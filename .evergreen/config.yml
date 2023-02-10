@@ -334,15 +334,37 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh
-  run mongosh integration tests:
-    - command: shell.exec
-      type: test
+  compile mongosh:
+    - command: subprocess.exec
       params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          export DISTRO_ID=${distro_id}
-          bash ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
+  run mongosh tests for package:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+          MONGOSH_RUN_ONLY_IN_PACKAGE: ${mongosh_package}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh
+  run mongosh package scope test:
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TASK_ID: ${task_id}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh
   cleanup:
     - command: shell.exec
       params:
@@ -2408,15 +2430,6 @@ tasks:
       - func: check types
         vars:
           TS_VERSION: 4.1.6
-  - name: run-mongosh-integration-tests
-    tags:
-      - run-mongosh-integration-tests
-    exec_timeout_secs: 3600
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: gallium
-      - func: run mongosh integration tests
   - name: download-and-merge-coverage
     tags: []
     commands:
@@ -2878,6 +2891,99 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run lambda handler example tests with aws auth
+  - name: run-mongosh-browser-repl
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: browser-repl
+  - name: run-mongosh-browser-runtime-electron
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: browser-runtime-electron
+  - name: run-mongosh-cli-repl
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: cli-repl
+  - name: run-mongosh-connectivity-tests
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: connectivity-tests
+  - name: run-mongosh-mongosh
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: mongosh
+  - name: run-mongosh-node-runtime-worker-thread
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: node-runtime-worker-thread
+  - name: run-mongosh-service-provider-server
+    tags:
+      - run-mongosh-integration-tests
+    depends_on: compile-mongosh
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh tests for package
+        vars:
+          mongosh_package: service-provider-server
+  - name: compile-mongosh
+    tags:
+      - run-mongosh-integration-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: compile mongosh
+  - name: verify-mongosh-scopes
+    tags:
+      - run-mongosh-integration-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: gallium
+      - func: run mongosh package scope test
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -3267,7 +3373,15 @@ buildvariants:
     display_name: mongosh integration tests
     run_on: ubuntu1804-large
     tasks:
-      - run-mongosh-integration-tests
+      - run-mongosh-browser-repl
+      - run-mongosh-browser-runtime-electron
+      - run-mongosh-cli-repl
+      - run-mongosh-connectivity-tests
+      - run-mongosh-mongosh
+      - run-mongosh-node-runtime-worker-thread
+      - run-mongosh-service-provider-server
+      - compile-mongosh
+      - verify-mongosh-scopes
   - name: ubuntu1804-test-mongodb-aws
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-large
