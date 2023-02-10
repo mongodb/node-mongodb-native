@@ -412,8 +412,8 @@ export abstract class AbstractCursor<
 
   async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
-    this[kClosed] = true;
     await cleanupCursorAsync(this, { needsToEmitClosed });
+    this[kClosed] = true;
   }
 
   /**
