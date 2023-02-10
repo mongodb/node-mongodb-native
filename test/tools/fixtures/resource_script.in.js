@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-undef */
+
 const driverPath = DRIVER_SOURCE_PATH;
 const func = FUNCTION_STRING;
 const name = NAME_STRING;
