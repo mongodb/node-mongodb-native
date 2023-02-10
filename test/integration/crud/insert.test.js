@@ -2141,164 +2141,40 @@ describe('crud - insert', function () {
       }
     });
 
-    it('should return error on unordered insertMany with multiple unique key constraints', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should return error on unordered insertMany with multiple unique key constraints', async () => {
+      const col = client.db().collection('insertManyMultipleWriteErrors');
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          // Get collection
-          var col = db.collection('insertManyMultipleWriteErrors');
-          col.drop(function (err, r) {
-            expect(r).to.not.exist;
+      await col.drop().catch(() => null);
 
-            // Create unique index
-            col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-              expect(err).to.not.exist;
-              test.ok(r);
+      const createIndexRes = await col.createIndex({ a: 1 }, { unique: true });
+      expect(createIndexRes).to.equal('a_1');
 
-              col.insertMany(
-                [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
-                { ordered: false },
-                function (err, r) {
-                  expect(r).to.not.exist;
-                  expect(err).to.exist;
-                  expect(err.result).to.exist;
-                  expect(err.result.getWriteErrors()).to.have.length(2);
+      const insertManyRes = await col
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }], { ordered: false })
+        .catch(error => error);
 
-                  client.close(done);
-                }
-              );
-            });
-          });
-        });
-      }
+      expect(insertManyRes).to.be.instanceOf(MongoBulkWriteError);
+      expect(insertManyRes.result).to.exist;
+      // Unordered will hit both the a:1 inserts
+      expect(insertManyRes.result.getWriteErrors()).to.have.length(2);
     });
 
-    it('should return error on unordered insert with multiple unique key constraints', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
-      },
+    it('should return error on ordered insertMany with multiple unique key constraints', async () => {
+      const col = client.db().collection('insertManyMultipleWriteErrors');
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          // Get collection
-          var col = db.collection('insertManyMultipleWriteErrors1');
-          col.drop(function (err, r) {
-            expect(r).to.not.exist;
+      await col.drop().catch(() => null);
 
-            // Create unique index
-            col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-              expect(err).to.not.exist;
-              test.ok(r);
+      const createIndexRes = await col.createIndex({ a: 1 }, { unique: true });
+      expect(createIndexRes).to.equal('a_1');
 
-              col.insert(
-                [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
-                { ordered: false },
-                function (err, r) {
-                  expect(r).to.not.exist;
-                  expect(err).to.exist;
-                  expect(err.result).to.exist;
-                  expect(err.result.getWriteErrors()).to.have.length(2);
+      const insertManyRes = await col
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }], { ordered: true })
+        .catch(error => error);
 
-                  client.close(done);
-                }
-              );
-            });
-          });
-        });
-      }
-    });
-
-    it('should return error on ordered insertMany with multiple unique key constraints', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          // Get collection
-          var col = db.collection('insertManyMultipleWriteErrors2');
-          col.drop(function (/*err, r*/) {
-            // TODO: reenable once SERVER-36317 is resolved
-            // expect(r).to.not.exist;
-
-            // Create unique index
-            col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-              expect(err).to.not.exist;
-              test.ok(r);
-
-              col.insertMany(
-                [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
-                { ordered: true },
-                function (err, r) {
-                  expect(r).to.not.exist;
-                  test.ok(err != null);
-                  test.ok(err.result);
-
-                  client.close(done);
-                }
-              );
-            });
-          });
-        });
-      }
-    });
-
-    it('should return error on ordered insert with multiple unique key constraints', {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-      },
-
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          // Get collection
-          var col = db.collection('insertManyMultipleWriteErrors3');
-          col.drop(function (/*err, r*/) {
-            // TODO: reenable once SERVER-36317 is resolved
-            // expect(r).to.not.exist;
-
-            // Create unique index
-            col.createIndex({ a: 1 }, { unique: true }, function (err, r) {
-              expect(err).to.not.exist;
-              test.ok(r);
-
-              col.insert(
-                [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
-                { ordered: true },
-                function (err, r) {
-                  expect(r).to.not.exist;
-                  test.ok(err != null);
-                  test.ok(err.result);
-
-                  client.close(done);
-                }
-              );
-            });
-          });
-        });
-      }
+      expect(insertManyRes).to.be.instanceOf(MongoBulkWriteError);
+      expect(insertManyRes.result).to.exist;
+      // Ordered will hit only the second a:1 insert
+      expect(insertManyRes.result.getWriteErrors()).to.have.length(1);
     });
 
     it('Correctly allow forceServerObjectId for insertOne', {

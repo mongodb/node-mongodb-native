@@ -393,3 +393,121 @@ tests:
           mechanism: "MONGODB-AWS"
           mechanism_properties:
               AWS_SESSION_TOKEN: "token!@#$%^&*()_+"
+    -
+      description: "should recognise the mechanism and request callback (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC"
+      callback:
+        - "oidcRequest"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              REQUEST_TOKEN_CALLBACK: true
+    -
+      description: "should recognise the mechanism when auth source is explicitly specified and with request callback (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authSource=$external"
+      callback:
+        - "oidcRequest"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              REQUEST_TOKEN_CALLBACK: true
+    -
+      description: "should recognise the mechanism with request and refresh callback (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authSource=$external"
+      callback:
+        - "oidcRequest"
+        - "oidcRefresh"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              REQUEST_TOKEN_CALLBACK: true
+              REFRESH_TOKEN_CALLBACK: true
+    -
+      description: "should recognise the mechanism and principalName with request callback (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PRINCIPAL_NAME:principalName"
+      callback:
+        - "oidcRequest"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              REQUEST_TOKEN_CALLBACK: true
+              PRINCIPAL_NAME: "principalName"
+    -
+      description: "should recognise the mechanism with aws device (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              DEVICE_NAME: "aws"
+    -
+      description: "should recognise the mechanism when auth source is explicitly specified and with aws device (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authSource=$external&authMechanismProperties=DEVICE_NAME:aws"
+      valid: true
+      credential:
+          username: null
+          password: null
+          source: "$external"
+          mechanism: "MONGODB-OIDC"
+          mechanism_properties:
+              DEVICE_NAME: "aws"
+    -
+      description: "should throw an exception if username is specified (MONGODB-OIDC)"
+      uri: "mongodb://user@localhost/?authMechanism=MONGODB-OIDC"
+      callback:
+        - "oidcRequest"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception if username and password are specified (MONGODB-OIDC)"
+      uri: "mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC"
+      callback:
+        - "oidcRequest"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception if principalName and deviceName are specified (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PRINCIPAL_NAME:principalName,DEVICE_NAME:aws"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception if specified deviceName is not supported (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:unexisted"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception if neither deviceName nor callbacks specified (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception when only refresh callback is specified (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC"
+      callback:
+        - "oidcRefresh"
+      valid: false
+      credential: null
+    -
+      description: "should throw an exception when unsupported auth property is specified (MONGODB-OIDC)"
+      uri: "mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=UnsupportedProperty:unexisted"
+      valid: false
+      credential: null

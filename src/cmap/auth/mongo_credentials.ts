@@ -1,7 +1,12 @@
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
-import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
+import {
+  MongoAPIError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../error';
 import { GSSAPICanonicalizationValue } from './gssapi';
+import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -25,13 +30,25 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-/** @public */
+/**
+ * TODO: NODE-5035: Make OIDC properties public.
+ *
+ * @public
+ * */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
+  /** @internal Name for the OIDC device workflow */
+  DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
+  /** @internal Similar to a username, is require by OIDC when more than one IDP is configured. */
+  PRINCIPAL_NAME?: string;
+  /** @internal User provided callback to get OIDC auth credentials */
+  REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
+  /** @internal User provided callback to refresh OIDC auth credentials */
+  REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
 
 /** @public */
@@ -135,6 +152,44 @@ export class MongoCredentials {
       !this.username
     ) {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
+      if (this.username) {
+        throw new MongoInvalidArgumentError(
+          `Username not permitted for mechanism '${this.mechanism}'. Use PRINCIPAL_NAME instead.`
+        );
+      }
+
+      if (this.mechanismProperties.PRINCIPAL_NAME && this.mechanismProperties.DEVICE_NAME) {
+        throw new MongoInvalidArgumentError(
+          `PRINCIPAL_NAME and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
+        );
+      }
+
+      if (this.mechanismProperties.DEVICE_NAME && this.mechanismProperties.DEVICE_NAME !== 'aws') {
+        throw new MongoInvalidArgumentError(
+          `Currently only a DEVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+        );
+      }
+
+      if (
+        this.mechanismProperties.REFRESH_TOKEN_CALLBACK &&
+        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
+      ) {
+        throw new MongoInvalidArgumentError(
+          `A REQUEST_TOKEN_CALLBACK must be provided when using a REFRESH_TOKEN_CALLBACK for mechanism '${this.mechanism}'`
+        );
+      }
+
+      if (
+        !this.mechanismProperties.DEVICE_NAME &&
+        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
+      ) {
+        throw new MongoInvalidArgumentError(
+          `Either a DEVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+        );
+      }
     }
 
     if (AUTH_MECHS_AUTH_SRC_EXTERNAL.has(this.mechanism)) {
