@@ -92,7 +92,7 @@ import { WriteConcern, WriteConcernOptions } from './write_concern';
 
 /**
  * @public
- * @deprecated This type will be completely removed in 5.0 and findOneAndUpdate,
+ * @deprecated This type will be completely removed and findOneAndUpdate,
  *             findOneAndDelete, and findOneAndReplace will then return the
  *             actual result document.
  */
