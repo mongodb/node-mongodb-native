@@ -48,15 +48,16 @@ main branch, and once the PR is merged Github will automatically update the host
 
 If releasing a minor version from a branch other than main, follow theses steps:
 
-- You should generate an commit the documentation to the branch that tracks that major
-  - Example if `main` is tracking 7.x.x, there should be a `6.x` branch
-  - `6.x` should have a commit for the generated docs merged for it's latest feature
+- As part of the release, generate and commit the documentation to the release branch
+  - For example, if `main` is currently tracking `7.x` and your release is from `6.x`
+  - `6.x` should contain the generated docs merged for its latest feature
 - Checkout a new branch off `main`
-- `git cherrypick` the commit containing the generated docs from the previous major
-- **There will be merge conflicts** (if there is no conflict there is an issue)
+- `git cherrypick` the commit containing the generated docs from the release
+- **There will be merge conflicts** (if there is no conflict, there is an issue)
 - Go through the conflicts:
   - undo the version increment change
   - undo the changes to history.md
   - merge together the feature version settings in the docs toml/json files
-  - merge two table rows (`<tr>`) for the legacy minor and for the current major's minor
+  - merge the two table rows (`<tr>`) for the legacy minor and the current major's minor
 - Check `npm run preview:docs`
+- Open a PR to merge the documentation into main
