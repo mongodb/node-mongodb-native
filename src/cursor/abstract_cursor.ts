@@ -778,18 +778,33 @@ function cleanupCursor(
   const error = options?.error;
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
-  if (cursor[kClosed]) {
+  const cleanupListeners = () => {
     if (needsToEmitClosed) {
       cursor[kClosed] = true;
       cursor[kId] = Long.ZERO;
       cursor.emit(AbstractCursor.CLOSE);
     }
     cursor.removeAllListeners();
-    if (session.owner === cursor && !session.hasEnded) {
+  };
+
+  const cleanupSession = () => {
+    if (session?.owner === cursor && !session?.hasEnded) {
       session.endSession({ error }).finally(callback);
       return;
     }
-    return process.nextTick(callback);
+    if (!session?.inTransaction()) {
+      maybeClearPinnedConnection(session, { error });
+    }
+    process.nextTick(callback);
+  };
+
+  const completeCleanup = () => {
+    cleanupListeners();
+    return cleanupSession();
+  };
+
+  if (cursor[kClosed]) {
+    return completeCleanup();
   }
 
   if (error) {
@@ -799,48 +814,7 @@ function cleanupCursor(
   }
 
   if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
-    if (needsToEmitClosed) {
-      cursor[kClosed] = true;
-      cursor[kId] = Long.ZERO;
-      cursor.emit(AbstractCursor.CLOSE);
-    }
-    cursor.removeAllListeners();
-
-    if (session) {
-      if (session.owner === cursor) {
-        session.endSession({ error }).finally(() => {
-          callback();
-        });
-        return;
-      }
-
-      if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error });
-      }
-    }
-
-    return callback();
-  }
-
-  function completeCleanup() {
-    if (session) {
-      if (session.owner === cursor) {
-        session.endSession({ error }).finally(() => {
-          cursor.emit(AbstractCursor.CLOSE);
-          cursor.removeAllListeners();
-          callback();
-        });
-        return;
-      }
-
-      if (!session.inTransaction()) {
-        maybeClearPinnedConnection(session, { error });
-      }
-    }
-
-    cursor.emit(AbstractCursor.CLOSE);
-    cursor.removeAllListeners();
-    return callback();
+    return completeCleanup();
   }
 
   cursor[kKilled] = true;
@@ -848,9 +822,7 @@ function cleanupCursor(
   executeOperation(
     cursor[kClient],
     new KillCursorsOperation(cursorId, cursorNs, server, { session })
-  ).finally(() => {
-    completeCleanup();
-  });
+  ).finally(completeCleanup);
   return;
 }
 
