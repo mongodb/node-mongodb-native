@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import { fork } from 'child_process';
 import { on, once } from 'events';
-import { readFile, unlink, writeFile } from 'fs/promises';
+import { promises } from 'fs';
+const { readFile, unlink, writeFile } = promises;
 import * as path from 'path';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
