@@ -1,9 +1,8 @@
-import { fork } from 'node:child_process';
-import { on, once } from 'node:events';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
-import * as path from 'node:path';
-
 import { expect } from 'chai';
+import { fork } from 'child_process';
+import { on, once } from 'events';
+import { readFile, unlink, writeFile } from 'fs/promises';
+import * as path from 'path';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
 import { MongoClient } from '../../../src';
