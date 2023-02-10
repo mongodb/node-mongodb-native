@@ -137,13 +137,13 @@ describe('CRUD API', function () {
         });
       });
     });
-  });
 
-  describe('#explain()', () => {
-    it('returns an explain document', async () => {
-      const cursor = makeCursor();
-      const result = await cursor.explain();
-      expect(result).to.exist;
+    describe('#explain()', () => {
+      it('returns an explain document', async () => {
+        const cursor = makeCursor();
+        const result = await cursor.explain();
+        expect(result).to.exist;
+      });
     });
   });
 
