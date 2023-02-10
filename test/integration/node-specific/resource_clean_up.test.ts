@@ -11,7 +11,7 @@ import { runScript } from './resource_tracking_script_builder';
  */
 const MB_PERMITTED_OFFSET = 5;
 
-describe('Driver Resources', () => {
+describe.only('Driver Resources', () => {
   let startingMemoryUsed;
   let endingMemoryUsed;
   let heap;
@@ -29,62 +29,61 @@ describe('Driver Resources', () => {
     }
   });
 
-  before('create leak reproduction script', async function () {
-    if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
-      return;
-    }
-    const res = await runScript(
-      'no_resource_leak_connect_close',
-      this.configuration,
-      async function run({ MongoClient, uri }) {
-        const mongoClient = new MongoClient(uri);
-        await mongoClient.connect();
-        const db = mongoClient.db();
-        await Promise.all([
-          db.collections(),
-          db.collections(),
-          db.collections(),
-          db.collections(),
-          db.collections(),
-          db.collections(),
-          db.collections(),
-          db.collections()
-        ]);
-        await mongoClient.close();
+  describe('MongoClient.close() should not leak resources', () => {
+    before('create leak reproduction script', async function () {
+      if (globalThis.AbortController == null || typeof this.configuration.serverApi === 'string') {
+        return;
       }
-    ).catch(error => error);
+      try {
+        const res = await runScript(
+          'no_resource_leak_connect_close',
+          this.configuration,
+          async function run({ MongoClient, uri }) {
+            const mongoClient = new MongoClient(uri, { minPoolSize: 100 });
+            await mongoClient.connect();
+            // Any operations will reproduce the issue found in v5.0.0/v4.13.0
+            // it would seem the MessageStream has to be used?
+            await mongoClient.db().command({ ping: 1 });
+            await mongoClient.close();
+          }
+        );
+        startingMemoryUsed = res.startingMemoryUsed;
+        endingMemoryUsed = res.endingMemoryUsed;
+        heap = res.heap;
+      } catch (error) {
+        // We don't expect the process execution to ever fail,
+        // leaving helpful debugging if we see this in CI
+        console.log(`runScript error message: ${error.message}`);
+        console.log(`runScript error stack: ${error.stack}`);
+        console.log(`runScript error cause: ${error.cause}`);
+        // Fail the test
+        this.test?.error(error);
+      }
+    });
 
-    if (res instanceof Error) {
-      console.log(res);
-      console.log(res.message);
-      console.log(res.cause);
-      throw res;
-    }
+    describe('ending memory usage', () => {
+      it(`must within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
+        // Why check the lower bound? No reason, but it would be very surprising if we managed to free MB_PERMITTED_OFFSET MB of memory
+        // I expect us to **never** be below the lower bound, but I'd want to know if it happened
+        expect(
+          endingMemoryUsed,
+          `script started with ${startingMemoryUsed}MB heap but ended with ${endingMemoryUsed}MB heap used`
+        ).to.be.within(
+          startingMemoryUsed - MB_PERMITTED_OFFSET,
+          startingMemoryUsed + MB_PERMITTED_OFFSET
+        );
+      });
+    });
 
-    startingMemoryUsed = res.startingMemoryUsed;
-    endingMemoryUsed = res.endingMemoryUsed;
-    heap = res.heap;
-  });
-
-  it(`ending memory usage should be within ${MB_PERMITTED_OFFSET}MB of starting amount`, async () => {
-    // Why check the lower bound? No reason, but it would be very surprising if we managed to free MB_PERMITTED_OFFSET MB of memory
-    // I expect us to **never** be below the lower bound, but I'd want to know if it happened
-    expect(
-      endingMemoryUsed,
-      `script started with ${startingMemoryUsed}MB heap but ended with ${endingMemoryUsed}MB heap used`
-    ).to.be.within(
-      startingMemoryUsed - MB_PERMITTED_OFFSET,
-      startingMemoryUsed + MB_PERMITTED_OFFSET
-    );
-  });
-
-  it('heapsnapshot has 0 MongoClients in memory', async () => {
-    const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
-    // lengthOf crashes chai b/c it tries to print out a gigantic diff
-    // Allow GC to miss a few
-    expect(
-      clients.length,
-      `expected no MongoClients in the heapsnapshot found ${clients.length}`
-    ).to.equal(0);
+    describe('heap snapshot', () => {
+      it('heapsnapshot has 0 MongoClients in memory', async () => {
+        const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
+        // lengthOf crashes chai b/c it tries to print out a gigantic diff
+        expect(
+          clients.length,
+          `expected no MongoClients in the heapsnapshot, found ${clients.length}`
+        ).to.equal(0);
+      });
+    });
   });
 });
