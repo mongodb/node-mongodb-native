@@ -1725,14 +1725,14 @@ describe('Cursor', function () {
     // We should get an end event on the stream and a close event on the cursor
     // We should **not** get an 'error' event,
     // the following will throw if either stream or cursor emitted an 'error' event
-    await Promise.race(
+    await Promise.race([
       willEnd,
       sleep(100).then(() => Promise.reject(new Error('end event never emitted')))
-    );
-    await Promise.race(
+    ]);
+    await Promise.race([
       willClose,
       sleep(100).then(() => Promise.reject(new Error('close event never emitted')))
-    );
+    ]);
   });
 
   // NOTE: skipped for use of topology manager
