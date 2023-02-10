@@ -2701,7 +2701,7 @@ describe('ChangeStream resumability', function () {
   );
 
   it(
-    'should not have the bug from NODE-5052',
+    'does not raise unhandled rejection errors',
     { requires: { topology: '!single' } },
     async function () {
       if (globalThis.AbortSignal?.timeout == null) {

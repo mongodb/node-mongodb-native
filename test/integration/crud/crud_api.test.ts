@@ -61,7 +61,7 @@ describe('CRUD API', function () {
     await client.close();
   });
 
-  context('should correctly execute find method using crud api', () => {
+  context('when creating a cursor with find', () => {
     let db;
 
     beforeEach(async () => {
@@ -87,13 +87,15 @@ describe('CRUD API', function () {
         .sort({ a: 1 });
     };
 
-    it('count should be accurate', async () => {
+    describe('#count(), () => {
+      it('returns the number of documents', async () => {
       const cursor = makeCursor();
       const res = await cursor.count();
       expect(res).to.equal(2);
     });
 
-    it('forEach should run 2 times', async () => {
+    describe('#forEach()', () => {
+      it('iterates all the documents', async () => {
       const cursor = makeCursor();
       let count = 0;
       await cursor.forEach(() => {
@@ -102,13 +104,15 @@ describe('CRUD API', function () {
       expect(count).to.equal(2);
     });
 
-    it('toArray should return an array with two documents', async () => {
+    describe('#toArray()', () => {
+      it('returns an array with all documents', async () => {
       const cursor = makeCursor();
       const res = await cursor.toArray();
       expect(res).to.have.lengthOf(2);
     });
 
-    it('next be callable three times without blocking', async () => {
+    describe('#next()', () => {
+      it('is callable without blocking', async () => {
       const cursor = makeCursor();
       const doc0 = await cursor.next();
       expect(doc0).to.exist;
@@ -118,7 +122,8 @@ describe('CRUD API', function () {
       expect(doc2).to.not.exist;
     });
 
-    it('stream() should create a node stream that emits 2 data events', async () => {
+    describe('#stream()', () => {
+      it('creates a node stream that emits data events', async () => {
       const count = 0;
       const cursor = makeCursor();
       const stream = cursor.stream();
@@ -128,7 +133,8 @@ describe('CRUD API', function () {
         });
     });
 
-    it('explain works', async () => {
+    describe('#explain()', () => {
+      it('returns an explain document', async () => {
       const cursor = makeCursor();
       const result = await cursor.explain();
       expect(result).to.exist;

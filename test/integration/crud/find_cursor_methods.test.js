@@ -108,7 +108,7 @@ describe('Find Cursor', function () {
     });
   });
 
-  context('#close', function () {
+  describe('#close', function () {
     beforeEach(async function () {
       await client
         .db()
@@ -119,7 +119,8 @@ describe('Find Cursor', function () {
       await client.db().collection('abstract_cursor').deleteMany();
     });
 
-    it('should send a killCursors command when closed before completely iterated', async function () {
+    context('when closed before completely iterated', function () {
+      it('sends a killCursors command', async function () {
       const commands = [];
       client.on('commandStarted', filterForCommands(['killCursors'], commands));
 
