@@ -778,6 +778,11 @@ function cleanupCursor(
   const error = options?.error;
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
+  if (cursor[kKilled] || cursor[kClosed]) {
+    process.nextTick(callback);
+    return;
+  }
+
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {
       return completeCleanup();
