@@ -62,18 +62,21 @@ describe('CRUD API', function () {
   });
 
   context('when creating a cursor with find', () => {
-    let db;
+    let collection;
 
     beforeEach(async () => {
-      db = client.db();
-      await db.collection('t').deleteMany({});
-      await db.collection('t').insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+      collection = client.db().collection('t');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+    });
+
+    afterEach(async () => {
+      await collection?.drop().catch(() => null);
     });
 
     const makeCursor = () => {
       // Possible methods on the the cursor instance
-      return db
-        .collection('t')
+      return collection
         .find({})
         .filter({ a: 1 })
         .addCursorFlag('noCursorTimeout', true)
