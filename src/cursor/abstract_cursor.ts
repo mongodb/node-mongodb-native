@@ -833,12 +833,14 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
-  executeOperation(
-    cursor[kClient],
-    new KillCursorsOperation(cursorId, cursorNs, server, { session })
-  ).finally(() => {
-    completeCleanup();
-  });
+  const maybeKilledCursor = session.hasEnded
+    ? Promise.resolve()
+    : executeOperation(
+        cursor[kClient],
+        new KillCursorsOperation(cursorId, cursorNs, server, { session })
+      );
+
+  maybeKilledCursor.finally(completeCleanup);
   return;
 }
 
