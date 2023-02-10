@@ -771,17 +771,17 @@ function cleanupCursor(
   options: { error?: AnyError | undefined; needsToEmitClosed?: boolean } | undefined,
   callback: Callback
 ): void {
+  if (cursor[kKilled] || cursor[kClosed]) {
+    process.nextTick(callback);
+    return;
+  }
+
   const cursorId = cursor[kId];
   const cursorNs = cursor[kNamespace];
   const server = cursor[kServer];
   const session = cursor[kSession];
   const error = options?.error;
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
-
-  if (cursor[kKilled] || cursor[kClosed]) {
-    process.nextTick(callback);
-    return;
-  }
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {
