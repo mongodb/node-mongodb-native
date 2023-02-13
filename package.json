@@ -94,6 +94,7 @@
     "tsd": "^0.25.0",
     "typescript": "^4.9.4",
     "typescript-cached-transpile": "^0.0.6",
+    "v8-heapsnapshot": "^1.2.0",
     "xml2js": "^0.4.23",
     "yargs": "^17.6.0"
   },
