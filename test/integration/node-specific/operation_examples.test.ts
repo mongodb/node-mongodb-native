@@ -4409,7 +4409,7 @@ describe('Operations', function () {
           .then(function (_collection) {
             collection = _collection;
 
-            const docs = [];
+            const docs: Array<{ a: number }> = [];
             for (let i = 0; i < 1000; i++) docs.push({ a: i });
 
             // Insert a document in the capped collection

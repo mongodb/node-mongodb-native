@@ -412,8 +412,8 @@ export abstract class AbstractCursor<
 
   async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
-    await cleanupCursorAsync(this, { needsToEmitClosed });
     this[kClosed] = true;
+    await cleanupCursorAsync(this, { needsToEmitClosed });
   }
 
   /**
@@ -771,11 +771,6 @@ function cleanupCursor(
   options: { error?: AnyError | undefined; needsToEmitClosed?: boolean } | undefined,
   callback: Callback
 ): void {
-  if (cursor[kKilled] || cursor[kClosed]) {
-    process.nextTick(callback);
-    return;
-  }
-
   const cursorId = cursor[kId];
   const cursorNs = cursor[kNamespace];
   const server = cursor[kServer];
