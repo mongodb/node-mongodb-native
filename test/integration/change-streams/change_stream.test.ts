@@ -1019,6 +1019,41 @@ describe('Change Streams', function () {
             }
           }
         );
+
+        context('when close() is invoked', () => {
+          it(
+            'throws "ChangeStream is closed"',
+            { requires: { topology: '!single' } },
+            async function () {
+              if (globalThis.AbortSignal?.timeout == null) {
+                this.skipReason = 'test requires AbortSignal.timeout';
+                this.skip();
+              }
+
+              changeStream = collection.watch();
+
+              const shouldErrorLoop = (async function () {
+                try {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  for await (const _change of changeStream) {
+                    return null; // loop should never be entered
+                  }
+                  return null; // loop should not finish without error
+                } catch (error) {
+                  return error;
+                }
+              })();
+
+              await sleep(1);
+              const closeResult = changeStream.close().catch(error => error);
+              expect(closeResult).to.not.be.instanceOf(Error);
+
+              const result = await shouldErrorLoop;
+              expect(result).to.be.instanceOf(MongoAPIError);
+              expect(result.message).to.match(/ChangeStream is closed/i);
+            }
+          );
+        });
       });
 
       describe('#return', function () {
@@ -1107,41 +1142,6 @@ describe('Change Streams', function () {
           }
         );
       });
-    });
-
-    describe('#close()', () => {
-      it(
-        'closing an in-use change stream throws "ChangeStream is closed"',
-        { requires: { topology: '!single' } },
-        async function () {
-          if (globalThis.AbortSignal?.timeout == null) {
-            this.skipReason = 'test requires AbortSignal.timeout';
-            this.skip();
-          }
-
-          changeStream = collection.watch();
-
-          const shouldErrorLoop = (async function () {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              for await (const _change of changeStream) {
-                return null; // loop should never be entered
-              }
-              return null; // loop should not finish without error
-            } catch (error) {
-              return error;
-            }
-          })();
-
-          await sleep(1);
-          const closeResult = changeStream.close().catch(error => error);
-          expect(closeResult).to.not.be.instanceOf(Error);
-
-          const result = await shouldErrorLoop;
-          expect(result).to.be.instanceOf(MongoAPIError);
-          expect(result.message).to.match(/ChangeStream is closed/i);
-        }
-      );
     });
   });
 
