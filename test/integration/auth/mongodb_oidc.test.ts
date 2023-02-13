@@ -3,7 +3,7 @@ import { expect } from 'chai';
 describe('MONGODB-OIDC', function () {
   beforeEach(function () {
     const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-OIDC') === -1) {
+    if (!MONGODB_URI || !MONGODB_URI.includes('MONGODB-OIDC')) {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-OIDC auth mechanism';
       this.skip();
     }
