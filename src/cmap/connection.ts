@@ -460,6 +460,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // this[kMessageStream].removeAllListeners();
     // this[kStream].removeAllListeners();
 
+    // when this line runs, the socket never closes for non-monitoring connections.
+    // when this line is removed, the socket always closes.
+    // This is the line from the initial PR that caused the memory leak to appear
     this[kMessageStream].destroy();
     this.closed = true;
 
