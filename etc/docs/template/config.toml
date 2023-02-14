@@ -6,4 +6,4 @@ canonifyurls = false
 githubRepo = "node-mongodb-native"
 
 [params]
-    referenceDocsUrl = "https://docs.mongodb.com/drivers/node"
+    referenceDocsUrl = "https://www.mongodb.com/docs/drivers/node"
