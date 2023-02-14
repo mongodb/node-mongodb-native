@@ -292,33 +292,69 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
+  /**
+   *
+   * @param options
+   */
+  _cleanup(options: { force: boolean; errorFactory?: () => Error; callback?: Callback }) {
+    const { callback, errorFactory, force } = options;
+    if (this.closed) {
+      if (callback) {
+        process.nextTick(callback);
+      }
+      return;
+    }
+
+    this.closed = true;
+
+    const completeCleanup = () => {
+      for (const op of this[kQueue].values()) {
+        op.cb(errorFactory?.());
+      }
+
+      this[kQueue].clear();
+
+      this.emit(Connection.CLOSE);
+
+      if (callback) {
+        process.nextTick(callback);
+      }
+    };
+
+    this.removeAllListeners(Connection.PINNED);
+    this.removeAllListeners(Connection.UNPINNED);
+    this[kStream].removeAllListeners();
+    this[kMessageStream].removeAllListeners();
+
+    this[kMessageStream].destroy();
+
+    if (force) {
+      this[kStream].destroy();
+      completeCleanup();
+      return;
+    }
+
+    if (!this[kStream].writableEnded) {
+      this[kStream].end(completeCleanup);
+    } else {
+      completeCleanup();
+    }
+  }
+
   onError(error: Error) {
     if (this.closed) {
       return;
     }
-    this.destroy({ force: false });
-
-    for (const op of this[kQueue].values()) {
-      op.cb(error);
-    }
-
-    this[kQueue].clear();
-    this.emit(Connection.CLOSE);
+    this._cleanup({ force: false, errorFactory: () => error });
   }
 
   onClose() {
     if (this.closed) {
       return;
     }
-    this.destroy({ force: false });
 
     const message = `connection ${this.id} to ${this.address} closed`;
-    for (const op of this[kQueue].values()) {
-      op.cb(new MongoNetworkError(message));
-    }
-
-    this[kQueue].clear();
-    this.emit(Connection.CLOSE);
+    this._cleanup({ force: false, errorFactory: () => new MongoNetworkError(message) });
   }
 
   onTimeout() {
@@ -327,16 +363,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this[kDelayedTimeoutId] = setTimeout(() => {
-      this.destroy({ force: false });
-
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      for (const op of this[kQueue].values()) {
-        op.cb(new MongoNetworkTimeoutError(message, { beforeHandshake }));
-      }
-
-      this[kQueue].clear();
-      this.emit(Connection.CLOSE);
+      this._cleanup({
+        force: false,
+        errorFactory: () => new MongoNetworkTimeoutError(message, { beforeHandshake })
+      });
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
@@ -437,26 +469,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   destroy(options: DestroyOptions, callback?: Callback): void {
-    this.removeAllListeners(Connection.PINNED);
-    this.removeAllListeners(Connection.UNPINNED);
-
-    this[kMessageStream].destroy();
-    this.closed = true;
-
-    if (options.force) {
-      this[kStream].destroy();
-      if (callback) {
-        return process.nextTick(callback);
-      }
-    }
-
-    if (!this[kStream].writableEnded) {
-      this[kStream].end(callback);
-    } else {
-      if (callback) {
-        return process.nextTick(callback);
-      }
-    }
+    this._cleanup({ ...options, callback });
   }
 
   command(
