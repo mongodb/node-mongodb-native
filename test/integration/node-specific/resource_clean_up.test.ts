@@ -76,14 +76,22 @@ describe.only('Driver Resources', () => {
     });
 
     describe('ending heap snapshot', () => {
-      it('has 0 MongoClients in memory', async () => {
-        const clients = heap.nodes.filter(n => n.name === 'MongoClient' && n.type === 'object');
-        // lengthOf crashes chai b/c it tries to print out a gigantic diff
-        expect(
-          clients.length,
-          `expected no MongoClients in the heapsnapshot, found ${clients.length}`
-        ).to.equal(0);
-      });
+      for (const className of [
+        'MongoClient',
+        'Server',
+        'ConnectionPool',
+        'Topology',
+        'Connection'
+      ]) {
+        it(`has 0 ${className} in memory`, async () => {
+          const clients = heap.nodes.filter(n => n.name === className && n.type === 'object');
+          // lengthOf crashes chai b/c it tries to print out a gigantic diff
+          expect(
+            clients.length,
+            `expected no ${className}s in the heapsnapshot, found ${clients.length}`
+          ).to.equal(0);
+        });
+      }
     });
   });
 });

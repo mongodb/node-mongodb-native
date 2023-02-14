@@ -1,4 +1,5 @@
 import { clearTimeout, setTimeout } from 'timers';
+import { inspect } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {
@@ -221,11 +222,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this[kDelayedTimeoutId] = null;
 
-    this[kMessageStream].on('message', message => this.onMessage(message));
-    this[kMessageStream].on('error', error => this.onError(error));
-    this[kStream].on('close', () => this.onClose());
-    this[kStream].on('timeout', () => this.onTimeout());
+    this[kMessageStream].on('message', message => {
+      this.onMessage(message);
+    });
+    this[kMessageStream].on('error', error => {
+      console.error('connection(', this.id, ') message stream error');
+      this.onError(error);
+    });
+    this[kStream].on('close', () => {
+      console.error('connection(', this.id, ') close');
+      this.onClose();
+    });
+    this[kStream].on('timeout', () => {
+      console.error('connection(', this.id, ') timeout');
+      this.onTimeout();
+    });
     this[kStream].on('error', () => {
+      console.error('connection(', this.id, ') kStream error');
       /* ignore errors, listen to `close` instead */
     });
 
@@ -440,9 +453,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
 
+    // Uncomment these lines and run either the reproduction or the tests. When these lines
+    // run, there is no memory leak because the listeners are removed,
+    // cleaning up references to other resources in the driver.
+
+    // this[kMessageStream].removeAllListeners();
+    // this[kStream].removeAllListeners();
+
     this[kMessageStream].destroy();
     this.closed = true;
 
+    console.error(`destroying connection${this.id} with ${inspect(options)}`);
     if (options.force) {
       this[kStream].destroy();
       if (callback) {
@@ -451,7 +472,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     if (!this[kStream].writableEnded) {
-      this[kStream].end(callback);
+      this[kStream].end(() => {
+        console.error('end() completed for connection(', this.id, ')');
+        callback?.();
+      });
     } else {
       if (callback) {
         return process.nextTick(callback);
