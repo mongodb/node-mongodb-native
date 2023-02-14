@@ -2408,7 +2408,7 @@ const validOptions = require('./operations/connect').validOptions;
 /**
  * A string specifying the level of a ReadConcern
  * @typedef {'local'|'available'|'majority'|'linearizable'|'snapshot'} ReadConcernLevel
- * @see https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels
+ * @see https://www.mongodb.com/docs/manual/reference/read-concern/index.html#read-concern-levels
  */
 
 /**
@@ -2508,7 +2508,7 @@ const validOptions = require('./operations/connect').validOptions;
  * @property {string} [appname] (**default**: undefined) The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections
  * @property {string} [options.auth.user] (**default**: undefined) The username for auth
  * @property {string} [options.auth.password] (**default**: undefined) The password for auth
- * @property {string} [authMechanism] An authentication mechanism to use for connection authentication, see the {@link https://docs.mongodb.com/manual/reference/connection-string/#urioption.authMechanism|authMechanism} reference for supported options.
+ * @property {string} [authMechanism] An authentication mechanism to use for connection authentication, see the {@link https://www.mongodb.com/docs/manual/reference/connection-string/#urioption.authMechanism|authMechanism} reference for supported options.
  * @property {object} [compression] Type of compression to use: snappy or zlib
  * @property {array} [readPreferenceTags] Read preference tags
  * @property {number} [numberOfRetries] (**default**: 5) The number of retries for a tailable cursor
@@ -2530,7 +2530,7 @@ const validOptions = require('./operations/connect').validOptions;
  * > Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error
  * > (see [libmongocrypt: Auto Encryption Allow-List](https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list)). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.
  * >
- * > Automatic encryption requires the authenticated user to have the [listCollections privilege action](https://docs.mongodb.com/manual/reference/command/listCollections/#dbcmd.listCollections).
+ * > Automatic encryption requires the authenticated user to have the [listCollections privilege action](https://www.mongodb.com/docs/manual/reference/command/listCollections/#dbcmd.listCollections).
  * >
  * > If a MongoClient with a limited connection pool size (i.e a non-zero maxPoolSize) is configured with AutoEncryptionOptions, a separate internal MongoClient is created if any of the following are true:
  * > - AutoEncryptionOptions.keyVaultClient is not passed.
@@ -2841,14 +2841,14 @@ MongoClient.prototype.withSession = function(options, operation) {
  * and config databases.
  * @method
  * @since 3.1.0
- * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+ * @param {Array} [pipeline] An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
  * @param {object} [options] Optional settings
  * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
  * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
- * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {ReadPreference} [options.readPreference] The read preference. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {ReadPreference} [options.readPreference] The read preference. See {@link https://www.mongodb.com/docs/manual/reference/read-preference|read preference documentation}.
  * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @return {ChangeStream} a ChangeStream instance.

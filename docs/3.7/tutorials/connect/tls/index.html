@@ -35,17 +35,17 @@
     
     <div class="logo pull-left">
       <a href="https://www.mongodb.com/">
-        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+        <img src="https://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
       </a>
     </div>
     
     <div>
 <div class="nav-items pull-right">
   <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
-  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
-  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
-  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
-  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <a href="https://www.mongodb.com/try" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="https://www.mongodb.com/community" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="https://www.mongodb.com/docs" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="https://www.mongodb.com/blog" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
   <div id="search">
 <form method="get" action="//www.google.com/search" target="_blank">
     <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
@@ -1628,7 +1628,7 @@
 
                     <div class="alert alert-info" role="alert">
   Note: You are currently viewing version 3.6 of the Node.js driver documentation.
-  <a href="https://docs.mongodb.com/drivers/node">Click here</a> for the latest version.
+  <a href="https://www.mongodb.com/docs/drivers/node">Click here</a> for the latest version.
 </div>
 
 
@@ -1666,7 +1666,7 @@
 
 <h2 id="no-certificate-validation">No Certificate Validation</h2>
 
-<p>If the MongoDB instance does not perform any validation of the certificate chain, include the <code>tls=true</code> in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a>.</p>
+<p>If the MongoDB instance does not perform any validation of the certificate chain, include the <code>tls=true</code> in the <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">URI Connection String </a>.</p>
 
 <pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
 
@@ -1682,7 +1682,7 @@ client.connect(function(err) {
 <p>If the MongoDB instance presents a certificate, to validate the server&rsquo;s certificate, pass the following when creating a <code>MongoClient</code>:</p>
 
 <ul>
-<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
+<li><p>A <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
 
 <li><p>A connections options with the certificate for the Certificate Authority (<code>tlsCAFile</code>)</p></li>
 </ul>
@@ -1708,7 +1708,7 @@ client.connect(function(err) {
 server&rsquo;s TLS certificate(s) matches the hostname(s) provided in the URI connection string. If you need to disable the hostname verification, but otherwise validate the server&rsquo;s certificate, pass to the new <code>MongoClient</code>:</p>
 
 <ul>
-<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
+<li><p>A <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
 
 <li><p>A connections options with the certificate for the Certificate Authority (<code>tlsCAFile</code>) but  <code>tlsAllowInvalidHostnames</code> set to <code>true</code>.</p></li>
 </ul>
@@ -1731,7 +1731,7 @@ client.connect(function(err) {
 certificate to the server. To pass the client&rsquo;s certificate as well as to validate the server&rsquo;s certificate, pass to the new <code>MongoClient</code>:</p>
 
 <ul>
-<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
+<li><p>A <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">URI Connection String </a> that includes <code>tls=true</code> setting,</p></li>
 
 <li><p>A connections options with the certificate for the Certificate Authority (<code>tlsCAFile</code>), the client&rsquo;s certificate (<code>tlsCertificateKeyFile</code>).  If the client&rsquo;s key file is encrypted, include the password (<code>tlsCertificateKeyFilePassword</code>).</p></li>
 </ul>
@@ -1751,9 +1751,9 @@ client.connect(function(err) {
 
 <h2 id="connect-with-x-509">Connect with X.509</h2>
 
-<p><a href="http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication">X.509</a> authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during TLS negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.</p>
+<p><a href="https://www.mongodb.com/docs/manual/core/authentication/#x-509-certificate-authentication">X.509</a> authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during TLS negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.</p>
 
-<p>To connect using the X.509 authentication mechanism, specify <code>MONGODB-X509</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>, <code>tls=true</code>, and the username. Use <code>enodeURIComponent</code> to encode the username string.</p>
+<p>To connect using the X.509 authentication mechanism, specify <code>MONGODB-X509</code> as the mechanism in the <a href="https://www.mongodb.com/docs/manual/reference/connection-string/">URI connection string</a>, <code>tls=true</code>, and the username. Use <code>enodeURIComponent</code> to encode the username string.</p>
 
 <p>In addition to the connection string, pass to the new <code>MongoClient</code>
 a connections options with  the X.509 certificate and other <a href="/node-mongodb-native/3.7/reference/connecting/connection-settings/">TLS/SSL connections</a> options.</p>

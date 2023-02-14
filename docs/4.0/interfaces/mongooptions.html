@@ -219,7 +219,7 @@
 							<dt>remarks</dt>
 							<dd><p> Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error
 								(see <a href="https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a>). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.</p>
-								<p> Automatic encryption requires the authenticated user to have the <a href="https://docs.mongodb.com/manual/reference/command/listCollections/#dbcmd.listCollections">listCollections privilege action</a>.</p>
+								<p> Automatic encryption requires the authenticated user to have the <a href="https://www.mongodb.com/docs/manual/reference/command/listCollections/#dbcmd.listCollections">listCollections privilege action</a>.</p>
 								<p> If a MongoClient with a limited connection pool size (i.e a non-zero maxPoolSize) is configured with AutoEncryptionOptions, a separate internal MongoClient is created if any of the following are true:</p>
 								<ul>
 									<li>AutoEncryptionOptions.keyVaultClient is not passed.</li>
