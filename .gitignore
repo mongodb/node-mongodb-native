@@ -88,7 +88,10 @@ etc/docs/build
 !docs/**/*.css
 !docs/**/*.js
 .nvmrc
-
 node_index.tab
 node-artifacts
 .npmrc
+
+# AWS SAM generated
+test/lambda/.aws-sam
+test/lambda/env.json
