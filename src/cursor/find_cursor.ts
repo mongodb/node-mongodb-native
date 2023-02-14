@@ -386,7 +386,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
    * Allows disk use for blocking sort operations exceeding 100MB memory. (MongoDB 3.2 or higher)
    *
    * @remarks
-   * {@link https://docs.mongodb.com/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
+   * {@link https://www.mongodb.com/docs/manual/reference/command/find/#find-cmd-allowdiskuse | find command allowDiskUse documentation}
    */
   allowDiskUse(allow = true): this {
     assertUninitialized(this);

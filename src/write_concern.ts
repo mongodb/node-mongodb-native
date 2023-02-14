@@ -32,7 +32,7 @@ export const WRITE_CONCERN_KEYS = ['w', 'wtimeout', 'j', 'journal', 'fsync'];
  * requested from MongoDB for write operations.
  * @public
  *
- * @see https://docs.mongodb.com/manual/reference/write-concern/
+ * @see https://www.mongodb.com/docs/manual/reference/write-concern/
  */
 export class WriteConcern {
   /** request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags. */
