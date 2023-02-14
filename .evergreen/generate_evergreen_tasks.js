@@ -33,8 +33,8 @@ const OPERATING_SYSTEMS = [
   ...osConfig
 }));
 
-// TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle']);
+// TODO: NODE-3060: enable skipped tests on windows except oidc (not supported)
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle', 'oidc']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -182,6 +182,25 @@ TASKS.push(
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
+    },
+    {
+      name: 'test-auth-oidc',
+      tags: ['latest', 'replica_set', 'oidc'],
+      commands: [
+        { func: 'install dependencies' },
+        { func: 'bootstrap oidc' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: 'latest',
+            TOPOLOGY: 'replica_set',
+            AUTH: 'auth',
+            ORCHESTRATION_FILE: 'auth-oidc.json'
+          }
+        },
+        { func: 'setup oidc roles' },
+        { func: 'run oidc tests aws' }
+      ]
     },
     {
       name: 'test-socks5',

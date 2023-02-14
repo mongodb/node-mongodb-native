@@ -128,6 +128,7 @@
     "check:atlas": "mocha --config test/manual/mocharc.json test/manual/atlas_connectivity.test.js",
     "check:adl": "mocha --config test/mocha_mongodb.json test/manual/atlas-data-lake-testing",
     "check:aws": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_aws.test.ts",
+    "check:oidc": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_oidc.test.ts",
     "check:ocsp": "mocha --config test/manual/mocharc.json test/manual/ocsp_support.test.js",
     "check:kerberos": "mocha --config test/manual/mocharc.json test/manual/kerberos.test.js",
     "check:tls": "mocha --config test/manual/mocharc.json test/manual/tls_support.test.js",
