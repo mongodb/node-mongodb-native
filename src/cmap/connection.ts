@@ -133,7 +133,7 @@ export interface ConnectionOptions
 /** @internal */
 export interface DestroyOptions {
   /** Force the destruction. */
-  force?: boolean;
+  force: boolean;
 }
 
 /** @public */
@@ -443,16 +443,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback(undefined, message.documents[0]);
   }
 
-  destroy(options?: DestroyOptions, callback?: Callback): void {
-    if (typeof options === 'function') {
-      callback = options;
-      options = { force: false };
-    }
-
+  destroy(options: DestroyOptions, callback?: Callback): void {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
 
-    options = Object.assign({ force: false }, options);
     if (this[kStream] == null || this.destroyed) {
       this.destroyed = true;
       if (typeof callback === 'function') {
