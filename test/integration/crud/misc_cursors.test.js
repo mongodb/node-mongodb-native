@@ -14,6 +14,7 @@ const { ReadPreference, MongoExpiredSessionError } = require('../../mongodb');
 const { ServerType } = require('../../mongodb');
 const { formatSort } = require('../../mongodb');
 const { getSymbolFrom } = require('../../tools/utils');
+const { MongoExpiredSessionError } = require('../../../src/error');
 
 describe('Cursor', function () {
   before(function () {
