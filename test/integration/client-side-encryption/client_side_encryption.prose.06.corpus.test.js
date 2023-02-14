@@ -262,7 +262,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
             // 5. Load `corpus/corpus.json <../corpus/corpus.json>`_ to a variable named ``corpus``. The corpus contains subdocuments with the following fields:
             //
             //    - ``kms`` is either ``aws`` or ``local``
-            //    - ``type`` is a BSON type string `names coming from here <https://docs.mongodb.com/manual/reference/operator/query/type/>`_)
+            //    - ``type`` is a BSON type string `names coming from here <https://www.mongodb.com/docs/manual/reference/operator/query/type/>`_)
             //    - ``algo`` is either ``rand`` or ``det`` for random or deterministic encryption
             //    - ``method`` is either ``auto``, for automatic encryption or ``explicit`` for  explicit encryption
             //    - ``identifier`` is either ``id`` or ``altname`` for the key identifier
