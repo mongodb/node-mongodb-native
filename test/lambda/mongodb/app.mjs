@@ -6,15 +6,25 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
   monitorCommands: true
 });
 
+let openConnections = 0;
+let heartbeatCount = 0;
+let totalHeartbeatDuration = 0;
+let totalCommands = 0;
+let totalCommandDuration = 0;
+
 mongoClient.on('commandStarted', (event) => {
   console.log('commandStarted', event);
 });
 
 mongoClient.on('commandSucceeded', (event) => {
+  totalCommands++;
+  totalCommandDuration += event.duration;
   console.log('commandSucceeded', event);
 });
 
 mongoClient.on('commandFailed', (event) => {
+  totalCommands++;
+  totalCommandDuration += event.duration;
   console.log('commandFailed', event);
 });
 
@@ -23,23 +33,48 @@ mongoClient.on('serverHeartbeatStarted', (event) => {
 });
 
 mongoClient.on('serverHeartbeatSucceeded', (event) => {
+  heartbeatCount++;
+  totalHeartbeatDuration += event.duration;
   console.log('serverHeartbeatSucceeded', event);
 });
 
 mongoClient.on('serverHeartbeatFailed', (event) => {
+  heartbeatCount++;
+  totalHeartbeatDuration += event.duration;
   console.log('serverHeartbeatFailed', event);
 });
 
 mongoClient.on('connectionCreated', (event) => {
+  openConnections++;
   console.log('connectionCreated', event);
 });
 
 mongoClient.on('connectionClosed', (event) => {
+  openConnections--;
   console.log('connectionClosed', event);
 });
 
 // Populate the connection pool.
 await mongoClient.connect();
+
+// Create the response to send back.
+function createResponse() {
+  return {
+    averageCommandDuration: totalCommandDuration / totalCommands,
+    averageHeartbeatDuration: totalHeartbeatDuration / heartbeatCount,
+    openConnections: openConnections,
+    heartbeatCount: heartbeatCount
+  };
+}
+
+// Reset the numbers.
+function reset() {
+  openConnections = 0;
+  heartbeatCount = 0;
+  totalHeartbeatDuration = 0;
+  totalCommands = 0;
+  totalCommandDuration = 0;
+}
 
 /**
  * The handler function itself performs an insert/delete and returns the
@@ -53,19 +88,12 @@ export const lambdaHandler = async (event) => {
   const collection = db.collection('test');
   const { insertedId } = await collection.insertOne({ n: 1 });
   await collection.deleteOne({ _id: insertedId });
-  try {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        insertedId: insertedId,
-      }),
-    };
-  } catch (err) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: err.message,
-      }),
-    };
-  }
+  // Create the response and then reset the numbers.
+  const response = createResponse();
+  reset();
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(response)
+  };
 };
