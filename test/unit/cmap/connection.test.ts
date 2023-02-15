@@ -75,7 +75,7 @@ class InputStream extends Readable {
   }
 }
 
-describe('new Connection()', function () {
+describe.only('new Connection()', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
@@ -453,7 +453,7 @@ describe('new Connection()', function () {
       let cleanupSpy;
       let timeoutSpy;
       beforeEach(() => {
-        cleanupSpy = sinon.spy(connection, '_cleanup');
+        cleanupSpy = sinon.spy(connection, 'cleanup');
         timeoutSpy = sinon.spy(connection, 'onTimeout');
       });
 
@@ -790,12 +790,12 @@ describe('new Connection()', function () {
         let callbackSpy;
         beforeEach(() => {
           connection.destroy({ force: true });
-          connection._cleanup.resetHistory();
+          connection.cleanup.resetHistory();
           callbackSpy = sinon.spy();
         });
         it('does not attempt to cleanup the socket again', () => {
           connection.destroy({ force: true }, callbackSpy);
-          expect(connection._cleanup).not.to.have.been.called;
+          expect(connection.cleanup).not.to.have.been.called;
         });
 
         it('calls the callback (asynchronously)', () => {
@@ -813,7 +813,7 @@ describe('new Connection()', function () {
         });
         it('cleans up the connection', () => {
           connection.destroy({ force: true }, callbackSpy);
-          expect(connection._cleanup).to.have.been.called;
+          expect(connection.cleanup).to.have.been.called;
         });
 
         it('calls the callback (asynchronously)', () => {

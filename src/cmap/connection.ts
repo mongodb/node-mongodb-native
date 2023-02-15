@@ -292,56 +292,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  _cleanup(force: boolean, error?: Error) {
-    if (this.closed) {
-      return;
-    }
-
-    this.closed = true;
-
-    const completeCleanup = () => {
-      for (const op of this[kQueue].values()) {
-        op.cb(error);
-      }
-
-      this[kQueue].clear();
-
-      this.emit(Connection.CLOSE);
-    };
-
-    this.removeAllListeners(Connection.PINNED);
-    this.removeAllListeners(Connection.UNPINNED);
-    this[kStream].removeAllListeners();
-    this[kMessageStream].removeAllListeners();
-
-    this[kMessageStream].destroy();
-
-    if (force) {
-      this[kStream].destroy();
-      completeCleanup();
-      return;
-    }
-
-    if (!this[kStream].writableEnded) {
-      this[kStream].end(() => {
-        this[kStream].destroy();
-        completeCleanup();
-      });
-    } else {
-      completeCleanup();
-    }
-  }
-
   onError(error: Error) {
     if (this.closed) {
       return;
     }
-    this._cleanup(false, error);
+    this.cleanup(false, error);
   }
 
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
-    this._cleanup(false, new MongoNetworkError(message));
+    this.cleanup(false, new MongoNetworkError(message));
   }
 
   onTimeout() {
@@ -352,7 +312,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kDelayedTimeoutId] = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      this._cleanup(false, new MongoNetworkTimeoutError(message, { beforeHandshake }));
+      this.cleanup(false, new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
@@ -373,7 +333,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       // First check if the map is of invalid size
       if (this[kQueue].size > 1) {
-        this._cleanup(true, new MongoRuntimeError(INVALID_QUEUE_SIZE));
+        this.cleanup(true, new MongoRuntimeError(INVALID_QUEUE_SIZE));
       } else {
         // Get the first orphaned operation description.
         const entry = this[kQueue].entries().next();
@@ -457,9 +417,59 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       process.nextTick(() => callback?.());
       return;
     }
-    this.once('close', () => process.nextTick(() => callback?.()));
+    if (typeof callback === 'function') {
+      this.once('close', () => process.nextTick(() => callback()));
+    }
     const message = `connection ${this.id} to ${this.address} closed`;
-    this._cleanup(options.force, new MongoNetworkError(message));
+    this.cleanup(options.force, new MongoNetworkError(message));
+  }
+
+  /**
+   * A method that cleans up the connection.  When `force` is true, this method
+   * forcibly destroys the socket.
+   *
+   * If an error is provided, any in-flight operations will be closed with the error.
+   *
+   * This method does nothing if the connection is already closed.
+   */
+  private cleanup(force: boolean, error?: Error): void {
+    if (this.closed) {
+      return;
+    }
+
+    this.closed = true;
+
+    const completeCleanup = () => {
+      for (const op of this[kQueue].values()) {
+        op.cb(error);
+      }
+
+      this[kQueue].clear();
+
+      this.emit(Connection.CLOSE);
+    };
+
+    this.removeAllListeners(Connection.PINNED);
+    this.removeAllListeners(Connection.UNPINNED);
+    this[kStream].removeAllListeners();
+    this[kMessageStream].removeAllListeners();
+
+    this[kMessageStream].destroy();
+
+    if (force) {
+      this[kStream].destroy();
+      completeCleanup();
+      return;
+    }
+
+    if (!this[kStream].writableEnded) {
+      this[kStream].end(() => {
+        this[kStream].destroy();
+        completeCleanup();
+      });
+    } else {
+      completeCleanup();
+    }
   }
 
   command(
