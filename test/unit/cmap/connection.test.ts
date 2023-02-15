@@ -12,9 +12,11 @@ import {
   hasSessionSupport,
   isHello,
   MessageStream,
+  MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
-  ns
+  ns,
+  OperationDescription
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
@@ -31,6 +33,7 @@ const connectionOptionsDefaults = {
 
 /** The absolute minimum socket API needed by Connection as of writing this test */
 class FakeSocket extends EventEmitter {
+  destroyed = false;
   writableEnded: boolean;
   address() {
     // is never called
@@ -41,6 +44,7 @@ class FakeSocket extends EventEmitter {
   destroy() {
     // is called, has no side effects
     this.writableEnded = true;
+    this.destroyed = true;
   }
   end(cb) {
     this.writableEnded = true;
@@ -385,165 +389,324 @@ describe('new Connection()', function () {
           connection.onMessage(message);
         });
 
-        it('calls all operation description callbacks with an error', function () {
+        it('calls all operation description callbacks with an error', function (done) {
           expect(spyOne).to.be.calledOnce;
           expect(spyTwo).to.be.calledOnce;
           const errorOne = spyOne.firstCall.args[0];
           const errorTwo = spyTwo.firstCall.args[0];
           expect(errorOne).to.be.instanceof(MongoRuntimeError);
           expect(errorTwo).to.be.instanceof(MongoRuntimeError);
+          done();
         });
       });
     });
   });
 
-  describe('onTimeout()', () => {
+  describe('when the socket times out', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
     let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let driverSocket: FakeSocket;
     let messageStream: MessageStream;
-    let kDelayedTimeoutId: symbol;
+    let callbackSpy;
+    let closeCount = 0;
+    let kDelayedTimeoutId;
     let NodeJSTimeoutClass: any;
 
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-
-      NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
-
-      driverSocket = sinon.spy(new FakeSocket());
+      clock = sinon.useFakeTimers({
+        toFake: ['nextTick', 'setTimeout', 'clearTimeout']
+      });
+      driverSocket = new FakeSocket();
       // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+      connection = new Connection(driverSocket, connectionOptionsDefaults);
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
+      messageStream = connection[messageStreamSymbol];
+
+      callbackSpy = sinon.spy();
+      // Create the operation description.
+      const operationDescription: OperationDescription = {
+        requestId: 1,
+        cb: callbackSpy
+      };
+
+      connection.on('close', () => {
+        closeCount++;
+      });
+
+      // Stick an operation description in the queue.
+      const queueSymbol = getSymbolFrom(connection, 'queue');
+      connection[queueSymbol].set(1, operationDescription);
+
       kDelayedTimeoutId = getSymbolFrom(connection, 'delayedTimeoutId');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
+      NodeJSTimeoutClass = setTimeout(() => null, 1).constructor;
     });
 
     afterEach(() => {
+      closeCount = 0;
+      sinon.restore();
       timerSandbox.restore();
       clock.restore();
     });
 
-    it('should delay timeout errors by one tick', async () => {
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
+    context('delayed timeout for lambda behavior', () => {
+      let cleanupSpy;
+      let timeoutSpy;
+      beforeEach(() => {
+        cleanupSpy = sinon.spy(connection, '_cleanup');
+        timeoutSpy = sinon.spy(connection, 'onTimeout');
+      });
 
-      driverSocket.emit('timeout');
-      expect(connection.onTimeout).to.have.been.calledOnce;
-      expect(connection.destroy).to.not.have.been.called;
-      expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
-      expect(connection).to.have.property('closed', false);
-      expect(driverSocket.end).to.not.have.been.called;
+      afterEach(() => {
+        sinon.restore();
+        timerSandbox.restore();
+        clock.restore();
+        sinon.restore();
+      });
 
-      clock.tick(1);
+      it('should delay timeout errors by one tick', async () => {
+        expect(connection).to.have.property(kDelayedTimeoutId, null);
 
-      expect(driverSocket.end).to.have.been.calledOnce;
-      expect(connection.destroy).to.have.been.calledOnce;
-      expect(connection).to.have.property('closed', true);
+        driverSocket.emit('timeout');
+        expect(cleanupSpy).to.not.have.been.called;
+        expect(connection)
+          .to.have.property(kDelayedTimeoutId)
+          .that.is.instanceOf(NodeJSTimeoutClass);
+        expect(connection).to.have.property('closed', false);
+
+        clock.tick(1);
+
+        expect(cleanupSpy).to.have.been.calledOnce;
+        expect(connection).to.have.property('closed', true);
+      });
+
+      it('should clear timeout errors if more data is available', () => {
+        expect(connection).to.have.property(kDelayedTimeoutId, null);
+
+        driverSocket.emit('timeout');
+        expect(timeoutSpy).to.have.been.calledOnce;
+        expect(cleanupSpy).not.to.have.been.called;
+        expect(connection)
+          .to.have.property(kDelayedTimeoutId)
+          .that.is.instanceOf(NodeJSTimeoutClass);
+
+        // emit a message before the clock ticks even once
+        // onMessage ignores unknown 'responseTo' value
+        messageStream.emit('message', { responseTo: null });
+
+        // New message before clock ticks 1 will clear the timeout
+        expect(connection).to.have.property(kDelayedTimeoutId, null);
+
+        // ticking the clock should do nothing, there is no timeout anymore
+        clock.tick(1);
+
+        expect(cleanupSpy).not.to.have.been.called;
+        expect(connection).to.have.property('closed', false);
+        expect(connection).to.have.property(kDelayedTimeoutId, null);
+      });
     });
 
-    it('should clear timeout errors if more data is available', () => {
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
+    context('when the timeout expires and no more data has come in', () => {
+      beforeEach(() => {
+        driverSocket.emit('timeout');
+        clock.tick(1);
+      });
 
-      driverSocket.emit('timeout');
-      expect(connection.onTimeout).to.have.been.calledOnce;
-      expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
+      it('destroys the message stream', () => {
+        expect(messageStream.destroyed).to.be.true;
+      });
 
-      // emit a message before the clock ticks even once
-      // onMessage ignores unknown 'responseTo' value
-      messageStream.emit('message', { responseTo: null });
+      it('ends the socket', () => {
+        expect(driverSocket.writableEnded).to.be.true;
+      });
 
-      // New message before clock ticks 1 will clear the timeout
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
+      it('destroys the socket after ending it', () => {
+        expect(driverSocket.destroyed).to.be.true;
+      });
 
-      // ticking the clock should do nothing, there is no timeout anymore
-      clock.tick(1);
+      it('passes the error along to any callbacks in the operation description queue (asynchronously)', () => {
+        expect(callbackSpy).to.have.been.calledOnce;
+        const error = callbackSpy.firstCall.args[0];
+        expect(error).to.be.instanceof(MongoNetworkTimeoutError);
+      });
 
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(connection).to.have.property('closed', false);
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
-    });
+      it('emits a Connection.CLOSE event (asynchronously)', () => {
+        expect(closeCount).to.equal(1);
+      });
 
-    it('destroys the message stream and socket', () => {
-      expect(connection).to.have.property(kDelayedTimeoutId, null);
+      it('removes all listeners on the message stream', () => {
+        expect(messageStream.eventNames()).to.deep.equal([]);
+      });
 
-      driverSocket.emit('timeout');
-
-      clock.tick(1);
-
-      expect(connection.onTimeout).to.have.been.calledOnce;
-      expect(connection).to.have.property(kDelayedTimeoutId).that.is.instanceOf(NodeJSTimeoutClass);
-
-      expect(messageStream.destroy).to.have.been.calledOnce;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
+      it('removes all listeners on the socket', () => {
+        expect(driverSocket.eventNames()).to.deep.equal([]);
+      });
     });
   });
 
-  describe('onError()', () => {
+  describe('when the message stream errors', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
     let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let driverSocket: FakeSocket;
     let messageStream: MessageStream;
+    let callbackSpy;
+    const error = new Error('something went wrong');
+    let closeCount = 0;
+
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-      driverSocket = sinon.spy(new FakeSocket());
+      clock = sinon.useFakeTimers({
+        toFake: ['nextTick']
+      });
+      driverSocket = new FakeSocket();
       // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+      connection = new Connection(driverSocket, connectionOptionsDefaults);
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
+      messageStream = connection[messageStreamSymbol];
+
+      callbackSpy = sinon.spy();
+      // Create the operation description.
+      const operationDescription: OperationDescription = {
+        requestId: 1,
+        cb: callbackSpy
+      };
+
+      connection.on('close', () => {
+        closeCount++;
+      });
+
+      // Stick an operation description in the queue.
+      const queueSymbol = getSymbolFrom(connection, 'queue');
+      connection[queueSymbol].set(1, operationDescription);
+
+      messageStream.emit('error', error);
     });
 
     afterEach(() => {
+      closeCount = 0;
+      sinon.restore();
       timerSandbox.restore();
       clock.restore();
     });
 
-    it('destroys the message stream and socket', () => {
-      messageStream.emit('error');
-      clock.tick(1);
-      expect(connection.onError).to.have.been.calledOnce;
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(messageStream.destroy).to.have.been.called;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
+    it('destroys the message stream synchronously', () => {
+      expect(messageStream.destroyed).to.be.true;
+    });
+
+    it('ends the socket', () => {
+      expect(driverSocket.writableEnded).to.be.true;
+    });
+
+    it('destroys the socket after ending it (asynchronously)', () => {
+      expect(driverSocket.writableEnded).to.be.true;
+      expect(driverSocket.destroyed).to.be.false;
+      clock.runAll();
+      expect(driverSocket.destroyed).to.be.true;
+    });
+
+    it('passes the error along to any callbacks in the operation description queue (asynchronously)', () => {
+      expect(callbackSpy).not.to.have.been.called;
+      clock.runAll();
+      expect(callbackSpy).to.have.been.calledOnceWithExactly(error);
+    });
+
+    it('emits a Connection.CLOSE event (asynchronously)', () => {
+      expect(closeCount).to.equal(0);
+      clock.runAll();
+      expect(closeCount).to.equal(1);
+    });
+
+    it('removes all listeners on the message stream', () => {
+      expect(messageStream.eventNames()).to.deep.equal([]);
+    });
+
+    it('removes all listeners on the socket', () => {
+      expect(driverSocket.eventNames()).to.deep.equal([]);
     });
   });
 
-  describe('onClose()', () => {
+  describe('when the underlying socket closes', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
     let timerSandbox: sinon.SinonFakeTimers;
-    let driverSocket: sinon.SinonSpiedInstance<FakeSocket>;
+    let driverSocket: FakeSocket;
     let messageStream: MessageStream;
+    let callbackSpy;
+    let closeCount = 0;
+
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
-
-      driverSocket = sinon.spy(new FakeSocket());
+      clock = sinon.useFakeTimers({
+        toFake: ['nextTick']
+      });
+      driverSocket = new FakeSocket();
       // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
-      connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
+      connection = new Connection(driverSocket, connectionOptionsDefaults);
       const messageStreamSymbol = getSymbolFrom(connection, 'messageStream');
-      messageStream = sinon.spy(connection[messageStreamSymbol]);
-    });
+      messageStream = connection[messageStreamSymbol];
 
-    afterEach(() => {
-      timerSandbox.restore();
-      clock.restore();
-    });
+      callbackSpy = sinon.spy();
+      // Create the operation description.
+      const operationDescription: OperationDescription = {
+        requestId: 1,
+        cb: callbackSpy
+      };
 
-    it('destroys the message stream and socket', () => {
+      connection.on('close', () => {
+        closeCount++;
+      });
+
+      // Stick an operation description in the queue.
+      const queueSymbol = getSymbolFrom(connection, 'queue');
+      connection[queueSymbol].set(1, operationDescription);
+
       driverSocket.emit('close');
-      clock.tick(1);
-      expect(connection.onClose).to.have.been.calledOnce;
-      connection.destroy({ force: false });
-      clock.tick(1);
-      expect(messageStream.destroy).to.have.been.called;
-      expect(driverSocket.destroy).to.not.have.been.called;
-      expect(driverSocket.end).to.have.been.calledOnce;
+    });
+
+    afterEach(() => {
+      closeCount = 0;
+      sinon.restore();
+      timerSandbox.restore();
+      clock.restore();
+    });
+
+    it('destroys the message stream synchronously', () => {
+      expect(messageStream.destroyed).to.be.true;
+    });
+
+    it('ends the socket', () => {
+      expect(driverSocket.writableEnded).to.be.true;
+    });
+
+    it('destroys the socket after ending it (asynchronously)', () => {
+      expect(driverSocket.writableEnded).to.be.true;
+      expect(driverSocket.destroyed).to.be.false;
+      clock.runAll();
+      expect(driverSocket.destroyed).to.be.true;
+    });
+
+    it('calls any callbacks in the queue with a MongoNetworkError (asynchronously)', () => {
+      expect(callbackSpy).not.to.have.been.called;
+      clock.runAll();
+      expect(callbackSpy).to.have.been.calledOnce;
+      const error = callbackSpy.firstCall.args[0];
+      expect(error).to.be.instanceof(MongoNetworkError);
+    });
+
+    it('emits a Connection.CLOSE event (asynchronously)', () => {
+      expect(closeCount).to.equal(0);
+      clock.runAll();
+      expect(closeCount).to.equal(1);
+    });
+
+    it('removes all listeners on the message stream', () => {
+      expect(messageStream.eventNames()).to.deep.equal([]);
+    });
+
+    it('removes all listeners on the socket', () => {
+      expect(driverSocket.eventNames()).to.deep.equal([]);
     });
   });
 
@@ -607,7 +770,9 @@ describe('new Connection()', function () {
     let messageStream: MessageStream;
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
-      clock = sinon.useFakeTimers();
+      clock = sinon.useFakeTimers({
+        toFake: ['nextTick']
+      });
 
       driverSocket = sinon.spy(new FakeSocket());
       // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
@@ -621,62 +786,86 @@ describe('new Connection()', function () {
       clock.restore();
     });
 
+    context('when a callback is provided', () => {
+      context('when the connection was already destroyed', () => {
+        let callbackSpy;
+        beforeEach(() => {
+          connection.destroy({ force: true });
+          connection._cleanup.resetHistory();
+          callbackSpy = sinon.spy();
+        });
+        it('does not attempt to cleanup the socket again', () => {
+          connection.destroy({ force: true }, callbackSpy);
+          expect(connection._cleanup).not.to.have.been.called;
+        });
+
+        it('calls the callback (asynchronously)', () => {
+          connection.destroy({ force: true }, callbackSpy);
+          expect(callbackSpy).not.to.have.been.called;
+          clock.runAll();
+          expect(callbackSpy).to.have.been.called;
+        });
+      });
+
+      context('when the connection was not destroyed', () => {
+        let callbackSpy;
+        beforeEach(() => {
+          callbackSpy = sinon.spy();
+        });
+        it('cleans up the connection', () => {
+          connection.destroy({ force: true }, callbackSpy);
+          expect(connection._cleanup).to.have.been.called;
+        });
+
+        it('calls the callback (asynchronously)', () => {
+          connection.destroy({ force: true }, callbackSpy);
+          expect(callbackSpy).not.to.have.been.called;
+          clock.runAll();
+          expect(callbackSpy).to.have.been.called;
+        });
+      });
+    });
+
     context('when options.force == true', function () {
-      it('calls stream.destroy', () => {
+      it('destroys the tcp socket (synchronously)', () => {
+        expect(driverSocket.destroy).not.to.have.been.called;
         connection.destroy({ force: true });
-        clock.tick(1);
         expect(driverSocket.destroy).to.have.been.calledOnce;
       });
 
       it('does not call stream.end', () => {
         connection.destroy({ force: true });
-        clock.tick(1);
         expect(driverSocket.end).to.not.have.been.called;
       });
 
-      it('destroys the tcp socket', () => {
+      it('destroys the messageStream (synchronously)', () => {
         connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.have.been.calledOnce;
-      });
-
-      it('destroys the messageStream', () => {
-        connection.destroy({ force: true });
-        clock.tick(1);
         expect(messageStream.destroy).to.have.been.calledOnce;
       });
 
-      it('calls stream.destroy whenever destroy is called ', () => {
+      it('when destroy({ force: true }) is called multiple times, it calls stream.destroy exactly once', () => {
         connection.destroy({ force: true });
         connection.destroy({ force: true });
         connection.destroy({ force: true });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.have.been.calledThrice;
+        expect(driverSocket.destroy).to.have.been.calledOnce;
       });
     });
 
     context('when options.force == false', function () {
-      it('calls stream.end', () => {
+      it('destroys the tcp socket (asynchronously)', () => {
         connection.destroy({ force: false });
+        expect(driverSocket.destroy).not.to.have.been.called;
         clock.tick(1);
+        expect(driverSocket.destroy).to.have.been.called;
+      });
+
+      it('ends the tcp socket (synchronously)', () => {
+        connection.destroy({ force: false });
         expect(driverSocket.end).to.have.been.calledOnce;
       });
 
-      it('does not call stream.destroy', () => {
+      it('destroys the messageStream (synchronously)', () => {
         connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.destroy).to.not.have.been.called;
-      });
-
-      it('ends the tcp socket', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
-        expect(driverSocket.end).to.have.been.calledOnce;
-      });
-
-      it('destroys the messageStream', () => {
-        connection.destroy({ force: false });
-        clock.tick(1);
         expect(messageStream.destroy).to.have.been.calledOnce;
       });
 

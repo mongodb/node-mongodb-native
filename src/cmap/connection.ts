@@ -292,16 +292,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  /**
-   *
-   * @param options
-   */
-  _cleanup(options: { force: boolean; errorFactory?: () => Error; callback?: Callback }) {
-    const { callback, errorFactory, force } = options;
+  _cleanup(options: { force: boolean; errorFactory?: () => Error }) {
+    const { errorFactory, force } = options;
     if (this.closed) {
-      if (callback) {
-        process.nextTick(callback);
-      }
       return;
     }
 
@@ -315,10 +308,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this[kQueue].clear();
 
       this.emit(Connection.CLOSE);
-
-      if (callback) {
-        process.nextTick(callback);
-      }
     };
 
     this.removeAllListeners(Connection.PINNED);
@@ -335,7 +324,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     if (!this[kStream].writableEnded) {
-      this[kStream].end(completeCleanup);
+      this[kStream].end(() => {
+        this[kStream].destroy();
+        completeCleanup();
+      });
     } else {
       completeCleanup();
     }
@@ -349,10 +341,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onClose() {
-    if (this.closed) {
-      return;
-    }
-
     const message = `connection ${this.id} to ${this.address} closed`;
     this._cleanup({ force: false, errorFactory: () => new MongoNetworkError(message) });
   }
@@ -389,7 +377,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       // First check if the map is of invalid size
       if (this[kQueue].size > 1) {
-        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+        this._cleanup({
+          force: true,
+          errorFactory: () => new MongoRuntimeError(INVALID_QUEUE_SIZE)
+        });
       } else {
         // Get the first orphaned operation description.
         const entry = this[kQueue].entries().next();
@@ -469,7 +460,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   destroy(options: DestroyOptions, callback?: Callback): void {
-    this._cleanup({ ...options, callback });
+    if (this.closed) {
+      process.nextTick(() => callback?.());
+      return;
+    }
+    this.once('close', () => process.nextTick(() => callback?.()));
+    const message = `connection ${this.id} to ${this.address} closed`;
+    this._cleanup({ ...options, errorFactory: () => new MongoNetworkError(message) });
   }
 
   command(
