@@ -80,7 +80,7 @@ describe('new Connection()', function () {
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
 
-  it('should support fire-and-forget messages', function (done) {
+  it('supports fire-and-forget messages', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -109,7 +109,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should destroy streams which time out', function (done) {
+  it('destroys streams which time out', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -140,7 +140,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to false on timeout after handshake', function (done) {
+  it('throws a network error with kBeforeHandshake set to false on timeout after handshake', function (done) {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -169,7 +169,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('should throw a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
+  it('throws a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event
     });
@@ -464,7 +464,7 @@ describe('new Connection()', function () {
         sinon.restore();
       });
 
-      it('should delay timeout errors by one tick', async () => {
+      it('delays timeout errors by one tick', async () => {
         expect(connection).to.have.property(kDelayedTimeoutId, null);
 
         driverSocket.emit('timeout');
@@ -480,7 +480,7 @@ describe('new Connection()', function () {
         expect(connection).to.have.property('closed', true);
       });
 
-      it('should clear timeout errors if more data is available', () => {
+      it('clears timeout errors if more data is available', () => {
         expect(connection).to.have.property(kDelayedTimeoutId, null);
 
         driverSocket.emit('timeout');
