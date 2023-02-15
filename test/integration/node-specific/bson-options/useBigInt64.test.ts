@@ -116,7 +116,7 @@ describe('useBigInt64 option', function () {
       await client.close().catch(() => expect.fail('failed to close client'));
     });
 
-    it('find', async function () {
+    it('deserializes to a bigint', async function () {
       const res = await col.findOne({ a: 1n }, { useBigInt64: true });
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('bigint');
