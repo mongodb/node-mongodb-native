@@ -292,8 +292,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  _cleanup(options: { force: boolean; errorFactory?: () => Error }) {
-    const { errorFactory, force } = options;
+  _cleanup(force: boolean, error?: Error) {
     if (this.closed) {
       return;
     }
@@ -302,7 +301,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const completeCleanup = () => {
       for (const op of this[kQueue].values()) {
-        op.cb(errorFactory?.());
+        op.cb(error);
       }
 
       this[kQueue].clear();
@@ -337,12 +336,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (this.closed) {
       return;
     }
-    this._cleanup({ force: false, errorFactory: () => error });
+    this._cleanup(false, error);
   }
 
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
-    this._cleanup({ force: false, errorFactory: () => new MongoNetworkError(message) });
+    this._cleanup(false, new MongoNetworkError(message));
   }
 
   onTimeout() {
@@ -353,10 +352,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this[kDelayedTimeoutId] = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      this._cleanup({
-        force: false,
-        errorFactory: () => new MongoNetworkTimeoutError(message, { beforeHandshake })
-      });
+      this._cleanup(false, new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
@@ -377,10 +373,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       // First check if the map is of invalid size
       if (this[kQueue].size > 1) {
-        this._cleanup({
-          force: true,
-          errorFactory: () => new MongoRuntimeError(INVALID_QUEUE_SIZE)
-        });
+        this._cleanup(true, new MongoRuntimeError(INVALID_QUEUE_SIZE));
       } else {
         // Get the first orphaned operation description.
         const entry = this[kQueue].entries().next();
@@ -466,7 +459,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
     this.once('close', () => process.nextTick(() => callback?.()));
     const message = `connection ${this.id} to ${this.address} closed`;
-    this._cleanup({ ...options, errorFactory: () => new MongoNetworkError(message) });
+    this._cleanup(options.force, new MongoNetworkError(message));
   }
 
   command(
