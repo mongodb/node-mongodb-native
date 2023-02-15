@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, Db, MongoClient } from '../../../mongodb';
+import { BSON, Collection, Db, MongoClient } from '../../../mongodb';
 import { setupDatabase } from '../../shared.js';
 
 describe('useBigInt64 option', function () {
@@ -120,6 +120,19 @@ describe('useBigInt64 option', function () {
       const res = await col.findOne({ a: 1n }, { useBigInt64: true });
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('bigint');
+    });
+  });
+
+  describe('when set to true and promoteLongs is set to false', function () {
+    it('throws a BSONError', async function () {
+      const client = configuration.newClient(configuration.writeConcernMax(), {
+        useBigInt64: true,
+        promoteLongs: false
+      });
+      const e = await client.connect().catch(e => e);
+      expect(e).to.be.instanceOf(BSON.BSONError);
+
+      await client.close();
     });
   });
 });
