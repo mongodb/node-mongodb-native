@@ -449,8 +449,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this.emit(Connection.CLOSE);
     };
 
-    this.removeAllListeners(Connection.PINNED);
-    this.removeAllListeners(Connection.UNPINNED);
+    for (const event of [
+      Connection.MESSAGE,
+      Connection.PINNED,
+      Connection.UNPINNED,
+      Connection.COMMAND_STARTED,
+      Connection.COMMAND_FAILED,
+      Connection.COMMAND_SUCCEEDED,
+      Connection.CLUSTER_TIME_RECEIVED
+    ]) {
+      this.removeAllListeners(event);
+    }
+
     this[kStream].removeAllListeners();
     this[kMessageStream].removeAllListeners();
 
