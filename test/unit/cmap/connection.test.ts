@@ -389,14 +389,13 @@ describe('new Connection()', function () {
           connection.onMessage(message);
         });
 
-        it('calls all operation description callbacks with an error', function (done) {
+        it('calls all operation description callbacks with an error', function () {
           expect(spyOne).to.be.calledOnce;
           expect(spyTwo).to.be.calledOnce;
           const errorOne = spyOne.firstCall.args[0];
           const errorTwo = spyTwo.firstCall.args[0];
           expect(errorOne).to.be.instanceof(MongoRuntimeError);
           expect(errorTwo).to.be.instanceof(MongoRuntimeError);
-          done();
         });
       });
     });
