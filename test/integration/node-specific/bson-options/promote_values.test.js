@@ -22,9 +22,6 @@ describe('Promote Values', function () {
         promoteValues: false
       });
       await client.connect();
-      this.defer(async () => {
-        await client.close();
-      });
       let db = client.db(configuration.db);
 
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
@@ -37,6 +34,8 @@ describe('Promote Values', function () {
       expect(Long.fromNumber(10)).deep.equals(doc.doc);
       expect(new Int32(10)).deep.equals(doc.int);
       expect(new Double(2.2222)).deep.equals(doc.double);
+
+      await client.close();
     }
   });
 
@@ -51,9 +50,6 @@ describe('Promote Values', function () {
       var configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
       await client.connect();
-      this.defer(async () => {
-        await client.close();
-      });
       const db = client.db(configuration.db);
 
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
@@ -67,6 +63,8 @@ describe('Promote Values', function () {
       expect(Long.fromNumber(10)).deep.equals(doc.doc);
       expect(new Int32(10)).deep.equals(doc.int);
       expect(new Double(2.2222)).deep.equals(doc.double);
+
+      await client.close();
     }
   });
 
@@ -81,7 +79,6 @@ describe('Promote Values', function () {
       const configuration = this.configuration;
       const client = configuration.newClient({}, { promoteValues: false });
       await client.connect();
-      this.defer(async () => await client.close());
       const db = client.db(configuration.db);
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
         doc: Long.fromNumber(10),
@@ -94,6 +91,8 @@ describe('Promote Values', function () {
       expect(doc.doc).to.deep.equal(Long.fromNumber(10));
       expect(doc.int).to.deep.equal(new Int32(10));
       expect(doc.double).to.deep.equal(new Double(2.2222));
+
+      await client.close();
     }
   });
 
@@ -108,7 +107,6 @@ describe('Promote Values', function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
       await client.connect();
-      this.defer(async () => await client.close());
       const db = client.db(configuration.db);
 
       await db.collection('shouldCorrectlyHonorPromoteValues').insertOne({
@@ -125,6 +123,8 @@ describe('Promote Values', function () {
       expect(doc.doc).to.deep.equal(Long.fromNumber(10));
       expect(doc.int).to.deep.equal(new Int32(10));
       expect(doc.double).to.deep.equal(new Double(2.2222));
+
+      await client.close();
     }
   });
 
@@ -139,9 +139,6 @@ describe('Promote Values', function () {
       const configuration = this.configuration;
       const client = configuration.newClient();
       await client.connect();
-      this.defer(async () => {
-        client.close();
-      });
       const db = client.db(configuration.db);
       await db.collection('shouldCorrectlyHonorPromoteValues2').insertOne({
         doc: Long.fromNumber(10),
@@ -156,6 +153,8 @@ describe('Promote Values', function () {
       expect(doc.doc, Long.fromNumber(10));
       expect(doc.int, new Int32(10));
       expect(doc.double, new Double(2.2222));
+
+      await client.close();
     }
   });
 

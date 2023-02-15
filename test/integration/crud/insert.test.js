@@ -432,9 +432,6 @@ describe('crud - insert', function () {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         await client.connect();
-        this.defer(async () => {
-          await client.close();
-        });
         const db = client.db(configuration.db);
         const collection = db.collection('test_to_json_for_long');
         await collection.insert(
@@ -443,6 +440,8 @@ describe('crud - insert', function () {
         );
         const findResult = await collection.findOne({});
         expect(findResult.value).to.deep.equal(32222432);
+
+        await client.close();
       }
     });
 
@@ -457,9 +456,6 @@ describe('crud - insert', function () {
         const configuration = this.configuration;
         const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
         await client.connect();
-        this.defer(async () => {
-          await client.close();
-        });
         const db = client.db(configuration.db);
         const collection = db.collection('test_insert_and_query_timestamp');
         await collection.insertOne(
@@ -470,6 +466,8 @@ describe('crud - insert', function () {
         expect(findResult.i._bsontype).equals('Timestamp');
         expect(findResult.i.toInt(), 100);
         expect(findResult.j, 200);
+
+        await client.close();
       }
     });
 
@@ -1718,9 +1716,6 @@ describe('crud - insert', function () {
           promoteLongs: false
         });
         await client.connect();
-        this.defer(async () => {
-          await client.close();
-        });
         const db = client.db(configuration.db);
         await db.collection('shouldCorrectlyHonorPromoteLong').insertOne({
           doc: Long.fromNumber(10),
@@ -1730,6 +1725,8 @@ describe('crud - insert', function () {
 
         expect(doc.doc._bsontype === 'Long');
         expect(doc.array[0][0]._bsontype === 'Long');
+
+        await client.close();
       }
     });
 
@@ -1750,9 +1747,6 @@ describe('crud - insert', function () {
           promoteLongs: false
         });
         await client.connect();
-        this.defer(async () => {
-          client.close();
-        });
         const db = client.db(configuration.db);
         await db
           .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
@@ -1790,6 +1784,7 @@ describe('crud - insert', function () {
           .toArray();
         const doc = docs.pop();
         expect(doc.a._bsontype).to.equal('Long');
+        client.close();
       }
     });
 
@@ -1891,9 +1886,6 @@ describe('crud - insert', function () {
           promoteLongs: false
         });
         await client.connect();
-        this.defer(async () => {
-          await client.close();
-        });
         const db = client.db(configuration.db);
         await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insertOne({
           doc: Long.fromNumber(10),
@@ -1902,6 +1894,8 @@ describe('crud - insert', function () {
         const doc = await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne({});
         expect(doc.doc._bsontype).to.equal('Long');
         expect(doc.array[0][0]._bsontype).to.equal('Long');
+
+        await client.close();
       }
     });
 

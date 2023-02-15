@@ -14,7 +14,7 @@ describe('useBigInt64 option', function () {
     let client: MongoClient;
 
     beforeEach(async function () {
-      client = await configuration.newClient(configuration.writeConcernMax());
+      client = configuration.newClient(configuration.writeConcernMax());
     });
 
     afterEach(async function () {
@@ -29,7 +29,7 @@ describe('useBigInt64 option', function () {
 
   describe('when set at client level', function () {
     let client: MongoClient;
-    beforeEach(async function () {
+    beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), { useBigInt64: true });
     });
 
