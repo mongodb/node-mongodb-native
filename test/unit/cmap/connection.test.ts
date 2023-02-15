@@ -75,7 +75,7 @@ class InputStream extends Readable {
   }
 }
 
-describe.only('new Connection()', function () {
+describe('new Connection()', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
@@ -457,13 +457,6 @@ describe.only('new Connection()', function () {
         timeoutSpy = sinon.spy(connection, 'onTimeout');
       });
 
-      afterEach(() => {
-        sinon.restore();
-        timerSandbox.restore();
-        clock.restore();
-        sinon.restore();
-      });
-
       it('delays timeout errors by one tick', async () => {
         expect(connection).to.have.property(kDelayedTimeoutId, null);
 
@@ -512,7 +505,7 @@ describe.only('new Connection()', function () {
         clock.tick(1);
       });
 
-      it('destroys the message stream', () => {
+      it('destroys the MessageStream', () => {
         expect(messageStream.destroyed).to.be.true;
       });
 
@@ -534,17 +527,17 @@ describe.only('new Connection()', function () {
         expect(closeCount).to.equal(1);
       });
 
-      it('removes all listeners on the message stream', () => {
-        expect(messageStream.eventNames()).to.deep.equal([]);
+      it('removes all listeners on the MessageStream', () => {
+        expect(messageStream.eventNames()).to.have.lengthOf(0);
       });
 
       it('removes all listeners on the socket', () => {
-        expect(driverSocket.eventNames()).to.deep.equal([]);
+        expect(driverSocket.eventNames()).to.have.lengthOf(0);
       });
     });
   });
 
-  describe('when the message stream errors', () => {
+  describe('when the MessageStream errors', () => {
     let connection: sinon.SinonSpiedInstance<Connection>;
     let clock: sinon.SinonFakeTimers;
     let timerSandbox: sinon.SinonFakeTimers;
@@ -590,7 +583,7 @@ describe.only('new Connection()', function () {
       clock.restore();
     });
 
-    it('destroys the message stream synchronously', () => {
+    it('destroys the MessageStream synchronously', () => {
       expect(messageStream.destroyed).to.be.true;
     });
 
@@ -617,12 +610,12 @@ describe.only('new Connection()', function () {
       expect(closeCount).to.equal(1);
     });
 
-    it('removes all listeners on the message stream', () => {
-      expect(messageStream.eventNames()).to.deep.equal([]);
+    it('removes all listeners on the MessageStream', () => {
+      expect(messageStream.eventNames()).to.have.lengthOf(0);
     });
 
     it('removes all listeners on the socket', () => {
-      expect(driverSocket.eventNames()).to.deep.equal([]);
+      expect(driverSocket.eventNames()).to.have.lengthOf(0);
     });
   });
 
@@ -671,7 +664,7 @@ describe.only('new Connection()', function () {
       clock.restore();
     });
 
-    it('destroys the message stream synchronously', () => {
+    it('destroys the MessageStream synchronously', () => {
       expect(messageStream.destroyed).to.be.true;
     });
 
@@ -700,12 +693,12 @@ describe.only('new Connection()', function () {
       expect(closeCount).to.equal(1);
     });
 
-    it('removes all listeners on the message stream', () => {
-      expect(messageStream.eventNames()).to.deep.equal([]);
+    it('removes all listeners on the MessageStream', () => {
+      expect(messageStream.eventNames()).to.have.lengthOf(0);
     });
 
     it('removes all listeners on the socket', () => {
-      expect(driverSocket.eventNames()).to.deep.equal([]);
+      expect(driverSocket.eventNames()).to.have.lengthOf(0);
     });
   });
 
