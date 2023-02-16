@@ -100,6 +100,27 @@ BASE_TASKS.push({
   ]
 });
 
+// TODO(NODE-5035): Bring back when implementing.
+// {
+//   name: 'test-auth-oidc',
+//   tags: ['latest', 'replica_set', 'oidc'],
+//   commands: [
+//     { func: 'install dependencies' },
+//     { func: 'bootstrap oidc' },
+//     {
+//       func: 'bootstrap mongo-orchestration',
+//       vars: {
+//         VERSION: 'latest',
+//         TOPOLOGY: 'replica_set',
+//         AUTH: 'auth',
+//         ORCHESTRATION_FILE: 'auth-oidc.json'
+//       }
+//     },
+//     { func: 'setup oidc roles' },
+//     { func: 'run oidc tests aws' }
+//   ]
+// }
+
 // manually added tasks
 TASKS.push(
   ...[
@@ -182,25 +203,6 @@ TASKS.push(
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    },
-    {
-      name: 'test-auth-oidc',
-      tags: ['latest', 'replica_set', 'oidc'],
-      commands: [
-        { func: 'install dependencies' },
-        { func: 'bootstrap oidc' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: 'latest',
-            TOPOLOGY: 'replica_set',
-            AUTH: 'auth',
-            ORCHESTRATION_FILE: 'auth-oidc.json'
-          }
-        },
-        { func: 'setup oidc roles' },
-        { func: 'run oidc tests aws' }
-      ]
     },
     {
       name: 'test-socks5',

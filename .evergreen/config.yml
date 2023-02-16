@@ -1433,22 +1433,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
-  - name: test-auth-oidc
-    tags:
-      - latest
-      - replica_set
-      - oidc
-    commands:
-      - func: install dependencies
-      - func: bootstrap oidc
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-          AUTH: auth
-          ORCHESTRATION_FILE: auth-oidc.json
-      - func: setup oidc roles
-      - func: run oidc tests aws
   - name: test-socks5
     tags: []
     commands:
@@ -3074,7 +3058,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3124,7 +3107,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3172,7 +3154,6 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3219,7 +3200,6 @@ buildvariants:
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
-      - test-auth-oidc
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
