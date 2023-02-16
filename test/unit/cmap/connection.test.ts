@@ -433,8 +433,12 @@ describe('new Connection()', function () {
       connection.on('close', () => {
         closeCount++;
       });
-      connection.once(Connection.PINNED, () => {});
-      connection.once(Connection.UNPINNED, () => {});
+      connection.once(Connection.PINNED, () => {
+        /* no-op */
+      });
+      connection.once(Connection.UNPINNED, () => {
+        /* no-op */
+      });
 
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
@@ -579,8 +583,12 @@ describe('new Connection()', function () {
         closeCount++;
       });
 
-      connection.once(Connection.PINNED, () => {});
-      connection.once(Connection.UNPINNED, () => {});
+      connection.once(Connection.PINNED, () => {
+        /* no-op */
+      });
+      connection.once(Connection.UNPINNED, () => {
+        /* no-op */
+      });
 
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
@@ -664,8 +672,12 @@ describe('new Connection()', function () {
         closeCount++;
       });
 
-      connection.once(Connection.PINNED, () => {});
-      connection.once(Connection.UNPINNED, () => {});
+      connection.once(Connection.PINNED, () => {
+        /* no-op */
+      });
+      connection.once(Connection.UNPINNED, () => {
+        /* no-op */
+      });
 
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
@@ -797,13 +809,17 @@ describe('new Connection()', function () {
     });
 
     it('removes all Connection.PINNED listeners', () => {
-      connection.once(Connection.PINNED, () => {});
+      connection.once(Connection.PINNED, () => {
+        /* no-op */
+      });
       connection.destroy({ force: true });
       expect(connection.listenerCount(Connection.PINNED)).to.equal(0);
     });
 
     it('removes all Connection.UNPINNED listeners', () => {
-      connection.once(Connection.UNPINNED, () => {});
+      connection.once(Connection.UNPINNED, () => {
+        /* no-op */
+      });
       connection.destroy({ force: true });
       expect(connection.listenerCount(Connection.UNPINNED)).to.equal(0);
     });
