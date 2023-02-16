@@ -420,6 +420,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (typeof callback === 'function') {
       this.once('close', () => process.nextTick(() => callback()));
     }
+
+    // load balanced mode requires that these listeners remain on the connection
+    // after cleanup on timeouts, errors or close so we remove them before calling
+    // cleanup.
+    this.removeAllListeners(Connection.PINNED);
+    this.removeAllListeners(Connection.UNPINNED);
     const message = `connection ${this.id} to ${this.address} closed`;
     this.cleanup(options.force, new MongoNetworkError(message));
   }
@@ -448,18 +454,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       this.emit(Connection.CLOSE);
     };
-
-    for (const event of [
-      Connection.MESSAGE,
-      Connection.PINNED,
-      Connection.UNPINNED,
-      Connection.COMMAND_STARTED,
-      Connection.COMMAND_FAILED,
-      Connection.COMMAND_SUCCEEDED,
-      Connection.CLUSTER_TIME_RECEIVED
-    ]) {
-      this.removeAllListeners(event);
-    }
 
     this[kStream].removeAllListeners();
     this[kMessageStream].removeAllListeners();

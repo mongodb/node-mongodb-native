@@ -75,7 +75,7 @@ class InputStream extends Readable {
   }
 }
 
-describe('new Connection()', function () {
+describe.only('new Connection()', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
@@ -433,6 +433,8 @@ describe('new Connection()', function () {
       connection.on('close', () => {
         closeCount++;
       });
+      connection.once(Connection.PINNED, () => {});
+      connection.once(Connection.UNPINNED, () => {});
 
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
@@ -527,6 +529,14 @@ describe('new Connection()', function () {
         expect(closeCount).to.equal(1);
       });
 
+      it('does NOT remove all Connection.PINNED listeners', () => {
+        expect(connection.listenerCount(Connection.PINNED)).to.equal(1);
+      });
+
+      it('does NOT remove all Connection.UNPINNED listeners', () => {
+        expect(connection.listenerCount(Connection.UNPINNED)).to.equal(1);
+      });
+
       it('removes all listeners on the MessageStream', () => {
         expect(messageStream.eventNames()).to.have.lengthOf(0);
       });
@@ -569,6 +579,9 @@ describe('new Connection()', function () {
         closeCount++;
       });
 
+      connection.once(Connection.PINNED, () => {});
+      connection.once(Connection.UNPINNED, () => {});
+
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
       connection[queueSymbol].set(1, operationDescription);
@@ -608,6 +621,14 @@ describe('new Connection()', function () {
       expect(closeCount).to.equal(0);
       clock.runAll();
       expect(closeCount).to.equal(1);
+    });
+
+    it('does NOT remove all Connection.PINNED listeners', () => {
+      expect(connection.listenerCount(Connection.PINNED)).to.equal(1);
+    });
+
+    it('does NOT remove all Connection.UNPINNED listeners', () => {
+      expect(connection.listenerCount(Connection.UNPINNED)).to.equal(1);
     });
 
     it('removes all listeners on the MessageStream', () => {
@@ -650,6 +671,9 @@ describe('new Connection()', function () {
         closeCount++;
       });
 
+      connection.once(Connection.PINNED, () => {});
+      connection.once(Connection.UNPINNED, () => {});
+
       // Stick an operation description in the queue.
       const queueSymbol = getSymbolFrom(connection, 'queue');
       connection[queueSymbol].set(1, operationDescription);
@@ -691,6 +715,14 @@ describe('new Connection()', function () {
       expect(closeCount).to.equal(0);
       clock.runAll();
       expect(closeCount).to.equal(1);
+    });
+
+    it('does NOT remove all Connection.PINNED listeners', () => {
+      expect(connection.listenerCount(Connection.PINNED)).to.equal(1);
+    });
+
+    it('does NOT remove all Connection.UNPINNED listeners', () => {
+      expect(connection.listenerCount(Connection.UNPINNED)).to.equal(1);
     });
 
     it('removes all listeners on the MessageStream', () => {
@@ -776,6 +808,18 @@ describe('new Connection()', function () {
     afterEach(() => {
       timerSandbox.restore();
       clock.restore();
+    });
+
+    it('removes all Connection.PINNED listeners', () => {
+      connection.once(Connection.PINNED, () => {});
+      connection.destroy({ force: true });
+      expect(connection.listenerCount(Connection.PINNED)).to.equal(0);
+    });
+
+    it('removes all Connection.UNPINNED listeners', () => {
+      connection.once(Connection.UNPINNED, () => {});
+      connection.destroy({ force: true });
+      expect(connection.listenerCount(Connection.UNPINNED)).to.equal(0);
     });
 
     context('when a callback is provided', () => {
