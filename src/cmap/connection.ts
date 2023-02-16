@@ -293,26 +293,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onError(error: Error) {
-    if (this.closed) {
-      return;
-    }
-    this.cleanup(false, error);
+    this.cleanup(true, error);
   }
 
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
-    this.cleanup(false, new MongoNetworkError(message));
+    this.cleanup(true, new MongoNetworkError(message));
   }
 
   onTimeout() {
-    if (this.closed) {
-      return;
-    }
-
     this[kDelayedTimeoutId] = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      this.cleanup(false, new MongoNetworkTimeoutError(message, { beforeHandshake }));
+      this.cleanup(true, new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 

@@ -75,7 +75,7 @@ class InputStream extends Readable {
   }
 }
 
-describe.only('new Connection()', function () {
+describe('new Connection()', function () {
   let server;
   after(() => mock.cleanup());
   before(() => mock.createServer().then(s => (server = s)));
@@ -133,7 +133,7 @@ describe.only('new Connection()', function () {
         expect(err).to.be.instanceOf(MongoNetworkTimeoutError);
         expect(result).to.not.exist;
 
-        expect(conn).property('stream').property('writableEnded', true);
+        expect(conn).property('stream').property('destroyed', true);
 
         done();
       });
@@ -604,22 +604,15 @@ describe.only('new Connection()', function () {
       expect(driverSocket.writableEnded).to.be.true;
     });
 
-    it('destroys the socket after ending it (asynchronously)', () => {
-      expect(driverSocket.writableEnded).to.be.true;
-      expect(driverSocket.destroyed).to.be.false;
-      clock.runAll();
+    it('destroys the socket after ending it (synchronously)', () => {
       expect(driverSocket.destroyed).to.be.true;
     });
 
-    it('passes the error along to any callbacks in the operation description queue (asynchronously)', () => {
-      expect(callbackSpy).not.to.have.been.called;
-      clock.runAll();
+    it('passes the error along to any callbacks in the operation description queue (synchronously)', () => {
       expect(callbackSpy).to.have.been.calledOnceWithExactly(error);
     });
 
-    it('emits a Connection.CLOSE event (asynchronously)', () => {
-      expect(closeCount).to.equal(0);
-      clock.runAll();
+    it('emits a Connection.CLOSE event (synchronously)', () => {
       expect(closeCount).to.equal(1);
     });
 
@@ -696,24 +689,17 @@ describe.only('new Connection()', function () {
       expect(driverSocket.writableEnded).to.be.true;
     });
 
-    it('destroys the socket after ending it (asynchronously)', () => {
-      expect(driverSocket.writableEnded).to.be.true;
-      expect(driverSocket.destroyed).to.be.false;
-      clock.runAll();
+    it('destroys the socket after ending it (synchronously)', () => {
       expect(driverSocket.destroyed).to.be.true;
     });
 
-    it('calls any callbacks in the queue with a MongoNetworkError (asynchronously)', () => {
-      expect(callbackSpy).not.to.have.been.called;
-      clock.runAll();
+    it('calls any callbacks in the queue with a MongoNetworkError (synchronously)', () => {
       expect(callbackSpy).to.have.been.calledOnce;
       const error = callbackSpy.firstCall.args[0];
       expect(error).to.be.instanceof(MongoNetworkError);
     });
 
-    it('emits a Connection.CLOSE event (asynchronously)', () => {
-      expect(closeCount).to.equal(0);
-      clock.runAll();
+    it('emits a Connection.CLOSE event (synchronously)', () => {
       expect(closeCount).to.equal(1);
     });
 
