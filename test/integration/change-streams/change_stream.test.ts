@@ -1700,6 +1700,46 @@ describe('Change Streams', function () {
       });
     });
 
+    context('useBigInt64', () => {
+      const useBigInt64FalseTest = async function (options: ChangeStreamOptions) {
+        cs = collection.watch([], options);
+        const willBeChange = once(cs, 'change').then(args => args[0]);
+        await once(cs.cursor, 'init');
+
+        await collection.insertOne({ a: Long.fromNumber(10) });
+
+        const change = await willBeChange;
+
+        expect(typeof change.fullDocument.a).to.equal('number');
+      };
+
+      context('when set to false', function () {
+        it('converts Long to number', async function () {
+          await useBigInt64FalseTest({ useBigInt64: false });
+        });
+      });
+
+      context('when set to true', function () {
+        it('converts Long to bigint', async function () {
+          cs = collection.watch([], { useBigInt64: true });
+          const willBeChange = once(cs, 'change').then(args => args[0]);
+          await once(cs.cursor, 'init');
+
+          await collection.insertOne({ a: Long.fromNumber(10) });
+
+          const change = await willBeChange;
+
+          expect(typeof change.fullDocument.a).to.equal('bigint');
+        });
+      });
+
+      context('when unset', function () {
+        it('defaults to false', async function () {
+          await useBigInt64FalseTest({});
+        });
+      });
+    });
+
     context('invalid options', function () {
       it('does not send invalid options on the aggregate command', {
         metadata: { requires: { topology: '!single' } },
