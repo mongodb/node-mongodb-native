@@ -1738,28 +1738,41 @@ describe('Change Streams', function () {
       };
 
       context('when set to false', function () {
-        it('converts Long to number', async function () {
-          await useBigInt64FalseTest({ useBigInt64: false });
+        it('converts Long to number', {
+          metadata: {
+            requires: { topology: '!single' }
+          },
+          test: async function () {
+            await useBigInt64FalseTest({ useBigInt64: false });
+          }
         });
       });
 
       context('when set to true', function () {
-        it('converts Long to bigint', async function () {
-          cs = collection.watch([], { useBigInt64: true });
-          const willBeChange = once(cs, 'change').then(args => args[0]);
-          await once(cs.cursor, 'init');
+        it('converts Long to bigint', {
+          metadata: {
+            requires: { topology: '!single' }
+          },
+          test: async function () {
+            cs = collection.watch([], { useBigInt64: true });
+            const willBeChange = once(cs, 'change').then(args => args[0]);
+            await once(cs.cursor, 'init');
 
-          await collection.insertOne({ a: Long.fromNumber(10) });
+            await collection.insertOne({ a: Long.fromNumber(10) });
 
-          const change = await willBeChange;
+            const change = await willBeChange;
 
-          expect(typeof change.fullDocument.a).to.equal('bigint');
+            expect(typeof change.fullDocument.a).to.equal('bigint');
+          }
         });
       });
 
       context('when unset', function () {
-        it('defaults to false', async function () {
-          await useBigInt64FalseTest({});
+        it('defaults to false', {
+          metadata: { requires: { topology: '!single' } },
+          test: async function () {
+            await useBigInt64FalseTest({});
+          }
         });
       });
     });
