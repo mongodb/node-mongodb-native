@@ -372,11 +372,7 @@ function makeTopologyVersion(tv: TopologyVersion) {
     processId: tv.processId,
     // tests mock counter as just number, but in a real situation counter should always be a Long
     // TODO(NODE-2674): Preserve int64 sent from MongoDB
-    counter: Long.isLong(tv.counter)
-      ? tv.counter
-      : typeof tv.counter === 'bigint'
-      ? Long.fromBigInt(tv.counter)
-      : Long.fromNumber(tv.counter)
+    counter: Long.isLong(tv.counter) ? tv.counter : Long.fromNumber(tv.counter)
   };
 }
 
