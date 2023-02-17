@@ -1,52 +1,56 @@
 import { expect } from 'chai';
 
-import { Collection, Db, MongoClient, MongoAPIError } from '../../../mongodb';
+import { Collection, Db, MongoAPIError, MongoClient } from '../../../mongodb';
 import { setupDatabase } from '../../shared.js';
 
-describe('useBigInt64 option', function() {
+describe('useBigInt64 option', function () {
   let configuration;
-  beforeEach(function() {
+  beforeEach(function () {
     configuration = this.configuration;
     return setupDatabase(this.configuration);
   });
 
-  describe('when not provided to client', async function() {
+  describe('when not provided to client', async function () {
     let client: MongoClient;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax());
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client.close();
     });
 
-    it('is set to driver default (useBigInt64=false)', async function() {
+    it('is set to driver default (useBigInt64=false)', async function () {
       expect(client.s.bsonOptions.useBigInt64).to.exist;
       expect(client.s.bsonOptions.useBigInt64).to.be.false;
     });
   });
 
-  describe('when set at client level', function() {
+  describe('when set at client level', function () {
     let client: MongoClient;
-    beforeEach(function() {
-      client = configuration.newClient(configuration.writeConcernMax(), { useBigInt64: true, promoteLongs: true, promoteValues: true });
+    beforeEach(function () {
+      client = configuration.newClient(configuration.writeConcernMax(), {
+        useBigInt64: true,
+        promoteLongs: true,
+        promoteValues: true
+      });
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client.close();
     });
 
-    it('supercedes driver level', function() {
+    it('supercedes driver level', function () {
       expect(client.s.bsonOptions.useBigInt64).to.exist;
       expect(client.s.bsonOptions.useBigInt64).to.be.true;
     });
   });
 
-  describe('when set at DB level', function() {
+  describe('when set at DB level', function () {
     let client: MongoClient;
     let db: Db;
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         useBigInt64: false
       });
@@ -56,22 +60,22 @@ describe('useBigInt64 option', function() {
       await db.dropCollection('useBigInt64Test').catch(() => null);
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await client.close();
     });
 
-    it('supercedes client level', async function() {
+    it('supercedes client level', async function () {
       expect(db.s.bsonOptions.useBigInt64).to.exist;
       expect(db.s.bsonOptions.useBigInt64).to.be.true;
     });
   });
 
-  describe('when set at collection level', function() {
+  describe('when set at collection level', function () {
     let client: MongoClient;
     let db: Db;
     let col: Collection;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax());
 
       await client.connect();
@@ -80,25 +84,25 @@ describe('useBigInt64 option', function() {
       col = await db.createCollection('useBigInt64Test', { useBigInt64: true });
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await db
         .dropCollection('useBigInt64Test')
         .catch(() => expect.fail('failed to drop collection'));
       await client.close();
     });
 
-    it('supercedes db level', function() {
+    it('supercedes db level', function () {
       expect(col.s.bsonOptions.useBigInt64).to.exist;
       expect(col.s.bsonOptions.useBigInt64).to.be.true;
     });
   });
 
-  describe('when set at operation level', function() {
+  describe('when set at operation level', function () {
     let client: MongoClient;
     let db: Db;
     let col: Collection;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax());
       await client.connect();
 
@@ -109,43 +113,39 @@ describe('useBigInt64 option', function() {
       await col.insertMany([{ a: 1n }, { a: 2n }, { a: 3n }, { a: 4n }]);
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await db
         .dropCollection('useBigInt64Test')
         .catch(() => expect.fail('failed to drop collection'));
       await client.close().catch(() => expect.fail('failed to close client'));
     });
 
-    it('deserializes to a bigint', async function() {
+    it('deserializes to a bigint', async function () {
       const res = await col.findOne({ a: 1n }, { useBigInt64: true });
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('bigint');
     });
   });
 
-  describe('when set to true and promoteLongs is set to false', function() {
-    it('throws a MongoAPIError', async function() {
+  describe('when set to true and promoteLongs is set to false', function () {
+    it('throws a MongoAPIError', async function () {
       expect(() => {
         configuration.newClient(configuration.writeConcernMax(), {
           useBigInt64: true,
           promoteLongs: false
         });
-      }).to.throw(
-        MongoAPIError,
-        /Must request either bigint or Long for int64 deserialization/);
+      }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
     });
   });
 
-  describe('when set to true and promoteValues is set to false', function() {
-    it('throws a MongoAPIError', async function() {
+  describe('when set to true and promoteValues is set to false', function () {
+    it('throws a MongoAPIError', async function () {
       expect(() => {
         configuration.newClient(configuration.writeConcernMax(), {
           useBigInt64: true,
           promoteValues: false
         });
-      }).to.throw(
-        MongoAPIError,
-        /Must request either bigint or Long for int64 deserialization/);
+      }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
     });
   });
 });
