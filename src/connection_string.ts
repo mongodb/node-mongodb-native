@@ -255,6 +255,15 @@ export function parseOptions(
     mongoClient = undefined;
   }
 
+  // validate BSONOptions
+  if (options.useBigInt64 && !options.promoteLongs) {
+    throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
+  }
+
+  if (options.useBigInt64 && !options.promoteValues) {
+    throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
+  }
+
   const url = new ConnectionString(uri);
   const { hosts, isSRV } = url;
 
