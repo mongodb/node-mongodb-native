@@ -972,18 +972,7 @@ export function applySession(
     serverSession.txnNumber += session[kTxnNumberIncrement];
     session[kTxnNumberIncrement] = 0;
     // TODO(NODE-2674): Preserve int64 sent from MongoDB
-    let txnNumber: Long;
-    switch (typeof serverSession.txnNumber) {
-      case 'number':
-        txnNumber = Long.fromNumber(serverSession.txnNumber);
-        break;
-      case 'bigint':
-        txnNumber = Long.fromBigInt(serverSession.txnNumber);
-        break;
-      default:
-        throw new MongoServerError({ message: 'HELP' });
-    }
-    command.txnNumber = txnNumber;
+    command.txnNumber = Long.fromNumber(serverSession.txnNumber);
   }
 
   if (!inTxnOrTxnCommand) {
