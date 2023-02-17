@@ -10,7 +10,7 @@ expectAssignable<AutoEncryptionOptions>({
   }
 });
 
-// TODO(NODE-XXXX): Azure support
+// TODO(NODE-4537): Azure support
 expectNotAssignable<AutoEncryptionOptions>({
   kmsProviders: {
     azure: {}

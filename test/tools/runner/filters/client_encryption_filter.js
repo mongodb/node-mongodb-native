@@ -22,7 +22,7 @@ class ClientSideEncryptionFilter {
       mongodbClientEncryption = require('mongodb-client-encryption').extension(mongodb);
     } catch (failedToGetFLELib) {
       if (process.env.TEST_CSFLE) {
-        console.log({ failedToGetFLELib });
+        console.error({ failedToGetFLELib });
       }
     }
 
