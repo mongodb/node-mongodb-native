@@ -255,14 +255,8 @@ export function compareTopologyVersion(
   // TODO(NODE-2674): Preserve int64 sent from MongoDB
   const currentCounter = Long.isLong(currentTv.counter)
     ? currentTv.counter
-    : typeof currentTv.counter === 'bigint'
-    ? Long.fromBigInt(currentTv.counter)
     : Long.fromNumber(currentTv.counter);
-  const newCounter = Long.isLong(newTv.counter)
-    ? newTv.counter
-    : typeof newTv.counter === 'bigint'
-    ? Long.fromBigInt(newTv.counter)
-    : Long.fromNumber(newTv.counter);
+  const newCounter = Long.isLong(newTv.counter) ? newTv.counter : Long.fromNumber(newTv.counter);
 
   return currentCounter.compare(newCounter);
 }
