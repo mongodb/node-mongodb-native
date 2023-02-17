@@ -48,6 +48,7 @@ export function executeUriValidationTest(
   shouldNotThrowOnWarn = false
 ): void {
   const knownTestKeys = [
+    'callback',
     'description',
     'uri',
     'valid',
@@ -84,7 +85,34 @@ export function executeUriValidationTest(
     return;
   }
 
-  const client = new MongoClient(test.uri);
+  // If a callback is specified in the spec test, we need to pass in references to those callbacks
+  // in the actual options provided to the MongoClient. This is because OIDC does not allow
+  // functions for callbacks in the URI itself but needs to validate they are passed.
+  const CALLBACKS = {
+    oidcRequest: async () => {
+      return { accessToken: '<test>' };
+    },
+    oidcRefresh: async () => {
+      return { accessToken: '<test>' };
+    }
+  };
+
+  const CALLBACK_MAPPINGS = {
+    oidcRequest: 'REQUEST_TOKEN_CALLBACK',
+    oidcRefresh: 'REFRESH_TOKEN_CALLBACK'
+  };
+
+  const mongoClientOptions = {};
+
+  if (test.callback) {
+    const authMechanismProperties = Object.create(null);
+    for (const callback of test.callback) {
+      authMechanismProperties[CALLBACK_MAPPINGS[callback]] = CALLBACKS[callback];
+    }
+    mongoClientOptions.authMechanismProperties = authMechanismProperties;
+  }
+
+  const client = new MongoClient(test.uri, mongoClientOptions);
   const options = client.options;
   expect(options, errorMessage).to.be.an('object').that.is.not.empty;
 
@@ -195,9 +223,19 @@ export function executeUriValidationTest(
             // TODO(NODE-3925): Ensure default SERVICE_NAME is set on the parsed mechanism properties
             continue;
           }
-          expect(options, `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`)
-            .to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`)
-            .equal(expectedMechValue);
+          if (
+            expectedMechProp === 'REQUEST_TOKEN_CALLBACK' ||
+            expectedMechProp === 'REFRESH_TOKEN_CALLBACK'
+          ) {
+            expect(
+              options,
+              `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`
+            ).to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`);
+          } else {
+            expect(options, `${errorMessage} credentials.mechanismProperties.${expectedMechProp}`)
+              .to.have.nested.property(`credentials.mechanismProperties.${expectedMechProp}`)
+              .equal(expectedMechValue);
+          }
         }
         break;
 

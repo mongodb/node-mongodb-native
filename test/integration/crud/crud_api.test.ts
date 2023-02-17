@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { on } from 'events';
 
 import { MongoClient, MongoError, ObjectId, ReturnDocument } from '../../mongodb';
 import { assert as test } from '../shared';
@@ -60,130 +61,92 @@ describe('CRUD API', function () {
     await client.close();
   });
 
-  it('should correctly execute find method using crud api', function (done) {
-    const db = client.db();
+  context('when creating a cursor with find', () => {
+    let collection;
 
-    db.collection('t').insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], function (err) {
-      expect(err).to.not.exist;
+    beforeEach(async () => {
+      collection = client.db().collection('t');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+    });
 
-      //
-      // Cursor
-      // --------------------------------------------------
-      const makeCursor = () => {
-        // Possible methods on the the cursor instance
-        return db
-          .collection('t')
-          .find({})
-          .filter({ a: 1 })
-          .addCursorFlag('noCursorTimeout', true)
-          .addQueryModifier('$comment', 'some comment')
-          .batchSize(2)
-          .comment('some comment 2')
-          .limit(2)
-          .maxTimeMS(50)
-          .project({ a: 1 })
-          .skip(0)
-          .sort({ a: 1 });
-      };
+    afterEach(async () => {
+      await collection?.drop().catch(() => null);
+    });
 
-      //
-      // Exercise count method
-      // -------------------------------------------------
-      const countMethod = function () {
-        // Execute the different methods supported by the cursor
+    const makeCursor = () => {
+      // Possible methods on the the cursor instance
+      return collection
+        .find({})
+        .filter({ a: 1 })
+        .addCursorFlag('noCursorTimeout', true)
+        .addQueryModifier('$comment', 'some comment')
+        .batchSize(1)
+        .comment('some comment 2')
+        .limit(2)
+        .maxTimeMS(50)
+        .project({ a: 1 })
+        .skip(0)
+        .sort({ a: 1 });
+    };
+
+    describe('#count()', () => {
+      it('returns the number of documents', async () => {
         const cursor = makeCursor();
-        cursor.count(function (err, count) {
-          expect(err).to.not.exist;
-          test.equal(2, count);
-          eachMethod();
-        });
-      };
+        const res = await cursor.count();
+        expect(res).to.equal(2);
+      });
+    });
 
-      //
-      // Exercise legacy method each
-      // -------------------------------------------------
-      const eachMethod = function () {
+    describe('#forEach()', () => {
+      it('iterates all the documents', async () => {
+        const cursor = makeCursor();
         let count = 0;
-
-        const cursor = makeCursor();
-        cursor.forEach(
-          () => {
-            count = count + 1;
-          },
-          err => {
-            expect(err).to.not.exist;
-            test.equal(2, count);
-            toArrayMethod();
-          }
-        );
-      };
-
-      //
-      // Exercise toArray
-      // -------------------------------------------------
-      const toArrayMethod = function () {
-        const cursor = makeCursor();
-        cursor.toArray(function (err, docs) {
-          expect(err).to.not.exist;
-          test.equal(2, docs.length);
-          nextMethod();
+        await cursor.forEach(() => {
+          count += 1;
         });
-      };
+        expect(count).to.equal(2);
+      });
+    });
 
-      //
-      // Exercise next method
-      // -------------------------------------------------
-      const nextMethod = function () {
+    describe('#toArray()', () => {
+      it('returns an array with all documents', async () => {
         const cursor = makeCursor();
-        cursor.next(function (err, doc) {
-          expect(err).to.not.exist;
-          test.ok(doc != null);
+        const res = await cursor.toArray();
+        expect(res).to.have.lengthOf(2);
+      });
+    });
 
-          cursor.next(function (err, doc) {
-            expect(err).to.not.exist;
-            test.ok(doc != null);
+    describe('#next()', () => {
+      it('is callable without blocking', async () => {
+        const cursor = makeCursor();
+        const doc0 = await cursor.next();
+        expect(doc0).to.exist;
+        const doc1 = await cursor.next();
+        expect(doc1).to.exist;
+        const doc2 = await cursor.next();
+        expect(doc2).to.not.exist;
+      });
+    });
 
-            cursor.next(function (err, doc) {
-              expect(err).to.not.exist;
-              expect(doc).to.not.exist;
-              streamMethod();
-            });
-          });
-        });
-      };
-
-      //
-      // Exercise stream
-      // -------------------------------------------------
-      const streamMethod = function () {
-        let count = 0;
+    describe('#stream()', () => {
+      it('creates a node stream that emits data events', async () => {
+        const count = 0;
         const cursor = makeCursor();
         const stream = cursor.stream();
-        stream.on('data', function () {
-          count = count + 1;
-        });
-
+        on(stream, 'data');
         cursor.once('close', function () {
-          test.equal(2, count);
-          explainMethod();
+          expect(count).to.equal(2);
         });
-      };
+      });
+    });
 
-      //
-      // Explain method
-      // -------------------------------------------------
-      const explainMethod = function () {
+    describe('#explain()', () => {
+      it('returns an explain document', async () => {
         const cursor = makeCursor();
-        cursor.explain(function (err, result) {
-          expect(err).to.not.exist;
-          test.ok(result != null);
-
-          client.close(done);
-        });
-      };
-
-      // Execute all the methods
-      countMethod();
+        const result = await cursor.explain();
+        expect(result).to.exist;
+      });
     });
   });
 

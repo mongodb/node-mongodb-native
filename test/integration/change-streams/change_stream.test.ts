@@ -1021,6 +1021,30 @@ describe('Change Streams', function () {
             }
           }
         );
+
+        it(
+          'when closed throws "ChangeStream is closed"',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch();
+
+            const loop = (async function () {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              for await (const _change of changeStream) {
+                return 'loop entered'; // loop should never be entered
+              }
+              return 'loop ended without error'; // loop should not finish without error
+            })();
+
+            await sleep(1);
+            const closeResult = changeStream.close().catch(error => error);
+            expect(closeResult).to.not.be.instanceOf(Error);
+
+            const result = await loop.catch(error => error);
+            expect(result).to.be.instanceOf(MongoAPIError);
+            expect(result.message).to.match(/ChangeStream is closed/i);
+          }
+        );
       });
 
       describe('#return', function () {

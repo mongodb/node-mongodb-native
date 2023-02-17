@@ -1,22 +1,18 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const { mongoshTasks } = require('./generate_mongosh_tasks');
 
-const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const versions = [
-  { codeName: 'fermium', versionNumber: 14 },
-  { codeName: 'gallium', versionNumber: 16 },
-  { codeName: 'hydrogen', versionNumber: 18 }
-];
-const NODE_VERSIONS = versions.map(({ codeName }) => codeName);
-NODE_VERSIONS.sort();
-const LOWEST_LTS = NODE_VERSIONS[0];
-const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
-
-const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
-const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
-const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
-
-const DEFAULT_OS = 'rhel80-large';
+const {
+  MONGODB_VERSIONS,
+  versions,
+  NODE_VERSIONS,
+  LOWEST_LTS,
+  LATEST_LTS,
+  TOPOLOGIES,
+  AWS_AUTH_VERSIONS,
+  TLS_VERSIONS,
+  DEFAULT_OS
+} = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
   {
@@ -37,8 +33,8 @@ const OPERATING_SYSTEMS = [
   ...osConfig
 }));
 
-// TODO: NODE-3060: enable skipped tests on windows
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle']);
+// TODO: NODE-3060: enable skipped tests on windows except oidc (not supported)
+const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle', 'oidc']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -103,6 +99,27 @@ BASE_TASKS.push({
     }
   ]
 });
+
+// TODO(NODE-5035): Bring back when implementing.
+// {
+//   name: 'test-auth-oidc',
+//   tags: ['latest', 'replica_set', 'oidc'],
+//   commands: [
+//     { func: 'install dependencies' },
+//     { func: 'bootstrap oidc' },
+//     {
+//       func: 'bootstrap mongo-orchestration',
+//       vars: {
+//         VERSION: 'latest',
+//         TOPOLOGY: 'replica_set',
+//         AUTH: 'auth',
+//         ORCHESTRATION_FILE: 'auth-oidc.json'
+//       }
+//     },
+//     { func: 'setup oidc roles' },
+//     { func: 'run oidc tests aws' }
+//   ]
+// }
 
 // manually added tasks
 TASKS.push(
@@ -561,27 +578,11 @@ BUILD_VARIANTS.push({
   tasks: ['download-and-merge-coverage']
 });
 
-// singleton build variant for mongosh integration tests
-SINGLETON_TASKS.push({
-  name: 'run-mongosh-integration-tests',
-  tags: ['run-mongosh-integration-tests'],
-  exec_timeout_secs: 3600,
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: 'gallium'
-      }
-    },
-    { func: 'run mongosh integration tests' }
-  ]
-});
-
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
   run_on: 'ubuntu1804-large',
-  tasks: ['run-mongosh-integration-tests']
+  tasks: mongoshTasks.map(({ name }) => name)
 });
 
 // special case for MONGODB-AWS authentication
@@ -597,7 +598,7 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = [];
 
-const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
+const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c';
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
@@ -710,7 +711,9 @@ fileData.tasks = (fileData.tasks || [])
   .concat(TASKS)
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
-  .concat(AWS_LAMBDA_HANDLER_TASKS);
+  .concat(AWS_LAMBDA_HANDLER_TASKS)
+  .concat(mongoshTasks);
+
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(

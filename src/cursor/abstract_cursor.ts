@@ -832,13 +832,16 @@ function cleanupCursor(
 
   cursor[kKilled] = true;
 
+  if (session.hasEnded) {
+    return completeCleanup();
+  }
+
   executeOperation(
     cursor[kClient],
     new KillCursorsOperation(cursorId, cursorNs, server, { session })
-  ).finally(() => {
-    completeCleanup();
-  });
-  return;
+  )
+    .catch(() => null)
+    .finally(completeCleanup);
 }
 
 /** @internal */

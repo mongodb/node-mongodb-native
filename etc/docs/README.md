@@ -43,3 +43,21 @@ The generated docs can be previewed using `npm run docs:preview`.
 
 Once everything looks correct, open a PR against `main`.  Our docs are hosted out of the `docs` folder on the
 main branch, and once the PR is merged Github will automatically update the hosted documentation.
+
+### Generating documentation for a previous major's feature release
+
+If releasing a minor version from a branch other than main, follow theses steps:
+
+- As part of the release, generate and commit the documentation to the release branch
+  - For example, if `main` is currently tracking `7.x` and your release is from `6.x`
+  - `6.x` should contain the generated docs merged for its latest feature
+- Checkout a new branch off `main`
+- `git cherrypick` the commit containing the generated docs from the release
+- **There will be merge conflicts** (if there is no conflict, there is an issue)
+- Go through the conflicts:
+  - undo the version increment change
+  - undo the changes to history.md
+  - merge together the feature version settings in the docs toml/json files
+  - merge the two table rows (`<tr>`) for the legacy minor and the current major's minor
+- Check `npm run preview:docs`
+- Open a PR to merge the documentation into main
