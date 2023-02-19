@@ -30,24 +30,16 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-/**
- * TODO: NODE-5035: Make OIDC properties public.
- *
- * @public
- * */
+/** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** @internal Name for the OIDC device workflow */
   DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
-  /** @internal Similar to a username, is require by OIDC when more than one IDP is configured. */
   PRINCIPAL_NAME?: string;
-  /** @internal User provided callback to get OIDC auth credentials */
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
-  /** @internal User provided callback to refresh OIDC auth credentials */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
 

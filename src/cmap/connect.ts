@@ -23,6 +23,7 @@ import { AuthContext, AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
 import { MongoDBAWS } from './auth/mongodb_aws';
+import { MongoDBOIDC } from './auth/mongodb_oidc';
 import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
@@ -39,6 +40,7 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
+  [AuthMechanism.MONGODB_OIDC, new MongoDBOIDC()],
   [AuthMechanism.MONGODB_PLAIN, new Plain()],
   [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
   [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
