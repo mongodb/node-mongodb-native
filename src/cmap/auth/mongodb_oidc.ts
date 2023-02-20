@@ -127,8 +127,8 @@ async function saslContinue(
  */
 function saslStartCommand(credentials: MongoCredentials): Document {
   const payload: Document = {};
-  if (credentials.username || credentials.mechanismProperties.PRINCIPAL_NAME) {
-    payload.n = credentials.username || credentials.mechanismProperties.PRINCIPAL_NAME;
+  if (credentials.username) {
+    payload.n = credentials.username;
   }
   return {
     saslStart: 1,

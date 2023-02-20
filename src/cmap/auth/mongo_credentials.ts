@@ -38,7 +38,6 @@ export interface AuthMechanismProperties extends Document {
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
   DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
-  PRINCIPAL_NAME?: string;
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
@@ -147,15 +146,9 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username) {
+      if (this.username && this.mechanismProperties.DEVICE_NAME) {
         throw new MongoInvalidArgumentError(
-          `Username not permitted for mechanism '${this.mechanism}'. Use PRINCIPAL_NAME instead.`
-        );
-      }
-
-      if (this.mechanismProperties.PRINCIPAL_NAME && this.mechanismProperties.DEVICE_NAME) {
-        throw new MongoInvalidArgumentError(
-          `PRINCIPAL_NAME and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
+          `username and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
