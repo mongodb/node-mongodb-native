@@ -1,13 +1,11 @@
-import { type Document, BSON } from 'bson';
-
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
-import { type Callback, ns } from '../../utils';
+import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsDeviceWorkflow } from './mongodb_oidc/aws_device_workflow';
-import { AuthMechanism } from './providers';
+import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 
 /** @public */
 export interface OIDCMechanismServerStep1 {
@@ -74,7 +72,7 @@ export class MongoDBOIDC extends AuthProvider {
         callback
       );
     } else {
-      executeCallbackWorkflow(connection, credentials, callback);
+      new CallbackWorkflow().execute(connection, credentials, callback);
     }
   }
 
@@ -98,31 +96,6 @@ export class MongoDBOIDC extends AuthProvider {
 }
 
 /**
- * Authenticates using the callback workflow.
- */
-function executeCallbackWorkflow(
-  connection: Connection,
-  credentials: MongoCredentials,
-  callback: Callback
-): void {
-  saslStart(connection, credentials, (error, result) => {
-    if (error) {
-      return callback(error);
-    }
-    if (!result) {
-      return callback(new MongoMissingCredentialsError('No result returned from saslStart'));
-    }
-    // Need to use the callbacks here to get the token.
-    saslContinue(connection, credentials, '', (continueError, continueResult) => {
-      if (continueError) {
-        return callback(continueError);
-      }
-      callback(undefined, continueResult);
-    });
-  });
-}
-
-/**
  * Authenticates using the device workflow.
  */
 function executeDeviceWorkflow(
@@ -140,67 +113,4 @@ function executeDeviceWorkflow(
       )
     );
   }
-}
-
-/**
- * Execute the saslStart command.
- */
-function saslStart(
-  connection: Connection,
-  credentials: MongoCredentials,
-  callback: Callback<OIDCMechanismServerStep1>
-): void {
-  const command = saslStartCommand(credentials);
-  connection.command(ns(credentials.source), command, undefined, (error, result) => {
-    if (error) {
-      return callback(error);
-    }
-    console.log('saslStart', result);
-    callback(undefined, { clientId: '' });
-  });
-}
-
-/**
- * Execute the saslContinue command.
- */
-function saslContinue(
-  connection: Connection,
-  credentials: MongoCredentials,
-  token: string,
-  callback: Callback<OIDCRequestTokenResult>
-): void {
-  const command = saslContinueCommand(token);
-  connection.command(ns(credentials.source), command, undefined, (error, commandResult) => {
-    if (error) {
-      return callback(error);
-    }
-    console.log('saslContinue', commandResult);
-    callback(undefined, { accessToken: '' });
-  });
-}
-
-/**
- * Generate the saslStart command document.
- */
-function saslStartCommand(credentials: MongoCredentials): Document {
-  const payload: Document = {};
-  if (credentials.username) {
-    payload.n = credentials.username;
-  }
-  return {
-    saslStart: 1,
-    autoAuthorize: 1,
-    mechanism: AuthMechanism.MONGODB_OIDC,
-    payload: BSON.serialize(payload)
-  };
-}
-
-/**
- * Generate the saslContinue command document.
- */
-function saslContinueCommand(token: string): Document {
-  return {
-    saslContinue: 1,
-    payload: BSON.serialize({ jwt: token })
-  };
 }
