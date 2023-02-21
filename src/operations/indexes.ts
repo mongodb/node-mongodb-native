@@ -102,7 +102,7 @@ export interface IndexDescription
 }
 
 /** @public */
-export interface CreateIndexesOptions extends CommandOperationOptions {
+export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Creates the index in the background, yielding whenever possible. */
   background?: boolean;
   /** Creates an unique index. */
@@ -382,7 +382,7 @@ export class DropIndexesOperation extends DropIndexOperation {
 }
 
 /** @public */
-export interface ListIndexesOptions extends CommandOperationOptions {
+export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
@@ -396,6 +396,8 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     super(collection, options);
 
     this.options = { ...options };
+    // @ts-expect-error Write concern is disallowed in types, but
+    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
     this.collectionNamespace = collection.s.namespace;
   }

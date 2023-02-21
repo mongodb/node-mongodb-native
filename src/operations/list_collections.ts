@@ -7,7 +7,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface ListCollectionsOptions extends CommandOperationOptions {
+export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
@@ -29,6 +29,8 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     super(db, options);
 
     this.options = { ...options };
+    // @ts-expect-error Write concern is disallowed in types, but
+    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
     this.db = db;
     this.filter = filter;

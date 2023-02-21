@@ -1,37 +1,38 @@
 import { expect } from 'chai';
 import { on, once } from 'events';
 
-import { Collection, Db, LEGACY_HELLO_COMMAND, MongoClient } from '../../mongodb';
+import {
+  Collection,
+  CommandStartedEvent,
+  Db,
+  LEGACY_HELLO_COMMAND,
+  MongoClient
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
+import { filterForCommands } from '../shared';
 
 describe('Write Concern', function () {
-  it('should respect writeConcern from uri', function (done) {
-    const client = this.configuration.newClient(
-      `${this.configuration.url()}&w=0&monitorCommands=true`
-    );
-    const events: any[] = [];
-    client.on('commandStarted', event => {
-      if (event.commandName === 'insert') {
-        events.push(event);
-      }
+  context('when the WriteConcern is set in the uri', function () {
+    let client;
+    const events: CommandStartedEvent[] = [];
+    beforeEach(function () {
+      client = this.configuration.newClient(`${this.configuration.url()}&w=0&monitorCommands=true`);
+      client.on('commandStarted', filterForCommands(['insert'], events));
     });
+    afterEach(() => client.close());
 
-    expect(client.writeConcern).to.eql({ w: 0 });
-    client
-      .db('test')
-      .collection('test')
-      .insertOne({ a: 1 }, (err, result) => {
-        expect(err).to.not.exist;
-        expect(result).to.exist;
-        expect(events).to.be.an('array').with.lengthOf(1);
-        expect(events[0]).to.containSubset({
-          commandName: 'insert',
-          command: {
-            writeConcern: { w: 0 }
-          }
-        });
-        client.close(done);
+    it('respects the writeConcern from uri', async function () {
+      expect(client.writeConcern).to.deep.equal({ w: 0 });
+      const result = await client.db('test').collection('test').insertOne({ a: 1 });
+      expect(result).to.exist;
+      expect(events).to.be.an('array').with.lengthOf(1);
+      expect(events[0]).to.containSubset({
+        commandName: 'insert',
+        command: {
+          writeConcern: { w: 0 }
+        }
       });
+    });
   });
 
   describe('mock server write concern test', () => {
@@ -44,11 +45,13 @@ describe('Write Concern', function () {
 
     after(() => mock.cleanup());
 
-    // TODO(NODE-3816): the mock server response is looking for writeConcern on all messages, but endSessions doesn't have it
-    it.skip('should pipe writeConcern from client down to API call', function () {
+    it('should pipe writeConcern from client down to API call', function () {
       server.setMessageHandler(request => {
         if (request.document && request.document[LEGACY_HELLO_COMMAND]) {
           return request.reply(mock.HELLO);
+        }
+        if (request.document && request.document.endSessions) {
+          return request.reply({ ok: 1 });
         }
         expect(request.document.writeConcern).to.exist;
         expect(request.document.writeConcern.w).to.equal('majority');
@@ -84,11 +87,7 @@ describe('Write Concern', function () {
           db = client.db('writeConcernTest');
           col = db.collection('writeConcernTest');
 
-          const docs: any[] = [];
-          for (let i = 0; i < 100; i++) {
-            docs.push({ a: i, b: i + 1 });
-          }
-
+          const docs = Array.from({ length: 100 }, (_, i) => ({ a: i, b: i + 1 }));
           await col.insertMany(docs);
         });
 
@@ -105,14 +104,11 @@ describe('Write Concern', function () {
         });
 
         it('succeeds on listCollections', async function () {
-          const collections: any[] = [];
-          for (let i = 0; i < 10; i++) {
-            collections.push(`writeConcernTestCol${i + 1}`);
-          }
+          const collections = Array.from({ length: 10 }, (_, i) => `writeConcernTestCol${i + 1}`);
 
-          for (const colName of collections) {
-            await db.createCollection(colName).catch(() => null);
-          }
+          await Promise.allSettled(
+            collections.map(colName => db.createCollection(colName).catch(() => null))
+          );
 
           const cols = db.listCollections({}, { batchSize: 2 });
 
