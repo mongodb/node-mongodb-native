@@ -1762,7 +1762,8 @@ describe('Change Streams', function () {
 
             const change = await willBeChange;
 
-            expect(typeof change.fullDocument.a).to.equal('bigint');
+            expect(change.fullDocument).property('a').to.be.a('bigint');
+            expect(change.fullDocument).property('a', 10n);
           }
         });
       });
