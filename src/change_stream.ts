@@ -82,7 +82,7 @@ export type OperationTime = Timestamp;
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @public
  */
-export interface ChangeStreamOptions extends AggregateOptions {
+export interface ChangeStreamOptions extends Omit<AggregateOptions, 'writeConcern'> {
   /**
    * Allowed values: 'updateLookup', 'whenAvailable', 'required'.
    *
@@ -587,6 +587,8 @@ export class ChangeStream<
 
     this.pipeline = pipeline;
     this.options = { ...options };
+    // @ts-expect-error Write concern is disallowed in types, but
+    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
 
     if (parent instanceof Collection) {
