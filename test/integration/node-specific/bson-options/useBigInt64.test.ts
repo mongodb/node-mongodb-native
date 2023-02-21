@@ -53,7 +53,6 @@ describe('useBigInt64 option', function () {
         useBigInt64: false
       });
 
-      await client.connect();
       db = client.db(configuration.db, { useBigInt64: true });
       await db.dropCollection('useBigInt64Test').catch(() => null);
     });
@@ -76,7 +75,6 @@ describe('useBigInt64 option', function () {
     beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax());
 
-      await client.connect();
       db = client.db(configuration.db, { useBigInt64: false });
       await db.dropCollection('useBigInt64Test').catch(() => null);
       col = await db.createCollection('useBigInt64Test', { useBigInt64: true });
@@ -102,7 +100,6 @@ describe('useBigInt64 option', function () {
 
     beforeEach(async function () {
       client = configuration.newClient(configuration.writeConcernMax());
-      await client.connect();
 
       db = client.db(configuration.db);
       await db.dropCollection('useBigInt64Test').catch(() => null);
@@ -148,7 +145,6 @@ describe('useBigInt64 option', function () {
     describe('when set at DB level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
         const db = client.db('bsonOptions', { promoteLongs: false, useBigInt64: true });
         const e = await db.createCollection('bsonError').catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
@@ -158,7 +154,6 @@ describe('useBigInt64 option', function () {
     describe('when set at collection level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
         const db = client.db('bsonOptions');
         const e = await db
           .createCollection('bsonError', { promoteLongs: false, useBigInt64: true })
@@ -170,7 +165,6 @@ describe('useBigInt64 option', function () {
     describe('when set at the operation level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
 
         const db = client.db('bsonOptions');
         const coll = db.collection('bsonError');
@@ -206,7 +200,6 @@ describe('useBigInt64 option', function () {
     describe('when set at DB level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
         const db = client.db('bsonOptions', { promoteValues: false, useBigInt64: true });
         const e = await db.createCollection('bsonError').catch(e => e);
         expect(e).to.be.instanceOf(BSON.BSONError);
@@ -216,7 +209,6 @@ describe('useBigInt64 option', function () {
     describe('when set at collection level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
         const db = client.db('bsonOptions');
         const e = await db
           .createCollection('bsonError', { promoteValues: false, useBigInt64: true })
@@ -228,7 +220,6 @@ describe('useBigInt64 option', function () {
     describe('when set at the operation level', function () {
       it('throws a BSONError', async function () {
         client = configuration.newClient(configuration.writeConcernMax());
-        await client.connect();
 
         const db = client.db('bsonOptions');
         const coll = db.collection('bsonError');
