@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { type Document, BSON } from 'bson';
 
 import { MongoMissingCredentialsError } from '../../error';
-import type { Callback } from '../../utils';
+import { type Callback, ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -29,13 +29,17 @@ export interface OIDCRequestTokenResult {
 
 /** @public */
 export type OIDCRequestFunction = (
-  idl: OIDCMechanismServerStep1
+  principalName: string,
+  idl: OIDCMechanismServerStep1,
+  timeout: AbortSignal
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @public */
 export type OIDCRefreshFunction = (
+  principalName: string,
   idl: OIDCMechanismServerStep1,
-  result: OIDCRequestTokenResult
+  result: OIDCRequestTokenResult,
+  timeout: AbortSignal
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @internal */
@@ -63,16 +67,22 @@ export class MongoDBOIDC extends AuthProvider {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
-    saslStart(connection, credentials)
-      .then(result => {
-        return saslContinue(connection, credentials, result);
-      })
-      .then(result => {
-        callback(undefined, result);
-      })
-      .catch(error => {
-        callback(error);
+    saslStart(connection, credentials, (error, result) => {
+      if (error) {
+        return callback(error);
+      }
+      if (!result) {
+        return callback(
+          new MongoMissingCredentialsError('No result token returned from saslStart')
+        );
+      }
+      saslContinue(connection, credentials, result, (continueError, continueResult) => {
+        if (continueError) {
+          return callback(continueError);
+        }
+        callback(undefined, continueResult);
       });
+    });
   }
 
   /**
@@ -97,29 +107,39 @@ export class MongoDBOIDC extends AuthProvider {
 /**
  * Execute the saslStart command.
  */
-async function saslStart(
+function saslStart(
   connection: Connection,
-  credentials: MongoCredentials
-): Promise<OIDCMechanismServerStep1> {
+  credentials: MongoCredentials,
+  callback: Callback<OIDCMechanismServerStep1>
+): void {
   // TODO: We can skip saslStart if we have a DEVICE_NAME or a cached token.
   const command = saslStartCommand(credentials);
-  const result = await connection.command(credentials.source, command, undefined);
-  console.log('saslStart result', result);
-  return { clientId: '' };
+  connection.command(ns(credentials.source), command, undefined, (error, result) => {
+    if (error) {
+      return callback(error);
+    }
+    console.log('saslStart result', result);
+    callback(undefined, { clientId: '' });
+  });
 }
 
 /**
  * Execute the saslContinue command.
  */
-async function saslContinue(
+function saslContinue(
   connection: Connection,
   credentials: MongoCredentials,
-  result: OIDCMechanismServerStep1
-): Promise<OIDCRequestTokenResult> {
+  result: OIDCMechanismServerStep1,
+  callback: Callback<OIDCRequestTokenResult>
+): void {
   const command = saslContinueCommand(1, 'test');
-  const commandResult = await connection.command(credentials.source, command, undefined);
-  console.log('saslContinue result', commandResult);
-  return { accessToken: '' };
+  connection.command(ns(credentials.source), command, undefined, (error, commandResult) => {
+    if (error) {
+      return callback(error);
+    }
+    console.log('saslContinue result', commandResult);
+    callback(undefined, { accessToken: '' });
+  });
 }
 
 /**

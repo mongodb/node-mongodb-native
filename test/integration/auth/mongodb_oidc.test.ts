@@ -1,5 +1,6 @@
-import { expect } from 'chai';
 import { readFile } from 'node:fs/promises';
+
+import { expect } from 'chai';
 
 describe('MONGODB-OIDC', function () {
   beforeEach(function () {
@@ -17,7 +18,6 @@ describe('MONGODB-OIDC', function () {
   });
 
   describe('OIDC Auth Spec Prose Tests', function () {
-
     // Drivers MUST be able to authenticate using OIDC callback(s) when there
     // is one principal configured.
     describe('1. Callback-Driven Auth', function () {
@@ -86,6 +86,7 @@ describe('MONGODB-OIDC', function () {
         const client = this.configuration.newClient(
           'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
         );
+        const collection = client.db('testOidc').collection('test');
 
         before(() => {
           // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
@@ -106,6 +107,7 @@ describe('MONGODB-OIDC', function () {
         const client = this.configuration.newClient(
           'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
         );
+        const collection = client.db('testOidc').collection('test');
 
         before(() => {
           // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
@@ -254,7 +256,6 @@ describe('MONGODB-OIDC', function () {
           }).to.throw;
         });
       });
-
     });
 
     describe('4. Invalid Callbacks', function () {
@@ -318,24 +319,19 @@ describe('MONGODB-OIDC', function () {
       // - Ensure that a ``find`` operation results in a call to the refresh callback.
       // - Validate the refresh callback inputs, including the timeout parameter if
       // -ssible.
-
       // - Ensure there is a cache with credentials that will expire in less than 5 minutes, using a client with an appropriate request callback.
       // - Create a new client with the a request callback but no refresh callback.
       // - Ensure that a ``find`` operation results in a call to the request callback.
-
       // - the driver does not supports using callback hashes as part of the cache key,
       // -ip the next test.
-
       // -Create a new client with a different request callback.
       // -Ensure that a ``find`` operation adds a new entry to the cache.
-
       // - Clear the cache.
       // - Ensure there is a cache with credentials that will expire in less than 5 minutes, using a client with an appropriate request callback.
       // - Ensure there is a cache with credentials that will expire in less than 5 minutes.
       // - Create a new client with a valid request callback and a refresh callback that gives invalid credentials.
       // - Ensure that a ``find`` operation results in an error.
       // - Ensure that the cache has been cleared.
-
       // - Clear the cache.
       // - Create a new client using the AWS device workflow.
       // - Ensure that a ``find`` operation does not add credentials to the cache.
