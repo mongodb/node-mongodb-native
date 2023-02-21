@@ -176,7 +176,7 @@ export type ArrayElement<Type> = Type extends ReadonlyArray<infer Item> ? Item :
 export type SchemaMember<T, V> = { [P in keyof T]?: V } | { [key: string]: V };
 
 /** @public */
-export type IntegerType = number | Int32 | Long;
+export type IntegerType = number | Int32 | Long | bigint;
 
 /** @public */
 export type NumericType = IntegerType | Decimal128 | Double;
@@ -454,6 +454,7 @@ export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 
   : Type extends
       | string
       | number
+      | bigint
       | boolean
       | Date
       | RegExp
