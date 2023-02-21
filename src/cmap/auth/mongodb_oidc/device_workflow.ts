@@ -4,12 +4,13 @@ import { type Callback, ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
 import { AuthMechanism } from '../providers';
+import type { Workflow } from './workflow';
 
 /**
  * Common behaviour for OIDC device workflows.
  * @internal
  */
-export abstract class DeviceWorkflow {
+export abstract class DeviceWorkflow implements Workflow {
   /**
    * Authenticates using the provided OIDC access token.
    */

@@ -5,6 +5,7 @@ import { type Callback, ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
 import { AuthMechanism } from '../providers';
+import type { Workflow } from './workflow';
 
 const FIVE_MINUTES = 300000;
 
@@ -12,7 +13,7 @@ const FIVE_MINUTES = 300000;
  * OIDC implementation of a callback based workflow.
  * @internal
  */
-export class CallbackWorkflow {
+export class CallbackWorkflow implements Workflow {
   /**
    * Execute the workflow.
    */
