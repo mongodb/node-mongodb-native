@@ -32,8 +32,6 @@ describe('useBigInt64 option', function () {
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         useBigInt64: true,
-        promoteLongs: true,
-        promoteValues: true
       });
     });
 
