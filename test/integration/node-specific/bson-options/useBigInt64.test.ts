@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, Db, MongoAPIError, MongoClient } from '../../../mongodb';
+import { BSON, Collection, Db, MongoAPIError, MongoClient } from '../../../mongodb';
 import { setupDatabase } from '../../shared.js';
 
 describe('useBigInt64 option', function () {
@@ -127,25 +127,119 @@ describe('useBigInt64 option', function () {
     });
   });
 
-  describe('when set to true and promoteLongs is set to false', function () {
-    it('throws a MongoAPIError', async function () {
-      expect(() => {
-        configuration.newClient(configuration.writeConcernMax(), {
-          useBigInt64: true,
-          promoteLongs: false
-        });
-      }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
+  describe('when useBigInt64=true and promoteLongs=false', function () {
+    let client: MongoClient;
+
+    afterEach(async function () {
+      if (client) {
+        await client.close();
+      }
+    });
+
+    describe('when set at client level', function () {
+      it('throws a MongoAPIError', async function () {
+        expect(() => {
+          client = configuration.newClient(configuration.writeConcernMax(), {
+            useBigInt64: true,
+            promoteLongs: false
+          });
+        }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
+      });
+    });
+
+    describe('when set at DB level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+        const db = client.db('bsonOptions', { promoteLongs: false, useBigInt64: true });
+        const e = await db.createCollection('bsonError').catch(e => e);
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
+    });
+
+    describe('when set at collection level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+        const db = client.db('bsonOptions');
+        const e = await db
+          .createCollection('bsonError', { promoteLongs: false, useBigInt64: true })
+          .catch(e => e);
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
+    });
+
+    describe('when set at the operation level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+
+        const db = client.db('bsonOptions');
+        const coll = db.collection('bsonError');
+        const e = await coll
+          .insertOne({ a: 10n }, { promoteLongs: false, useBigInt64: true })
+          .catch(e => e);
+
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
     });
   });
 
-  describe('when set to true and promoteValues is set to false', function () {
-    it('throws a MongoAPIError', async function () {
-      expect(() => {
-        configuration.newClient(configuration.writeConcernMax(), {
-          useBigInt64: true,
-          promoteValues: false
-        });
-      }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
+  describe('when useBigInt64=true and promoteValues=false', function () {
+    let client: MongoClient;
+
+    afterEach(async function () {
+      if (client) {
+        await client.close();
+      }
+    });
+
+    describe('when set at client level', function () {
+      it('throws a MongoAPIError', async function () {
+        expect(() => {
+          client = configuration.newClient(configuration.writeConcernMax(), {
+            useBigInt64: true,
+            promoteValues: false
+          });
+        }).to.throw(MongoAPIError, /Must request either bigint or Long for int64 deserialization/);
+      });
+    });
+
+    describe('when set at DB level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+        const db = client.db('bsonOptions', { promoteValues: false, useBigInt64: true });
+        const e = await db.createCollection('bsonError').catch(e => e);
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
+    });
+
+    describe('when set at collection level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+        const db = client.db('bsonOptions');
+        const e = await db
+          .createCollection('bsonError', { promoteValues: false, useBigInt64: true })
+          .catch(e => e);
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
+    });
+
+    describe('when set at the operation level', function () {
+      it('throws a BSONError', async function () {
+        client = configuration.newClient(configuration.writeConcernMax());
+        await client.connect();
+
+        const db = client.db('bsonOptions');
+        const coll = db.collection('bsonError');
+        const e = await coll
+          .insertOne({ a: 10n }, { promoteValues: false, useBigInt64: true })
+          .catch(e => e);
+
+        expect(e).to.be.instanceOf(BSON.BSONError);
+      });
     });
   });
 });
