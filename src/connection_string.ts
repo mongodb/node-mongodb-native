@@ -256,11 +256,11 @@ export function parseOptions(
   }
 
   // validate BSONOptions
-  if (options.useBigInt64 && (typeof options.promoteLongs === 'boolean') && !options.promoteLongs) {
+  if (options.useBigInt64 && typeof options.promoteLongs === 'boolean' && !options.promoteLongs) {
     throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
   }
 
-  if (options.useBigInt64 && (typeof options.promoteValues === 'boolean') && !options.promoteValues) {
+  if (options.useBigInt64 && typeof options.promoteValues === 'boolean' && !options.promoteValues) {
     throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
   }
 

@@ -31,7 +31,7 @@ describe('useBigInt64 option', function () {
     let client: MongoClient;
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
-        useBigInt64: true,
+        useBigInt64: true
       });
     });
 
