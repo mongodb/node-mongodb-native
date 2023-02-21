@@ -1,17 +1,12 @@
-import { readFile } from 'node:fs';
-
 import { type Document, BSON } from 'bson';
 
-import {
-  MongoAWSError,
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError
-} from '../../error';
+import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import { type Callback, ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
+import { AwsDeviceWorkflow } from './mongodb_oidc/aws_device_workflow';
 import { AuthMechanism } from './providers';
 
 /** @public */
@@ -79,20 +74,7 @@ export class MongoDBOIDC extends AuthProvider {
         callback
       );
     } else {
-      saslStart(connection, credentials, (error, result) => {
-        if (error) {
-          return callback(error);
-        }
-        if (!result) {
-          return callback(new MongoMissingCredentialsError('No result returned from saslStart'));
-        }
-        saslContinue(connection, credentials, '', (continueError, continueResult) => {
-          if (continueError) {
-            return callback(continueError);
-          }
-          callback(undefined, continueResult);
-        });
-      });
+      executeCallbackWorkflow(connection, credentials, callback);
     }
   }
 
@@ -116,6 +98,31 @@ export class MongoDBOIDC extends AuthProvider {
 }
 
 /**
+ * Authenticates using the callback workflow.
+ */
+function executeCallbackWorkflow(
+  connection: Connection,
+  credentials: MongoCredentials,
+  callback: Callback
+): void {
+  saslStart(connection, credentials, (error, result) => {
+    if (error) {
+      return callback(error);
+    }
+    if (!result) {
+      return callback(new MongoMissingCredentialsError('No result returned from saslStart'));
+    }
+    // Need to use the callbacks here to get the token.
+    saslContinue(connection, credentials, '', (continueError, continueResult) => {
+      if (continueError) {
+        return callback(continueError);
+      }
+      callback(undefined, continueResult);
+    });
+  });
+}
+
+/**
  * Authenticates using the device workflow.
  */
 function executeDeviceWorkflow(
@@ -125,22 +132,7 @@ function executeDeviceWorkflow(
   callback: Callback
 ): void {
   if (deviceName === 'aws') {
-    const tokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
-    if (tokenFile) {
-      readFile(tokenFile, 'utf8', (error, token) => {
-        if (error) {
-          return callback(error);
-        }
-        saslContinue(connection, credentials, token, (continueError, continueResult) => {
-          if (continueError) {
-            return callback(continueError);
-          }
-          callback(undefined, continueResult);
-        });
-      });
-    } else {
-      callback(new MongoAWSError('AWS_WEB_IDENTITY_TOKEN_FILE must be set in the environment.'));
-    }
+    new AwsDeviceWorkflow().execute(connection, credentials, callback);
   } else {
     callback(
       new MongoInvalidArgumentError(
