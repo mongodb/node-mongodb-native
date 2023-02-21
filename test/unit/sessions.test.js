@@ -117,7 +117,6 @@ describe('Sessions - unit', function () {
       });
 
       it('sets clusterTime to the one provided when the signature.keyId is a bigint', () => {
-        // NOTE: Prior to BigInt support, this would have thrown MongoInvalidArgumentError
         const validClusterTime = {
           clusterTime: new BSON.Timestamp(BSON.Long.fromNumber(1, true)),
           signature: { hash: new BSON.Binary('test'), keyId: 100n }
