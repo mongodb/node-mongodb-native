@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 
+import { Binary, BSON, MongoNetworkError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
-const metadata = {
+const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
     mongodb: '>=4.2.0',
@@ -79,7 +80,7 @@ describe('14. Decryption Events', metadata, function () {
         monitorCommands: true,
         autoEncryption: {
           keyVaultNamespace: 'keyvault.datakeys',
-          kmsProviders: getKmsProviders(LOCAL_KEY),
+          kmsProviders: { local: { key: LOCAL_KEY } },
           extraOptions: getEncryptExtraOptions()
         }
       }
