@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import { BSON, Collection, Db, MongoAPIError, MongoClient, WithId } from '../../../mongodb';
 
@@ -141,10 +140,6 @@ describe('useBigInt64 option', function () {
       expect(res).to.exist;
       expect(typeof res?.a).to.equal('bigint');
       expect(res?.a).to.equal(1n);
-    });
-
-    afterEach(function () {
-      sinon.reset();
     });
   });
 
