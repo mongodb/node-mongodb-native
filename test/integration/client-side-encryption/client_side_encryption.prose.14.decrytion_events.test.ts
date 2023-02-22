@@ -1,6 +1,13 @@
 import { expect } from 'chai';
 
-import { Binary, BSON, MongoNetworkError } from '../../mongodb';
+import {
+  Binary,
+  BSON,
+  CommandFailedEvent,
+  CommandSucceededEvent,
+  MongoClient,
+  MongoNetworkError
+} from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
@@ -20,14 +27,14 @@ const LOCAL_KEY = Buffer.from(
 describe('14. Decryption Events', metadata, function () {
   installNodeDNSWorkaroundHooks();
 
-  let setupClient;
+  let setupClient: MongoClient;
   let clientEncryption;
-  let keyId;
-  let cipherText;
-  let malformedCiphertext;
-  let encryptedClient;
-  let aggregateSucceeded;
-  let aggregateFailed;
+  let keyId: Binary;
+  let cipherText: Binary;
+  let malformedCiphertext: Binary;
+  let encryptedClient: MongoClient;
+  let aggregateSucceeded: CommandSucceededEvent | undefined;
+  let aggregateFailed: CommandFailedEvent | undefined;
 
   beforeEach(async function () {
     const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
