@@ -533,7 +533,14 @@ export class ChangeStream<
   TChange extends Document = ChangeStreamDocument<TSchema>
 > extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
   pipeline: Document[];
-  options: ChangeStreamOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  options: ChangeStreamOptions & { writeConcern?: never };
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
@@ -587,8 +594,6 @@ export class ChangeStream<
 
     this.pipeline = pipeline;
     this.options = { ...options };
-    // @ts-expect-error Write concern is disallowed in types, but
-    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
 
     if (parent instanceof Collection) {

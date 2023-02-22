@@ -67,7 +67,14 @@ export interface FindOptions<TSchema extends Document = Document>
 
 /** @internal */
 export class FindOperation extends CommandOperation<Document> {
-  override options: FindOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: FindOptions & { writeConcern?: never };
   filter: Document;
 
   constructor(
@@ -79,8 +86,6 @@ export class FindOperation extends CommandOperation<Document> {
     super(collection, options);
 
     this.options = { ...options };
-    // @ts-expect-error Write concern is disallowed in types, but
-    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
     this.ns = ns;
 

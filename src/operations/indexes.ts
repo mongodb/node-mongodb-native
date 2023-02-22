@@ -389,15 +389,20 @@ export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'write
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<Document> {
-  override options: ListIndexesOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: ListIndexesOptions & { writeConcern?: never };
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
     super(collection, options);
 
     this.options = { ...options };
-    // @ts-expect-error Write concern is disallowed in types, but
-    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
     this.collectionNamespace = collection.s.namespace;
   }

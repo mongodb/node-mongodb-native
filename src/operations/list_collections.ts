@@ -18,7 +18,14 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 
 /** @internal */
 export class ListCollectionsOperation extends CommandOperation<string[]> {
-  override options: ListCollectionsOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: ListCollectionsOptions & { writeConcern?: never };
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -29,8 +36,6 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     super(db, options);
 
     this.options = { ...options };
-    // @ts-expect-error Write concern is disallowed in types, but
-    // must still be removed in case the user is not using Typescript
     delete this.options.writeConcern;
     this.db = db;
     this.filter = filter;
