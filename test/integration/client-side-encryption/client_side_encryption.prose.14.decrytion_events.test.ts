@@ -2,6 +2,14 @@ import { expect } from 'chai';
 
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
+const metadata = {
+  requires: {
+    clientSideEncryption: true,
+    mongodb: '>=4.2.0',
+    topology: '!load-balanced'
+  }
+};
+
 describe('14. Decryption Events', metadata, function () {
   installNodeDNSWorkaroundHooks();
 
