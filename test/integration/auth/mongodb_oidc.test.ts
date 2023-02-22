@@ -290,14 +290,11 @@ describe('MONGODB-OIDC', function () {
         };
 
         before(function () {
-          client = this.configuration.newClient(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-            {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestCallback
-              }
+          client = this.configuration.newClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback
             }
-          );
+          });
         });
 
         it('raises an error', async function () {
@@ -315,14 +312,11 @@ describe('MONGODB-OIDC', function () {
         };
 
         before(function () {
-          client = this.configuration.newClient(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-            {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestCallback
-              }
+          client = this.configuration.newClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback
             }
-          );
+          });
         });
 
         it('raises an error', async function () {
