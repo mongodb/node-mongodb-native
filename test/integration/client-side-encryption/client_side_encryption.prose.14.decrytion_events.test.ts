@@ -225,7 +225,7 @@ describe('14. Decryption Events', metadata, function () {
 
       expect(error).property('message').to.include('HMAC validation failure');
       expect(aggregateSucceeded)
-        .nested.property('reply.cursor.firstBatch[0]')
+        .nested.property('reply.cursor.firstBatch[0].encrypted')
         .to.be.instanceOf(Binary);
     });
   });
@@ -245,7 +245,7 @@ describe('14. Decryption Events', metadata, function () {
 
       expect(result).nested.property('[0].encrypted', 'hello');
       expect(aggregateSucceeded)
-        .nested.property('reply.cursor.firstBatch[0]')
+        .nested.property('reply.cursor.firstBatch[0].encrypted')
         .to.be.instanceOf(Binary);
     });
   });
