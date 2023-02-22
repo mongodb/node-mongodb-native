@@ -1,19 +1,26 @@
 import { type Document, BSON } from 'bson';
 
-import { MongoInvalidArgumentError } from '../../../error';
 import { type Callback, ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
+import { OIDCAuthContextProvider } from './oidc_auth_context_provider';
 import { AuthMechanism } from '../providers';
 import type { Workflow } from './workflow';
-
-const FIVE_MINUTES = 300000;
 
 /**
  * OIDC implementation of a callback based workflow.
  * @internal
  */
 export class CallbackWorkflow implements Workflow {
+  contextProvider: OIDCAuthContextProvider;
+
+  /**
+   * Instantiate the workflow
+   */
+  constructor() {
+    this.contextProvider = new OIDCAuthContextProvider();
+  }
+
   /**
    * Execute the workflow.
    */
@@ -26,33 +33,21 @@ export class CallbackWorkflow implements Workflow {
         if (error) {
           return callback(error);
         }
-        // TODO: Handle request/refresh/caching here ?
-        const requestCallback = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-        if (requestCallback) {
-          requestCallback(credentials.username, stepOneResult, AbortSignal.timeout(FIVE_MINUTES))
-            .then(requestResult => {
-              connection.command(
-                ns(credentials.source),
-                stepTwoCommandDocument(requestResult.accessToken),
-                undefined,
-                (error, stepTwoResult) => {
-                  if (error) {
-                    return callback(error);
-                  }
-                  callback(undefined, stepTwoResult);
-                }
-              );
-            })
-            .catch(err => {
-              return callback(err);
-            });
-        } else {
-          callback(
-            new MongoInvalidArgumentError(
-              'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
-            )
+        // TODO: Deal with the payload in the result.
+        this.contextProvider.getContext(connection, credentials, stepOneResult, (error, result) => {
+          if (error) {
+            return callback(error);
+          }
+
+          connection.command(
+            ns(credentials.source),
+            stepTwoCommandDocument(result.tokenResult.accessToken),
+            undefined,
+            (error, stepTwoResult) => {
+
+            }
           );
-        }
+        });
       }
     );
   }
@@ -80,7 +75,7 @@ function stepOneCommandDocument(credentials: MongoCredentials): Document {
 function stepTwoCommandDocument(token: string): Document {
   return {
     saslContinue: 1,
-    // conversationId ?
+    //conversationId: conversationId,
     payload: BSON.serialize({ jwt: token })
   };
 }
