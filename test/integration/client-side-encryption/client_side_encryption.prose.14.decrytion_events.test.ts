@@ -35,7 +35,7 @@ describe('14. Decryption Events', metadata, function () {
     setupClient = this.configuration.newClient();
     // Drop and create the collection ``db.decryption_events``.
     const db = setupClient.db('db');
-    await dropCollection(db, 'decryption_events');
+    await db.dropCollection('decryption_events').catch(() => null);
     await db.createCollection('decryption_events');
     // Create a ClientEncryption object named ``clientEncryption`` with these options:
     //   ClientEncryptionOpts {
