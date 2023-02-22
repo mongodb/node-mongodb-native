@@ -140,12 +140,13 @@ describe('14. Decryption Events', metadata, function () {
       // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
       // Expect an exception to be thrown from the command error. Expect a CommandFailedEvent.
       const collection = encryptedClient.db('db').collection('decryption_events');
-      try {
-        await collection.aggregate([]).toArray();
-        expect.fail('aggregate must fail with error');
-      } catch (error) {
-        expect(error.code).to.equal(123);
-      }
+
+      const error = await collection
+        .aggregate([])
+        .toArray()
+        .catch(error => error);
+
+      expect(error.code).to.equal(123);
       expect(aggregateFailed.failure.code).to.equal(123);
     });
   });
@@ -186,12 +187,13 @@ describe('14. Decryption Events', metadata, function () {
       // Use ``encryptedClient`` to run an aggregate on ``db.decryption_events``.
       // Expect an exception to be thrown from the network error. Expect a CommandFailedEvent.
       const collection = encryptedClient.db('db').collection('decryption_events');
-      try {
-        await collection.aggregate([]).toArray();
-        expect.fail('aggregate must fail with error');
-      } catch (error) {
-        expect(error).to.be.instanceOf(MongoNetworkError);
-      }
+
+      const error = await collection
+        .aggregate([])
+        .toArray()
+        .catch(error => error);
+
+      expect(error).to.be.instanceOf(MongoNetworkError);
       expect(aggregateFailed.failure.message).to.include('closed');
     });
   });
@@ -207,12 +209,13 @@ describe('14. Decryption Events', metadata, function () {
       // ``cursor.firstBatch.encrypted``.
       const collection = encryptedClient.db('db').collection('decryption_events');
       await collection.insertOne({ encrypted: malformedCiphertext });
-      try {
-        await collection.aggregate([]).toArray();
-        expect.fail('aggregate must fail with error');
-      } catch (error) {
-        expect(error.message).to.include('HMAC validation failure');
-      }
+
+      const error = await collection
+        .aggregate([])
+        .toArray()
+        .catch(error => error);
+
+      expect(error.message).to.include('HMAC validation failure');
       const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
       expect(doc.encrypted).to.be.instanceOf(Binary);
     });
@@ -228,12 +231,9 @@ describe('14. Decryption Events', metadata, function () {
       // to contain BSON binary for the field ``cursor.firstBatch.encrypted``.
       const collection = encryptedClient.db('db').collection('decryption_events');
       await collection.insertOne({ encrypted: cipherText });
-      let result;
-      try {
-        result = await collection.aggregate([]).toArray();
-      } catch (error) {
-        expect.fail(`aggregate must not fail, got ${error.message}`);
-      }
+
+      const result = await collection.aggregate([]).toArray();
+
       expect(result[0].encrypted).to.equal('hello');
       const doc = aggregateSucceeded.reply.cursor.firstBatch[0];
       expect(doc.encrypted).to.be.instanceOf(Binary);
