@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+
 describe('14. Decryption Events', metadata, function () {
   let setupClient;
   let clientEncryption;
