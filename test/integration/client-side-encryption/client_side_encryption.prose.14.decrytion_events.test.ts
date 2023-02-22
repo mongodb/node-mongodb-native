@@ -83,6 +83,7 @@ describe('14. Decryption Events', metadata, function () {
     encryptedClient = this.configuration.newClient(
       {},
       {
+        writeConcern: { w: 'majority' },
         retryReads: false,
         monitorCommands: true,
         autoEncryption: {
