@@ -1,6 +1,7 @@
 'use strict';
 
 const mongodb = require('../../../mongodb');
+const process = require('process');
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption
@@ -19,8 +20,10 @@ class ClientSideEncryptionFilter {
     let mongodbClientEncryption;
     try {
       mongodbClientEncryption = require('mongodb-client-encryption').extension(mongodb);
-    } catch (e) {
-      // Do Nothing
+    } catch (failedToGetFLELib) {
+      if (process.env.TEST_CSFLE) {
+        console.error({ failedToGetFLELib });
+      }
     }
 
     this.enabled = !!(CSFLE_KMS_PROVIDERS && mongodbClientEncryption);
