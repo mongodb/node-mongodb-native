@@ -29,17 +29,20 @@ describe('MONGODB-OIDC', function () {
       };
 
       context('when no username is provided', function () {
+        let collection;
         // - Create a client with a url of the form  ``mongodb://localhost/?authMechanism=MONGODB-OIDC``
         //   and the OIDC request callback.
-        const client = this.configuration.newClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-          {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback
+        before(function () {
+          const client = this.configuration.newClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: requestCallback
+              }
             }
-          }
-        );
-        const collection = client.db('testOidc').collection('test');
+          );
+          collection = client.db('testOidc').collection('test');
+        });
 
         // - Perform a ``find`` operation.
         // - Clear the cache.
@@ -50,17 +53,20 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when a username is provided', function () {
+        let collection;
         // - Create a client with a url of the form
         //   ``mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC`` and the OIDC request callback.
-        const client = this.configuration.newClient(
-          'mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC',
-          {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback
+        before(function () {
+          const client = this.configuration.newClient(
+            'mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: requestCallback
+              }
             }
-          }
-        );
-        const collection = client.db('testOidc').collection('test');
+          );
+          collection = client.db('testOidc').collection('test');
+        });
 
         // - Perform a ``find`` operation.
         // - Clear the cache.
@@ -81,12 +87,15 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when authenticating with user 1', function () {
+        let collection;
         // - Create a client with the url parameters
         //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
-        const client = this.configuration.newClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
-        );
-        const collection = client.db('testOidc').collection('test');
+        before(function () {
+          const client = this.configuration.newClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
+          );
+          collection = client.db('testOidc').collection('test');
+        });
 
         before(() => {
           // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
@@ -102,12 +111,15 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when authenticating with user 2', function () {
+        let collection;
         // - Create a client with the url parameters
         //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
-        const client = this.configuration.newClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
-        );
-        const collection = client.db('testOidc').collection('test');
+        before(function () {
+          const client = this.configuration.newClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
+          );
+          collection = client.db('testOidc').collection('test');
+        });
 
         before(() => {
           // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
@@ -130,6 +142,7 @@ describe('MONGODB-OIDC', function () {
     describe('3. Multiple Principles', function () {
       context('when authenticating with user 1', function () {
         context('when using a callback', function () {
+          let collection;
           // - Create a request callback that reads in the generated ``test_user1`` token file.
           const requestCallback = async () => {
             const file = readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, { encoding: 'utf8' });
@@ -139,15 +152,17 @@ describe('MONGODB-OIDC', function () {
           // - Create a client with a url of the form
           // ``mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
           // and the OIDC request callback.
-          const client = this.configuration.newClient(
-            'mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
-            {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestCallback
+          before(function () {
+            const client = this.configuration.newClient(
+              'mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
+              {
+                authMechanismProperties: {
+                  REQUEST_TOKEN_CALLBACK: requestCallback
+                }
               }
-            }
-          );
-          const collection = client.db('testOidc').collection('test');
+            );
+            collection = client.db('testOidc').collection('test');
+          });
 
           // - Perform a ``find`` operation.
           // - Clear the cache.
@@ -159,6 +174,7 @@ describe('MONGODB-OIDC', function () {
 
         context('when using aws', function () {
           const testTokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
+          let collection;
 
           after(() => {
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = testTokenFile;
@@ -168,13 +184,13 @@ describe('MONGODB-OIDC', function () {
             // - Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
             // of the ``test_user1`` generated token file.
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
+            // - Create a client with a url of the form
+            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
+            const client = this.configuration.newClient(
+              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+            );
+            collection = client.db('testOidc').collection('test');
           });
-          // - Create a client with a url of the form
-          // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
-          const client = this.configuration.newClient(
-            'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
-          );
-          const collection = client.db('testOidc').collection('test');
 
           // - Perform a ``find`` operation.
           it('successfully authenticates', async function () {
@@ -186,6 +202,7 @@ describe('MONGODB-OIDC', function () {
 
       context('when authenticating with user 2', function () {
         context('when using a callback', function () {
+          let collection;
           // - Create a request callback that reads in the generated ``test_user2`` token file.
           const requestCallback = async () => {
             const file = readFile(`${process.env.OIDC_TOKEN_DIR}/test_user2`, { encoding: 'utf8' });
@@ -195,15 +212,17 @@ describe('MONGODB-OIDC', function () {
           // - Create a client with a url of the form
           // ``mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
           // and the OIDC request callback.
-          const client = this.configuration.newClient(
-            'mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
-            {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestCallback
+          before(function () {
+            const client = this.configuration.newClient(
+              'mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
+              {
+                authMechanismProperties: {
+                  REQUEST_TOKEN_CALLBACK: requestCallback
+                }
               }
-            }
-          );
-          const collection = client.db('testOidc').collection('test');
+            );
+            collection = client.db('testOidc').collection('test');
+          });
 
           // - Perform a ``find`` operation.
           // - Clear the cache.
@@ -214,6 +233,7 @@ describe('MONGODB-OIDC', function () {
         });
 
         context('when using aws', function () {
+          let collection;
           const testTokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
 
           after(() => {
@@ -224,13 +244,13 @@ describe('MONGODB-OIDC', function () {
             // - Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
             // of the ``test_user2`` generated token file.
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user2`;
+            // - Create a client with a url of the form
+            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
+            const client = this.configuration.newClient(
+              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+            );
+            collection = client.db('testOidc').collection('test');
           });
-          // - Create a client with a url of the form
-          // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
-          const client = this.configuration.newClient(
-            'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
-          );
-          const collection = client.db('testOidc').collection('test');
 
           // - Perform a ``find`` operation.
           it('successfully authenticates', async function () {
@@ -241,17 +261,20 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when not providing a user', function () {
+        let collection;
         // - Create a client with a url of the form
         // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
         // and the OIDC request callback.
-        const client = this.configuration.newClient(
-          'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
-        );
-        const collection = client.db('testOidc').collection('test');
+        before(function () {
+          const client = this.configuration.newClient(
+            'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
+          );
+          collection = client.db('testOidc').collection('test');
+        });
 
         // - Assert that a ``find`` operation fails.
         it('fails to authenticate', async function () {
-          expect(() => {
+          expect(async () => {
             await collection.findOne();
           }).to.throw;
         });
@@ -261,20 +284,24 @@ describe('MONGODB-OIDC', function () {
     describe('4. Invalid Callbacks', function () {
       // - Any callback returns null
       context('when the callback returns null', function () {
+        let client;
         const requestCallback = async () => {
           return null;
         };
-        const client = this.configuration.newClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-          {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback
+
+        before(function () {
+          client = this.configuration.newClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: requestCallback
+              }
             }
-          }
-        );
+          );
+        });
 
         it('raises an error', async function () {
-          expect(() => {
+          expect(async () => {
             await client.connect();
           }).to.throw;
         });
@@ -282,20 +309,24 @@ describe('MONGODB-OIDC', function () {
 
       // - Any callback returns unexpected result
       context('then the callback returns an unexpected result', function () {
+        let client;
         const requestCallback = async () => {
           return { unexpected: 'test' };
         };
-        const client = this.configuration.newClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-          {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback
+
+        before(function () {
+          client = this.configuration.newClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: requestCallback
+              }
             }
-          }
-        );
+          );
+        });
 
         it('raises an error', async function () {
-          expect(() => {
+          expect(async () => {
             await client.connect();
           }).to.throw;
         });
