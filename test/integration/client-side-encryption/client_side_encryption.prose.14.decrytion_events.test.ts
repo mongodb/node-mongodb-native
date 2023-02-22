@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
   requires: {
