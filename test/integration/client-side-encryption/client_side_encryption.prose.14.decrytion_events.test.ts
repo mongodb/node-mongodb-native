@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 
+import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+
 describe('14. Decryption Events', metadata, function () {
+  installNodeDNSWorkaroundHooks();
+
   let setupClient;
   let clientEncryption;
   let keyId;
