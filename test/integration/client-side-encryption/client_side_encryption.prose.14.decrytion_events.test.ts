@@ -1,4 +1,4 @@
-context('14. Decryption Events', metadata, function () {
+describe('14. Decryption Events', metadata, function () {
   let setupClient;
   let clientEncryption;
   let keyId;
