@@ -10,6 +10,11 @@ const metadata = {
   }
 };
 
+const LOCAL_KEY = Buffer.from(
+  'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
+  'base64'
+);
+
 describe('14. Decryption Events', metadata, function () {
   installNodeDNSWorkaroundHooks();
 
@@ -38,7 +43,7 @@ describe('14. Decryption Events', metadata, function () {
     //   }
     clientEncryption = new mongodbClientEncryption.ClientEncryption(setupClient, {
       keyVaultNamespace: 'keyvault.datakeys',
-      kmsProviders: getKmsProviders(LOCAL_KEY),
+      kmsProviders: { local: { key: LOCAL_KEY } },
       bson: BSON,
       extraOptions: getEncryptExtraOptions()
     });
