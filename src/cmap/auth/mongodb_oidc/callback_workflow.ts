@@ -23,6 +23,27 @@ export class CallbackWorkflow implements Workflow {
 
   /**
    * Execute the workflow.
+   *
+   * Steps:
+   * - If an entry is in the cache
+   *   - If it is not expired
+   *     - Skip step one and use the entry to execute step two.
+   *   - If it is expired
+   *     - If the refresh callback exists
+   *       - remove expired entry from cache
+   *       - call the refresh callback.
+   *       - put the new entry in the cache.
+   *       - execute step two.
+   *     - If the refresh callback does not exist.
+   *       - remove expired entry from cache
+   *       - call the request callback.
+   *       - put the new entry in the cache.
+   *       - execute step two.
+   * - If no entry is in the cache.
+   *   - execute step one.
+   *   - call the refresh callback.
+   *   - put the new entry in the cache.
+   *   - execute step two.
    */
   execute(connection: Connection, credentials: MongoCredentials, callback: Callback): void {
     connection.command(
