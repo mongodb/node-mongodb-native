@@ -1725,7 +1725,7 @@ describe('Change Streams', function () {
     });
 
     context('useBigInt64', () => {
-      const useBigInt64FalseTest = async function (options: ChangeStreamOptions) {
+      const useBigInt64FalseTest = async (options: ChangeStreamOptions) => {
         cs = collection.watch([], options);
         const willBeChange = once(cs, 'change').then(args => args[0]);
         await once(cs.cursor, 'init');
