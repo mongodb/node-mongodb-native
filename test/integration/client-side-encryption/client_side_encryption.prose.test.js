@@ -7,9 +7,9 @@ const path = require('path');
 const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 const { dropCollection, APMEventCollector } = require('../shared');
 
-const { EJSON, Binary } = BSON;
+const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
-const { MongoNetworkError, MongoServerError } = require('../../mongodb');
+const { MongoServerError } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
