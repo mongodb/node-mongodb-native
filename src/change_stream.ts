@@ -82,7 +82,7 @@ export type OperationTime = Timestamp;
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @public
  */
-export interface ChangeStreamOptions extends AggregateOptions {
+export interface ChangeStreamOptions extends Omit<AggregateOptions, 'writeConcern'> {
   /**
    * Allowed values: 'updateLookup', 'whenAvailable', 'required'.
    *
@@ -533,7 +533,14 @@ export class ChangeStream<
   TChange extends Document = ChangeStreamDocument<TSchema>
 > extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
   pipeline: Document[];
-  options: ChangeStreamOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  options: ChangeStreamOptions & { writeConcern?: never };
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
@@ -586,7 +593,8 @@ export class ChangeStream<
     super();
 
     this.pipeline = pipeline;
-    this.options = options;
+    this.options = { ...options };
+    delete this.options.writeConcern;
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;

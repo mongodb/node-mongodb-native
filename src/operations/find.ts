@@ -14,7 +14,8 @@ import { Aspect, defineAspects, Hint } from './operation';
  * @typeParam TSchema - Unused schema definition, deprecated usage, only specify `FindOptions` with no generic
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface FindOptions<TSchema extends Document = Document> extends CommandOperationOptions {
+export interface FindOptions<TSchema extends Document = Document>
+  extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Sets the limit of documents returned in the query. */
   limit?: number;
   /** Set to sort the documents coming back from the query. Array of indexes, `[['a', 1]]` etc. */
@@ -66,7 +67,14 @@ export interface FindOptions<TSchema extends Document = Document> extends Comman
 
 /** @internal */
 export class FindOperation extends CommandOperation<Document> {
-  override options: FindOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: FindOptions & { writeConcern?: never };
   filter: Document;
 
   constructor(
@@ -77,7 +85,8 @@ export class FindOperation extends CommandOperation<Document> {
   ) {
     super(collection, options);
 
-    this.options = options;
+    this.options = { ...options };
+    delete this.options.writeConcern;
     this.ns = ns;
 
     if (typeof filter !== 'object' || Array.isArray(filter)) {

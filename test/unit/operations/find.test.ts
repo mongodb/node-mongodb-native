@@ -21,15 +21,15 @@ describe('FindOperation', function () {
     const operation = new FindOperation(undefined, namespace, filter, options);
 
     it('sets the namespace', function () {
-      expect(operation.ns).to.equal(namespace);
+      expect(operation.ns).to.deep.equal(namespace);
     });
 
     it('sets options', function () {
-      expect(operation.options).to.equal(options);
+      expect(operation.options).to.deep.equal(options);
     });
 
     it('sets filter', function () {
-      expect(operation.filter).to.equal(filter);
+      expect(operation.filter).to.deep.equal(filter);
     });
   });
 

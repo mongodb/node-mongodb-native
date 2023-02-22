@@ -1031,6 +1031,51 @@ tasks:
       - command: perf.send
         params:
           file: src/results.json
+  - name: test-gcpkms-task
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: setup
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
+            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
+            GCPKMS_ZONE: ${GCPKMS_ZONE}
+            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
+          args:
+            - src/.evergreen/setup-gcp-testing.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
+            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
+            GCPKMS_ZONE: ${GCPKMS_ZONE}
+            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
+            GCPKMS_CMD: env EXPECTED_GCPKMS_OUTCOME=success bash src/.evergreen/run-gcp-kms-tests.sh
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
+  - name: test-gcpkms-fail-task
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - command: subprocess.exec
+        type: test
+        params:
+          binary: bash
+          env:
+            EXPECTED_GCPKMS_OUTCOME: failure
+          args:
+            - src/.evergreen/run-gcp-kms-tests.sh
   - name: test-latest-server
     tags:
       - latest
@@ -3002,6 +3047,40 @@ task_groups:
               bash ${DRIVERS_TOOLS}/.evergreen/serverless/delete-instance.sh
     tasks:
       - .serverless
+  - name: test_gcpkms_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            testgcpkms_key_file: ${gcpkms_key_file}
+            GCPKMS_SERVICEACCOUNT: ${gcpkms_service_account}
+            GCPKMS_DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            GCPKMS_MACHINETYPE: e2-standard-4
+          args:
+            - .evergreen/setup-gcp-instance.sh
+      - command: expansions.update
+        params:
+          file: src/testgcpkms-expansions.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
+            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
+            GCPKMS_ZONE: ${GCPKMS_ZONE}
+            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
+    tasks:
+      - test-gcpkms-task
 pre:
   - func: fetch source
   - func: windows fix
@@ -3461,6 +3540,12 @@ buildvariants:
       NODE_LTS_NAME: fermium
     tasks:
       - serverless_task_group
+  - name: rhel8-test-gcp-kms
+    display_name: GCP KMS Test
+    run_on: debian11-small
+    tasks:
+      - test_gcpkms_task_group
+      - test-gcpkms-fail-task
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large
