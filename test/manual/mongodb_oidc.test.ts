@@ -27,14 +27,11 @@ describe('MONGODB-OIDC', function () {
         // - Create a client with a url of the form  ``mongodb://localhost/?authMechanism=MONGODB-OIDC``
         //   and the OIDC request callback.
         before(function () {
-          const client = new MongoClient(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC',
-            {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestCallback
-              }
+          const client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback
             }
-          );
+          });
           collection = client.db('testOidc').collection('test');
         });
 
