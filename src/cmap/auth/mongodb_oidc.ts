@@ -53,9 +53,6 @@ const DEVICE_WORKFLOWS = {
  * OIDC auth provider.
  */
 export class MongoDBOIDC extends AuthProvider {
-  /** @internal */
-  [kWorkflow]?: Workflow;
-
   /**
    * Instantiate the auth provider.
    */
@@ -73,18 +70,15 @@ export class MongoDBOIDC extends AuthProvider {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
-    if (!this[kWorkflow]) {
-      const workflow = createWorkflow(credentials);
-      if (!workflow) {
-        return callback(
-          new MongoInvalidArgumentError(
-            `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
-          )
-        );
-      }
-      this[kWorkflow] = workflow;
+    const workflow = getWorkflow(credentials);
+    if (!workflow) {
+      return callback(
+        new MongoInvalidArgumentError(
+          `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+        )
+      );
     }
-    this[kWorkflow].execute(connection, credentials, callback);
+    workflow.execute(connection, credentials, callback);
   }
 
   /**
@@ -100,9 +94,9 @@ export class MongoDBOIDC extends AuthProvider {
 }
 
 /**
- * Creates either a device workflow or callback workflow.
+ * Gets either a device workflow or callback workflow.
  */
-function createWorkflow(credentials: MongoCredentials): Workflow | undefined {
+function getWorkflow(credentials: MongoCredentials): Workflow | undefined {
   const deviceName = credentials.mechanismProperties.DEVICE_NAME;
   if (deviceName) {
     return DEVICE_WORKFLOWS[deviceName];

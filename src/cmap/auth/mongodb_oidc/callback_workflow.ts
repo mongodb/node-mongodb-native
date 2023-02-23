@@ -1,4 +1,5 @@
-import { type Document, BSON } from 'bson';
+import { type Document, Binary, BSON } from 'bson';
+import { setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError } from '../../../error';
 import { type Callback, ns } from '../../../utils';
@@ -56,7 +57,7 @@ export class CallbackWorkflow implements Workflow {
       // Check if the entry is not expired.
       if (entry.isValid()) {
         // Skip step one and execute the step two saslContinue.
-        finishAuth(entry.tokenResult, connection, credentials, callback);
+        finishAuth(entry.tokenResult, undefined, connection, credentials, callback);
       } else {
         // Remove the expired entry from the cache.
         this.cache.deleteEntry(connection.address, credentials.username);
@@ -66,6 +67,7 @@ export class CallbackWorkflow implements Workflow {
           credentials,
           entry.serverResult,
           entry.tokenResult,
+          undefined,
           callback
         );
       }
@@ -80,10 +82,11 @@ export class CallbackWorkflow implements Workflow {
             return callback(error);
           }
           // What to do about the payload?
-          console.log('saslStart result', result, BSON.deserialize(result.payload));
+          console.log('saslStart result', result);
+          const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
           // result.conversationId;
           // Call the request callback and finish auth.
-          this.requestAndFinish(connection, credentials, result, callback);
+          this.requestAndFinish(connection, credentials, stepOne, result.conversationId, callback);
         }
       );
     }
@@ -98,6 +101,7 @@ export class CallbackWorkflow implements Workflow {
     credentials: MongoCredentials,
     stepOneResult: OIDCMechanismServerStep1,
     tokenResult: OIDCRequestTokenResult,
+    conversationId: number | undefined,
     callback: Callback
   ) {
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
@@ -107,14 +111,14 @@ export class CallbackWorkflow implements Workflow {
         .then(tokenResult => {
           // Cache a new entry and continue with the saslContinue.
           this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
-          finishAuth(tokenResult, connection, credentials, callback);
+          finishAuth(tokenResult, conversationId, connection, credentials, callback);
         })
         .catch(error => {
           return callback(error);
         });
     } else {
       // Fallback to using the request callback.
-      this.requestAndFinish(connection, credentials, stepOneResult, callback);
+      this.requestAndFinish(connection, credentials, stepOneResult, conversationId, callback);
     }
   }
 
@@ -125,6 +129,7 @@ export class CallbackWorkflow implements Workflow {
     connection: Connection,
     credentials: MongoCredentials,
     stepOneResult: OIDCMechanismServerStep1,
+    conversationId: number | undefined,
     callback: Callback
   ) {
     // Call the request callback.
@@ -134,7 +139,7 @@ export class CallbackWorkflow implements Workflow {
         .then(tokenResult => {
           // Cache a new entry and continue with the saslContinue.
           this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
-          finishAuth(tokenResult, connection, credentials, callback);
+          finishAuth(tokenResult, conversationId, connection, credentials, callback);
         })
         .catch(error => {
           return callback(error);
@@ -148,12 +153,21 @@ export class CallbackWorkflow implements Workflow {
   }
 }
 
+function timeout(): AbortSignal {
+  const controller = new AbortController();
+  setTimeout(() => {
+    controller.abort();
+  }, TIMEOUT);
+  return controller.signal;
+}
+
 /**
  * Cache the result of the user supplied callback and execute the
  * step two saslContinue.
  */
 function finishAuth(
   result: OIDCRequestTokenResult,
+  conversationId: number | undefined,
   connection: Connection,
   credentials: MongoCredentials,
   callback: Callback
@@ -161,14 +175,12 @@ function finishAuth(
   // Execute the step two saslContinue.
   connection.command(
     ns(credentials.source),
-    continueCommandDocument(result.accessToken),
+    continueCommandDocument(result.accessToken, conversationId),
     undefined,
     (error, result) => {
       if (error) {
         return callback(error);
       }
-      // What to do about the payload?
-      console.log('saslContinue result', result, BSON.deserialize(result.payload));
       return callback(undefined, result);
     }
   );
@@ -186,17 +198,24 @@ function startCommandDocument(credentials: MongoCredentials): Document {
     saslStart: 1,
     autoAuthorize: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,
-    payload: BSON.serialize(payload)
+    payload: new Binary(BSON.serialize(payload))
   };
 }
 
 /**
  * Generate the saslContinue command document.
  */
-function continueCommandDocument(token: string): Document {
+function continueCommandDocument(token: string, conversationId?: number): Document {
+  if (conversationId) {
+    return {
+      saslContinue: 1,
+      conversationId: conversationId,
+      payload: new Binary(BSON.serialize({ jwt: token }))
+    };
+  }
   return {
-    saslContinue: 1,
-    //conversationId: conversationId,
-    payload: BSON.serialize({ jwt: token })
+    saslStart: 1,
+    mechanism: AuthMechanism.MONGODB_OIDC,
+    payload: new Binary(BSON.serialize({ jwt: token }))
   };
 }
