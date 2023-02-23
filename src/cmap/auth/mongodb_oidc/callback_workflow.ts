@@ -105,6 +105,7 @@ export class CallbackWorkflow implements Workflow {
       refresh(credentials.username, stepOneResult, tokenResult, AbortSignal.timeout(TIMEOUT))
         .then(tokenResult => {
           // Cache a new entry and continue with the saslContinue.
+          this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
           finishAuth(tokenResult, connection, credentials, callback);
         })
         .catch(error => {
