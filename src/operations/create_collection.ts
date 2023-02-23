@@ -23,6 +23,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
   'writeConcern',
   'raw',
   'fieldsAsRaw',
+  'useBigInt64',
   'promoteLongs',
   'promoteValues',
   'promoteBuffers',

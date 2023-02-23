@@ -428,25 +428,20 @@ describe('crud - insert', function () {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_to_json_for_long');
+      test: async function () {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        await client.connect();
+        const db = client.db(configuration.db);
+        const collection = db.collection('test_to_json_for_long');
+        await collection.insert(
+          [{ value: Long.fromNumber(32222432) }],
+          configuration.writeConcernMax()
+        );
+        const findResult = await collection.findOne({});
+        expect(findResult.value).to.deep.equal(32222432);
 
-          collection.insert(
-            [{ value: Long.fromNumber(32222432) }],
-            configuration.writeConcernMax(),
-            function (err, ids) {
-              test.ok(ids);
-              collection.findOne({}, function (err, item) {
-                test.equal(32222432, item.value);
-                client.close(done);
-              });
-            }
-          );
-        });
+        await client.close();
       }
     });
 
@@ -457,29 +452,22 @@ describe('crud - insert', function () {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_insert_and_query_timestamp');
+      test: async function () {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+        await client.connect();
+        const db = client.db(configuration.db);
+        const collection = db.collection('test_insert_and_query_timestamp');
+        await collection.insertOne(
+          { i: Timestamp.fromNumber(100), j: Long.fromNumber(200) },
+          configuration.writeConcernMax()
+        );
+        const findResult = await collection.findOne({});
+        expect(findResult.i._bsontype).equals('Timestamp');
+        expect(findResult.i.toInt(), 100);
+        expect(findResult.j, 200);
 
-          // Insert the update
-          collection.insert(
-            { i: Timestamp.fromNumber(100), j: Long.fromNumber(200) },
-            configuration.writeConcernMax(),
-            function (err, r) {
-              test.ok(r);
-              // Locate document
-              collection.findOne({}, function (err, item) {
-                test.ok(item.i._bsontype === 'Timestamp');
-                test.equal(100, item.i.toInt());
-                test.equal(200, item.j);
-                client.close(done);
-              });
-            }
-          );
-        });
+        await client.close();
       }
     });
 
@@ -1705,7 +1693,7 @@ describe('crud - insert', function () {
           try {
             db.collection(k.toString());
             test.fail(false);
-          } catch (err) {} // eslint-disable-line
+          } catch (err) { } // eslint-disable-line
 
           client.close(done);
         });
@@ -1719,34 +1707,26 @@ describe('crud - insert', function () {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var o = configuration.writeConcernMax();
+      test: async function () {
+        const configuration = this.configuration;
+        const o = configuration.writeConcernMax();
         o.promoteLongs = false;
-        var client = configuration.newClient(configuration.writeConcernMax(), {
+        const client = configuration.newClient(configuration.writeConcernMax(), {
           maxPoolSize: 1,
           promoteLongs: false
         });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteLong').insert(
-            {
-              doc: Long.fromNumber(10),
-              array: [[Long.fromNumber(10)]]
-            },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
-
-              db.collection('shouldCorrectlyHonorPromoteLong').findOne(function (err, doc) {
-                expect(err).to.not.exist;
-                test.ok(doc.doc._bsontype === 'Long');
-                test.ok(doc.array[0][0]._bsontype === 'Long');
-                client.close(done);
-              });
-            }
-          );
+        await client.connect();
+        const db = client.db(configuration.db);
+        await db.collection('shouldCorrectlyHonorPromoteLong').insertOne({
+          doc: Long.fromNumber(10),
+          array: [[Long.fromNumber(10)]]
         });
+        const doc = await db.collection('shouldCorrectlyHonorPromoteLong').findOne();
+
+        expect(doc.doc._bsontype === 'Long');
+        expect(doc.array[0][0]._bsontype === 'Long');
+
+        await client.close();
       }
     });
 
@@ -1757,61 +1737,54 @@ describe('crud - insert', function () {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var o = configuration.writeConcernMax();
+      test: async function () {
+        const configuration = this.configuration;
+        const o = configuration.writeConcernMax();
         o.promoteLongs = false;
 
-        var client = configuration.newClient(configuration.writeConcernMax(), {
+        const client = configuration.newClient(configuration.writeConcernMax(), {
           maxPoolSize: 1,
           promoteLongs: false
         });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore').insertMany(
-            [
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) },
-              { a: Long.fromNumber(10) }
-            ],
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
+        await client.connect();
+        const db = client.db(configuration.db);
+        await db
+          .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
+          .insertMany([
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) },
+            { a: Long.fromNumber(10) }
+          ]);
 
-              db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
-                .find({})
-                .batchSize(2)
-                .toArray(function (err, docs) {
-                  expect(err).to.not.exist;
-                  var doc = docs.pop();
-
-                  test.ok(doc.a._bsontype === 'Long');
-                  client.close(done);
-                });
-            }
-          );
-        });
+        const docs = await db
+          .collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore')
+          .find({})
+          .batchSize(2)
+          .toArray();
+        const doc = docs.pop();
+        expect(doc.a._bsontype).to.equal('Long');
+        client.close();
       }
     });
 
@@ -1906,36 +1879,23 @@ describe('crud - insert', function () {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function (done) {
-        var configuration = this.configuration;
-        var client = configuration.newClient(configuration.writeConcernMax(), {
+      test: async function () {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax(), {
           maxPoolSize: 1,
           promoteLongs: false
         });
-        client.connect(function (err, client) {
-          var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert(
-            {
-              doc: Long.fromNumber(10),
-              array: [[Long.fromNumber(10)]]
-            },
-            function (err, doc) {
-              expect(err).to.not.exist;
-              test.ok(doc);
-
-              db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function (
-                err,
-                doc
-              ) {
-                expect(err).to.not.exist;
-                expect(err).to.not.exist;
-                test.ok(doc.doc._bsontype === 'Long');
-                test.ok(doc.array[0][0]._bsontype === 'Long');
-                client.close(done);
-              });
-            }
-          );
+        await client.connect();
+        const db = client.db(configuration.db);
+        await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insertOne({
+          doc: Long.fromNumber(10),
+          array: [[Long.fromNumber(10)]]
         });
+        const doc = await db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne({});
+        expect(doc.doc._bsontype).to.equal('Long');
+        expect(doc.array[0][0]._bsontype).to.equal('Long');
+
+        await client.close();
       }
     });
 

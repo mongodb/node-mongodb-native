@@ -255,6 +255,15 @@ export function parseOptions(
     mongoClient = undefined;
   }
 
+  // validate BSONOptions
+  if (options.useBigInt64 && typeof options.promoteLongs === 'boolean' && !options.promoteLongs) {
+    throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
+  }
+
+  if (options.useBigInt64 && typeof options.promoteValues === 'boolean' && !options.promoteValues) {
+    throw new MongoAPIError('Must request either bigint or Long for int64 deserialization');
+  }
+
   const url = new ConnectionString(uri);
   const { hosts, isSRV } = url;
 
@@ -953,6 +962,9 @@ export const OPTIONS = {
     type: 'boolean'
   },
   promoteValues: {
+    type: 'boolean'
+  },
+  useBigInt64: {
     type: 'boolean'
   },
   proxyHost: {
