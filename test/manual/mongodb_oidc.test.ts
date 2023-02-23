@@ -2,15 +2,9 @@ import { readFile } from 'node:fs/promises';
 
 import { expect } from 'chai';
 
-describe('MONGODB-OIDC', function () {
-  beforeEach(function () {
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI || !MONGODB_URI.includes('MONGODB-OIDC')) {
-      this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-OIDC auth mechanism';
-      this.skip();
-    }
-  });
+import { MongoClient } from '../mongodb';
 
+describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {
     it('contains AWS_WEB_IDENTITY_TOKEN_FILE', function () {
       expect(process.env).to.have.property('AWS_WEB_IDENTITY_TOKEN_FILE');
@@ -33,7 +27,7 @@ describe('MONGODB-OIDC', function () {
         // - Create a client with a url of the form  ``mongodb://localhost/?authMechanism=MONGODB-OIDC``
         //   and the OIDC request callback.
         before(function () {
-          const client = this.configuration.newClient(
+          const client = new MongoClient(
             'mongodb://localhost/?authMechanism=MONGODB-OIDC',
             {
               authMechanismProperties: {
@@ -57,7 +51,7 @@ describe('MONGODB-OIDC', function () {
         // - Create a client with a url of the form
         //   ``mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC`` and the OIDC request callback.
         before(function () {
-          const client = this.configuration.newClient(
+          const client = new MongoClient(
             'mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC',
             {
               authMechanismProperties: {
@@ -91,7 +85,7 @@ describe('MONGODB-OIDC', function () {
         // - Create a client with the url parameters
         //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
         before(function () {
-          const client = this.configuration.newClient(
+          const client = new MongoClient(
             'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
           );
           collection = client.db('testOidc').collection('test');
@@ -115,7 +109,7 @@ describe('MONGODB-OIDC', function () {
         // - Create a client with the url parameters
         //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
         before(function () {
-          const client = this.configuration.newClient(
+          const client = new MongoClient(
             'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
           );
           collection = client.db('testOidc').collection('test');
@@ -153,7 +147,7 @@ describe('MONGODB-OIDC', function () {
           // ``mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
           // and the OIDC request callback.
           before(function () {
-            const client = this.configuration.newClient(
+            const client = new MongoClient(
               'mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
               {
                 authMechanismProperties: {
@@ -186,7 +180,7 @@ describe('MONGODB-OIDC', function () {
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
             // - Create a client with a url of the form
             // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
-            const client = this.configuration.newClient(
+            const client = new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
             );
             collection = client.db('testOidc').collection('test');
@@ -213,7 +207,7 @@ describe('MONGODB-OIDC', function () {
           // ``mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
           // and the OIDC request callback.
           before(function () {
-            const client = this.configuration.newClient(
+            const client = new MongoClient(
               'mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
               {
                 authMechanismProperties: {
@@ -246,7 +240,7 @@ describe('MONGODB-OIDC', function () {
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user2`;
             // - Create a client with a url of the form
             // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
-            const client = this.configuration.newClient(
+            const client = new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
             );
             collection = client.db('testOidc').collection('test');
@@ -266,7 +260,7 @@ describe('MONGODB-OIDC', function () {
         // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred``
         // and the OIDC request callback.
         before(function () {
-          const client = this.configuration.newClient(
+          const client = new MongoClient(
             'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
           );
           collection = client.db('testOidc').collection('test');
@@ -290,7 +284,7 @@ describe('MONGODB-OIDC', function () {
         };
 
         before(function () {
-          client = this.configuration.newClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestCallback
             }
@@ -312,7 +306,7 @@ describe('MONGODB-OIDC', function () {
         };
 
         before(function () {
-          client = this.configuration.newClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestCallback
             }
