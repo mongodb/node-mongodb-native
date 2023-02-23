@@ -164,7 +164,6 @@ describe('MONGODB-OIDC', function () {
             // - Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
             // of the ``test_user1`` generated token file.
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
-            console.log('token file test', process.env.AWS_WEB_IDENTITY_TOKEN_FILE);
             // - Create a client with a url of the form
             // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
             client = new MongoClient(
