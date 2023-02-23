@@ -28,7 +28,7 @@ export interface OIDCRequestTokenResult {
 export type OIDCRequestFunction = (
   principalName: string,
   idl: OIDCMechanismServerStep1,
-  timeout: AbortSignal
+  timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @public */
@@ -36,11 +36,8 @@ export type OIDCRefreshFunction = (
   principalName: string,
   idl: OIDCMechanismServerStep1,
   result: OIDCRequestTokenResult,
-  timeout: AbortSignal
+  timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
-
-/** @internal */
-const kWorkflow = Symbol('workflow');
 
 /** @internal */
 const DEVICE_WORKFLOWS = {

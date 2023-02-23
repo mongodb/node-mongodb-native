@@ -1,5 +1,4 @@
 import { type Document, Binary, BSON } from 'bson';
-import { setTimeout } from 'timers';
 
 import { MongoInvalidArgumentError } from '../../../error';
 import { type Callback, ns } from '../../../utils';
@@ -82,7 +81,6 @@ export class CallbackWorkflow implements Workflow {
             return callback(error);
           }
           // What to do about the payload?
-          console.log('saslStart result', result);
           const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
           // result.conversationId;
           // Call the request callback and finish auth.
@@ -107,7 +105,7 @@ export class CallbackWorkflow implements Workflow {
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // If a refresh callback exists, use it. Otherwise use the request callback.
     if (refresh) {
-      refresh(credentials.username, stepOneResult, tokenResult, AbortSignal.timeout(TIMEOUT))
+      refresh(credentials.username, stepOneResult, tokenResult, TIMEOUT)
         .then(tokenResult => {
           // Cache a new entry and continue with the saslContinue.
           this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
@@ -135,7 +133,7 @@ export class CallbackWorkflow implements Workflow {
     // Call the request callback.
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     if (request) {
-      request(credentials.username, stepOneResult, AbortSignal.timeout(TIMEOUT))
+      request(credentials.username, stepOneResult, TIMEOUT)
         .then(tokenResult => {
           // Cache a new entry and continue with the saslContinue.
           this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
@@ -151,14 +149,6 @@ export class CallbackWorkflow implements Workflow {
       );
     }
   }
-}
-
-function timeout(): AbortSignal {
-  const controller = new AbortController();
-  setTimeout(() => {
-    controller.abort();
-  }, TIMEOUT);
-  return controller.signal;
 }
 
 /**

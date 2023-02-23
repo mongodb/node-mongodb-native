@@ -25,8 +25,7 @@ export abstract class DeviceWorkflow implements Workflow {
       if (error) {
         return callback(error);
       }
-      console.log('authenticate result', result);
-      callback(undefined, { clientId: '' });
+      callback(undefined, result);
     });
   }
 

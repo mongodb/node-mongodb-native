@@ -172,13 +172,11 @@ function performInitialHandshake(
       conn.hello = response;
       conn.lastHelloMS = new Date().getTime() - start;
 
-      console.log('credentials', credentials);
       if (!response.arbiterOnly && credentials) {
         // store the response on auth context
         authContext.response = response;
 
         const resolvedCredentials = credentials.resolveAuthMechanism(response);
-        console.log('resolvedCredentials', resolvedCredentials);
         const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
         if (!provider) {
           return callback(

@@ -22,10 +22,8 @@ export class AwsDeviceWorkflow extends DeviceWorkflow {
    */
   execute(connection: Connection, credentials: MongoCredentials, callback: Callback): void {
     const tokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
-    console.log('aws device workflow', tokenFile);
     if (tokenFile) {
       readFile(tokenFile, 'utf8', (error, token) => {
-        console.log('token', token);
         if (error) {
           return callback(error);
         }
