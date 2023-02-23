@@ -1,24 +1,29 @@
 import { type Document, BSON } from 'bson';
 
+import { MongoInvalidArgumentError } from '../../../error';
 import { type Callback, ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
-import { OIDCAuthContextProvider } from './oidc_auth_context_provider';
+import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
+import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
+
+/* 5 minutes in milliseconds */
+const TIMEOUT = 300000;
 
 /**
  * OIDC implementation of a callback based workflow.
  * @internal
  */
 export class CallbackWorkflow implements Workflow {
-  contextProvider: OIDCAuthContextProvider;
+  cache: TokenEntryCache;
 
   /**
    * Instantiate the workflow
    */
   constructor() {
-    this.contextProvider = new OIDCAuthContextProvider();
+    this.cache = new TokenEntryCache();
   }
 
   /**
@@ -46,38 +51,129 @@ export class CallbackWorkflow implements Workflow {
    *   - execute step two.
    */
   execute(connection: Connection, credentials: MongoCredentials, callback: Callback): void {
-    connection.command(
-      ns(credentials.source),
-      stepOneCommandDocument(credentials),
-      undefined,
-      (error, stepOneResult) => {
-        if (error) {
-          return callback(error);
-        }
-        // TODO: Deal with the payload in the result.
-        this.contextProvider.getContext(connection, credentials, stepOneResult, (error, result) => {
+    const entry = this.cache.getEntry(connection.address, credentials.username);
+    if (entry) {
+      // Check if the entry is not expired.
+      if (entry.isValid()) {
+        // Skip step one and execute the step two saslContinue.
+        finishAuth(entry.tokenResult, connection, credentials, callback);
+      } else {
+        // Remove the expired entry from the cache.
+        this.cache.deleteEntry(connection.address, credentials.username);
+        // Execute a refresh of the token and finish auth.
+        this.refreshAndFinish(
+          connection,
+          credentials,
+          entry.serverResult,
+          entry.tokenResult,
+          callback
+        );
+      }
+    } else {
+      // No entry means to start with the step one saslStart.
+      connection.command(
+        ns(credentials.source),
+        startCommandDocument(credentials),
+        undefined,
+        (error, result) => {
           if (error) {
             return callback(error);
           }
-
-          connection.command(
-            ns(credentials.source),
-            stepTwoCommandDocument(result.tokenResult.accessToken),
-            undefined,
-            (error, stepTwoResult) => {
-
-            }
-          );
-        });
-      }
-    );
+          // What to do about the payload?
+          // Call the request callback and finish auth.
+          this.requestAndFinish(connection, credentials, result, callback);
+        }
+      );
+    }
   }
+
+  /**
+   * Execute the refresh callback if it exists, otherwise the request callback, then
+   * finish the authentication.
+   */
+  private refreshAndFinish(
+    connection: Connection,
+    credentials: MongoCredentials,
+    stepOneResult: OIDCMechanismServerStep1,
+    tokenResult: OIDCRequestTokenResult,
+    callback: Callback
+  ) {
+    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
+    // If a refresh callback exists, use it. Otherwise use the request callback.
+    if (refresh) {
+      refresh(credentials.username, stepOneResult, tokenResult, AbortSignal.timeout(TIMEOUT))
+        .then(tokenResult => {
+          // Cache a new entry and continue with the saslContinue.
+          finishAuth(tokenResult, connection, credentials, callback);
+        })
+        .catch(error => {
+          return callback(error);
+        });
+    } else {
+      // Fallback to using the request callback.
+      this.requestAndFinish(connection, credentials, stepOneResult, callback);
+    }
+  }
+
+  /**
+   * Execute the request callback and finish authentication.
+   */
+  private requestAndFinish(
+    connection: Connection,
+    credentials: MongoCredentials,
+    stepOneResult: OIDCMechanismServerStep1,
+    callback: Callback
+  ) {
+    // Call the request callback.
+    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    if (request) {
+      request(credentials.username, stepOneResult, AbortSignal.timeout(TIMEOUT))
+        .then(tokenResult => {
+          // Cache a new entry and continue with the saslContinue.
+          this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
+          finishAuth(tokenResult, connection, credentials, callback);
+        })
+        .catch(error => {
+          return callback(error);
+        });
+    } else {
+      // Request callback must be present.
+      callback(
+        new MongoInvalidArgumentError('Auth mechanism property REQUEST_TOKEN_CALLBACK is required.')
+      );
+    }
+  }
+}
+
+/**
+ * Cache the result of the user supplied callback and execute the
+ * step two saslContinue.
+ */
+function finishAuth(
+  result: OIDCRequestTokenResult,
+  connection: Connection,
+  credentials: MongoCredentials,
+  callback: Callback
+) {
+  // Execute the step two saslContinue.
+  connection.command(
+    ns(credentials.source),
+    continueCommandDocument(result.accessToken),
+    undefined,
+    (error, result) => {
+      if (error) {
+        return callback(error);
+      }
+      // What to do about the payload?
+      return callback(undefined, result);
+    }
+  );
 }
 
 /**
  * Generate the saslStart command document.
  */
-function stepOneCommandDocument(credentials: MongoCredentials): Document {
+function startCommandDocument(credentials: MongoCredentials): Document {
   const payload: Document = {};
   if (credentials.username) {
     payload.n = credentials.username;
@@ -93,7 +189,7 @@ function stepOneCommandDocument(credentials: MongoCredentials): Document {
 /**
  * Generate the saslContinue command document.
  */
-function stepTwoCommandDocument(token: string): Document {
+function continueCommandDocument(token: string): Document {
   return {
     saslContinue: 1,
     //conversationId: conversationId,
