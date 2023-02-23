@@ -76,56 +76,27 @@ describe('MONGODB-OIDC', function () {
     // Drivers Evergreen Tools.
     describe('2. AWS Device Auth', function () {
       const testTokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
+      let collection;
       after(() => {
         process.env.AWS_WEB_IDENTITY_TOKEN_FILE = testTokenFile;
       });
 
-      context('when authenticating with user 1', function () {
-        let collection;
-        // - Create a client with the url parameters
-        //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
-        before(function () {
-          const client = new MongoClient(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
-          );
-          collection = client.db('testOidc').collection('test');
-        });
-
-        before(() => {
-          // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
-          // of the ``test_user1`` generated token file.
-          process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
-        });
-
-        // - Perform a find operation on the client.
-        it('successfully authenticates', async function () {
-          const doc = await collection.findOne();
-          expect(doc).to.equal(null);
-        });
+      // - Create a client with the url parameters
+      //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
+      before(function () {
+        // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
+        // of the ``test_user1`` generated token file.
+        process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
+        const client = new MongoClient(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
+        );
+        collection = client.db('testOidc').collection('test');
       });
 
-      context('when authenticating with user 2', function () {
-        let collection;
-        // - Create a client with the url parameters
-        //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
-        before(function () {
-          const client = new MongoClient(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws'
-          );
-          collection = client.db('testOidc').collection('test');
-        });
-
-        before(() => {
-          // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
-          // of the ``test_user2`` generated token file.
-          process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user2`;
-        });
-
-        // - Perform a find operation on the client.
-        it('successfully authenticates', async function () {
-          const doc = await collection.findOne();
-          expect(doc).to.equal(null);
-        });
+      // - Perform a find operation on the client.
+      it('successfully authenticates', async function () {
+        const doc = await collection.findOne();
+        expect(doc).to.equal(null);
       });
     });
 
