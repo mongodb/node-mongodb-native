@@ -80,6 +80,7 @@ export class CallbackWorkflow implements Workflow {
             return callback(error);
           }
           // What to do about the payload?
+          console.log('saslStart result', result);
           // Call the request callback and finish auth.
           this.requestAndFinish(connection, credentials, result, callback);
         }
@@ -165,6 +166,7 @@ function finishAuth(
         return callback(error);
       }
       // What to do about the payload?
+      console.log('saslContinue result', result);
       return callback(undefined, result);
     }
   );
