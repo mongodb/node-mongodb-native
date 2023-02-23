@@ -123,7 +123,7 @@ functions:
           export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
           export AWS_TOKEN_DIR=/tmp/tokens
 
-          . ./activate_authoidcvenv.sh
+          . ./activate-authoidcvenv.sh
           python oidc_write_orchestration.py
           python oidc_get_tokens.py
 
