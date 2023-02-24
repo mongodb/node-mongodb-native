@@ -27,20 +27,21 @@ export interface OIDCRequestTokenResult {
 /** @public */
 export type OIDCRequestFunction = (
   principalName: string,
-  idl: OIDCMechanismServerStep1,
+  serverResult: OIDCMechanismServerStep1,
   timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @public */
 export type OIDCRefreshFunction = (
   principalName: string,
-  idl: OIDCMechanismServerStep1,
+  serverResult: OIDCMechanismServerStep1,
   result: OIDCRequestTokenResult,
   timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @internal */
-const DEVICE_WORKFLOWS = {
+export const OIDC_WORKFLOWS = {
+  callback: new CallbackWorkflow(),
   aws: new AwsDeviceWorkflow(),
   azure: undefined,
   gcp: undefined
@@ -102,8 +103,5 @@ export class MongoDBOIDC extends AuthProvider {
  */
 function getWorkflow(credentials: MongoCredentials): Workflow | undefined {
   const deviceName = credentials.mechanismProperties.DEVICE_NAME;
-  if (deviceName) {
-    return DEVICE_WORKFLOWS[deviceName];
-  }
-  return new CallbackWorkflow();
+  return OIDC_WORKFLOWS[deviceName || 'callback'];
 }

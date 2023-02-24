@@ -63,6 +63,13 @@ export class TokenEntryCache {
   }
 
   /**
+   * Clear the cache.
+   */
+  clear(): void {
+    this.entries.clear();
+  }
+
+  /**
    * Delete an entry from the cache.
    */
   deleteEntry(address: string, username = ''): void {

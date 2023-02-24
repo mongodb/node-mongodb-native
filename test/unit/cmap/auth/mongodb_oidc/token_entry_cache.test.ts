@@ -51,6 +51,19 @@ describe('TokenEntryCache', function () {
     });
   });
 
+  describe('#clear', function () {
+    const cache = new TokenEntryCache();
+
+    before(function () {
+      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
+      cache.clear();
+    });
+
+    it('clears the cache', function () {
+      expect(cache.entries.size).to.equal(0);
+    });
+  });
+
   describe('#deleteEntry', function () {
     const cache = new TokenEntryCache();
 

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { expect } from 'chai';
 
-import { MongoClient } from '../mongodb';
+import { MongoClient, OIDC_WORKFLOWS } from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {
@@ -319,33 +319,134 @@ describe('MONGODB-OIDC', function () {
     // the authorization code workflow with and without a provided refresh callback.
     // If desired, the caching tests can be done using mock server responses.
     describe('5. Caching', function () {
-      // - Clear the cache.
-      // - Create a new client with a request callback and a refresh callback.  Both callbacks will read the contents of the ``AWS_WEB_IDENTITY_TOKEN_FILE`` location to obtain a valid access token.
-      // - Validate the request callback inputs, including the timeout parameter if
-      // -ssible.
+      let requestInvokations = 0;
+      let refreshInvokations = 0;
+      const cache = OIDC_WORKFLOWS.callback.cache;
       // - Give a callback response with a valid accessToken and an expiresInSeconds
-      // -at is within one minute.
-      // - Ensure that a ``find`` operation adds credentials to the cache.
-      // - Create a new client with the same request callback and a refresh callback.
-      // - Ensure that a ``find`` operation results in a call to the refresh callback.
-      // - Validate the refresh callback inputs, including the timeout parameter if
-      // -ssible.
-      // - Ensure there is a cache with credentials that will expire in less than 5 minutes, using a client with an appropriate request callback.
-      // - Create a new client with the a request callback but no refresh callback.
-      // - Ensure that a ``find`` operation results in a call to the request callback.
-      // - the driver does not supports using callback hashes as part of the cache key,
-      // -ip the next test.
-      // -Create a new client with a different request callback.
-      // -Ensure that a ``find`` operation adds a new entry to the cache.
-      // - Clear the cache.
-      // - Ensure there is a cache with credentials that will expire in less than 5 minutes, using a client with an appropriate request callback.
-      // - Ensure there is a cache with credentials that will expire in less than 5 minutes.
-      // - Create a new client with a valid request callback and a refresh callback that gives invalid credentials.
-      // - Ensure that a ``find`` operation results in an error.
-      // - Ensure that the cache has been cleared.
-      // - Clear the cache.
-      // - Create a new client using the AWS device workflow.
-      // - Ensure that a ``find`` operation does not add credentials to the cache.
+      //   that is within one minute.
+      // - Validate the request callback inputs, including the timeout parameter if possible.
+      const requestCallback = async (principalName, serverResult, timeout) => {
+        const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
+          encoding: 'utf8'
+        });
+
+        expect(principalName).to.equal('test_user1');
+        expect(serverResult).to.have.property('clientId');
+        expect(timeout).to.equal(300000);
+        requestInvokations++;
+
+        return { accessToken: token, expiresInSeconds: 30 };
+      };
+
+      const refreshCallback = async (principalName, serverResult, tokenResult, timeout) => {
+        const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
+          encoding: 'utf8'
+        });
+
+        expect(principalName).to.equal('test_user1');
+        expect(serverResult).to.have.property('clientId');
+        expect(tokenResult.accessToken).to.equal(token);
+        expect(timeout).to.equal(300000);
+        refreshInvokations++;
+
+        return { accessToken: token, expiresInSeconds: 30 };
+      };
+
+      beforeEach(() => {
+        requestInvokations = 0;
+        refreshInvokations = 0;
+      });
+
+      context('when calling the request callback', function () {
+        let client;
+        let collection;
+
+        // - Clear the cache.
+        before(function () {
+          cache.clear();
+
+          // - Create a new client with a request callback and a refresh callback.
+          //   Both callbacks will read the contents of the AWS_WEB_IDENTITY_TOKEN_FILE
+          //   location to obtain a valid access token.
+          client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback,
+              REFRESH_TOKEN_CALLBACK: refreshCallback
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
+        after(async () => {
+          client?.close();
+        });
+
+        // - Ensure that a find operation adds credentials to the cache.
+        it('adds credentials to the cache', async function () {
+          await collection.findOne();
+          expect(cache.entries.size).to.equal(1);
+        });
+      });
+
+      context('when calling the refresh callback', function () {
+        let client;
+        let collection;
+
+        before(function () {
+          // - Create a new client with the same request callback and a refresh callback.
+          client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback,
+              REFRESH_TOKEN_CALLBACK: refreshCallback
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
+        after(async () => {
+          client?.close();
+        });
+
+        // - Ensure that a find operation results in a call to the refresh callback.
+        // - Validate the refresh callback inputs, including the timeout parameter if possible.
+        // - Ensure there is a cache with credentials that will expire in less than 5 minutes,
+        //   using a client with an appropriate request callback.
+        it('adds credentials to the cache', async function () {
+          await collection.findOne();
+          expect(requestInvokations).to.equal(0);
+          expect(refreshInvokations).to.equal(1);
+          expect(cache.entries.values().next().value.expiration).to.be.below(
+            Date.now() + 300000
+          );
+        });
+      });
+
+      context('when providing no refresh callback', function () {
+        let client;
+        let collection;
+
+        before(function () {
+          // - Create a new client with the a request callback but no refresh callback.
+          client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestCallback
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
+        after(async () => {
+          client?.close();
+          cache.clear();
+        });
+
+        // - Ensure that a find operation results in a call to the request callback.
+        it('adds credentials to the cache', async function () {
+          await collection.findOne();
+          expect(requestInvokations).to.equal(1);
+          expect(refreshInvokations).to.equal(0);
+        });
+      });
     });
   });
 });
