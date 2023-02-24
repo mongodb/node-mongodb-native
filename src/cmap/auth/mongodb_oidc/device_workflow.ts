@@ -1,6 +1,7 @@
 import { type Document, BSON } from 'bson';
+import { promisify } from 'util';
 
-import { type Callback, ns } from '../../../utils';
+import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
 import { AuthMechanism } from '../providers';
@@ -14,26 +15,21 @@ export abstract class DeviceWorkflow implements Workflow {
   /**
    * Authenticates using the provided OIDC access token.
    */
-  authenticate(
+  async authenticate(
     connection: Connection,
     credentials: MongoCredentials,
-    token: string,
-    callback: Callback
-  ): void {
+    token: string
+  ): Promise<Document> {
     const command = commandDocument(token);
-    connection.command(ns(credentials.source), command, undefined, (error, result) => {
-      if (error) {
-        return callback(error);
-      }
-      callback(undefined, result);
-    });
+    const executeCommand = promisify(connection.command.bind(connection));
+    return executeCommand(ns(credentials.source), command, undefined);
   }
 
   /**
    * All device workflows must implement this method in order to get the access
    * token and then call authenticate with it.
    */
-  abstract execute(connection: Connection, credentials: MongoCredentials, callback: Callback): void;
+  abstract execute(connection: Connection, credentials: MongoCredentials): Promise<Document>;
 }
 
 /**

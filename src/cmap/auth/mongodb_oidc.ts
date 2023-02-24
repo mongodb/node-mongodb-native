@@ -75,7 +75,14 @@ export class MongoDBOIDC extends AuthProvider {
         )
       );
     }
-    workflow.execute(connection, credentials, callback);
+    workflow
+      .execute(connection, credentials)
+      .then(result => {
+        return callback(undefined, result);
+      })
+      .catch(error => {
+        callback(error);
+      });
   }
 
   /**

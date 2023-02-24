@@ -1,7 +1,8 @@
 import { type Document, Binary, BSON } from 'bson';
+import { promisify } from 'util';
 
 import { MongoInvalidArgumentError } from '../../../error';
-import { type Callback, ns } from '../../../utils';
+import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
 import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongodb_oidc';
@@ -50,43 +51,37 @@ export class CallbackWorkflow implements Workflow {
    *   - put the new entry in the cache.
    *   - execute step two.
    */
-  execute(connection: Connection, credentials: MongoCredentials, callback: Callback): void {
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     const entry = this.cache.getEntry(connection.address, credentials.username);
     if (entry) {
       // Check if the entry is not expired.
       if (entry.isValid()) {
         // Skip step one and execute the step two saslContinue.
-        finishAuth(entry.tokenResult, undefined, connection, credentials, callback);
+        return finishAuth(entry.tokenResult, undefined, connection, credentials);
       } else {
         // Remove the expired entry from the cache.
         this.cache.deleteEntry(connection.address, credentials.username);
         // Execute a refresh of the token and finish auth.
-        this.refreshAndFinish(
+        return this.refreshAndFinish(
           connection,
           credentials,
           entry.serverResult,
-          entry.tokenResult,
-          undefined,
-          callback
+          entry.tokenResult
         );
       }
     } else {
       // No entry means to start with the step one saslStart.
-      connection.command(
+      const executeCommand = promisify(connection.command.bind(connection));
+      const result = await executeCommand(
         ns(credentials.source),
         startCommandDocument(credentials),
-        undefined,
-        (error, result) => {
-          if (error) {
-            return callback(error);
-          }
-          // What to do about the payload?
-          const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
-          // result.conversationId;
-          // Call the request callback and finish auth.
-          this.requestAndFinish(connection, credentials, stepOne, result.conversationId, callback);
-        }
+        undefined
       );
+      // What to do about the payload?
+      const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
+      // result.conversationId;
+      // Call the request callback and finish auth.
+      return this.requestAndFinish(connection, credentials, stepOne, result.conversationId);
     }
   }
 
@@ -94,58 +89,51 @@ export class CallbackWorkflow implements Workflow {
    * Execute the refresh callback if it exists, otherwise the request callback, then
    * finish the authentication.
    */
-  private refreshAndFinish(
+  private async refreshAndFinish(
     connection: Connection,
     credentials: MongoCredentials,
     stepOneResult: OIDCMechanismServerStep1,
     tokenResult: OIDCRequestTokenResult,
-    conversationId: number | undefined,
-    callback: Callback
-  ) {
+    conversationId?: number
+  ): Promise<Document> {
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // If a refresh callback exists, use it. Otherwise use the request callback.
     if (refresh) {
-      refresh(credentials.username, stepOneResult, tokenResult, TIMEOUT)
-        .then(tokenResult => {
-          // Cache a new entry and continue with the saslContinue.
-          this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
-          finishAuth(tokenResult, conversationId, connection, credentials, callback);
-        })
-        .catch(error => {
-          return callback(error);
-        });
+      const result: OIDCRequestTokenResult = await refresh(
+        credentials.username,
+        stepOneResult,
+        tokenResult,
+        TIMEOUT
+      );
+      // Cache a new entry and continue with the saslContinue.
+      this.cache.addEntry(result, stepOneResult, connection.address, credentials.username);
+      return finishAuth(result, conversationId, connection, credentials);
     } else {
       // Fallback to using the request callback.
-      this.requestAndFinish(connection, credentials, stepOneResult, conversationId, callback);
+      return this.requestAndFinish(connection, credentials, stepOneResult, conversationId);
     }
   }
 
   /**
    * Execute the request callback and finish authentication.
    */
-  private requestAndFinish(
+  private async requestAndFinish(
     connection: Connection,
     credentials: MongoCredentials,
     stepOneResult: OIDCMechanismServerStep1,
-    conversationId: number | undefined,
-    callback: Callback
-  ) {
+    conversationId?: number
+  ): Promise<Document> {
     // Call the request callback.
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     if (request) {
-      request(credentials.username, stepOneResult, TIMEOUT)
-        .then(tokenResult => {
-          // Cache a new entry and continue with the saslContinue.
-          this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
-          finishAuth(tokenResult, conversationId, connection, credentials, callback);
-        })
-        .catch(error => {
-          return callback(error);
-        });
+      const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT);
+      // Cache a new entry and continue with the saslContinue.
+      this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
+      return finishAuth(tokenResult, conversationId, connection, credentials);
     } else {
       // Request callback must be present.
-      callback(
-        new MongoInvalidArgumentError('Auth mechanism property REQUEST_TOKEN_CALLBACK is required.')
+      throw new MongoInvalidArgumentError(
+        'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
   }
@@ -155,24 +143,18 @@ export class CallbackWorkflow implements Workflow {
  * Cache the result of the user supplied callback and execute the
  * step two saslContinue.
  */
-function finishAuth(
+async function finishAuth(
   result: OIDCRequestTokenResult,
   conversationId: number | undefined,
   connection: Connection,
-  credentials: MongoCredentials,
-  callback: Callback
-) {
+  credentials: MongoCredentials
+): Promise<Document> {
   // Execute the step two saslContinue.
-  connection.command(
+  const executeCommand = promisify(connection.command.bind(connection));
+  return executeCommand(
     ns(credentials.source),
     continueCommandDocument(result.accessToken, conversationId),
-    undefined,
-    (error, result) => {
-      if (error) {
-        return callback(error);
-      }
-      return callback(undefined, result);
-    }
+    undefined
   );
 }
 
