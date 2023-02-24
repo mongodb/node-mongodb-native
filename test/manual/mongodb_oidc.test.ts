@@ -415,9 +415,7 @@ describe('MONGODB-OIDC', function () {
           await collection.findOne();
           expect(requestInvokations).to.equal(0);
           expect(refreshInvokations).to.equal(1);
-          expect(cache.entries.values().next().value.expiration).to.be.below(
-            Date.now() + 300000
-          );
+          expect(cache.entries.values().next().value.expiration).to.be.below(Date.now() + 300000);
         });
       });
 
