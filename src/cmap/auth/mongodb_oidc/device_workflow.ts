@@ -13,28 +13,28 @@ import type { Workflow } from './workflow';
  */
 export abstract class DeviceWorkflow implements Workflow {
   /**
-   * Authenticates using the provided OIDC access token.
+   * Execute the workflow. Looks for AWS_WEB_IDENTITY_TOKEN_FILE in the environment
+   * and then attempts to read the token from that path.
    */
-  async authenticate(
-    connection: Connection,
-    credentials: MongoCredentials,
-    token: string
-  ): Promise<Document> {
+  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+    const token = await this.getToken();
     const command = commandDocument(token);
     const executeCommand = promisify(connection.command.bind(connection));
     return executeCommand(ns(credentials.source), command, undefined);
   }
 
   /**
-   * All device workflows must implement this method in order to get the access
-   * token and then call authenticate with it.
-   */
-  abstract execute(connection: Connection, credentials: MongoCredentials): Promise<Document>;
-
-  /**
    * Get the document to add for speculative authentication.
    */
-  abstract speculativeAuth(): Promise<Document>;
+  async speculativeAuth(): Promise<Document> {
+    const token = await this.getToken();
+    return { speculativeAuthenticate: commandDocument(token) };
+  }
+
+  /**
+   * Get the token from the environment or endpoint.
+   */
+  abstract getToken(): Promise<string>;
 }
 
 /**
