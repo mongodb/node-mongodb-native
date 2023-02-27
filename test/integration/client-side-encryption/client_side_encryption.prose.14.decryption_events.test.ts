@@ -154,8 +154,8 @@ describe('14. Decryption Events', metadata, function () {
         .toArray()
         .catch(error => error);
 
-      expect(error).property('code', 123);
-      expect(aggregateFailed).nested.property('failure.code', 123);
+      expect(error).to.have.property('code', 123);
+      expect(aggregateFailed).to.have.nested.property('failure.code', 123);
     });
   });
 
@@ -202,7 +202,7 @@ describe('14. Decryption Events', metadata, function () {
         .catch(error => error);
 
       expect(error).to.be.instanceOf(MongoNetworkError);
-      expect(aggregateFailed).nested.property('failure.message').to.include('closed');
+      expect(aggregateFailed).to.have.nested.property('failure.message').to.include('closed');
     });
   });
 
@@ -223,9 +223,9 @@ describe('14. Decryption Events', metadata, function () {
         .toArray()
         .catch(error => error);
 
-      expect(error).property('message').to.include('HMAC validation failure');
+      expect(error).to.have.property('message').to.include('HMAC validation failure');
       expect(aggregateSucceeded)
-        .nested.property('reply.cursor.firstBatch[0].encrypted')
+        .to.have.nested.property('reply.cursor.firstBatch[0].encrypted')
         .to.be.instanceOf(Binary);
     });
   });
@@ -243,9 +243,9 @@ describe('14. Decryption Events', metadata, function () {
 
       const result = await collection.aggregate([]).toArray();
 
-      expect(result).nested.property('[0].encrypted', 'hello');
+      expect(result).to.have.nested.property('[0].encrypted', 'hello');
       expect(aggregateSucceeded)
-        .nested.property('reply.cursor.firstBatch[0].encrypted')
+        .to.have.nested.property('reply.cursor.firstBatch[0].encrypted')
         .to.be.instanceOf(Binary);
     });
   });
