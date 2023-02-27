@@ -1,6 +1,6 @@
 'use strict';
 
-const { clearTimeout, setTimeout } = require('timers');
+const { clearTimeout } = require('timers');
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -8,7 +8,6 @@ const net = require('net');
 const { MongoClient, MongoServerSelectionError, ReadPreference } = require('../../mongodb');
 const { Topology } = require('../../mongodb');
 const { Server } = require('../../mongodb');
-const { ServerDescription } = require('../../mongodb');
 const { ns, makeClientMetadata, isHello } = require('../../mongodb');
 const { TopologyDescriptionChangedEvent } = require('../../mongodb');
 const { TopologyDescription } = require('../../mongodb');
