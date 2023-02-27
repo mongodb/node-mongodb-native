@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
+import { Writable, WritableOptions } from 'stream';
 
 import {
   AbstractCursor,
@@ -36,7 +37,7 @@ import {
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';
-import type { ClientEncryption, ClientEntity, EntityDescription } from './schema';
+import type { ClientEncryption, ClientEntity, EntityDescription, ExpectedLogMessage, ObservableLogComponent, ObservableLogSeverity } from './schema';
 import {
   createClientEncryption,
   makeConnectionString,
@@ -94,16 +95,38 @@ export type CmapEvent =
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
 export type SdamEvent = ServerDescriptionChangedEvent;
+export type Log = ExpectedLogMessage;
 
 function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
+class LogCollector extends Writable {
+  consumer: (chunk: Log) => void;
+  _sink: Log[];
+  constructor(options: WritableOptions) {
+    super({ ...options, objectMode: true });
+  }
+
+  set sink(s: Log[]) {
+    this._sink = s;
+    this.consumer = (l: Log) => {
+      this._sink.push(l);
+    }
+  }
+
+  write(chunk: any, cb?: ((e: Error | undefined | null) => void) | undefined) {
+    this.consumer(chunk as Log);
+  }
+}
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[] = [];
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
+  logs: Log[] = [];
+  logSink: Writable;
+
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
@@ -119,6 +142,7 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
+  observedLogEvents: Map<ObservableLogComponent, ObservableLogSeverity>;
   observedSdamEvents: 'serverDescriptionChangedEvent'[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
@@ -148,12 +172,18 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
+    // TODO: Install a writable stream to capture logs
+    // TODO: configure the client to write to the new stream.
+    const logSink = new LogCollector({});
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {})
+      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
     });
+
+    // Now the logs should be collected in this.logs;
+    logSink.sink = this.logs;
 
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
@@ -169,6 +199,7 @@ export class UnifiedMongoClient extends MongoClient {
     this.observedSdamEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.SDAM_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
+    this.observedLogEvents = new Map();
     for (const eventName of this.observedCommandEvents) {
       this.on(eventName, this.pushCommandEvent);
     }
@@ -178,6 +209,8 @@ export class UnifiedMongoClient extends MongoClient {
     for (const eventName of this.observedSdamEvents) {
       this.on(eventName, this.pushSdamEvent);
     }
+
+    this.logSink = new Writable();
   }
 
   isIgnored(e: CommandEvent): boolean {
@@ -203,6 +236,10 @@ export class UnifiedMongoClient extends MongoClient {
       default:
         throw new Error(`Unknown eventType: ${eventType}`);
     }
+  }
+
+  getCapturedLogs(): Log[] {
+    return this.logs;
   }
 
   // NOTE: pushCommandEvent must be an arrow function

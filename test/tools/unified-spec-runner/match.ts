@@ -34,8 +34,12 @@ import {
   ExpectedCommandEvent,
   ExpectedError,
   ExpectedEventsForClient,
-  ExpectedSdamEvent
+  ExpectedSdamEvent,
+  ExpectedLogMessage,
+  ExpectedLogMessagesForClient
 } from './schema';
+
+import * as BSON from 'bson';
 
 export interface ExistsOperator {
   $$exists: boolean;
@@ -342,7 +346,7 @@ export function specialCheck(
       ).to.be.false;
     }
   } else if (isMatchAsDocumentOperator(expected)) {
-    resultCheck(actual, expected.$$matchAsDocument as any, entities, path, false);
+    resultCheck(actual, expected.$$matchAsDocument as any, entities, path, true);
   } else if (isMatchAsRootOperator(expected)) {
     resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
   } else {
@@ -393,16 +397,14 @@ function compareCommandStartedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
   if (expected!.databaseName) {
     expect(
       expected!.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
-        actual.databaseName
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${actual.databaseName
       }`
     ).to.equal(actual.databaseName);
   }
@@ -420,8 +422,7 @@ function compareCommandSucceededEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
@@ -436,8 +437,7 @@ function compareCommandFailedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
@@ -543,6 +543,51 @@ export function matchesEvents(
 
     compareEvents(actual, expected, entities);
   }
+}
+
+function compareLogs(actual: ExpectedLogMessage[], expected: ExpectedLogMessage[], entities: EntitiesMap): void {
+  if (actual.length !== expected.length) {
+    expect.fail(`Expected log counts to match, expected ${inspect(expected)}, but got ${inspect(actual)}`);
+  }
+
+  for (const [index, actualLog] of actual.entries()) {
+    const path = `expectedLogMessagesForClient[${index}]`;
+    const expectedLog = expected[index];
+
+    // Check that log levels match
+    const expectedLevel = expectedLog.level;
+    const actualLevel = actualLog.level;
+    expect(actualLevel, `expected ${path}.level to be ${expectedLevel}`).to.deep.equal(expectedLevel);
+
+    // Check that components match
+    const expectedComponent = expectedLog.component;
+    const actualComponent = actualLog.component;
+
+    expect(actualComponent, `expected ${path}.component to be ${expectedComponent}`).to.deep.equal(expectedComponent);
+
+
+    //FIXME: Implement me
+    if (expectedLog.failureIsRedacted !== undefined) {
+      if (expectedLog.failureIsRedacted) {
+        // Assert that a failure is present and has been redacted in accordance with the CLAM spec
+      } else {
+        // Assert that a failure did occur and has not been redacted
+      }
+    }
+
+    // Check that data fields match. Ensure that the  actual.data is treated as a root-level document
+    const actualData = BSON.serialize(actualLog.data);
+    const expectedData = BSON.serialize(expectedLog.data);
+
+    expect(actualData, `expected ${path}.data to be ${expectedData}`).to.deep.equal(expectedData);
+  }
+}
+
+export function matchesLogs(logMessages: ExpectedLogMessagesForClient,
+  actual: ExpectedLogMessage[],
+  entities: EntitiesMap): void {
+  const expected = logMessages.messages;
+  compareLogs(actual, expected, entities)
 }
 
 function isMongoCryptError(err): boolean {

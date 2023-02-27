@@ -100,6 +100,7 @@ export const TopologyType = Object.freeze({
   shardedReplicaset: 'sharded-replicaset',
   loadBalanced: 'load-balanced'
 } as const);
+
 export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
@@ -127,12 +128,24 @@ export type ObservableCmapEventId =
   | 'connectionCheckedOutEvent'
   | 'connectionCheckedInEvent';
 
+export type ObservableLogComponent = 'command' | 'topology' | 'serverSelection' | 'connection';
+export type ObservableLogSeverity = 'emergency'
+  | 'alert'
+  | 'critical'
+  | 'error'
+  | 'warn'
+  | 'notice'
+  | 'info'
+  | 'debug'
+  | 'trace'
+  | 'off';
+
 export interface ClientEntity {
   id: string;
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
-  observeLogMessages?: Document;
+  observeLogMessages?: Map<ObservableLogComponent, ObservableLogSeverity>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
 }
@@ -333,7 +346,7 @@ export type TestFilter = (test: Test, ctx: TestConfiguration) => string | false;
  */
 export interface ClientEncryption {
   // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new (client: MongoClient, options: any): ClientEncryption;
+  new(client: MongoClient, options: any): ClientEncryption;
   createDataKey(provider, options?: Document): Promise<any>;
   rewrapManyDataKey(filter, options): Promise<any>;
   deleteKey(id): Promise<any>;
