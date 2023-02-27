@@ -66,7 +66,7 @@ MongoDB in General
 ------------------
 There are two main places to learn about MongoDB itself. I've included links below.
 
-  * http://www.mongodb.org, all the documentation for the database
+  * www.mongodb.com/docs, all the documentation for the database
   * http://www.10gen.com/presentations, lots of presentations and slides about using the database.
 
 There are also some very good books out these days

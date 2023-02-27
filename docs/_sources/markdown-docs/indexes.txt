@@ -7,7 +7,7 @@ index set, then the query will be a lot faster compared to if the index
 was not present.
 
 See `MongoDB
-documentation <http://www.mongodb.org/display/DOCS/Indexes>`_ for
+documentation <www.mongodb.com/docs/display/DOCS/Indexes>`_ for
 details.
 
 Create indexes with createIndex()

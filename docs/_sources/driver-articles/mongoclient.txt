@@ -136,7 +136,7 @@ Write concern configuration:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 More detailed information about write concerns can be found at
-`http://www.mongodb.org/display/DOCS/getLastError+Command <http://www.mongodb.org/display/DOCS/getLastError+Command>`_
+`www.mongodb.com/docs/display/DOCS/getLastError+Command <www.mongodb.com/docs/display/DOCS/getLastError+Command>`_
 
 -  **w=wValue**
 
@@ -466,4 +466,3 @@ mongos: A hash of options at the mongos level not supported by the url.
    to reconnect to down proxies
 -  **haInterval** {Number, default:2000}, time between each replicaset
    status check.
-
