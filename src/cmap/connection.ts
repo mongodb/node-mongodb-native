@@ -502,6 +502,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (err) {
         return callback(err);
       }
+    } else if (session?.explicit) {
+      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     // if we have a known cluster time, gossip it
