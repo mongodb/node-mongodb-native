@@ -48,10 +48,10 @@ export class TokenEntryCache {
    * Set an entry in the token cache.
    */
   addEntry(
-    tokenResult: OIDCRequestTokenResult,
-    serverResult: OIDCMechanismServerStep1,
     address: string,
-    username = ''
+    username: string,
+    tokenResult: OIDCRequestTokenResult,
+    serverResult: OIDCMechanismServerStep1
   ): TokenEntry {
     const entry = new TokenEntry(
       tokenResult,
@@ -72,14 +72,14 @@ export class TokenEntryCache {
   /**
    * Delete an entry from the cache.
    */
-  deleteEntry(address: string, username = ''): void {
+  deleteEntry(address: string, username: string): void {
     this.entries.delete(cacheKey(address, username));
   }
 
   /**
    * Get an entry from the cache.
    */
-  getEntry(address: string, username = ''): TokenEntry | undefined {
+  getEntry(address: string, username: string): TokenEntry | undefined {
     return this.entries.get(cacheKey(address, username));
   }
 

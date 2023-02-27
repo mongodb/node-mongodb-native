@@ -71,12 +71,12 @@ export class CallbackWorkflow implements Workflow {
         } catch (error) {
           // If authentication errors when using a cached token we remove it from
           // the cache.
-          this.cache.deleteEntry(connection.address, credentials.username);
+          this.cache.deleteEntry(connection.address, credentials.username || '');
           return Promise.reject(error);
         }
       } else {
         // Remove the expired entry from the cache.
-        this.cache.deleteEntry(connection.address, credentials.username);
+        this.cache.deleteEntry(connection.address, credentials.username || '');
         // Execute a refresh of the token and finish auth.
         return this.refreshAndFinish(
           connection,
@@ -120,7 +120,7 @@ export class CallbackWorkflow implements Workflow {
         TIMEOUT
       );
       // Cache a new entry and continue with the saslContinue.
-      this.cache.addEntry(result, stepOneResult, connection.address, credentials.username);
+      this.cache.addEntry(connection.address, credentials.username || '', result, stepOneResult);
       return finishAuth(result, conversationId, connection, credentials);
     } else {
       // Fallback to using the request callback.
@@ -144,7 +144,12 @@ export class CallbackWorkflow implements Workflow {
     if (request) {
       const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT);
       // Cache a new entry and continue with the saslContinue.
-      this.cache.addEntry(tokenResult, stepOneResult, connection.address, credentials.username);
+      this.cache.addEntry(
+        connection.address,
+        credentials.username || '',
+        tokenResult,
+        stepOneResult
+      );
       return finishAuth(tokenResult, conversationId, connection, credentials);
     } else {
       // Request callback must be present.

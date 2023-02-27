@@ -111,7 +111,7 @@ describe('MONGODB-OIDC', function () {
     // type if there are multiple principals configured on the server.  Note that
     // ``directConnection=true`` and ``readPreference=secondaryPreferred`` are needed
     // because the server is a secondary on a replica set, on port ``27018``.
-    describe('3. Multiple Principles', function () {
+    describe('3. Multiple Principals', function () {
       context('when authenticating with user 1', function () {
         context('when using a callback', function () {
           let client;
@@ -254,7 +254,7 @@ describe('MONGODB-OIDC', function () {
             new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
             );
-          }).to.throw;
+          }).to.throw();
         });
       });
     });
@@ -282,7 +282,7 @@ describe('MONGODB-OIDC', function () {
         it('raises an error', async function () {
           expect(async () => {
             await client.connect();
-          }).to.throw;
+          }).to.throw();
         });
       });
 
@@ -308,7 +308,7 @@ describe('MONGODB-OIDC', function () {
         it('raises an error', async function () {
           expect(async () => {
             await client.connect();
-          }).to.throw;
+          }).to.throw();
         });
       });
     });

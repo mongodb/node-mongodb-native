@@ -21,10 +21,11 @@ describe('AwsDeviceWorkFlow', function () {
         process.env.AWS_WEB_IDENTITY_TOKEN_FILE = file;
       });
 
-      it('returns an error in the callback', function () {
-        workflow.execute(connection, credentials, error => {
+      it('returns an error in the callback', async function () {
+        const result = await workflow.execute(connection, credentials).catch(error => {
           expect(error.message).to.include('AWS_WEB_IDENTITY_TOKEN_FILE');
         });
+        expect(result).to.equal(undefined, 'must fail without AWS_WEB_IDENTITY_TOKEN_FILE');
       });
     });
   });
