@@ -9,9 +9,9 @@ import type { Workflow } from './mongodb_oidc/workflow';
 
 /** @public */
 export interface OIDCMechanismServerStep1 {
-  authorizeEndpoint?: string;
+  authorizationEndpoint?: string;
   tokenEndpoint?: string;
-  deviceAuthorizeEndpoint?: string;
+  deviceAuthorizationEndpoint?: string;
   clientId: string;
   clientSecret?: string;
   requestScopes?: string[];
@@ -44,7 +44,8 @@ export const OIDC_WORKFLOWS = {
   callback: new CallbackWorkflow(),
   aws: new AwsDeviceWorkflow(),
   azure: undefined,
-  gcp: undefined
+  gcp: undefined,
+  __proto__: null
 };
 
 /**
@@ -88,7 +89,7 @@ export class MongoDBOIDC extends AuthProvider {
   }
 
   /**
-   * Add the specualtive auth for the initial handshake.
+   * Add the speculative auth for the initial handshake.
    */
   override prepare(
     handshakeDoc: HandshakeDocument,
