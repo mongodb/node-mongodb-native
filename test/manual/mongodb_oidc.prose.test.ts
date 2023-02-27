@@ -452,5 +452,82 @@ describe('MONGODB-OIDC', function () {
         });
       });
     });
+
+    // The driver MUST test reauthentication with MONGODB-OIDC for a read operation.
+    describe('6. Reauthentication', function () {
+      let requestInvokations = 0;
+      let refreshInvokations = 0;
+      let findStarted = 0;
+      let findSucceeded = 0;
+      let findFailed = 0;
+      let saslStartStarted = 0;
+      let saslStartSuceeded = 0;
+      let client;
+      let collection;
+      const cache = OIDC_WORKFLOWS.callback.cache;
+
+      // - Create request and refresh callbacks that return valid credentials that
+      //   will not expire soon. 
+      const requestCallback = async () => {
+        const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
+          encoding: 'utf8'
+        });
+        requestInvokations++;
+        return { accessToken: token, expiresInSeconds: 300 };
+      };
+
+      const refreshCallback = async () => {
+        const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
+          encoding: 'utf8'
+        });
+        refreshInvokations++;
+        return { accessToken: token, expiresInSeconds: 300 };
+      };
+
+      const commandStarted = (event) => {
+        console.log(event);
+      };
+
+      const commandSucceeded = (event) => {
+        console.log(event);
+      };
+
+      const commandFailed = (event) => {
+        console.log(event);
+      };
+
+      before(function () {
+        // - Clear the cache
+        cache.clear();
+        requestInvokations = 0;
+        refreshInvokations = 0;
+        // - Create a client with the callbacks and an event listener capable of
+        //   listening for SASL commands
+        client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
+          authMechanismProperties: {
+            REQUEST_TOKEN_CALLBACK: requestCallback,
+            REFRESH_TOKEN_CALLBACK: refreshCallback
+          },
+          monitorCommands: true
+        });
+        client.on('commandStarted', commandStarted);
+        client.on('commandSucceeded', commandSucceeded);
+        client.on('commandFailed', commandFailed);
+        collection = client.db('test').collection('test');
+      });
+
+      context('on the first find invokation', function () {
+        // - Perform a find operation.
+        // - Assert that the refresh callback has not been called. 
+        it('does not call the refresh callback', async function () {
+          await collection.findOne();
+          expect(refreshInvokations).to.equal(0);
+        });
+      });
+
+      context('when a command errors and needs reauthentication', function () {
+
+      });
+    });
   });
 });
