@@ -1,6 +1,9 @@
 import { expect } from 'chai';
+import { spawn } from 'child_process';
+import { once } from 'events';
 
-import type { Collection, CommandStartedEvent, MongoClient } from '../../mongodb';
+import { Collection, CommandStartedEvent, MongoClient, MongoDriverError } from '../../mongodb';
+import { sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {
   describe('14. Implicit sessions only allocate their server session after a successful connection checkout', () => {
@@ -51,5 +54,136 @@ describe('Sessions Prose Tests', () => {
       // This is a guarantee in node, unless you are performing a transaction (which is not being done in this test)
       expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex')))).to.have.lengthOf(2);
     });
+  });
+
+  describe('When sessions are not supported', () => {
+    const mongocryptdTestPort = '27022';
+    let client: MongoClient;
+    before(() => {
+      const childProcess = spawn(
+        'mongocryptd',
+        ['--port', mongocryptdTestPort, '--ipv6', '--idleShutdownTimeoutSecs', '10'],
+        {
+          stdio: 'ignore',
+          detached: true
+        }
+      );
+
+      childProcess.on('error', () => null);
+
+      // unref child to remove handle from event loop
+      childProcess.unref();
+    });
+
+    afterEach(async () => {
+      await client?.close();
+    });
+
+    it(
+      '18. Implicit session is ignored if connection does not support sessions',
+      {
+        requires: {
+          // clientSideEncryption: true
+        }
+      },
+      async function () {
+        /**
+         * 1. Ensure a mongocryptd process is running
+         * 2. Create a new `MongoClient` pointed at the mongocryptd server with command monitoring enabled
+         */
+        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`, {
+          monitorCommands: true
+        });
+
+        /**
+         * 3. Verify that the server does NOT define a value for `logicalSessionTimeoutMinutes`
+         *    by sending a hello command to the server and checking the response
+         */
+        const hello = await client.db().command({ hello: true });
+        expect(hello).to.have.property('iscryptd', true); // sanity check
+        expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
+
+        /**
+         * 4. Send a read command to the server (e.g., `findOne`), ignoring any errors from the server response
+         * 5. Check the corresponding `commandStarted` event: verify that `lsid` is not set
+         */
+        const readCommandEventPromise = once(client, 'commandStarted').then(res => res[0]);
+        await client
+          .db()
+          .collection('test')
+          .findOne({})
+          .catch(() => null);
+        const readCommandEvent = await Promise.race([readCommandEventPromise, sleep(500)]);
+        expect(readCommandEvent).to.have.property('commandName', 'find');
+        expect(readCommandEvent).to.not.have.property('lsid');
+
+        /**
+         * 6. Send a write command to the server (e.g., `insertOne`), ignoring any errors from the server response
+         * 7. Check the corresponding `commandStarted` event: verify that `lsid` is not set
+         */
+        const writeCommandEventPromise = once(client, 'commandStarted').then(res => res[0]);
+        await client
+          .db()
+          .collection('test')
+          .insertOne({})
+          .catch(() => null);
+        const writeCommandEvent = await Promise.race([writeCommandEventPromise, sleep(500)]);
+        expect(writeCommandEvent).to.have.property('commandName', 'insert');
+        expect(writeCommandEvent).to.not.have.property('lsid');
+      }
+    );
+
+    it(
+      '19. Explicit session raises an error if connection does not support sessions',
+      {
+        requires: {
+          // clientSideEncryption: true
+        }
+      },
+      async function () {
+        /**
+         * 1. Ensure a mongocryptd process is running
+         * 2. Create a new `MongoClient` pointed at the mongocryptd server
+         */
+        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`);
+
+        /**
+         * 3. Verify that the server does NOT define a value for `logicalSessionTimeoutMinutes`
+         *    by sending a hello command to the server and checking the response
+         */
+        const hello = await client.db().command({ hello: true });
+        expect(hello).to.have.property('iscryptd', true); // sanity check
+        expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
+
+        /**
+         * 4. Create a new explicit session by calling `startSession` (this MUST NOT error)
+         */
+        const session = client.startSession();
+
+        /**
+         * 5 Attempt to send a read command to the server (e.g., `findOne`) with the explicit session passed in
+         * 6. Assert that a client-side error is generated indicating that sessions are not supported
+         */
+        const readOutcome = await client
+          .db()
+          .collection('test')
+          .findOne({}, { session })
+          .catch(err => err);
+        expect(readOutcome).to.be.instanceOf(MongoDriverError);
+        expect(readOutcome.message).to.match(/does not support sessions/);
+
+        /**
+         * 7. Attempt to send a write command to the server (e.g., `insertOne`) with the explicit session passed in
+         * 8. Assert that a client-side error is generated indicating that sessions are not supported
+         */
+        const writeOutcome = await client
+          .db()
+          .collection('test')
+          .insertOne({}, { session })
+          .catch(err => err);
+        expect(writeOutcome).to.be.instanceOf(MongoDriverError);
+        expect(writeOutcome.message).to.match(/does not support sessions/);
+      }
+    );
   });
 });
