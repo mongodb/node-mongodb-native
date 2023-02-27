@@ -28,6 +28,14 @@ export class CallbackWorkflow implements Workflow {
   }
 
   /**
+   * Get the document to add for speculative authentication. Is empty when
+   * callbacks are in play.
+   */
+  speculativeAuth(): Promise<Document> {
+    return Promise.resolve({});
+  }
+
+  /**
    * Execute the workflow.
    *
    * Steps:

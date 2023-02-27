@@ -62,28 +62,29 @@ export class MongoDBOIDC extends AuthProvider {
    * Authenticate using OIDC
    */
   override auth(authContext: AuthContext, callback: Callback): void {
-    const { connection, credentials } = authContext;
+    const { connection, credentials, response } = authContext;
+
+    if (response && response.speculativeAuthenticate) {
+      return callback();
+    }
 
     if (!credentials) {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
-    const workflow = getWorkflow(credentials);
-    if (!workflow) {
-      return callback(
-        new MongoInvalidArgumentError(
-          `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
-        )
-      );
-    }
-    workflow
-      .execute(connection, credentials)
-      .then(result => {
-        return callback(undefined, result);
-      })
-      .catch(error => {
-        callback(error);
-      });
+    getWorkflow(credentials, (error, workflow) => {
+      if (error || !workflow) {
+        return callback(error);
+      }
+      workflow
+        .execute(connection, credentials)
+        .then(result => {
+          return callback(undefined, result);
+        })
+        .catch(error => {
+          callback(error);
+        });
+    });
   }
 
   /**
@@ -94,14 +95,40 @@ export class MongoDBOIDC extends AuthProvider {
     authContext: AuthContext,
     callback: Callback<HandshakeDocument>
   ): void {
-    callback(undefined, handshakeDoc);
+    const { credentials } = authContext;
+
+    if (!credentials) {
+      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+    }
+
+    getWorkflow(credentials, (error, workflow) => {
+      if (error || !workflow) {
+        return callback(error);
+      }
+      workflow
+        .speculativeAuth()
+        .then(result => {
+          return callback(undefined, { ...handshakeDoc, ...result });
+        })
+        .catch(error => {
+          callback(error);
+        });
+    });
   }
 }
 
 /**
  * Gets either a device workflow or callback workflow.
  */
-function getWorkflow(credentials: MongoCredentials): Workflow | undefined {
+function getWorkflow(credentials: MongoCredentials, callback: Callback<Workflow>): void {
   const deviceName = credentials.mechanismProperties.DEVICE_NAME;
-  return OIDC_WORKFLOWS[deviceName || 'callback'];
+  const workflow = OIDC_WORKFLOWS[deviceName || 'callback'];
+  if (!workflow) {
+    return callback(
+      new MongoInvalidArgumentError(
+        `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+      )
+    );
+  }
+  callback(undefined, workflow);
 }

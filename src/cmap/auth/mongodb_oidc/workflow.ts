@@ -9,4 +9,9 @@ export interface Workflow {
    * token and then call authenticate with it.
    */
   execute(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+
+  /**
+   * Get the document to add for speculative authentication.
+   */
+  speculativeAuth(): Promise<Document>;
 }

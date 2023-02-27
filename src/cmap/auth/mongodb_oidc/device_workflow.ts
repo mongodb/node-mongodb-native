@@ -30,12 +30,17 @@ export abstract class DeviceWorkflow implements Workflow {
    * token and then call authenticate with it.
    */
   abstract execute(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+
+  /**
+   * Get the document to add for speculative authentication.
+   */
+  abstract speculativeAuth(): Promise<Document>;
 }
 
 /**
  * Create the saslStart command document.
  */
-function commandDocument(token: string): Document {
+export function commandDocument(token: string): Document {
   return {
     saslStart: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,
