@@ -5,14 +5,20 @@ import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 
+/** @internal */
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
-/** Context used during authentication */
+/**
+ * Context used during authentication
+ * @internal
+ */
 export class AuthContext {
   /** The connection to authenticate */
   connection: Connection;
   /** The credentials to use for authentication */
   credentials?: MongoCredentials;
+  /** If the context if for reauthentication. */
+  reauthenticating = false;
   /** The options passed to the `connect` method */
   options: AuthContextOptions;
 
