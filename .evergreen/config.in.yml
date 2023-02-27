@@ -106,11 +106,6 @@ functions:
         shell: bash
         script: |
           ${PREPARE_SHELL}
-
-          # TODO(NODE-5035): Remove these 2 lines when PR merged.
-          rm -rf "${DRIVERS_TOOLS}"
-          git clone --branch DRIVERS-2415-orch https://github.com/mongodb-labs/drivers-evergreen-tools.git "${DRIVERS_TOOLS}"
-
           cd "${DRIVERS_TOOLS}"/.evergreen/auth_oidc
 
           # This is a bit confusing but the ec2.assume_role command before
