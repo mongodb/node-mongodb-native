@@ -64,6 +64,25 @@ describe('TokenEntryCache', function () {
     });
   });
 
+  describe('#deleteExpiredEntries', function () {
+    const cache = new TokenEntryCache();
+
+    const nonExpiredResult = {
+      accessToken: 'test',
+      expiresInSeconds: 600
+    };
+
+    before(function () {
+      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
+      cache.addEntry(nonExpiredResult, serverResult, 'localhost', 'user2');
+      cache.deleteExpiredEntries();
+    });
+
+    it('deletes all expired tokens from the cache', function () {
+      expect(cache.entries.size).to.equal(1);
+    });
+  });
+
   describe('#deleteEntry', function () {
     const cache = new TokenEntryCache();
 

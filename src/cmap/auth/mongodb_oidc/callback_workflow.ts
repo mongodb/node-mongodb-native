@@ -131,6 +131,8 @@ export class CallbackWorkflow implements Workflow {
   ): Promise<Document> {
     // Call the request callback.
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    // Always clear expired entries from the cache on each finish as cleanup.
+    this.cache.deleteExpiredEntries();
     if (request) {
       const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT);
       // Cache a new entry and continue with the saslContinue.

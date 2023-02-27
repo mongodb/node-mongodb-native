@@ -82,6 +82,17 @@ export class TokenEntryCache {
   getEntry(address: string, username = ''): TokenEntry | undefined {
     return this.entries.get(cacheKey(address, username));
   }
+
+  /**
+   * Delete all expired entries from the cache.
+   */
+  deleteExpiredEntries(): void {
+    this.entries.forEach((entry, key, entries) => {
+      if (!entry.isValid()) {
+        entries.delete(key);
+      }
+    });
+  }
 }
 
 /**
