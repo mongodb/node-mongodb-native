@@ -45,6 +45,7 @@ export const OIDC_WORKFLOWS = {
   aws: new AwsDeviceWorkflow(),
   azure: undefined,
   gcp: undefined,
+  // Set the protype to null to avoid false returns and keep types.
   __proto__: null
 };
 
