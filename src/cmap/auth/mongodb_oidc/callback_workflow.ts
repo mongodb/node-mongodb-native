@@ -65,7 +65,15 @@ export class CallbackWorkflow implements Workflow {
       // Check if the entry is not expired.
       if (entry.isValid()) {
         // Skip step one and execute the step two saslContinue.
-        return finishAuth(entry.tokenResult, undefined, connection, credentials);
+        try {
+          const result = await finishAuth(entry.tokenResult, undefined, connection, credentials);
+          return result;
+        } catch (error) {
+          // If authentication errors when using a cached token we remove it from
+          // the cache.
+          this.cache.deleteEntry(connection.address, credentials.username);
+          return Promise.reject(error);
+        }
       } else {
         // Remove the expired entry from the cache.
         this.cache.deleteEntry(connection.address, credentials.username);
