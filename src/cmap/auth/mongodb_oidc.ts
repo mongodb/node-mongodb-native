@@ -78,14 +78,14 @@ export class MongoDBOIDC extends AuthProvider {
       if (error || !workflow) {
         return callback(error);
       }
-      workflow
-        .execute(connection, credentials)
-        .then(result => {
+      workflow.execute(connection, credentials).then(
+        result => {
           return callback(undefined, result);
-        })
-        .catch(error => {
+        },
+        error => {
           callback(error);
-        });
+        }
+      );
     });
   }
 
@@ -107,14 +107,14 @@ export class MongoDBOIDC extends AuthProvider {
       if (error || !workflow) {
         return callback(error);
       }
-      workflow
-        .speculativeAuth()
-        .then(result => {
+      workflow.speculativeAuth().then(
+        result => {
           return callback(undefined, { ...handshakeDoc, ...result });
-        })
-        .catch(error => {
+        },
+        error => {
           callback(error);
-        });
+        }
+      );
     });
   }
 }

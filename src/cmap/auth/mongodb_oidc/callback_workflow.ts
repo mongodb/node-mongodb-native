@@ -1,5 +1,4 @@
 import { type Document, Binary, BSON } from 'bson';
-import { promisify } from 'util';
 
 import { MongoInvalidArgumentError } from '../../../error';
 import { ns } from '../../../utils';
@@ -11,7 +10,7 @@ import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
 
 /* 5 minutes in milliseconds */
-const TIMEOUT = 300000;
+const TIMEOUT_MS = 300000;
 
 /**
  * OIDC implementation of a callback based workflow.
@@ -72,7 +71,7 @@ export class CallbackWorkflow implements Workflow {
           // If authentication errors when using a cached token we remove it from
           // the cache.
           this.cache.deleteEntry(connection.address, credentials.username || '');
-          return Promise.reject(error);
+          throw error;
         }
       } else {
         // Remove the expired entry from the cache.
@@ -87,8 +86,7 @@ export class CallbackWorkflow implements Workflow {
       }
     } else {
       // No entry means to start with the step one saslStart.
-      const executeCommand = promisify(connection.command.bind(connection));
-      const result = await executeCommand(
+      const result = await connection.commandAsync(
         ns(credentials.source),
         startCommandDocument(credentials),
         undefined
@@ -117,7 +115,7 @@ export class CallbackWorkflow implements Workflow {
         credentials.username,
         stepOneResult,
         tokenResult,
-        TIMEOUT
+        TIMEOUT_MS
       );
       // Cache a new entry and continue with the saslContinue.
       this.cache.addEntry(connection.address, credentials.username || '', result, stepOneResult);
@@ -142,7 +140,7 @@ export class CallbackWorkflow implements Workflow {
     // Always clear expired entries from the cache on each finish as cleanup.
     this.cache.deleteExpiredEntries();
     if (request) {
-      const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT);
+      const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT_MS);
       // Cache a new entry and continue with the saslContinue.
       this.cache.addEntry(
         connection.address,
@@ -171,8 +169,7 @@ async function finishAuth(
   credentials: MongoCredentials
 ): Promise<Document> {
   // Execute the step two saslContinue.
-  const executeCommand = promisify(connection.command.bind(connection));
-  return executeCommand(
+  return connection.commandAsync(
     ns(credentials.source),
     continueCommandDocument(result.accessToken, conversationId),
     undefined
@@ -206,6 +203,10 @@ function continueCommandDocument(token: string, conversationId?: number): Docume
       payload: new Binary(BSON.serialize({ jwt: token }))
     };
   }
+  // saslContinue requires a conversationId in the command to be valid so in this
+  // case the server allows "step two" to actually be a saslStart with the token
+  // as the jwt since the use of the cached value has no correlating conversating
+  // on the particular connection.
   return {
     saslStart: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,

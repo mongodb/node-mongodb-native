@@ -87,11 +87,11 @@ export class TokenEntryCache {
    * Delete all expired entries from the cache.
    */
   deleteExpiredEntries(): void {
-    this.entries.forEach((entry, key, entries) => {
+    for (const [key, entry] of this.entries) {
       if (!entry.isValid()) {
-        entries.delete(key);
+        this.entries.delete(key);
       }
-    });
+    }
   }
 }
 
