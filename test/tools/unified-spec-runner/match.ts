@@ -74,13 +74,13 @@ export function isSessionLsidOperator(value: unknown): value is SessionLsidOpera
   return typeof value === 'object' && value != null && '$$sessionLsid' in value;
 }
 export interface MatchAsDocumentOperator {
-  $$matchAsDocument: string;
+  $$matchAsDocument: unknown;
 }
 export function isMatchAsDocumentOperator(value: unknown): value is MatchAsDocumentOperator {
   return typeof value === 'object' && value != null && '$$matchAsDocument' in value;
 }
 export interface MatchAsRootOperator {
-  $$matchAsRoot: string;
+  $$matchAsRoot: unknown;
 }
 export function isMatchAsRootOperator(value: unknown): value is MatchAsRootOperator {
   return typeof value === 'object' && value != null && '$$matchAsRoot' in value;
@@ -342,9 +342,9 @@ export function specialCheck(
       ).to.be.false;
     }
   } else if (isMatchAsDocumentOperator(expected)) {
-    // TODO: IMPLEMENT ME
+    resultCheck(actual, expected.$$matchAsDocument as any, entities, path, false);
   } else if (isMatchAsRootOperator(expected)) {
-    // TODO: IMPLEMENT ME
+    resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
@@ -393,14 +393,16 @@ function compareCommandStartedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
   if (expected!.databaseName) {
     expect(
       expected!.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${actual.databaseName
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
+        actual.databaseName
       }`
     ).to.equal(actual.databaseName);
   }
@@ -418,7 +420,8 @@ function compareCommandSucceededEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
@@ -433,7 +436,8 @@ function compareCommandFailedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
+        actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
