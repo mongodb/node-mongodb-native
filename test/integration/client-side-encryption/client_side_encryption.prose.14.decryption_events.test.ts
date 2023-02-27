@@ -42,6 +42,11 @@ describe('14. Decryption Events', metadata, function () {
     setupClient = this.configuration.newClient();
     // Drop and create the collection ``db.decryption_events``.
     const db = setupClient.db('db');
+    await setupClient
+      .db('db')
+      .collection('decryption_events')
+      .deleteMany({})
+      .catch(() => null);
     await db.dropCollection('decryption_events').catch(() => null);
     await db.createCollection('decryption_events');
     // Create a ClientEncryption object named ``clientEncryption`` with these options:
@@ -110,6 +115,11 @@ describe('14. Decryption Events', metadata, function () {
   afterEach(async function () {
     aggregateSucceeded = undefined;
     aggregateFailed = undefined;
+    await setupClient
+      .db('db')
+      .collection('decryption_events')
+      .deleteMany({})
+      .catch(() => null);
     await setupClient.close();
     await encryptedClient.close();
   });
