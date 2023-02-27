@@ -2192,13 +2192,13 @@ const CHANGE_DOMAIN_TYPES = {
 /**
  * @typedef ResumeToken
  * @description Represents the logical starting point for a new or resuming {@link ChangeStream} on the server.
- * @see https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token
+ * @see https://www.mongodb.com/docs/master/changeStreams/#change-stream-resume-token
  */
 
 /**
  * @typedef OperationTime
  * @description Represents a specific point in time on a server. Can be retrieved by using {@link Db#command}
- * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
+ * @see https://www.mongodb.com/docs/manual/reference/method/db.runCommand/#response
  */
 
 /**
@@ -2206,12 +2206,12 @@ const CHANGE_DOMAIN_TYPES = {
  * @description Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @property {string} [fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @property {number} [maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query.
- * @property {ResumeToken} [resumeAfter] Allows you to start a changeStream after a specified event. See {@link https://docs.mongodb.com/master/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}.
- * @property {ResumeToken} [startAfter] Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://docs.mongodb.com/master/changeStreams/#startafter-for-change-streams|ChangeStream documentation}.
+ * @property {ResumeToken} [resumeAfter] Allows you to start a changeStream after a specified event. See {@link https://www.mongodb.com/docs/master/changeStreams/#resumeafter-for-change-streams|ChangeStream documentation}.
+ * @property {ResumeToken} [startAfter] Similar to resumeAfter, but will allow you to start after an invalidated event. See {@link https://www.mongodb.com/docs/master/changeStreams/#startafter-for-change-streams|ChangeStream documentation}.
  * @property {OperationTime} [startAtOperationTime] Will start the changeStream after the specified operationTime.
- * @property {number} [batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @property {object} [collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @property {ReadPreference} [readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @property {number} [batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @property {object} [collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @property {ReadPreference} [readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://www.mongodb.com/docs/manual/reference/read-preference|read preference documentation}.
  */
 
 /**
@@ -2219,7 +2219,7 @@ const CHANGE_DOMAIN_TYPES = {
  * @class ChangeStream
  * @since 3.0.0
  * @param {(MongoClient|Db|Collection)} parent The parent object that created this change stream
- * @param {Array} pipeline An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
+ * @param {Array} pipeline An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
  * @param {ChangeStreamOptions} [options] Optional settings
  * @fires ChangeStream#close
  * @fires ChangeStream#change

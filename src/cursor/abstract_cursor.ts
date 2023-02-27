@@ -557,7 +557,7 @@ export abstract class AbstractCursor<
   /**
    * Set the batch size for the cursor.
    *
-   * @param value - The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
+   * @param value - The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/find/|find command documentation}.
    */
   batchSize(value: number): this {
     assertUninitialized(this);
@@ -642,6 +642,8 @@ export abstract class AbstractCursor<
           this[kId] =
             typeof response.cursor.id === 'number'
               ? Long.fromNumber(response.cursor.id)
+              : typeof response.cursor.id === 'bigint'
+              ? Long.fromBigInt(response.cursor.id)
               : response.cursor.id;
 
           if (response.cursor.ns) {
@@ -741,6 +743,8 @@ export function next<T>(
       const cursorId =
         typeof response.cursor.id === 'number'
           ? Long.fromNumber(response.cursor.id)
+          : typeof response.cursor.id === 'bigint'
+          ? Long.fromBigInt(response.cursor.id)
           : response.cursor.id;
 
       cursor[kDocuments].pushMany(response.cursor.nextBatch);

@@ -664,6 +664,13 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
+  name: 'rhel8-test-gcp-kms',
+  display_name: 'GCP KMS Test',
+  run_on: 'debian11-small',
+  tasks: ['test_gcpkms_task_group', 'test-gcpkms-fail-task']
+});
+
+BUILD_VARIANTS.push({
   name: 'rhel8-no-auth-tests',
   display_name: 'No Auth Tests',
   run_on: DEFAULT_OS,

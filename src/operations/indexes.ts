@@ -102,7 +102,7 @@ export interface IndexDescription
 }
 
 /** @public */
-export interface CreateIndexesOptions extends CommandOperationOptions {
+export interface CreateIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Creates the index in the background, yielding whenever possible. */
   background?: boolean;
   /** Creates an unique index. */
@@ -382,20 +382,28 @@ export class DropIndexesOperation extends DropIndexOperation {
 }
 
 /** @public */
-export interface ListIndexesOptions extends CommandOperationOptions {
+export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
   batchSize?: number;
 }
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<Document> {
-  override options: ListIndexesOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: ListIndexesOptions & { writeConcern?: never };
   collectionNamespace: MongoDBNamespace;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
     super(collection, options);
 
-    this.options = options ?? {};
+    this.options = { ...options };
+    delete this.options.writeConcern;
     this.collectionNamespace = collection.s.namespace;
   }
 

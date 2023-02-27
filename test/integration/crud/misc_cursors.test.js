@@ -1887,7 +1887,7 @@ describe('Cursor', function () {
     },
 
     test: function (done) {
-      // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+      // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
       client.connect((err, client) => {
@@ -1926,7 +1926,7 @@ describe('Cursor', function () {
   });
 
   it('shouldAwaitDataWithDocumentsAvailable', function (done) {
-    // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+    // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
     const configuration = this.configuration;
     const client = configuration.newClient({ maxPoolSize: 1 });
@@ -2020,7 +2020,7 @@ describe('Cursor', function () {
     },
 
     test: function (done) {
-      // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+      // www.mongodb.com/docs/display/DOCS/Tailable+Cursors
 
       const configuration = this.configuration;
       client.connect((err, client) => {

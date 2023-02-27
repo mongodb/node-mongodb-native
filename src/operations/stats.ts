@@ -78,7 +78,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
 
 /**
  * @public
- * @see https://docs.mongodb.org/manual/reference/command/collStats/
+ * @see https://www.mongodb.com/docs/manual/reference/command/collStats/
  */
 export interface CollStats extends Document {
   /** Namespace */

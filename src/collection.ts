@@ -568,7 +568,7 @@ export class Collection<TSchema extends Document = Document> {
    * error.
    *
    * **Note**: Unlike {@link Collection#createIndex| createIndex}, this function takes in raw index specifications.
-   * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/| here}.
+   * Index specifications are defined {@link https://www.mongodb.com/docs/manual/reference/command/createIndexes/| here}.
    *
    * @param indexSpecs - An array of index specifications to be created
    * @param options - Optional settings for the command
@@ -705,18 +705,18 @@ export class Collection<TSchema extends Document = Document> {
    * | `$near`    | [`$geoWithin`][2] with [`$center`][3] |
    * | `$nearSphere` | [`$geoWithin`][2] with [`$centerSphere`][4] |
    *
-   * [1]: https://docs.mongodb.com/manual/reference/operator/query/expr/
-   * [2]: https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
-   * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
-   * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+   * [1]: https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+   * [2]: https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+   * [3]: https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+   * [4]: https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    *
    * @param filter - The filter for the count
    * @param options - Optional settings for the command
    *
-   * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
-   * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
-   * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
-   * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+   * @see https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+   * @see https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+   * @see https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+   * @see https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
   async countDocuments(
     filter: Document = {},
@@ -916,7 +916,7 @@ export class Collection<TSchema extends Document = Document> {
    *   });
    * ```
    *
-   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+   * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TLocal - Type of the data being detected by the change stream
    * @typeParam TChange - Type of the whole change stream document emitted

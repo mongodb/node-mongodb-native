@@ -36,7 +36,6 @@ export interface BSONSerializeOptions
       | 'allowObjectSmallerThanBufferSize'
       | 'index'
       | 'validation'
-      | 'useBigInt64'
     > {
   /**
    * Enabling the raw option will return a [Node.js Buffer](https://nodejs.org/api/buffer.html)
@@ -67,6 +66,7 @@ export interface BSONSerializeOptions
 export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSerializeOptions {
   const {
     fieldsAsRaw,
+    useBigInt64,
     promoteValues,
     promoteBuffers,
     promoteLongs,
@@ -78,6 +78,7 @@ export function pluckBSONSerializeOptions(options: BSONSerializeOptions): BSONSe
   } = options;
   return {
     fieldsAsRaw,
+    useBigInt64,
     promoteValues,
     promoteBuffers,
     promoteLongs,
@@ -102,6 +103,7 @@ export function resolveBSONOptions(
   const parentOptions = parent?.bsonOptions;
   return {
     raw: options?.raw ?? parentOptions?.raw ?? false,
+    useBigInt64: options?.useBigInt64 ?? parentOptions?.useBigInt64 ?? false,
     promoteLongs: options?.promoteLongs ?? parentOptions?.promoteLongs ?? true,
     promoteValues: options?.promoteValues ?? parentOptions?.promoteValues ?? true,
     promoteBuffers: options?.promoteBuffers ?? parentOptions?.promoteBuffers ?? false,

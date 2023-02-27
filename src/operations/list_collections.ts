@@ -7,7 +7,7 @@ import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
-export interface ListCollectionsOptions extends CommandOperationOptions {
+export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** Since 4.0: If true, will only return the collection name in the response, and will omit additional info */
   nameOnly?: boolean;
   /** Since 4.0: If true and nameOnly is true, allows a user without the required privilege (i.e. listCollections action on the database) to run the command when access control is enforced. */
@@ -18,7 +18,14 @@ export interface ListCollectionsOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ListCollectionsOperation extends CommandOperation<string[]> {
-  override options: ListCollectionsOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  override options: ListCollectionsOptions & { writeConcern?: never };
   db: Db;
   filter: Document;
   nameOnly: boolean;
@@ -28,7 +35,8 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
     super(db, options);
 
-    this.options = options ?? {};
+    this.options = { ...options };
+    delete this.options.writeConcern;
     this.db = db;
     this.filter = filter;
     this.nameOnly = !!this.options.nameOnly;

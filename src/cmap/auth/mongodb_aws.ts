@@ -21,6 +21,7 @@ const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
 const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 const bsonOptions: BSONSerializeOptions = {
+  useBigInt64: false,
   promoteLongs: true,
   promoteValues: true,
   promoteBuffers: false,

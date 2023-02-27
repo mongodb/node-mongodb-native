@@ -87,3 +87,4 @@ etc/docs/build
 !docs/**/*.png
 !docs/**/*.css
 !docs/**/*.js
+.nvmrc

@@ -3100,7 +3100,7 @@ Collection.prototype.insert = deprecate(function(docs, options, callback) {
  * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+ * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
  * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query..
  * @param {(number|string)} [options.w] **Deprecated** The write concern. Use writeConcern instead.
  * @param {number} [options.wtimeout] **Deprecated** The write concern timeout. Use writeConcern instead.
@@ -3139,7 +3139,7 @@ Collection.prototype.updateOne = function(filter, update, options, callback) {
  * @param {object} [options] Optional settings.
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+ * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
  * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query.
  * @param {(number|string)} [options.w] **Deprecated** The write concern. Use writeConcern instead.
  * @param {number} [options.wtimeout] **Deprecated** The write concern timeout. Use writeConcern instead.
@@ -3178,7 +3178,7 @@ Collection.prototype.replaceOne = function(filter, doc, options, callback) {
  * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
- * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+ * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
  * @param {boolean} [options.upsert=false] When true, creates a new document if no document matches the query..
  * @param {(number|string)} [options.w] **Deprecated** The write concern. Use writeConcern instead.
  * @param {number} [options.wtimeout] **Deprecated** The write concern timeout. Use writeConcern instead.
@@ -3225,7 +3225,7 @@ Collection.prototype.updateMany = function(filter, update, options, callback) {
  * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
  * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+ * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
  * @param {Collection~writeOpCallback} [callback] The command result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
@@ -3622,7 +3622,7 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
 /**
  * @typedef {object} Collection~IndexDefinition
  * @description A definition for an index. Used by the createIndex command.
- * @see https://docs.mongodb.com/manual/reference/command/createIndexes/
+ * @see https://www.mongodb.com/docs/manual/reference/command/createIndexes/
  */
 
 /**
@@ -3631,7 +3631,7 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
  * error.
  *
  * **Note**: Unlike {@link Collection#createIndex createIndex}, this function takes in raw index specifications.
- * Index specifications are defined {@link http://docs.mongodb.org/manual/reference/command/createIndexes/ here}.
+ * Index specifications are defined {@link https://www.mongodb.com/docs/manual/reference/command/createIndexes/ here}.
  *
  * @method
  * @param {Collection~IndexDefinition[]} indexSpecs An array of index specifications to be created
@@ -3867,7 +3867,7 @@ Collection.prototype.indexInformation = function(options, callback) {
  * @method
  * @param {object} [query={}] The query for the count.
  * @param {object} [options] Optional settings.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
  * @param {boolean} [options.limit] The limit of documents to count.
  * @param {boolean} [options.skip] The number of documents to skip for the count.
  * @param {string} [options.hint] An index name hint for the query.
@@ -3925,10 +3925,10 @@ Collection.prototype.estimatedDocumentCount = function(options, callback) {
  * | `$near`    | [`$geoWithin`][2] with [`$center`][3] |
  * | `$nearSphere` | [`$geoWithin`][2] with [`$centerSphere`][4] |
  *
- * [1]: https://docs.mongodb.com/manual/reference/operator/query/expr/
- * [2]: https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
- * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
- * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ * [1]: https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+ * [2]: https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+ * [3]: https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+ * [4]: https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
  *
  * @param {object} [query] the query for the count
  * @param {object} [options] Optional settings.
@@ -3939,10 +3939,10 @@ Collection.prototype.estimatedDocumentCount = function(options, callback) {
  * @param {number} [options.skip] The number of documents to skip before counting.
  * @param {Collection~countCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed.
- * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
- * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
- * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
- * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
  */
 
 Collection.prototype.countDocuments = function(query, options, callback) {
@@ -3964,7 +3964,7 @@ Collection.prototype.countDocuments = function(query, options, callback) {
  * @param {object} [options] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {number} [options.maxTimeMS] Number of milliseconds to wait before aborting the query.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
  * @param {'queryPlanner'|'queryPlannerExtended'|'executionStats'|'allPlansExecution'|boolean} [options.explain] The verbosity mode for the explain output.
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
@@ -4021,7 +4021,7 @@ Collection.prototype.stats = function(options, callback) {
 /**
  * @typedef {Object} Collection~findAndModifyWriteOpResult
  * @property {object} value Document returned from the `findAndModify` command. If no documents were found, `value` will be `null` by default even if a document was upserted unless `returnDocument` is specified as `'after'`, in which case the upserted document will be returned.
- * @property {object} lastErrorObject The raw lastErrorObject returned from the command. See {@link https://docs.mongodb.com/manual/reference/command/findAndModify/index.html#lasterrorobject|findAndModify command documentation}.
+ * @property {object} lastErrorObject The raw lastErrorObject returned from the command. See {@link https://www.mongodb.com/docs/manual/reference/command/findAndModify/index.html#lasterrorobject|findAndModify command documentation}.
  * @property {Number} ok Is 1 if the command executed correctly.
  */
 
@@ -4253,7 +4253,7 @@ Collection.prototype.findAndRemove = deprecate(function(query, sort, options, ca
  * @param {object} [pipeline=[]] Array containing all the aggregation framework commands for the execution.
  * @param {object} [options] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
  * @param {object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
  * @param {number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize`
  * @param {boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
@@ -4265,7 +4265,7 @@ Collection.prototype.findAndRemove = deprecate(function(query, sort, options, ca
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {boolean} [options.bsonRegExp=false] By default, regex returned from MDB will be native to the language. Setting to true will ensure that a BSON.BSONRegExp object is returned.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
  * @param {string} [options.comment] Add a comment to an aggregation command
  * @param {string|object} [options.hint] Add an index selection hint to an aggregation command
  * @param {'queryPlanner'|'queryPlannerExtended'|'executionStats'|'allPlansExecution'|boolean} [options.explain] The verbosity mode for the explain output.
@@ -4328,14 +4328,14 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
  * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
  * @method
  * @since 3.0.0
- * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+ * @param {Array} [pipeline] An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
  * @param {object} [options] Optional settings
  * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
  * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
- * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://www.mongodb.com/docs/manual/reference/read-preference|read preference documentation}.
  * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @return {ChangeStream} a ChangeStream instance.
@@ -4411,7 +4411,7 @@ Collection.prototype.parallelCollectionScan = deprecate(function(options, callba
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
- * @deprecated See {@link https://docs.mongodb.com/manual/geospatial-queries/|geospatial queries docs} for current geospatial support
+ * @deprecated See {@link https://www.mongodb.com/docs/manual/geospatial-queries/|geospatial queries docs} for current geospatial support
  */
 Collection.prototype.geoHaystackSearch = deprecate(function(x, y, options, callback) {
   const args = Array.prototype.slice.call(arguments, 2);

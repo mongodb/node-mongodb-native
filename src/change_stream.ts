@@ -74,7 +74,7 @@ export type ResumeToken = unknown;
 /**
  * Represents a specific point in time on a server. Can be retrieved by using `db.command()`
  * @public
- * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
+ * @see https://www.mongodb.com/docs/manual/reference/method/db.runCommand/#response
  */
 export type OperationTime = Timestamp;
 
@@ -82,7 +82,7 @@ export type OperationTime = Timestamp;
  * Options that can be passed to a ChangeStream. Note that startAfter, resumeAfter, and startAtOperationTime are all mutually exclusive, and the server will error if more than one is specified.
  * @public
  */
-export interface ChangeStreamOptions extends AggregateOptions {
+export interface ChangeStreamOptions extends Omit<AggregateOptions, 'writeConcern'> {
   /**
    * Allowed values: 'updateLookup', 'whenAvailable', 'required'.
    *
@@ -117,19 +117,19 @@ export interface ChangeStreamOptions extends AggregateOptions {
   maxAwaitTimeMS?: number;
   /**
    * Allows you to start a changeStream after a specified event.
-   * @see https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams
+   * @see https://www.mongodb.com/docs/manual/changeStreams/#resumeafter-for-change-streams
    */
   resumeAfter?: ResumeToken;
   /**
    * Similar to resumeAfter, but will allow you to start after an invalidated event.
-   * @see https://docs.mongodb.com/manual/changeStreams/#startafter-for-change-streams
+   * @see https://www.mongodb.com/docs/manual/changeStreams/#startafter-for-change-streams
    */
   startAfter?: ResumeToken;
   /** Will start the changeStream after the specified operationTime. */
   startAtOperationTime?: OperationTime;
   /**
    * The number of documents to return per batch.
-   * @see https://docs.mongodb.com/manual/reference/command/aggregate
+   * @see https://www.mongodb.com/docs/manual/reference/command/aggregate
    */
   batchSize?: number;
 
@@ -533,7 +533,14 @@ export class ChangeStream<
   TChange extends Document = ChangeStreamDocument<TSchema>
 > extends TypedEventEmitter<ChangeStreamEvents<TSchema, TChange>> {
   pipeline: Document[];
-  options: ChangeStreamOptions;
+  /**
+   * @remarks WriteConcern can still be present on the options because
+   * we inherit options from the client/db/collection.  The
+   * key must be present on the options in order to delete it.
+   * This allows typescript to delete the key but will
+   * not allow a writeConcern to be assigned as a property on options.
+   */
+  options: ChangeStreamOptions & { writeConcern?: never };
   parent: MongoClient | Db | Collection;
   namespace: MongoDBNamespace;
   type: symbol;
@@ -576,7 +583,7 @@ export class ChangeStream<
    * @internal
    *
    * @param parent - The parent object that created this change stream
-   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
+   * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
   constructor(
     parent: OperationParent,
@@ -586,7 +593,8 @@ export class ChangeStream<
     super();
 
     this.pipeline = pipeline;
-    this.options = options;
+    this.options = { ...options };
+    delete this.options.writeConcern;
 
     if (parent instanceof Collection) {
       this.type = CHANGE_DOMAIN_TYPES.COLLECTION;
