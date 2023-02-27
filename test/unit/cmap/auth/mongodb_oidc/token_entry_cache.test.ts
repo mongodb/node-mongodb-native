@@ -17,7 +17,7 @@ describe('TokenEntryCache', function () {
     let entry;
 
     before(function () {
-      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
+      cache.addEntry('localhost', 'user', tokenResult, serverResult);
       entry = cache.getEntry('localhost', 'user');
     });
 
@@ -42,7 +42,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
+      cache.addEntry('localhost', 'user', tokenResult, serverResult);
       cache.clear();
     });
 
@@ -60,8 +60,8 @@ describe('TokenEntryCache', function () {
     };
 
     before(function () {
-      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
-      cache.addEntry(nonExpiredResult, serverResult, 'localhost', 'user2');
+      cache.addEntry('localhost', 'user', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user2', nonExpiredResult, serverResult);
       cache.deleteExpiredEntries();
     });
 
@@ -74,7 +74,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
+      cache.addEntry('localhost', 'user', tokenResult, serverResult);
       cache.deleteEntry('localhost', 'user');
     });
 
@@ -87,8 +87,8 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry(tokenResult, serverResult, 'localhost', 'user');
-      cache.addEntry(tokenResult, serverResult, 'localhost');
+      cache.addEntry('localhost', 'user', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user2', tokenResult, serverResult);
     });
 
     context('when there is a matching entry', function () {
