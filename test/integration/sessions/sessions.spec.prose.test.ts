@@ -83,7 +83,7 @@ describe('Sessions Prose Tests', () => {
       '18. Implicit session is ignored if connection does not support sessions',
       {
         requires: {
-          // clientSideEncryption: true
+          clientSideEncryption: true
         }
       },
       async function () {
@@ -137,7 +137,7 @@ describe('Sessions Prose Tests', () => {
       '19. Explicit session raises an error if connection does not support sessions',
       {
         requires: {
-          // clientSideEncryption: true
+          clientSideEncryption: true
         }
       },
       async function () {
