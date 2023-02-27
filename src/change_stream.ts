@@ -74,7 +74,7 @@ export type ResumeToken = unknown;
 /**
  * Represents a specific point in time on a server. Can be retrieved by using `db.command()`
  * @public
- * @see https://docs.mongodb.com/manual/reference/method/db.runCommand/#response
+ * @see https://www.mongodb.com/docs/manual/reference/method/db.runCommand/#response
  */
 export type OperationTime = Timestamp;
 
@@ -117,19 +117,19 @@ export interface ChangeStreamOptions extends Omit<AggregateOptions, 'writeConcer
   maxAwaitTimeMS?: number;
   /**
    * Allows you to start a changeStream after a specified event.
-   * @see https://docs.mongodb.com/manual/changeStreams/#resumeafter-for-change-streams
+   * @see https://www.mongodb.com/docs/manual/changeStreams/#resumeafter-for-change-streams
    */
   resumeAfter?: ResumeToken;
   /**
    * Similar to resumeAfter, but will allow you to start after an invalidated event.
-   * @see https://docs.mongodb.com/manual/changeStreams/#startafter-for-change-streams
+   * @see https://www.mongodb.com/docs/manual/changeStreams/#startafter-for-change-streams
    */
   startAfter?: ResumeToken;
   /** Will start the changeStream after the specified operationTime. */
   startAtOperationTime?: OperationTime;
   /**
    * The number of documents to return per batch.
-   * @see https://docs.mongodb.com/manual/reference/command/aggregate
+   * @see https://www.mongodb.com/docs/manual/reference/command/aggregate
    */
   batchSize?: number;
 
@@ -583,7 +583,7 @@ export class ChangeStream<
    * @internal
    *
    * @param parent - The parent object that created this change stream
-   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
+   * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents
    */
   constructor(
     parent: OperationParent,

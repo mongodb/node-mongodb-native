@@ -211,7 +211,7 @@ export class Db {
 
   /**
    * Create a new collection on a server with the specified options. Use this to create capped collections.
-   * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
+   * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
    *
    * @param name - The name of the collection to create
    * @param options - Optional settings for the command
@@ -488,7 +488,7 @@ export class Db {
    * - The first is to provide the schema that may be defined for all the collections within this database
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
    *
-   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+   * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TSchema - Type of the data being detected by the change stream
    * @typeParam TChange - Type of the whole change stream document emitted

@@ -557,7 +557,7 @@ export abstract class AbstractCursor<
   /**
    * Set the batch size for the cursor.
    *
-   * @param value - The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/find/|find command documentation}.
+   * @param value - The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/find/|find command documentation}.
    */
   batchSize(value: number): this {
     assertUninitialized(this);

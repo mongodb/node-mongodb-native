@@ -218,7 +218,7 @@ The same functionality can be achieved using the aggregation pipeline's `$group`
 ### GridStore removed
 
 The deprecated GridStore API has been removed from the driver.
-For more information on GridFS [see the mongodb manual](https://docs.mongodb.com/manual/core/gridfs/).
+For more information on GridFS [see the mongodb manual](https://www.mongodb.com/docs/manual/core/gridfs/).
 
 Below are some snippets that represent equivalent operations:
 

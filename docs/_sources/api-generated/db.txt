@@ -41,7 +41,7 @@ Options
 Constants
 ------------------
 
-.. csv-table:: 
+.. csv-table::
    :header: "Constant Name", "Value", "Description"
    :widths: 15, 10, 30
 
@@ -57,13 +57,13 @@ Initialize the database connection.
 .. js:function:: open(callback)
 
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the index information or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of a simple single server db connection
 
   .. code-block:: javascript
@@ -84,13 +84,13 @@ Initialize the database connection.
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        db.on('close', test.done.bind(test));
        db.close();
      });
 
-  
-  
+
+
   Simple replicaset connection setup, requires a running replicaset on the correct ports
 
   .. code-block:: javascript
@@ -118,8 +118,8 @@ Initialize the database connection.
        p_db.close();
      });
 
-  
-  
+
+
   Example of Read Preference usage at the query level.
 
   .. code-block:: javascript
@@ -147,7 +147,7 @@ Initialize the database connection.
      db.on("fullsetup", function() {
        // Rip out secondaries forcing an attempt to read from the primary
        db.serverConfig._state.secondaries = {};
-     
+
        // Grab the collection
        db.collection("read_preference_replicaset_test_0", function(err, collection) {
          // Attempt to read (should fail due to the server not being a primary);
@@ -159,14 +159,14 @@ Initialize the database connection.
          });
        });
      });
-     
+
      // Connect to the db
      db.open(function(err, p_db) {
        db = p_db;
      });
 
-  
-  
+
+
   A Simple example off connecting to Mongos with a list of alternative proxies.
 
   .. code-block:: javascript
@@ -188,23 +188,23 @@ Initialize the database connection.
          new Server("localhost", 50000, { auto_reconnect: true }),
          new Server("localhost", 50001, { auto_reconnect: true })
        ])
-     
+
      // Connect using the mongos connections
      var db = new Db('integration_test_', mongos, {w:0});
      db.open(function(err, db) {
        assert.equal(null, err);
        assert.ok(db != null);
-     
+
        // Perform a simple insert into a collection
        var collection = db.collection("shard_test");
        // Insert a simple doc
        collection.insert({test:1}, {w:1}, function(err, result) {
          assert.equal(null, err);
-     
+
          collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
            assert.equal(null, err);
            assert.equal(1, item.test);
-     
+
            db.close();
          })
        });
@@ -226,8 +226,8 @@ Create a new Db instance sharing the current socket connections.
 
 **Examples**
 
-  
-  
+
+
   Simple example connecting to two different databases sharing the socket connections below.
 
   .. code-block:: javascript
@@ -245,29 +245,29 @@ Create a new Db instance sharing the current socket connections.
          assert = require('assert');
 
      var db = new Db('test', new Server('localhost', 27017));
-     // Establish connection to db  
+     // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-       
+
        // Reference a different database sharing the same connections
        // for the data transfer
        var secondDb = db.db("integration_tests_2");
-       
+
        // Fetch the collections
        var multipleColl1 = db.collection("multiple_db_instances");
        var multipleColl2 = secondDb.collection("multiple_db_instances");
-       
+
        // Write a record into each and then count the records stored
-       multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
+       multipleColl1.insert({a:1}, {w:1}, function(err, result) {
          multipleColl2.insert({a:1}, {w:1}, function(err, result) {
-           
+
            // Count over the results ensuring only on record in each collection
            multipleColl1.count(function(err, count) {
              assert.equal(1, count);
-     
+
              multipleColl2.count(function(err, count) {
                assert.equal(1, count);
-     
+
                db.close();
              });
            });
@@ -287,13 +287,13 @@ Close the current db connection, including all the child db instances. Emits clo
 
    :param boolean [forceClose]: connection can never be reused.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example that shows how to force close a db connection so it cannot be reused.
 
   .. code-block:: javascript
@@ -313,17 +313,17 @@ Close the current db connection, including all the child db instances. Emits clo
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Fetch a collection
        var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
-     
+
        // Insert a document
        collection.insert({a:1}, {w:1}, function(err, result) {
          assert.equal(null, err);
-     
+
          // Force close the connection
          db.close(true, function(err, result) {
-     
+
            // Attemp to insert should fail now with correct message 'db closed by application'
            collection.insert({a:2}, {w:1}, function(err, result) {
              assert.equal('db closed by application', err.message);
@@ -332,8 +332,8 @@ Close the current db connection, including all the child db instances. Emits clo
        });
      });
 
-  
-  
+
+
   An example of a simple single server db connection and close function
 
   .. code-block:: javascript
@@ -354,11 +354,11 @@ Close the current db connection, including all the child db instances. Emits clo
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Close the connection with a callback that is optional
        db.close(function(err, result) {
          assert.equal(null, err);
-     
+
        });
      });
 
@@ -378,8 +378,8 @@ Access the Admin database
 
 **Examples**
 
-  
-  
+
+
   Example showing how to access the Admin database for admin level operations.
 
   .. code-block:: javascript
@@ -398,11 +398,11 @@ Access the Admin database
 
      var db = new Db('test', new Server('localhost', 27017));
      db.open(function(err, db) {
-     
+
        // Use the admin database for the operation
        var adminDb = db.admin()
        assert.ok(adminDb != null);
-       
+
        db.close();
      });
 
@@ -418,13 +418,13 @@ Returns a cursor to all the collection information.
 
    :param string [collectionName]: the collection name we wish to retrieve the information from.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the options or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of retrieving the information of all the collections.
 
   .. code-block:: javascript
@@ -445,22 +445,22 @@ Returns a cursor to all the collection information.
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Create a collection
        db.createCollection('test_collections_info', function(err, r) {
          assert.equal(null, err);
-     
+
          // Return the information of a single collection name
          db.collectionsInfo("test_collections_info").toArray(function(err, items) {
            assert.equal(1, items.length);
-     
+
            // Return the information of a all collections, using the callback format
            db.collectionsInfo(function(err, cursor) {
-     
+
              // Turn the cursor into an array of results
              cursor.toArray(function(err, items) {
                assert.ok(items.length > 0);
-     
+
                db.close();
              });
            })
@@ -486,13 +486,13 @@ Options
    :param string [collectionName]: the collection name we wish to filter by.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection names or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of retrieving the collection names for a database.
 
   .. code-block:: javascript
@@ -513,19 +513,19 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Create a collection
        db.createCollection('test_collections_info', function(err, r) {
          assert.equal(null, err);
-     
+
          // Return the information of a single collection name
          db.collectionNames("test_collections_info", function(err, items) {
            assert.equal(1, items.length);
-     
+
            // Return the information of a all collections, using the callback format
            db.collectionNames(function(err, items) {
              assert.ok(items.length > 0);
-     
+
              db.close();
            });
          });
@@ -559,13 +559,13 @@ Options
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of retrieving a collection from a db using the collection function.
 
   .. code-block:: javascript
@@ -586,25 +586,25 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Grab a collection without a callback no safe mode
        var col1 = db.collection('test_correctly_access_collections');
-     
+
        // Grab a collection with a callback but no safe operation
        db.collection('test_correctly_access_collections', function(err, col2) {
          assert.equal(null, err);
-     
+
          // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
          db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
            assert.ok(err != null);
-     
+
            // Create the collection
            db.createCollection('test_correctly_access_collections', function(err, result) {
-     
+
              // Retry to get the collection, should work as it's now created
              db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
                assert.equal(null, err);
-     
+
                db.close();
              });
            });
@@ -623,13 +623,13 @@ Fetch all collections for the current db.
 .. js:function:: collections(callback)
 
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collections or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of retrieving all collections for a db as Collection objects
 
   .. code-block:: javascript
@@ -650,15 +650,15 @@ Fetch all collections for the current db.
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Create the collection
        db.createCollection('test_correctly_access_collections2', function(err, result) {
-     
+
          // Retry to get the collection, should work as it's now created
          db.collections(function(err, collections) {
            assert.equal(null, err);
            assert.ok(collections.length > 0);
-     
+
            db.close();
          });
        });
@@ -683,13 +683,13 @@ Options
    :param object [parameters]: the parameters for the call.
    :param object [options]: the options
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from eval or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A whole bunch of examples on how to use eval on the server.
 
   .. code-block:: javascript
@@ -710,26 +710,26 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        var numberOfTests = 10;
-     
+
        var tests_done = function() {
          numberOfTests = numberOfTests - 1;
-     
+
          if(numberOfTests == 0) {
            db.close();
          }
        }
-     
+
        // Evaluate a function on the server with the parameter 3 passed in
        db.eval('function (x) {return x;}', [3], function(err, result) {
          assert.equal(3, result); tests_done();
        });
-     
+
        // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
        // on server
        db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
          assert.equal(3, result); tests_done();
        });
-     
+
        // Evaluate a function on the server that writes to a server collection
        db.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
          // Locate the entry
@@ -739,37 +739,37 @@ Options
            });
          });
        });
-     
+
        // Evaluate a function with 2 parameters passed in
        db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
          assert.equal(5, result); tests_done();
        });
-     
+
        // Evaluate a function with no parameters passed in
        db.eval('function () {return 5;}', function(err, result) {
          assert.equal(5, result); tests_done();
        });
-     
+
        // Evaluate a statement
        db.eval('2 + 3;', function(err, result) {
          assert.equal(5, result); tests_done();
        });
-     
+
        // Evaluate a statement using the code object
        db.eval(new Code("2 + 3;"), function(err, result) {
          assert.equal(5, result); tests_done();
        });
-     
+
        // Evaluate a statement using the code object including a scope
        db.eval(new Code("return i;", {'i':2}), function(err, result) {
          assert.equal(2, result); tests_done();
        });
-     
+
        // Evaluate a statement using the code object including a scope
        db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
          assert.equal(5, result); tests_done();
        });
-     
+
        // Evaluate an illegal statement
        db.eval("5 ++ 5;", function(err, result) {
          assert.ok(err instanceof Error);
@@ -781,9 +781,9 @@ Options
        });
      });
 
-  
-  
-  Defining and calling a system level javascript function (NOT recommended, <a href='http://www.mongodb.org/display/DOCS/Server-side+Code+Execution'>http://www.mongodb.org/display/DOCS/Server-side+Code+Execution</a>)
+
+
+  Defining and calling a system level javascript function (NOT recommended, <a href='www.mongodb.com/docs/display/DOCS/Server-side+Code+Execution'>www.mongodb.com/docs/display/DOCS/Server-side+Code+Execution</a>)
 
   .. code-block:: javascript
 
@@ -802,19 +802,19 @@ Options
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Clean out the collection
        db.collection("system.js").remove({}, {w:1}, function(err, result) {
          assert.equal(null, err);
-     
+
          // Define a system level function
          db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
            assert.equal(null, err);
-         
+
            db.eval("echo(5)", function(err, result) {
              assert.equal(null, err);
              assert.equal(5, result);
-     
+
              db.close();
            });
          });
@@ -833,13 +833,13 @@ Dereference a dbref, against a db
 
    :param dbref dbRef: db reference object we wish to resolve.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dereference or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of dereferencing values.
 
   .. code-block:: javascript
@@ -860,30 +860,30 @@ Dereference a dbref, against a db
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Get a second db
        var secondDb = db.db('integration_tests_2');
-     
+
        // Create a dereference example
        secondDb.createCollection('test_deref_examples', function(err, collection) {
-     
+
          // Insert a document in the collection
          collection.insert({'a':1}, {w:1}, function(err, ids) {
-     
+
            // Let's build a db reference and resolve it
            var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
-     
+
            // Resolve it including a db resolve
            db.dereference(dbRef, function(err, item) {
              assert.equal(1, item.a);
-     
+
              // Let's build a db reference and resolve it
              var dbRef = new DBRef('test_deref_examples', ids[0]._id);
-     
+
              // Simple local resolve
              secondDb.dereference(dbRef, function(err, item) {
                assert.equal(1, item.a);
-     
+
                db.close();
              });
            });
@@ -902,13 +902,13 @@ Logout user from server, fire off on all connections and remove all auth info
 .. js:function:: logout(callback)
 
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from logout or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of using the logout command for the database.
 
   .. code-block:: javascript
@@ -929,23 +929,23 @@ Logout user from server, fire off on all connections and remove all auth info
        // Establish connection to db
        db.open(function(err, db) {
          assert.equal(null, err);
-     
+
          // Add a user to the database
          db.addUser('user3', 'name', function(err, result) {
            assert.equal(null, err);
-     
+
            // Authenticate
            db.authenticate('user3', 'name', function(err, result) {
              assert.equal(true, result);
-     
+
              // Logout the db
              db.logout(function(err, result) {
                assert.equal(true, result);
-     
+
                // Remove the user
                db.removeUser('user3', function(err, result) {
                  assert.equal(true, result);
-     
+
                  db.close();
                });
              });
@@ -970,13 +970,13 @@ Options
    :param string password: password.
    :param object [options]: the options
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from authentication or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of using the authenticate command.
 
   .. code-block:: javascript
@@ -997,15 +997,15 @@ Options
        // Establish connection to db
        db.open(function(err, db) {
          assert.equal(null, err);
-     
+
          // Add a user to the database
          db.addUser('user2', 'name', function(err, result) {
            assert.equal(null, err);
-     
+
            // Authenticate
            db.authenticate('user2', 'name', function(err, result) {
              assert.equal(true, result);
-     
+
              db.close();
            });
          });
@@ -1035,13 +1035,13 @@ Options
    :param string password: password.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from addUser or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of adding a user to the database.
 
   .. code-block:: javascript
@@ -1062,11 +1062,11 @@ Options
        // Establish connection to db
        db.open(function(err, db) {
          assert.equal(null, err);
-     
+
          // Add a user to the database
          db.addUser('user', 'name', function(err, result) {
            assert.equal(null, err);
-     
+
            db.close();
          });
        });
@@ -1092,13 +1092,13 @@ Options
    :param string username: username.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example of dereferencing values.
 
   .. code-block:: javascript
@@ -1119,26 +1119,26 @@ Options
        // Establish connection to db
        db.open(function(err, db) {
          assert.equal(null, err);
-     
+
          // Add a user to the database
          db.addUser('user', 'name', function(err, result) {
            assert.equal(null, err);
-     
+
            // Authenticate
            db.authenticate('user', 'name', function(err, result) {
              assert.equal(true, result);
-     
+
              // Logout the db
              db.logout(function(err, result) {
                assert.equal(true, result);
-     
+
                // Remove the user from the db
                db.removeUser('user', function(err, result) {
-     
+
                  // Authenticate
                  db.authenticate('user', 'name', function(err, result) {
                    assert.equal(false, result);
-     
+
                    db.close();
                  });
                });
@@ -1177,13 +1177,13 @@ Options
    :param string collectionName: the collection name we wish to access.
    :param object [options]: returns option results.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createCollection or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A simple example showing the creation of a collection.
 
   .. code-block:: javascript
@@ -1204,15 +1204,15 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Create a capped collection with a maximum of 1000 documents
        db.createCollection("a_simple_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a document in the capped collection
          collection.insert({a:1}, {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            db.close();
          });
        });
@@ -1240,13 +1240,13 @@ Options
    :param object selector: the command hash to send to the server, ex: {ping:1}.
    :param object [options]: additional options for the command.
    :param function callback: this will be called after executing this method. The command always return the whole result of the command as the second parameter.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A simple example creating, dropping a collection and then verifying that the collection is gone.
 
   .. code-block:: javascript
@@ -1267,11 +1267,11 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Execute ping against the server
        db.command({ping:1}, function(err, result) {
          assert.equal(null, err);
-     
+
          db.close();
        });
      });
@@ -1288,13 +1288,13 @@ Drop a collection from the database, removing it permanently. New accesses will 
 
    :param string collectionName: the name of the collection we wish to drop.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropCollection or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A simple example executing a command against the server.
 
   .. code-block:: javascript
@@ -1315,27 +1315,27 @@ Drop a collection from the database, removing it permanently. New accesses will 
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Execute ping against the server
        db.command({ping:1}, function(err, result) {
          assert.equal(null, err);
-     
+
          // Create a capped collection with a maximum of 1000 documents
          db.createCollection("a_simple_create_drop_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
            assert.equal(null, err);
-     
+
            // Insert a document in the capped collection
            collection.insert({a:1}, {w:1}, function(err, result) {
              assert.equal(null, err);
-     
+
              // Drop the collection from this world
              db.dropCollection("a_simple_create_drop_collection", function(err, result) {
                assert.equal(null, err);
-     
+
                // Verify that the collection is gone
                db.collectionNames("a_simple_create_drop_collection", function(err, names) {
                  assert.equal(0, names.length);
-     
+
                  db.close();
                });
              });
@@ -1363,13 +1363,13 @@ Options
    :param string toCollection: the new name of the collection.
    :param object [options]: returns option results.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from renameCollection or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A simple example creating, dropping a collection and then verifying that the collection is gone.
 
   .. code-block:: javascript
@@ -1390,31 +1390,31 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        // Create a collection
        db.createCollection("simple_rename_collection", {w:1}, function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a document in the collection
          collection.insert({a:1}, {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Rename the collection
            db.renameCollection("simple_rename_collection", "simple_rename_collection_2", function(err, collection2) {
              assert.equal(null, err);
-     
+
              // Retrieve the number of documents from the collection
              collection2.count(function(err, count) {
                assert.equal(1, count);
-     
+
                // Verify that the collection is gone
                db.collectionNames("simple_rename_collection", function(err, names) {
                  assert.equal(0, names.length);
-     
+
                  // Verify that the new collection exists
                  db.collectionNames("simple_rename_collection_2", function(err, names) {
                    assert.equal(1, names.length);
-     
+
                    db.close();
                  });
                });
@@ -1455,13 +1455,13 @@ Options
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from createIndex or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A more complex createIndex using a compound unique index in the background and dropping duplicated documents
 
   .. code-block:: javascript
@@ -1481,31 +1481,31 @@ Options
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('more_complex_index_test', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Create an index on the a field
            db.createIndex('more_complex_index_test', {a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-     
+
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
                assert.equal(null, err);
                assert.equal(4, items.length);
-     
+
                // Peform a query, with explain to show we hit the query
                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                  assert.equal(null, err);
                  assert.ok(explanation[0].indexBounds.a != null);
                  assert.ok(explanation[0].indexBounds.b != null);
-     
+
                  db.close();
                });
              })
@@ -1545,13 +1545,13 @@ Options
    :param object fieldOrSpec: fieldOrSpec that defines the index.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from ensureIndex or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
 
   .. code-block:: javascript
@@ -1571,31 +1571,31 @@ Options
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('more_complex_ensure_index_db_test', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Create an index on the a field
            db.ensureIndex('more_complex_ensure_index_db_test', {a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-     
+
              // Show that duplicate records got dropped
              collection.find({}).toArray(function(err, items) {
                assert.equal(null, err);
                assert.equal(4, items.length);
-     
+
                // Peform a query, with explain to show we hit the query
                collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                  assert.equal(null, err);
                  assert.ok(explanation[0].indexBounds.a != null);
                  assert.ok(explanation[0].indexBounds.b != null);
-     
+
                  db.close();
                });
              })
@@ -1621,13 +1621,13 @@ Options
 
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from cursorInfo or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   A Simple example of returning current cursor information in MongoDB
 
   .. code-block:: javascript
@@ -1647,30 +1647,30 @@ Options
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('cursor_information_collection', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Create a bunch of documents so we can force the creation of a cursor
          var docs = [];
          for(var i = 0; i < 1000; i++) {
            docs.push({a:'hello world hello world hello world hello world hello world hello world hello world hello world'});
          }
-     
+
          // Insert a bunch of documents for the index
          collection.insert(docs, {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Let's set a cursor
            var cursor = collection.find({}, {batchSize:10});
            cursor.nextObject(function(err, item) {
              assert.equal(null, err);
-     
+
              // Let's grab the information about the cursors on the database
              db.cursorInfo(function(err, cursorInformation) {
                assert.ok(cursorInformation.totalOpen > 0);
-     
+
                db.close();
              });
            });
@@ -1691,13 +1691,13 @@ Drop an index on a collection.
    :param string collectionName: the name of the collection where the command will drop an index.
    :param string indexName: name of the index to drop.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropIndex or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An examples showing the creation and dropping of an index
 
   .. code-block:: javascript
@@ -1717,29 +1717,29 @@ Drop an index on a collection.
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('create_and_drop_an_index', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-     
+
              // Drop the index
              db.dropIndex("create_and_drop_an_index", "a_1_b_1", function(err, result) {
                assert.equal(null, err);
-     
+
                // Verify that the index is gone
                collection.indexInformation(function(err, indexInformation) {
                  assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                  assert.equal(null, indexInformation.a_1_b_1);
-     
+
                  db.close();
                });
              });
@@ -1764,8 +1764,8 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 
 **Examples**
 
-  
-  
+
+
   An example showing how to force a reindex of a collection.
 
   .. code-block:: javascript
@@ -1785,30 +1785,30 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('create_and_drop_all_indexes', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-     
+
              // Force a reindex of the collection
              db.reIndex('create_and_drop_all_indexes', function(err, result) {
                assert.equal(null, err);
                assert.equal(true, result);
-     
+
                // Verify that the index is gone
                collection.indexInformation(function(err, indexInformation) {
                  assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                  assert.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
-     
+
                  db.close();
                });
              });
@@ -1836,13 +1836,13 @@ Options
    :param string collectionName: the name of the collection.
    :param object [options]: additional options during update.
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from indexInformation or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example showing the information returned by indexInformation
 
   .. code-block:: javascript
@@ -1862,30 +1862,30 @@ Options
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection we want to drop later
        db.createCollection('more_index_information_test', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Create an index on the a field
            collection.ensureIndex({a:1, b:1}
              , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-     
+
              // Fetch basic indexInformation for collection
              db.indexInformation('more_index_information_test', function(err, indexInformation) {
                assert.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                assert.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
-     
+
                // Fetch full index information
                collection.indexInformation({full:true}, function(err, indexInformation) {
                  assert.deepEqual({ _id: 1 }, indexInformation[0].key);
                  assert.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
-     
+
                  db.close();
                });
              });
@@ -1905,13 +1905,13 @@ Drop a database.
 .. js:function:: dropDatabase(callback)
 
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from dropDatabase or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An examples showing the dropping of a database
 
   .. code-block:: javascript
@@ -1931,20 +1931,20 @@ Drop a database.
      var db = new Db('test', new Server('localhost', 27017));
      // Establish connection to db
      db.open(function(err, db) {
-     
+
        // Create a collection
        db.createCollection('more_index_information_test', function(err, collection) {
          assert.equal(null, err);
-     
+
          // Insert a bunch of documents for the index
          collection.insert([{a:1, b:1}, {a:1, b:1}
            , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
            assert.equal(null, err);
-     
+
            // Let's drop the database
            db.dropDatabase(function(err, result) {
              assert.equal(null, err);
-     
+
              // Wait to seconds to let it replicate across
              setTimeout(function() {
                // Get the admin database
@@ -1953,15 +1953,15 @@ Drop a database.
                  dbs = dbs.databases;
                  // Did we find the db
                  var found = false;
-     
+
                  // Check if we have the db in the list
                  for(var i = 0; i < dbs.length; i++) {
                    if(dbs[i].name == 'integration_tests_to_drop') found = true;
                  }
-     
+
                  // We should not find the databases
                  if(process.env['JENKINS'] == null) assert.equal(false, found);
-     
+
                  db.close();
                });
              }, 2000);
@@ -1988,13 +1988,13 @@ Options
 
    :param objects [options]: options for the stats command
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the results from stats or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   An example showing how to retrieve the db statistics
 
   .. code-block:: javascript
@@ -2015,11 +2015,11 @@ Options
      // Establish connection to db
      db.open(function(err, db) {
        assert.equal(null, err);
-     
+
        db.stats(function(err, stats) {
          assert.equal(null, err);
          assert.ok(stats != null);
-     
+
          db.close();
        })
      });
@@ -2050,13 +2050,13 @@ Options
    :param string url: connection url for MongoDB.
    :param object [options]: optional options for insert command
    :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the db instance or null if an error occurred.
-   :returns: null 
+   :returns: null
 
 
 **Examples**
 
-  
-  
+
+
   Example of a simple url connection string, with no acknowledgement of writes.
 
   .. code-block:: javascript
@@ -2076,7 +2076,6 @@ Options
      // Connect to the server
      Db.connect(configuration.url(), function(err, db) {
        assert.equal(null, err);
-       
+
        db.close();
      });
-

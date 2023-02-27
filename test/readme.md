@@ -484,7 +484,7 @@ lerna run test --scope @mongosh/service-provider-server
 
 [mocha]: https://mochajs.org/
 [mocha-skip]: https://mochajs.org/#inclusive-tests
-[mongodb-ulimit]: https://docs.mongodb.com/manual/reference/ulimit/#recommended-ulimit-settings
+[mongodb-ulimit]: https://www.mongodb.com/docs/manual/reference/ulimit/#recommended-ulimit-settings
 [macos-ulimt]: https://wilsonmar.github.io/maximum-limits/
 [mocha-only]: https://mochajs.org/#exclusive-tests
 [mocha-grep]: https://mochajs.org/#command-line-usage

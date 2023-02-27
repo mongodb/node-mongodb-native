@@ -35,7 +35,7 @@ const ILLEGAL_COMMAND_FIELDS = new Set([
 
 /** @public
  * Configuration options for timeseries collections
- * @see https://docs.mongodb.com/manual/core/timeseries-collections/
+ * @see https://www.mongodb.com/docs/manual/core/timeseries-collections/
  */
 export interface TimeSeriesCollectionOptions extends Document {
   timeField: string;

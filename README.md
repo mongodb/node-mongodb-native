@@ -31,7 +31,7 @@ Core Server (i.e. SERVER) project are **public**.
 
 ### Support / Feedback
 
-For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://docs.mongodb.com/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
+For issues with, questions about, or feedback for the Node.js driver, please look into our [support channels](https://www.mongodb.com/docs/manual/support). Please do not email any of the driver developers directly with issues or questions - you're more likely to get an answer on the [MongoDB Community Forums](https://community.mongodb.com/tags/c/drivers-odms-connectors/7/node-js-driver).
 
 ### Change Log
 
@@ -41,8 +41,8 @@ Change history can be found in [`HISTORY.md`](https://github.com/mongodb/node-mo
 
 For version compatibility matrices, please refer to the following links:
 
-- [MongoDB](https://docs.mongodb.com/drivers/node/current/compatibility/#mongodb-compatibility)
-- [NodeJS](https://docs.mongodb.com/drivers/node/current/compatibility/#language-compatibility)
+- [MongoDB](https://www.mongodb.com/docs/drivers/node/current/compatibility/#mongodb-compatibility)
+- [NodeJS](https://www.mongodb.com/docs/drivers/node/current/compatibility/#language-compatibility)
 
 #### Typescript Version
 
@@ -91,7 +91,7 @@ Third party:
 
 ## Quick Start
 
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://docs.mongodb.com/drivers/node/).
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [official documentation](https://www.mongodb.com/docs/drivers/node/).
 
 ### Create the `package.json` file
 
@@ -116,7 +116,7 @@ npm install mongodb
 
 ### Start a MongoDB Server
 
-For complete MongoDB installation instructions, see [the manual](https://docs.mongodb.org/manual/installation/).
+For complete MongoDB installation instructions, see [the manual](https://www.mongodb.com/docs/manual/installation/).
 
 1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
 2. Create a database directory (in this case under **/data**).
@@ -243,7 +243,7 @@ console.log('Deleted documents =>', deleteResult);
 
 ### Index a Collection
 
-[Indexes](https://docs.mongodb.org/manual/indexes/) can improve your application's
+[Indexes](https://www.mongodb.com/docs/manual/indexes/) can improve your application's
 performance. The following function creates an index on the **a** field in the
 **documents** collection.
 
@@ -252,7 +252,7 @@ const indexName = await collection.createIndex({ a: 1 });
 console.log('index name =', indexName);
 ```
 
-For more detailed information, see the [indexing strategies page](https://docs.mongodb.com/manual/applications/indexes/).
+For more detailed information, see the [indexing strategies page](https://www.mongodb.com/docs/manual/applications/indexes/).
 
 ## Error Handling
 
@@ -282,9 +282,9 @@ try {
 
 ## Next Steps
 
-- [MongoDB Documentation](https://docs.mongodb.com/manual/)
-- [MongoDB Node Driver Documentation](https://docs.mongodb.com/drivers/node/)
-- [Read about Schemas](https://docs.mongodb.com/manual/core/data-modeling-introduction/)
+- [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
+- [MongoDB Node Driver Documentation](https://www.mongodb.com/docs/drivers/node/)
+- [Read about Schemas](https://www.mongodb.com/docs/manual/core/data-modeling-introduction/)
 - [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
 ## License
