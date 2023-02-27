@@ -132,6 +132,7 @@ export interface ClientEntity {
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
+  observeLogMessages?: Document;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
 }
@@ -241,6 +242,7 @@ export interface Test {
   skipReason?: string;
   operations: OperationDescription[];
   expectEvents?: ExpectedEventsForClient[];
+  expectLogMessages?: ExpectedLogMessagesForClient[];
   outcome?: CollectionData[];
 }
 export interface ExpectedEventsForClient {
@@ -251,6 +253,12 @@ export interface ExpectedEventsForClient {
 }
 
 export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent;
+
+// TODO
+export interface ExpectedLogMessagesForClient {
+  client: string;
+  messages: ExpectedLogMessage[];
+}
 
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
@@ -305,6 +313,13 @@ export interface ExpectedError {
   errorLabelsContain?: string[];
   errorLabelsOmit?: string[];
   expectResult?: unknown;
+}
+
+export interface ExpectedLogMessage {
+  level: string;
+  component: 'command' | 'topology' | 'serverSelection' | 'connection';
+  failureIsRedacted?: boolean;
+  data: Document;
 }
 
 /**

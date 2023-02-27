@@ -23,7 +23,7 @@ import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
 import { EntitiesMap, UnifiedChangeStream } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
-import type { ExpectedEvent, OperationDescription } from './schema';
+import type { ExpectedEvent, OperationDescription, ExpectedLogMessage } from './schema';
 import { getMatchingEventCount, translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {

@@ -73,12 +73,26 @@ export interface SessionLsidOperator {
 export function isSessionLsidOperator(value: unknown): value is SessionLsidOperator {
   return typeof value === 'object' && value != null && '$$sessionLsid' in value;
 }
+export interface MatchAsDocumentOperator {
+  $$matchAsDocument: string;
+}
+export function isMatchAsDocumentOperator(value: unknown): value is MatchAsDocumentOperator {
+  return typeof value === 'object' && value != null && '$$matchAsDocument' in value;
+}
+export interface MatchAsRootOperator {
+  $$matchAsRoot: string;
+}
+export function isMatchAsRootOperator(value: unknown): value is MatchAsRootOperator {
+  return typeof value === 'object' && value != null && '$$matchAsRoot' in value;
+}
 
 export const SpecialOperatorKeys = [
   '$$exists',
   '$$type',
   '$$matchesEntity',
   '$$matchesHexBytes',
+  '$$matchAsRoot',
+  '$$matchAsDocument',
   '$$unsetOrMatches',
   '$$sessionLsid'
 ];
@@ -89,7 +103,9 @@ export type SpecialOperator =
   | MatchesEntityOperator
   | MatchesHexBytesOperator
   | UnsetOrMatchesOperator
-  | SessionLsidOperator;
+  | SessionLsidOperator
+  | MatchAsDocumentOperator
+  | MatchAsRootOperator;
 
 type KeysOfUnion<T> = T extends object ? keyof T : never;
 export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
@@ -100,7 +116,9 @@ export function isSpecialOperator(value: unknown): value is SpecialOperator {
     isMatchesEntityOperator(value) ||
     isMatchesHexBytesOperator(value) ||
     isUnsetOrMatchesOperator(value) ||
-    isSessionLsidOperator(value)
+    isSessionLsidOperator(value) ||
+    isMatchAsRootOperator(value) ||
+    isMatchAsDocumentOperator(value)
   );
 }
 
@@ -323,6 +341,10 @@ export function specialCheck(
         ejson`expected value at path ${path.join('')} NOT to exist, but received ${actual}`
       ).to.be.false;
     }
+  } else if (isMatchAsDocumentOperator(expected)) {
+    // TODO: IMPLEMENT ME
+  } else if (isMatchAsRootOperator(expected)) {
+    // TODO: IMPLEMENT ME
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
@@ -371,16 +393,14 @@ function compareCommandStartedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
   if (expected!.databaseName) {
     expect(
       expected!.databaseName,
-      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${
-        actual.databaseName
+      `expected ${prefix}.databaseName to equal ${expected!.databaseName} but received ${actual.databaseName
       }`
     ).to.equal(actual.databaseName);
   }
@@ -398,8 +418,7 @@ function compareCommandSucceededEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
@@ -414,8 +433,7 @@ function compareCommandFailedEvents(
   if (expected!.commandName) {
     expect(
       expected!.commandName,
-      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${
-        actual.commandName
+      `expected ${prefix}.commandName to equal ${expected!.commandName} but received ${actual.commandName
       }`
     ).to.equal(actual.commandName);
   }
