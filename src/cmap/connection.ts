@@ -37,6 +37,7 @@ import {
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
+import type { AuthContext } from './auth/auth_provider';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import {
   CommandFailedEvent,
@@ -127,7 +128,6 @@ export interface ConnectionOptions
   noDelay?: boolean;
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
-
   metadata: ClientMetadata;
 }
 
@@ -165,6 +165,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     cmd: Document,
     options: CommandOptions | undefined
   ) => Promise<Document>;
+  /** @internal */
+  authContext?: AuthContext;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
