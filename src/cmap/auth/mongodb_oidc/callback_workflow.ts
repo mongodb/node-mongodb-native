@@ -85,7 +85,6 @@ export class CallbackWorkflow implements Workflow {
         startCommandDocument(credentials),
         undefined
       );
-      // What to do about the payload?
       const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
       // result.conversationId;
       // Call the request callback and finish auth.
