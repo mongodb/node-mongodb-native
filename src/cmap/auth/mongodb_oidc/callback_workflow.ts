@@ -107,7 +107,7 @@ export class CallbackWorkflow implements Workflow {
       const result = await connection.commandAsync(
         ns(credentials.source),
         startCommandDocument(credentials),
-        undefined
+        { monitorCommands: true }
       );
       const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
       // Call the request callback and finish auth.
@@ -212,7 +212,7 @@ async function finishAuth(
   return connection.commandAsync(
     ns(credentials.source),
     continueCommandDocument(result.accessToken, conversationId),
-    undefined
+    { monitorCommands: true }
   );
 }
 
