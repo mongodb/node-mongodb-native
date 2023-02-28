@@ -1,9 +1,9 @@
 import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongodb_oidc';
 
 /* 5 minutes in milliseonds */
-const EXPIRATION_BUFFER = 300000;
+const EXPIRATION_BUFFER_MS = 300000;
 /* 5 hours in seconds */
-const DEFAULT_EXPIRATION = 18000;
+const DEFAULT_EXPIRATION_SECS = 0;
 
 /** @internal */
 export class TokenEntry {
@@ -29,7 +29,7 @@ export class TokenEntry {
    * 5 minutes from the expiration time.
    */
   isValid() {
-    return this.expiration - Date.now() > EXPIRATION_BUFFER;
+    return this.expiration - Date.now() > EXPIRATION_BUFFER_MS;
   }
 }
 
@@ -98,7 +98,7 @@ export class TokenEntryCache {
 /**
  * Get an expiration time in milliseconds past epoch. Defaults to 5 hours.
  */
-function expirationTime(expiresInSeconds: number = DEFAULT_EXPIRATION): number {
+function expirationTime(expiresInSeconds: number = DEFAULT_EXPIRATION_SECS): number {
   return Date.now() + expiresInSeconds * 1000;
 }
 
