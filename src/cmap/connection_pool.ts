@@ -615,7 +615,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     });
     const credentials = connection.credentials;
     if (credentials) {
-      const provider = AUTH_PROVIDERS.get(credentials.mechanism);
+      const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello || undefined);
+      const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
       if (provider) {
         provider.auth(authContext, error => {
           if (error) {
