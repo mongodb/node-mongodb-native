@@ -173,7 +173,8 @@ describe('Connect Tests', function () {
       });
       connectOptions = {
         ...CONNECT_DEFAULTS,
-        hostAddress: server.hostAddress() as HostAddress
+        hostAddress: server.hostAddress() as HostAddress,
+        socketTimeoutMS: 15000
       };
 
       connection = await promisify<Connection>(callback =>

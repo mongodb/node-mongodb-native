@@ -31,10 +31,15 @@ const connectionOptionsDefaults = {
   loadBalanced: false
 };
 
-/** The absolute minimum socket API needed by Connection as of writing this test */
+/**
+ * The absolute minimum socket API needed by these tests
+ *
+ * The driver has a greater API requirement for sockets detailed in: NODE-4785
+ */
 class FakeSocket extends EventEmitter {
   destroyed = false;
   writableEnded: boolean;
+  timeout = 0;
   address() {
     // is never called
   }
@@ -59,10 +64,15 @@ class FakeSocket extends EventEmitter {
   get remotePort() {
     return 123;
   }
+  setTimeout(timeout) {
+    this.timeout = timeout;
+  }
 }
 
 class InputStream extends Readable {
   writableEnded: boolean;
+  timeout = 0;
+
   constructor(options?) {
     super(options);
   }
@@ -72,6 +82,10 @@ class InputStream extends Readable {
     if (typeof cb === 'function') {
       process.nextTick(cb);
     }
+  }
+
+  setTimeout(timeout) {
+    this.timeout = timeout;
   }
 }
 
