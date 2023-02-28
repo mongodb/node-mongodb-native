@@ -358,8 +358,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
-    } else if (operationDescription.socketTimeoutOverride) {
-      this[kStream].setTimeout(this.socketTimeoutMS);
     }
 
     try {
@@ -683,7 +681,6 @@ function write(
   }
 
   if (typeof options.socketTimeoutMS === 'number') {
-    operationDescription.socketTimeoutOverride = true;
     conn[kStream].setTimeout(options.socketTimeoutMS);
   } else if (conn.socketTimeoutMS !== 0) {
     conn[kStream].setTimeout(conn.socketTimeoutMS);
