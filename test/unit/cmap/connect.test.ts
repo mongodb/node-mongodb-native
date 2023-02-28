@@ -1,17 +1,19 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter } from 'events';
+import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
-const mock = require('../../tools/mongodb-mock/index');
-const { expect } = require('chai');
-const EventEmitter = require('events');
-const { setTimeout } = require('timers');
-
-const { connect, prepareHandshakeDocument: prepareHandshakeDocumentCb } = require('../../mongodb');
-const { MongoCredentials } = require('../../mongodb');
-const { genClusterTime } = require('../../tools/common');
-const { MongoNetworkError } = require('../../mongodb');
-const { HostAddress, isHello } = require('../../mongodb');
-const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
-const { promisify } = require('util');
+import {
+  connect,
+  HostAddress,
+  isHello,
+  LEGACY_HELLO_COMMAND,
+  MongoCredentials,
+  MongoNetworkError,
+  prepareHandshakeDocument as prepareHandshakeDocumentCb
+} from '../../mongodb';
+import { genClusterTime } from '../../tools/common';
+import * as mock from '../../tools/mongodb-mock/index';
 
 describe('Connect Tests', function () {
   const test = {};
