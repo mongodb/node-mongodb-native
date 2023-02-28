@@ -249,12 +249,12 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when not providing a user', function () {
-        it('fails on option parsing', async function () {
-          expect(async () => {
+        it('fails on option parsing', function () {
+          expect(() => {
             new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
             );
-          }).to.throw();
+          }).to.throw(/DEVICE_NAME|REQUEST_TOKEN_CALLBACK/);
         });
       });
     });
@@ -280,9 +280,12 @@ describe('MONGODB-OIDC', function () {
         });
 
         it('raises an error', async function () {
-          expect(async () => {
+          try {
             await client.connect();
-          }).to.throw();
+            fail('Invalid request callbacks must throw on connect');
+          } catch (error) {
+            expect(error.message).to.include('REQUEST_TOKEN_CALLBACK');
+          }
         });
       });
 
@@ -306,9 +309,12 @@ describe('MONGODB-OIDC', function () {
         });
 
         it('raises an error', async function () {
-          expect(async () => {
+          try {
             await client.connect();
-          }).to.throw();
+            fail('Invalid request callbacks must throw on connect');
+          } catch (error) {
+            expect(error.message).to.include('REQUEST_TOKEN_CALLBACK');
+          }
         });
       });
     });

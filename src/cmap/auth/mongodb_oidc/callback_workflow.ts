@@ -1,6 +1,6 @@
 import { type Document, Binary, BSON } from 'bson';
 
-import { MongoInvalidArgumentError } from '../../../error';
+import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -117,6 +117,12 @@ export class CallbackWorkflow implements Workflow {
         tokenResult,
         TIMEOUT_MS
       );
+      // Validate the result.
+      if (!result || !result.accessToken) {
+        throw new MongoMissingCredentialsError(
+          'REFRESH_TOKEN_CALLBACK must return a valid object with an accessToken'
+        );
+      }
       // Cache a new entry and continue with the saslContinue.
       this.cache.addEntry(connection.address, credentials.username || '', result, stepOneResult);
       return finishAuth(result, conversationId, connection, credentials);
@@ -141,6 +147,12 @@ export class CallbackWorkflow implements Workflow {
     this.cache.deleteExpiredEntries();
     if (request) {
       const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT_MS);
+      // Validate the result.
+      if (!tokenResult || !tokenResult.accessToken) {
+        throw new MongoMissingCredentialsError(
+          'REQUEST_TOKEN_CALLBACK must return a valid object with an accessToken'
+        );
+      }
       // Cache a new entry and continue with the saslContinue.
       this.cache.addEntry(
         connection.address,
