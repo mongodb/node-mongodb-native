@@ -1,10 +1,12 @@
 import { expect } from 'chai';
-import { EventEmitter } from 'events';
 import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {
+  CancellationToken,
+  ClientMetadata,
   connect,
+  ConnectionOptions,
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -15,24 +17,35 @@ import {
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
 
-describe('Connect Tests', function () {
-  const test = {};
-  beforeEach(() => {
-    return mock.createServer().then(mockServer => {
-      test.server = mockServer;
-      test.connectOptions = {
-        hostAddress: test.server.hostAddress(),
-        credentials: new MongoCredentials({
-          username: 'testUser',
-          password: 'pencil',
-          source: 'admin',
-          mechanism: 'PLAIN'
-        })
-      };
-    });
+describe.only('Connect Tests', function () {
+  const test: {
+    server?: any;
+    connectOptions?: ConnectionOptions;
+  } = {};
+
+  beforeEach(async () => {
+    const mockServer = await mock.createServer();
+    test.server = mockServer;
+    test.connectOptions = {
+      id: 1,
+      tls: false,
+      generation: 1,
+      monitorCommands: false,
+      metadata: {} as ClientMetadata,
+      loadBalanced: false,
+      hostAddress: test.server.hostAddress() as HostAddress,
+      credentials: new MongoCredentials({
+        username: 'testUser',
+        password: 'pencil',
+        source: 'admin',
+        mechanism: 'PLAIN',
+        mechanismProperties: {}
+      })
+    };
   });
 
   afterEach(() => mock.cleanup());
+
   it('should auth against a non-arbiter', function (done) {
     const whatHappened = {};
 
@@ -104,9 +117,9 @@ describe('Connect Tests', function () {
   });
 
   it.skip('should allow a cancellaton token', function (done) {
-    const cancellationToken = new EventEmitter();
+    const cancellationToken = new CancellationToken();
     setTimeout(() => cancellationToken.emit('cancel'), 500);
-    // set no response handler for mock server, effecively blackhole requests
+    // set no response handler for mock server, effectively black hole requests
 
     connect({ hostAddress: new HostAddress('240.0.0.1'), cancellationToken }, (err, conn) => {
       expect(err).to.exist;
