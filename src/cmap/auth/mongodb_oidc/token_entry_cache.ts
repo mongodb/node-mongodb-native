@@ -2,7 +2,7 @@ import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongod
 
 /* 5 minutes in milliseonds */
 const EXPIRATION_BUFFER_MS = 300000;
-/* 5 hours in seconds */
+/* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
 
 /** @internal */
