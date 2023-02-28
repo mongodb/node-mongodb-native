@@ -57,6 +57,15 @@ describe('Sessions Prose Tests', () => {
   });
 
   describe('When sessions are not supported', () => {
+    /**
+     * Since all regular 3.6+ servers support sessions, the prose tests which test for
+     * session non-support SHOULD use a mongocryptd server as the test server
+     * (available with server versions 4.2+)
+     *
+     * As part of the test setup for these cases, create a MongoClient pointed at the test server
+     * with the options specified in the test case and verify that the test server does NOT define a
+     * value for logicalSessionTimeoutMinutes by sending a hello command and checking the response.
+     */
     const mongocryptdTestPort = '27022';
     let client: MongoClient;
     let childProcess: ChildProcess;
@@ -69,6 +78,16 @@ describe('Sessions Prose Tests', () => {
       childProcess.on('error', err => {
         console.warn('Sessions prose mongocryptd error:', err);
       });
+    });
+
+    beforeEach(async () => {
+      client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`, {
+        monitorCommands: true
+      });
+
+      const hello = await client.db().command({ hello: true });
+      expect(hello).to.have.property('iscryptd', true); // sanity check
+      expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
     });
 
     afterEach(async () => {
@@ -89,24 +108,8 @@ describe('Sessions Prose Tests', () => {
       },
       async function () {
         /**
-         * 1. Ensure a mongocryptd process is running
-         * 2. Create a new `MongoClient` pointed at the mongocryptd server with command monitoring enabled
-         */
-        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`, {
-          monitorCommands: true
-        });
-
-        /**
-         * 3. Verify that the server does NOT define a value for `logicalSessionTimeoutMinutes`
-         *    by sending a hello command to the server and checking the response
-         */
-        const hello = await client.db().command({ hello: true });
-        expect(hello).to.have.property('iscryptd', true); // sanity check
-        expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
-
-        /**
-         * 4. Send a read command to the server (e.g., `findOne`), ignoring any errors from the server response
-         * 5. Check the corresponding `commandStarted` event: verify that `lsid` is not set
+         * 1. Send a read command to the server (e.g., `findOne`), ignoring any errors from the server response
+         * 2. Check the corresponding `commandStarted` event: verify that `lsid` is not set
          */
         const readCommandEventPromise = once(client, 'commandStarted').then(res => res[0]);
         await client
@@ -119,8 +122,8 @@ describe('Sessions Prose Tests', () => {
         expect(readCommandEvent).to.not.have.property('lsid');
 
         /**
-         * 6. Send a write command to the server (e.g., `insertOne`), ignoring any errors from the server response
-         * 7. Check the corresponding `commandStarted` event: verify that `lsid` is not set
+         * 3. Send a write command to the server (e.g., `insertOne`), ignoring any errors from the server response
+         * 4. Check the corresponding `commandStarted` event: verify that `lsid` is not set
          */
         const writeCommandEventPromise = once(client, 'commandStarted').then(res => res[0]);
         await client
@@ -144,27 +147,13 @@ describe('Sessions Prose Tests', () => {
       },
       async function () {
         /**
-         * 1. Ensure a mongocryptd process is running
-         * 2. Create a new `MongoClient` pointed at the mongocryptd server
-         */
-        client = new MongoClient(`mongodb://localhost:${mongocryptdTestPort}`);
-
-        /**
-         * 3. Verify that the server does NOT define a value for `logicalSessionTimeoutMinutes`
-         *    by sending a hello command to the server and checking the response
-         */
-        const hello = await client.db().command({ hello: true });
-        expect(hello).to.have.property('iscryptd', true); // sanity check
-        expect(hello).to.not.have.property('logicalSessionTimeoutMinutes');
-
-        /**
-         * 4. Create a new explicit session by calling `startSession` (this MUST NOT error)
+         * 1. Create a new explicit session by calling `startSession` (this MUST NOT error)
          */
         const session = client.startSession();
 
         /**
-         * 5 Attempt to send a read command to the server (e.g., `findOne`) with the explicit session passed in
-         * 6. Assert that a client-side error is generated indicating that sessions are not supported
+         * 2. Attempt to send a read command to the server (e.g., `findOne`) with the explicit session passed in
+         * 3. Assert that a client-side error is generated indicating that sessions are not supported
          */
         const readOutcome = await client
           .db()
@@ -175,8 +164,8 @@ describe('Sessions Prose Tests', () => {
         expect(readOutcome.message).to.match(/does not support sessions/);
 
         /**
-         * 7. Attempt to send a write command to the server (e.g., `insertOne`) with the explicit session passed in
-         * 8. Assert that a client-side error is generated indicating that sessions are not supported
+         * 4. Attempt to send a write command to the server (e.g., `insertOne`) with the explicit session passed in
+         * 5. Assert that a client-side error is generated indicating that sessions are not supported
          */
         const writeOutcome = await client
           .db()
