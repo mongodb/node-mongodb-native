@@ -1,5 +1,4 @@
 import { type Document, BSON } from 'bson';
-import { promisify } from 'util';
 
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
@@ -19,8 +18,7 @@ export abstract class DeviceWorkflow implements Workflow {
   async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     const token = await this.getToken();
     const command = commandDocument(token);
-    const executeCommand = promisify(connection.command.bind(connection));
-    return executeCommand(ns(credentials.source), command, undefined);
+    return connection.commandAsync(ns(credentials.source), command, undefined);
   }
 
   /**
