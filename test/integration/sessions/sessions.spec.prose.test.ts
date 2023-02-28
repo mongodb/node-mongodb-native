@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { spawn } from 'child_process';
+import { ChildProcess, spawn } from 'child_process';
 import { once } from 'events';
 
 import { Collection, CommandStartedEvent, MongoClient, MongoDriverError } from '../../mongodb';
@@ -59,31 +59,32 @@ describe('Sessions Prose Tests', () => {
   describe('When sessions are not supported', () => {
     const mongocryptdTestPort = '27022';
     let client: MongoClient;
+    let childProcess: ChildProcess;
     before(() => {
-      const childProcess = spawn(
-        'mongocryptd',
-        ['--port', mongocryptdTestPort, '--ipv6', '--idleShutdownTimeoutSecs', '10'],
-        {
-          stdio: 'ignore',
-          detached: true
-        }
-      );
+      childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
+        stdio: 'ignore',
+        detached: true
+      });
 
-      childProcess.on('error', () => null);
-
-      // unref child to remove handle from event loop
-      childProcess.unref();
+      childProcess.on('error', err => {
+        console.warn('Sessions prose mongocryptd error:', err);
+      });
     });
 
     afterEach(async () => {
       await client?.close();
     });
 
+    after(() => {
+      childProcess.kill();
+    });
+
     it(
       '18. Implicit session is ignored if connection does not support sessions',
       {
         requires: {
-          clientSideEncryption: true
+          clientSideEncryption: true,
+          mongodb: '>=4.2.0'
         }
       },
       async function () {
@@ -137,7 +138,8 @@ describe('Sessions Prose Tests', () => {
       '19. Explicit session raises an error if connection does not support sessions',
       {
         requires: {
-          clientSideEncryption: true
+          clientSideEncryption: true,
+          mongodb: '>=4.2.0'
         }
       },
       async function () {
