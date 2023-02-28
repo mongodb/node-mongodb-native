@@ -316,6 +316,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this[kDelayedTimeoutId] = null;
     }
 
+    this[kStream].setTimeout(0);
+
     // always emit the message, in case we are streaming
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
@@ -683,6 +685,8 @@ function write(
   if (typeof options.socketTimeoutMS === 'number') {
     operationDescription.socketTimeoutOverride = true;
     conn[kStream].setTimeout(options.socketTimeoutMS);
+  } else if (conn.socketTimeoutMS !== 0) {
+    conn[kStream].setTimeout(conn.socketTimeoutMS);
   }
 
   // if command monitoring is enabled we need to modify the callback here
@@ -692,7 +696,7 @@ function write(
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       // Command monitoring spec states that if ok is 1, then we must always emit
-      // a command suceeded event, even if there's an error. Write concern errors
+      // a command succeeded event, even if there's an error. Write concern errors
       // will have an ok: 1 in their reply.
       if (err && reply?.ok !== 1) {
         conn.emit(
