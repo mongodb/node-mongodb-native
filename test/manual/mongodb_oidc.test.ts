@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 
 import { expect } from 'chai';
 
-import { MongoClient, OIDC_WORKFLOWS } from '../mongodb';
+import { MongoClient, MongoInvalidArgumentError, OIDC_WORKFLOWS } from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {
@@ -254,7 +254,7 @@ describe('MONGODB-OIDC', function () {
             new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
             );
-          }).to.throw(/DEVICE_NAME|REQUEST_TOKEN_CALLBACK/);
+          }).to.throw(MongoInvalidArgumentError, /DEVICE_NAME|REQUEST_TOKEN_CALLBACK/);
         });
       });
     });
