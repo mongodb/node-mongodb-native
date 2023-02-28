@@ -18,6 +18,15 @@ import {
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
 
+const CONNECT_DEFAULTS = {
+  id: 1,
+  tls: false,
+  generation: 1,
+  monitorCommands: false,
+  metadata: {} as ClientMetadata,
+  loadBalanced: false
+};
+
 describe('Connect Tests', function () {
   context('when PLAIN auth enabled', () => {
     const test: {
@@ -29,12 +38,7 @@ describe('Connect Tests', function () {
       const mockServer = await mock.createServer();
       test.server = mockServer;
       test.connectOptions = {
-        id: 1,
-        tls: false,
-        generation: 1,
-        monitorCommands: false,
-        metadata: {} as ClientMetadata,
-        loadBalanced: false,
+        ...CONNECT_DEFAULTS,
         hostAddress: test.server.hostAddress() as HostAddress,
         credentials: new MongoCredentials({
           username: 'testUser',
@@ -109,6 +113,39 @@ describe('Connect Tests', function () {
 
         done(err);
       });
+    });
+  });
+
+  context('when creating a connection', () => {
+    let server;
+    let connectOptions;
+    let connection: Connection;
+
+    beforeEach(async () => {
+      server = await mock.createServer();
+      server.setMessageHandler(request => {
+        if (isHello(request.document)) {
+          request.reply(mock.HELLO);
+        }
+      });
+      connectOptions = {
+        ...CONNECT_DEFAULTS,
+        hostAddress: server.hostAddress() as HostAddress
+      };
+
+      connection = await promisify<Connection>(callback =>
+        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+        connect(connectOptions, callback)
+      )();
+    });
+
+    afterEach(async () => {
+      connection.destroy({ force: true });
+      await mock.cleanup();
+    });
+
+    it('creates a connection with an infinite timeout', async () => {
+      expect(connection.stream).to.have.property('timeout', 0);
     });
   });
 
