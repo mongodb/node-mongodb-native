@@ -6,6 +6,7 @@ import {
   CancellationToken,
   ClientMetadata,
   connect,
+  Connection,
   ConnectionOptions,
   HostAddress,
   isHello,
@@ -17,95 +18,97 @@ import {
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
 
-describe.only('Connect Tests', function () {
-  const test: {
-    server?: any;
-    connectOptions?: ConnectionOptions;
-  } = {};
+describe('Connect Tests', function () {
+  context('when PLAIN auth enabled', () => {
+    const test: {
+      server?: any;
+      connectOptions?: ConnectionOptions;
+    } = {};
 
-  beforeEach(async () => {
-    const mockServer = await mock.createServer();
-    test.server = mockServer;
-    test.connectOptions = {
-      id: 1,
-      tls: false,
-      generation: 1,
-      monitorCommands: false,
-      metadata: {} as ClientMetadata,
-      loadBalanced: false,
-      hostAddress: test.server.hostAddress() as HostAddress,
-      credentials: new MongoCredentials({
-        username: 'testUser',
-        password: 'pencil',
-        source: 'admin',
-        mechanism: 'PLAIN',
-        mechanismProperties: {}
-      })
-    };
-  });
-
-  afterEach(() => mock.cleanup());
-
-  it('should auth against a non-arbiter', function (done) {
-    const whatHappened = {};
-
-    test.server.setMessageHandler(request => {
-      const doc = request.document;
-      const $clusterTime = genClusterTime(Date.now());
-
-      if (isHello(doc)) {
-        whatHappened[LEGACY_HELLO_COMMAND] = true;
-        request.reply(
-          Object.assign({}, mock.HELLO, {
-            $clusterTime
-          })
-        );
-      } else if (doc.saslStart) {
-        whatHappened.saslStart = true;
-        request.reply({ ok: 1 });
-      }
+    beforeEach(async () => {
+      const mockServer = await mock.createServer();
+      test.server = mockServer;
+      test.connectOptions = {
+        id: 1,
+        tls: false,
+        generation: 1,
+        monitorCommands: false,
+        metadata: {} as ClientMetadata,
+        loadBalanced: false,
+        hostAddress: test.server.hostAddress() as HostAddress,
+        credentials: new MongoCredentials({
+          username: 'testUser',
+          password: 'pencil',
+          source: 'admin',
+          mechanism: 'PLAIN',
+          mechanismProperties: {}
+        })
+      };
     });
 
-    connect(test.connectOptions, err => {
-      try {
-        expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
-        expect(whatHappened).to.have.property('saslStart', true);
-      } catch (_err) {
-        err = _err;
-      }
+    afterEach(() => mock.cleanup());
 
-      done(err);
+    it('should auth against a non-arbiter', function (done) {
+      const whatHappened = {};
+
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        const $clusterTime = genClusterTime(Date.now());
+
+        if (isHello(doc)) {
+          whatHappened[LEGACY_HELLO_COMMAND] = true;
+          request.reply(
+            Object.assign({}, mock.HELLO, {
+              $clusterTime
+            })
+          );
+        } else if (doc.saslStart) {
+          whatHappened.saslStart = true;
+          request.reply({ ok: 1 });
+        }
+      });
+
+      connect(test.connectOptions, err => {
+        try {
+          expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
+          expect(whatHappened).to.have.property('saslStart', true);
+        } catch (_err) {
+          err = _err;
+        }
+
+        done(err);
+      });
     });
-  });
 
-  it('should not auth against an arbiter', function (done) {
-    const whatHappened = {};
-    test.server.setMessageHandler(request => {
-      const doc = request.document;
-      const $clusterTime = genClusterTime(Date.now());
-      if (isHello(doc)) {
-        whatHappened[LEGACY_HELLO_COMMAND] = true;
-        request.reply(
-          Object.assign({}, mock.HELLO, {
-            $clusterTime,
-            arbiterOnly: true
-          })
-        );
-      } else if (doc.saslStart) {
-        whatHappened.saslStart = true;
-        request.reply({ ok: 0 });
-      }
-    });
+    it('should not auth against an arbiter', function (done) {
+      const whatHappened = {};
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        const $clusterTime = genClusterTime(Date.now());
+        if (isHello(doc)) {
+          whatHappened[LEGACY_HELLO_COMMAND] = true;
+          request.reply(
+            Object.assign({}, mock.HELLO, {
+              $clusterTime,
+              arbiterOnly: true
+            })
+          );
+        } else if (doc.saslStart) {
+          whatHappened.saslStart = true;
+          request.reply({ ok: 0 });
+        }
+      });
 
-    connect(test.connectOptions, err => {
-      try {
-        expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
-        expect(whatHappened).to.not.have.property('saslStart');
-      } catch (_err) {
-        err = _err;
-      }
+      connect(test.connectOptions, err => {
+        try {
+          expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
+          expect(whatHappened).to.not.have.property('saslStart');
+        } catch (_err) {
+          err = _err;
+        }
 
-      done(err);
+        done(err);
+      });
     });
   });
 
