@@ -16,8 +16,10 @@ import {
   CONNECTION_READY
 } from '../constants';
 import {
+  MONGODB_ERROR_CODES,
   MongoError,
   MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
   MongoNetworkError,
   MongoRuntimeError,
   MongoServerError
@@ -25,7 +27,8 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Callback, eachAsync, List, makeCounter } from '../utils';
-import { connect } from './connect';
+import { AuthContext } from './auth/auth_provider';
+import { AUTH_PROVIDERS, connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import {
   ConnectionCheckedInEvent,
@@ -544,7 +547,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       fn(undefined, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
-            callback(fnErr);
+            if ((fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
+              this.reauthenticate(conn, fn, (error, res) => {
+                if (error) {
+                  callback(error);
+                } else {
+                  callback(undefined, res);
+                }
+              });
+            } else {
+              callback(fnErr);
+            }
           } else {
             callback(undefined, result);
           }
@@ -559,7 +572,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       fn(err as MongoError, conn, (fnErr, result) => {
         if (typeof callback === 'function') {
           if (fnErr) {
-            callback(fnErr);
+            if (conn && (fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
+              this.reauthenticate(conn, fn, (error, res) => {
+                if (error) {
+                  callback(error);
+                } else {
+                  callback(undefined, res);
+                }
+              });
+            } else {
+              callback(fnErr);
+            }
           } else {
             callback(undefined, result);
           }
@@ -570,6 +593,55 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
       });
     });
+  }
+
+  /**
+   * Reauthenticate on the same connection and then retry the operation.
+   */
+  private reauthenticate(
+    connection: Connection,
+    fn: WithConnectionCallback,
+    callback: Callback
+  ): void {
+    const authContext = new AuthContext(connection, connection.credentials, {
+      id: connection.id,
+      generation: connection.generation,
+      monitorCommands: connection.monitorCommands,
+      loadBalanced: connection.loadBalanced,
+      hostAddress: connection.hostAddress,
+      tls: connection.tls,
+      metadata: connection.metadata,
+      reauthenticate: true
+    });
+    const credentials = connection.credentials;
+    if (credentials) {
+      const provider = AUTH_PROVIDERS.get(credentials.mechanism);
+      if (provider) {
+        provider.auth(authContext, error => {
+          if (error) {
+            return callback(error);
+          }
+          return fn(undefined, connection, (fnErr, fnResult) => {
+            if (fnErr) {
+              return callback(fnErr);
+            }
+            callback(undefined, fnResult);
+          });
+        });
+      } else {
+        callback(
+          new MongoMissingCredentialsError(
+            `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
+          )
+        );
+      }
+    } else {
+      callback(
+        new MongoMissingCredentialsError(
+          'Connection is missing credentials when asked to reauthenticate'
+        )
+      );
+    }
   }
 
   /** Clear the min pool size timer */

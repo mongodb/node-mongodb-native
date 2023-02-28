@@ -36,7 +36,8 @@ import {
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
 
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
+/** @internal */
+export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],

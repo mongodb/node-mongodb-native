@@ -459,6 +459,8 @@ describe('MONGODB-OIDC', function () {
       let findStarted = 0;
       let findSucceeded = 0;
       let findFailed = 0;
+      let saslStarted = 0;
+      let saslSucceeded = 0;
       let client;
       let collection;
       const cache = OIDC_WORKFLOWS.callback.cache;
@@ -481,21 +483,24 @@ describe('MONGODB-OIDC', function () {
       };
 
       const commandStarted = event => {
-        console.log(event);
         if (event.commandName === 'find') {
           findStarted++;
+        }
+        if (event.commandName === 'saslStart') {
+          saslStarted++;
         }
       };
 
       const commandSucceeded = event => {
-        console.log(event);
         if (event.commandName === 'find') {
           findSucceeded++;
+        }
+        if (event.commandName === 'saslStart') {
+          saslSucceeded++;
         }
       };
 
       const commandFailed = event => {
-        console.log(event);
         if (event.commandName === 'find') {
           findFailed++;
         }
@@ -504,7 +509,6 @@ describe('MONGODB-OIDC', function () {
       before(function () {
         // - Clear the cache
         cache.clear();
-        refreshInvokations = 0;
         // - Create a client with the callbacks and an event listener capable of
         //   listening for SASL commands
         //
@@ -527,6 +531,15 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('on the first find invokation', function () {
+        before(function () {
+          findStarted = 0;
+          findSucceeded = 0;
+          findFailed = 0;
+          refreshInvokations = 0;
+          saslStarted = 0;
+          saslSucceeded = 0;
+        });
+
         // - Perform a find operation.
         // - Assert that the refresh callback has not been called.
         it('does not call the refresh callback', async function () {
@@ -538,6 +551,12 @@ describe('MONGODB-OIDC', function () {
       context('when a command errors and needs reauthentication', function () {
         //  Force a reauthenication using a failCommand of the form:
         before(async function () {
+          findStarted = 0;
+          findSucceeded = 0;
+          findFailed = 0;
+          refreshInvokations = 0;
+          saslStarted = 0;
+          saslSucceeded = 0;
           await client.db('admin').command({
             configureFailPoint: 'failCommand',
             mode: { times: 1 },
@@ -557,16 +576,22 @@ describe('MONGODB-OIDC', function () {
 
         // - Assert that a find operation was started twice and a saslStart operation
         //   was started once during the command execution.
-        // - TODO(NODE-3494): Driver does not observe sensitive commands.
         it('starts the find operation twice', function () {
           expect(findStarted).to.equal(2);
         });
 
+        it('starts saslStart once', function () {
+          expect(saslStarted).to.equal(1);
+        });
+
         // - Assert that a find operation succeeeded once and the saslStart operation
         //   succeeded during the command execution.
-        // - TODO(NODE-3494): Driver does not observe sensitive commands.
         it('succeeds on the find once', function () {
           expect(findSucceeded).to.equal(1);
+        });
+
+        it('succeeds on saslStart once', function () {
+          expect(saslSucceeded).to.equal(1);
         });
 
         // Assert that a find operation failed once during the command execution.

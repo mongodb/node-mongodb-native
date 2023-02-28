@@ -65,7 +65,7 @@ export class MongoDBOIDC extends AuthProvider {
    * Authenticate using OIDC
    */
   override auth(authContext: AuthContext, callback: Callback): void {
-    const { connection, credentials, response } = authContext;
+    const { connection, credentials, response, options } = authContext;
 
     if (response?.speculativeAuthenticate) {
       return callback();
@@ -86,7 +86,7 @@ export class MongoDBOIDC extends AuthProvider {
           )
         );
       }
-      workflow.execute(connection, credentials).then(
+      workflow.execute(connection, credentials, options.reauthenticate).then(
         result => {
           return callback(undefined, result);
         },
