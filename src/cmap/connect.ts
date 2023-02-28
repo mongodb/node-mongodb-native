@@ -129,6 +129,7 @@ function performInitialHandshake(
     }
 
     const start = new Date().getTime();
+    console.log('handshakeDoc', handshakeDoc);
     conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
       if (err) {
         callback(err);
@@ -185,6 +186,7 @@ function performInitialHandshake(
             )
           );
         }
+        console.log('calling auth', authContext);
         provider.auth(authContext, err => {
           if (err) {
             if (err instanceof MongoError) {
