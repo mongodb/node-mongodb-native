@@ -705,7 +705,6 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    console.log('monitorCommands', command);
     conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
 
     operationDescription.started = now();

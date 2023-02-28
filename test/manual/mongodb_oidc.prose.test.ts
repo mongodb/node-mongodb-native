@@ -455,24 +455,20 @@ describe('MONGODB-OIDC', function () {
 
     // The driver MUST test reauthentication with MONGODB-OIDC for a read operation.
     describe('6. Reauthentication', function () {
-      let requestInvokations = 0;
       let refreshInvokations = 0;
       let findStarted = 0;
       let findSucceeded = 0;
       let findFailed = 0;
-      let saslStartStarted = 0;
-      let saslStartSuceeded = 0;
       let client;
       let collection;
       const cache = OIDC_WORKFLOWS.callback.cache;
 
       // - Create request and refresh callbacks that return valid credentials that
-      //   will not expire soon. 
+      //   will not expire soon.
       const requestCallback = async () => {
         const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
           encoding: 'utf8'
         });
-        requestInvokations++;
         return { accessToken: token, expiresInSeconds: 300 };
       };
 
@@ -484,25 +480,35 @@ describe('MONGODB-OIDC', function () {
         return { accessToken: token, expiresInSeconds: 300 };
       };
 
-      const commandStarted = (event) => {
+      const commandStarted = event => {
         console.log(event);
+        if (event.commandName === 'find') {
+          findStarted++;
+        }
       };
 
-      const commandSucceeded = (event) => {
+      const commandSucceeded = event => {
         console.log(event);
+        if (event.commandName === 'find') {
+          findSucceeded++;
+        }
       };
 
-      const commandFailed = (event) => {
+      const commandFailed = event => {
         console.log(event);
+        if (event.commandName === 'find') {
+          findFailed++;
+        }
       };
 
       before(function () {
         // - Clear the cache
         cache.clear();
-        requestInvokations = 0;
         refreshInvokations = 0;
         // - Create a client with the callbacks and an event listener capable of
         //   listening for SASL commands
+        //
+        // - TODO(NODE-3494): Driver does not observe sensitive commands.
         client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
           authMechanismProperties: {
             REQUEST_TOKEN_CALLBACK: requestCallback,
@@ -516,9 +522,13 @@ describe('MONGODB-OIDC', function () {
         collection = client.db('test').collection('test');
       });
 
+      after(async function () {
+        await client?.close();
+      });
+
       context('on the first find invokation', function () {
         // - Perform a find operation.
-        // - Assert that the refresh callback has not been called. 
+        // - Assert that the refresh callback has not been called.
         it('does not call the refresh callback', async function () {
           await collection.findOne();
           expect(refreshInvokations).to.equal(0);
@@ -526,7 +536,43 @@ describe('MONGODB-OIDC', function () {
       });
 
       context('when a command errors and needs reauthentication', function () {
+        //  Force a reauthenication using a failCommand of the form:
+        before(async function () {
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: { times: 1 },
+            data: {
+              failCommands: ['find'],
+              errorCode: 391
+            }
+          });
+          // Perform another find operation.
+          await collection.findOne();
+        });
 
+        // - Assert that the refresh callback has been called, if possible.
+        it('calls the refresh callback', function () {
+          expect(refreshInvokations).to.equal(1);
+        });
+
+        // - Assert that a find operation was started twice and a saslStart operation
+        //   was started once during the command execution.
+        // - TODO(NODE-3494): Driver does not observe sensitive commands.
+        it('starts the find operation twice', function () {
+          expect(findStarted).to.equal(2);
+        });
+
+        // - Assert that a find operation succeeeded once and the saslStart operation
+        //   succeeded during the command execution.
+        // - TODO(NODE-3494): Driver does not observe sensitive commands.
+        it('succeeds on the find once', function () {
+          expect(findSucceeded).to.equal(1);
+        });
+
+        // Assert that a find operation failed once during the command execution.
+        it('fails on the find once', function () {
+          expect(findFailed).to.equal(1);
+        });
       });
     });
   });
