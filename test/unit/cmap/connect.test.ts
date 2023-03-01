@@ -205,7 +205,7 @@ describe('Connect Tests', function () {
       expect(streamSetTimeoutSpy).to.have.been.calledWith(2000);
     });
 
-    it('clears timeout after getting a message', async () => {
+    it('clears timeout after getting a message if moreToCome=false', async () => {
       connection.stream.setTimeout(1);
       const msg = generateOpMsgBuffer({ hello: 1 });
       const msgHeader = {
@@ -222,6 +222,26 @@ describe('Connect Tests', function () {
       }
       // timeout is still reset
       expect(connection.stream).to.have.property('timeout', 0);
+    });
+
+    it('does not clear timeout after getting a message if moreToCome=true', async () => {
+      connection.stream.setTimeout(1);
+      const msg = generateOpMsgBuffer({ hello: 1 });
+      const msgHeader = {
+        length: msg.readInt32LE(0),
+        requestId: 1,
+        responseTo: 0,
+        opCode: msg.readInt32LE(12)
+      };
+      const msgBody = msg.subarray(16);
+      msgBody.writeInt32LE(2); // OPTS_MORE_TO_COME
+      try {
+        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+      } catch {
+        // regardless of outcome
+      }
+      // timeout is still set
+      expect(connection.stream).to.have.property('timeout', 1);
     });
   });
 
