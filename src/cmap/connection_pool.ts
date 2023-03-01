@@ -27,7 +27,6 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Callback, eachAsync, List, makeCounter } from '../utils';
-import { AuthContext } from './auth/auth_provider';
 import { AUTH_PROVIDERS, connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import {
@@ -603,46 +602,40 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     fn: WithConnectionCallback,
     callback: Callback
   ): void {
-    const authContext = new AuthContext(connection, connection.credentials, {
-      id: connection.id,
-      generation: connection.generation,
-      monitorCommands: connection.monitorCommands,
-      loadBalanced: connection.loadBalanced,
-      hostAddress: connection.hostAddress,
-      tls: connection.tls,
-      metadata: connection.metadata,
-      reauthenticate: true
-    });
-    const credentials = connection.credentials;
-    if (credentials) {
-      const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello || undefined);
-      const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
-      if (provider) {
-        provider.auth(authContext, error => {
-          if (error) {
-            return callback(error);
-          }
-          return fn(undefined, connection, (fnErr, fnResult) => {
-            if (fnErr) {
-              return callback(fnErr);
-            }
-            callback(undefined, fnResult);
-          });
-        });
-      } else {
-        callback(
-          new MongoMissingCredentialsError(
-            `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
-          )
-        );
-      }
-    } else {
-      callback(
+    const authContext = connection.authContext;
+    if (!authContext) {
+      return callback(new MongoRuntimeError('No auth context found on connection.'));
+    }
+    authContext.reauthenticating = true;
+    const credentials = authContext.credentials;
+    if (!credentials) {
+      return callback(
         new MongoMissingCredentialsError(
           'Connection is missing credentials when asked to reauthenticate'
         )
       );
     }
+    const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello || undefined);
+    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    if (!provider) {
+      return callback(
+        new MongoMissingCredentialsError(
+          `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
+        )
+      );
+    }
+    provider.auth(authContext, error => {
+      authContext.reauthenticating = false;
+      if (error) {
+        return callback(error);
+      }
+      return fn(undefined, connection, (fnErr, fnResult) => {
+        if (fnErr) {
+          return callback(fnErr);
+        }
+        callback(undefined, fnResult);
+      });
+    });
   }
 
   /** Clear the min pool size timer */

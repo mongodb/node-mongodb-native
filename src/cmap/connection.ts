@@ -37,6 +37,7 @@ import {
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
+import type { AuthContext } from './auth/auth_provider';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import {
   CommandFailedEvent,
@@ -117,7 +118,6 @@ export interface ConnectionOptions
   autoEncrypter?: AutoEncrypter;
   serverApi?: ServerApi;
   monitorCommands: boolean;
-  reauthenticate?: boolean;
   /** @internal */
   connectionType?: typeof Connection;
   credentials?: MongoCredentials;
@@ -165,10 +165,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     cmd: Document,
     options: CommandOptions | undefined
   ) => Promise<Document>;
-  credentials?: MongoCredentials;
-  hostAddress: HostAddress;
-  tls: boolean;
-  metadata: ClientMetadata;
+  /** @internal */
+  authContext?: AuthContext;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
@@ -218,10 +216,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       ) => this.command(ns, cmd, options, callback as any)
     );
 
-    this.credentials = options.credentials;
-    this.hostAddress = options.hostAddress;
-    this.tls = options.tls;
-    this.metadata = options.metadata;
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
