@@ -118,6 +118,7 @@ function performInitialHandshake(
   }
 
   const authContext = new AuthContext(conn, credentials, options);
+  conn.authContext = authContext;
   prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
     if (err || !handshakeDoc) {
       return callback(err);

@@ -53,8 +53,8 @@ class ScramSHA extends AuthProvider {
   }
 
   override auth(authContext: AuthContext, callback: Callback) {
-    const response = authContext.response;
-    if (response && response.speculativeAuthenticate) {
+    const { reauthenticating, response } = authContext;
+    if (response?.speculativeAuthenticate && !reauthenticating) {
       continueScramConversation(
         this.cryptoMethod,
         response.speculativeAuthenticate,
