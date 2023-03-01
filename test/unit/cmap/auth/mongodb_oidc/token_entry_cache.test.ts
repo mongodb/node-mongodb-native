@@ -35,7 +35,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('creates an expiration', function () {
-        expect(entry.expiration).to.be.at.most(Date.now() * 100 * 1000);
+        expect(entry.expiration).to.be.within(Date.now(), Date.now() + 100 * 1000);
       });
     });
 
