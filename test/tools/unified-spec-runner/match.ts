@@ -547,8 +547,8 @@ export function matchesEvents(
 }
 
 export function compareLogs(
-  actual: ExpectedLogMessage[],
   expected: ExpectedLogMessage[],
+  actual: ExpectedLogMessage[],
   entities: EntitiesMap
 ): void {
   expect(actual).to.have.lengthOf(expected.length);
@@ -563,12 +563,17 @@ export function compareLogs(
     // Check that components match
     expect(actualLog.component).to.deep.equal(expectedLog.component);
 
-    //FIXME: Implement me
+    // NOTE: The spec states that if the failureIsRedacted flag is present, we
+    // must assert that a failure occurred.
     if (expectedLog.failureIsRedacted !== undefined) {
       if (expectedLog.failureIsRedacted) {
-        // Assert that a failure is present and has been redacted in accordance with the CLAM spec
+        // Assert that a failure is present and has been redacted
+        expect(actualLog.data.failure).to.exist;
+        expect(actualLog.data.failure).to.deep.equal({});
       } else {
-        // Assert that a failure did occur and has not been redacted
+        // Assert that a failure is present and has not been redacted
+        expect(actualLog.data.failure).to.exist;
+        expect(actualLog.data.failure).to.not.deep.equal({});
       }
     }
 
