@@ -3,14 +3,14 @@ import { expect } from 'chai';
 import { TokenEntry, TokenEntryCache } from '../../../../mongodb';
 
 describe('TokenEntryCache', function () {
-  const tokenResultWithExpiration = {
+  const tokenResultWithExpiration = Object.freeze({
     accessToken: 'test',
     expiresInSeconds: 100
-  };
+  });
 
-  const serverResult = {
+  const serverResult = Object.freeze({
     clientId: '1'
-  };
+  });
 
   describe('#addEntry', function () {
     context('when expiresInSeconds is provided', function () {
@@ -43,7 +43,7 @@ describe('TokenEntryCache', function () {
       const cache = new TokenEntryCache();
       let entry: TokenEntry | undefined;
 
-      const expiredResult = { accessToken: 'test' };
+      const expiredResult = Object.freeze({ accessToken: 'test' });
 
       before(function () {
         cache.addEntry('localhost', 'user', expiredResult, serverResult);
@@ -72,10 +72,10 @@ describe('TokenEntryCache', function () {
   describe('#deleteExpiredEntries', function () {
     const cache = new TokenEntryCache();
 
-    const nonExpiredResult = {
+    const nonExpiredResult = Object.freeze({
       accessToken: 'test',
       expiresInSeconds: 600
-    };
+    });
 
     before(function () {
       cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
@@ -85,6 +85,8 @@ describe('TokenEntryCache', function () {
 
     it('deletes all expired tokens from the cache', function () {
       expect(cache.entries.size).to.equal(1);
+      expect(cache.entries.has('localhost-user')).to.be.false;
+      expect(cache.entries.has('localhost-user2')).to.be.true;
     });
   });
 
@@ -111,7 +113,7 @@ describe('TokenEntryCache', function () {
 
     context('when there is a matching entry', function () {
       it('returns the entry', function () {
-        expect(cache.getEntry('localhost', 'user')?.tokenResult).to.deep.equal(
+        expect(cache.getEntry('localhost', 'user')?.tokenResult).to.equal(
           tokenResultWithExpiration
         );
       });
