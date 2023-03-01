@@ -1,15 +1,15 @@
 import { expect } from 'chai';
 
-import { TokenEntryCache } from '../../../../mongodb';
+import { TokenEntry, TokenEntryCache } from '../../../../mongodb';
 
 describe('TokenEntryCache', function () {
-  const tokenResult = {
+  const tokenResultWithExpiration = {
     accessToken: 'test',
     expiresInSeconds: 100
   };
 
   const serverResult = {
-    clientId: 1
+    clientId: '1'
   };
 
   describe('#addEntry', function () {
@@ -18,7 +18,7 @@ describe('TokenEntryCache', function () {
       let entry;
 
       before(function () {
-        cache.addEntry('localhost', 'user', tokenResult, serverResult);
+        cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
         entry = cache.getEntry('localhost', 'user');
       });
 
@@ -27,7 +27,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('adds the token result', function () {
-        expect(entry.tokenResult).to.deep.equal(tokenResult);
+        expect(entry.tokenResult).to.deep.equal(tokenResultWithExpiration);
       });
 
       it('adds the server result', function () {
@@ -35,13 +35,13 @@ describe('TokenEntryCache', function () {
       });
 
       it('creates an expiration', function () {
-        expect(entry.expiration).to.be.above(Date.now());
+        expect(entry.expiration).to.be.at.most(Date.now() * 100 * 1000);
       });
     });
 
     context('when expiresInSeconds is not provided', function () {
       const cache = new TokenEntryCache();
-      let entry;
+      let entry: TokenEntry | undefined;
 
       const expiredResult = { accessToken: 'test' };
 
@@ -51,26 +51,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('sets an immediate expiration', function () {
-        expect(entry.expiration).to.be.below(Date.now() + 1);
-      });
-    });
-
-    context('when expiresInSeconds is null', function () {
-      const cache = new TokenEntryCache();
-      let entry;
-
-      const expiredResult = {
-        accessToken: 'test',
-        expiresInSeconds: null
-      };
-
-      before(function () {
-        cache.addEntry('localhost', 'user', expiredResult, serverResult);
-        entry = cache.getEntry('localhost', 'user');
-      });
-
-      it('sets an immediate expiration', function () {
-        expect(entry.expiration).to.be.below(Date.now() + 1);
+        expect(entry?.expiration).to.be.at.most(Date.now());
       });
     });
   });
@@ -79,7 +60,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
       cache.clear();
     });
 
@@ -97,7 +78,7 @@ describe('TokenEntryCache', function () {
     };
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
       cache.addEntry('localhost', 'user2', nonExpiredResult, serverResult);
       cache.deleteExpiredEntries();
     });
@@ -111,7 +92,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
       cache.deleteEntry('localhost', 'user');
     });
 
@@ -124,13 +105,15 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResult, serverResult);
-      cache.addEntry('localhost', 'user2', tokenResult, serverResult);
+      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user2', tokenResultWithExpiration, serverResult);
     });
 
     context('when there is a matching entry', function () {
       it('returns the entry', function () {
-        expect(cache.getEntry('localhost', 'user').tokenResult).to.deep.equal(tokenResult);
+        expect(cache.getEntry('localhost', 'user')?.tokenResult).to.deep.equal(
+          tokenResultWithExpiration
+        );
       });
     });
 

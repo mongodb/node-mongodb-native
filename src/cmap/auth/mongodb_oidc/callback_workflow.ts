@@ -145,28 +145,22 @@ export class CallbackWorkflow implements Workflow {
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     // Always clear expired entries from the cache on each finish as cleanup.
     this.cache.deleteExpiredEntries();
-    if (request) {
-      const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT_MS);
-      // Validate the result.
-      if (!tokenResult || !tokenResult.accessToken) {
-        throw new MongoMissingCredentialsError(
-          'REQUEST_TOKEN_CALLBACK must return a valid object with an accessToken'
-        );
-      }
-      // Cache a new entry and continue with the saslContinue.
-      this.cache.addEntry(
-        connection.address,
-        credentials.username || '',
-        tokenResult,
-        stepOneResult
-      );
-      return finishAuth(tokenResult, conversationId, connection, credentials);
-    } else {
+    if (!request) {
       // Request callback must be present.
       throw new MongoInvalidArgumentError(
         'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
+    const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT_MS);
+    // Validate the result.
+    if (!tokenResult || !tokenResult.accessToken) {
+      throw new MongoMissingCredentialsError(
+        'REQUEST_TOKEN_CALLBACK must return a valid object with an accessToken'
+      );
+    }
+    // Cache a new entry and continue with the saslContinue.
+    this.cache.addEntry(connection.address, credentials.username || '', tokenResult, stepOneResult);
+    return finishAuth(tokenResult, conversationId, connection, credentials);
   }
 }
 

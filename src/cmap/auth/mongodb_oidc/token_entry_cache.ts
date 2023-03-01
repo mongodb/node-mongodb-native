@@ -96,7 +96,7 @@ export class TokenEntryCache {
 }
 
 /**
- * Get an expiration time in milliseconds past epoch. Defaults to 5 hours.
+ * Get an expiration time in milliseconds past epoch. Defaults to immediate.
  */
 function expirationTime(expiresInSeconds?: number): number {
   return Date.now() + (expiresInSeconds ?? DEFAULT_EXPIRATION_SECS) * 1000;

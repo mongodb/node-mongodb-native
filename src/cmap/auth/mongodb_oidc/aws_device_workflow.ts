@@ -18,10 +18,9 @@ export class AwsDeviceWorkflow extends DeviceWorkflow {
    */
   async getToken(): Promise<string> {
     const tokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
-    if (tokenFile) {
-      return readFile(tokenFile, 'utf8');
-    } else {
+    if (!tokenFile) {
       throw new MongoAWSError('AWS_WEB_IDENTITY_TOKEN_FILE must be set in the environment.');
     }
+    return readFile(tokenFile, 'utf8');
   }
 }

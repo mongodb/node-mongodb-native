@@ -1,4 +1,8 @@
-import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
+import {
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
+  MongoRuntimeError
+} from '../../error';
 import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -66,7 +70,7 @@ export class MongoDBOIDC extends AuthProvider {
   override auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials, response } = authContext;
 
-    if (response && response.speculativeAuthenticate) {
+    if (response?.speculativeAuthenticate) {
       return callback();
     }
 
@@ -75,8 +79,15 @@ export class MongoDBOIDC extends AuthProvider {
     }
 
     getWorkflow(credentials, (error, workflow) => {
-      if (error || !workflow) {
+      if (error) {
         return callback(error);
+      }
+      if (!workflow) {
+        return callback(
+          new MongoRuntimeError(
+            `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+          )
+        );
       }
       workflow.execute(connection, credentials).then(
         result => {
@@ -104,8 +115,15 @@ export class MongoDBOIDC extends AuthProvider {
     }
 
     getWorkflow(credentials, (error, workflow) => {
-      if (error || !workflow) {
+      if (error) {
         return callback(error);
+      }
+      if (!workflow) {
+        return callback(
+          new MongoRuntimeError(
+            `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+          )
+        );
       }
       workflow.speculativeAuth().then(
         result => {
