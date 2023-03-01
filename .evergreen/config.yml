@@ -68,6 +68,16 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+  bootstrap azure idms server:
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-azure-kms-mock-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
   bootstrap oidc:
     - command: ec2.assume_role
       params:
@@ -1003,6 +1013,7 @@ tasks:
     commands:
       - func: install dependencies
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run serverless tests
   - name: run-spec-benchmark-tests
     tags:
@@ -1067,6 +1078,43 @@ tasks:
             EXPECTED_GCPKMS_OUTCOME: failure
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
+  - name: test-azurekms-task
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        type: setup
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          env: null
+          args:
+            - src/.evergreen/copy-driver-to-azure.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            AZUREKMS_CMD: ls && env EXPECTED_AZUREKMS_OUTCOME=success bash src/.evergreen/run-azure-kms-tests.sh
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh
+  - name: test-azurekms-fail-task
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - command: subprocess.exec
+        type: test
+        params:
+          binary: bash
+          env:
+            EXPECTED_AZUREKMS_OUTCOME: failure
+          args:
+            - src/.evergreen/run-azure-kms-tests.sh
   - name: test-latest-server
     tags:
       - latest
@@ -1079,6 +1127,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-latest-replica_set
     tags:
@@ -1092,6 +1141,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-latest-sharded_cluster
     tags:
@@ -1105,6 +1155,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-server
     tags:
@@ -1118,6 +1169,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-replica_set
     tags:
@@ -1131,6 +1183,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-sharded_cluster
     tags:
@@ -1144,6 +1197,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-server
     tags:
@@ -1157,6 +1211,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-replica_set
     tags:
@@ -1170,6 +1225,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-sharded_cluster
     tags:
@@ -1183,6 +1239,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-server
     tags:
@@ -1196,6 +1253,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-replica_set
     tags:
@@ -1209,6 +1267,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-sharded_cluster
     tags:
@@ -1222,6 +1281,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-server
     tags:
@@ -1235,6 +1295,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-replica_set
     tags:
@@ -1248,6 +1309,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-sharded_cluster
     tags:
@@ -1261,6 +1323,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-server
     tags:
@@ -1274,6 +1337,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-replica_set
     tags:
@@ -1287,6 +1351,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-sharded_cluster
     tags:
@@ -1300,6 +1365,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-server
     tags:
@@ -1313,6 +1379,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-replica_set
     tags:
@@ -1326,6 +1393,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-sharded_cluster
     tags:
@@ -1339,6 +1407,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-server
     tags:
@@ -1352,6 +1421,7 @@ tasks:
           TOPOLOGY: server
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-replica_set
     tags:
@@ -1365,6 +1435,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-sharded_cluster
     tags:
@@ -1378,6 +1449,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: auth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-latest-server-v1-api
     tags:
@@ -2578,6 +2650,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-latest-replica_set-noauth
     tags:
@@ -2592,6 +2665,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-latest-sharded_cluster-noauth
     tags:
@@ -2606,6 +2680,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-server-noauth
     tags:
@@ -2620,6 +2695,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-replica_set-noauth
     tags:
@@ -2634,6 +2710,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-rapid-sharded_cluster-noauth
     tags:
@@ -2648,6 +2725,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-server-noauth
     tags:
@@ -2662,6 +2740,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-replica_set-noauth
     tags:
@@ -2676,6 +2755,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-6.0-sharded_cluster-noauth
     tags:
@@ -2690,6 +2770,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-server-noauth
     tags:
@@ -2704,6 +2785,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-replica_set-noauth
     tags:
@@ -2718,6 +2800,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-5.0-sharded_cluster-noauth
     tags:
@@ -2732,6 +2815,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-server-noauth
     tags:
@@ -2746,6 +2830,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-replica_set-noauth
     tags:
@@ -2760,6 +2845,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.4-sharded_cluster-noauth
     tags:
@@ -2774,6 +2860,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-server-noauth
     tags:
@@ -2788,6 +2875,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-replica_set-noauth
     tags:
@@ -2802,6 +2890,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.2-sharded_cluster-noauth
     tags:
@@ -2816,6 +2905,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-server-noauth
     tags:
@@ -2830,6 +2920,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-replica_set-noauth
     tags:
@@ -2844,6 +2935,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-4.0-sharded_cluster-noauth
     tags:
@@ -2858,6 +2950,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-server-noauth
     tags:
@@ -2872,6 +2965,7 @@ tasks:
           TOPOLOGY: server
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-replica_set-noauth
     tags:
@@ -2886,6 +2980,7 @@ tasks:
           TOPOLOGY: replica_set
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-3.6-sharded_cluster-noauth
     tags:
@@ -2900,6 +2995,7 @@ tasks:
           TOPOLOGY: sharded_cluster
           AUTH: noauth
       - func: bootstrap kms servers
+      - func: bootstrap azure idms server
       - func: run tests
   - name: test-lambda-example
     tags:
@@ -3088,6 +3184,30 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
     tasks:
       - test-gcpkms-task
+  - name: test_azurekms_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/setup-azure-vm.sh
+      - command: expansions.update
+        params:
+          file: src/testazurekms-expansions.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
+    tasks:
+      - test-azurekms-task
 pre:
   - func: fetch source
   - func: windows fix
@@ -3557,6 +3677,12 @@ buildvariants:
     tasks:
       - test_gcpkms_task_group
       - test-gcpkms-fail-task
+  - name: debian11-test-azure-kms
+    display_name: Azure KMS Test
+    run_on: debian11-small
+    tasks:
+      - test_azurekms_task_group
+      - test-azurekms-fail-task
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large

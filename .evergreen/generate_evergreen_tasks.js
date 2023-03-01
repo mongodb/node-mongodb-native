@@ -54,6 +54,7 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
         }
       },
       { func: 'bootstrap kms servers' },
+      { func: 'bootstrap azure idms server' },
       { func: 'run tests' }
     ]
   };
@@ -666,6 +667,13 @@ BUILD_VARIANTS.push({
   display_name: 'GCP KMS Test',
   run_on: 'debian11-small',
   tasks: ['test_gcpkms_task_group', 'test-gcpkms-fail-task']
+});
+
+BUILD_VARIANTS.push({
+  name: 'debian11-test-azure-kms',
+  display_name: 'Azure KMS Test',
+  run_on: 'debian11-small',
+  tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
 BUILD_VARIANTS.push({
