@@ -1282,7 +1282,9 @@ export const OPTIONS = {
   index: { type: 'any' },
   // Legacy Options, these are unused but left here to avoid errors with CSFLE lib
   useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
-  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor
+  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor,
+  // MongoLogger
+  mongodbLogPath: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
