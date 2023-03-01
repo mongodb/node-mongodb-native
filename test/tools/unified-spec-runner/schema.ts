@@ -268,7 +268,6 @@ export interface ExpectedEventsForClient {
 
 export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent;
 
-// TODO
 export interface ExpectedLogMessagesForClient {
   client: string;
   messages: ExpectedLogMessage[];
