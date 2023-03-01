@@ -620,7 +620,7 @@ export class CryptoConnection extends Connection {
 /** @internal */
 export function hasSessionSupport(conn: Connection): boolean {
   const description = conn.description;
-  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
+  return description.logicalSessionTimeoutMinutes != null;
 }
 
 function supportsOpMsg(conn: Connection) {
