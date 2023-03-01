@@ -108,24 +108,28 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
+// TODO: FIXME
 class LogCollector extends Writable {
-  _accumulator: Log[];
+  _logs: Log[];
   constructor(options: WritableOptions) {
     super({ ...options, objectMode: true });
-    this._accumulator = [];
+    this._logs = [];
+    this.on('data', function (log: Log) {
+      this._accumulator.push(log);
+    });
   }
 
   _write(chunk: any, encoding: string, next: (error?: Error) => void) {
-    this._accumulator.push(chunk as Log);
+    this._logs.push(chunk as Log);
     next();
   }
 
-  set accumulator(acc: Log[]) {
-    this._accumulator = acc;
+  set logs(logs: Log[]) {
+    this._logs = logs;
   }
 
-  get accumulator(): Log[] {
-    return this._accumulator;
+  get logs(): Log[] {
+    return this._logs;
   }
 }
 
@@ -193,7 +197,7 @@ export class UnifiedMongoClient extends MongoClient {
     });
     this.logs = [];
 
-    logCollector.accumulator = this.logs;
+    logCollector.logs = this.logs;
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
