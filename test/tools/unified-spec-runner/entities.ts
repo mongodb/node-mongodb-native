@@ -37,7 +37,14 @@ import {
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';
-import type { ClientEncryption, ClientEntity, EntityDescription, ExpectedLogMessage, ObservableLogComponent, ObservableLogSeverity } from './schema';
+import type {
+  ClientEncryption,
+  ClientEntity,
+  EntityDescription,
+  ExpectedLogMessage,
+  ObservableLogComponent,
+  ObservableLogSeverity
+} from './schema';
 import {
   createClientEncryption,
   makeConnectionString,
@@ -102,30 +109,32 @@ function getClient(address) {
 }
 
 class LogCollector extends Writable {
-  consumer: (chunk: Log) => void;
-  _sink: Log[];
+  _accumulator: Log[];
   constructor(options: WritableOptions) {
     super({ ...options, objectMode: true });
+    this._accumulator = [];
   }
 
-  set sink(s: Log[]) {
-    this._sink = s;
-    this.consumer = (l: Log) => {
-      this._sink.push(l);
-    }
+  _write(chunk: any, encoding: string, next: (error?: Error) => void) {
+    this._accumulator.push(chunk as Log);
+    next();
   }
 
-  write(chunk: any, cb?: ((e: Error | undefined | null) => void) | undefined) {
-    this.consumer(chunk as Log);
+  set accumulator(acc: Log[]) {
+    this._accumulator = acc;
+  }
+
+  get accumulator(): Log[] {
+    return this._accumulator;
   }
 }
+
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[] = [];
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
   logs: Log[] = [];
-  logSink: Writable;
 
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
@@ -172,19 +181,19 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    // TODO: Install a writable stream to capture logs
-    // TODO: configure the client to write to the new stream.
-    const logSink = new LogCollector({});
+    // TODO(NODE-4849): Install a writable stream to capture logs
+    const logCollector = new LogCollector({});
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
+      [Symbol.for('@@mdb.enableMongoLogger')]: true,
+      mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
+      ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
+    this.logs = [];
 
-    // Now the logs should be collected in this.logs;
-    logSink.sink = this.logs;
-
+    logCollector.accumulator = this.logs;
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -209,8 +218,6 @@ export class UnifiedMongoClient extends MongoClient {
     for (const eventName of this.observedSdamEvents) {
       this.on(eventName, this.pushSdamEvent);
     }
-
-    this.logSink = new Writable();
   }
 
   isIgnored(e: CommandEvent): boolean {
@@ -466,6 +473,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const map = entityMap ?? new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
+        // TODO(NODE-4849): check observeLogMessages to set the kinds of logs we should be collecting
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;

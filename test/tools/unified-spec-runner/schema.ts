@@ -129,7 +129,8 @@ export type ObservableCmapEventId =
   | 'connectionCheckedInEvent';
 
 export type ObservableLogComponent = 'command' | 'topology' | 'serverSelection' | 'connection';
-export type ObservableLogSeverity = 'emergency'
+export type ObservableLogSeverity =
+  | 'emergency'
   | 'alert'
   | 'critical'
   | 'error'
@@ -346,7 +347,7 @@ export type TestFilter = (test: Test, ctx: TestConfiguration) => string | false;
  */
 export interface ClientEncryption {
   // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new(client: MongoClient, options: any): ClientEncryption;
+  new (client: MongoClient, options: any): ClientEncryption;
   createDataKey(provider, options?: Document): Promise<any>;
   rewrapManyDataKey(filter, options): Promise<any>;
   deleteKey(id): Promise<any>;
