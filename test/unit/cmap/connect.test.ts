@@ -1,10 +1,8 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {
-  BinMsg,
   CancellationToken,
   ClientMetadata,
   connect,
@@ -15,12 +13,10 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoCredentials,
   MongoNetworkError,
-  ns,
   prepareHandshakeDocument as prepareHandshakeDocumentCb
 } from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
-import { generateOpMsgBuffer } from '../../tools/utils';
 
 const CONNECT_DEFAULTS = {
   id: 1,
@@ -155,93 +151,6 @@ describe('Connect Tests', function () {
 
     it('connection instance has property socketTimeoutMS equal to the value passed in the connectOptions', async () => {
       expect(connection).to.have.property('socketTimeoutMS', 15000);
-    });
-  });
-
-  context('when sending commands on a connection', () => {
-    let server;
-    let connectOptions;
-    let connection: Connection;
-    let streamSetTimeoutSpy;
-
-    beforeEach(async () => {
-      server = await mock.createServer();
-      server.setMessageHandler(request => {
-        if (isHello(request.document)) {
-          request.reply(mock.HELLO);
-        }
-      });
-      connectOptions = {
-        ...CONNECT_DEFAULTS,
-        hostAddress: server.hostAddress() as HostAddress,
-        socketTimeoutMS: 15000
-      };
-
-      connection = await promisify<Connection>(callback =>
-        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-        connect(connectOptions, callback)
-      )();
-
-      streamSetTimeoutSpy = sinon.spy(connection.stream, 'setTimeout');
-    });
-
-    afterEach(async () => {
-      connection.destroy({ force: true });
-      sinon.restore();
-      await mock.cleanup();
-    });
-
-    it('sets timeout specified on class before writing to the socket', async () => {
-      await promisify(callback =>
-        connection.command(ns('admin.$cmd'), { hello: 1 }, {}, callback)
-      )();
-      expect(streamSetTimeoutSpy).to.have.been.calledWith(15000);
-    });
-
-    it('sets timeout specified on options before writing to the socket', async () => {
-      await promisify(callback =>
-        connection.command(ns('admin.$cmd'), { hello: 1 }, { socketTimeoutMS: 2000 }, callback)
-      )();
-      expect(streamSetTimeoutSpy).to.have.been.calledWith(2000);
-    });
-
-    it('clears timeout after getting a message if moreToCome=false', async () => {
-      connection.stream.setTimeout(1);
-      const msg = generateOpMsgBuffer({ hello: 1 });
-      const msgHeader = {
-        length: msg.readInt32LE(0),
-        requestId: 1,
-        responseTo: 0,
-        opCode: msg.readInt32LE(12)
-      };
-      const msgBody = msg.subarray(16);
-      try {
-        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
-      } catch {
-        // regardless of outcome
-      }
-      // timeout is still reset
-      expect(connection.stream).to.have.property('timeout', 0);
-    });
-
-    it('does not clear timeout after getting a message if moreToCome=true', async () => {
-      connection.stream.setTimeout(1);
-      const msg = generateOpMsgBuffer({ hello: 1 });
-      const msgHeader = {
-        length: msg.readInt32LE(0),
-        requestId: 1,
-        responseTo: 0,
-        opCode: msg.readInt32LE(12)
-      };
-      const msgBody = msg.subarray(16);
-      msgBody.writeInt32LE(2); // OPTS_MORE_TO_COME
-      try {
-        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
-      } catch {
-        // regardless of outcome
-      }
-      // timeout is still set
-      expect(connection.stream).to.have.property('timeout', 1);
     });
   });
 

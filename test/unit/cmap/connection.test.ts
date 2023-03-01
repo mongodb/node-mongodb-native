@@ -4,12 +4,15 @@ import { Socket } from 'net';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import {
   BinMsg,
+  ClientMetadata,
   connect,
   Connection,
   hasSessionSupport,
+  HostAddress,
   isHello,
   MessageStream,
   MongoNetworkError,
@@ -411,6 +414,101 @@ describe('new Connection()', function () {
           expect(errorOne).to.be.instanceof(MongoRuntimeError);
           expect(errorTwo).to.be.instanceof(MongoRuntimeError);
         });
+      });
+    });
+
+    context('when sending commands on a connection', () => {
+      const CONNECT_DEFAULTS = {
+        id: 1,
+        tls: false,
+        generation: 1,
+        monitorCommands: false,
+        metadata: {} as ClientMetadata,
+        loadBalanced: false
+      };
+      let server;
+      let connectOptions;
+      let connection: Connection;
+      let streamSetTimeoutSpy;
+
+      beforeEach(async () => {
+        server = await mock.createServer();
+        server.setMessageHandler(request => {
+          if (isHello(request.document)) {
+            request.reply(mock.HELLO);
+          }
+        });
+        connectOptions = {
+          ...CONNECT_DEFAULTS,
+          hostAddress: server.hostAddress() as HostAddress,
+          socketTimeoutMS: 15000
+        };
+
+        connection = await promisify<Connection>(callback =>
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          connect(connectOptions, callback)
+        )();
+
+        streamSetTimeoutSpy = sinon.spy(connection.stream, 'setTimeout');
+      });
+
+      afterEach(async () => {
+        connection.destroy({ force: true });
+        sinon.restore();
+        await mock.cleanup();
+      });
+
+      it('sets timeout specified on class before writing to the socket', async () => {
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, {}, callback)
+        )();
+        expect(streamSetTimeoutSpy).to.have.been.calledWith(15000);
+      });
+
+      it('sets timeout specified on options before writing to the socket', async () => {
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, { socketTimeoutMS: 2000 }, callback)
+        )();
+        expect(streamSetTimeoutSpy).to.have.been.calledWith(2000);
+      });
+
+      it('clears timeout after getting a message if moreToCome=false', async () => {
+        connection.stream.setTimeout(1);
+        const msg = generateOpMsgBuffer({ hello: 1 });
+        const msgHeader = {
+          length: msg.readInt32LE(0),
+          requestId: 1,
+          responseTo: 0,
+          opCode: msg.readInt32LE(12)
+        };
+        const msgBody = msg.subarray(16);
+        try {
+          connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        } catch {
+          // regardless of outcome
+        }
+        // timeout is still reset
+        expect(connection.stream).to.have.property('timeout', 0);
+      });
+
+      it('does not clear timeout after getting a message if moreToCome=true', async () => {
+        connection.stream.setTimeout(1);
+        const msg = generateOpMsgBuffer({ hello: 1 });
+        const msgHeader = {
+          length: msg.readInt32LE(0),
+          requestId: 1,
+          responseTo: 0,
+          opCode: msg.readInt32LE(12)
+        };
+        const msgBody = msg.subarray(16);
+        msgBody.writeInt32LE(2); // OPTS_MORE_TO_COME
+        try {
+          connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        } catch {
+          // regardless of outcome
+        }
+        // timeout is still set
+        expect(connection.stream).to.have.property('timeout', 1);
       });
     });
   });
