@@ -153,40 +153,44 @@ describe('Connect Tests', function () {
       expect(connection).to.have.property('socketTimeoutMS', 15000);
     });
 
-    it.only('cancels connecting if provided cancellationToken emits cancel', async () => {
-      // set no response handler for mock server, effectively black hole requests
-      server.setMessageHandler(() => null);
+    context('when the provided cancellation token emits cancel', () => {
+      it('interrupts the connection with an error', async () => {
+        // set no response handler for mock server, effectively black hole requests
+        server.setMessageHandler(() => null);
 
-      const cancellationToken = new CancellationToken();
-      setTimeout(() => cancellationToken.emit('cancel'), 500);
+        const cancellationToken = new CancellationToken();
+        setTimeout(() => cancellationToken.emit('cancel'), 500);
 
-      const error = await promisify<Connection>(callback =>
-        connect(
-          {
-            ...connectOptions,
-            // Ensure these timeouts do not fire first
-            socketTimeoutMS: 1000,
-            connectTimeoutMS: 1000,
-            cancellationToken
-          },
-          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-          callback
-        )
-      )().catch(error => error);
+        const error = await promisify<Connection>(callback =>
+          connect(
+            {
+              ...connectOptions,
+              // Ensure these timeouts do not fire first
+              socketTimeoutMS: 1000,
+              connectTimeoutMS: 1000,
+              cancellationToken
+            },
+            //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+            callback
+          )
+        )().catch(error => error);
 
-      expect(error).to.match(/connection establishment was cancelled/);
+        expect(error).to.match(/connection establishment was cancelled/);
+      });
     });
 
-    it('interrupts connecting based on connectionTimeoutMS setting', async () => {
-      // set no response handler for mock server, effectively black hole requests
-      server.setMessageHandler(() => null);
+    context('when connecting takes longer than connectTimeoutMS', () => {
+      it('interrupts the connection with an error', async () => {
+        // set no response handler for mock server, effectively black hole requests
+        server.setMessageHandler(() => null);
 
-      const error = await promisify<Connection>(callback =>
-        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-        connect({ ...connectOptions, connectTimeoutMS: 5 }, callback)
-      )().catch(error => error);
+        const error = await promisify<Connection>(callback =>
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          connect({ ...connectOptions, connectTimeoutMS: 5 }, callback)
+        )().catch(error => error);
 
-      expect(error).to.match(/timed out/);
+        expect(error).to.match(/timed out/);
+      });
     });
   });
 
