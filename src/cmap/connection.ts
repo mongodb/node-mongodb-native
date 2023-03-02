@@ -504,6 +504,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (err) {
         return callback(err);
       }
+    } else if (session?.explicit) {
+      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     // if we have a known cluster time, gossip it
@@ -620,7 +622,7 @@ export class CryptoConnection extends Connection {
 /** @internal */
 export function hasSessionSupport(conn: Connection): boolean {
   const description = conn.description;
-  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
+  return description.logicalSessionTimeoutMinutes != null;
 }
 
 function supportsOpMsg(conn: Connection) {
