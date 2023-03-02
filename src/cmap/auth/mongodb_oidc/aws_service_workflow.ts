@@ -1,14 +1,14 @@
 import { readFile } from 'fs/promises';
 
 import { MongoAWSError } from '../../../error';
-import { DeviceWorkflow } from './device_workflow';
+import { ServiceWorkflow } from './service_workflow';
 
 /**
  * Device workflow implementation for AWS.
  *
  * @internal
  */
-export class AwsDeviceWorkflow extends DeviceWorkflow {
+export class AwsServiceWorkflow extends ServiceWorkflow {
   constructor() {
     super();
   }

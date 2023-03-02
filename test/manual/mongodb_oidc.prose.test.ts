@@ -89,13 +89,13 @@ describe('MONGODB-OIDC', function () {
       });
 
       // - Create a client with the url parameters
-      //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME=aws``.
+      //   ``?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME=aws``.
       before(function () {
         // Set the ``AWS_WEB_IDENTITY_TOKEN_FILE`` environment variable to the location
         // of the ``test_user1`` generated token file.
         process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
         client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws'
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws'
         );
         collection = client.db('test').collection('test');
       });
@@ -165,9 +165,9 @@ describe('MONGODB-OIDC', function () {
             // of the ``test_user1`` generated token file.
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user1`;
             // - Create a client with a url of the form
-            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
+            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
             client = new MongoClient(
-              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
             );
             collection = client.db('test').collection('test');
           });
@@ -233,9 +233,9 @@ describe('MONGODB-OIDC', function () {
             // of the ``test_user2`` generated token file.
             process.env.AWS_WEB_IDENTITY_TOKEN_FILE = `${process.env.OIDC_TOKEN_DIR}/test_user2`;
             // - Create a client with a url of the form
-            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
+            // ``mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred``.
             client = new MongoClient(
-              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=DEVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+              'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
             );
             collection = client.db('test').collection('test');
           });
@@ -254,7 +254,7 @@ describe('MONGODB-OIDC', function () {
             new MongoClient(
               'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred'
             );
-          }).to.throw(MongoInvalidArgumentError, /DEVICE_NAME|REQUEST_TOKEN_CALLBACK/);
+          }).to.throw(MongoInvalidArgumentError, /SERVICE_NAME|REQUEST_TOKEN_CALLBACK/);
         });
       });
     });

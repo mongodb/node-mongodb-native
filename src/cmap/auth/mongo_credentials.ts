@@ -37,7 +37,6 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
 }
@@ -146,15 +145,18 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username && this.mechanismProperties.DEVICE_NAME) {
+      if (this.username && this.mechanismProperties.SERVICE_NAME) {
         throw new MongoInvalidArgumentError(
-          `username and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
+          `username and SERVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
-      if (this.mechanismProperties.DEVICE_NAME && this.mechanismProperties.DEVICE_NAME !== 'aws') {
+      if (
+        this.mechanismProperties.SERVICE_NAME &&
+        this.mechanismProperties.SERVICE_NAME !== 'aws'
+      ) {
         throw new MongoInvalidArgumentError(
-          `Currently only a DEVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+          `Currently only a SERVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
         );
       }
 
@@ -168,11 +170,11 @@ export class MongoCredentials {
       }
 
       if (
-        !this.mechanismProperties.DEVICE_NAME &&
+        !this.mechanismProperties.SERVICE_NAME &&
         !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
       ) {
         throw new MongoInvalidArgumentError(
-          `Either a DEVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+          `Either a SERVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
       }
     }

@@ -7,7 +7,7 @@ import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
-import { AwsDeviceWorkflow } from './mongodb_oidc/aws_device_workflow';
+import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
 
@@ -44,14 +44,9 @@ export type OIDCRefreshFunction = (
 ) => Promise<OIDCRequestTokenResult>;
 
 /** @internal */
-export const OIDC_WORKFLOWS = {
-  callback: new CallbackWorkflow(),
-  aws: new AwsDeviceWorkflow(),
-  azure: undefined,
-  gcp: undefined,
-  // Set the protype to null to avoid false returns and keep types.
-  __proto__: null
-};
+export const OIDC_WORKFLOWS: Map<string, Workflow> = new Map();
+OIDC_WORKFLOWS.set('callback', new CallbackWorkflow());
+OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
 
 /**
  * OIDC auth provider.
@@ -85,7 +80,7 @@ export class MongoDBOIDC extends AuthProvider {
       if (!workflow) {
         return callback(
           new MongoRuntimeError(
-            `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+            `Could not load workflow for device ${credentials.mechanismProperties.SERVICE_NAME}`
           )
         );
       }
@@ -121,7 +116,7 @@ export class MongoDBOIDC extends AuthProvider {
       if (!workflow) {
         return callback(
           new MongoRuntimeError(
-            `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+            `Could not load workflow for service ${credentials.mechanismProperties.SERVICE_NAME}`
           )
         );
       }
@@ -141,12 +136,12 @@ export class MongoDBOIDC extends AuthProvider {
  * Gets either a device workflow or callback workflow.
  */
 function getWorkflow(credentials: MongoCredentials, callback: Callback<Workflow>): void {
-  const deviceName = credentials.mechanismProperties.DEVICE_NAME;
-  const workflow = OIDC_WORKFLOWS[deviceName || 'callback'];
+  const serviceName = credentials.mechanismProperties.SERVICE_NAME;
+  const workflow = OIDC_WORKFLOWS.get(serviceName || 'callback');
   if (!workflow) {
     return callback(
       new MongoInvalidArgumentError(
-        `Could not load workflow for device ${credentials.mechanismProperties.DEVICE_NAME}`
+        `Could not load workflow for service ${credentials.mechanismProperties.SERVICE_NAME}`
       )
     );
   }
