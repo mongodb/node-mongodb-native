@@ -228,6 +228,13 @@ describe('14. Decryption Events', metadata, function () {
       const collection = encryptedClient.db('db').collection('decryption_events');
       await collection.insertOne({ encrypted: malformedCiphertext });
 
+      /// Verify the malformedCiphertext was inserted with a plain client
+      const docCount = setupClient.db('db').collection('decryption_events').countDocuments({});
+      expect(docCount, 'expected collection to have exactly one document').to.equal(1);
+
+      const document = setupClient.db('db').collection('decryption_events').findOne();
+      expect(document).to.have.deep.property('encrypted', malformedCiphertext);
+
       const error = await collection
         .aggregate([])
         .toArray()
