@@ -51,6 +51,25 @@ describe('TokenEntryCache', function () {
       });
 
       it('sets an immediate expiration', function () {
+        expect(entry.expiration).to.be.at.most(Date.now());
+      });
+    });
+
+    context('when expiresInSeconds is null', function () {
+      const cache = new TokenEntryCache();
+      let entry: TokenEntry | undefined;
+
+      const expiredResult = Object.freeze({
+        accessToken: 'test',
+        expiredInSeconds: null
+      });
+
+      before(function () {
+        cache.addEntry('localhost', 'user', expiredResult, serverResult);
+        entry = cache.getEntry('localhost', 'user');
+      });
+
+      it('sets an immediate expiration', function () {
         expect(entry?.expiration).to.be.at.most(Date.now());
       });
     });
@@ -83,7 +102,7 @@ describe('TokenEntryCache', function () {
       cache.deleteExpiredEntries();
     });
 
-    it('deletes all expired tokens from the cache', function () {
+    it('deletes all expired tokens from the cache 5 minutes before expiredInSeconds', function () {
       expect(cache.entries.size).to.equal(1);
       expect(cache.entries.has('localhost-user')).to.be.false;
       expect(cache.entries.has('localhost-user2')).to.be.true;
