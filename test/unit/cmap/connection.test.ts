@@ -499,6 +499,7 @@ describe('new Connection()', function () {
         };
         const msgBody = msg.subarray(16);
         msgBody.writeInt32LE(2, 0); // OPTS_MORE_TO_COME
+        connection[getSymbolFrom(connection, 'queue')].set(0, { cb: () => null });
         connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
         // timeout is still set
         expect(connection.stream).to.have.property('timeout', 1);

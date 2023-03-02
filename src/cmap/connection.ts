@@ -316,6 +316,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this[kDelayedTimeoutId] = null;
     }
 
+    const socketTimeoutMS = this[kStream].timeout ?? 0;
+    this[kStream].setTimeout(0);
+
     // always emit the message, in case we are streaming
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
@@ -341,7 +344,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     if (!operationDescription) {
-      this[kStream].setTimeout(0);
       return;
     }
 
@@ -357,8 +359,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
-    } else {
-      this[kStream].setTimeout(0);
+      this[kStream].setTimeout(socketTimeoutMS);
     }
 
     try {
