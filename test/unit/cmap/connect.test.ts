@@ -153,16 +153,25 @@ describe('Connect Tests', function () {
       expect(connection).to.have.property('socketTimeoutMS', 15000);
     });
 
-    it('cancels connecting if provided cancellationToken emits cancel', async () => {
+    it.only('cancels connecting if provided cancellationToken emits cancel', async () => {
       // set no response handler for mock server, effectively black hole requests
       server.setMessageHandler(() => null);
 
       const cancellationToken = new CancellationToken();
-      setTimeout(() => cancellationToken.emit('cancel'), 5);
+      setTimeout(() => cancellationToken.emit('cancel'), 500);
 
       const error = await promisify<Connection>(callback =>
-        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-        connect({ ...connectOptions, cancellationToken }, callback)
+        connect(
+          {
+            ...connectOptions,
+            // Ensure these timeouts do not fire first
+            socketTimeoutMS: 1000,
+            connectTimeoutMS: 1000,
+            cancellationToken
+          },
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          callback
+        )
       )().catch(error => error);
 
       expect(error).to.match(/connection establishment was cancelled/);

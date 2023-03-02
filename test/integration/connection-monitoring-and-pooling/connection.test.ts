@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import {
   connect,
   Connection,
-  HostAddress,
   LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoServerError,
