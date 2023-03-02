@@ -106,35 +106,18 @@ async function executeOperationAsync<
     throw new MongoRuntimeError('client.connect did not create a topology but also did not throw');
   }
 
-  if (topology.shouldCheckForSessionSupport()) {
-    await topology.selectServerAsync(ReadPreference.primaryPreferred, {});
-  }
-
   // The driver sessions spec mandates that we implicitly create sessions for operations
   // that are not explicitly provided with a session.
   let session = operation.session;
   let owner: symbol | undefined;
-  if (topology.hasSessionSupport()) {
-    if (session == null) {
-      owner = Symbol();
-      session = client.startSession({ owner, explicit: false });
-    } else if (session.hasEnded) {
-      throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
-    } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
-      throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
-    }
-  } else {
-    // no session support
-    if (session && session.explicit) {
-      // If the user passed an explicit session and we are still, after server selection,
-      // trying to run against a topology that doesn't support sessions we error out.
-      throw new MongoCompatibilityError('Current topology does not support sessions');
-    } else if (session && !session.explicit) {
-      // We do not have to worry about ending the session because the server session has not been acquired yet
-      delete operation.options.session;
-      operation.clearSession();
-      session = undefined;
-    }
+
+  if (session == null) {
+    owner = Symbol();
+    session = client.startSession({ owner, explicit: false });
+  } else if (session.hasEnded) {
+    throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
+  } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
+    throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
   }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;

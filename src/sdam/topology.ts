@@ -574,26 +574,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     processWaitQueue(this);
   }
 
-  // Sessions related methods
-
-  /**
-   * @returns Whether the topology should initiate selection to determine session support
-   */
-  shouldCheckForSessionSupport(): boolean {
-    if (this.description.type === TopologyType.Single) {
-      return !this.description.hasKnownServers;
-    }
-
-    return !this.description.hasDataBearingServers;
-  }
-
-  /**
-   * @returns Whether sessions are supported on the current topology
-   */
-  hasSessionSupport(): boolean {
-    return this.loadBalanced || this.description.logicalSessionTimeoutMinutes != null;
-  }
-
   /**
    * Update the internal TopologyDescription with a ServerDescription
    *

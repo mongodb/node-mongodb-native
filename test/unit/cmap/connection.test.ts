@@ -752,34 +752,16 @@ describe('new Connection()', function () {
     });
 
     context('when logicalSessionTimeoutMinutes is not present', function () {
-      context('when in load balancing mode', function () {
-        beforeEach(function () {
-          const options = {
-            ...connectionOptionsDefaults,
-            hostAddress: server.hostAddress(),
-            loadBalanced: true
-          };
-          connection = new Connection(stream, options);
-        });
-
-        it('returns true', function () {
-          expect(hasSessionSupport(connection)).to.be.true;
-        });
+      beforeEach(function () {
+        const options = {
+          ...connectionOptionsDefaults,
+          hostAddress: server.hostAddress()
+        };
+        connection = new Connection(stream, options);
       });
 
-      context('when not in load balancing mode', function () {
-        beforeEach(function () {
-          const options = {
-            ...connectionOptionsDefaults,
-            hostAddress: server.hostAddress(),
-            loadBalanced: false
-          };
-          connection = new Connection(stream, options);
-        });
-
-        it('returns false', function () {
-          expect(hasSessionSupport(connection)).to.be.false;
-        });
+      it('returns false', function () {
+        expect(hasSessionSupport(connection)).to.be.false;
       });
     });
   });
