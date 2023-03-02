@@ -12,18 +12,22 @@ describe('TokenEntryCache', function () {
     clientId: '1'
   });
 
+  const fnOne = () => {
+    return { accessToken: 'test' };
+  };
+
+  const fnTwo = () => {
+    return { accessToken: 'test' };
+  };
+
   describe('#addEntry', function () {
     context('when expiresInSeconds is provided', function () {
       const cache = new TokenEntryCache();
       let entry;
 
       before(function () {
-        cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
-        entry = cache.getEntry('localhost', 'user');
-      });
-
-      it('sets the username in the key', function () {
-        expect(cache.entries.has('localhost-user')).to.be.true;
+        cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
       });
 
       it('adds the token result', function () {
@@ -46,8 +50,8 @@ describe('TokenEntryCache', function () {
       const expiredResult = Object.freeze({ accessToken: 'test' });
 
       before(function () {
-        cache.addEntry('localhost', 'user', expiredResult, serverResult);
-        entry = cache.getEntry('localhost', 'user');
+        cache.addEntry('localhost', 'user', fnOne, fnTwo, expiredResult, serverResult);
+        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
       });
 
       it('sets an immediate expiration', function () {
@@ -65,8 +69,8 @@ describe('TokenEntryCache', function () {
       });
 
       before(function () {
-        cache.addEntry('localhost', 'user', expiredResult, serverResult);
-        entry = cache.getEntry('localhost', 'user');
+        cache.addEntry('localhost', 'user', fnOne, fnTwo, expiredResult, serverResult);
+        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
       });
 
       it('sets an immediate expiration', function () {
@@ -79,7 +83,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
       cache.clear();
     });
 
@@ -97,15 +101,15 @@ describe('TokenEntryCache', function () {
     });
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
-      cache.addEntry('localhost', 'user2', nonExpiredResult, serverResult);
+      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user2', fnOne, fnTwo, nonExpiredResult, serverResult);
       cache.deleteExpiredEntries();
     });
 
     it('deletes all expired tokens from the cache 5 minutes before expiredInSeconds', function () {
       expect(cache.entries.size).to.equal(1);
-      expect(cache.entries.has('localhost-user')).to.be.false;
-      expect(cache.entries.has('localhost-user2')).to.be.true;
+      expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)).to.not.exist;
+      expect(cache.getEntry('localhost', 'user2', fnOne, fnTwo)).to.exist;
     });
   });
 
@@ -113,12 +117,12 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
-      cache.deleteEntry('localhost', 'user');
+      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+      cache.deleteEntry('localhost', 'user', fnOne, fnTwo);
     });
 
     it('deletes the entry', function () {
-      expect(cache.entries.has('localhost-user')).to.be.false;
+      expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)).to.not.exist;
     });
   });
 
@@ -126,13 +130,13 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', tokenResultWithExpiration, serverResult);
-      cache.addEntry('localhost', 'user2', tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user2', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
     });
 
     context('when there is a matching entry', function () {
       it('returns the entry', function () {
-        expect(cache.getEntry('localhost', 'user')?.tokenResult).to.equal(
+        expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)?.tokenResult).to.equal(
           tokenResultWithExpiration
         );
       });
@@ -140,7 +144,7 @@ describe('TokenEntryCache', function () {
 
     context('when there is no matching entry', function () {
       it('returns undefined', function () {
-        expect(cache.getEntry('localhost', 'user1')).to.equal(undefined);
+        expect(cache.getEntry('localhost', 'user1', fnOne, fnTwo)).to.equal(undefined);
       });
     });
   });

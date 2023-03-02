@@ -327,7 +327,7 @@ describe('MONGODB-OIDC', function () {
     describe('5. Caching', function () {
       let requestInvokations = 0;
       let refreshInvokations = 0;
-      const cache = OIDC_WORKFLOWS.callback.cache;
+      const cache = OIDC_WORKFLOWS.get('callback').cache;
       // - Give a callback response with a valid accessToken and an expiresInSeconds
       //   that is within one minute.
       // - Validate the request callback inputs, including the timeout parameter if possible.

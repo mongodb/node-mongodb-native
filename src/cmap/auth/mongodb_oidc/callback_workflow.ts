@@ -59,7 +59,15 @@ export class CallbackWorkflow implements Workflow {
    *   - execute step two.
    */
   async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
-    const entry = this.cache.getEntry(connection.address, credentials.username);
+    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
+
+    const entry = this.cache.getEntry(
+      connection.address,
+      credentials.username,
+      request || null,
+      refresh || null
+    );
     if (entry) {
       // Check if the entry is not expired.
       if (entry.isValid()) {
@@ -70,12 +78,22 @@ export class CallbackWorkflow implements Workflow {
         } catch (error) {
           // If authentication errors when using a cached token we remove it from
           // the cache.
-          this.cache.deleteEntry(connection.address, credentials.username || '');
+          this.cache.deleteEntry(
+            connection.address,
+            credentials.username || '',
+            request || null,
+            refresh || null
+          );
           throw error;
         }
       } else {
         // Remove the expired entry from the cache.
-        this.cache.deleteEntry(connection.address, credentials.username || '');
+        this.cache.deleteEntry(
+          connection.address,
+          credentials.username || '',
+          request || null,
+          refresh || null
+        );
         // Execute a refresh of the token and finish auth.
         return this.refreshAndFinish(
           connection,
@@ -108,6 +126,7 @@ export class CallbackWorkflow implements Workflow {
     tokenResult: OIDCRequestTokenResult,
     conversationId?: number
   ): Promise<Document> {
+    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // If a refresh callback exists, use it. Otherwise use the request callback.
     if (refresh) {
@@ -124,7 +143,14 @@ export class CallbackWorkflow implements Workflow {
         );
       }
       // Cache a new entry and continue with the saslContinue.
-      this.cache.addEntry(connection.address, credentials.username || '', result, stepOneResult);
+      this.cache.addEntry(
+        connection.address,
+        credentials.username || '',
+        request || null,
+        refresh,
+        result,
+        stepOneResult
+      );
       return finishAuth(result, conversationId, connection, credentials);
     } else {
       // Fallback to using the request callback.
@@ -143,6 +169,7 @@ export class CallbackWorkflow implements Workflow {
   ): Promise<Document> {
     // Call the request callback.
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // Always clear expired entries from the cache on each finish as cleanup.
     this.cache.deleteExpiredEntries();
     if (!request) {
@@ -159,7 +186,14 @@ export class CallbackWorkflow implements Workflow {
       );
     }
     // Cache a new entry and continue with the saslContinue.
-    this.cache.addEntry(connection.address, credentials.username || '', tokenResult, stepOneResult);
+    this.cache.addEntry(
+      connection.address,
+      credentials.username || '',
+      request,
+      refresh || null,
+      tokenResult,
+      stepOneResult
+    );
     return finishAuth(tokenResult, conversationId, connection, credentials);
   }
 }

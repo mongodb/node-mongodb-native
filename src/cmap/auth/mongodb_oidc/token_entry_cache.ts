@@ -1,9 +1,24 @@
-import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongodb_oidc';
+import type {
+  OIDCMechanismServerStep1,
+  OIDCRefreshFunction,
+  OIDCRequestFunction,
+  OIDCRequestTokenResult
+} from '../mongodb_oidc';
 
 /* 5 minutes in milliseonds */
 const EXPIRATION_BUFFER_MS = 300000;
 /* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
+/* Counter for function "hashes".*/
+let FN_HASH_COUNTER = 0;
+/* No function present function */
+const NO_FUNCTION: OIDCRequestFunction = () => {
+  return Promise.resolve({ accessToken: 'test' });
+};
+/* The map of function hashes */
+const FN_HASHES = new WeakMap<OIDCRequestFunction | OIDCRefreshFunction, number>();
+/* Put the no function hash in the map. */
+FN_HASHES.set(NO_FUNCTION, FN_HASH_COUNTER);
 
 /** @internal */
 export class TokenEntry {
@@ -50,6 +65,8 @@ export class TokenEntryCache {
   addEntry(
     address: string,
     username: string,
+    requestFn: OIDCRequestFunction | null,
+    refreshFn: OIDCRefreshFunction | null,
     tokenResult: OIDCRequestTokenResult,
     serverResult: OIDCMechanismServerStep1
   ): TokenEntry {
@@ -58,7 +75,7 @@ export class TokenEntryCache {
       serverResult,
       expirationTime(tokenResult.expiresInSeconds)
     );
-    this.entries.set(cacheKey(address, username), entry);
+    this.entries.set(cacheKey(address, username, requestFn, refreshFn), entry);
     return entry;
   }
 
@@ -72,15 +89,25 @@ export class TokenEntryCache {
   /**
    * Delete an entry from the cache.
    */
-  deleteEntry(address: string, username: string): void {
-    this.entries.delete(cacheKey(address, username));
+  deleteEntry(
+    address: string,
+    username: string,
+    requestFn: OIDCRequestFunction | null,
+    refreshFn: OIDCRefreshFunction | null
+  ): void {
+    this.entries.delete(cacheKey(address, username, requestFn, refreshFn));
   }
 
   /**
    * Get an entry from the cache.
    */
-  getEntry(address: string, username: string): TokenEntry | undefined {
-    return this.entries.get(cacheKey(address, username));
+  getEntry(
+    address: string,
+    username: string,
+    requestFn: OIDCRequestFunction | null,
+    refreshFn: OIDCRefreshFunction | null
+  ): TokenEntry | undefined {
+    return this.entries.get(cacheKey(address, username, requestFn, refreshFn));
   }
 
   /**
@@ -105,6 +132,35 @@ function expirationTime(expiresInSeconds?: number): number {
 /**
  * Create a cache key from the address and username.
  */
-function cacheKey(address: string, username: string): string {
-  return `${address}-${username}`;
+function cacheKey(
+  address: string,
+  username: string,
+  requestFn: OIDCRequestFunction | null,
+  refreshFn: OIDCRefreshFunction | null
+): string {
+  return `${address}-${username}-${hashFunctions(requestFn, refreshFn)}`;
+}
+
+/**
+ * Get the hash string for the request and refresh functions.
+ */
+function hashFunctions(
+  requestFn: OIDCRequestFunction | null,
+  refreshFn: OIDCRefreshFunction | null
+): string {
+  let requestHash = FN_HASHES.get(requestFn || NO_FUNCTION);
+  let refreshHash = FN_HASHES.get(refreshFn || NO_FUNCTION);
+  if (!requestHash && requestFn) {
+    // Create a new one for the function and put it in the map.
+    FN_HASH_COUNTER++;
+    requestHash = FN_HASH_COUNTER;
+    FN_HASHES.set(requestFn, FN_HASH_COUNTER);
+  }
+  if (!refreshHash && refreshFn) {
+    // Create a new one for the function and put it in the map.
+    FN_HASH_COUNTER++;
+    refreshHash = FN_HASH_COUNTER;
+    FN_HASHES.set(refreshFn, FN_HASH_COUNTER);
+  }
+  return `${requestHash}-${refreshHash}`;
 }
