@@ -167,6 +167,18 @@ describe('Connect Tests', function () {
 
       expect(error).to.match(/connection establishment was cancelled/);
     });
+
+    it('interrupts connecting based on connectionTimeoutMS setting', async () => {
+      // set no response handler for mock server, effectively black hole requests
+      server.setMessageHandler(() => null);
+
+      const error = await promisify<Connection>(callback =>
+        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+        connect({ ...connectOptions, connectTimeoutMS: 5 }, callback)
+      )().catch(error => error);
+
+      expect(error).to.match(/timed out/);
+    });
   });
 
   it('should emit `MongoNetworkError` for network errors', function (done) {
