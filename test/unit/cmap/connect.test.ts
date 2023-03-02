@@ -152,6 +152,21 @@ describe('Connect Tests', function () {
     it('connection instance has property socketTimeoutMS equal to the value passed in the connectOptions', async () => {
       expect(connection).to.have.property('socketTimeoutMS', 15000);
     });
+
+    it('cancels connecting if provided cancellationToken emits cancel', async () => {
+      // set no response handler for mock server, effectively black hole requests
+      server.setMessageHandler(() => null);
+
+      const cancellationToken = new CancellationToken();
+      setTimeout(() => cancellationToken.emit('cancel'), 5);
+
+      const error = await promisify<Connection>(callback =>
+        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+        connect({ ...connectOptions, cancellationToken }, callback)
+      )().catch(error => error);
+
+      expect(error).to.match(/connection establishment was cancelled/);
+    });
   });
 
   it('should emit `MongoNetworkError` for network errors', function (done) {
@@ -160,19 +175,6 @@ describe('Connect Tests', function () {
       done();
     });
   });
-
-  it.skip('should allow a cancellaton token', function (done) {
-    const cancellationToken = new CancellationToken();
-    setTimeout(() => cancellationToken.emit('cancel'), 500);
-    // set no response handler for mock server, effectively black hole requests
-
-    connect({ hostAddress: new HostAddress('240.0.0.1'), cancellationToken }, (err, conn) => {
-      expect(err).to.exist;
-      expect(err).to.match(/connection establishment was cancelled/);
-      expect(conn).to.not.exist;
-      done();
-    });
-  }).skipReason = 'TODO(NODE-2941): stop using 240.0.0.1 in tests';
 
   context('prepareHandshakeDocument', () => {
     const prepareHandshakeDocument = promisify(prepareHandshakeDocumentCb);
