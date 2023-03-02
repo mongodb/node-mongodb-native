@@ -341,6 +341,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     if (!operationDescription) {
+      this[kStream].setTimeout(0);
       return;
     }
 

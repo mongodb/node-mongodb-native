@@ -482,11 +482,8 @@ describe('new Connection()', function () {
           opCode: msg.readInt32LE(12)
         };
         const msgBody = msg.subarray(16);
-        try {
-          connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
-        } catch {
-          // regardless of outcome
-        }
+        msgBody.writeInt32LE(0, 0); // OPTS_MORE_TO_COME
+        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
         // timeout is still reset
         expect(connection.stream).to.have.property('timeout', 0);
       });
@@ -501,12 +498,8 @@ describe('new Connection()', function () {
           opCode: msg.readInt32LE(12)
         };
         const msgBody = msg.subarray(16);
-        msgBody.writeInt32LE(2); // OPTS_MORE_TO_COME
-        try {
-          connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
-        } catch {
-          // regardless of outcome
-        }
+        msgBody.writeInt32LE(2, 0); // OPTS_MORE_TO_COME
+        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
         // timeout is still set
         expect(connection.stream).to.have.property('timeout', 1);
       });
