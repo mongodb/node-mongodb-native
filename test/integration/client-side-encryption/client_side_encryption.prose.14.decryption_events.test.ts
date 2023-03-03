@@ -232,7 +232,7 @@ describe('14. Decryption Events', metadata, function () {
       );
 
       /// Verify the malformedCiphertext was inserted with a plain client
-      const docs = setupClient.db('db').collection('decryption_events').find({}).toArray();
+      const docs = await setupClient.db('db').collection('decryption_events').find({}).toArray();
       expect(docs).to.have.lengthOf(1);
       expect(docs).to.have.deep.nested.property('[0].encrypted', malformedCiphertext);
 
