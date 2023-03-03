@@ -430,7 +430,7 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
       }
     }
 
-    socket.setTimeout(socketTimeoutMS);
+    socket.setTimeout(0);
     callback(undefined, socket);
   }
 
