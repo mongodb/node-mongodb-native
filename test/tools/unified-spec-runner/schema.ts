@@ -134,6 +134,7 @@ export interface ClientEntity {
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
+  observeSensitiveCommands?: boolean;
 }
 export interface DatabaseEntity {
   id: string;
