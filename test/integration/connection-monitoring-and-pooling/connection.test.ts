@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import {
   connect,
   Connection,
-  HostAddress,
   LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoServerError,
@@ -75,28 +74,6 @@ describe('Connection', function () {
             expect(events).to.have.length(2);
             done();
           });
-        });
-      }
-    });
-
-    it.skip('should support socket timeouts', {
-      // FIXME: NODE-2941
-      metadata: {
-        requires: {
-          os: '!win32' // 240.0.0.1 doesnt work for windows
-        }
-      },
-      test: function (done) {
-        const connectOptions = {
-          hostAddress: new HostAddress('240.0.0.1'),
-          connectionType: Connection,
-          connectionTimeout: 500
-        };
-
-        connect(connectOptions, err => {
-          expect(err).to.exist;
-          expect(err).to.match(/timed out/);
-          done();
         });
       }
     });
