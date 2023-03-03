@@ -88,3 +88,7 @@ etc/docs/build
 !docs/**/*.css
 !docs/**/*.js
 .nvmrc
+
+node_index.tab
+node-artifacts
+.npmrc
