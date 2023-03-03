@@ -1,4 +1,5 @@
 import { clearTimeout, setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {
@@ -159,6 +160,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
+  commandAsync: (
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions | undefined
+  ) => Promise<Document>;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
@@ -198,6 +204,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
+
+    this.commandAsync = promisify(
+      (
+        ns: MongoDBNamespace,
+        cmd: Document,
+        options: CommandOptions | undefined,
+        callback: Callback
+      ) => this.command(ns, cmd, options, callback as any)
+    );
+
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;

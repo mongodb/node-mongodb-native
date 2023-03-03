@@ -79,11 +79,6 @@ functions:
         shell: bash
         script: |
           ${PREPARE_SHELL}
-
-          # TODO(NODE-5035): Remove when merged - need to replace with branch just for OIDC.
-          rm -rf "${DRIVERS_TOOLS}"
-          git clone --branch DRIVERS-2415 https://github.com/blink1073/drivers-evergreen-tools.git "${DRIVERS_TOOLS}"
-
           cd "${DRIVERS_TOOLS}"/.evergreen/auth_oidc
 
           # This is a bit confusing but the ec2.assume_role command before
@@ -94,9 +89,9 @@ functions:
           export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
           export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
           export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-          export AWS_TOKEN_DIR=/tmp/tokens
+          export OIDC_TOKEN_DIR=/tmp/tokens
 
-          . ./activate_venv.sh
+          . ./activate-authoidcvenv.sh
           python oidc_write_orchestration.py
           python oidc_get_tokens.py
   setup oidc roles:
@@ -118,6 +113,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
+          OIDC_TOKEN_DIR="/tmp/tokens" \
           AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
@@ -1478,6 +1474,22 @@ tasks:
     commands:
       - func: install dependencies
       - func: run ldap tests
+  - name: test-auth-oidc
+    tags:
+      - latest
+      - replica_set
+      - oidc
+    commands:
+      - func: install dependencies
+      - func: bootstrap oidc
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+          AUTH: auth
+          ORCHESTRATION_FILE: auth-oidc.json
+      - func: setup oidc roles
+      - func: run oidc tests aws
   - name: test-socks5
     tags: []
     commands:
@@ -3137,6 +3149,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3186,6 +3199,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3233,6 +3247,7 @@ buildvariants:
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
@@ -3279,6 +3294,7 @@ buildvariants:
       - test-6.0-load-balanced
       - test-latest-load-balanced
       - test-auth-ldap
+      - test-auth-oidc
       - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
