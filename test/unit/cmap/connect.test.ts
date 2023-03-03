@@ -159,15 +159,20 @@ describe('Connect Tests', function () {
         server.setMessageHandler(() => null);
 
         const cancellationToken = new CancellationToken();
-        setTimeout(() => cancellationToken.emit('cancel'), 500);
+        // Make sure the cancel listener is added before emitting cancel
+        cancellationToken.addListener('newListener', () => {
+          process.nextTick(() => {
+            cancellationToken.emit('cancel');
+          });
+        });
 
         const error = await promisify<Connection>(callback =>
           connect(
             {
               ...connectOptions,
               // Ensure these timeouts do not fire first
-              socketTimeoutMS: 1000,
-              connectTimeoutMS: 1000,
+              socketTimeoutMS: 5000,
+              connectTimeoutMS: 5000,
               cancellationToken
             },
             //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
@@ -175,7 +180,7 @@ describe('Connect Tests', function () {
           )
         )().catch(error => error);
 
-        expect(error).to.match(/connection establishment was cancelled/);
+        expect(error, error.stack).to.match(/connection establishment was cancelled/);
       });
     });
 
