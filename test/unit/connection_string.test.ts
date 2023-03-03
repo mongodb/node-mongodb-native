@@ -454,7 +454,7 @@ describe('Connection String', function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
         const mechanismProperties = {};
         if (mechanism === AuthMechanism.MONGODB_OIDC) {
-          mechanismProperties.SERVICE_NAME = 'aws';
+          mechanismProperties.PROVIDER_NAME = 'aws';
         }
 
         const credentials = new MongoCredentials({
