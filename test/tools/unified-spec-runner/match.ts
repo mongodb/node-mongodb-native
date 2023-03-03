@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { inspect } from 'util';
 
@@ -218,6 +219,10 @@ export function resultCheck(
       return;
     }
 
+    if (typeof actual !== 'object') {
+      expect.fail('Expected actual value to be an object');
+    }
+
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
@@ -313,7 +318,7 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id!.id.buffer.toString().toUpperCase();
     const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
     expect(
       entitySessionHex,
@@ -343,8 +348,21 @@ export function specialCheck(
       ).to.be.false;
     }
   } else if (isMatchAsDocumentOperator(expected)) {
-    resultCheck(actual, expected.$$matchAsDocument as any, entities, path, true);
+    if (typeof actual === 'string') {
+      const actualDoc = EJSON.parse(actual, { relaxed: false });
+      resultCheck(actualDoc, expected.$$matchAsDocument as any, entities, path, true);
+    } else {
+      expect.fail(`Expected value at path ${path.join('')} to be string, but received ${actual}`);
+    }
   } else if (isMatchAsRootOperator(expected)) {
+    expect(
+      typeof actual,
+      `Expected value at path ${path.join('')} to be object, but received ${actual}`
+    ).to.equal('object');
+    expect(typeof expected.$$matchAsRoot, 'Value of $$matchAsRoot must be an object').to.equal(
+      'object'
+    );
+
     resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
@@ -569,12 +587,20 @@ export function compareLogs(
       if (expectedLog.failureIsRedacted) {
         // Assert that a failure is present and has been redacted
         expect(actualLog.data.failure).to.exist;
-        expect(actualLog.data.failure).to.deep.equal({});
+        expect(actualLog.data.failure, 'Expected failure to have been redacted').to.deep.equal({});
       } else {
         // Assert that a failure is present and has not been redacted
         expect(actualLog.data.failure).to.exist;
-        expect(actualLog.data.failure).to.not.deep.equal({});
+        expect(
+          actualLog.data.failure,
+          'Expected failure to have not been redacted'
+        ).to.not.deep.equal({});
       }
+    } else {
+      expect(
+        actualLog.data.failure,
+        'Expected failure to not exist since test.failureIsRedacted is undefined'
+      ).to.not.exist;
     }
 
     // TODO: Check that data fields match. Ensure that the  actual.data is treated as a root-level document
