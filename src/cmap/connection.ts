@@ -399,22 +399,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
       }
 
-      if (operationDescription.command) {
-        if (document.writeConcernError) {
-          callback(new MongoWriteConcernError(document.writeConcernError, document), document);
-          return;
-        }
+      if (document.writeConcernError) {
+        callback(new MongoWriteConcernError(document.writeConcernError, document), document);
+        return;
+      }
 
-        if (document.ok === 0 || document.$err || document.errmsg || document.code) {
-          callback(new MongoServerError(document));
-          return;
-        }
-      } else {
-        // Pre 3.2 support
-        if (document.ok === 0 || document.$err || document.errmsg) {
-          callback(new MongoServerError(document));
-          return;
-        }
+      if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+        callback(new MongoServerError(document));
+        return;
       }
     }
 
