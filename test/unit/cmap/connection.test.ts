@@ -54,6 +54,26 @@ class FakeSocket extends EventEmitter {
   }
 }
 
+class InputStream extends Readable {
+  writableEnded: boolean;
+  timeout = 0;
+
+  constructor(options?) {
+    super(options);
+  }
+
+  end(cb) {
+    this.writableEnded = true;
+    if (typeof cb === 'function') {
+      process.nextTick(cb);
+    }
+  }
+
+  setTimeout(timeout) {
+    this.timeout = timeout;
+  }
+}
+
 describe('new Connection()', function () {
   let server;
   after(() => mock.cleanup());
@@ -181,7 +201,7 @@ describe('new Connection()', function () {
 
       context('when multiple hellos exist on the stream', function () {
         let callbackSpy;
-        const inputStream = new Readable();
+        const inputStream = new InputStream();
         const document = { ok: 1 };
         const last = { isWritablePrimary: true };
 

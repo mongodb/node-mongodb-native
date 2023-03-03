@@ -1,19 +1,16 @@
 import { expect } from 'chai';
 import { promisify } from 'util';
 
+import { CancellationToken } from '../../../src';
+import { MongoCredentials } from '../../../src/cmap/auth/mongo_credentials';
 import {
-  CancellationToken,
-  ClientMetadata,
   connect,
-  Connection,
-  ConnectionOptions,
-  HostAddress,
-  isHello,
-  LEGACY_HELLO_COMMAND,
-  MongoCredentials,
-  MongoNetworkError,
   prepareHandshakeDocument as prepareHandshakeDocumentCb
-} from '../../mongodb';
+} from '../../../src/cmap/connect';
+import { Connection, ConnectionOptions } from '../../../src/cmap/connection';
+import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
+import { MongoNetworkError } from '../../../src/error';
+import { ClientMetadata, HostAddress, isHello } from '../../../src/utils';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
 
@@ -215,9 +212,9 @@ describe('Connect Tests', function () {
         options
       };
 
-      it('sets the hello parameter to 1', async () => {
+      it('sets the hello parameter to true', async () => {
         const handshakeDocument = await prepareHandshakeDocument(authContext);
-        expect(handshakeDocument).to.have.property('hello', 1);
+        expect(handshakeDocument).to.have.property('hello', true);
       });
     });
 
@@ -228,9 +225,9 @@ describe('Connect Tests', function () {
         options
       };
 
-      it('sets the legacy hello parameter to 1', async () => {
+      it('sets the legacy hello parameter to true', async () => {
         const handshakeDocument = await prepareHandshakeDocument(authContext);
-        expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
+        expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, true);
       });
     });
 
