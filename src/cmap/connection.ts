@@ -370,6 +370,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this[kDelayedTimeoutId] = null;
     }
 
+    const socketTimeoutMS = this[kStream].timeout ?? 0;
+    this[kStream].setTimeout(0);
+
     // always emit the message, in case we are streaming
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
@@ -410,8 +413,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
-    } else if (operationDescription.socketTimeoutOverride) {
-      this[kStream].setTimeout(this.socketTimeoutMS);
+      this[kStream].setTimeout(socketTimeoutMS);
     }
 
     try {
@@ -707,8 +709,9 @@ function write(
   }
 
   if (typeof options.socketTimeoutMS === 'number') {
-    operationDescription.socketTimeoutOverride = true;
     conn[kStream].setTimeout(options.socketTimeoutMS);
+  } else if (conn.socketTimeoutMS !== 0) {
+    conn[kStream].setTimeout(conn.socketTimeoutMS);
   }
 
   // if command monitoring is enabled we need to modify the callback here
