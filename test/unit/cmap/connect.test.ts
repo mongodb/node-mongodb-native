@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {
