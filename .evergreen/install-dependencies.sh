@@ -3,9 +3,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
-if [[ "$OS" = "Windows_NT" ]]; then
-  NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH")
-fi
+if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
 mkdir -p "$NODE_ARTIFACTS_PATH/npm_global"
 
@@ -25,10 +23,6 @@ while IFS=$'\t' read -r -a row; do
   [[ "$NODE_LTS_NAME" = "latest" ]] && break # first line is latest
   [[ "$NODE_LTS_NAME" = "$node_index_lts" ]] && break # case insensitive compare
 done < node_index.tab
-
-cat <<EOT > deps-expansion.yml
-NODE_VERSION: "${node_index_version:1}"  # :1 gets rid of the leading 'v'
-EOT
 
 if [[ "$OS" = "Windows_NT" ]]; then
   operating_system="win"
@@ -55,11 +49,8 @@ else
   exit 1
 fi
 
-if [[ "$OS" = "Windows_NT" ]]; then
-  file_extension="zip"
-else
-  file_extension="tar.gz"
-fi
+file_extension="tar.gz"
+if [[ "$OS" = "Windows_NT" ]]; then file_extension="zip"; fi
 
 node_directory="node-${node_index_version}-${operating_system}-${architecture}"
 node_archive="${node_directory}.${file_extension}"

@@ -91,5 +91,4 @@ etc/docs/build
 
 node_index.tab
 node-artifacts
-deps-expansion.yml
 .npmrc
