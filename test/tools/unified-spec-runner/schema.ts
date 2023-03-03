@@ -72,7 +72,7 @@ export const OperationNames = [
   'removeKeyAltName',
   'getKeyByAltName'
 ] as const;
-export type OperationName = typeof OperationNames[number];
+export type OperationName = (typeof OperationNames)[number];
 
 export interface OperationDescription {
   name: OperationName;
@@ -100,7 +100,7 @@ export const TopologyType = Object.freeze({
   shardedReplicaset: 'sharded-replicaset',
   loadBalanced: 'load-balanced'
 } as const);
-export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
+export type TopologyId = (typeof TopologyType)[keyof typeof TopologyType];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;

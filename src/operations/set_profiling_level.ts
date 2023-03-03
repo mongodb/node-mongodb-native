@@ -16,7 +16,7 @@ export const ProfilingLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type ProfilingLevel = typeof ProfilingLevel[keyof typeof ProfilingLevel];
+export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel];
 
 /** @public */
 export type SetProfilingLevelOptions = CommandOperationOptions;
