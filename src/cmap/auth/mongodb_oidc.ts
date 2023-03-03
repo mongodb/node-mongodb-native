@@ -43,8 +43,10 @@ export type OIDCRefreshFunction = (
   timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
+type ProviderName = 'aws' | 'callback';
+
 /** @internal */
-export const OIDC_WORKFLOWS: Map<string, Workflow> = new Map();
+export const OIDC_WORKFLOWS: Map<ProviderName, Workflow> = new Map();
 OIDC_WORKFLOWS.set('callback', new CallbackWorkflow());
 OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
 
@@ -80,7 +82,7 @@ export class MongoDBOIDC extends AuthProvider {
       if (!workflow) {
         return callback(
           new MongoRuntimeError(
-            `Could not load workflow for device ${credentials.mechanismProperties.SERVICE_NAME}`
+            `Could not load workflow for device ${credentials.mechanismProperties.PROVIDER_NAME}`
           )
         );
       }
@@ -116,7 +118,7 @@ export class MongoDBOIDC extends AuthProvider {
       if (!workflow) {
         return callback(
           new MongoRuntimeError(
-            `Could not load workflow for service ${credentials.mechanismProperties.SERVICE_NAME}`
+            `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
           )
         );
       }
@@ -136,12 +138,12 @@ export class MongoDBOIDC extends AuthProvider {
  * Gets either a device workflow or callback workflow.
  */
 function getWorkflow(credentials: MongoCredentials, callback: Callback<Workflow>): void {
-  const serviceName = credentials.mechanismProperties.SERVICE_NAME;
-  const workflow = OIDC_WORKFLOWS.get(serviceName || 'callback');
+  const providerName = credentials.mechanismProperties.PROVIDER_NAME;
+  const workflow = OIDC_WORKFLOWS.get(providerName || 'callback');
   if (!workflow) {
     return callback(
       new MongoInvalidArgumentError(
-        `Could not load workflow for service ${credentials.mechanismProperties.SERVICE_NAME}`
+        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
       )
     );
   }

@@ -39,6 +39,7 @@ export interface AuthMechanismProperties extends Document {
   AWS_SESSION_TOKEN?: string;
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
+  PROVIDER_NAME?: 'aws';
 }
 
 /** @public */
@@ -145,18 +146,18 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username && this.mechanismProperties.SERVICE_NAME) {
+      if (this.username && this.mechanismProperties.PROVIDER_NAME) {
         throw new MongoInvalidArgumentError(
-          `username and SERVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
+          `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
       if (
-        this.mechanismProperties.SERVICE_NAME &&
-        this.mechanismProperties.SERVICE_NAME !== 'aws'
+        this.mechanismProperties.PROVIDER_NAME &&
+        this.mechanismProperties.PROVIDER_NAME !== 'aws'
       ) {
         throw new MongoInvalidArgumentError(
-          `Currently only a SERVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+          `Currently only a PROVIDER_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
         );
       }
 
@@ -170,11 +171,11 @@ export class MongoCredentials {
       }
 
       if (
-        !this.mechanismProperties.SERVICE_NAME &&
+        !this.mechanismProperties.PROVIDER_NAME &&
         !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
       ) {
         throw new MongoInvalidArgumentError(
-          `Either a SERVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+          `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
       }
     }

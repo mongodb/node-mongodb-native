@@ -402,7 +402,7 @@ tests:
     mechanism_properties:
       REQUEST_TOKEN_CALLBACK: true
 - description: should recognise the mechanism with aws device (MONGODB-OIDC)
-  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:aws
+  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws
   valid: true
   credential:
     username:
@@ -410,10 +410,10 @@ tests:
     source: "$external"
     mechanism: MONGODB-OIDC
     mechanism_properties:
-      SERVICE_NAME: aws
+      PROVIDER_NAME: aws
 - description: should recognise the mechanism when auth source is explicitly specified
     and with aws device (MONGODB-OIDC)
-  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authSource=$external&authMechanismProperties=SERVICE_NAME:aws
+  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authSource=$external&authMechanismProperties=PROVIDER_NAME:aws
   valid: true
   credential:
     username:
@@ -421,7 +421,7 @@ tests:
     source: "$external"
     mechanism: MONGODB-OIDC
     mechanism_properties:
-      SERVICE_NAME: aws
+      PROVIDER_NAME: aws
 - description: should throw an exception if username and password are specified (MONGODB-OIDC)
   uri: mongodb://user:pass@localhost/?authMechanism=MONGODB-OIDC
   callback:
@@ -430,12 +430,12 @@ tests:
   credential:
 - description: should throw an exception if username and deviceName are specified
     (MONGODB-OIDC)
-  uri: mongodb://principalName@localhost/?authMechanism=MONGODB-OIDC&SERVICE_NAME:gcp
+  uri: mongodb://principalName@localhost/?authMechanism=MONGODB-OIDC&PROVIDER_NAME:gcp
   valid: false
   credential:
 - description: should throw an exception if specified deviceName is not supported
     (MONGODB-OIDC)
-  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=SERVICE_NAME:unexisted
+  uri: mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:unexisted
   valid: false
   credential:
 - description: should throw an exception if neither deviceName nor callbacks specified
