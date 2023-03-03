@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
-NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
+NODE_LTS_NAME=${NODE_LTS_NAME:-erbium}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
@@ -86,7 +86,8 @@ cat <<EOT > .npmrc
 prefix=$NODE_ARTIFACTS_PATH/npm_global
 EOT
 
-if [[ $operating_system != "win" ]]; then
+# Cannot upgrade npm version for node 12
+if [[ $operating_system != "win" ]] && [[ $NODE_LTS_NAME != "erbium" ]]; then
   # Update npm to latest when we can
   npm install --global npm@latest
   hash -r
