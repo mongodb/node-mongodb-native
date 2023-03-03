@@ -463,7 +463,7 @@ describe('MONGODB-OIDC', function () {
       let saslSucceeded = 0;
       let client;
       let collection;
-      const cache = OIDC_WORKFLOWS.callback.cache;
+      const cache = OIDC_WORKFLOWS.get('callback').cache;
 
       // - Create request and refresh callbacks that return valid credentials that
       //   will not expire soon.
