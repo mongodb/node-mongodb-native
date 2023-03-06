@@ -42,6 +42,11 @@ describe('14. Decryption Events', metadata, function () {
     setupClient = this.configuration.newClient();
     // Drop and create the collection ``db.decryption_events``.
     const db = setupClient.db('db');
+    await setupClient
+      .db('db')
+      .collection('decryption_events')
+      .deleteMany({})
+      .catch(() => null);
     await db.dropCollection('decryption_events').catch(() => null);
     await db.createCollection('decryption_events');
     // Create a ClientEncryption object named ``clientEncryption`` with these options:
@@ -110,6 +115,11 @@ describe('14. Decryption Events', metadata, function () {
   afterEach(async function () {
     aggregateSucceeded = undefined;
     aggregateFailed = undefined;
+    await setupClient
+      .db('db')
+      .collection('decryption_events')
+      .deleteMany({})
+      .catch(() => null);
     await setupClient.close();
     await encryptedClient.close();
   });
@@ -216,7 +226,15 @@ describe('14. Decryption Events', metadata, function () {
       // to contain BSON binary for the field
       // ``cursor.firstBatch.encrypted``.
       const collection = encryptedClient.db('db').collection('decryption_events');
-      await collection.insertOne({ encrypted: malformedCiphertext });
+      await collection.insertOne(
+        { encrypted: malformedCiphertext },
+        { writeConcern: { w: 'majority' } }
+      );
+
+      /// Verify the malformedCiphertext was inserted with a plain client
+      const docs = await setupClient.db('db').collection('decryption_events').find({}).toArray();
+      expect(docs).to.have.lengthOf(1);
+      expect(docs).to.have.deep.nested.property('[0].encrypted', malformedCiphertext);
 
       const error = await collection
         .aggregate([])
