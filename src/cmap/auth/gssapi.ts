@@ -10,6 +10,7 @@ import {
   MongoRuntimeError
 } from '../../error';
 import { Callback, ns } from '../../utils';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
@@ -33,6 +34,9 @@ type MechanismProperties = {
 };
 
 export class GSSAPI extends AuthProvider {
+  prepare(handshakeDoc: HandshakeDocument): Promise<HandshakeDocument> {
+    return Promise.resolve(handshakeDoc);
+  }
   override auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (credentials == null)

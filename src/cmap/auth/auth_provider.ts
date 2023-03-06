@@ -1,8 +1,8 @@
 import type { Document } from '../../bson';
 import { MongoRuntimeError } from '../../error';
 import type { Callback, ClientMetadataOptions } from '../../utils';
-import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import type { MongoCredentials } from './mongo_credentials';
 
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
@@ -32,20 +32,17 @@ export class AuthContext {
   }
 }
 
-export class AuthProvider {
+export abstract class AuthProvider {
   /**
    * Prepare the handshake document before the initial handshake.
    *
    * @param handshakeDoc - The document used for the initial handshake on a connection
    * @param authContext - Context for authentication flow
    */
-  prepare(
+  abstract prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
-    callback(undefined, handshakeDoc);
-  }
+    authContext: AuthContext
+  ): Promise<HandshakeDocument>;
 
   /**
    * Authenticate

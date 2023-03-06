@@ -12,6 +12,7 @@ import {
   MongoRuntimeError
 } from '../../error';
 import { ByteUtils, Callback, maxWireVersion, ns } from '../../utils';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import { AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -35,6 +36,9 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
+  prepare(handshakeDoc: HandshakeDocument): Promise<HandshakeDocument> {
+    return Promise.resolve(handshakeDoc);
+  }
   override auth(authContext: AuthContext, callback: Callback): void {
     const { connection, credentials } = authContext;
     if (!credentials) {

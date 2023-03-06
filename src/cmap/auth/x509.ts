@@ -1,25 +1,24 @@
 import type { Document } from '../../bson';
 import { MongoMissingCredentialsError } from '../../error';
 import { Callback, ns } from '../../utils';
-import type { HandshakeDocument } from '../connect';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 
 export class X509 extends AuthProvider {
   override prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback
-  ): void {
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
     const { credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
     Object.assign(handshakeDoc, {
       speculativeAuthenticate: x509AuthenticateCommand(credentials)
     });
 
-    callback(undefined, handshakeDoc);
+    return Promise.resolve(handshakeDoc);
   }
 
   override auth(authContext: AuthContext, callback: Callback): void {

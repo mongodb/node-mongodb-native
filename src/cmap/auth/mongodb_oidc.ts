@@ -4,7 +4,7 @@ import {
   MongoRuntimeError
 } from '../../error';
 import type { Callback } from '../../utils';
-import type { HandshakeDocument } from '../connect';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
@@ -75,17 +75,8 @@ export class MongoDBOIDC extends AuthProvider {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
-    getWorkflow(credentials, (error, workflow) => {
-      if (error) {
-        return callback(error);
-      }
-      if (!workflow) {
-        return callback(
-          new MongoRuntimeError(
-            `Could not load workflow for device ${credentials.mechanismProperties.PROVIDER_NAME}`
-          )
-        );
-      }
+    try {
+      const workflow = getWorkflow(credentials);
       workflow.execute(connection, credentials).then(
         result => {
           return callback(undefined, result);
@@ -94,58 +85,45 @@ export class MongoDBOIDC extends AuthProvider {
           callback(error);
         }
       );
-    });
+    } catch (error) {
+      callback(error);
+    }
   }
 
   /**
    * Add the speculative auth for the initial handshake.
    */
-  override prepare(
+  override async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
     const { credentials } = authContext;
 
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    getWorkflow(credentials, (error, workflow) => {
-      if (error) {
-        return callback(error);
-      }
-      if (!workflow) {
-        return callback(
-          new MongoRuntimeError(
-            `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
-          )
-        );
-      }
-      workflow.speculativeAuth().then(
-        result => {
-          return callback(undefined, { ...handshakeDoc, ...result });
-        },
-        error => {
-          callback(error);
-        }
+    const workflow = getWorkflow(credentials);
+    if (!workflow) {
+      throw new MongoRuntimeError(
+        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
       );
-    });
+    }
+    const result = await workflow.speculativeAuth();
+    return { ...handshakeDoc, ...result };
   }
 }
 
 /**
  * Gets either a device workflow or callback workflow.
  */
-function getWorkflow(credentials: MongoCredentials, callback: Callback<Workflow>): void {
+function getWorkflow(credentials: MongoCredentials): Workflow {
   const providerName = credentials.mechanismProperties.PROVIDER_NAME;
   const workflow = OIDC_WORKFLOWS.get(providerName || 'callback');
   if (!workflow) {
-    return callback(
-      new MongoInvalidArgumentError(
-        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
-      )
+    throw new MongoInvalidArgumentError(
+      `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
     );
   }
-  callback(undefined, workflow);
+  return workflow;
 }

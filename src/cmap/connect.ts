@@ -18,7 +18,7 @@ import {
   MongoServerError,
   needsRetryableWriteLabel
 } from '../error';
-import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
+import { Callback, HostAddress, ns } from '../utils';
 import { AuthContext, AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
@@ -30,13 +30,18 @@ import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
 import { Connection, ConnectionOptions, CryptoConnection } from './connection';
 import {
+  HANDSHAKE_DECORATORS,
+  HandshakeDocument,
+  HandshakeGenerator
+} from './handshake/handshake_generator';
+import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
   MIN_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
 
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
+export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
@@ -206,19 +211,6 @@ function performInitialHandshake(
   });
 }
 
-export interface HandshakeDocument extends Document {
-  /**
-   * @deprecated Use hello instead
-   */
-  ismaster?: boolean;
-  hello?: boolean;
-  helloOk?: boolean;
-  client: ClientMetadata;
-  compression: string[];
-  saslSupportedMechs?: string;
-  loadBalanced?: boolean;
-}
-
 /**
  * @internal
  *
@@ -228,46 +220,14 @@ export function prepareHandshakeDocument(
   authContext: AuthContext,
   callback: Callback<HandshakeDocument>
 ) {
-  const options = authContext.options;
-  const compressors = options.compressors ? options.compressors : [];
-  const { serverApi } = authContext.connection;
-
-  const handshakeDoc: HandshakeDocument = {
-    [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
-    helloOk: true,
-    client: options.metadata || makeClientMetadata(options),
-    compression: compressors
-  };
-
-  if (options.loadBalanced === true) {
-    handshakeDoc.loadBalanced = true;
-  }
-
-  const credentials = authContext.credentials;
-  if (credentials) {
-    if (credentials.mechanism === AuthMechanism.MONGODB_DEFAULT && credentials.username) {
-      handshakeDoc.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
-
-      const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256);
-      if (!provider) {
-        // This auth mechanism is always present.
-        return callback(
-          new MongoInvalidArgumentError(
-            `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
-          )
-        );
-      }
-      return provider.prepare(handshakeDoc, authContext, callback);
+  new HandshakeGenerator(HANDSHAKE_DECORATORS).generate(authContext).then(
+    handshakeDoc => {
+      callback(undefined, handshakeDoc);
+    },
+    error => {
+      callback(error);
     }
-    const provider = AUTH_PROVIDERS.get(credentials.mechanism);
-    if (!provider) {
-      return callback(
-        new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`)
-      );
-    }
-    return provider.prepare(handshakeDoc, authContext, callback);
-  }
-  callback(undefined, handshakeDoc);
+  );
 }
 
 /** @public */

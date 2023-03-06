@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import { promisify } from 'util';
 
 import { Binary, Document } from '../../bson';
 import { saslprep } from '../../deps';
@@ -10,7 +11,7 @@ import {
   MongoServerError
 } from '../../error';
 import { Callback, emitWarning, ns } from '../../utils';
-import type { HandshakeDocument } from '../connect';
+import type { HandshakeDocument } from '../handshake/handshake_generator';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -19,37 +20,38 @@ type CryptoMethod = 'sha1' | 'sha256';
 
 class ScramSHA extends AuthProvider {
   cryptoMethod: CryptoMethod;
+  randomBytesAsync: (size: number) => Promise<Buffer>;
+
   constructor(cryptoMethod: CryptoMethod) {
     super();
     this.cryptoMethod = cryptoMethod || 'sha1';
+    this.randomBytesAsync = promisify(crypto.randomBytes);
   }
 
-  override prepare(handshakeDoc: HandshakeDocument, authContext: AuthContext, callback: Callback) {
+  override async prepare(
+    handshakeDoc: HandshakeDocument,
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
     const cryptoMethod = this.cryptoMethod;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
     if (cryptoMethod === 'sha256' && saslprep == null) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
-    crypto.randomBytes(24, (err, nonce) => {
-      if (err) {
-        return callback(err);
-      }
+    const nonce = await this.randomBytesAsync(24);
+    // store the nonce for later use
+    Object.assign(authContext, { nonce });
 
-      // store the nonce for later use
-      Object.assign(authContext, { nonce });
-
-      const request = Object.assign({}, handshakeDoc, {
-        speculativeAuthenticate: Object.assign(makeFirstMessage(cryptoMethod, credentials, nonce), {
-          db: credentials.source
-        })
-      });
-
-      callback(undefined, request);
+    const request = Object.assign({}, handshakeDoc, {
+      speculativeAuthenticate: Object.assign(makeFirstMessage(cryptoMethod, credentials, nonce), {
+        db: credentials.source
+      })
     });
+
+    return request;
   }
 
   override auth(authContext: AuthContext, callback: Callback) {
