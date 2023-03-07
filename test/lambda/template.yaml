@@ -3,12 +3,14 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   Node driver lambda function test
 
+Parameters:
+  MongoDbUri:
+    Type: String
+    Description: The MongoDB connection string.
+
 Globals:
   Function:
-    Timeout: 10
-    Environment:
-      Variables:
-        MONGODB_URI: 'mongodb://127.0.0.1:27017'
+    Timeout: 30
 
 Resources:
   MongoDBFunction:
@@ -17,6 +19,9 @@ Resources:
       CodeUri: mongodb/
       Handler: app.lambdaHandler
       Runtime: nodejs18.x
+      Environment:
+        Variables:
+          MONGODB_URI: !Ref MongoDbUri
       Architectures:
       - x86_64
       Events:

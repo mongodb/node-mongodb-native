@@ -3,6 +3,9 @@ Prerequisites:
 - Docker daemon running
 
 Environment:
+- `LAMBDA_AWS_ROLE_ARN`
+- `LAMBDA_STACK_NAME`
+- `DRIVERS_ATLAS_GROUP_ID`
 - `MONGODB_URI`
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`

@@ -126,6 +126,20 @@ functions:
           AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
+  run deployed aws lambda tests:
+    - command: ec2.assume_role
+      params:
+        role_arn: ${LAMBDA_AWS_ROLE_ARN}
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-deployed-lambda-aws-tests.sh
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+          LAMBDA_STACK_NAME: dbx-node-lambda
   run tests:
     - command: shell.exec
       type: test
@@ -2957,6 +2971,13 @@ tasks:
           VERSION: rapid
           TOPOLOGY: server
       - func: run lambda handler example tests
+  - name: test-deployed-lambda
+    tags:
+      - latest
+      - lambda
+    commands:
+      - func: install dependencies
+      - func: run deployed aws lambda tests
   - name: test-lambda-aws-auth-example
     tags:
       - latest
