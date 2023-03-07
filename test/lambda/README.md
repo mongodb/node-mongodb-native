@@ -64,6 +64,22 @@ Function Setup:
 
 Function Testing:
 
-1. `sam build`
+1. Create an Atlas M10 sharded cluster.
 
-2. `sam sync --stack-name drivers-testing --watch`
+2. Get URI to connect to cluster.
+
+3. Set MONGODB_URI in the function environment.
+
+4. `sam build`
+
+5. Assume role DRIVERS-2384
+
+6. `sam deploy ==stack-name ${LAMBDA_STACK_NAME}` --capabilities CAPABILITY_IAM --resolve-s3`
+
+7. Get the function arn
+
+7. `aws lambda invoke --function-name <function arn> standard.json`
+
+8. Sleep 30 seconds.
+
+7. `aws lambda invoke --function-name <function arn> standard.json`
