@@ -5,7 +5,7 @@ import { connect } from '../../../src/cmap/connect';
 import { Connection } from '../../../src/cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
-import { HostAddress, ns } from '../../../src/utils';
+import { ns } from '../../../src/utils';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
 
@@ -70,28 +70,6 @@ describe('Connection', function () {
             expect(events).to.have.length(2);
             done();
           });
-        });
-      }
-    });
-
-    it.skip('should support socket timeouts', {
-      // FIXME: NODE-2941
-      metadata: {
-        requires: {
-          os: '!win32' // 240.0.0.1 doesnt work for windows
-        }
-      },
-      test: function (done) {
-        const connectOptions = {
-          hostAddress: new HostAddress('240.0.0.1'),
-          connectionType: Connection,
-          connectionTimeout: 500
-        };
-
-        connect(connectOptions, err => {
-          expect(err).to.exist;
-          expect(err).to.match(/timed out/);
-          done();
         });
       }
     });

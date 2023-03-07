@@ -36,7 +36,6 @@ export interface OperationDescription extends BSONSerializeOptions {
   raw: boolean;
   requestId: number;
   session?: ClientSession;
-  socketTimeoutOverride?: boolean;
   agreedCompressor?: CompressorName;
   zlibCompressionLevel?: number;
   $clusterTime?: Document;
