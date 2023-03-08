@@ -699,7 +699,7 @@ BUILD_VARIANTS.push({
   name: 'rhel8-test-lambda',
   display_name: 'AWS Lambda handler tests',
   run_on: DEFAULT_OS,
-  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
+  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example', 'test-deployed-lambda']
 });
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
