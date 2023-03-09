@@ -108,50 +108,58 @@ describe('Find Cursor', function () {
     });
   });
 
-  context('#close', function () {
-    it('should send a killCursors command when closed before completely iterated', function (done) {
-      const commands = [];
-      client.on('commandStarted', filterForCommands(['killCursors'], commands));
+  describe('#close', function () {
+    let collection;
 
-      const coll = client.db().collection('abstract_cursor');
-      const cursor = coll.find({}, { batchSize: 2 });
-      cursor.next(err => {
-        expect(err).to.not.exist;
-        cursor.close(err => {
-          expect(err).to.not.exist;
-          expect(commands).to.have.length(1);
-          done();
-        });
+    beforeEach(async function () {
+      collection = client.db().collection('abstract_cursor');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }]);
+    });
+
+    afterEach(async function () {
+      await collection?.drop().catch(() => null);
+    });
+
+    context('when closed before completely iterated', () => {
+      it('sends a killCursors command', async () => {
+        const killCursorsCommands = [];
+        client.on('commandStarted', filterForCommands(['killCursors'], killCursorsCommands));
+
+        const cursor = collection.find({}, { batchSize: 2 });
+
+        const doc = await cursor.next();
+        expect(doc).property('a', 1);
+
+        expect(killCursorsCommands).to.have.length(0);
+        await cursor.close();
+        expect(killCursorsCommands).to.have.length(1);
       });
     });
 
-    it('should not send a killCursors command when closed after completely iterated', function (done) {
-      const commands = [];
-      client.on('commandStarted', filterForCommands(['killCursors'], commands));
+    context('when closed after completely iterated', () => {
+      it('does not send a killCursors command', async () => {
+        const killCursorsCommands = [];
+        client.on('commandStarted', filterForCommands(['killCursors'], killCursorsCommands));
 
-      const coll = client.db().collection('abstract_cursor');
-      const cursor = coll.find({}, { batchSize: 2 });
-      cursor.toArray(err => {
-        expect(err).to.not.exist;
-
-        cursor.close(err => {
-          expect(err).to.not.exist;
-          expect(commands).to.have.length(0);
-          done();
-        });
+        const cursor = collection.find();
+        await cursor.toArray();
+        expect(killCursorsCommands).to.have.length(0);
+        await cursor.close();
+        expect(killCursorsCommands).to.have.length(0);
       });
     });
 
-    it('should not send a killCursors command when closed before initialization', function (done) {
-      const commands = [];
-      client.on('commandStarted', filterForCommands(['killCursors'], commands));
+    context('when closed before initialization', () => {
+      it('does not send a killCursors command', async () => {
+        const killCursorsCommands = [];
+        client.on('commandStarted', filterForCommands(['killCursors'], killCursorsCommands));
 
-      const coll = client.db().collection('abstract_cursor');
-      const cursor = coll.find({}, { batchSize: 2 });
-      cursor.close(err => {
-        expect(err).to.not.exist;
-        expect(commands).to.have.length(0);
-        done();
+        const cursor = collection.find();
+
+        expect(killCursorsCommands).to.have.length(0);
+        await cursor.close();
+        expect(killCursorsCommands).to.have.length(0);
       });
     });
   });

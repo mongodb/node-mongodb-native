@@ -3222,7 +3222,7 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
 /**
  * Creates multiple indexes in the collection, this method is only supported for
  * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
- * error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.
+ * error. Index specifications are defined at https://www.mongodb.com/docs/manual/reference/command/createIndexes/.
  * @method
  * @param {array} indexSpecs An array of index specifications to be created
  * @param {Object} [options] Optional settings
@@ -3489,10 +3489,10 @@ Collection.prototype.estimatedDocumentCount = function(options, callback) {
  * | `$near`    | [`$geoWithin`][2] with [`$center`][3] |
  * | `$nearSphere` | [`$geoWithin`][2] with [`$centerSphere`][4] |
  *
- * [1]: https://docs.mongodb.com/manual/reference/operator/query/expr/
- * [2]: https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
- * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
- * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ * [1]: https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+ * [2]: https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+ * [3]: https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+ * [4]: https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
  *
  * @param {object} [query] the query for the count
  * @param {object} [options] Optional settings.
@@ -3503,10 +3503,10 @@ Collection.prototype.estimatedDocumentCount = function(options, callback) {
  * @param {number} [options.skip] The number of documents to skip before counting.
  * @param {Collection~countCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed.
- * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
- * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
- * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
- * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/expr/
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/center/#op._S_center
+ * @see https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
  */
 
 Collection.prototype.countDocuments = function(query, options, callback) {
@@ -3843,14 +3843,14 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
  * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
  * @method
  * @since 3.0.0
- * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+ * @param {Array} [pipeline] An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
  * @param {object} [options] Optional settings
  * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
  * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
- * @param {number} [options.batchSize] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {number} [options.batchSize] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://www.mongodb.com/docs/manual/reference/read-preference|read preference documentation}.
  * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @return {ChangeStream} a ChangeStream instance.

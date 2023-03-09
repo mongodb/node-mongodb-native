@@ -120,6 +120,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       // force BSON serialization options
       {
         raw: false,
+        useBigInt64: false,
         promoteLongs: true,
         promoteValues: true,
         promoteBuffers: true

@@ -21,7 +21,7 @@ export type ReturnDocument = typeof ReturnDocument[keyof typeof ReturnDocument];
 
 /** @public */
 export interface FindOneAndDeleteOptions extends CommandOperationOptions {
-  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
@@ -35,7 +35,7 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
 export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
-  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;
@@ -55,7 +55,7 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   arrayFilters?: Document[];
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
-  /** An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
+  /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
   /** Limits the fields to return for all matching documents. */
   projection?: Document;

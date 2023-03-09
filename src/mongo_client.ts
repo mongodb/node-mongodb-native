@@ -88,7 +88,7 @@ export type SupportedNodeConnectionOptions = SupportedTLSConnectionOptions &
 /**
  * Describes all possible URI query options for the mongo client
  * @public
- * @see https://docs.mongodb.com/manual/reference/connection-string
+ * @see https://www.mongodb.com/docs/manual/reference/connection-string
  */
 export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeConnectionOptions {
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
@@ -194,7 +194,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * A MongoDB WriteConcern, which describes the level of acknowledgement
    * requested from MongoDB for write operations.
    *
-   * @see https://docs.mongodb.com/manual/reference/write-concern/
+   * @see https://www.mongodb.com/docs/manual/reference/write-concern/
    */
   writeConcern?: WriteConcern | WriteConcernSettings;
   /** Validate mongod server certificate against Certificate Authority */
@@ -230,7 +230,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    *  Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error
    *  (see [libmongocrypt: Auto Encryption Allow-List](https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list)). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.
    *
-   *  Automatic encryption requires the authenticated user to have the [listCollections privilege action](https://docs.mongodb.com/manual/reference/command/listCollections/#dbcmd.listCollections).
+   *  Automatic encryption requires the authenticated user to have the [listCollections privilege action](https://www.mongodb.com/docs/manual/reference/command/listCollections/#dbcmd.listCollections).
    *
    *  If a MongoClient with a limited connection pool size (i.e a non-zero maxPoolSize) is configured with AutoEncryptionOptions, a separate internal MongoClient is created if any of the following are true:
    *  - AutoEncryptionOptions.keyVaultClient is not passed.
@@ -542,7 +542,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @remarks
    * The programmatically provided options take precedence over the URI options.
    *
-   * @see https://docs.mongodb.org/manual/reference/connection-string/
+   * @see https://www.mongodb.com/docs/manual/reference/connection-string/
    */
   static async connect(url: string, options?: MongoClientOptions): Promise<MongoClient> {
     const client = new this(url, options);
@@ -616,7 +616,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * - The first is to provide the schema that may be defined for all the data within the current cluster
    * - The second is to override the shape of the change stream document entirely, if it is not provided the type will default to ChangeStreamDocument of the first argument
    *
-   * @param pipeline - An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+   * @param pipeline - An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
    * @param options - Optional settings for the command
    * @typeParam TSchema - Type of the data being detected by the change stream
    * @typeParam TChange - Type of the whole change stream document emitted

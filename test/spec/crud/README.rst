@@ -257,7 +257,7 @@ Test that ``writeErrors[].errInfo`` in a command response is propagated as
 ``WriteError.details`` (or equivalent) in the driver.
 
 Using a 5.0+ server, create a collection with
-`document validation <https://docs.mongodb.com/manual/core/schema-validation/>`_
+`document validation <https://www.mongodb.com/docs/manual/core/schema-validation/>`_
 like so:
 
 .. code:: javascript

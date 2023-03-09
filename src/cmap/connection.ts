@@ -1,4 +1,5 @@
 import { clearTimeout, setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {
@@ -133,7 +134,7 @@ export interface ConnectionOptions
 /** @internal */
 export interface DestroyOptions {
   /** Force the destruction. */
-  force?: boolean;
+  force: boolean;
 }
 
 /** @public */
@@ -154,11 +155,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   address: string;
   socketTimeoutMS: number;
   monitorCommands: boolean;
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
   closed: boolean;
-  destroyed: boolean;
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
+  commandAsync: (
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions | undefined
+  ) => Promise<Document>;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
@@ -198,13 +204,22 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
+
+    this.commandAsync = promisify(
+      (
+        ns: MongoDBNamespace,
+        cmd: Document,
+        options: CommandOptions | undefined,
+        callback: Callback
+      ) => this.command(ns, cmd, options, callback as any)
+    );
+
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
     this.closed = false;
-    this.destroyed = false;
     this[kHello] = null;
     this[kClusterTime] = null;
 
@@ -294,56 +309,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onError(error: Error) {
-    if (this.closed) {
-      return;
-    }
-
-    this[kStream].destroy(error);
-
-    this.closed = true;
-
-    for (const op of this[kQueue].values()) {
-      op.cb(error);
-    }
-
-    this[kQueue].clear();
-    this.emit(Connection.CLOSE);
+    this.cleanup(true, error);
   }
 
   onClose() {
-    if (this.closed) {
-      return;
-    }
-
-    this.closed = true;
-
     const message = `connection ${this.id} to ${this.address} closed`;
-    for (const op of this[kQueue].values()) {
-      op.cb(new MongoNetworkError(message));
-    }
-
-    this[kQueue].clear();
-    this.emit(Connection.CLOSE);
+    this.cleanup(true, new MongoNetworkError(message));
   }
 
   onTimeout() {
-    if (this.closed) {
-      return;
-    }
-
     this[kDelayedTimeoutId] = setTimeout(() => {
-      this[kStream].destroy();
-
-      this.closed = true;
-
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      for (const op of this[kQueue].values()) {
-        op.cb(new MongoNetworkTimeoutError(message, { beforeHandshake }));
-      }
-
-      this[kQueue].clear();
-      this.emit(Connection.CLOSE);
+      this.cleanup(true, new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
@@ -353,6 +331,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       clearTimeout(delayedTimeoutId);
       this[kDelayedTimeoutId] = null;
     }
+
+    const socketTimeoutMS = this[kStream].timeout ?? 0;
+    this[kStream].setTimeout(0);
 
     // always emit the message, in case we are streaming
     this.emit('message', message);
@@ -364,7 +345,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       // First check if the map is of invalid size
       if (this[kQueue].size > 1) {
-        this.onError(new MongoRuntimeError(INVALID_QUEUE_SIZE));
+        this.cleanup(true, new MongoRuntimeError(INVALID_QUEUE_SIZE));
       } else {
         // Get the first orphaned operation description.
         const entry = this[kQueue].entries().next();
@@ -394,8 +375,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
-    } else if (operationDescription.socketTimeoutOverride) {
-      this[kStream].setTimeout(this.socketTimeoutMS);
+      this[kStream].setTimeout(socketTimeoutMS);
     }
 
     try {
@@ -443,41 +423,68 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     callback(undefined, message.documents[0]);
   }
 
-  destroy(options?: DestroyOptions, callback?: Callback): void {
-    if (typeof options === 'function') {
-      callback = options;
-      options = { force: false };
+  destroy(options: DestroyOptions, callback?: Callback): void {
+    if (this.closed) {
+      process.nextTick(() => callback?.());
+      return;
+    }
+    if (typeof callback === 'function') {
+      this.once('close', () => process.nextTick(() => callback()));
     }
 
+    // load balanced mode requires that these listeners remain on the connection
+    // after cleanup on timeouts, errors or close so we remove them before calling
+    // cleanup.
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
+    const message = `connection ${this.id} to ${this.address} closed`;
+    this.cleanup(options.force, new MongoNetworkError(message));
+  }
 
-    options = Object.assign({ force: false }, options);
-    if (this[kStream] == null || this.destroyed) {
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-
+  /**
+   * A method that cleans up the connection.  When `force` is true, this method
+   * forcibly destroys the socket.
+   *
+   * If an error is provided, any in-flight operations will be closed with the error.
+   *
+   * This method does nothing if the connection is already closed.
+   */
+  private cleanup(force: boolean, error?: Error): void {
+    if (this.closed) {
       return;
     }
 
-    if (options.force) {
+    this.closed = true;
+
+    const completeCleanup = () => {
+      for (const op of this[kQueue].values()) {
+        op.cb(error);
+      }
+
+      this[kQueue].clear();
+
+      this.emit(Connection.CLOSE);
+    };
+
+    this[kStream].removeAllListeners();
+    this[kMessageStream].removeAllListeners();
+
+    this[kMessageStream].destroy();
+
+    if (force) {
       this[kStream].destroy();
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-
+      completeCleanup();
       return;
     }
 
-    this[kStream].end(() => {
-      this.destroyed = true;
-      if (typeof callback === 'function') {
-        callback();
-      }
-    });
+    if (!this[kStream].writableEnded) {
+      this[kStream].end(() => {
+        this[kStream].destroy();
+        completeCleanup();
+      });
+    } else {
+      completeCleanup();
+    }
   }
 
   command(
@@ -513,6 +520,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (err) {
         return callback(err);
       }
+    } else if (session?.explicit) {
+      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     // if we have a known cluster time, gossip it
@@ -629,7 +638,7 @@ export class CryptoConnection extends Connection {
 /** @internal */
 export function hasSessionSupport(conn: Connection): boolean {
   const description = conn.description;
-  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
+  return description.logicalSessionTimeoutMinutes != null;
 }
 
 function supportsOpMsg(conn: Connection) {
@@ -672,6 +681,7 @@ function write(
     command: !!options.command,
 
     // for BSON parsing
+    useBigInt64: typeof options.useBigInt64 === 'boolean' ? options.useBigInt64 : false,
     promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
     promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
@@ -691,8 +701,9 @@ function write(
   }
 
   if (typeof options.socketTimeoutMS === 'number') {
-    operationDescription.socketTimeoutOverride = true;
     conn[kStream].setTimeout(options.socketTimeoutMS);
+  } else if (conn.socketTimeoutMS !== 0) {
+    conn[kStream].setTimeout(conn.socketTimeoutMS);
   }
 
   // if command monitoring is enabled we need to modify the callback here
@@ -702,7 +713,7 @@ function write(
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       // Command monitoring spec states that if ok is 1, then we must always emit
-      // a command suceeded event, even if there's an error. Write concern errors
+      // a command succeeded event, even if there's an error. Write concern errors
       // will have an ok: 1 in their reply.
       if (err && reply?.ok !== 1) {
         conn.emit(

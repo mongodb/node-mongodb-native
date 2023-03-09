@@ -100,6 +100,14 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
 };
 
 const testConfigBeforeHook = async function () {
+  // TODO(NODE-5035): Implement OIDC support. Creating the MongoClient will fail
+  // with "MongoInvalidArgumentError: AuthMechanism 'MONGODB-OIDC' not supported"
+  // as is expected until that ticket goes in. Then this condition gets removed.
+  if (MONGODB_URI && MONGODB_URI.includes('MONGODB-OIDC')) {
+    this.configuration = new TestConfiguration(MONGODB_URI, {});
+    return;
+  }
+
   const client = new MongoClient(loadBalanced ? SINGLE_MONGOS_LB_URI : MONGODB_URI, {
     ...getEnvironmentalOptions(),
     // TODO(NODE-4884): once happy eyeballs support is added, we no longer need to set

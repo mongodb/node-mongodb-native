@@ -307,7 +307,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     if (
       !clusterTime.signature ||
       clusterTime.signature.hash?._bsontype !== 'Binary' ||
-      (typeof clusterTime.signature.keyId !== 'number' &&
+      (typeof clusterTime.signature.keyId !== 'bigint' &&
+        typeof clusterTime.signature.keyId !== 'number' &&
         clusterTime.signature.keyId?._bsontype !== 'Long') // apparently we decode the key to number?
     ) {
       throw new MongoInvalidArgumentError(

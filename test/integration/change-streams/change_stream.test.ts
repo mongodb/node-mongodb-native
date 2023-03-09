@@ -162,12 +162,14 @@ describe('Change Streams', function () {
   it('should close the listeners after the cursor is closed', {
     metadata: { requires: { topology: 'replicaset' } },
     async test() {
+      const collection = db.collection('closesListeners');
+      const changeStream = collection.watch(pipeline);
       const willBeChanges = on(changeStream, 'change');
       await once(changeStream.cursor, 'init');
       await collection.insertOne({ a: 1 });
 
       await willBeChanges.next();
-      expect(changeStream.cursorStream.listenerCount('data')).to.equal(1);
+      expect(changeStream.cursorStream?.listenerCount('data')).to.equal(1);
 
       await changeStream.close();
       expect(changeStream.cursorStream).to.not.exist;
@@ -1019,6 +1021,30 @@ describe('Change Streams', function () {
             }
           }
         );
+
+        it(
+          'when closed throws "ChangeStream is closed"',
+          { requires: { topology: '!single' } },
+          async function () {
+            changeStream = collection.watch();
+
+            const loop = (async function () {
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              for await (const _change of changeStream) {
+                return 'loop entered'; // loop should never be entered
+              }
+              return 'loop ended without error'; // loop should not finish without error
+            })();
+
+            await sleep(1);
+            const closeResult = changeStream.close().catch(error => error);
+            expect(closeResult).to.not.be.instanceOf(Error);
+
+            const result = await loop.catch(error => error);
+            expect(result).to.be.instanceOf(MongoAPIError);
+            expect(result.message).to.match(/ChangeStream is closed/i);
+          }
+        );
       });
 
       describe('#return', function () {
@@ -1646,7 +1672,7 @@ describe('Change Streams', function () {
         it('does not convert Longs to numbers', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([], { promoteLongs: true });
+            cs = collection.watch([], { promoteLongs: true, useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
@@ -1665,7 +1691,7 @@ describe('Change Streams', function () {
         it('converts Long values to native numbers', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([], { promoteLongs: false });
+            cs = collection.watch([], { promoteLongs: false, useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
@@ -1683,7 +1709,7 @@ describe('Change Streams', function () {
         it('defaults to true', {
           metadata: { requires: { topology: '!single' } },
           test: async function () {
-            cs = collection.watch([]);
+            cs = collection.watch([], { useBigInt64: false });
 
             const willBeChange = once(cs, 'change').then(args => args[0]);
             await once(cs.cursor, 'init');
@@ -1693,6 +1719,60 @@ describe('Change Streams', function () {
 
             const change = await willBeChange;
             expect(typeof change.fullDocument.a).to.equal('number');
+          }
+        });
+      });
+    });
+
+    context('useBigInt64', () => {
+      const useBigInt64FalseTest = async (options: ChangeStreamOptions) => {
+        cs = collection.watch([], options);
+        const willBeChange = once(cs, 'change').then(args => args[0]);
+        await once(cs.cursor, 'init');
+
+        await collection.insertOne({ a: Long.fromNumber(10) });
+
+        const change = await willBeChange;
+
+        expect(typeof change.fullDocument.a).to.equal('number');
+      };
+
+      context('when set to false', function () {
+        it('converts Long to number', {
+          metadata: {
+            requires: { topology: '!single' }
+          },
+          test: async function () {
+            await useBigInt64FalseTest({ useBigInt64: false });
+          }
+        });
+      });
+
+      context('when set to true', function () {
+        it('converts Long to bigint', {
+          metadata: {
+            requires: { topology: '!single' }
+          },
+          test: async function () {
+            cs = collection.watch([], { useBigInt64: true });
+            const willBeChange = once(cs, 'change').then(args => args[0]);
+            await once(cs.cursor, 'init');
+
+            await collection.insertOne({ a: Long.fromNumber(10) });
+
+            const change = await willBeChange;
+
+            expect(change.fullDocument).property('a').to.be.a('bigint');
+            expect(change.fullDocument).property('a', 10n);
+          }
+        });
+      });
+
+      context('when unset', function () {
+        it('defaults to false', {
+          metadata: { requires: { topology: '!single' } },
+          test: async function () {
+            await useBigInt64FalseTest({});
           }
         });
       });

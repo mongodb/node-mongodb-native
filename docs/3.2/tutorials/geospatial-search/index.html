@@ -35,17 +35,17 @@
     
     <div class="logo pull-left">
       <a href="https://www.mongodb.com/">
-        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+        <img src="https://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
       </a>
     </div>
     
     <div>
 <div class="nav-items pull-right">
   <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
-  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
-  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
-  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
-  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <a href="https://www.mongodb.com/try" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="https://www.mongodb.com/community" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="https://www.mongodb.com/docs" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="https://www.mongodb.com/blog" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
   <div id="search">
 <form method="get" action="//www.google.com/search" target="_blank">
     <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
@@ -1692,7 +1692,7 @@
 
                     <div class="alert alert-info" role="alert">
   Note: You are currently viewing version 3.2 of the Node.js driver documentation.
-  <a href="https://docs.mongodb.com/drivers/node">Click here</a> for the latest version.
+  <a href="https://www.mongodb.com/docs/drivers/node">Click here</a> for the latest version.
 </div>
 
 
@@ -1726,8 +1726,8 @@
 
 <h1 id="geospatial-search">Geospatial Search</h1>
 
-<p>You can query against <a href="https://docs.mongodb.org/manual/applications/geospatial-indexes/">geospatial indexes</a>
-in several ways via the Node.js driver, using <a href="https://docs.mongodb.org/manual/reference/operator/query-geospatial/">geospatial query operators</a>.</p>
+<p>You can query against <a href="https://www.mongodb.com/docs/manual/applications/geospatial-indexes/">geospatial indexes</a>
+in several ways via the Node.js driver, using <a href="https://www.mongodb.com/docs/manual/reference/operator/query-geospatial/">geospatial query operators</a>.</p>
 
 <p>To create a 2dsphere index on a collection, pass a document containing the name of the
 field to be indexed with the value &lsquo;2dsphere&rsquo; to the <code>createIndex()</code> method.</p>
@@ -1769,13 +1769,13 @@ client.connect(function(err, client) {
 </code></pre>
 
 <p>The following examples assume that a database called <code>test</code> has a
-collection called <code>restaurants</code>, with a <a href="https://docs.mongodb.org/manual/core/2dsphere/">2d sphere index</a>
+collection called <code>restaurants</code>, with a <a href="https://www.mongodb.com/docs/manual/core/2dsphere/">2d sphere index</a>
 index on the <code>address.coord</code> field. A
-<a href="https://docs.mongodb.org/getting-started/node/import-data/">sample dataset</a> is available for download.</p>
+<a href="https://www.mongodb.com/docs/getting-started/node/import-data/">sample dataset</a> is available for download.</p>
 
 <h2 id="near">$near</h2>
 
-<p>The <a href="https://docs.mongodb.org/manual/reference/operator/query/near/">$near</a> operator specifies
+<p>The <a href="https://www.mongodb.com/docs/manual/reference/operator/query/near/">$near</a> operator specifies
 a set of longitude-latitude coordinates and returns documents from nearest to farthest.</p>
 
 <pre><code class="language-js">function findDocuments(db, callback) {
@@ -1826,11 +1826,11 @@ client.connect(function(err, client) {
 
 <p>The <code>$maxDistance</code> option specifies a maximum distance (in meters) from the given
 coordinates. For a complete list of <code>$near</code> options, see the
-<a href="https://docs.mongodb.org/manual/reference/operator/query/near/">MongoDB manual</a>.</p>
+<a href="https://www.mongodb.com/docs/manual/reference/operator/query/near/">MongoDB manual</a>.</p>
 
 <h2 id="geowithin">$geoWithin</h2>
 
-<p>The <a href="https://docs.mongodb.org/manual/reference/operator/query/geoWithin/">$geoWithin</a> operator
+<p>The <a href="https://www.mongodb.com/docs/manual/reference/operator/query/geoWithin/">$geoWithin</a> operator
 selects documents with geospatial data that exist within a specified shape.</p>
 
 <pre><code class="language-js">function findDocuments(db, callback) {

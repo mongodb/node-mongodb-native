@@ -176,7 +176,7 @@ export type ArrayElement<Type> = Type extends ReadonlyArray<infer Item> ? Item :
 export type SchemaMember<T, V> = { [P in keyof T]?: V } | { [key: string]: V };
 
 /** @public */
-export type IntegerType = number | Int32 | Long;
+export type IntegerType = number | Int32 | Long | bigint;
 
 /** @public */
 export type NumericType = IntegerType | Decimal128 | Double;
@@ -440,7 +440,7 @@ export type PropertyType<Type, Property extends string> = string extends Propert
 /**
  * @public
  * returns tuple of strings (keys to be joined on '.') that represent every path into a schema
- * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ * https://www.mongodb.com/docs/manual/tutorial/query-embedded-documents/
  *
  * @remarks
  * Through testing we determined that a depth of 8 is safe for the typescript compiler
@@ -454,6 +454,7 @@ export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 
   : Type extends
       | string
       | number
+      | bigint
       | boolean
       | Date
       | RegExp
@@ -490,7 +491,7 @@ export type NestedPaths<Type, Depth extends number[]> = Depth['length'] extends 
 /**
  * @public
  * returns keys (strings) for every path into a schema with a value of type
- * https://docs.mongodb.com/manual/tutorial/query-embedded-documents/
+ * https://www.mongodb.com/docs/manual/tutorial/query-embedded-documents/
  */
 export type NestedPathsOfType<TSchema, Type> = KeysOfAType<
   {

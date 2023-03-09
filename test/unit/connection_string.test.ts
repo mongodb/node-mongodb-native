@@ -458,11 +458,6 @@ describe('Connection String', function () {
     for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
-        const mechanismProperties = {};
-        if (mechanism === AuthMechanism.MONGODB_OIDC) {
-          mechanismProperties.DEVICE_NAME = 'aws';
-        }
-
         const credentials = new MongoCredentials({
           source: '$external',
           mechanism,

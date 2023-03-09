@@ -304,6 +304,7 @@ export class Response {
   queryFailure?: boolean;
   shardConfigStale?: boolean;
   awaitCapable?: boolean;
+  useBigInt64: boolean;
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
@@ -320,6 +321,7 @@ export class Response {
     this.raw = message;
     this.data = msgBody;
     this.opts = opts ?? {
+      useBigInt64: false,
       promoteLongs: true,
       promoteValues: true,
       promoteBuffers: false,
@@ -334,6 +336,7 @@ export class Response {
     this.fromCompressed = msgHeader.fromCompressed;
 
     // Flag values
+    this.useBigInt64 = typeof this.opts.useBigInt64 === 'boolean' ? this.opts.useBigInt64 : false;
     this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
     this.promoteValues =
       typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
@@ -354,6 +357,7 @@ export class Response {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
+    const useBigInt64 = options.useBigInt64 ?? this.opts.useBigInt64;
     const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
@@ -362,6 +366,7 @@ export class Response {
 
     // Set up the options
     const _options: BSONSerializeOptions = {
+      useBigInt64,
       promoteLongs,
       promoteValues,
       promoteBuffers,
@@ -369,7 +374,7 @@ export class Response {
     };
 
     // Position within OP_REPLY at which documents start
-    // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
+    // (See https://www.mongodb.com/docs/manual/reference/mongodb-wire-protocol/#wire-op-reply)
     this.index = 20;
 
     // Read the message body
@@ -590,6 +595,7 @@ export class BinMsg {
   checksumPresent: boolean;
   moreToCome: boolean;
   exhaustAllowed: boolean;
+  useBigInt64: boolean;
   promoteLongs: boolean;
   promoteValues: boolean;
   promoteBuffers: boolean;
@@ -607,6 +613,7 @@ export class BinMsg {
     this.raw = message;
     this.data = msgBody;
     this.opts = opts ?? {
+      useBigInt64: false,
       promoteLongs: true,
       promoteValues: true,
       promoteBuffers: false,
@@ -625,6 +632,7 @@ export class BinMsg {
     this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
     this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
     this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
+    this.useBigInt64 = typeof this.opts.useBigInt64 === 'boolean' ? this.opts.useBigInt64 : false;
     this.promoteLongs = typeof this.opts.promoteLongs === 'boolean' ? this.opts.promoteLongs : true;
     this.promoteValues =
       typeof this.opts.promoteValues === 'boolean' ? this.opts.promoteValues : true;
@@ -648,6 +656,7 @@ export class BinMsg {
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
     const documentsReturnedIn = options.documentsReturnedIn || null;
+    const useBigInt64 = options.useBigInt64 ?? this.opts.useBigInt64;
     const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
     const promoteBuffers = options.promoteBuffers ?? this.opts.promoteBuffers;
@@ -656,6 +665,7 @@ export class BinMsg {
 
     // Set up the options
     const bsonOptions: BSONSerializeOptions = {
+      useBigInt64,
       promoteLongs,
       promoteValues,
       promoteBuffers,

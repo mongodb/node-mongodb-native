@@ -14,7 +14,7 @@ const MIN_WIRE_VERSION_$OUT_READ_CONCERN_SUPPORT = 8 as const;
 export interface AggregateOptions extends CommandOperationOptions {
   /** allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 \>). */
   allowDiskUse?: boolean;
-  /** The number of documents to return per batch. See [aggregation documentation](https://docs.mongodb.com/manual/reference/command/aggregate). */
+  /** The number of documents to return per batch. See [aggregation documentation](https://www.mongodb.com/docs/manual/reference/command/aggregate). */
   batchSize?: number;
   /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
   bypassDocumentValidation?: boolean;
@@ -44,7 +44,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
   constructor(ns: MongoDBNamespace, pipeline: Document[], options?: AggregateOptions) {
     super(undefined, { ...options, dbName: ns.db });
 
-    this.options = options ?? {};
+    this.options = { ...options };
 
     // Covers when ns.collection is null, undefined or the empty string, use DB_AGGREGATE_COLLECTION
     this.target = ns.collection || DB_AGGREGATE_COLLECTION;
@@ -65,6 +65,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
 
     if (this.hasWriteStage) {
       this.trySecondaryWrite = true;
+    } else {
+      delete this.options.writeConcern;
     }
 
     if (this.explain && this.writeConcern) {

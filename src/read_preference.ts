@@ -56,7 +56,7 @@ export interface ReadPreferenceFromOptions extends ReadPreferenceLikeOptions {
  * used to construct connections.
  * @public
  *
- * @see https://docs.mongodb.com/manual/core/read-preference/
+ * @see https://www.mongodb.com/docs/manual/core/read-preference/
  */
 export class ReadPreference {
   mode: ReadPreferenceMode;
@@ -229,7 +229,7 @@ export class ReadPreference {
 
   /**
    * Indicates that this readPreference needs the "SecondaryOk" bit when sent over the wire
-   * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
+   * @see https://www.mongodb.com/docs/manual/reference/mongodb-wire-protocol/#op-query
    */
   secondaryOk(): boolean {
     const NEEDS_SECONDARYOK = new Set<string>([

@@ -8,7 +8,7 @@ data:
 minServerVersion: '3.4'
 serverless: 'forbid'
 
-# See: https://docs.mongodb.com/manual/reference/collation/#collation-document
+# See: https://www.mongodb.com/docs/manual/reference/collation/#collation-document
 tests:
     -
         description: "BulkWrite with delete operations and collation"

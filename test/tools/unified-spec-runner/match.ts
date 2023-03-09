@@ -131,7 +131,10 @@ TYPE_MAP.set(
 );
 TYPE_MAP.set(
   'long',
-  actual => (typeof actual === 'number' && Number.isInteger(actual)) || Long.isLong(actual)
+  actual =>
+    (typeof actual === 'number' && Number.isInteger(actual)) ||
+    Long.isLong(actual) ||
+    typeof actual === 'bigint'
 );
 
 /**

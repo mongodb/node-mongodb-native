@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.1.0](https://github.com/mongodb/node-mongodb-native/compare/v5.0.1...v5.1.0) (2023-02-23)
+
+
+### Features
+
+* **NODE-3445:** add support for AssumeRoleWithWebIdentity in aws authentication ([#3556](https://github.com/mongodb/node-mongodb-native/issues/3556)) ([e8a30b1](https://github.com/mongodb/node-mongodb-native/commit/e8a30b15c8ec6caac770fa08f1201e6b95a5270d))
+* **NODE-4877:** Add support for useBigInt64 ([#3519](https://github.com/mongodb/node-mongodb-native/issues/3519)) ([917668c](https://github.com/mongodb/node-mongodb-native/commit/917668c0bc42dbfa0a00869daa223f953f28c2e2))
+* **NODE-5034:** support OIDC auth options ([#3557](https://github.com/mongodb/node-mongodb-native/issues/3557)) ([20a4fec](https://github.com/mongodb/node-mongodb-native/commit/20a4fec5fa013c41f525f8c8c465b8f0db380bb2))
+* **NODE-5050:** support GCP automatic credential fetch for CSFLE ([#3574](https://github.com/mongodb/node-mongodb-native/issues/3574)) ([722a4a6](https://github.com/mongodb/node-mongodb-native/commit/722a4a6c613e4c169b51f14251a8fb4bebc1cf2a))
+
+
+### Bug Fixes
+
+* **NODE-5044:** Write Concern 0 Must Not Affect Read Operations ([#3541](https://github.com/mongodb/node-mongodb-native/issues/3541)) ([#3575](https://github.com/mongodb/node-mongodb-native/issues/3575)) ([10146a4](https://github.com/mongodb/node-mongodb-native/commit/10146a42fcc8d84cd07fb26bde9b2926deee6f1e))
+* **NODE-5052:** prevent cursor and changestream close logic from running more than once ([#3562](https://github.com/mongodb/node-mongodb-native/issues/3562)) ([71d0d79](https://github.com/mongodb/node-mongodb-native/commit/71d0d79e012e298be2307a73c097494072224bdb))
+* **NODE-5064:** consolidate connection cleanup logic and ensure socket is always closed ([#3572](https://github.com/mongodb/node-mongodb-native/issues/3572)) ([e544d88](https://github.com/mongodb/node-mongodb-native/commit/e544d880b1731fa59ad6a0d740b946e79478cfa6))
+
 ### [5.0.1](https://github.com/mongodb/node-mongodb-native/compare/v5.0.0...v5.0.1) (2023-02-07)
 
 

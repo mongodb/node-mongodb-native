@@ -1,7 +1,12 @@
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
-import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
+import {
+  MongoAPIError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../error';
 import { GSSAPICanonicalizationValue } from './gssapi';
+import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -32,6 +37,9 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
+  REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
+  REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
+  PROVIDER_NAME?: 'aws';
 }
 
 /** @public */
@@ -135,6 +143,41 @@ export class MongoCredentials {
       !this.username
     ) {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
+      if (this.username && this.mechanismProperties.PROVIDER_NAME) {
+        throw new MongoInvalidArgumentError(
+          `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
+        );
+      }
+
+      if (
+        this.mechanismProperties.PROVIDER_NAME &&
+        this.mechanismProperties.PROVIDER_NAME !== 'aws'
+      ) {
+        throw new MongoInvalidArgumentError(
+          `Currently only a PROVIDER_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+        );
+      }
+
+      if (
+        this.mechanismProperties.REFRESH_TOKEN_CALLBACK &&
+        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
+      ) {
+        throw new MongoInvalidArgumentError(
+          `A REQUEST_TOKEN_CALLBACK must be provided when using a REFRESH_TOKEN_CALLBACK for mechanism '${this.mechanism}'`
+        );
+      }
+
+      if (
+        !this.mechanismProperties.PROVIDER_NAME &&
+        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
+      ) {
+        throw new MongoInvalidArgumentError(
+          `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+        );
+      }
     }
 
     if (AUTH_MECHS_AUTH_SRC_EXTERNAL.has(this.mechanism)) {

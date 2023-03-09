@@ -110,7 +110,7 @@ else intact.
       collection.update({_id:"123"}, {$set: {author:"Jessica"}});
 
 See `MongoDB
-documentation <http://www.mongodb.org/display/DOCS/Updating>`_ for all
+documentation <www.mongodb.com/docs/display/DOCS/Updating>`_ for all
 possible operators.
 
 Find and Modify
@@ -154,7 +154,7 @@ Example
 ::
 
       var MongoClient = require('mongodb').MongoClient
-        , format = require('util').format;    
+        , format = require('util').format;
 
       MongoClient.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
       if(err) throw err;
@@ -172,4 +172,3 @@ Example
             }
         });
       });
-

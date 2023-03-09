@@ -1,6 +1,6 @@
 'use strict';
 
-const { clearTimeout, setTimeout } = require('timers');
+const { clearTimeout } = require('timers');
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -8,7 +8,6 @@ const net = require('net');
 const { MongoClient, MongoServerSelectionError, ReadPreference } = require('../../mongodb');
 const { Topology } = require('../../mongodb');
 const { Server } = require('../../mongodb');
-const { ServerDescription } = require('../../mongodb');
 const { ns, makeClientMetadata, isHello } = require('../../mongodb');
 const { TopologyDescriptionChangedEvent } = require('../../mongodb');
 const { TopologyDescription } = require('../../mongodb');
@@ -26,7 +25,7 @@ describe('Topology (unit)', function () {
     }
 
     if (topology) {
-      topology.close();
+      topology.close({});
     }
   });
 
@@ -78,80 +77,6 @@ describe('Topology (unit)', function () {
     });
   });
 
-  describe('shouldCheckForSessionSupport', function () {
-    beforeEach(function () {
-      this.sinon = sinon.createSandbox();
-
-      // these are mocks we want across all tests
-      this.sinon.stub(Server.prototype, 'requestCheck');
-      this.sinon
-        .stub(Topology.prototype, 'selectServer')
-        .callsFake(function (selector, options, callback) {
-          setTimeout(() => {
-            const server = Array.from(this.s.servers.values())[0];
-            callback(null, server);
-          }, 50);
-        });
-    });
-
-    afterEach(function () {
-      this.sinon.restore();
-    });
-
-    it('should check for sessions if connected to a single server and has no known servers', function (done) {
-      const topology = new Topology('someserver:27019');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
-        this.s.state = 'connected';
-        this.emit('connect');
-      });
-
-      topology.connect(() => {
-        expect(topology.shouldCheckForSessionSupport()).to.be.true;
-        topology.close(done);
-      });
-    });
-
-    it('should not check for sessions if connected to a single server', function (done) {
-      const topology = new Topology('someserver:27019');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
-        this.s.state = 'connected';
-        this.emit('connect');
-
-        setTimeout(() => {
-          this.emit(
-            'descriptionReceived',
-            new ServerDescription('someserver:27019', { ok: 1, maxWireVersion: 6 })
-          );
-        }, 20);
-      });
-
-      topology.connect(() => {
-        expect(topology.shouldCheckForSessionSupport()).to.be.false;
-        topology.close(done);
-      });
-    });
-
-    it('should check for sessions if there are no data-bearing nodes', function (done) {
-      const topology = new Topology(['mongos:27019', 'mongos:27018', 'mongos:27017'], {});
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
-        this.s.state = 'connected';
-        this.emit('connect');
-
-        setTimeout(() => {
-          this.emit(
-            'descriptionReceived',
-            new ServerDescription(this.name, { ok: 1, msg: 'isdbgrid', maxWireVersion: 6 })
-          );
-        }, 20);
-      });
-
-      topology.connect(() => {
-        expect(topology.shouldCheckForSessionSupport()).to.be.false;
-        topology.close(done);
-      });
-    });
-  });
-
   describe('black holes', function () {
     let mockServer;
     beforeEach(() => mock.createServer().then(server => (mockServer = server)));
@@ -182,7 +107,7 @@ describe('Topology (unit)', function () {
             expect(err).to.exist;
             expect(err).to.match(/timed out/);
 
-            topology.close(done);
+            topology.close({}, done);
           });
         });
       });
@@ -325,7 +250,7 @@ describe('Topology (unit)', function () {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.false;
-            topology.close(done);
+            topology.close({}, done);
           });
         });
       });
@@ -467,7 +392,7 @@ describe('Topology (unit)', function () {
 
         it('should clean up listeners on close', function (done) {
           topology.s.state = 'connected'; // fake state to test clean up logic
-          topology.close(e => {
+          topology.close({}, e => {
             const srvPollerListeners = topology.s.srvPoller.listeners(
               SrvPoller.SRV_RECORD_DISCOVERY
             );
@@ -547,7 +472,7 @@ describe('Topology (unit)', function () {
           // occurs `requestCheck` will be called for an immediate check.
           expect(requestCheck).property('callCount').to.equal(1);
 
-          topology.close(done);
+          topology.close({}, done);
         });
       });
     });
@@ -559,7 +484,7 @@ describe('Topology (unit)', function () {
         this.emit('connect');
       });
 
-      topology.close(() => {
+      topology.close({}, () => {
         topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 }, err => {
           expect(err).to.exist;
           expect(err).to.match(/Topology is closed/);
