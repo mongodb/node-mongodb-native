@@ -40,6 +40,8 @@ if [[ $architecture = "x86_64" ]]; then
   architecture="x64"
 elif [[ $architecture = "arm64" ]]; then
   architecture="arm64"
+elif [[ $architecture = "aarch64" ]]; then
+  architecture="arm64"
 elif [[ $architecture == s390* ]]; then
   architecture="s390x"
 elif [[ $architecture == ppc* ]]; then
