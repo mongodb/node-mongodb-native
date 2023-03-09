@@ -13,19 +13,17 @@
   "types": "mongodb.d.ts",
   "repository": {
     "type": "git",
-    "url": "git@github.com:mongodb/node-mongodb-native.git"
+    "url": "git+ssh://git@github.com/mongodb/node-mongodb-native.git"
   },
   "keywords": [
     "mongodb",
     "driver",
     "official"
   ],
-  "author": {
-    "name": "The MongoDB NodeJS Team",
-    "email": "dbx-node@mongodb.com"
-  },
+  "author": "The MongoDB NodeJS Team <dbx-node@mongodb.com>",
   "dependencies": {
     "bson": "^5.0.0",
+    "mongodb": "^5.0.1",
     "mongodb-connection-string-url": "^2.6.0",
     "socks": "^2.7.1"
   },
@@ -151,5 +149,10 @@
       "module": "commonjs",
       "moduleResolution": "node"
     }
+  },
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
   }
 }

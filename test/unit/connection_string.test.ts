@@ -230,6 +230,12 @@ describe('Connection String', function () {
     expect(options.credentials.source).to.equal('$external');
   });
 
+  it('should parse MongoOptions.credentials.source', function () {
+    expect(() =>
+      parseOptions('mongodb+srv://localhost/?authMechanism=MONGODB-X509&authSource=somedb')
+    ).to.throw(MongoParseError, 'Invalid X509 Connection String');
+  });
+
   it('should omit credentials option when the only authSource is provided', function () {
     let options = parseOptions(`mongodb://a/?authSource=someDb`);
     expect(options).to.not.have.property('credentials');
@@ -401,7 +407,7 @@ describe('Connection String', function () {
     it('should validate authMechanism', function () {
       expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
         MongoParseError,
-        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509, got DOGS'
+        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509,MONGODB-OIDC, got DOGS'
       );
     });
 
@@ -452,13 +458,19 @@ describe('Connection String', function () {
     for (const mechanism of AUTH_MECHS_AUTH_SRC_EXTERNAL) {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
+        const mechanismProperties = {};
+        if (mechanism === AuthMechanism.MONGODB_OIDC) {
+          mechanismProperties.DEVICE_NAME = 'aws';
+        }
+
         const credentials = new MongoCredentials({
           source: '$external',
           mechanism,
-          username: 'username',
+          username: mechanism === AuthMechanism.MONGODB_OIDC ? undefined : 'username',
           password: mechanism === AuthMechanism.MONGODB_X509 ? undefined : 'password',
-          mechanismProperties: {}
+          mechanismProperties: mechanismProperties
         });
+
         credentials.validate();
 
         const options = {
