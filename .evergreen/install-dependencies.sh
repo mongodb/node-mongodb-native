@@ -91,6 +91,10 @@ if [[ $operating_system != "win" ]] && [[ $NODE_LTS_NAME != "erbium" ]]; then
   # Update npm to latest when we can
   npm install --global npm@latest
   hash -r
+elif [[ $NODE_LTS_NAME == "erbium" ]]; then
+  # Node.js 12 can run up to npm v8
+  npm install --global npm@8
+  hash -r
 fi
 
 echo "npm version: $(npm -v)"
