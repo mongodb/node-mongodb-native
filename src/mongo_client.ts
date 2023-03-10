@@ -318,6 +318,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   topology?: Topology;
   /** @internal */
   readonly mongoLogger: MongoLogger;
+  /** @internal */
+  private connectionLock?: Promise<this>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -409,46 +411,57 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       return this;
     }
 
-    const options = this[kOptions];
+    if (this.connectionLock) {
+      return this.connectionLock;
+    }
 
-    if (typeof options.srvHost === 'string') {
-      const hosts = await resolveSRVRecord(options);
+    this.connectionLock = (async () => {
+      const options = this[kOptions];
 
-      for (const [index, host] of hosts.entries()) {
-        options.hosts[index] = host;
+      if (typeof options.srvHost === 'string') {
+        const hosts = await resolveSRVRecord(options);
+
+        for (const [index, host] of hosts.entries()) {
+          options.hosts[index] = host;
+        }
       }
-    }
 
-    const topology = new Topology(options.hosts, options);
-    // Events can be emitted before initialization is complete so we have to
-    // save the reference to the topology on the client ASAP if the event handlers need to access it
-    this.topology = topology;
-    topology.client = this;
+      const topology = new Topology(options.hosts, options);
+      // Events can be emitted before initialization is complete so we have to
+      // save the reference to the topology on the client ASAP if the event handlers need to access it
+      this.topology = topology;
+      topology.client = this;
 
-    topology.once(Topology.OPEN, () => this.emit('open', this));
+      topology.once(Topology.OPEN, () => this.emit('open', this));
 
-    for (const event of MONGO_CLIENT_EVENTS) {
-      topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
-    }
-
-    const topologyConnect = async () => {
-      try {
-        await promisify(callback => topology.connect(options, callback))();
-      } catch (error) {
-        topology.close({ force: true });
-        throw error;
+      for (const event of MONGO_CLIENT_EVENTS) {
+        topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
       }
-    };
 
-    if (this.autoEncrypter) {
-      const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
-      await initAutoEncrypter();
-      await topologyConnect();
-      await options.encrypter.connectInternalClient();
-    } else {
-      await topologyConnect();
-    }
+      const topologyConnect = async () => {
+        try {
+          await promisify(callback => topology.connect(options, callback))();
+        } catch (error) {
+          topology.close({ force: true });
+          throw error;
+        }
+      };
 
+      if (this.autoEncrypter) {
+        const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
+        await initAutoEncrypter();
+        await topologyConnect();
+        await options.encrypter.connectInternalClient();
+      } else {
+        await topologyConnect();
+      }
+
+      return this;
+    })();
+
+    await this.connectionLock;
+    // release
+    this.connectionLock = undefined;
     return this;
   }
 
