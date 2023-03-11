@@ -459,9 +459,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       return this;
     })();
 
-    await this.connectionLock;
-    // release
-    this.connectionLock = undefined;
+    try {
+      await this.connectionLock;
+    } finally {
+      // release
+      this.connectionLock = undefined;
+    }
+
     return this;
   }
 
