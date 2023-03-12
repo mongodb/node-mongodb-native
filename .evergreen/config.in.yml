@@ -167,7 +167,7 @@ functions:
         args:
           - .evergreen/run-deployed-lambda-aws-tests.sh
         env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
           LAMBDA_STACK_NAME: dbx-node-lambda
 
