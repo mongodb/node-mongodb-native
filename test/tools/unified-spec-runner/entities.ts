@@ -280,7 +280,6 @@ export class UnifiedMongoClient extends MongoClient {
       expect.fail('Log level must be valid log level');
     }
     if (
-      minLogLevel !== undefined &&
       minLogLevel !== 'off' &&
       numericMinLogLevel >= numericLogLevel
     ) {
