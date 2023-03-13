@@ -125,7 +125,7 @@ class LogCollector extends Duplex {
     const logMessage = chunk as LogMessage;
     const minLogLevel = this._severities?.get(logMessage.component);
     // TODO(NODE-4849): implement ordering for log levels
-    if (minLogLevel !== undefined && minLogLevel >= logMessage.level) {
+    if (minLogLevel !== undefined && minLogLevel !== 'off' && minLogLevel >= logMessage.level) {
       this._logs.push(logMessage);
     }
 
