@@ -8,6 +8,7 @@ set -o errexit  # Exit the script with error if any of the commands fail
 # export DRIVERS_ATLAS_GROUP_ID=${DRIVERS_ATLAS_GROUP_ID}
 # export TEST_LAMBDA_DIRECTORY=${TEST_LAMBDA_DIRECTORY}
 # export LAMBDA_STACK_NAME=${LAMBDA_STACK_NAME}
+# export AWS_REGION=${AWS_REGION}
 
 # TODO(BUILD-16797): Install sam on EVG
 curl -L https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip -o aws-sam-cli-linux-x86_64.zip
