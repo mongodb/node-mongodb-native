@@ -171,7 +171,6 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
-  observedLogEvents: Map<ObservableLogComponent, ObservableLogSeverity>;
   observedSdamEvents: 'serverDescriptionChangedEvent'[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
@@ -229,7 +228,6 @@ export class UnifiedMongoClient extends MongoClient {
     this.observedSdamEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.SDAM_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
-    this.observedLogEvents = new Map();
     for (const eventName of this.observedCommandEvents) {
       this.on(eventName, this.pushCommandEvent);
     }
