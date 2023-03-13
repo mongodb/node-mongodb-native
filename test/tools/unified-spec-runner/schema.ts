@@ -330,8 +330,8 @@ export interface ExpectedError {
 }
 
 export interface ExpectedLogMessage {
-  level: string;
-  component: 'command' | 'topology' | 'serverSelection' | 'connection';
+  level: ObservableLogSeverity;
+  component: ObservableLogComponent;
   failureIsRedacted?: boolean;
   data: Document;
 }

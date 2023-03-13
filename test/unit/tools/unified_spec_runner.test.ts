@@ -183,7 +183,10 @@ describe('Unified Spec Runner', function () {
                 message: 'some message'
               }
             };
-            expect(runCompareLogs).to.throw(AssertionError);
+            expect(runCompareLogs).to.throw(
+              AssertionError,
+              /Can only use failureIsRedacted when a failure exists/
+            );
           });
 
           it('throws AssertionError when failure is present and not redacted', function () {
@@ -235,7 +238,10 @@ describe('Unified Spec Runner', function () {
                 message: 'some message'
               }
             };
-            expect(runCompareLogs).to.throw(AssertionError);
+            expect(runCompareLogs).to.throw(
+              AssertionError,
+              /Can only use failureIsRedacted when a failure exists/
+            );
           });
 
           it('throws AssertionError when failure is present and redacted', function () {
@@ -247,7 +253,10 @@ describe('Unified Spec Runner', function () {
               }
             };
 
-            expect(runCompareLogs).to.throw(AssertionError);
+            expect(runCompareLogs).to.throw(
+              AssertionError,
+              /Expected failure to have not been redacted/
+            );
           });
         });
       });
@@ -270,7 +279,10 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          expect(runCompareLogs).to.throw(AssertionError);
+          expect(runCompareLogs).to.throw(
+            AssertionError,
+            /Expected failure to not exist since test.failureIsRedacted is undefined/
+          );
         });
 
         it('passes when failure is not present', function () {
@@ -324,6 +336,7 @@ describe('Unified Spec Runner', function () {
               b: 2
             }
           };
+
           expect(runCompareLogs).to.throw(AssertionError);
         });
       });

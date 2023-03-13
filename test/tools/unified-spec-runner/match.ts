@@ -318,8 +318,8 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id!.id.buffer.toString().toUpperCase();
-    const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
+    const actualSessionHex = actual.id!.buffer.toString('hex').toUpperCase();
     expect(
       entitySessionHex,
       `Session entity ${expected.$$sessionLsid} does not match lsid`
@@ -586,11 +586,13 @@ export function compareLogs(
     if (expectedLog.failureIsRedacted !== undefined) {
       if (expectedLog.failureIsRedacted) {
         // Assert that a failure is present and has been redacted
-        expect(actualLog.data.failure).to.exist;
+        expect(actualLog.data.failure, 'Can only use failureIsRedacted when a failure exists').to
+          .exist;
         expect(actualLog.data.failure, 'Expected failure to have been redacted').to.deep.equal({});
       } else {
         // Assert that a failure is present and has not been redacted
-        expect(actualLog.data.failure).to.exist;
+        expect(actualLog.data.failure, 'Can only use failureIsRedacted when a failure exists').to
+          .exist;
         expect(
           actualLog.data.failure,
           'Expected failure to have not been redacted'
