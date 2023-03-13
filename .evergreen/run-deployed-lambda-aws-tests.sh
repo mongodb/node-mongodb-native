@@ -17,8 +17,8 @@ set -o xtrace   # Write all commands first to stderr
 # support testing cluster outages.
 ATLAS_BASE_URL="https://cloud.mongodb.com/api/atlas/v1.0"
 
-# Switch to the directory the Lambda tests reside in.
-# cd "${TEST_LAMBDA_DIRECTORY}"
+# Add git commit to name of function and cluster.
+FUNCTION_NAME="${LAMBDA_STACK_NAME}-$(git rev-parse --short HEAD)"
 
 # Set the create cluster configuration.
 CREATE_CLUSTER_JSON=$(cat <<EOF
@@ -41,7 +41,7 @@ CREATE_CLUSTER_JSON=$(cat <<EOF
   "encryptionAtRestProvider" : "NONE",
   "mongoDBMajorVersion" : "6.0",
   "mongoDBVersion" : "6.0.4",
-  "name" : "${LAMBDA_STACK_NAME}",
+  "name" : "${FUNCTION_NAME}",
   "numShards" : 1,
   "paused" : false,
   "pitEnabled" : false,
@@ -88,7 +88,7 @@ delete_cluster ()
   echo $(curl \
     --digest -u ${DRIVERS_ATLAS_PUBLIC_API_KEY}:${DRIVERS_ATLAS_PRIVATE_API_KEY} \
     -X DELETE \
-    "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${LAMBDA_STACK_NAME}?pretty=true"
+    "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${FUNCTION_NAME}?pretty=true"
   )
 }
 
@@ -105,7 +105,7 @@ check_cluster ()
     SRV_ADDRESS=$(curl \
       --digest -u "${DRIVERS_ATLAS_PUBLIC_API_KEY}:${DRIVERS_ATLAS_PRIVATE_API_KEY}" \
       -X GET \
-      "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${LAMBDA_STACK_NAME}" \
+      "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${FUNCTION_NAME}" \
       | jq -r '.srvAddress'
     );
     count=$(( $count + 1 ))
@@ -132,7 +132,7 @@ restart_cluster_primary ()
   echo $(curl \
     --digest -u ${DRIVERS_ATLAS_PUBLIC_API_KEY}:${DRIVERS_ATLAS_PRIVATE_API_KEY} \
     -X POST \
-    "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${LAMBDA_STACK_NAME}/restartPrimaries"
+    "${ATLAS_BASE_URL}/groups/${DRIVERS_ATLAS_GROUP_ID}/clusters/${FUNCTION_NAME}/restartPrimaries"
   )
 }
 
@@ -141,7 +141,7 @@ deploy_lambda_function ()
 {
   echo "Deploying Lambda function..."
   sam deploy \
-    --stack-name "${LAMBDA_STACK_NAME}" \
+    --stack-name "${FUNCTION_NAME}" \
     --capabilities CAPABILITY_IAM \
     --resolve-s3 \
     --parameter-overrides "MongoDbUri=${MONGODB_URI}"
@@ -152,46 +152,40 @@ get_lambda_function_arn ()
 {
   echo "Getting Lambda function ARN..."
   LAMBDA_FUNCTION_ARN=$(sam list stack-outputs \
-    --stack-name ${LAMBDA_STACK_NAME} \
+    --stack-name ${FUNCTION_NAME} \
     --output json | jq '.[] | select(.OutputKey == "MongoDBFunction") | .OutputValue'
   )
   echo "Lambda function ARN: $LAMBDA_FUNCTION_ARN"
   export LAMBDA_FUNCTION_ARN=$LAMBDA_FUNCTION_ARN
 }
 
-# Create a new Atlas cluster for the function to use.
+cd "${TEST_LAMBDA_DIRECTORY}"
+
 create_cluster
 
-# Check if the cluster has been created.
 check_cluster
 
-# Build the function.
 sam build
 
-# Deploy the function - need to pull out the ARN for the function to invoke.
 deploy_lambda_function
 
-# Figure out the Lambda function ARN to invoke it.
 get_lambda_function_arn
 
-# Invoke the function
-aws lambda invoke --function-name "${LAMBDA_FUNCTION_ARN}" "lambda-invoke-standard.json"
+aws lambda invoke --function-name ${LAMBDA_FUNCTION_ARN} lambda-invoke-standard.json > /dev/null 2>&1
+tail lambda-invoke-standard.json
 
-# Sleep 1 min to get some heartbeat buildup, then invoke.
 echo "Sleeping 1 minute to build up some streaming protocol heartbeats..."
 sleep 60
-aws lambda invoke --function-name "${LAMBDA_FUNCTION_ARN}" "lambda-invoke-frozen.json"
+aws lambda invoke --function-name ${LAMBDA_FUNCTION_ARN} lambda-invoke-frozen.json > /dev/null 2>&1
+tail lambda-invoke-frozen.json
 
-# Test Atlas primary re-election.
 restart_cluster_primary
 
-# Invoke the function after 1 minute.
 echo "Sleeping 1 minute to build up some streaming protocol heartbeats..."
 sleep 60
-aws lambda invoke --function-name "${LAMBDA_FUNCTION_ARN}" "lambda-invoke-outage.json"
+aws lambda invoke --function-name ${LAMBDA_FUNCTION_ARN} lambda-invoke-outage.json > /dev/null 2>&1
+tail lambda-invoke-outage.json
 
-# Delete the function.
-sam delete --stack-name ${LAMBDA_STACK_NAME} --no-prompts
+sam delete --stack-name ${FUNCTION_NAME} --no-prompts --region us-east-1
 
-# Delete the Atlas cluster.
 delete_cluster
