@@ -20,6 +20,24 @@ export const SeverityLevel = Object.freeze({
 export type SeverityLevel = typeof SeverityLevel[keyof typeof SeverityLevel];
 
 /** @internal */
+export const SeverityLevelMap: Map<string | number, string | number> = new Map([
+  [SeverityLevel.OFF, 0],
+  [SeverityLevel.TRACE, 1],
+  [SeverityLevel.DEBUG, 2],
+  [SeverityLevel.INFORMATIONAL, 3],
+  [SeverityLevel.NOTICE, 4],
+  [SeverityLevel.WARNING, 5],
+  [SeverityLevel.ERROR, 6],
+  [SeverityLevel.CRITICAL, 7],
+  [SeverityLevel.ALERT, 8],
+  [SeverityLevel.EMERGENCY, 9]
+]);
+
+for (const [level, value] of SeverityLevelMap.entries()) {
+  SeverityLevelMap.set(value, level);
+}
+
+/** @internal */
 export const MongoLoggableComponent = Object.freeze({
   COMMAND: 'command',
   TOPOLOGY: 'topology',

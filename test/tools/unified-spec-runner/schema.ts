@@ -146,7 +146,7 @@ export interface ClientEntity {
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
-  observeLogMessages?: Map<ObservableLogComponent, ObservableLogSeverity>;
+  observeLogMessages?: Record<ObservableLogComponent, ObservableLogSeverity>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;

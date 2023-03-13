@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { Duplex, DuplexOptions } from 'stream';
+import {  Transform } from 'stream';
 
 import {
   AbstractCursor,
@@ -32,6 +32,7 @@ import {
   ReadPreference,
   SENSITIVE_COMMANDS,
   ServerDescriptionChangedEvent,
+  SeverityLevelMap,
   TopologyDescription,
   WriteConcern
 } from '../../mongodb';
@@ -109,54 +110,15 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-class LogCollector extends Duplex {
-  _logs: LogMessage[];
-  _severities?: Map<ObservableLogComponent, ObservableLogSeverity>;
-  constructor(
-    options: DuplexOptions,
-    severities?: Map<ObservableLogComponent, ObservableLogSeverity>
-  ) {
-    super({ ...options, writableObjectMode: true, readableObjectMode: true });
-    this._severities = severities;
-    this._logs = [];
-  }
-
-  _write(chunk: any, encoding: string, next: (error?: Error) => void) {
-    const logMessage = chunk as LogMessage;
-    const minLogLevel = this._severities?.get(logMessage.component);
-    // TODO(NODE-4849): implement ordering for log levels
-    if (minLogLevel !== undefined && minLogLevel !== 'off' && minLogLevel >= logMessage.level) {
-      this._logs.push(logMessage);
-    }
-
-    next();
-  }
-
-  _read(size = 1) {
-    for (let i = 0; i < size; i++) {
-      if (this._logs.length > 0) {
-        this.push(this._logs.shift());
-      }
-    }
-  }
-
-  set logs(logs: LogMessage[]) {
-    this._logs = logs;
-  }
-
-  get logs(): LogMessage[] {
-    return this._logs;
-  }
-}
-
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[] = [];
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logCollector: LogCollector;
+  logs: LogMessage[] = [];
 
   ignoredEvents: string[];
+  observedLogMessages: Map<ObservableLogComponent, ObservableLogSeverity>;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -200,7 +162,12 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    const logCollector = new LogCollector({}, description.observeLogMessages);
+    const logCollector = new Transform({
+      objectMode: true,
+      transform(log: LogMessage, _: string, next: (e: Error | null, log: LogMessage) => void) {
+        next(null, log);
+      }
+    });
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
@@ -209,7 +176,10 @@ export class UnifiedMongoClient extends MongoClient {
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
-    this.logCollector = logCollector;
+
+    // FIXME:
+    this.observedLogMessages = new Map(Object.entries(description.observeLogMessages ?? {}));
+    logCollector.on('data', (log: LogMessage) => this.pushLogMessage(log));
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -265,7 +235,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   getCapturedLogs(): LogMessage[] {
-    return this.logCollector.logs;
+    return this.logs;
   }
 
   // NOTE: pushCommandEvent must be an arrow function
@@ -298,6 +268,23 @@ export class UnifiedMongoClient extends MongoClient {
     }
     for (const eventName of this.observedSdamEvents) {
       this.off(eventName, this.pushSdamEvent);
+    }
+  }
+
+  pushLogMessage(log: LogMessage) {
+    const minLogLevel = this.observedLogMessages.get(log.component) ?? 'off';
+    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? 0;
+
+    const numericLogLevel = SeverityLevelMap.get(log.level);
+    if (typeof numericLogLevel !== 'number') {
+      expect.fail('Log level must be valid log level');
+    }
+    if (
+      minLogLevel !== undefined &&
+      minLogLevel !== 'off' &&
+      numericMinLogLevel >= numericLogLevel
+    ) {
+      this.logs.push(log);
     }
   }
 }
