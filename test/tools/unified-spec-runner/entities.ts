@@ -154,7 +154,7 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logs: LogMessage[] = [];
+  logCollector: LogCollector;
 
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
@@ -210,9 +210,7 @@ export class UnifiedMongoClient extends MongoClient {
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
-    this.logs = [];
-
-    logCollector.logs = this.logs;
+    this.logCollector = logCollector;
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -269,7 +267,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   getCapturedLogs(): LogMessage[] {
-    return this.logs;
+    return this.logCollector.logs;
   }
 
   // NOTE: pushCommandEvent must be an arrow function
