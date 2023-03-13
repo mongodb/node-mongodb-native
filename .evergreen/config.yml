@@ -145,6 +145,7 @@ functions:
           DRIVERS_ATLAS_LAMBDA_PASSWORD: ${DRIVERS_ATLAS_LAMBDA_PASSWORD}
           DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
           LAMBDA_STACK_NAME: dbx-node-lambda
+          AWS_REGION: us-east-1
   run tests:
     - command: shell.exec
       type: test
