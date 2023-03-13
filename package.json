@@ -59,7 +59,7 @@
     "@types/express": "^4.17.17",
     "@types/kerberos": "^1.1.1",
     "@types/mocha": "^10.0.1",
-    "@types/node": "^18.15.1",
+    "@types/node": "^18.11.0",
     "@types/saslprep": "^1.0.1",
     "@types/semver": "^7.3.13",
     "@types/sinon": "^10.0.13",
