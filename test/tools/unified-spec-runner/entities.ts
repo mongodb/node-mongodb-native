@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { Writable, WritableOptions } from 'stream';
+import { Duplex, DuplexOptions } from 'stream';
 
 import {
   AbstractCursor,
@@ -109,20 +109,35 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-// FIXME
-class LogCollector extends Writable {
+class LogCollector extends Duplex {
   _logs: LogMessage[];
-  constructor(options: WritableOptions) {
-    super({ ...options, objectMode: true });
+  _severities?: Map<ObservableLogComponent, ObservableLogSeverity>;
+  constructor(
+    options: DuplexOptions,
+    severities?: Map<ObservableLogComponent, ObservableLogSeverity>
+  ) {
+    super({ ...options, writableObjectMode: true, readableObjectMode: true });
+    this._severities = severities;
     this._logs = [];
-    this.on('data', function(log: LogMessage) {
-      this._accumulator.push(log);
-    });
   }
 
   _write(chunk: any, encoding: string, next: (error?: Error) => void) {
-    this._logs.push(chunk as LogMessage);
+    const logMessage = chunk as LogMessage;
+    const minLogLevel = this._severities?.get(logMessage.component);
+    // TODO(NODE-4849): implement ordering for log levels
+    if (minLogLevel !== undefined && minLogLevel >= logMessage.level) {
+      this._logs.push(logMessage);
+    }
+
     next();
+  }
+
+  _read(size = 1) {
+    for (let i = 0; i < size; i++) {
+      if (this._logs.length > 0) {
+        this.push(this._logs.shift());
+      }
+    }
   }
 
   set logs(logs: LogMessage[]) {
@@ -187,7 +202,7 @@ export class UnifiedMongoClient extends MongoClient {
 
   constructor(uri: string, description: ClientEntity) {
     // TODO(NODE-4849): Install a writable stream to capture logs
-    const logCollector = new LogCollector({});
+    const logCollector = new LogCollector({}, description.observeLogMessages);
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
