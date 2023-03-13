@@ -7,8 +7,7 @@ import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 import type { Topology } from '../../sdam/topology';
 import { TopologyDescription } from '../../sdam/topology_description';
-import type { OpQueryOptions } from '../commands';
-import type { CommandOptions, Connection } from '../connection';
+import type { Connection } from '../connection';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
@@ -33,27 +32,6 @@ export function getReadPreference(cmd: Document, options?: ReadPreferenceOption)
   }
 
   return readPreference;
-}
-
-export function applyCommonQueryOptions(
-  queryOptions: OpQueryOptions,
-  options: CommandOptions
-): CommandOptions {
-  Object.assign(queryOptions, {
-    raw: typeof options.raw === 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    bsonRegExp: typeof options.bsonRegExp === 'boolean' ? options.bsonRegExp : false,
-    enableUtf8Validation:
-      typeof options.enableUtf8Validation === 'boolean' ? options.enableUtf8Validation : true
-  });
-
-  if (options.session) {
-    queryOptions.session = options.session;
-  }
-
-  return queryOptions;
 }
 
 export function isSharded(topologyOrServer?: Topology | Server | Connection): boolean {

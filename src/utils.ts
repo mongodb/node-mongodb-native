@@ -29,7 +29,7 @@ import { ServerType } from './sdam/common';
 import type { Server } from './sdam/server';
 import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
-import { W, WriteConcern, WriteConcernOptions } from './write_concern';
+import { WriteConcern } from './write_concern';
 
 /**
  * MongoDB Driver style callback
@@ -167,9 +167,6 @@ export function applyRetryableWrites<T extends HasRetryableWrites>(target: T, db
   return target;
 }
 
-interface HasWriteConcern {
-  writeConcern?: WriteConcernOptions | WriteConcern | W;
-}
 /**
  * Applies a write concern to a command based on well defined inheritance rules, optionally
  * detecting support for the write concern in the first place.
@@ -179,39 +176,6 @@ interface HasWriteConcern {
  * @param sources - sources where we can inherit default write concerns from
  * @param options - optional settings passed into a command for write concern overrides
  */
-export function applyWriteConcern<T extends HasWriteConcern>(
-  target: T,
-  sources: { db?: Db; collection?: Collection },
-  options?: OperationOptions & WriteConcernOptions
-): T {
-  options = options ?? {};
-  const db = sources.db;
-  const coll = sources.collection;
-
-  if (options.session && options.session.inTransaction()) {
-    // writeConcern is not allowed within a multi-statement transaction
-    if (target.writeConcern) {
-      delete target.writeConcern;
-    }
-
-    return target;
-  }
-
-  const writeConcern = WriteConcern.fromOptions(options);
-  if (writeConcern) {
-    return Object.assign(target, { writeConcern });
-  }
-
-  if (coll && coll.writeConcern) {
-    return Object.assign(target, { writeConcern: Object.assign({}, coll.writeConcern) });
-  }
-
-  if (db && db.writeConcern) {
-    return Object.assign(target, { writeConcern: Object.assign({}, db.writeConcern) });
-  }
-
-  return target;
-}
 
 /**
  * Checks if a given value is a Promise
@@ -481,40 +445,6 @@ export function eachAsync<T = Document>(
       callback();
     }
   }
-}
-
-/** @internal */
-export function eachAsyncSeries<T = any>(
-  arr: T[],
-  eachFn: (item: T, callback: (err?: AnyError) => void) => void,
-  callback: Callback
-): void {
-  arr = arr || [];
-
-  let idx = 0;
-  let awaiting = arr.length;
-  if (awaiting === 0) {
-    callback();
-    return;
-  }
-
-  function eachCallback(err?: AnyError) {
-    idx++;
-    awaiting--;
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    if (idx === arr.length && awaiting <= 0) {
-      callback();
-      return;
-    }
-
-    eachFn(arr[idx], eachCallback);
-  }
-
-  eachFn(arr[idx], eachCallback);
 }
 
 /** @internal */
