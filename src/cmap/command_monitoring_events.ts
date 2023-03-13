@@ -149,8 +149,11 @@ export class CommandFailedEvent {
   }
 }
 
-/** Commands that we want to redact because of the sensitive nature of their contents */
-const SENSITIVE_COMMANDS = new Set([
+/**
+ * Commands that we want to redact because of the sensitive nature of their contents
+ * @internal
+ */
+export const SENSITIVE_COMMANDS = new Set([
   'authenticate',
   'saslStart',
   'saslContinue',

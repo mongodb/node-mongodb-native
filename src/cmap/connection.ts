@@ -1,4 +1,5 @@
 import { clearTimeout, setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import {
@@ -159,6 +160,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
+  commandAsync: (
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions | undefined
+  ) => Promise<Document>;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
@@ -198,6 +204,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
+
+    this.commandAsync = promisify(
+      (
+        ns: MongoDBNamespace,
+        cmd: Document,
+        options: CommandOptions | undefined,
+        callback: Callback
+      ) => this.command(ns, cmd, options, callback as any)
+    );
+
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
@@ -316,6 +332,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       this[kDelayedTimeoutId] = null;
     }
 
+    const socketTimeoutMS = this[kStream].timeout ?? 0;
+    this[kStream].setTimeout(0);
+
     // always emit the message, in case we are streaming
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
@@ -356,8 +375,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // back in the queue with the correct requestId and will resolve not being able
       // to find the next one via the responseTo of the next streaming hello.
       this[kQueue].set(message.requestId, operationDescription);
-    } else if (operationDescription.socketTimeoutOverride) {
-      this[kStream].setTimeout(this.socketTimeoutMS);
+      this[kStream].setTimeout(socketTimeoutMS);
     }
 
     try {
@@ -502,6 +520,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       if (err) {
         return callback(err);
       }
+    } else if (session?.explicit) {
+      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
     }
 
     // if we have a known cluster time, gossip it
@@ -618,7 +638,7 @@ export class CryptoConnection extends Connection {
 /** @internal */
 export function hasSessionSupport(conn: Connection): boolean {
   const description = conn.description;
-  return description.logicalSessionTimeoutMinutes != null || !!description.loadBalanced;
+  return description.logicalSessionTimeoutMinutes != null;
 }
 
 function supportsOpMsg(conn: Connection) {
@@ -681,8 +701,9 @@ function write(
   }
 
   if (typeof options.socketTimeoutMS === 'number') {
-    operationDescription.socketTimeoutOverride = true;
     conn[kStream].setTimeout(options.socketTimeoutMS);
+  } else if (conn.socketTimeoutMS !== 0) {
+    conn[kStream].setTimeout(conn.socketTimeoutMS);
   }
 
   // if command monitoring is enabled we need to modify the callback here
@@ -692,7 +713,7 @@ function write(
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
       // Command monitoring spec states that if ok is 1, then we must always emit
-      // a command suceeded event, even if there's an error. Write concern errors
+      // a command succeeded event, even if there's an error. Write concern errors
       // will have an ok: 1 in their reply.
       if (err && reply?.ok !== 1) {
         conn.emit(

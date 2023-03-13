@@ -19,6 +19,7 @@ npx mocha \
   test/integration/retryable-reads/retryable_reads.spec.test.js \
   test/integration/retryable-writes/retryable_writes.spec.test.ts \
   test/integration/sessions/sessions.spec.test.ts \
+  test/integration/sessions/sessions.prose.test.ts \
   test/integration/sessions/sessions.test.ts \
   test/integration/transactions/transactions.spec.test.js \
   test/integration/transactions/transactions.test.ts \

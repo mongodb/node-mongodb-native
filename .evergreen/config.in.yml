@@ -106,11 +106,6 @@ functions:
         shell: bash
         script: |
           ${PREPARE_SHELL}
-
-          # TODO(NODE-5035): Remove when merged - need to replace with branch just for OIDC.
-          rm -rf "${DRIVERS_TOOLS}"
-          git clone --branch DRIVERS-2415 https://github.com/blink1073/drivers-evergreen-tools.git "${DRIVERS_TOOLS}"
-
           cd "${DRIVERS_TOOLS}"/.evergreen/auth_oidc
 
           # This is a bit confusing but the ec2.assume_role command before
@@ -121,9 +116,9 @@ functions:
           export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
           export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
           export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-          export AWS_TOKEN_DIR=/tmp/tokens
+          export OIDC_TOKEN_DIR=/tmp/tokens
 
-          . ./activate_venv.sh
+          . ./activate-authoidcvenv.sh
           python oidc_write_orchestration.py
           python oidc_get_tokens.py
 
@@ -147,6 +142,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
 
+          OIDC_TOKEN_DIR="/tmp/tokens" \
           AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
@@ -195,7 +191,7 @@ functions:
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} \
+          SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run serverless tests":
@@ -295,7 +291,6 @@ functions:
           AUTH=${AUTH} \
           SSL=${SSL} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} \
           SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}" \
           MULTI_MONGOS_LB_URI="${MULTI_MONGOS_LB_URI}" \
           TOPOLOGY="${TOPOLOGY}" \
@@ -316,7 +311,6 @@ functions:
           AUTH=${AUTH} \
           SSL=${SSL} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          NODE_VERSION=${NODE_VERSION} \
           TOPOLOGY="${TOPOLOGY}" \
           COMPRESSOR="${COMPRESSOR}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
@@ -461,9 +455,6 @@ functions:
           ${PREPARE_SHELL}
           NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
-    - command: expansions.update
-      params:
-        file: src/deps-expansion.yml
 
   "install aws-credential-providers":
     - command: shell.exec

@@ -280,7 +280,7 @@ efficient way is to replace the whole document, this is not really the
 way to go if you want to change just a field in your document. Luckily
 Mongo DB provides a whole set of operations that let you modify just
 pieces of the document `Atomic operations
-documentation <http://www.mongodb.org/display/DOCS/Atomic+Operations>`_.
+documentation <www.mongodb.com/docs/display/DOCS/Atomic+Operations>`_.
 Basically outlined below.
 
 -  $inc - increment a particular value by a certain amount
@@ -379,7 +379,7 @@ and Mongo DB is no exception. Fortunately for us it has a rich query
 interface with cursors and close to SQL concepts for slicing and dicing
 your datasets. To build queries we have lots of operators to choose from
 `Mongo DB advanced
-queries <http://www.mongodb.org/display/DOCS/Advanced+Queries>`_. There
+queries <www.mongodb.com/docs/display/DOCS/Advanced+Queries>`_. There
 are literarily tons of ways to search and ways to limit the query. Let's
 look at some simple code for dealing with queries in different ways.
 
@@ -461,7 +461,6 @@ Links and stuff
 -  `All the integration tests, they have tons of different usage
    cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`_
 -  `The Mongo DB wiki pages such as the advanced query
-   link <http://www.mongodb.org/display/DOCS/Advanced+Queries>`_
+   link <www.mongodb.com/docs/display/DOCS/Advanced+Queries>`_
 -  `A silly simple location based application using Express JS and Mongo
    DB <https://github.com/christkv/mongodb-presentation>`_
-

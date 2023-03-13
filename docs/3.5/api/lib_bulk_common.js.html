@@ -2898,8 +2898,8 @@ class FindOperators {
    * Add a multiple update operation to the bulk operation
    *
    * @method
-   * @param {object} updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+   * @param {object} updateDocument An update field for an update operation. See {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-u u documentation}
+   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
    * @throws {MongoError} If operation cannot be added to bulk write
    * @return {OrderedBulkOperation|UnorderedBulkOperation} A reference to the parent BulkOperation
    */
@@ -2928,8 +2928,8 @@ class FindOperators {
    * Add a single update operation to the bulk operation
    *
    * @method
-   * @param {object} updateDocument An update field for an update operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-u u documentation}
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+   * @param {object} updateDocument An update field for an update operation. See {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-u u documentation}
+   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
    * @throws {MongoError} If operation cannot be added to bulk write
    * @return {OrderedBulkOperation|UnorderedBulkOperation} A reference to the parent BulkOperation
    */
@@ -3176,7 +3176,7 @@ class BulkOperationBase {
    * Returns a builder object used to complete the definition of the operation.
    *
    * @method
-   * @param {object} selector The selector for the bulk operation. See {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-q q documentation}
+   * @param {object} selector The selector for the bulk operation. See {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-q q documentation}
    * @throws {MongoError} if a selector is not specified
    * @return {FindOperators} A helper object with which the write operation can be defined.
    *
@@ -3227,7 +3227,7 @@ class BulkOperationBase {
    *
    * @method
    * @param {object} op The raw operation to perform.
-   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://docs.mongodb.com/manual/reference/command/update/#update-command-hint|update command} reference for more information.
+   * @param {object} [options.hint] An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.
    * @return {BulkOperationBase} A reference to self
    */
   raw(op) {

@@ -4,12 +4,15 @@ import { Socket } from 'net';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
 import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import {
   BinMsg,
+  ClientMetadata,
   connect,
   Connection,
   hasSessionSupport,
+  HostAddress,
   isHello,
   MessageStream,
   MongoNetworkError,
@@ -31,10 +34,15 @@ const connectionOptionsDefaults = {
   loadBalanced: false
 };
 
-/** The absolute minimum socket API needed by Connection as of writing this test */
+/**
+ * The absolute minimum socket API needed by these tests
+ *
+ * The driver has a greater API requirement for sockets detailed in: NODE-4785
+ */
 class FakeSocket extends EventEmitter {
   destroyed = false;
   writableEnded: boolean;
+  timeout = 0;
   address() {
     // is never called
   }
@@ -59,10 +67,15 @@ class FakeSocket extends EventEmitter {
   get remotePort() {
     return 123;
   }
+  setTimeout(timeout) {
+    this.timeout = timeout;
+  }
 }
 
 class InputStream extends Readable {
   writableEnded: boolean;
+  timeout = 0;
+
   constructor(options?) {
     super(options);
   }
@@ -72,6 +85,10 @@ class InputStream extends Readable {
     if (typeof cb === 'function') {
       process.nextTick(cb);
     }
+  }
+
+  setTimeout(timeout) {
+    this.timeout = timeout;
   }
 }
 
@@ -397,6 +414,95 @@ describe('new Connection()', function () {
           expect(errorOne).to.be.instanceof(MongoRuntimeError);
           expect(errorTwo).to.be.instanceof(MongoRuntimeError);
         });
+      });
+    });
+
+    context('when sending commands on a connection', () => {
+      const CONNECT_DEFAULTS = {
+        id: 1,
+        tls: false,
+        generation: 1,
+        monitorCommands: false,
+        metadata: {} as ClientMetadata,
+        loadBalanced: false
+      };
+      let server;
+      let connectOptions;
+      let connection: Connection;
+      let streamSetTimeoutSpy;
+
+      beforeEach(async () => {
+        server = await mock.createServer();
+        server.setMessageHandler(request => {
+          if (isHello(request.document)) {
+            request.reply(mock.HELLO);
+          }
+        });
+        connectOptions = {
+          ...CONNECT_DEFAULTS,
+          hostAddress: server.hostAddress() as HostAddress,
+          socketTimeoutMS: 15000
+        };
+
+        connection = await promisify<Connection>(callback =>
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          connect(connectOptions, callback)
+        )();
+
+        streamSetTimeoutSpy = sinon.spy(connection.stream, 'setTimeout');
+      });
+
+      afterEach(async () => {
+        connection.destroy({ force: true });
+        sinon.restore();
+        await mock.cleanup();
+      });
+
+      it('sets timeout specified on class before writing to the socket', async () => {
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, {}, callback)
+        )();
+        expect(streamSetTimeoutSpy).to.have.been.calledWith(15000);
+      });
+
+      it('sets timeout specified on options before writing to the socket', async () => {
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, { socketTimeoutMS: 2000 }, callback)
+        )();
+        expect(streamSetTimeoutSpy).to.have.been.calledWith(2000);
+      });
+
+      it('clears timeout after getting a message if moreToCome=false', async () => {
+        connection.stream.setTimeout(1);
+        const msg = generateOpMsgBuffer({ hello: 1 });
+        const msgHeader = {
+          length: msg.readInt32LE(0),
+          requestId: 1,
+          responseTo: 0,
+          opCode: msg.readInt32LE(12)
+        };
+        const msgBody = msg.subarray(16);
+        msgBody.writeInt32LE(0, 0); // OPTS_MORE_TO_COME
+        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        // timeout is still reset
+        expect(connection.stream).to.have.property('timeout', 0);
+      });
+
+      it('does not clear timeout after getting a message if moreToCome=true', async () => {
+        connection.stream.setTimeout(1);
+        const msg = generateOpMsgBuffer({ hello: 1 });
+        const msgHeader = {
+          length: msg.readInt32LE(0),
+          requestId: 1,
+          responseTo: 0,
+          opCode: msg.readInt32LE(12)
+        };
+        const msgBody = msg.subarray(16);
+        msgBody.writeInt32LE(2, 0); // OPTS_MORE_TO_COME
+        connection[getSymbolFrom(connection, 'queue')].set(0, { cb: () => null });
+        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        // timeout is still set
+        expect(connection.stream).to.have.property('timeout', 1);
       });
     });
   });
@@ -752,34 +858,16 @@ describe('new Connection()', function () {
     });
 
     context('when logicalSessionTimeoutMinutes is not present', function () {
-      context('when in load balancing mode', function () {
-        beforeEach(function () {
-          const options = {
-            ...connectionOptionsDefaults,
-            hostAddress: server.hostAddress(),
-            loadBalanced: true
-          };
-          connection = new Connection(stream, options);
-        });
-
-        it('returns true', function () {
-          expect(hasSessionSupport(connection)).to.be.true;
-        });
+      beforeEach(function () {
+        const options = {
+          ...connectionOptionsDefaults,
+          hostAddress: server.hostAddress()
+        };
+        connection = new Connection(stream, options);
       });
 
-      context('when not in load balancing mode', function () {
-        beforeEach(function () {
-          const options = {
-            ...connectionOptionsDefaults,
-            hostAddress: server.hostAddress(),
-            loadBalanced: false
-          };
-          connection = new Connection(stream, options);
-        });
-
-        it('returns false', function () {
-          expect(hasSessionSupport(connection)).to.be.false;
-        });
+      it('returns false', function () {
+        expect(hasSessionSupport(connection)).to.be.false;
       });
     });
   });

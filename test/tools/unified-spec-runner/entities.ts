@@ -30,6 +30,7 @@ import {
   MongoCredentials,
   ReadConcern,
   ReadPreference,
+  SENSITIVE_COMMANDS,
   ServerDescriptionChangedEvent,
   TopologyDescription,
   WriteConcern
@@ -202,6 +203,10 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
+
+    if (!description.observeSensitiveCommands) {
+      this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
+    }
 
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])

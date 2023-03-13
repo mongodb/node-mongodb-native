@@ -374,7 +374,7 @@ export class Response {
     };
 
     // Position within OP_REPLY at which documents start
-    // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
+    // (See https://www.mongodb.com/docs/manual/reference/mongodb-wire-protocol/#wire-op-reply)
     this.index = 20;
 
     // Read the message body

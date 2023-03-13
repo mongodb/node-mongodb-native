@@ -3576,7 +3576,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
                 </td>
             
             
-            <td class="description last"><p>Allows you to start a changeStream after a specified event. See <a href="https://docs.mongodb.com/master/changeStreams/#resumeafter-for-change-streams">ChangeStream documentation</a>.</p></td>
+            <td class="description last"><p>Allows you to start a changeStream after a specified event. See <a href="https://www.mongodb.com/docs/master/changeStreams/#resumeafter-for-change-streams">ChangeStream documentation</a>.</p></td>
         </tr>
 	
 	
@@ -3611,7 +3611,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
                 </td>
             
             
-            <td class="description last"><p>Similar to resumeAfter, but will allow you to start after an invalidated event. See <a href="https://docs.mongodb.com/master/changeStreams/#startafter-for-change-streams">ChangeStream documentation</a>.</p></td>
+            <td class="description last"><p>Similar to resumeAfter, but will allow you to start after an invalidated event. See <a href="https://www.mongodb.com/docs/master/changeStreams/#startafter-for-change-streams">ChangeStream documentation</a>.</p></td>
         </tr>
 	
 	
@@ -3683,7 +3683,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
                 </td>
             
             
-            <td class="description last"><p>The number of documents to return per batch. See <a href="https://docs.mongodb.com/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
+            <td class="description last"><p>The number of documents to return per batch. See <a href="https://www.mongodb.com/docs/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
         </tr>
 	
 	
@@ -3718,7 +3718,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
                 </td>
             
             
-            <td class="description last"><p>Specify collation settings for operation. See <a href="https://docs.mongodb.com/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
+            <td class="description last"><p>Specify collation settings for operation. See <a href="https://www.mongodb.com/docs/manual/reference/command/aggregate">aggregation documentation</a>.</p></td>
         </tr>
 	
 	
@@ -3753,7 +3753,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
                 </td>
             
             
-            <td class="description last"><p>The read preference. Defaults to the read preference of the database or collection. See <a href="https://docs.mongodb.com/manual/reference/read-preference">read preference documentation</a>.</p></td>
+            <td class="description last"><p>The read preference. Defaults to the read preference of the database or collection. See <a href="https://www.mongodb.com/docs/manual/reference/read-preference">read preference documentation</a>.</p></td>
         </tr>
 	
 	
@@ -6899,7 +6899,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
             
             
             
-            <td class="description last"><p>An authentication mechanism to use for connection authentication, see the <a href="https://docs.mongodb.com/manual/reference/connection-string/#urioption.authMechanism">authMechanism</a> reference for supported options.</p></td>
+            <td class="description last"><p>An authentication mechanism to use for connection authentication, see the <a href="https://www.mongodb.com/docs/manual/reference/connection-string/#urioption.authMechanism">authMechanism</a> reference for supported options.</p></td>
         </tr>
 	
 	
@@ -7433,7 +7433,7 @@ Other validation rules in the JSON schema will not be enforced by the driver and
 <blockquote>
 <p>Automatic encryption is an enterprise only feature that only applies to operations on a collection. Automatic encryption is not supported for operations on a database or view, and operations that are not bypassed will result in error<br>
 (see <a href="https://github.com/mongodb/specifications/blob/master/source/client-side-encryption/client-side-encryption.rst#libmongocrypt-auto-encryption-allow-list">libmongocrypt: Auto Encryption Allow-List</a>). To bypass automatic encryption for all operations, set bypassAutoEncryption=true in AutoEncryptionOpts.</p>
-<p>Automatic encryption requires the authenticated user to have the <a href="https://docs.mongodb.com/manual/reference/command/listCollections/#dbcmd.listCollections">listCollections privilege action</a>.</p>
+<p>Automatic encryption requires the authenticated user to have the <a href="https://www.mongodb.com/docs/manual/reference/command/listCollections/#dbcmd.listCollections">listCollections privilege action</a>.</p>
 <p>If a MongoClient with a limited connection pool size (i.e a non-zero maxPoolSize) is configured with AutoEncryptionOptions, a separate internal MongoClient is created if any of the following are true:</p>
 <ul>
 <li>AutoEncryptionOptions.keyVaultClient is not passed.</li>
@@ -7607,7 +7607,7 @@ If an internal MongoClient is created, it is configured with the same options as
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
-            <li><a href="https://docs.mongodb.com/manual/reference/method/db.runCommand/#response">https://docs.mongodb.com/manual/reference/method/db.runCommand/#response</a></li>
+            <li><a href="https://www.mongodb.com/docs/manual/reference/method/db.runCommand/#response">https://www.mongodb.com/docs/manual/reference/method/db.runCommand/#response</a></li>
         </ul>
     </dd>
     
@@ -7723,7 +7723,7 @@ of the data read from replica sets and replica set shards.</p>
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
-            <li><a href="https://docs.mongodb.com/manual/reference/read-concern/">https://docs.mongodb.com/manual/reference/read-concern/</a></li>
+            <li><a href="https://www.mongodb.com/docs/manual/reference/read-concern/">https://www.mongodb.com/docs/manual/reference/read-concern/</a></li>
         </ul>
     </dd>
     
@@ -7775,7 +7775,7 @@ of the data read from replica sets and replica set shards.</p>
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
-            <li><a href="https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels">https://docs.mongodb.com/manual/reference/read-concern/index.html#read-concern-levels</a></li>
+            <li><a href="https://www.mongodb.com/docs/manual/reference/read-concern/index.html#read-concern-levels">https://www.mongodb.com/docs/manual/reference/read-concern/index.html#read-concern-levels</a></li>
         </ul>
     </dd>
     
@@ -7827,7 +7827,7 @@ of the data read from replica sets and replica set shards.</p>
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
-            <li><a href="https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token">https://docs.mongodb.com/master/changeStreams/#change-stream-resume-token</a></li>
+            <li><a href="https://www.mongodb.com/docs/master/changeStreams/#change-stream-resume-token">https://www.mongodb.com/docs/master/changeStreams/#change-stream-resume-token</a></li>
         </ul>
     </dd>
     
@@ -8516,7 +8516,7 @@ been written to the journal</p></td>
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
-            <li><a href="https://docs.mongodb.com/manual/reference/write-concern/">https://docs.mongodb.com/manual/reference/write-concern/</a></li>
+            <li><a href="https://www.mongodb.com/docs/manual/reference/write-concern/">https://www.mongodb.com/docs/manual/reference/write-concern/</a></li>
         </ul>
     </dd>
     

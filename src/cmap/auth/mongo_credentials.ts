@@ -30,25 +30,16 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-/**
- * TODO: NODE-5035: Make OIDC properties public.
- *
- * @public
- * */
+/** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
   SERVICE_NAME?: string;
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** @internal Name for the OIDC device workflow */
-  DEVICE_NAME?: 'aws' | 'azure' | 'gcp';
-  /** @internal Similar to a username, is require by OIDC when more than one IDP is configured. */
-  PRINCIPAL_NAME?: string;
-  /** @internal User provided callback to get OIDC auth credentials */
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
-  /** @internal User provided callback to refresh OIDC auth credentials */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
+  PROVIDER_NAME?: 'aws';
 }
 
 /** @public */
@@ -155,21 +146,18 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username) {
+      if (this.username && this.mechanismProperties.PROVIDER_NAME) {
         throw new MongoInvalidArgumentError(
-          `Username not permitted for mechanism '${this.mechanism}'. Use PRINCIPAL_NAME instead.`
+          `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
-      if (this.mechanismProperties.PRINCIPAL_NAME && this.mechanismProperties.DEVICE_NAME) {
+      if (
+        this.mechanismProperties.PROVIDER_NAME &&
+        this.mechanismProperties.PROVIDER_NAME !== 'aws'
+      ) {
         throw new MongoInvalidArgumentError(
-          `PRINCIPAL_NAME and DEVICE_NAME may not be used together for mechanism '${this.mechanism}'.`
-        );
-      }
-
-      if (this.mechanismProperties.DEVICE_NAME && this.mechanismProperties.DEVICE_NAME !== 'aws') {
-        throw new MongoInvalidArgumentError(
-          `Currently only a DEVICE_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+          `Currently only a PROVIDER_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
         );
       }
 
@@ -183,11 +171,11 @@ export class MongoCredentials {
       }
 
       if (
-        !this.mechanismProperties.DEVICE_NAME &&
+        !this.mechanismProperties.PROVIDER_NAME &&
         !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
       ) {
         throw new MongoInvalidArgumentError(
-          `Either a DEVICE_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+          `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
       }
     }

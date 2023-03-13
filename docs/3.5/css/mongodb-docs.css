@@ -497,14 +497,14 @@ ul.home-nav li.docs { width: 276px; }
 
 ul.home-nav li.docs a, ul.home-nav li.docs a:visited {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -11px -63px;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -11px -63px;
     width: 209px;
     height: 54px;
 }
 
 ul.home-nav li.docs a:hover {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -11px 0;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -11px 0;
     width: 209px;
     height: 54px;
 }
@@ -513,14 +513,14 @@ ul.home-nav li.try { width: 238px; }
 
 ul.home-nav li.try a, ul.home-nav li.try a:visited {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -274px -63px;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -274px -63px;
     width: 176px;
     height: 54px;
 }
 
 ul.home-nav li.try a:hover {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -274px 0;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -274px 0;
     width: 176px;
     height: 54px;
 }
@@ -529,14 +529,14 @@ ul.home-nav li.downloads { width: 245px; }
 
 ul.home-nav li.downloads a, ul.home-nav li.downloads a:visited {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -497px -63px;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -497px -63px;
     width: 185px;
     height: 54px;
 }
 
 ul.home-nav li.downloads a:hover {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) -497px 0;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) -497px 0;
     width: 185px;
     height: 54px;
 }
@@ -547,14 +547,14 @@ ul.home-nav li.drivers {
 
 ul.home-nav li.drivers a, ul.home-nav li.drivers a:visited {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) right -63px no-repeat;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) right -63px no-repeat;
     width: 194px;
     height: 54px;
 }
 
 ul.home-nav li.drivers a:hover {
     float: left;
-    background: url(http://www.mongodb.org/static/images/home_nav.png) right 0 no-repeat;
+    background: url(www.mongodb.com/docs/static/images/home_nav.png) right 0 no-repeat;
     width: 194px;
     height: 54px;
 }

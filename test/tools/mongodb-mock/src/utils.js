@@ -1,6 +1,6 @@
 /*
  * MongoDB OPCODES
- * reference: https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#request-opcodes
+ * reference: https://www.mongodb.com/docs/manual/reference/mongodb-wire-protocol/#request-opcodes
  */
 const opcodes = {
   OP_REPLY: 1,

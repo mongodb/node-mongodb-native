@@ -149,6 +149,7 @@ export interface ClientEntity {
   observeLogMessages?: Map<ObservableLogComponent, ObservableLogSeverity>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
+  observeSensitiveCommands?: boolean;
 }
 export interface DatabaseEntity {
   id: string;

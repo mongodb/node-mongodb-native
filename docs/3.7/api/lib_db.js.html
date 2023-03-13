@@ -2669,7 +2669,7 @@ Db.prototype.command = function(command, options, callback) {
  * @param {object} [pipeline=[]] Array containing all the aggregation framework commands for the execution.
  * @param {object} [options] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
  * @param {object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
  * @param {number} [options.cursor.batchSize=1000] Deprecated. Use `options.batchSize`
  * @param {'queryPlanner'|'queryPlannerExtended'|'executionStats'|'allPlansExecution'|boolean} [options.explain] The verbosity mode for the explain output.
@@ -2864,7 +2864,7 @@ Db.prototype.collection = deprecateOptions(
 
 /**
  * Create a new collection on a server with the specified options. Use this to create capped collections.
- * More information about command options available at https://docs.mongodb.com/manual/reference/command/create/
+ * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
  *
  * @method
  * @param {string} name the collection name we wish to access.
@@ -3318,14 +3318,14 @@ Db.prototype.unref = function() {
  * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this database. Will ignore all changes to system collections.
  * @method
  * @since 3.1.0
- * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+ * @param {Array} [pipeline] An array of {@link https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
  * @param {object} [options] Optional settings
  * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
  * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
- * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
- * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {number} [options.batchSize=1000] The number of documents to return per batch. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://www.mongodb.com/docs/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database. See {@link https://www.mongodb.com/docs/manual/reference/read-preference|read preference documentation}.
  * @param {Timestamp} [options.startAtOperationTime] receive change events that occur after the specified timestamp
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @return {ChangeStream} a ChangeStream instance.
