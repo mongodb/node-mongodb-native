@@ -201,7 +201,6 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    // TODO(NODE-4849): Install a writable stream to capture logs
     const logCollector = new LogCollector({}, description.observeLogMessages);
     super(uri, {
       monitorCommands: true,
