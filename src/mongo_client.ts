@@ -407,63 +407,72 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
-    if (this.topology && this.topology.isConnected()) {
-      return this;
-    }
-
     if (this.connectionLock) {
       return this.connectionLock;
     }
 
-    this.connectionLock = (async () => {
-      const options = this[kOptions];
-
-      if (typeof options.srvHost === 'string') {
-        const hosts = await resolveSRVRecord(options);
-
-        for (const [index, host] of hosts.entries()) {
-          options.hosts[index] = host;
-        }
-      }
-
-      const topology = new Topology(options.hosts, options);
-      // Events can be emitted before initialization is complete so we have to
-      // save the reference to the topology on the client ASAP if the event handlers need to access it
-      this.topology = topology;
-      topology.client = this;
-
-      topology.once(Topology.OPEN, () => this.emit('open', this));
-
-      for (const event of MONGO_CLIENT_EVENTS) {
-        topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
-      }
-
-      const topologyConnect = async () => {
-        try {
-          await promisify(callback => topology.connect(options, callback))();
-        } catch (error) {
-          topology.close({ force: true });
-          throw error;
-        }
-      };
-
-      if (this.autoEncrypter) {
-        const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
-        await initAutoEncrypter();
-        await topologyConnect();
-        await options.encrypter.connectInternalClient();
-      } else {
-        await topologyConnect();
-      }
-
-      return this;
-    })();
-
     try {
+      this.connectionLock = this._connect();
       await this.connectionLock;
     } finally {
       // release
       this.connectionLock = undefined;
+    }
+
+    return this;
+  }
+
+  /**
+   * Create a topology to open the connection, must be locked to avoid topology leaks in concurrency scenario.
+   * Locking is enforced by the connect method.
+   *
+   * When decorators available put implementation back to original connect methods
+   * and enforce locking via a dedicated decorator.
+   * @see https://github.com/mongodb/node-mongodb-native/pull/3596#discussion_r1134211500
+   */
+  private async _connect(): Promise<this> {
+    if (this.topology && this.topology.isConnected()) {
+      return this;
+    }
+
+    const options = this[kOptions];
+
+    if (typeof options.srvHost === 'string') {
+      const hosts = await resolveSRVRecord(options);
+
+      for (const [index, host] of hosts.entries()) {
+        options.hosts[index] = host;
+      }
+    }
+
+    const topology = new Topology(options.hosts, options);
+    // Events can be emitted before initialization is complete so we have to
+    // save the reference to the topology on the client ASAP if the event handlers need to access it
+    this.topology = topology;
+    topology.client = this;
+
+    topology.once(Topology.OPEN, () => this.emit('open', this));
+
+    for (const event of MONGO_CLIENT_EVENTS) {
+      topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
+    }
+
+    const topologyConnect = async () => {
+      try {
+        await promisify(callback => topology.connect(options, callback))();
+      } catch (error) {
+        topology.close({ force: true });
+        throw error;
+      }
+    };
+
+    if (this.autoEncrypter) {
+      const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
+      await initAutoEncrypter();
+      await topologyConnect();
+      await options.encrypter.connectInternalClient();
+    } else {
+      await topologyConnect();
     }
 
     return this;
