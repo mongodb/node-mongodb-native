@@ -103,33 +103,33 @@ export type CmapEvent =
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
 export type SdamEvent = ServerDescriptionChangedEvent;
-export type Log = ExpectedLogMessage;
+export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-// TODO: FIXME
+// FIXME
 class LogCollector extends Writable {
-  _logs: Log[];
+  _logs: LogMessage[];
   constructor(options: WritableOptions) {
     super({ ...options, objectMode: true });
     this._logs = [];
-    this.on('data', function (log: Log) {
+    this.on('data', function(log: LogMessage) {
       this._accumulator.push(log);
     });
   }
 
   _write(chunk: any, encoding: string, next: (error?: Error) => void) {
-    this._logs.push(chunk as Log);
+    this._logs.push(chunk as LogMessage);
     next();
   }
 
-  set logs(logs: Log[]) {
+  set logs(logs: LogMessage[]) {
     this._logs = logs;
   }
 
-  get logs(): Log[] {
+  get logs(): LogMessage[] {
     return this._logs;
   }
 }
@@ -139,7 +139,7 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logs: Log[] = [];
+  logs: LogMessage[] = [];
 
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
@@ -254,7 +254,7 @@ export class UnifiedMongoClient extends MongoClient {
     }
   }
 
-  getCapturedLogs(): Log[] {
+  getCapturedLogs(): LogMessage[] {
     return this.logs;
   }
 
