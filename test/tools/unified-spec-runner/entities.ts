@@ -177,7 +177,6 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
-    // FIXME:
     this.observedLogMessages = new Map(Object.entries(description.observeLogMessages ?? {}));
     logCollector.on('data', (log: LogMessage) => this.pushLogMessage(log));
     this.ignoredEvents = [
