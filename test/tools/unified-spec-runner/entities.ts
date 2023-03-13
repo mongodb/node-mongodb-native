@@ -280,7 +280,7 @@ export class UnifiedMongoClient extends MongoClient {
     }
     if (
       minLogLevel !== 'off' &&
-      numericMinLogLevel >= numericLogLevel
+      numericLogLevel >= numericMinLogLevel
     ) {
       this.logs.push(log);
     }
