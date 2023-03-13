@@ -496,7 +496,6 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     const map = entityMap ?? new EntitiesMap();
     for (const entity of entities ?? []) {
       if ('client' in entity) {
-        // TODO(NODE-4849): check observeLogMessages to set the kinds of logs we should be collecting
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
