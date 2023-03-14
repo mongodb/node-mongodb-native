@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import {  Transform } from 'stream';
+import { Transform } from 'stream';
 
 import {
   AbstractCursor,
@@ -278,10 +278,7 @@ export class UnifiedMongoClient extends MongoClient {
     if (typeof numericLogLevel !== 'number') {
       expect.fail('Log level must be valid log level');
     }
-    if (
-      minLogLevel !== 'off' &&
-      numericLogLevel >= numericMinLogLevel
-    ) {
+    if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
       this.logs.push(log);
     }
   }
