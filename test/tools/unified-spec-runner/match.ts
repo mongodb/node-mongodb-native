@@ -605,7 +605,6 @@ export function compareLogs(
       ).to.not.exist;
     }
 
-    // TODO: Check that data fields match. Ensure that the  actual.data is treated as a root-level document
     resultCheck(actualLog.data, expectedLog.data, entities, [rootPrefix], false);
   }
 }
