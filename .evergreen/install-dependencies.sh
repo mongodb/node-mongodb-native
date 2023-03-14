@@ -5,6 +5,8 @@ NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
+CURL_FLAGS=(--compressed --location --retry 8 --silent --show-error --max-time 900 --continue-at -)
+
 mkdir -p "$NODE_ARTIFACTS_PATH/npm_global"
 
 # Comparisons are all case insensitive
@@ -13,7 +15,7 @@ shopt -s nocasematch
 # index.tab is a sorted tab separated values file with the following headers
 # 0       1    2     3   4  5  6    7       8       9   10
 # version date files npm v8 uv zlib openssl modules lts security
-curl --compressed -C - -L --retry 8 -sS "https://nodejs.org/dist/index.tab" --max-time 900 --output node_index.tab
+curl "${CURL_FLAGS[@]}" "https://nodejs.org/dist/index.tab" --output node_index.tab
 
 while IFS=$'\t' read -r -a row; do
   node_index_version="${row[0]}"
@@ -63,7 +65,7 @@ echo "Node.js ${node_index_version} for ${operating_system}-${architecture} rele
 
 set -o xtrace
 
-curl --compressed -C - -L --fail --retry 8 -sS "${node_download_url}" --max-time 900 --output "$node_archive_path"
+curl "${CURL_FLAGS[@]}" "${node_download_url}" --output "$node_archive_path"
 
 if [[ "$file_extension" = "zip" ]]; then
   unzip -q "$node_archive_path" -d "${NODE_ARTIFACTS_PATH}"
