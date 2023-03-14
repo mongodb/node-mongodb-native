@@ -6,6 +6,7 @@ NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
 CURL_FLAGS=(
+  --fail          # Exit code 1 if request fails
   --compressed    # Request a compressed response should keep fetching fast
   --location      # Follow a redirect
   --retry 8       # Retry HTTP 408, 429, 500, 502, 503 or 504, 8 times
