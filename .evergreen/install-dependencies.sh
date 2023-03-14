@@ -5,7 +5,15 @@ NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
-CURL_FLAGS=(--compressed --location --retry 8 --silent --show-error --max-time 900 --continue-at -)
+CURL_FLAGS=(
+  --compressed    # Request a compressed response should keep fetching fast
+  --location      # Follow a redirect
+  --retry 8       # Retry HTTP 408, 429, 500, 502, 503 or 504, 8 times
+  --silent        # Do not print a progress bar
+  --show-error    # Despite the silent flag still print out errors
+  --max-time 900  # 900 seconds is 15 minutes, evergreen times out at 20
+  --continue-at - # If a download is interrupted it can figure out where to resume
+)
 
 mkdir -p "$NODE_ARTIFACTS_PATH/npm_global"
 
