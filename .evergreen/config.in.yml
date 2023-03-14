@@ -191,7 +191,7 @@ functions:
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
-          SKIP_DEPS=${SKIP_DEPS|1} \
+          NODE_VERSION=${NODE_VERSION} SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
   "run serverless tests":
@@ -291,6 +291,7 @@ functions:
           AUTH=${AUTH} \
           SSL=${SSL} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
           SINGLE_MONGOS_LB_URI="${SINGLE_MONGOS_LB_URI}" \
           MULTI_MONGOS_LB_URI="${MULTI_MONGOS_LB_URI}" \
           TOPOLOGY="${TOPOLOGY}" \
@@ -311,6 +312,7 @@ functions:
           AUTH=${AUTH} \
           SSL=${SSL} \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
+          NODE_VERSION=${NODE_VERSION} \
           TOPOLOGY="${TOPOLOGY}" \
           COMPRESSOR="${COMPRESSOR}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
@@ -455,6 +457,9 @@ functions:
           ${PREPARE_SHELL}
           NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+    - command: expansions.update
+      params:
+        file: src/deps-expansion.yml
 
   "install aws-credential-providers":
     - command: shell.exec

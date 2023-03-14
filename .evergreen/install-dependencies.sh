@@ -1,95 +1,105 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
+NVM_WINDOWS_URL="https://github.com/coreybutler/nvm-windows/releases/download/1.1.9/nvm-noinstall.zip"
+NVM_URL="https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh"
+
 NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
-NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
-if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
+NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY}/node-artifacts"
 
-mkdir -p "$NODE_ARTIFACTS_PATH/npm_global"
+# this needs to be explicitly exported for the nvm install below
+export NVM_DIR="${NODE_ARTIFACTS_PATH}/nvm"
+export XDG_CONFIG_HOME=${NODE_ARTIFACTS_PATH}
 
-# Comparisons are all case insensitive
-shopt -s nocasematch
+# create node artifacts path if needed
+mkdir -p "${NODE_ARTIFACTS_PATH}"
 
-# index.tab is a sorted tab separated values file with the following headers
-# 0       1    2     3   4  5  6    7       8       9   10
-# version date files npm v8 uv zlib openssl modules lts security
-curl --retry 8 -sS "https://nodejs.org/dist/index.tab" --max-time 300 --output node_index.tab
+function node_lts_to_version() {
+  case $1 in
+    "fermium")
+      echo 14
+      ;;
+    "gallium")
+      echo 16
+      ;;
+    "hydrogen")
+      echo 18
+      ;;
+    "iron")
+      echo 20
+      ;;
+    "latest")
+      echo 'latest'
+      ;;
+    *)
+      echo "Unsupported Node LTS version $1"
+      ;;
+  esac
+}
 
-while IFS=$'\t' read -r -a row; do
-  node_index_version="${row[0]}"
-  node_index_date="${row[1]}"
-  node_index_lts="${row[9]}"
-  [[ "$node_index_version" = "version" ]] && continue # skip tsv header
-  [[ "$NODE_LTS_NAME" = "latest" ]] && break # first line is latest
-  [[ "$NODE_LTS_NAME" = "$node_index_lts" ]] && break # case insensitive compare
-done < node_index.tab
+function latest_version_for_node_major() {
+  local __NODE_MAJOR_VERSION=$1
+  local NODE_DOWNLOAD_URI="https://nodejs.org/download/release/latest-v${__NODE_MAJOR_VERSION}.x/SHASUMS256.txt"
 
-if [[ "$OS" = "Windows_NT" ]]; then
-  operating_system="win"
-elif [[ $(uname) = "darwin" ]]; then
-  operating_system="darwin"
-elif [[ $(uname) = "linux" ]]; then
-  operating_system="linux"
-else
-  echo "Unable to determine operating system: $operating_system"
-  exit 1
-fi
+  if [ $__NODE_MAJOR_VERSION == 'latest' ]
+  then
+    NODE_DOWNLOAD_URI="https://nodejs.org/download/release/latest/SHASUMS256.txt"
+  fi
 
-architecture=$(uname -m)
-if [[ $architecture = "x86_64" ]]; then
-  architecture="x64"
-elif [[ $architecture = "arm64" ]]; then
-  architecture="arm64"
-elif [[ $architecture == s390* ]]; then
-  architecture="s390x"
-elif [[ $architecture == ppc* ]]; then
-  architecture="ppc64le"
-else
-  echo "Unable to determine operating system: $architecture"
-  exit 1
-fi
+  # check that the requested version does exist
+  curl --silent --fail $NODE_DOWNLOAD_URI &> /dev/null
 
-file_extension="tar.gz"
-if [[ "$OS" = "Windows_NT" ]]; then file_extension="zip"; fi
+  echo $(curl --retry 8 --retry-delay 5  --max-time 50 --silent -o- $NODE_DOWNLOAD_URI | head -n 1 | awk '{print $2};' | cut -d- -f2)
+}
 
-node_directory="node-${node_index_version}-${operating_system}-${architecture}"
-node_archive="${node_directory}.${file_extension}"
-node_archive_path="$NODE_ARTIFACTS_PATH/${node_archive}"
-node_download_url="https://nodejs.org/dist/${node_index_version}/${node_archive}"
+NODE_MAJOR_VERSION=$(node_lts_to_version $NODE_LTS_NAME)
+NODE_VERSION=$(latest_version_for_node_major $NODE_MAJOR_VERSION)
+NODE_VERSION=${NODE_VERSION:1} # :1 gets rid of the leading 'v'
 
-echo "Node.js ${node_index_version} for ${operating_system}-${architecture} released on ${node_index_date}"
+echo "set version to $NODE_VERSION"
 
-set -o xtrace
-
-curl --fail --retry 8 -sS "${node_download_url}" --max-time 300 --output "$node_archive_path"
-
-if [[ "$file_extension" = "zip" ]]; then
-  unzip -q "$node_archive_path" -d "${NODE_ARTIFACTS_PATH}"
-  mkdir -p "${NODE_ARTIFACTS_PATH}/nodejs"
-  # Windows "bins" are at the top level
-  mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs/bin"
-  # Need to add executable flag ourselves
-  chmod +x "${NODE_ARTIFACTS_PATH}/nodejs/bin/node.exe"
-  chmod +x "${NODE_ARTIFACTS_PATH}/nodejs/bin/npm"
-else
-  tar -xf "$node_archive_path" -C "${NODE_ARTIFACTS_PATH}"
-  mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
-fi
-
-export PATH="$NODE_ARTIFACTS_PATH/npm_global/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
-hash -r
-
-# Set npm -g prefix to our local artifacts directory
-cat <<EOT > .npmrc
-prefix=$NODE_ARTIFACTS_PATH/npm_global
+# output node version to expansions file for use in subsequent scripts
+cat <<EOT > deps-expansion.yml
+  NODE_VERSION: "$NODE_VERSION"
 EOT
 
-if [[ $operating_system != "win" ]]; then
-  # Update npm to latest when we can
-  npm install --global npm@latest
-  hash -r
+# install Node.js on Windows
+if [[ "$OS" == "Windows_NT" ]]; then
+  # Delete pre-existing node to avoid version conflicts
+  rm -rf "/cygdrive/c/Program Files/nodejs"
+
+
+  NVM_HOME=$(cygpath -w "$NVM_DIR")
+  export NVM_HOME
+  NVM_SYMLINK=$(cygpath -w "$NODE_ARTIFACTS_PATH/bin")
+  export NVM_SYMLINK
+  NVM_ARTIFACTS_PATH=$(cygpath -w "$NODE_ARTIFACTS_PATH/bin")
+  export NVM_ARTIFACTS_PATH
+  PATH=$(cygpath $NVM_SYMLINK):$(cygpath $NVM_HOME):$PATH
+  export PATH
+
+  curl -L $NVM_WINDOWS_URL -o nvm.zip
+  unzip -d "$NVM_DIR" nvm.zip
+  rm nvm.zip
+
+  chmod 777 "$NVM_DIR"
+  chmod -R a+rx "$NVM_DIR"
+
+  cat <<EOT > "$NVM_DIR/settings.txt"
+root: $NVM_HOME
+path: $NVM_SYMLINK
+EOT
+  nvm install "$NODE_VERSION"
+  nvm use "$NODE_VERSION"
+  which node || echo "node not found, PATH=$PATH"
+  which npm || echo "npm not found, PATH=$PATH"
+  npm cache clear --force # Fixes: Cannot read properties of null (reading 'pickAlgorithm') error on windows
+
+# install Node.js on Linux/MacOS
+else
+  curl -o- $NVM_URL | bash
+  [ -s "${NVM_DIR}/nvm.sh" ] && source "${NVM_DIR}/nvm.sh"
+  nvm install --no-progress "$NODE_VERSION"
 fi
 
-echo "npm version: $(npm -v)"
-
-npm install "${NPM_OPTIONS}"
+npm install ${NPM_OPTIONS}

@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+[ -s "$PROJECT_DIRECTORY/node-artifacts/nvm/nvm.sh" ] && source "$PROJECT_DIRECTORY"/node-artifacts/nvm/nvm.sh
 
 export MONGODB_URI=$MONGODB_URI
 
