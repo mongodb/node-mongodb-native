@@ -176,6 +176,9 @@ functions:
           DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
           LAMBDA_STACK_NAME: dbx-node-lambda
           AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
 
   "run tests":
     - command: shell.exec
