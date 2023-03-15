@@ -33,7 +33,7 @@ export const SeverityLevelMap: Map<string | number, string | number> = new Map([
   [SeverityLevel.EMERGENCY, 9]
 ]);
 
-for (const [level, value] of SeverityLevelMap.entries()) {
+for (const [level, value] of SeverityLevelMap) {
   SeverityLevelMap.set(value, level);
 }
 
