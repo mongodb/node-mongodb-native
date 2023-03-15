@@ -403,7 +403,7 @@ export function parseOptions(
     ) {
       // If authSource was explicitly given and its incorrect, we error
       throw new MongoParseError(
-        `${mongoOptions.credentials} can only have authSource set to '$external'`
+        `authMechanism ${mongoOptions.credentials.mechanism} requires an authSource of '$external'`
       );
     }
 

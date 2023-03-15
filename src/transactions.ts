@@ -18,7 +18,7 @@ export const TxnState = Object.freeze({
 } as const);
 
 /** @internal */
-export type TxnState = typeof TxnState[keyof typeof TxnState];
+export type TxnState = (typeof TxnState)[keyof typeof TxnState];
 
 const stateMachine: { [state in TxnState]: TxnState[] } = {
   [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],

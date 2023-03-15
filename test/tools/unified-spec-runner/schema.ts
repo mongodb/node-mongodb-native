@@ -72,7 +72,7 @@ export const OperationNames = [
   'removeKeyAltName',
   'getKeyByAltName'
 ] as const;
-export type OperationName = typeof OperationNames[number];
+export type OperationName = (typeof OperationNames)[number];
 
 export interface OperationDescription {
   name: OperationName;

@@ -1,4 +1,4 @@
-import { type Document, Binary, BSON } from 'bson';
+import { Binary, BSON, type Document } from 'bson';
 
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';

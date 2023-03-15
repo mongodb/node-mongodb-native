@@ -9,7 +9,7 @@ source ".evergreen/init-nvm.sh"
 
 set -o xtrace
 
-npm install 'mongodb-client-encryption@2.6.0-alpha.0'
+npm install 'mongodb-client-encryption@2.6.0'
 npm install 'gcp-metadata'
 
 export MONGODB_URI="mongodb://localhost:27017"
