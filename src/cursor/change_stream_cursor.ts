@@ -1,20 +1,20 @@
 import type { Document, Long, Timestamp } from '../bson';
 import {
+  ChangeStream,
   type ChangeStreamDocument,
   type ChangeStreamEvents,
   type OperationTime,
-  type ResumeToken,
-  ChangeStream
+  type ResumeToken
 } from '../change_stream';
 import { INIT, RESPONSE } from '../constants';
 import type { MongoClient } from '../mongo_client';
 import type { TODO_NODE_3286 } from '../mongo_types';
 import { AggregateOperation } from '../operations/aggregate';
 import type { CollationOptions } from '../operations/command';
-import { type ExecutionResult, executeOperation } from '../operations/execute_operation';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
-import { type Callback, type MongoDBNamespace, maxWireVersion } from '../utils';
-import { type AbstractCursorOptions, AbstractCursor } from './abstract_cursor';
+import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { AbstractCursor, type AbstractCursorOptions } from './abstract_cursor';
 
 /** @internal */
 export interface ChangeStreamCursorOptions extends AbstractCursorOptions {

@@ -24,7 +24,7 @@ export const TopologyType = Object.freeze({
 } as const);
 
 /** @public */
-export type TopologyType = typeof TopologyType[keyof typeof TopologyType];
+export type TopologyType = (typeof TopologyType)[keyof typeof TopologyType];
 
 /**
  * An enumeration of server types we know about
@@ -44,7 +44,7 @@ export const ServerType = Object.freeze({
 } as const);
 
 /** @public */
-export type ServerType = typeof ServerType[keyof typeof ServerType];
+export type ServerType = (typeof ServerType)[keyof typeof ServerType];
 
 /** @internal */
 export type TimerQueue = Set<NodeJS.Timeout>;

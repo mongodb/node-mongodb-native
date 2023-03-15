@@ -10,7 +10,7 @@ if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_USER+omitted} ]; then echo "SERVERLESS_ATLAS_USER is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASSWORD is unset" && exit 1; fi
 
-npm install mongodb-client-encryption@"2.4.0"
+npm install mongodb-client-encryption@"2.6.0"
 
 npx mocha \
   --config test/mocha_mongodb.json \
