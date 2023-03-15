@@ -177,7 +177,9 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
-    this.observedLogMessages = description.observeLogMessages ?? {} as Record<ObservableLogComponent, ObservableLogSeverity>;
+    this.observedLogMessages =
+      description.observeLogMessages ??
+      ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
     logCollector.on('data', (log: LogMessage) => this.pushLogMessage(log));
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
