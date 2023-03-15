@@ -576,10 +576,10 @@ export function compareLogs(
     const expectedLog = expected[index];
 
     // Check that log levels match
-    expect(actualLog.level).to.deep.equal(expectedLog.level);
+    expect(actualLog).to.have.deep.property('level', expectedLog.level);
 
     // Check that components match
-    expect(actualLog.component).to.deep.equal(expectedLog.component);
+    expect(actualLog).to.have.deep.property('component', expectedLog.component);
 
     // NOTE: The spec states that if the failureIsRedacted flag is present, we
     // must assert that a failure occurred.
