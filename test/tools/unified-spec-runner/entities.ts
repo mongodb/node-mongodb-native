@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { Transform } from 'stream';
+import { Writable } from 'stream';
 
 import {
   AbstractCursor,
@@ -110,12 +110,36 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
+export class UnifiedLogCollector extends Writable {
+  collectedLogs: LogMessage[] = [];
+  observeLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
+
+  constructor(observeLogMessages?: Record<ObservableLogComponent, ObservableLogSeverity>) {
+    super({ objectMode: true });
+    this.observeLogMessages =
+      observeLogMessages ?? ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
+  }
+
+  _write(log: LogMessage) {
+    const minLogLevel = this.observeLogMessages[log.component] ?? 'off';
+    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? 0;
+
+    const numericLogLevel = SeverityLevelMap.get(log.level);
+    if (typeof numericLogLevel !== 'number') {
+      expect.fail('Log level must be valid log level');
+    }
+    if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
+      this.collectedLogs.push(log);
+    }
+  }
+}
+
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[] = [];
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  collectedLogs: LogMessage[] = [];
+  logCollector: UnifiedLogCollector;
 
   ignoredEvents: string[];
   observedLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
@@ -162,12 +186,7 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    const logCollector = new Transform({
-      objectMode: true,
-      transform(log: LogMessage, _: string, next: (e: Error | null, log: LogMessage) => void) {
-        next(null, log);
-      }
-    });
+    const logCollector = new UnifiedLogCollector(description.observeLogMessages);
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
@@ -176,11 +195,11 @@ export class UnifiedMongoClient extends MongoClient {
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
+    this.logCollector = logCollector;
 
     this.observedLogMessages =
       description.observeLogMessages ??
       ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
-    logCollector.on('data', (log: LogMessage) => this.pushLogMessage(log));
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
@@ -268,17 +287,8 @@ export class UnifiedMongoClient extends MongoClient {
     }
   }
 
-  pushLogMessage(log: LogMessage) {
-    const minLogLevel = this.observedLogMessages.get(log.component) ?? 'off';
-    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? 0;
-
-    const numericLogLevel = SeverityLevelMap.get(log.level);
-    if (typeof numericLogLevel !== 'number') {
-      expect.fail('Log level must be valid log level');
-    }
-    if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
-      this.collectedLogs.push(log);
-    }
+  get collectedLogs(): LogMessage[] {
+    return this.logCollector.collectedLogs;
   }
 }
 
