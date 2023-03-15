@@ -115,10 +115,10 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logs: LogMessage[] = [];
+  collectedLogs: LogMessage[] = [];
 
   ignoredEvents: string[];
-  observedLogMessages: Map<ObservableLogComponent, ObservableLogSeverity>;
+  observedLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -177,7 +177,7 @@ export class UnifiedMongoClient extends MongoClient {
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
 
-    this.observedLogMessages = new Map(Object.entries(description.observeLogMessages ?? {}));
+    this.observedLogMessages = description.observeLogMessages ?? {} as Record<ObservableLogComponent, ObservableLogSeverity>;
     logCollector.on('data', (log: LogMessage) => this.pushLogMessage(log));
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
@@ -233,10 +233,6 @@ export class UnifiedMongoClient extends MongoClient {
     }
   }
 
-  getCapturedLogs(): LogMessage[] {
-    return this.logs;
-  }
-
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
     if (!this.isIgnored(e)) {
@@ -279,7 +275,7 @@ export class UnifiedMongoClient extends MongoClient {
       expect.fail('Log level must be valid log level');
     }
     if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
-      this.logs.push(log);
+      this.collectedLogs.push(log);
     }
   }
 }

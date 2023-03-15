@@ -225,7 +225,7 @@ async function runUnifiedTest(
         const testClient = clientList.get(clientId);
 
         expect(testClient, `No client entity found with id ${clientId}`).to.exist;
-        compareLogs(expectedLogsForClient.messages, testClient!.getCapturedLogs(), entities);
+        compareLogs(expectedLogsForClient.messages, testClient!.collectedLogs, entities);
       }
     }
 
