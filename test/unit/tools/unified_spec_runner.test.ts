@@ -337,7 +337,7 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          expect(runCompareLogs).to.throw(AssertionError);
+          expect(runCompareLogs).to.throw(AssertionError, /expected undefined to equal 3/);
         });
       });
     });
