@@ -40,7 +40,7 @@ describe('Unified Spec Runner', function () {
           it('throws AssertionError when it finds extra keys', function () {
             actual =
               '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}, "b": {"$numberInt": "100"}}';
-            expect(runResultCheck).to.throw(AssertionError);
+            expect(runResultCheck).to.throw(AssertionError, /object has more keys than expected/);
           });
 
           it('passes when all keys match', function () {
@@ -52,7 +52,7 @@ describe('Unified Spec Runner', function () {
         context('when actual value is not EJSON string', function () {
           it('throws AssertionError', function () {
             actual = { data: { $numberLong: '100' }, a: { $numberInt: 10 } };
-            expect(runResultCheck).to.throw(AssertionError);
+            expect(runResultCheck).to.throw(AssertionError, /Expected .* to be string/);
           });
         });
       });
