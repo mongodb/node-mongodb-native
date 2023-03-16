@@ -603,7 +603,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if (!authContext) {
       return callback(new MongoRuntimeError('No auth context found on connection.'));
     }
-    authContext.reauthenticating = true;
     const credentials = authContext.credentials;
     if (!credentials) {
       return callback(
@@ -621,8 +620,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         )
       );
     }
-    provider.auth(authContext, error => {
-      authContext.reauthenticating = false;
+    provider.reauth(authContext, error => {
       if (error) {
         return callback(error);
       }

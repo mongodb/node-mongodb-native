@@ -63,4 +63,18 @@ export class AuthProvider {
     // TODO(NODE-3483): Replace this with MongoMethodOverrideError
     callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
   }
+
+  /**
+   * Reauthenticate.
+   * @param context - The shared auth context.
+   * @param callback - The callback.
+   */
+  reauth(context: AuthContext, callback: Callback): void {
+    context.reauthenticating = true;
+    const cb: Callback = (error, result) => {
+      context.reauthenticating = false;
+      callback(error, result);
+    };
+    this.auth(context, cb);
+  }
 }
