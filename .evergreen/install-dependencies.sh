@@ -74,7 +74,11 @@ echo "Node.js ${node_index_version} for ${operating_system}-${architecture} rele
 
 set -o xtrace
 
+set +o errexit
 curl "${CURL_FLAGS[@]}" "${node_download_url}" --output "$node_archive_path"
+if [[ $? -eq 92 ]]; then exit 1; fi
+set -o errexit
+
 
 if [[ "$file_extension" = "zip" ]]; then
   unzip -q "$node_archive_path" -d "${NODE_ARTIFACTS_PATH}"
