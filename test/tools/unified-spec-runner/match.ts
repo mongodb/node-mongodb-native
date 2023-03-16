@@ -318,8 +318,11 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
-    const actualSessionHex = actual.id!.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id?.id.toString('hex').toUpperCase();
+    const actualSessionHex = actual.id?.id.toString('hex').toUpperCase();
+    expect(entitySessionHex).to.be.a('string');
+    expect(actualSessionHex).to.be.a('string');
+
     expect(
       entitySessionHex,
       `Session entity ${expected.$$sessionLsid} does not match lsid`

@@ -1,5 +1,6 @@
 import { BSON } from 'bson';
 import { AssertionError, expect } from 'chai';
+import * as sinon from 'sinon';
 
 import { EntitiesMap } from '../../tools/unified-spec-runner/entities';
 import { compareLogs, resultCheck } from '../../tools/unified-spec-runner/match';
@@ -9,21 +10,16 @@ describe('Unified Spec Runner', function () {
   describe('Matching', function () {
     describe('resultCheck', function () {
       const entitiesMap: EntitiesMap = new EntitiesMap();
-      let ranResultCheck: boolean;
       let actual: any;
       let expected: any;
-
-      const runResultCheck = () => {
-        ranResultCheck = true;
-        resultCheck(actual, expected, entitiesMap, []);
-      };
+      let resultCheckSpy;
 
       beforeEach(function () {
-        ranResultCheck = false;
+        sinon.spy(resultCheck);
       });
 
       afterEach(function () {
-        expect(ranResultCheck, 'Test cannot pass unless resultCheck has been called').to.be.true;
+        expect(resultCheckSpy).to.have.been.calledOnce;
       });
 
       context('$$matchAsDocument', function () {
@@ -40,19 +36,25 @@ describe('Unified Spec Runner', function () {
           it('throws AssertionError when it finds extra keys', function () {
             actual =
               '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}, "b": {"$numberInt": "100"}}';
-            expect(runResultCheck).to.throw(AssertionError, /object has more keys than expected/);
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
+              AssertionError,
+              /object has more keys than expected/
+            );
           });
 
           it('passes when all keys match', function () {
             actual = '{"data": {"$numberLong": "100"}, "a": {"$numberInt": "10"}}';
-            runResultCheck();
+            resultCheckSpy(actual, expected, entitiesMap, []);
           });
         });
 
         context('when actual value is not EJSON string', function () {
           it('throws AssertionError', function () {
             actual = { data: { $numberLong: '100' }, a: { $numberInt: 10 } };
-            expect(runResultCheck).to.throw(AssertionError, /Expected .* to be string/);
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
+              AssertionError,
+              /Expected .* to be string/
+            );
           });
         });
       });
@@ -78,8 +80,7 @@ describe('Unified Spec Runner', function () {
                 b: 100
               }
             };
-
-            runResultCheck();
+            resultCheckSpy(actual, expected, entitiesMap, []);
           });
 
           it('throws AssertionError when some expected keys differ', function () {
@@ -90,7 +91,7 @@ describe('Unified Spec Runner', function () {
               }
             };
 
-            expect(runResultCheck).to.throw(
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Expected \[string\] to be one of \[int\]/
             );
@@ -110,7 +111,7 @@ describe('Unified Spec Runner', function () {
               }
             };
 
-            expect(runResultCheck).to.throw(
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Value of \$\$matchAsRoot must be an object/
             );
@@ -125,7 +126,7 @@ describe('Unified Spec Runner', function () {
           it('throws AssertionError', function () {
             actual = '{"data": { "data": 10, "a": 11 }}';
 
-            expect(runResultCheck).to.throw(
+            expect(() => resultCheckSpy(actual, expected, entitiesMap, [])).to.throw(
               AssertionError,
               /Expected actual value to be an object/
             );
@@ -138,19 +139,15 @@ describe('Unified Spec Runner', function () {
       const entitiesMap = new EntitiesMap();
       let actual: ExpectedLogMessage;
       let expected: ExpectedLogMessage;
-      let ranCompareLogs: boolean;
-
-      const runCompareLogs = () => {
-        ranCompareLogs = true;
-        compareLogs([expected], [actual], entitiesMap);
-      };
+      let compareLogsSpy;
 
       beforeEach(function () {
-        ranCompareLogs = false;
+        compareLogsSpy = sinon.spy(compareLogs);
       });
 
       afterEach(function () {
-        expect(ranCompareLogs, 'Test cannot pass unless compareLogs has been called').to.be.true;
+        expect(compareLogsSpy).to.have.been.calledOnce;
+        sinon.restore();
       });
 
       context('when failureIsRedacted is present', function () {
@@ -172,7 +169,7 @@ describe('Unified Spec Runner', function () {
                 failure: {}
               }
             };
-            runCompareLogs();
+            compareLogsSpy([expected], [actual], entitiesMap);
           });
 
           it('throws AssertionError when failure is absent', function () {
@@ -183,7 +180,7 @@ describe('Unified Spec Runner', function () {
                 message: 'some message'
               }
             };
-            expect(runCompareLogs).to.throw(
+            expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
               /Can only use failureIsRedacted when a failure exists/
             );
@@ -199,7 +196,7 @@ describe('Unified Spec Runner', function () {
                 }
               }
             };
-            expect(runCompareLogs).to.throw(
+            expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
               /Expected failure to have been redacted/
             );
@@ -227,7 +224,7 @@ describe('Unified Spec Runner', function () {
               }
             };
 
-            runCompareLogs();
+            compareLogsSpy([expected], [actual], entitiesMap);
           });
 
           it('throws AssertionError when failure is absent', function () {
@@ -238,7 +235,7 @@ describe('Unified Spec Runner', function () {
                 message: 'some message'
               }
             };
-            expect(runCompareLogs).to.throw(
+            expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
               /Can only use failureIsRedacted when a failure exists/
             );
@@ -253,7 +250,7 @@ describe('Unified Spec Runner', function () {
               }
             };
 
-            expect(runCompareLogs).to.throw(
+            expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
               /Expected failure to have not been redacted/
             );
@@ -279,7 +276,7 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          expect(runCompareLogs).to.throw(
+          expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
             AssertionError,
             /Expected failure to not exist since test.failureIsRedacted is undefined/
           );
@@ -294,7 +291,7 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          runCompareLogs();
+          compareLogsSpy([expected], [actual], entitiesMap);
         });
       });
 
@@ -324,7 +321,7 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          runCompareLogs();
+          compareLogsSpy([expected], [actual], entitiesMap);
         });
 
         it('throws an Assertion error when expected.data has fields not specified by actual.data', function () {
@@ -337,7 +334,10 @@ describe('Unified Spec Runner', function () {
             }
           };
 
-          expect(runCompareLogs).to.throw(AssertionError, /expected undefined to equal 3/);
+          expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
+            AssertionError,
+            /expected undefined to equal 3/
+          );
         });
       });
     });
