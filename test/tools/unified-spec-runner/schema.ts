@@ -101,7 +101,7 @@ export const TopologyType = Object.freeze({
   loadBalanced: 'load-balanced'
 } as const);
 
-export type TopologyId = typeof TopologyType[keyof typeof TopologyType];
+export type TopologyId = (typeof TopologyType)[keyof typeof TopologyType];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;
