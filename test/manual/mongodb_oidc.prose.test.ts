@@ -525,6 +525,9 @@ describe('MONGODB-OIDC', function () {
       });
 
       after(async function () {
+        client.removeAllListeners('commandStarted');
+        client.removeAllListeners('commandSucceeded');
+        client.removeAllListeners('commandFailed');
         await client?.close();
       });
 
