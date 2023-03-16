@@ -1157,8 +1157,6 @@ tasks:
         params:
           binary: bash
           add_expansions_to_env: true
-          env:
-            # AZUREKMS_PRIVATEKEYPATH: /tmp/testazurekms_privatekey
           args:
             - src/.evergreen/copy-driver-to-azure.sh
       - command: subprocess.exec
@@ -1168,7 +1166,6 @@ tasks:
           binary: bash
           add_expansions_to_env: true
           env:
-            # AZUREKMS_PRIVATEKEYPATH: /tmp/testazurekms_privatekey
             AZUREKMS_CMD: "ls && env EXPECTED_AZUREKMS_OUTCOME=success bash src/.evergreen/run-azure-kms-tests.sh"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh

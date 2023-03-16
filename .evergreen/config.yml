@@ -1086,7 +1086,6 @@ tasks:
         params:
           binary: bash
           add_expansions_to_env: true
-          env: null
           args:
             - src/.evergreen/copy-driver-to-azure.sh
       - command: subprocess.exec
@@ -3680,6 +3679,7 @@ buildvariants:
   - name: debian11-test-azure-kms
     display_name: Azure KMS Test
     run_on: debian11-small
+    batchtime: 20160
     tasks:
       - test_azurekms_task_group
       - test-azurekms-fail-task

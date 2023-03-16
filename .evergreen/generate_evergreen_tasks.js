@@ -457,9 +457,8 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${
-    versions.find(version => version.codeName === LATEST_LTS).versionNumber
-  }`,
+  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber
+    }`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
@@ -673,6 +672,7 @@ BUILD_VARIANTS.push({
   name: 'debian11-test-azure-kms',
   display_name: 'Azure KMS Test',
   run_on: 'debian11-small',
+  batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
