@@ -110,6 +110,7 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
+// TODO(NODE-4813): Remove this class in favour of a simple object with a write method
 export class UnifiedLogCollector extends Writable {
   collectedLogs: LogMessage[] = [];
   observeLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
@@ -120,7 +121,11 @@ export class UnifiedLogCollector extends Writable {
       observeLogMessages ?? ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
   }
 
-  _write(log: LogMessage) {
+  _write(
+    log: LogMessage,
+    _: string,
+    callback: (e: Error | null, l: LogMessage | undefined) => void
+  ) {
     const minLogLevel = this.observeLogMessages[log.component] ?? 'off';
     const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? 0;
 
@@ -128,9 +133,13 @@ export class UnifiedLogCollector extends Writable {
     if (typeof numericLogLevel !== 'number') {
       expect.fail('Log level must be valid log level');
     }
+
     if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
       this.collectedLogs.push(log);
+      callback(null, log);
+      return;
     }
+    callback(null, undefined);
   }
 }
 
