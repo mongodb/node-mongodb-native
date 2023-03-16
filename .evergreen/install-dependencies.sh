@@ -76,7 +76,7 @@ set -o xtrace
 
 set +o errexit
 curl "${CURL_FLAGS[@]}" "${node_download_url}" --output "$node_archive_path"
-if [[ $? -ne 92 ]]; then exit 1; fi
+if [[ $? -eq 92 ]]; then exit 1; fi
 set -o errexit
 
 if [[ "$file_extension" = "zip" ]]; then
