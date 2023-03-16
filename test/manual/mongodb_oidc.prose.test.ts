@@ -511,8 +511,6 @@ describe('MONGODB-OIDC', function () {
         cache.clear();
         // - Create a client with the callbacks and an event listener capable of
         //   listening for SASL commands
-        //
-        // - TODO(NODE-3494): Driver does not observe sensitive commands.
         client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
           authMechanismProperties: {
             REQUEST_TOKEN_CALLBACK: requestCallback,
