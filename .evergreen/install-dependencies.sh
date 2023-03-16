@@ -76,8 +76,7 @@ set -o xtrace
 
 set +o errexit
 curl "${CURL_FLAGS[@]}" "${node_download_url}" --output "$node_archive_path"
-code=$?
-if [ $code -ne 0 ] && [ $code -ne 92 ]; then echo "non-zero or 92 exit code while downloading NodeJS $code"; fi
+if [[ $? -ne 0 && $? -ne 92 ]]; then echo "neither zero nor 92 exit code while downloading Node.js: got $code"; fi
 set -o errexit
 
 
