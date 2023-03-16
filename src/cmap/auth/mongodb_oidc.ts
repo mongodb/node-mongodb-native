@@ -11,7 +11,7 @@ import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
 
-/** @public */
+/** @experimental */
 export interface OIDCMechanismServerStep1 {
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
@@ -21,21 +21,21 @@ export interface OIDCMechanismServerStep1 {
   requestScopes?: string[];
 }
 
-/** @public */
+/** @experimental */
 export interface OIDCRequestTokenResult {
   accessToken: string;
   expiresInSeconds?: number;
   refreshToken?: string;
 }
 
-/** @public */
+/** @experimental */
 export type OIDCRequestFunction = (
   principalName: string,
   serverResult: OIDCMechanismServerStep1,
   timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
-/** @public */
+/** @experimental */
 export type OIDCRefreshFunction = (
   principalName: string,
   serverResult: OIDCMechanismServerStep1,
@@ -52,6 +52,7 @@ OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
 
 /**
  * OIDC auth provider.
+ * @experimental
  */
 export class MongoDBOIDC extends AuthProvider {
   /**
