@@ -16,6 +16,7 @@ import {
   CONNECTION_READY
 } from '../constants';
 import {
+  AnyError,
   MONGODB_ERROR_CODES,
   MongoError,
   MongoInvalidArgumentError,
@@ -545,17 +546,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // use the provided connection, and do _not_ check it in after execution
       fn(undefined, conn, (fnErr, result) => {
         if (fnErr) {
-          if ((fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
-            this.reauthenticate(conn, fn, (error, res) => {
-              if (error) {
-                callback(error);
-              } else {
-                callback(undefined, res);
-              }
-            });
-          } else {
-            callback(fnErr);
-          }
+          this.withRequthentication(fnErr, conn, fn, callback);
         } else {
           callback(undefined, result);
         }
@@ -566,17 +557,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // don't callback with `err` here, we might want to act upon it inside `fn`
       fn(err as MongoError, conn, (fnErr, result) => {
         if (fnErr) {
-          if (conn && (fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
-            this.reauthenticate(conn, fn, (error, res) => {
-              if (error) {
-                callback(error);
-              } else {
-                callback(undefined, res);
-              }
-            });
-          } else {
-            callback(fnErr);
+          if (conn) {
+            return this.withRequthentication(fnErr, conn, fn, callback);
           }
+          return callback(fnErr);
         } else {
           callback(undefined, result);
         }
@@ -586,6 +570,25 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
       });
     });
+  }
+
+  private withRequthentication(
+    fnErr: AnyError,
+    conn: Connection,
+    fn: WithConnectionCallback,
+    callback: Callback<Connection>
+  ) {
+    if ((fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
+      this.reauthenticate(conn, fn, (error, res) => {
+        if (error) {
+          callback(error);
+        } else {
+          callback(undefined, res);
+        }
+      });
+    } else {
+      callback(fnErr);
+    }
   }
 
   /**
