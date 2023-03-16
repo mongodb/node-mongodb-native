@@ -546,10 +546,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // use the provided connection, and do _not_ check it in after execution
       fn(undefined, conn, (fnErr, result) => {
         if (fnErr) {
-          this.withRequthentication(fnErr, conn, fn, callback);
-        } else {
-          callback(undefined, result);
+          return this.withReauthentication(fnErr, conn, fn, callback);
         }
+        return callback(undefined, result);
       });
     }
 
@@ -558,9 +557,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       fn(err as MongoError, conn, (fnErr, result) => {
         if (fnErr) {
           if (conn) {
-            return this.withRequthentication(fnErr, conn, fn, callback);
+            this.withReauthentication(fnErr, conn, fn, callback);
+          } else {
+            callback(fnErr);
           }
-          return callback(fnErr);
         } else {
           callback(undefined, result);
         }
@@ -572,7 +572,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     });
   }
 
-  private withRequthentication(
+  private withReauthentication(
     fnErr: AnyError,
     conn: Connection,
     fn: WithConnectionCallback,
@@ -581,10 +581,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     if ((fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
       this.reauthenticate(conn, fn, (error, res) => {
         if (error) {
-          callback(error);
-        } else {
-          callback(undefined, res);
+          return callback(error);
         }
+        callback(undefined, res);
       });
     } else {
       callback(fnErr);

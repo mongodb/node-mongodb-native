@@ -525,10 +525,16 @@ describe('MONGODB-OIDC', function () {
       });
 
       after(async function () {
+        console.log('removing listeners');
         client.removeAllListeners('commandStarted');
         client.removeAllListeners('commandSucceeded');
         client.removeAllListeners('commandFailed');
+        console.log('1 clearing cache');
+        cache.clear();
+        console.log('1 closing client');
         await client?.close();
+        console.log('1 closed');
+        console.log(process._getActiveHandles());
       });
 
       context('on the first find invokation', function () {
@@ -568,6 +574,18 @@ describe('MONGODB-OIDC', function () {
           });
           // Perform another find operation.
           await collection.findOne();
+        });
+
+        after(async function () {
+          await client.db('admin').command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+          console.log('clearing cache');
+          cache.clear();
+          console.log('closing client');
+          await client?.close();
+          console.log('closed');
         });
 
         // - Assert that the refresh callback has been called, if possible.
