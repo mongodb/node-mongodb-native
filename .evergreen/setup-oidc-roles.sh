@@ -5,4 +5,4 @@ set -o xtrace   # Write all commands first to stderr
 cd ${DRIVERS_TOOLS}/.evergreen/auth_oidc
 . ./activate-authoidcvenv.sh
 
-${DRIVERS_TOOLS}/mongodb/bin/mongosh setup_oidc.js
+${DRIVERS_TOOLS}/mongodb/bin/mongosh "mongodb://localhost:27017,localhost:27018/?replicaSet=oidc-repl0&readPreference=primary" setup_oidc.js
