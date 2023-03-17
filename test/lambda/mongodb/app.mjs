@@ -89,11 +89,11 @@ export const lambdaHandler = async (event) => {
   const { insertedId } = await collection.insertOne({ n: 1 });
   await collection.deleteOne({ _id: insertedId });
   // Create the response and then reset the numbers.
-  const response = createResponse();
+  const response = JSON.stringify(createResponse());
   reset();
 
   return {
     statusCode: 200,
-    body: JSON.stringify(response)
+    body: response
   };
 };
