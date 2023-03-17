@@ -579,7 +579,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     fn: WithConnectionCallback,
     callback: Callback<Connection>
   ) {
-    if ((fnErr as MongoError).code === MONGODB_ERROR_CODES.Reauthenticate) {
+    if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
       this.reauthenticate(conn, fn, (error, res) => {
         if (error) {
           return callback(error);
