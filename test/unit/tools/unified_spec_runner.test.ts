@@ -15,11 +15,12 @@ describe('Unified Spec Runner', function () {
       let resultCheckSpy;
 
       beforeEach(function () {
-        sinon.spy(resultCheck);
+        resultCheckSpy = sinon.spy(resultCheck);
       });
 
       afterEach(function () {
         expect(resultCheckSpy).to.have.been.calledOnce;
+        sinon.restore();
       });
 
       context('$$matchAsDocument', function () {
