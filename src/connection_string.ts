@@ -1284,6 +1284,7 @@ export const OPTIONS = {
   useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
   useUnifiedTopology: { type: 'boolean' } as OptionDescriptor,
   // MongoLogger
+  // TODO(NODE-4849): Tighten the type of mongodbLogPath
   mongodbLogPath: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
