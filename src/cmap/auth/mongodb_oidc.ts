@@ -12,7 +12,7 @@ import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
 
 /**
- * @alpha
+ * @public
  * @experimental
  */
 export interface OIDCMechanismServerStep1 {
@@ -25,7 +25,7 @@ export interface OIDCMechanismServerStep1 {
 }
 
 /**
- * @alpha
+ * @public
  * @experimental
  */
 export interface OIDCRequestTokenResult {
@@ -35,7 +35,7 @@ export interface OIDCRequestTokenResult {
 }
 
 /**
- * @alpha
+ * @public
  * @experimental
  */
 export type OIDCRequestFunction = (
@@ -45,7 +45,7 @@ export type OIDCRequestFunction = (
 ) => Promise<OIDCRequestTokenResult>;
 
 /**
- * @alpha
+ * @public
  * @experimental
  */
 export type OIDCRefreshFunction = (

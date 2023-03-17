@@ -1,5 +1,8 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/tsdoc/v0/tsdoc.schema.json",
+    "extends": [
+        "@microsoft/api-extractor/extends/tsdoc-base.json"
+    ],
     "tagDefinitions": [
         {
             "syntaxKind": "block",
@@ -17,5 +20,11 @@
             "syntaxKind": "block",
             "tagName": "@category"
         }
-    ]
+    ],
+    "supportForTags": {
+        "@event": true,
+        "@since": true,
+        "@sinceServerVersion": true,
+        "@category": true
+    }
 }
