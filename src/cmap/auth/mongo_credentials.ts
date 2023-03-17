@@ -37,11 +37,20 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** @experimental */
+  /**
+   * @alpha
+   * @experimental
+   */
   REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
-  /** @experimental */
+  /**
+   * @alpha
+   * @experimental
+   */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
-  /** @experimental */
+  /**
+   * @alpha
+   * @experimental
+   */
   PROVIDER_NAME?: 'aws';
 }
 
