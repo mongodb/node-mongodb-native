@@ -455,7 +455,7 @@ describe('MONGODB-OIDC', function () {
 
     // The driver MUST test reauthentication with MONGODB-OIDC for a read operation.
     describe('6. Reauthentication', function () {
-      let refreshInvokations = 0;
+      let refreshInvocations = 0;
       let findStarted = 0;
       let findSucceeded = 0;
       let findFailed = 0;
@@ -478,7 +478,7 @@ describe('MONGODB-OIDC', function () {
         const token = await readFile(`${process.env.OIDC_TOKEN_DIR}/test_user1`, {
           encoding: 'utf8'
         });
-        refreshInvokations++;
+        refreshInvocations++;
         return { accessToken: token, expiresInSeconds: 300 };
       };
 
@@ -537,7 +537,7 @@ describe('MONGODB-OIDC', function () {
           findStarted = 0;
           findSucceeded = 0;
           findFailed = 0;
-          refreshInvokations = 0;
+          refreshInvocations = 0;
           saslStarted = 0;
           saslSucceeded = 0;
         });
@@ -546,7 +546,7 @@ describe('MONGODB-OIDC', function () {
         // - Assert that the refresh callback has not been called.
         it('does not call the refresh callback', async function () {
           await collection.findOne();
-          expect(refreshInvokations).to.equal(0);
+          expect(refreshInvocations).to.equal(0);
         });
       });
 
@@ -556,7 +556,7 @@ describe('MONGODB-OIDC', function () {
           findStarted = 0;
           findSucceeded = 0;
           findFailed = 0;
-          refreshInvokations = 0;
+          refreshInvocations = 0;
           saslStarted = 0;
           saslSucceeded = 0;
           await client.db('admin').command({
@@ -582,7 +582,7 @@ describe('MONGODB-OIDC', function () {
 
         // - Assert that the refresh callback has been called, if possible.
         it('calls the refresh callback', function () {
-          expect(refreshInvokations).to.equal(1);
+          expect(refreshInvocations).to.equal(1);
         });
 
         // - Assert that a find operation was started twice and a saslStart operation

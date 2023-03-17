@@ -17,7 +17,7 @@ export class AuthContext {
   connection: Connection;
   /** The credentials to use for authentication */
   credentials?: MongoCredentials;
-  /** If the context if for reauthentication. */
+  /** If the context is for reauthentication. */
   reauthenticating = false;
   /** The options passed to the `connect` method */
   options: AuthContextOptions;
@@ -70,6 +70,10 @@ export class AuthProvider {
    * @param callback - The callback.
    */
   reauth(context: AuthContext, callback: Callback): void {
+    // If we are already reauthenticating this is a no-op.
+    if (context.reauthenticating) {
+      return callback(new MongoRuntimeError('Reauthentication already in progress.'));
+    }
     context.reauthenticating = true;
     const cb: Callback = (error, result) => {
       context.reauthenticating = false;
