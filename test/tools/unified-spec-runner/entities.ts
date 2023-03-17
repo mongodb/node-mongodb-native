@@ -127,14 +127,14 @@ export class UnifiedLogCollector extends Writable {
     callback: (e: Error | null, l: LogMessage | undefined) => void
   ) {
     const minLogLevel = this.observeLogMessages[log.component] ?? 'off';
-    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? 0;
+    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? -Infinity;
 
     const numericLogLevel = SeverityLevelMap.get(log.level);
     if (typeof numericLogLevel !== 'number') {
-      expect.fail('Log level must be valid log level');
+      expect.fail(`Invalid log level: ${log.level}`);
     }
 
-    if (minLogLevel !== 'off' && numericLogLevel >= numericMinLogLevel) {
+    if (numericLogLevel <= numericMinLogLevel) {
       this.collectedLogs.push(log);
       callback(null, log);
       return;

@@ -21,16 +21,16 @@ export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
 export const SeverityLevelMap: Map<string | number, string | number> = new Map([
-  [SeverityLevel.OFF, 0],
-  [SeverityLevel.TRACE, 1],
-  [SeverityLevel.DEBUG, 2],
-  [SeverityLevel.INFORMATIONAL, 3],
-  [SeverityLevel.NOTICE, 4],
-  [SeverityLevel.WARNING, 5],
-  [SeverityLevel.ERROR, 6],
-  [SeverityLevel.CRITICAL, 7],
-  [SeverityLevel.ALERT, 8],
-  [SeverityLevel.EMERGENCY, 9]
+  [SeverityLevel.OFF, -Infinity],
+  [SeverityLevel.EMERGENCY, 0],
+  [SeverityLevel.ALERT, 1],
+  [SeverityLevel.CRITICAL, 2],
+  [SeverityLevel.ERROR, 3],
+  [SeverityLevel.WARNING, 4],
+  [SeverityLevel.NOTICE, 5],
+  [SeverityLevel.INFORMATIONAL, 6],
+  [SeverityLevel.DEBUG, 7],
+  [SeverityLevel.TRACE, 8]
 ]);
 
 for (const [level, value] of SeverityLevelMap) {

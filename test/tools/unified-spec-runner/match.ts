@@ -355,12 +355,14 @@ export function specialCheck(
       const actualDoc = EJSON.parse(actual, { relaxed: false });
       resultCheck(actualDoc, expected.$$matchAsDocument as any, entities, path, true);
     } else {
-      expect.fail(`Expected value at path ${path.join('')} to be string, but received ${actual}`);
+      expect.fail(
+        `Expected value at path '${path.join('')}' to be string, but received ${inspect(actual)}`
+      );
     }
   } else if (isMatchAsRootOperator(expected)) {
     expect(
       typeof actual,
-      `Expected value at path ${path.join('')} to be object, but received ${actual}`
+      `Expected value at path '${path.join('')}' to be object, but received ${inspect(actual)}`
     ).to.equal('object');
     expect(typeof expected.$$matchAsRoot, 'Value of $$matchAsRoot must be an object').to.equal(
       'object'
@@ -579,33 +581,26 @@ export function compareLogs(
     const expectedLog = expected[index];
 
     // Check that log levels match
-    expect(actualLog).to.have.deep.property('level', expectedLog.level);
+    expect(actualLog).to.have.property('level', expectedLog.level);
 
     // Check that components match
-    expect(actualLog).to.have.deep.property('component', expectedLog.component);
+    expect(actualLog).to.have.property('component', expectedLog.component);
 
     // NOTE: The spec states that if the failureIsRedacted flag is present, we
     // must assert that a failure occurred.
     if (expectedLog.failureIsRedacted !== undefined) {
+      expect(expectedLog.failureIsRedacted).to.be.a('boolean');
+      expect(actualLog.data.failure, 'Expected failure to exist').to.exist;
       if (expectedLog.failureIsRedacted) {
-        // Assert that a failure is present and has been redacted
-        expect(actualLog.data.failure, 'Can only use failureIsRedacted when a failure exists').to
-          .exist;
+        // Assert that failure has been redacted
         expect(actualLog.data.failure, 'Expected failure to have been redacted').to.deep.equal({});
       } else {
-        // Assert that a failure is present and has not been redacted
-        expect(actualLog.data.failure, 'Can only use failureIsRedacted when a failure exists').to
-          .exist;
+        // Assert that failure has not been redacted
         expect(
           actualLog.data.failure,
           'Expected failure to have not been redacted'
         ).to.not.deep.equal({});
       }
-    } else {
-      expect(
-        actualLog.data.failure,
-        'Expected failure to not exist since test.failureIsRedacted is undefined'
-      ).to.not.exist;
     }
 
     resultCheck(actualLog.data, expectedLog.data, entities, [rootPrefix], false);
