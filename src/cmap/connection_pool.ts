@@ -548,8 +548,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         if (fnErr) {
           return this.withReauthentication(fnErr, conn, fn, callback);
         }
-        return callback(undefined, result);
+        callback(undefined, result);
       });
+      return;
     }
 
     this.checkOut((err, conn) => {

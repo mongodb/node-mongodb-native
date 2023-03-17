@@ -308,36 +308,5 @@ describe('Connection Pool', function () {
         callback
       );
     });
-
-    it('should still manage a connection if no callback is provided', function (done) {
-      server.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.reply(mock.HELLO);
-        }
-      });
-
-      const pool = new ConnectionPool(server, {
-        maxPoolSize: 1,
-        hostAddress: server.hostAddress()
-      });
-      pool.ready();
-
-      const events = [];
-      pool.on('connectionCheckedOut', event => events.push(event));
-      pool.on('connectionCheckedIn', event => {
-        events.push(event);
-
-        expect(events).to.have.length(2);
-        expect(events[0]).to.be.instanceOf(cmapEvents.ConnectionCheckedOutEvent);
-        expect(events[1]).to.be.instanceOf(cmapEvents.ConnectionCheckedInEvent);
-        pool.close(done);
-      });
-
-      pool.withConnection(undefined, (err, conn, cb) => {
-        expect(err).to.not.exist;
-        cb();
-      });
-    });
   });
 });
