@@ -3,7 +3,6 @@
 const { ConnectionPool } = require('../../mongodb');
 const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
-const cmapEvents = require('../../mongodb');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers');
