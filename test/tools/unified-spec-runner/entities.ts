@@ -180,14 +180,34 @@ export class UnifiedMongoClient extends MongoClient {
 
   constructor(uri: string, description: ClientEntity) {
     const logCollector = new UnifiedLogCollector();
+    const componentSeverities = {
+      MONGODB_LOG_ALL: 'off'
+    };
+    const camelToUpperSnake = (s: string) => {
+      const output: string[] = [];
+      for (const c of s) {
+        if (/[A-Z]/.test(c)) {
+          output.push('_');
+          output.push(c);
+        } else {
+          output.push(c);
+        }
+      }
+      return output.join('').toUpperCase();
+    };
+
+    // NOTE: this is done to override the logger environment variables
+    for (const key in description.observeLogMessages) {
+      componentSeverities['MONGODB_LOG_' + camelToUpperSnake(key)] =
+        description.observeLogMessages[key];
+    }
+
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: {
-        componentSeverities: { default: 'off', ...description.observeLogMessages },
-        logDestination: logCollector
-      },
+      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: componentSeverities,
+      mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
