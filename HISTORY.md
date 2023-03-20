@@ -42,7 +42,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **NODE-4998:** use ipv4 in socks5 tests for node 18 ([#3538](https://github.com/mongodb/node-mongodb-native/issues/3538)) ([425dbe0](https://github.com/mongodb/node-mongodb-native/commit/425dbe05d7bd1ebc1f77303332b67181aa5ab135))
 
-## [5.0.0-alpha.0](https://github.com/mongodb/node-mongodb-native/compare/v4.13.0...v5.0.0-alpha.0) (2023-01-24)
+## [5.0.0-alpha.0](https://github.com/mongodb/node-mongodb-native/compare/v4.14.0...v5.0.0-alpha.0) (2023-01-24)
 
 
 ### ⚠ BREAKING CHANGES
@@ -92,6 +92,19 @@ All notable changes to this project will be documented in this file. See [standa
 * **NODE-4924:** remove mapReduce collection helper ([#3511](https://github.com/mongodb/node-mongodb-native/issues/3511)) ([10d757a](https://github.com/mongodb/node-mongodb-native/commit/10d757a89e74b722d300450665f076aeae4970db))
 * **NODE-4925:** remove deprecated options and types ([#3513](https://github.com/mongodb/node-mongodb-native/issues/3513)) ([8f8ea45](https://github.com/mongodb/node-mongodb-native/commit/8f8ea453bd3c03e5a5fe357d32821a1d5735ebcf))
 * **NODE-4950:** remove bson-ext import ([#3523](https://github.com/mongodb/node-mongodb-native/issues/3523)) ([1470115](https://github.com/mongodb/node-mongodb-native/commit/147011599b0ad376116951e9058cfba3a67a06d0))
+
+
+## [4.14.0](https://github.com/mongodb/node-mongodb-native/compare/v4.13.0...v4.14.0) (2023-02-07)
+
+
+### Deprecations
+* **NODE-4992:** Deprecate methods and options that reference legacy logger ([#3532](https://github.com/mongodb/node-mongodb-native/issues/3532)) ([6c94b4a](https://github.com/mongodb/node-mongodb-native/commit/6c94b4a826f51796a23d26f0d1976e5dfcd88d88))
+
+### Bug Fixes
+* **NODE-4999:** Write Concern 0 Must Not Affect Read Operations ([#3541](https://github.com/mongodb/node-mongodb-native/issues/3541)) ([ddfc2b9](https://github.com/mongodb/node-mongodb-native/commit/ddfc2b9bc0475b3d18db355ed73cebfccaf6b874))
+* **NODE-5026:** revert "ensure that MessageStream is destroyed when connections are destroyed" ([#3551](https://github.com/mongodb/node-mongodb-native/issues/3551)) ([c4da623](https://github.com/mongodb/node-mongodb-native/commit/c4da623b1b30439521ce59e4d9db810ea7d213e2))
+
+
 
 ## [4.13.0](https://github.com/mongodb/node-mongodb-native/compare/v4.12.1...v4.13.0) (2022-12-19)
 
