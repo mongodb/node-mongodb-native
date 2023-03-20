@@ -16,7 +16,7 @@ const dataKeyOptions = {
   }
 };
 
-describe('19. On-demand GCP Credentials', () => {
+describe('19. On-demand Azure Credentials', () => {
   let clientEncryption: import('mongodb-client-encryption').ClientEncryption;
   let keyVaultClient;
   let MongoCryptAzureKMSRequestError;
@@ -29,7 +29,7 @@ describe('19. On-demand GCP Credentials', () => {
       this.configuration.mongodbClientEncryption.MongoCryptAzureKMSRequestError;
 
     if (typeof env.AZUREKMS_VMNAME === 'string') {
-      // If Google cloud env is present then EXPECTED_GCPKMS_OUTCOME MUST be set
+      // If azure cloud env is present then EXPECTED_AZUREKMS_OUTCOME MUST be set
       expect(
         env.EXPECTED_AZUREKMS_OUTCOME,
         `EXPECTED_AZUREKMS_OUTCOME must be 'success' or 'failure'`
