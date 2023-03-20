@@ -42,9 +42,7 @@ import type {
   ClientEncryption,
   ClientEntity,
   EntityDescription,
-  ExpectedLogMessage,
-  ObservableLogComponent,
-  ObservableLogSeverity
+  ExpectedLogMessage
 } from './schema';
 import {
   createClientEncryption,
@@ -110,6 +108,9 @@ function getClient(address) {
 }
 
 // TODO(NODE-4813): Remove this class in favour of a simple object with a write method
+/* TODO(NODE-4813): Ensure that the object that we replace this with has logic to convert the
+ * collected log into the format require by the unified spec runner
+ * (see ExpectedLogMessage type in schema.ts) */
 export class UnifiedLogCollector extends Writable {
   collectedLogs: LogMessage[] = [];
 
@@ -135,7 +136,6 @@ export class UnifiedMongoClient extends MongoClient {
   logCollector: UnifiedLogCollector;
 
   ignoredEvents: string[];
-  observedLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -185,7 +185,7 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
       [Symbol.for('@@mdb.internalLoggerConfig')]: {
-        componentSeverities: description.observeLogMessages,
+        componentSeverities: { default: 'off', ...description.observeLogMessages },
         logDestination: logCollector
       },
       ...getEnvironmentalOptions(),
@@ -193,9 +193,6 @@ export class UnifiedMongoClient extends MongoClient {
     });
     this.logCollector = logCollector;
 
-    this.observedLogMessages =
-      description.observeLogMessages ??
-      ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
