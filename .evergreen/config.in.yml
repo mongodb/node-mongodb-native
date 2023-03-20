@@ -94,8 +94,6 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-
-  "bootstrap azure idms server":
     - command: subprocess.exec
       params:
         background: true
@@ -1074,7 +1072,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: bootstrap kms servers
-      - func: bootstrap azure idms server
       - func: "run serverless tests"
 
   - name: run-spec-benchmark-tests

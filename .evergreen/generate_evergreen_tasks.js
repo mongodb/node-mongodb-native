@@ -54,7 +54,6 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
         }
       },
       { func: 'bootstrap kms servers' },
-      { func: 'bootstrap azure idms server' },
       { func: 'run tests' }
     ]
   };
