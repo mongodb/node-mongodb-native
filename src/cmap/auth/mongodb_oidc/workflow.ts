@@ -8,7 +8,11 @@ export interface Workflow {
    * All device workflows must implement this method in order to get the access
    * token and then call authenticate with it.
    */
-  execute(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+  execute(
+    connection: Connection,
+    credentials: MongoCredentials,
+    reauthenticate?: boolean
+  ): Promise<Document>;
 
   /**
    * Get the document to add for speculative authentication.
