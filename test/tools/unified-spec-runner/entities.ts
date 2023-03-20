@@ -184,7 +184,7 @@ export class UnifiedMongoClient extends MongoClient {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      [Symbol.for('@@mdb.internalLoggerConfig')]: {
+      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: {
         componentSeverities: { default: 'off', ...description.observeLogMessages },
         logDestination: logCollector
       },
