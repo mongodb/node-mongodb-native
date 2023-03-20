@@ -52,6 +52,9 @@ class IDMSMockServerFilter {
     if (!requiresMockServer) {
       return true;
     }
+    if (process.env.TEST_CSFLE && !this.isRunning) {
+      throw new Error('Expected Azure KMS server to be running.');
+    }
     return this.isRunning;
   }
 }
