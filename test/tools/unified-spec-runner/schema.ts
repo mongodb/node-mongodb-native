@@ -1,8 +1,10 @@
 import type {
   Document,
+  MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
   ReadPreferenceMode,
+  SeverityLevel,
   TagSet,
   W
 } from '../../mongodb';
@@ -128,25 +130,12 @@ export type ObservableCmapEventId =
   | 'connectionCheckedOutEvent'
   | 'connectionCheckedInEvent';
 
-export type ObservableLogComponent = 'command' | 'topology' | 'serverSelection' | 'connection';
-export type ObservableLogSeverity =
-  | 'emergency'
-  | 'alert'
-  | 'critical'
-  | 'error'
-  | 'warn'
-  | 'notice'
-  | 'info'
-  | 'debug'
-  | 'trace'
-  | 'off';
-
 export interface ClientEntity {
   id: string;
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
-  observeLogMessages?: Record<ObservableLogComponent, ObservableLogSeverity>;
+  observeLogMessages?: Record<MongoLoggableComponent, SeverityLevel>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;
@@ -330,8 +319,8 @@ export interface ExpectedError {
 }
 
 export interface ExpectedLogMessage {
-  level: ObservableLogSeverity;
-  component: ObservableLogComponent;
+  level: SeverityLevel;
+  component: MongoLoggableComponent;
   failureIsRedacted?: boolean;
   data: Document;
 }
