@@ -11,6 +11,7 @@ declare global {
       clientSideEncryption?: boolean;
       serverless?: 'forbid' | 'allow' | 'require';
       auth?: 'enabled' | 'disabled';
+      idmsMockServer?: true;
     };
 
     sessions?: {
