@@ -5,14 +5,20 @@ import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 
+/** @internal */
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
-/** Context used during authentication */
+/**
+ * Context used during authentication
+ * @internal
+ */
 export class AuthContext {
   /** The connection to authenticate */
   connection: Connection;
   /** The credentials to use for authentication */
   credentials?: MongoCredentials;
+  /** If the context is for reauthentication. */
+  reauthenticating = false;
   /** The options passed to the `connect` method */
   options: AuthContextOptions;
 
@@ -56,5 +62,23 @@ export class AuthProvider {
   auth(context: AuthContext, callback: Callback): void {
     // TODO(NODE-3483): Replace this with MongoMethodOverrideError
     callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
+  }
+
+  /**
+   * Reauthenticate.
+   * @param context - The shared auth context.
+   * @param callback - The callback.
+   */
+  reauth(context: AuthContext, callback: Callback): void {
+    // If we are already reauthenticating this is a no-op.
+    if (context.reauthenticating) {
+      return callback(new MongoRuntimeError('Reauthentication already in progress.'));
+    }
+    context.reauthenticating = true;
+    const cb: Callback = (error, result) => {
+      context.reauthenticating = false;
+      callback(error, result);
+    };
+    this.auth(context, cb);
   }
 }

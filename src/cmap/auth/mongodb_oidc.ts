@@ -11,7 +11,10 @@ import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
 
-/** @public */
+/**
+ * @public
+ * @experimental
+ */
 export interface OIDCMechanismServerStep1 {
   authorizationEndpoint?: string;
   tokenEndpoint?: string;
@@ -21,21 +24,30 @@ export interface OIDCMechanismServerStep1 {
   requestScopes?: string[];
 }
 
-/** @public */
+/**
+ * @public
+ * @experimental
+ */
 export interface OIDCRequestTokenResult {
   accessToken: string;
   expiresInSeconds?: number;
   refreshToken?: string;
 }
 
-/** @public */
+/**
+ * @public
+ * @experimental
+ */
 export type OIDCRequestFunction = (
   principalName: string,
   serverResult: OIDCMechanismServerStep1,
   timeout: AbortSignal | number
 ) => Promise<OIDCRequestTokenResult>;
 
-/** @public */
+/**
+ * @public
+ * @experimental
+ */
 export type OIDCRefreshFunction = (
   principalName: string,
   serverResult: OIDCMechanismServerStep1,
@@ -52,6 +64,7 @@ OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
 
 /**
  * OIDC auth provider.
+ * @experimental
  */
 export class MongoDBOIDC extends AuthProvider {
   /**
@@ -65,7 +78,7 @@ export class MongoDBOIDC extends AuthProvider {
    * Authenticate using OIDC
    */
   override auth(authContext: AuthContext, callback: Callback): void {
-    const { connection, credentials, response } = authContext;
+    const { connection, credentials, response, reauthenticating } = authContext;
 
     if (response?.speculativeAuthenticate) {
       return callback();
@@ -86,7 +99,7 @@ export class MongoDBOIDC extends AuthProvider {
           )
         );
       }
-      workflow.execute(connection, credentials).then(
+      workflow.execute(connection, credentials, reauthenticating).then(
         result => {
           return callback(undefined, result);
         },
