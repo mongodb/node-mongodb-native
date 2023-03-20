@@ -5,7 +5,7 @@ import { Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
 
-async function mockServerIsSetup() {
+async function isMockServerSetup() {
   const url = (() => {
     const copiedURL = new URL(BASE_URL);
 
@@ -49,7 +49,7 @@ context('Azure KMS Mock Server Tests', function () {
   const AZURE_KMS_TEST_EXPORTS = '___azureKMSProseTestExports';
   beforeEach(async function () {
     try {
-      await mockServerIsSetup();
+      await isMockServerSetup();
     } catch {
       this.currentTest.skipReason = 'Test requires mock azure identity endpoint to be running.';
       this.test?.skip();
@@ -88,9 +88,7 @@ context('Azure KMS Mock Server Tests', function () {
     // The test case should ensure that this error condition is handled gracefully.
 
     it('returns an error', async () => {
-      const error = await fetchAzureKMSToken(new KMSRequestOptions('empty-json')).catch(
-        e => e
-      );
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('empty-json')).catch(e => e);
 
       expect(credentials).to.be.instanceof(KMSRequestFailedError);
     });
