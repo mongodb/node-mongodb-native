@@ -79,9 +79,9 @@ context('Azure KMS Mock Server Tests', function () {
     // The test case should ensure that this error condition is handled gracefully.
 
     it('returns an error', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions('bad-json')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('bad-json')).catch(e => e);
 
-      expect(credentials).to.be.instanceof(MongoCryptAzureKMSRequestError);
+      expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
   });
 
@@ -94,9 +94,9 @@ context('Azure KMS Mock Server Tests', function () {
     // 2. The response body is unspecified.
     // The test case should ensure that this error condition is handled gracefully.
     it('returns an error', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions('404')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('404')).catch(e => e);
 
-      expect(credentials).to.be.instanceof(MongoCryptAzureKMSRequestError);
+      expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
   });
 
@@ -109,9 +109,9 @@ context('Azure KMS Mock Server Tests', function () {
     // 2. The response body is unspecified.
     // The test case should ensure that this error condition is handled gracefully.
     it('returns an error', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions('500')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('500')).catch(e => e);
 
-      expect(credentials).to.be.instanceof(MongoCryptAzureKMSRequestError);
+      expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
   });
 
@@ -122,9 +122,9 @@ context('Azure KMS Mock Server Tests', function () {
     // The HTTP response from the ``fake_azure`` server will take at least 1000 seconds
     // to complete. The request should fail with a timeout.
     it('returns an error after the request times out', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions('slow')).catch(e => e);
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('slow')).catch(e => e);
 
-      expect(credentials).to.be.instanceof(MongoCryptAzureKMSRequestError);
+      expect(error).to.be.instanceof(MongoCryptAzureKMSRequestError);
     });
   });
 });
