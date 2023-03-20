@@ -83,7 +83,6 @@
     "mongodb-legacy": "^5.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.4",
-    "rimraf": "^4.4.0",
     "semver": "^7.3.8",
     "sinon": "^15.0.2",
     "sinon-chai": "^3.7.0",
@@ -109,7 +108,7 @@
   "scripts": {
     "build:evergreen": "node .evergreen/generate_evergreen_tasks.js",
     "build:ts": "node ./node_modules/typescript/bin/tsc",
-    "build:dts": "npm run build:ts && api-extractor run && rimraf 'lib/**/*.d.ts*'",
+    "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs",
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
     "check:bench": "node test/benchmarks/driverBench",
