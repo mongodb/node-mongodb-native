@@ -521,6 +521,9 @@ export function parseOptions(
   const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
   mongoOptions[loggerFeatureFlag] = mongoOptions[loggerFeatureFlag] ?? false;
 
+  const internalLoggerConfigFlag = Symbol.for('@@mdb.internalLoggerConfig');
+  const internalLoggerConfig = mongoOptions[internalLoggerConfigFlag] ?? {};
+
   let loggerEnvOptions: MongoLoggerEnvOptions = {};
   let loggerClientOptions: MongoLoggerMongoClientOptions = {};
   if (mongoOptions[loggerFeatureFlag]) {
@@ -542,7 +545,7 @@ export function parseOptions(
     loggerClientOptions
   );
 
-  return mongoOptions;
+  return { ...mongoOptions, ...internalLoggerConfig };
 }
 
 /**

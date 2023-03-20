@@ -32,7 +32,6 @@ import {
   ReadPreference,
   SENSITIVE_COMMANDS,
   ServerDescriptionChangedEvent,
-  SeverityLevelMap,
   TopologyDescription,
   WriteConcern
 } from '../../mongodb';
@@ -113,12 +112,9 @@ function getClient(address) {
 // TODO(NODE-4813): Remove this class in favour of a simple object with a write method
 export class UnifiedLogCollector extends Writable {
   collectedLogs: LogMessage[] = [];
-  observeLogMessages: Record<ObservableLogComponent, ObservableLogSeverity>;
 
-  constructor(observeLogMessages?: Record<ObservableLogComponent, ObservableLogSeverity>) {
+  constructor() {
     super({ objectMode: true });
-    this.observeLogMessages =
-      observeLogMessages ?? ({} as Record<ObservableLogComponent, ObservableLogSeverity>);
   }
 
   _write(
@@ -126,20 +122,8 @@ export class UnifiedLogCollector extends Writable {
     _: string,
     callback: (e: Error | null, l: LogMessage | undefined) => void
   ) {
-    const minLogLevel = this.observeLogMessages[log.component] ?? 'off';
-    const numericMinLogLevel = SeverityLevelMap.get(minLogLevel) ?? -Infinity;
-
-    const numericLogLevel = SeverityLevelMap.get(log.level);
-    if (typeof numericLogLevel !== 'number') {
-      expect.fail(`Invalid log level: ${log.level}`);
-    }
-
-    if (numericLogLevel <= numericMinLogLevel) {
-      this.collectedLogs.push(log);
-      callback(null, log);
-      return;
-    }
-    callback(null, undefined);
+    this.collectedLogs.push(log);
+    callback(null, log);
   }
 }
 
@@ -195,12 +179,15 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    const logCollector = new UnifiedLogCollector(description.observeLogMessages);
+    const logCollector = new UnifiedLogCollector();
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      mongodbLogPath: logCollector,
+      [Symbol.for('@@mdb.internalLoggerConfig')]: {
+        componentSeverities: description.observeLogMessages,
+        logDestination: logCollector
+      },
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
