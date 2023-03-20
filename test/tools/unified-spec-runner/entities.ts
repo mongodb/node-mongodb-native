@@ -178,27 +178,22 @@ export class UnifiedMongoClient extends MongoClient {
     serverDescriptionChangedEvent: 'serverDescriptionChanged'
   } as const;
 
+  static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {
+    command: 'MONGODB_LOG_COMMAND',
+    serverSelection: 'MONGODB_LOG_SERVER_SELECTION',
+    connection: 'MONGODB_LOG_CONNECTION',
+    topology: 'MONGODB_LOG_TOPOLOGY'
+  } as const;
+
   constructor(uri: string, description: ClientEntity) {
     const logCollector = new UnifiedLogCollector();
     const componentSeverities = {
       MONGODB_LOG_ALL: 'off'
     };
-    const camelToUpperSnake = (s: string) => {
-      const output: string[] = [];
-      for (const c of s) {
-        if (/[A-Z]/.test(c)) {
-          output.push('_');
-          output.push(c);
-        } else {
-          output.push(c);
-        }
-      }
-      return output.join('').toUpperCase();
-    };
 
     // NOTE: this is done to override the logger environment variables
     for (const key in description.observeLogMessages) {
-      componentSeverities['MONGODB_LOG_' + camelToUpperSnake(key)] =
+      componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
         description.observeLogMessages[key];
     }
 
