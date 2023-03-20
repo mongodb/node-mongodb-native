@@ -44,7 +44,7 @@ context('Azure KMS Mock Server Tests', function () {
     url: URL;
     headers: Document;
   }) => Promise<{ accessToken: string }>;
-  let KMSRequestFailedError: Error;
+  let MongoCryptAzureKMSRequestError: Error;
 
   const AZURE_KMS_TEST_EXPORTS = '___azureKMSProseTestExports';
   beforeEach(async function () {
@@ -88,7 +88,7 @@ context('Azure KMS Mock Server Tests', function () {
     // The test case should ensure that this error condition is handled gracefully.
 
     it('returns an error', async () => {
-      const credentials = await fetchAzureKMSToken(new KMSRequestOptions('empty-json')).catch(
+      const error = await fetchAzureKMSToken(new KMSRequestOptions('empty-json')).catch(
         e => e
       );
 
