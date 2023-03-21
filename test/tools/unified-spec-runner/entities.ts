@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
+import { Writable } from 'stream';
 
 import {
   AbstractCursor,
@@ -37,7 +38,12 @@ import {
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
 import { trace } from './runner';
-import type { ClientEncryption, ClientEntity, EntityDescription } from './schema';
+import type {
+  ClientEncryption,
+  ClientEntity,
+  EntityDescription,
+  ExpectedLogMessage
+} from './schema';
 import {
   createClientEncryption,
   makeConnectionString,
@@ -95,9 +101,31 @@ export type CmapEvent =
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
 export type SdamEvent = ServerDescriptionChangedEvent;
+export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
+}
+
+// TODO(NODE-4813): Remove this class in favour of a simple object with a write method
+/* TODO(NODE-4813): Ensure that the object that we replace this with has logic to convert the
+ * collected log into the format require by the unified spec runner
+ * (see ExpectedLogMessage type in schema.ts) */
+export class UnifiedLogCollector extends Writable {
+  collectedLogs: LogMessage[] = [];
+
+  constructor() {
+    super({ objectMode: true });
+  }
+
+  _write(
+    log: LogMessage,
+    _: string,
+    callback: (e: Error | null, l: LogMessage | undefined) => void
+  ) {
+    this.collectedLogs.push(log);
+    callback(null, log);
+  }
 }
 
 export class UnifiedMongoClient extends MongoClient {
@@ -105,6 +133,8 @@ export class UnifiedMongoClient extends MongoClient {
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
+  logCollector: UnifiedLogCollector;
+
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
@@ -148,13 +178,35 @@ export class UnifiedMongoClient extends MongoClient {
     serverDescriptionChangedEvent: 'serverDescriptionChanged'
   } as const;
 
+  static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {
+    command: 'MONGODB_LOG_COMMAND',
+    serverSelection: 'MONGODB_LOG_SERVER_SELECTION',
+    connection: 'MONGODB_LOG_CONNECTION',
+    topology: 'MONGODB_LOG_TOPOLOGY'
+  } as const;
+
   constructor(uri: string, description: ClientEntity) {
+    const logCollector = new UnifiedLogCollector();
+    const componentSeverities = {
+      MONGODB_LOG_ALL: 'off'
+    };
+
+    // NOTE: this is done to override the logger environment variables
+    for (const key in description.observeLogMessages) {
+      componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
+        description.observeLogMessages[key];
+    }
+
     super(uri, {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
+      [Symbol.for('@@mdb.enableMongoLogger')]: true,
+      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: componentSeverities,
+      mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
     });
+    this.logCollector = logCollector;
 
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
@@ -241,6 +293,10 @@ export class UnifiedMongoClient extends MongoClient {
     for (const eventName of this.observedSdamEvents) {
       this.off(eventName, this.pushSdamEvent);
     }
+  }
+
+  get collectedLogs(): LogMessage[] {
+    return this.logCollector.collectedLogs;
   }
 }
 
