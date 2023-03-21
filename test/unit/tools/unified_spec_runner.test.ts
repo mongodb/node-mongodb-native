@@ -183,7 +183,7 @@ describe('Unified Spec Runner', function () {
             };
             expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
-              /Can only use failureIsRedacted when a failure exists/
+              /Expected failure to exist/
             );
           });
 
@@ -238,7 +238,7 @@ describe('Unified Spec Runner', function () {
             };
             expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
               AssertionError,
-              /Can only use failureIsRedacted when a failure exists/
+              /Expected failure to exist/
             );
           });
 
@@ -266,21 +266,6 @@ describe('Unified Spec Runner', function () {
             component: 'command',
             data: { $$exists: true }
           };
-        });
-
-        it('throws AssertionError when failure is present', function () {
-          actual = {
-            level: 'debug',
-            component: 'command',
-            data: {
-              failure: {}
-            }
-          };
-
-          expect(() => compareLogsSpy([expected], [actual], entitiesMap)).to.throw(
-            AssertionError,
-            /Expected failure to not exist since test.failureIsRedacted is undefined/
-          );
         });
 
         it('passes when failure is not present', function () {
