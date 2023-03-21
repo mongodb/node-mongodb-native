@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 /* eslint-disable @typescript-eslint/no-var-requires */
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 function* walk(root) {
   const directoryContents = fs.readdirSync(root);
