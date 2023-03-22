@@ -47,8 +47,7 @@ export class AuthProvider {
    */
   async prepare(
     handshakeDoc: HandshakeDocument,
-    /* eslint @typescript-eslint/no-unused-vars : 0 */
-    authContext: AuthContext
+    _authContext: AuthContext
   ): Promise<HandshakeDocument> {
     return handshakeDoc;
   }
@@ -59,7 +58,7 @@ export class AuthProvider {
    * @param context - A shared context for authentication flow
    * @param callback - The callback to return the result from the authentication
    */
-  auth(context: AuthContext, callback: Callback): void {
+  auth(_context: AuthContext, callback: Callback): void {
     // TODO(NODE-3483): Replace this with MongoMethodOverrideError
     callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
   }

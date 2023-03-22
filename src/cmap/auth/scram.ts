@@ -42,13 +42,15 @@ class ScramSHA extends AuthProvider {
 
     const nonce = await this.randomBytesAsync(24);
     // store the nonce for later use
-    Object.assign(authContext, { nonce });
+    authContext.nonce = nonce;
 
-    const request = Object.assign({}, handshakeDoc, {
-      speculativeAuthenticate: Object.assign(makeFirstMessage(cryptoMethod, credentials, nonce), {
+    const request = {
+      ...handshakeDoc,
+      speculativeAuthenticate: {
+        ...makeFirstMessage(cryptoMethod, credentials, nonce),
         db: credentials.source
-      })
-    });
+      }
+    };
 
     return request;
   }

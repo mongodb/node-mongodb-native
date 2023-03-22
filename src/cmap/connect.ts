@@ -15,7 +15,6 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
-  MongoServerError,
   needsRetryableWriteLabel
 } from '../error';
 import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
@@ -28,7 +27,7 @@ import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
-import { Connection, ConnectionOptions, CryptoConnection } from './connection';
+import { CommandOptions, Connection, ConnectionOptions, CryptoConnection } from './connection';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
@@ -121,7 +120,8 @@ function performInitialHandshake(
   conn.authContext = authContext;
   prepareHandshakeDocument(authContext).then(
     handshakeDoc => {
-      const handshakeOptions: Document = Object.assign({}, options);
+      // @ts-expect-error: TODO(NODE-XXXX): The options need to be filtered properly, Connection options differ from Command options
+      const handshakeOptions: CommandOptions = { ...options };
       if (typeof options.connectTimeoutMS === 'number') {
         // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
         handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
@@ -131,11 +131,6 @@ function performInitialHandshake(
       conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
         if (err) {
           callback(err);
-          return;
-        }
-
-        if (response?.ok === 0) {
-          callback(new MongoServerError(response));
           return;
         }
 
