@@ -88,17 +88,8 @@ export class MongoDBOIDC extends AuthProvider {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
-    getWorkflow(credentials, (error, workflow) => {
-      if (error) {
-        return callback(error);
-      }
-      if (!workflow) {
-        return callback(
-          new MongoRuntimeError(
-            `Could not load workflow for device ${credentials.mechanismProperties.PROVIDER_NAME}`
-          )
-        );
-      }
+    try {
+      const workflow = getWorkflow(credentials);
       workflow.execute(connection, credentials, reauthenticating).then(
         result => {
           return callback(undefined, result);
@@ -107,7 +98,9 @@ export class MongoDBOIDC extends AuthProvider {
           callback(error);
         }
       );
-    });
+    } catch (error) {
+      callback(error);
+    }
   }
 
   /**
@@ -150,15 +143,13 @@ export class MongoDBOIDC extends AuthProvider {
 /**
  * Gets either a device workflow or callback workflow.
  */
-function getWorkflow(credentials: MongoCredentials, callback: Callback<Workflow>): void {
+function getWorkflow(credentials: MongoCredentials): Workflow {
   const providerName = credentials.mechanismProperties.PROVIDER_NAME;
   const workflow = OIDC_WORKFLOWS.get(providerName || 'callback');
   if (!workflow) {
-    return callback(
-      new MongoInvalidArgumentError(
-        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
-      )
+    throw new MongoInvalidArgumentError(
+      `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
     );
   }
-  callback(undefined, workflow);
+  return workflow;
 }

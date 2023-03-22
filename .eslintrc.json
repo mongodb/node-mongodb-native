@@ -87,6 +87,7 @@
       "global"
     ],
     "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/require-await": "off",
     "no-restricted-imports": [
       "error",
       {
@@ -228,6 +229,7 @@
         "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
+        "@typescript-eslint/require-await": "off",
         "no-return-await": "off",
         "@typescript-eslint/return-await": [
           "error",
