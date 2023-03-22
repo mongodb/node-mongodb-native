@@ -102,7 +102,6 @@ export class MongoDBOIDC extends AuthProvider {
     }
 
     const workflow = getWorkflow(credentials);
-
     const result = await workflow.speculativeAuth();
     return { ...handshakeDoc, ...result };
   }
