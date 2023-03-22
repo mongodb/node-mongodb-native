@@ -88,19 +88,23 @@ export class MongoDBOIDC extends AuthProvider {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
 
+    let workflow;
+
     try {
-      const workflow = getWorkflow(credentials);
-      workflow.execute(connection, credentials, reauthenticating).then(
-        result => {
-          return callback(undefined, result);
-        },
-        error => {
-          callback(error);
-        }
-      );
+      workflow = getWorkflow(credentials);
     } catch (error) {
       callback(error);
+      return;
     }
+
+    workflow.execute(connection, credentials, reauthenticating).then(
+      result => {
+        return callback(undefined, result);
+      },
+      error => {
+        callback(error);
+      }
+    );
   }
 
   /**
