@@ -106,37 +106,24 @@ export class MongoDBOIDC extends AuthProvider {
   /**
    * Add the speculative auth for the initial handshake.
    */
-  override prepare(
+  override async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
     const { credentials } = authContext;
 
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    getWorkflow(credentials, (error, workflow) => {
-      if (error) {
-        return callback(error);
-      }
-      if (!workflow) {
-        return callback(
-          new MongoRuntimeError(
-            `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
-          )
-        );
-      }
-      workflow.speculativeAuth().then(
-        result => {
-          return callback(undefined, { ...handshakeDoc, ...result });
-        },
-        error => {
-          callback(error);
-        }
+    const workflow = getWorkflow(credentials);
+    if (!workflow) {
+      throw new MongoRuntimeError(
+        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
       );
-    });
+    }
+    const result = await workflow.speculativeAuth();
+    return { ...handshakeDoc, ...result };
   }
 }
 

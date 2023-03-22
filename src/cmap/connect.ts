@@ -119,93 +119,92 @@ function performInitialHandshake(
 
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
-  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
-    if (err || !handshakeDoc) {
-      return callback(err);
-    }
-
-    const handshakeOptions: Document = Object.assign({}, options);
-    if (typeof options.connectTimeoutMS === 'number') {
-      // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
-      handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
-    }
-
-    const start = new Date().getTime();
-    conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
-      if (err) {
-        callback(err);
-        return;
+  prepareHandshakeDocument(authContext).then(
+    handshakeDoc => {
+      const handshakeOptions: Document = Object.assign({}, options);
+      if (typeof options.connectTimeoutMS === 'number') {
+        // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
+        handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
       }
 
-      if (response?.ok === 0) {
-        callback(new MongoServerError(response));
-        return;
-      }
-
-      if (!('isWritablePrimary' in response)) {
-        // Provide hello-style response document.
-        response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
-      }
-
-      if (response.helloOk) {
-        conn.helloOk = true;
-      }
-
-      const supportedServerErr = checkSupportedServer(response, options);
-      if (supportedServerErr) {
-        callback(supportedServerErr);
-        return;
-      }
-
-      if (options.loadBalanced) {
-        if (!response.serviceId) {
-          return callback(
-            new MongoCompatibilityError(
-              'Driver attempted to initialize in load balancing mode, ' +
-                'but the server does not support this mode.'
-            )
-          );
+      const start = new Date().getTime();
+      conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
+        if (err) {
+          callback(err);
+          return;
         }
-      }
 
-      // NOTE: This is metadata attached to the connection while porting away from
-      //       handshake being done in the `Server` class. Likely, it should be
-      //       relocated, or at very least restructured.
-      conn.hello = response;
-      conn.lastHelloMS = new Date().getTime() - start;
-
-      if (!response.arbiterOnly && credentials) {
-        // store the response on auth context
-        authContext.response = response;
-
-        const resolvedCredentials = credentials.resolveAuthMechanism(response);
-        const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
-        if (!provider) {
-          return callback(
-            new MongoInvalidArgumentError(
-              `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
-            )
-          );
+        if (response?.ok === 0) {
+          callback(new MongoServerError(response));
+          return;
         }
-        provider.auth(authContext, err => {
-          if (err) {
-            if (err instanceof MongoError) {
-              err.addErrorLabel(MongoErrorLabel.HandshakeError);
-              if (needsRetryableWriteLabel(err, response.maxWireVersion)) {
-                err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-              }
-            }
-            return callback(err);
+
+        if (!('isWritablePrimary' in response)) {
+          // Provide hello-style response document.
+          response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
+        }
+
+        if (response.helloOk) {
+          conn.helloOk = true;
+        }
+
+        const supportedServerErr = checkSupportedServer(response, options);
+        if (supportedServerErr) {
+          callback(supportedServerErr);
+          return;
+        }
+
+        if (options.loadBalanced) {
+          if (!response.serviceId) {
+            return callback(
+              new MongoCompatibilityError(
+                'Driver attempted to initialize in load balancing mode, ' +
+                  'but the server does not support this mode.'
+              )
+            );
           }
-          callback(undefined, conn);
-        });
+        }
 
-        return;
-      }
+        // NOTE: This is metadata attached to the connection while porting away from
+        //       handshake being done in the `Server` class. Likely, it should be
+        //       relocated, or at very least restructured.
+        conn.hello = response;
+        conn.lastHelloMS = new Date().getTime() - start;
 
-      callback(undefined, conn);
-    });
-  });
+        if (!response.arbiterOnly && credentials) {
+          // store the response on auth context
+          authContext.response = response;
+
+          const resolvedCredentials = credentials.resolveAuthMechanism(response);
+          const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+          if (!provider) {
+            return callback(
+              new MongoInvalidArgumentError(
+                `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
+              )
+            );
+          }
+          provider.auth(authContext, err => {
+            if (err) {
+              if (err instanceof MongoError) {
+                err.addErrorLabel(MongoErrorLabel.HandshakeError);
+                if (needsRetryableWriteLabel(err, response.maxWireVersion)) {
+                  err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+                }
+              }
+              return callback(err);
+            }
+            callback(undefined, conn);
+          });
+
+          return;
+        }
+
+        callback(undefined, conn);
+      });
+    },
+    error => callback(error)
+  );
 }
 
 export interface HandshakeDocument extends Document {
@@ -226,10 +225,9 @@ export interface HandshakeDocument extends Document {
  *
  * This function is only exposed for testing purposes.
  */
-export function prepareHandshakeDocument(
-  authContext: AuthContext,
-  callback: Callback<HandshakeDocument>
-) {
+export async function prepareHandshakeDocument(
+  authContext: AuthContext
+): Promise<HandshakeDocument> {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
   const { serverApi } = authContext.connection;
@@ -253,23 +251,19 @@ export function prepareHandshakeDocument(
       const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256);
       if (!provider) {
         // This auth mechanism is always present.
-        return callback(
-          new MongoInvalidArgumentError(
-            `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
-          )
+        throw new MongoInvalidArgumentError(
+          `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
         );
       }
-      return provider.prepare(handshakeDoc, authContext, callback);
+      return provider.prepare(handshakeDoc, authContext);
     }
     const provider = AUTH_PROVIDERS.get(credentials.mechanism);
     if (!provider) {
-      return callback(
-        new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`)
-      );
+      throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
-    return provider.prepare(handshakeDoc, authContext, callback);
+    return provider.prepare(handshakeDoc, authContext);
   }
-  callback(undefined, handshakeDoc);
+  return handshakeDoc;
 }
 
 /** @public */

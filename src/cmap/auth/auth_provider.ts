@@ -45,12 +45,12 @@ export class AuthProvider {
    * @param handshakeDoc - The document used for the initial handshake on a connection
    * @param authContext - Context for authentication flow
    */
-  prepare(
+  async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
-    callback(undefined, handshakeDoc);
+    /* eslint @typescript-eslint/no-unused-vars : 0 */
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
+    return handshakeDoc;
   }
 
   /**
