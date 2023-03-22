@@ -1,16 +1,12 @@
-const chai = require('chai');
-const dns = require('dns');
-const sinon = require('sinon');
-const sinonChai = require('sinon-chai');
+import { expect } from 'chai';
+import { promises as dns } from 'dns';
+import * as sinon from 'sinon';
 
-const {
+import {
   GSSAPICanonicalizationValue,
   performGSSAPICanonicalizeHostName,
   resolveCname
-} = require('../../../mongodb');
-
-const expect = chai.expect;
-chai.use(sinonChai);
+} from '../../../mongodb';
 
 describe('GSSAPI', () => {
   const sandbox = sinon.createSandbox();

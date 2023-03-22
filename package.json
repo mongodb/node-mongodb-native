@@ -129,7 +129,7 @@
     "check:aws": "mocha --config test/mocha_mongodb.json test/integration/auth/mongodb_aws.test.ts",
     "check:oidc": "mocha --config test/manual/mocharc.json test/manual/mongodb_oidc.prose.test.ts",
     "check:ocsp": "mocha --config test/manual/mocharc.json test/manual/ocsp_support.test.js",
-    "check:kerberos": "mocha --config test/manual/mocharc.json test/manual/kerberos.test.js",
+    "check:kerberos": "mocha --config test/manual/mocharc.json test/manual/kerberos.test.ts",
     "check:tls": "mocha --config test/manual/mocharc.json test/manual/tls_support.test.js",
     "check:ldap": "mocha --config test/manual/mocharc.json test/manual/ldap.test.js",
     "check:socks5": "mocha --config test/manual/mocharc.json test/manual/socks5.test.ts",

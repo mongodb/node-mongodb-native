@@ -1,10 +1,11 @@
-'use strict';
-const { MongoClient } = require('../mongodb');
-const chai = require('chai');
-const sinon = require('sinon');
-const dns = require('dns');
+import * as chai from 'chai';
+import { promises as dns } from 'dns';
+import * as sinon from 'sinon';
+
+import { MongoClient } from '../mongodb';
 
 const expect = chai.expect;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 chai.use(require('sinon-chai'));
 
 function verifyKerberosAuthentication(client, done) {
