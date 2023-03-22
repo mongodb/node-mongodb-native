@@ -1,8 +1,8 @@
 import type { Document } from '../../bson';
 import { MongoRuntimeError } from '../../error';
-import type { ClientMetadataOptions } from '../../utils';
-import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
+import type { ClientMetadataOptions } from '../handshake/client_metadata';
+import type { HandshakeDocument } from '../handshake/handshake_document';
 import type { MongoCredentials } from './mongo_credentials';
 
 /** @internal */

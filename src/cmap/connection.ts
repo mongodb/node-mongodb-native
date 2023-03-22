@@ -25,11 +25,11 @@ import {
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
+import type { TopologyVersion } from '../sdam/server_description';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
   Callback,
-  ClientMetadata,
   HostAddress,
   maxWireVersion,
   MongoDBNamespace,
@@ -46,6 +46,8 @@ import {
 } from './command_monitoring_events';
 import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
+import type { ClientMetadata } from './handshake/client_metadata';
+import type { HandshakeGenerator } from './handshake/handshake_generator';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
@@ -128,6 +130,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+  /** @internal */
+  handshakeGenerator?: HandshakeGenerator;
 }
 
 /** @internal */
@@ -266,6 +270,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
+  }
+
+  get topologyVersion(): TopologyVersion | null {
+    return this[kHello]?.topologyVersion;
   }
 
   // Set the whether the message stream is for a monitoring connection.

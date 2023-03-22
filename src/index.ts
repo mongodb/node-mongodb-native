@@ -239,6 +239,14 @@ export type {
   WithConnectionCallback
 } from './cmap/connection_pool';
 export type {
+  ClientMetadata,
+  ClientMetadataOptions,
+  FaasMetadata
+} from './cmap/handshake/client_metadata';
+export type { HandshakeDecorator } from './cmap/handshake/handshake_decorator';
+export type { HandshakeDocument } from './cmap/handshake/handshake_document';
+export type { HandshakeGenerator } from './cmap/handshake/handshake_generator';
+export type {
   MessageStream,
   MessageStreamOptions,
   OperationDescription
@@ -463,8 +471,6 @@ export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,
   Callback,
-  ClientMetadata,
-  ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
   List,

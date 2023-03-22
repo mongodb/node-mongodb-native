@@ -9,7 +9,7 @@ import {
   MongoRuntimeError
 } from '../../error';
 import { emitWarning, ns } from '../../utils';
-import type { HandshakeDocument } from '../connect';
+import type { HandshakeDocument } from '../handshake/handshake_document';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';

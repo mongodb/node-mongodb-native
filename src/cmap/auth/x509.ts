@@ -1,7 +1,7 @@
 import type { Document } from '../../bson';
 import { MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
-import type { HandshakeDocument } from '../connect';
+import type { HandshakeDocument } from '../handshake/handshake_document';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 
