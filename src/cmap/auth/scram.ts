@@ -4,13 +4,11 @@ import { promisify } from 'util';
 import { Binary, Document } from '../../bson';
 import { saslprep } from '../../deps';
 import {
-  AnyError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
-  MongoRuntimeError,
-  MongoServerError
+  MongoRuntimeError
 } from '../../error';
-import { Callback, emitWarning, ns } from '../../utils';
+import { emitWarning, ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -55,20 +53,16 @@ class ScramSHA extends AuthProvider {
     return request;
   }
 
-  override auth(authContext: AuthContext, callback: Callback) {
+  override async auth(authContext: AuthContext) {
     const { reauthenticating, response } = authContext;
     if (response?.speculativeAuthenticate && !reauthenticating) {
-      continueScramConversation(
+      return continueScramConversation(
         this.cryptoMethod,
         response.speculativeAuthenticate,
-        authContext,
-        callback
+        authContext
       );
-
-      return;
     }
-
-    executeScram(this.cryptoMethod, authContext, callback);
+    return executeScram(this.cryptoMethod, authContext);
   }
 }
 
@@ -109,43 +103,34 @@ function makeFirstMessage(
   };
 }
 
-function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext, callback: Callback) {
+async function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext): Promise<void> {
   const { connection, credentials } = authContext;
   if (!credentials) {
-    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+    throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
   }
   if (!authContext.nonce) {
-    return callback(
-      new MongoInvalidArgumentError('AuthContext must contain a valid nonce property')
-    );
+    throw new MongoInvalidArgumentError('AuthContext must contain a valid nonce property');
   }
   const nonce = authContext.nonce;
   const db = credentials.source;
 
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-  connection.command(ns(`${db}.$cmd`), saslStartCmd, undefined, (_err, result) => {
-    const err = resolveError(_err, result);
-    if (err) {
-      return callback(err);
-    }
-
-    continueScramConversation(cryptoMethod, result, authContext, callback);
-  });
+  const response = await connection.commandAsync(ns(`${db}.$cmd`), saslStartCmd, undefined);
+  await continueScramConversation(cryptoMethod, response, authContext);
 }
 
-function continueScramConversation(
+async function continueScramConversation(
   cryptoMethod: CryptoMethod,
   response: Document,
-  authContext: AuthContext,
-  callback: Callback
-) {
+  authContext: AuthContext
+): Promise<void> {
   const connection = authContext.connection;
   const credentials = authContext.credentials;
   if (!credentials) {
-    return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+    throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
   }
   if (!authContext.nonce) {
-    return callback(new MongoInvalidArgumentError('Unable to continue SCRAM without valid nonce'));
+    throw new MongoInvalidArgumentError('Unable to continue SCRAM without valid nonce');
   }
   const nonce = authContext.nonce;
 
@@ -157,11 +142,7 @@ function continueScramConversation(
   if (cryptoMethod === 'sha256') {
     processedPassword = 'kModuleError' in saslprep ? password : saslprep(password);
   } else {
-    try {
-      processedPassword = passwordDigest(username, password);
-    } catch (e) {
-      return callback(e);
-    }
+    processedPassword = passwordDigest(username, password);
   }
 
   const payload = Buffer.isBuffer(response.payload)
@@ -171,20 +152,15 @@ function continueScramConversation(
 
   const iterations = parseInt(dict.i, 10);
   if (iterations && iterations < 4096) {
-    callback(
-      // TODO(NODE-3483)
-      new MongoRuntimeError(`Server returned an invalid iteration count ${iterations}`),
-      false
-    );
-    return;
+    // TODO(NODE-3483)
+    throw new MongoRuntimeError(`Server returned an invalid iteration count ${iterations}`);
   }
 
   const salt = dict.s;
   const rnonce = dict.r;
   if (rnonce.startsWith('nonce')) {
     // TODO(NODE-3483)
-    callback(new MongoRuntimeError(`Server returned an invalid nonce: ${rnonce}`), false);
-    return;
+    throw new MongoRuntimeError(`Server returned an invalid nonce: ${rnonce}`);
   }
 
   // Set up start of proof
@@ -214,30 +190,25 @@ function continueScramConversation(
     payload: new Binary(Buffer.from(clientFinal))
   };
 
-  connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined, (_err, r) => {
-    const err = resolveError(_err, r);
-    if (err) {
-      return callback(err);
-    }
+  const r = await connection.commandAsync(ns(`${db}.$cmd`), saslContinueCmd, undefined);
+  const parsedResponse = parsePayload(r.payload.value());
 
-    const parsedResponse = parsePayload(r.payload.value());
-    if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
-      callback(new MongoRuntimeError('Server returned an invalid signature'));
-      return;
-    }
+  if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
+    throw new MongoRuntimeError('Server returned an invalid signature');
+  }
 
-    if (!r || r.done !== false) {
-      return callback(err, r);
-    }
+  if (r.done !== false) {
+    // If the server sends r.done === true we can save one RTT
+    return;
+  }
 
-    const retrySaslContinueCmd = {
-      saslContinue: 1,
-      conversationId: r.conversationId,
-      payload: Buffer.alloc(0)
-    };
+  const retrySaslContinueCmd = {
+    saslContinue: 1,
+    conversationId: r.conversationId,
+    payload: Buffer.alloc(0)
+  };
 
-    connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined, callback);
-  });
+  await connection.commandAsync(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
 }
 
 function parsePayload(payload: string) {
@@ -364,14 +335,6 @@ function compareDigest(lhs: Buffer, rhs: Uint8Array) {
   }
 
   return result === 0;
-}
-
-function resolveError(err?: AnyError, result?: Document) {
-  if (err) return err;
-  if (result) {
-    if (result.$err || result.errmsg) return new MongoServerError(result);
-  }
-  return;
 }
 
 export class ScramSHA1 extends ScramSHA {

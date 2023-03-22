@@ -620,17 +620,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         )
       );
     }
-    provider.reauth(authContext, error => {
-      if (error) {
-        return callback(error);
-      }
-      return fn(undefined, connection, (fnErr, fnResult) => {
-        if (fnErr) {
-          return callback(fnErr);
-        }
-        callback(undefined, fnResult);
-      });
-    });
+    provider.reauth(authContext).then(
+      () => {
+        fn(undefined, connection, (fnErr, fnResult) => {
+          if (fnErr) {
+            return callback(fnErr);
+          }
+          callback(undefined, fnResult);
+        });
+      },
+      error => callback(error)
+    );
   }
 
   /** Clear the min pool size timer */

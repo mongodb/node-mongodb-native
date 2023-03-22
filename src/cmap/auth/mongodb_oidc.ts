@@ -3,7 +3,6 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import type { Callback } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -77,34 +76,20 @@ export class MongoDBOIDC extends AuthProvider {
   /**
    * Authenticate using OIDC
    */
-  override auth(authContext: AuthContext, callback: Callback): void {
+  override async auth(authContext: AuthContext): Promise<void> {
     const { connection, credentials, response, reauthenticating } = authContext;
 
     if (response?.speculativeAuthenticate) {
-      return callback();
-    }
-
-    if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
-    }
-
-    let workflow;
-
-    try {
-      workflow = getWorkflow(credentials);
-    } catch (error) {
-      callback(error);
       return;
     }
 
-    workflow.execute(connection, credentials, reauthenticating).then(
-      result => {
-        return callback(undefined, result);
-      },
-      error => {
-        callback(error);
-      }
-    );
+    if (!credentials) {
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
+    }
+
+    const workflow = getWorkflow(credentials);
+
+    await workflow.execute(connection, credentials, reauthenticating);
   }
 
   /**
