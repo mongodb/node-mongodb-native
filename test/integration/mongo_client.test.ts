@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { MongoClient } from '../../src';
+import { MongoClient } from '../mongodb';
 
 describe('MongoClient', () => {
   let client: MongoClient;
