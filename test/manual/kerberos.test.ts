@@ -16,6 +16,7 @@ async function verifyKerberosAuthentication(client) {
 describe('Kerberos', function () {
   let resolvePtrSpy;
   let resolveCnameSpy;
+  let client;
 
   beforeEach(() => {
     sinon.spy(dns, 'lookup');
@@ -25,6 +26,11 @@ describe('Kerberos', function () {
 
   afterEach(function () {
     sinon.restore();
+  });
+
+  afterEach(async () => {
+    await client.close();
+    client = null;
   });
 
   if (process.env.MONGODB_URI == null) {
@@ -49,7 +55,7 @@ describe('Kerberos', function () {
   }
 
   it('should authenticate with original uri', async function () {
-    const client = new MongoClient(krb5Uri);
+    client = new MongoClient(krb5Uri);
     await client.connect();
     await verifyKerberosAuthentication(client);
   });
@@ -65,7 +71,7 @@ describe('Kerberos', function () {
 
     context('when the value is forward', function () {
       it('authenticates with a forward cname lookup', async function () {
-        const client = new MongoClient(
+        client = new MongoClient(
           `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:forward&maxPoolSize=1`
         );
         await client.connect();
@@ -77,7 +83,7 @@ describe('Kerberos', function () {
     for (const option of [false, 'none']) {
       context(`when the value is ${option}`, function () {
         it('authenticates with no dns lookups', async function () {
-          const client = new MongoClient(
+          client = new MongoClient(
             `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
           );
           await client.connect();
@@ -98,7 +104,7 @@ describe('Kerberos', function () {
           });
 
           it('authenticates with a forward dns lookup and a reverse ptr lookup', async function () {
-            const client = new MongoClient(
+            client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
             await client.connect();
@@ -117,7 +123,7 @@ describe('Kerberos', function () {
           });
 
           it('authenticates with a fallback cname lookup', async function () {
-            const client = new MongoClient(
+            client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
 
@@ -140,7 +146,7 @@ describe('Kerberos', function () {
           });
 
           it('authenticates with a fallback cname lookup', async function () {
-            const client = new MongoClient(
+            client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
 
@@ -163,7 +169,7 @@ describe('Kerberos', function () {
           });
 
           it('authenticates with a fallback host name', async function () {
-            const client = new MongoClient(
+            client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
             await client.connect();
@@ -185,7 +191,7 @@ describe('Kerberos', function () {
           });
 
           it('authenticates with a fallback host name', async function () {
-            const client = new MongoClient(
+            client = new MongoClient(
               `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:${option}&maxPoolSize=1`
             );
             await client.connect();
@@ -204,7 +210,7 @@ describe('Kerberos', function () {
   });
 
   it.skip('validate that SERVICE_REALM and CANONICALIZE_HOST_NAME can be passed in', async function () {
-    const client = new MongoClient(
+    client = new MongoClient(
       `${krb5Uri}&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1`
     );
     await client.connect();
@@ -213,7 +219,7 @@ describe('Kerberos', function () {
 
   context('when passing SERVICE_HOST as an auth mech option', function () {
     context('when the SERVICE_HOST is invalid', function () {
-      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+      client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
         authMechanismProperties: {
           SERVICE_HOST: 'example.com'
         }
@@ -229,14 +235,10 @@ describe('Kerberos', function () {
     });
 
     context('when the SERVICE_HOST is valid', function () {
-      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+      client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
         authMechanismProperties: {
           SERVICE_HOST: 'ldaptest.10gen.cc'
         }
-      });
-
-      afterEach(async () => {
-        await client.close();
       });
 
       it('authenticates', async function () {
@@ -248,7 +250,7 @@ describe('Kerberos', function () {
 
   describe('should use the SERVICE_NAME property', function () {
     it('as an option handed to the MongoClient', async function () {
-      const client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+      client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
         authMechanismProperties: {
           SERVICE_NAME: 'alternate'
         }
@@ -261,7 +263,7 @@ describe('Kerberos', function () {
     });
 
     it('as part of the query string parameters', async function () {
-      const client = new MongoClient(
+      client = new MongoClient(
         `${krb5Uri}&authMechanismProperties=SERVICE_NAME:alternate&maxPoolSize=1`
       );
 
@@ -273,7 +275,7 @@ describe('Kerberos', function () {
   });
 
   it('should fail to authenticate with bad credentials', async function () {
-    const client = new MongoClient(
+    client = new MongoClient(
       krb5Uri.replace(encodeURIComponent(process.env.KRB5_PRINCIPAL), 'bad%40creds.cc')
     );
     const err = await client.connect().catch(e => e);
