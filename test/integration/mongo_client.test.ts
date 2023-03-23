@@ -35,7 +35,7 @@ describe('MongoClient', () => {
     await Promise.all(clientClosePromises);
   });
 
-  it('Concurrents client connect correctly locked (only one topology created)', async function () {
+  it('parallel client connect calls only create one topology', async function () {
     await Promise.all([clientConnect(), clientConnect(), clientConnect()]);
 
     expect(topologyOpenEvents).to.have.lengthOf(1);
