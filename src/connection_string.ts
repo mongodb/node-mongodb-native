@@ -1,5 +1,4 @@
-import * as dns from 'dns';
-import * as fs from 'fs';
+import { promises as dns } from 'dns';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
@@ -80,9 +79,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const lookupAddress = options.srvHost;
-  const addresses = await dns.promises.resolveSrv(
-    `_${options.srvServiceName}._tcp.${lookupAddress}`
-  );
+  const addresses = await dns.resolveSrv(`_${options.srvServiceName}._tcp.${lookupAddress}`);
 
   if (addresses.length === 0) {
     throw new MongoAPIError('No addresses found at host');
@@ -101,7 +98,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   // Resolve TXT record and add options from there if they exist.
   let record;
   try {
-    record = await dns.promises.resolveTxt(lookupAddress);
+    record = await dns.resolveTxt(lookupAddress);
   } catch (error) {
     if (error.code !== 'ENODATA' && error.code !== 'ENOTFOUND') {
       throw error;
@@ -1103,28 +1100,20 @@ export const OPTIONS = {
     type: 'boolean'
   },
   sslCA: {
-    target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'caFileName',
+    type: 'string'
   },
   sslCRL: {
-    target: 'crl',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'crlFileName',
+    type: 'string'
   },
   sslCert: {
-    target: 'cert',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'certFileName',
+    type: 'string'
   },
   sslKey: {
-    target: 'key',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'keyFileName',
+    type: 'string'
   },
   sslPass: {
     deprecated: true,
@@ -1153,22 +1142,16 @@ export const OPTIONS = {
     }
   },
   tlsCAFile: {
-    target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'caFileName',
+    type: 'string'
   },
   tlsCertificateFile: {
-    target: 'cert',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'certFileName',
+    type: 'string'
   },
   tlsCertificateKeyFile: {
-    target: 'key',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    target: 'keyFileName',
+    type: 'string'
   },
   tlsCertificateKeyFilePassword: {
     target: 'passphrase',

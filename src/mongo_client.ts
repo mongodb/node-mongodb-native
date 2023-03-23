@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 import { promisify } from 'util';
@@ -324,6 +325,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @internal
    */
   [kOptions]: MongoOptions;
+  /** @internal */
+  private hasReadTLSFiles = false;
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
@@ -410,6 +413,22 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     }
 
     const options = this[kOptions];
+
+    if (options.tls && !this.hasReadTLSFiles) {
+      if (typeof options.caFileName === 'string' && options.caFileName.length !== 0) {
+        options.ca = await fs.readFile(options.caFileName, { encoding: 'utf8' });
+      }
+      if (typeof options.crlFileName === 'string' && options.crlFileName.length !== 0) {
+        options.crl = await fs.readFile(options.crlFileName, { encoding: 'utf8' });
+      }
+      if (typeof options.certFileName === 'string' && options.certFileName.length !== 0) {
+        options.cert = await fs.readFile(options.certFileName, { encoding: 'utf8' });
+      }
+      if (typeof options.keyFileName === 'string' && options.keyFileName.length !== 0) {
+        options.key = await fs.readFile(options.keyFileName, { encoding: 'utf8' });
+      }
+      this.hasReadTLSFiles = true;
+    }
 
     if (typeof options.srvHost === 'string') {
       const hosts = await resolveSRVRecord(options);
@@ -720,6 +739,11 @@ export interface MongoOptions
    *
    */
   tls: boolean;
+
+  caFileName?: string;
+  crlFileName?: string;
+  certFileName?: string;
+  keyFileName?: string;
 
   /** @internal */
   [featureFlag: symbol]: any;

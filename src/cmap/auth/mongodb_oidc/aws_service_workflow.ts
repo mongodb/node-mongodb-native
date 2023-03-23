@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { promises as fs } from 'fs';
 
 import { MongoAWSError } from '../../../error';
 import { ServiceWorkflow } from './service_workflow';
@@ -21,6 +21,6 @@ export class AwsServiceWorkflow extends ServiceWorkflow {
     if (!tokenFile) {
       throw new MongoAWSError('AWS_WEB_IDENTITY_TOKEN_FILE must be set in the environment.');
     }
-    return readFile(tokenFile, 'utf8');
+    return fs.readFile(tokenFile, 'utf8');
   }
 }
