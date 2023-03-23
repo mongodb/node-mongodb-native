@@ -29,7 +29,7 @@ describe('Kerberos', function () {
   });
 
   afterEach(async () => {
-    await client.close();
+    await client?.close();
     client = null;
   });
 
@@ -219,13 +219,13 @@ describe('Kerberos', function () {
 
   context('when passing SERVICE_HOST as an auth mech option', function () {
     context('when the SERVICE_HOST is invalid', function () {
-      client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
-        authMechanismProperties: {
-          SERVICE_HOST: 'example.com'
-        }
-      });
-
       it('fails to authenticate', async function () {
+        client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+          authMechanismProperties: {
+            SERVICE_HOST: 'example.com'
+          }
+        });
+
         const expectedError = await client.connect().catch(e => e);
         if (!expectedError) {
           expect.fail('Expected connect with invalid SERVICE_HOST to fail');
@@ -235,13 +235,13 @@ describe('Kerberos', function () {
     });
 
     context('when the SERVICE_HOST is valid', function () {
-      client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
-        authMechanismProperties: {
-          SERVICE_HOST: 'ldaptest.10gen.cc'
-        }
-      });
-
       it('authenticates', async function () {
+        client = new MongoClient(`${krb5Uri}&maxPoolSize=1`, {
+          authMechanismProperties: {
+            SERVICE_HOST: 'ldaptest.10gen.cc'
+          }
+        });
+
         await client.connect();
         await verifyKerberosAuthentication(client);
       });
