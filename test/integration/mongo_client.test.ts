@@ -31,7 +31,7 @@ describe('MongoClient', () => {
 
   afterEach(async function () {
     /** Close as many times as connect calls in the runned test (tracked by clientConnectCounter) */
-    const clientClosePromises = [...new Array(clientConnectCounter)].map(() => client.close());
+    const clientClosePromises = Array.from({ length: clientConnectCounter }, () => client.close());
     await Promise.all(clientClosePromises);
   });
 
