@@ -91,7 +91,7 @@ async function makeKerberosClient(authContext: AuthContext): Promise<KerberosCli
 
   const initOptions = {};
   if (password != null) {
-    // TODO(NODE-XXXX): These do not match the typescript options in initializeClient
+    // TODO(NODE-5139): These do not match the typescript options in initializeClient
     Object.assign(initOptions, { user: username, password: password });
   }
 

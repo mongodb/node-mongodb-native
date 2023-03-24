@@ -120,7 +120,7 @@ async function performInitialHandshake(
 
   const handshakeDoc = await prepareHandshakeDocument(authContext);
 
-  // @ts-expect-error: TODO(NODE-XXXX): The options need to be filtered properly, Connection options differ from Command options
+  // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
   const handshakeOptions: CommandOptions = { ...options };
   if (typeof options.connectTimeoutMS === 'number') {
     // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
