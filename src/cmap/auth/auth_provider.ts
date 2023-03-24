@@ -1,6 +1,6 @@
 import type { Document } from '../../bson';
 import { MongoRuntimeError } from '../../error';
-import type { Callback, ClientMetadataOptions } from '../../utils';
+import type { ClientMetadataOptions } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
@@ -38,47 +38,40 @@ export class AuthContext {
   }
 }
 
-export class AuthProvider {
+export abstract class AuthProvider {
   /**
    * Prepare the handshake document before the initial handshake.
    *
    * @param handshakeDoc - The document used for the initial handshake on a connection
    * @param authContext - Context for authentication flow
    */
-  prepare(
+  async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
-    callback(undefined, handshakeDoc);
+    _authContext: AuthContext
+  ): Promise<HandshakeDocument> {
+    return handshakeDoc;
   }
 
   /**
    * Authenticate
    *
    * @param context - A shared context for authentication flow
-   * @param callback - The callback to return the result from the authentication
    */
-  auth(context: AuthContext, callback: Callback): void {
-    // TODO(NODE-3483): Replace this with MongoMethodOverrideError
-    callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
-  }
+  abstract auth(context: AuthContext): Promise<void>;
 
   /**
    * Reauthenticate.
    * @param context - The shared auth context.
-   * @param callback - The callback.
    */
-  reauth(context: AuthContext, callback: Callback): void {
-    // If we are already reauthenticating this is a no-op.
+  async reauth(context: AuthContext): Promise<void> {
     if (context.reauthenticating) {
-      return callback(new MongoRuntimeError('Reauthentication already in progress.'));
+      throw new MongoRuntimeError('Reauthentication already in progress.');
     }
-    context.reauthenticating = true;
-    const cb: Callback = (error, result) => {
+    try {
+      context.reauthenticating = true;
+      await this.auth(context);
+    } finally {
       context.reauthenticating = false;
-      callback(error, result);
-    };
-    this.auth(context, cb);
+    }
   }
 }

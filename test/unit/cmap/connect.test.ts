@@ -12,7 +12,7 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoCredentials,
   MongoNetworkError,
-  prepareHandshakeDocument as prepareHandshakeDocumentCb
+  prepareHandshakeDocument
 } from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
 import * as mock from '../../tools/mongodb-mock/index';
@@ -206,8 +206,6 @@ describe('Connect Tests', function () {
   });
 
   context('prepareHandshakeDocument', () => {
-    const prepareHandshakeDocument = promisify(prepareHandshakeDocumentCb);
-
     context('when serverApi.version is present', () => {
       const options = {};
       const authContext = {
