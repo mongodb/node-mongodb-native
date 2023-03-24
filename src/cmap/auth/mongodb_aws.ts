@@ -44,8 +44,8 @@ export class MongoDBAWS extends AuthProvider {
   }
 
   override async auth(authContext: AuthContext): Promise<void> {
-    const { connection, credentials } = authContext;
-    if (!credentials) {
+    const { connection } = authContext;
+    if (!authContext.credentials) {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
@@ -60,9 +60,11 @@ export class MongoDBAWS extends AuthProvider {
       );
     }
 
-    if (!credentials.username) {
-      authContext.credentials = await makeTempCredentials(credentials);
+    if (!authContext.credentials.username) {
+      authContext.credentials = await makeTempCredentials(authContext.credentials);
     }
+
+    const { credentials } = authContext;
 
     const accessKeyId = credentials.username;
     const secretAccessKey = credentials.password;
