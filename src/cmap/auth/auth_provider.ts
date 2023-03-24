@@ -56,17 +56,14 @@ export abstract class AuthProvider {
    * Authenticate
    *
    * @param context - A shared context for authentication flow
-   * @param callback - The callback to return the result from the authentication
    */
-  abstract auth(_context: AuthContext): Promise<void>;
+  abstract auth(context: AuthContext): Promise<void>;
 
   /**
    * Reauthenticate.
    * @param context - The shared auth context.
-   * @param callback - The callback.
    */
   async reauth(context: AuthContext): Promise<void> {
-    // If we are already reauthenticating this is a no-op.
     if (context.reauthenticating) {
       throw new MongoRuntimeError('Reauthentication already in progress.');
     }

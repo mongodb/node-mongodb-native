@@ -1,8 +1,4 @@
-import {
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError,
-  MongoRuntimeError
-} from '../../error';
+import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -106,11 +102,7 @@ export class MongoDBOIDC extends AuthProvider {
     }
 
     const workflow = getWorkflow(credentials);
-    if (!workflow) {
-      throw new MongoRuntimeError(
-        `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
-      );
-    }
+
     const result = await workflow.speculativeAuth();
     return { ...handshakeDoc, ...result };
   }

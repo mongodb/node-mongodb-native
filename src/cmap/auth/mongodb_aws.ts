@@ -62,7 +62,6 @@ export class MongoDBAWS extends AuthProvider {
 
     if (!credentials.username) {
       authContext.credentials = await makeTempCredentials(credentials);
-      return this.auth(authContext);
     }
 
     const accessKeyId = credentials.username;

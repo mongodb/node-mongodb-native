@@ -24,6 +24,7 @@ interface UriTest extends UriTestBase {
   };
   options: Record<string, any>;
 }
+
 interface AuthTest extends UriTestBase {
   credential: {
     username: string;
