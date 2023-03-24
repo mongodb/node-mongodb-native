@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { inspect } from 'util';
 
@@ -34,6 +35,7 @@ import {
   ExpectedCommandEvent,
   ExpectedError,
   ExpectedEventsForClient,
+  ExpectedLogMessage,
   ExpectedSdamEvent
 } from './schema';
 
@@ -73,12 +75,26 @@ export interface SessionLsidOperator {
 export function isSessionLsidOperator(value: unknown): value is SessionLsidOperator {
   return typeof value === 'object' && value != null && '$$sessionLsid' in value;
 }
+export interface MatchAsDocumentOperator {
+  $$matchAsDocument: unknown;
+}
+export function isMatchAsDocumentOperator(value: unknown): value is MatchAsDocumentOperator {
+  return typeof value === 'object' && value != null && '$$matchAsDocument' in value;
+}
+export interface MatchAsRootOperator {
+  $$matchAsRoot: unknown;
+}
+export function isMatchAsRootOperator(value: unknown): value is MatchAsRootOperator {
+  return typeof value === 'object' && value != null && '$$matchAsRoot' in value;
+}
 
 export const SpecialOperatorKeys = [
   '$$exists',
   '$$type',
   '$$matchesEntity',
   '$$matchesHexBytes',
+  '$$matchAsRoot',
+  '$$matchAsDocument',
   '$$unsetOrMatches',
   '$$sessionLsid'
 ];
@@ -89,7 +105,9 @@ export type SpecialOperator =
   | MatchesEntityOperator
   | MatchesHexBytesOperator
   | UnsetOrMatchesOperator
-  | SessionLsidOperator;
+  | SessionLsidOperator
+  | MatchAsDocumentOperator
+  | MatchAsRootOperator;
 
 type KeysOfUnion<T> = T extends object ? keyof T : never;
 export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
@@ -100,7 +118,9 @@ export function isSpecialOperator(value: unknown): value is SpecialOperator {
     isMatchesEntityOperator(value) ||
     isMatchesHexBytesOperator(value) ||
     isUnsetOrMatchesOperator(value) ||
-    isSessionLsidOperator(value)
+    isSessionLsidOperator(value) ||
+    isMatchAsRootOperator(value) ||
+    isMatchAsDocumentOperator(value)
   );
 }
 
@@ -199,6 +219,10 @@ export function resultCheck(
       return;
     }
 
+    if (typeof actual !== 'object') {
+      expect.fail('Expected actual value to be an object');
+    }
+
     const expectedEntries = Object.entries(expected);
 
     if (Array.isArray(expected)) {
@@ -294,8 +318,9 @@ export function specialCheck(
     // $$sessionLsid
     const session = entities.getEntity('session', expected.$$sessionLsid, false);
     expect(session, `Session ${expected.$$sessionLsid} does not exist in entities`).to.exist;
-    const entitySessionHex = session.id!.id.buffer.toString('hex').toUpperCase();
-    const actualSessionHex = actual.id.buffer.toString('hex').toUpperCase();
+    const entitySessionHex = session.id!.id.toString('hex').toUpperCase();
+    const actualSessionHex = actual.id!.toString('hex').toUpperCase();
+
     expect(
       entitySessionHex,
       `Session entity ${expected.$$sessionLsid} does not match lsid`
@@ -323,6 +348,25 @@ export function specialCheck(
         ejson`expected value at path ${path.join('')} NOT to exist, but received ${actual}`
       ).to.be.false;
     }
+  } else if (isMatchAsDocumentOperator(expected)) {
+    if (typeof actual === 'string') {
+      const actualDoc = EJSON.parse(actual, { relaxed: false });
+      resultCheck(actualDoc, expected.$$matchAsDocument as any, entities, path, true);
+    } else {
+      expect.fail(
+        `Expected value at path '${path.join('')}' to be string, but received ${inspect(actual)}`
+      );
+    }
+  } else if (isMatchAsRootOperator(expected)) {
+    expect(
+      typeof actual,
+      `Expected value at path '${path.join('')}' to be object, but received ${inspect(actual)}`
+    ).to.equal('object');
+    expect(typeof expected.$$matchAsRoot, 'Value of $$matchAsRoot must be an object').to.equal(
+      'object'
+    );
+
+    resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
@@ -520,6 +564,44 @@ export function matchesEvents(
     }
 
     compareEvents(actual, expected, entities);
+  }
+}
+
+export function compareLogs(
+  expected: ExpectedLogMessage[],
+  actual: ExpectedLogMessage[],
+  entities: EntitiesMap
+): void {
+  expect(actual).to.have.lengthOf(expected.length);
+
+  for (const [index, actualLog] of actual.entries()) {
+    const rootPrefix = `expectLogMessages[${index}]`;
+    const expectedLog = expected[index];
+
+    // Check that log levels match
+    expect(actualLog).to.have.property('level', expectedLog.level);
+
+    // Check that components match
+    expect(actualLog).to.have.property('component', expectedLog.component);
+
+    // NOTE: The spec states that if the failureIsRedacted flag is present, we
+    // must assert that a failure occurred.
+    if (expectedLog.failureIsRedacted !== undefined) {
+      expect(expectedLog.failureIsRedacted).to.be.a('boolean');
+      expect(actualLog.data.failure, 'Expected failure to exist').to.exist;
+      if (expectedLog.failureIsRedacted) {
+        // Assert that failure has been redacted
+        expect(actualLog.data.failure, 'Expected failure to have been redacted').to.deep.equal({});
+      } else {
+        // Assert that failure has not been redacted
+        expect(
+          actualLog.data.failure,
+          'Expected failure to have not been redacted'
+        ).to.not.deep.equal({});
+      }
+    }
+
+    resultCheck(actualLog.data, expectedLog.data, entities, [rootPrefix], false);
   }
 }
 

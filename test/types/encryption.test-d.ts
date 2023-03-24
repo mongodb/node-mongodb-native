@@ -1,4 +1,4 @@
-import { expectAssignable, expectNotAssignable } from 'tsd';
+import { expectAssignable } from 'tsd';
 
 import type { AutoEncryptionOptions } from '../mongodb';
 
@@ -10,8 +10,7 @@ expectAssignable<AutoEncryptionOptions>({
   }
 });
 
-// TODO(NODE-4537): Azure support
-expectNotAssignable<AutoEncryptionOptions>({
+expectAssignable<AutoEncryptionOptions>({
   kmsProviders: {
     azure: {}
   }

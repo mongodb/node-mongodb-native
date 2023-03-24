@@ -1,8 +1,10 @@
 import type {
   Document,
+  MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
   ReadPreferenceMode,
+  SeverityLevel,
   TagSet,
   W
 } from '../../mongodb';
@@ -100,6 +102,7 @@ export const TopologyType = Object.freeze({
   shardedReplicaset: 'sharded-replicaset',
   loadBalanced: 'load-balanced'
 } as const);
+
 export type TopologyId = (typeof TopologyType)[keyof typeof TopologyType];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
@@ -132,6 +135,7 @@ export interface ClientEntity {
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
   observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
+  observeLogMessages?: Record<MongoLoggableComponent, SeverityLevel>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;
@@ -242,6 +246,7 @@ export interface Test {
   skipReason?: string;
   operations: OperationDescription[];
   expectEvents?: ExpectedEventsForClient[];
+  expectLogMessages?: ExpectedLogMessagesForClient[];
   outcome?: CollectionData[];
 }
 export interface ExpectedEventsForClient {
@@ -252,6 +257,11 @@ export interface ExpectedEventsForClient {
 }
 
 export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedSdamEvent;
+
+export interface ExpectedLogMessagesForClient {
+  client: string;
+  messages: ExpectedLogMessage[];
+}
 
 export interface ExpectedCommandEvent {
   commandStartedEvent?: {
@@ -306,6 +316,13 @@ export interface ExpectedError {
   errorLabelsContain?: string[];
   errorLabelsOmit?: string[];
   expectResult?: unknown;
+}
+
+export interface ExpectedLogMessage {
+  level: SeverityLevel;
+  component: MongoLoggableComponent;
+  failureIsRedacted?: boolean;
+  data: Document;
 }
 
 /**
