@@ -72,7 +72,12 @@ const kHello = Symbol('hello');
 const kAutoEncrypter = Symbol('autoEncrypter');
 /** @internal */
 const kDelayedTimeoutId = Symbol('delayedTimeoutId');
-
+/**
+ * @internal
+ *
+ * Used by the socket leak checker to determine the type of connection.
+ */
+const kConnectionType = Symbol.for('@@mdb.connectionType');
 const INVALID_QUEUE_SIZE = 'Connection internal queue contains more than 1 operation description';
 
 /** @internal */
@@ -253,6 +258,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // hook the message stream up to the passed in stream
     this[kStream].pipe(this[kMessageStream]);
     this[kMessageStream].pipe(this[kStream]);
+
+    // for testing purposes only
+    // @ts-expect-error There is no `kConnectionType` on a socket.
+    this[kStream][kConnectionType] = this.id;
   }
 
   get description(): StreamDescription {
