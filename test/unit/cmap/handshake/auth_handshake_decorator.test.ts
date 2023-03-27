@@ -3,9 +3,9 @@ import * as os from 'os';
 import * as sinon from 'sinon';
 
 import {
+  AUTH_PROVIDERS,
   AuthHandshakeDecorator,
   AuthMechanism,
-  AUTH_PROVIDERS,
   Connection,
   HostAddress,
   MongoCredentials,
@@ -49,7 +49,7 @@ describe('AuthHandshakeDecorator', function () {
         const handshake = await decorator.decorate({ hello: 1 }, authContext);
         expect(handshake).to.deep.equal({ hello: 1 });
       });
-    })
+    });
 
     context('when an invalid mechanism is provided', () => {
       const authContext = {
@@ -67,16 +67,18 @@ describe('AuthHandshakeDecorator', function () {
 
       it('returns the handshake with default auth', async function () {
         const error = await decorator.decorate({}, authContext).catch(e => e);
-        expect(error).to.be.instanceOf(MongoInvalidArgumentError)
+        expect(error)
+          .to.be.instanceOf(MongoInvalidArgumentError)
           .to.match(/No AuthProvider for/);
       });
-    })
+    });
 
     context('when no mechanism provided', function () {
       after(() => sinon.restore());
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256)!;
       const providerSpy = sinon.stub(provider, 'prepare');
-      providerSpy.callsFake(async (doc, _) => doc)
+      providerSpy.callsFake(async (doc, _) => doc);
       const authContext = {
         credentials: new MongoCredentials({
           username: 'foo',
