@@ -125,7 +125,7 @@ describe('GridFS', () => {
     context('find(oid)', () => {
       let findsStarted;
 
-      beforeEach(async function () {
+      beforeEach(function () {
         findsStarted = [];
         client.on('commandStarted', ev => {
           if (ev.commandName === 'find') findsStarted.push(ev.command);
@@ -143,6 +143,7 @@ describe('GridFS', () => {
           await bucket.find(oid).toArray();
           expect(findsStarted).to.have.lengthOf(1);
           expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+          expect(findsStarted[0].filter).to.have.all.keys(['_id']);
         });
       });
     });

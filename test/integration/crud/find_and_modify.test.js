@@ -325,7 +325,7 @@ describe('Find and Modify', function () {
     let client;
     let findAndModifyStarted;
 
-    beforeEach(async function () {
+    beforeEach(function () {
       client = this.configuration.newClient({ monitorCommands: true });
       findAndModifyStarted = [];
       client.on('commandStarted', ev => {

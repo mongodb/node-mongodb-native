@@ -2582,7 +2582,7 @@ describe('Find', function () {
     let client;
     let findsStarted;
 
-    beforeEach(async function () {
+    beforeEach(function () {
       client = this.configuration.newClient({ monitorCommands: true });
       findsStarted = [];
       client.on('commandStarted', ev => {
@@ -2602,6 +2602,7 @@ describe('Find', function () {
         await collection.find(oid).toArray();
         expect(findsStarted).to.have.lengthOf(1);
         expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+        expect(findsStarted[0].filter).to.have.all.keys(['_id']);
       });
     });
 
@@ -2612,6 +2613,7 @@ describe('Find', function () {
         await collection.findOne(oid);
         expect(findsStarted).to.have.lengthOf(1);
         expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+        expect(findsStarted[0].filter).to.have.all.keys(['_id']);
       });
     });
   });
