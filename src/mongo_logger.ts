@@ -1,5 +1,20 @@
+import { Document, EJSON } from 'bson';
 import { Writable } from 'stream';
 
+import {
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent
+} from './cmap/command_monitoring_events';
+import {
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolReadyEvent,
+  ConnectionReadyEvent
+} from './cmap/connection_pool_events';
 import { parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -91,7 +106,7 @@ export interface MongoLoggerOptions {
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
-  logDestination: Writable;
+  logDestination: MongoDBLogWritable;
 }
 
 /**
@@ -143,11 +158,84 @@ function resolveLogPath(
   return process.stderr;
 }
 
+export interface Log extends Record<string, any> {
+  s: SeverityLevel;
+  t: Date;
+  c: MongoLoggableComponent;
+  message?: string;
+}
+
+export interface MongoDBLogWritable {
+  write(log: Log): unknown;
+}
+
+function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
+  const s0Num = SeverityLevelMap.get(s0) as number;
+  const s1Num = SeverityLevelMap.get(s1) as number;
+
+  return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
+}
+
+type LogTransform = (message: Record<string, any>) => Record<string, any>;
+
+const DEFAULT_LOG_TRANSFORM = (message: Record<string, any>): Record<string, any> => {
+  const commandCommonFields = (
+    message: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+  ) => {
+    return {
+      commandName: message.commandName,
+      requestId: message.requestId,
+      driverConnectionId: message.connectionId,
+      serverHost: message.address,
+      serverPort: message.address,
+      serviceId: message.serviceId
+    };
+  };
+  const maybeTruncate = (doc: Document, len: number): string => {
+    const rv = EJSON.stringify(doc);
+    return rv.length > len ? rv.slice(0, len) + '...' : rv;
+  };
+
+  if (message instanceof CommandStartedEvent) {
+    return {
+      ...commandCommonFields(message),
+      message: 'Command started',
+      command: maybeTruncate(message.command, 1000),
+      databaseName: message.databaseName
+    };
+  } else if (message instanceof CommandSucceededEvent) {
+    return {
+      ...commandCommonFields(message),
+      message: 'Command succeeded',
+      durationMS: message.duration,
+      reply: maybeTruncate(message.reply as Document, 1000)
+    };
+  } else if (message instanceof CommandFailedEvent) {
+    return {
+      ...commandCommonFields(message),
+      message: 'Command failed',
+      durationMS: message.duration,
+      failure: message.failure
+    };
+  } else if (message instanceof ConnectionReadyEvent) {
+  } else if (message instanceof ConnectionClosedEvent) {
+  } else if (message instanceof ConnectionCreatedEvent) {
+  } else if (message instanceof ConnectionPoolReadyEvent) {
+  } else if (message instanceof ConnectionPoolClosedEvent) {
+  } else if (message instanceof ConnectionPoolClearedEvent) {
+  } else if (message instanceof ConnectionPoolCreatedEvent) {
+  } else {
+    return message;
+  }
+
+  return {};
+};
+
 /** @internal */
 export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
-  logDestination: Writable;
+  logDestination: MongoDBLogWritable;
 
   constructor(options: MongoLoggerOptions) {
     this.componentSeverities = options.componentSeverities;
@@ -155,25 +243,83 @@ export class MongoLogger {
     this.logDestination = options.logDestination;
   }
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  emergency(component: any, message: any): void {}
+  emergency(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'emergency', message, transform);
+  }
+  alert(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'alert', message, transform);
+  }
+  critical(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform: LogTransform = DEFAULT_LOG_TRANSFORM
+  ): void {
+    this.log(component, 'critical', message, transform);
+  }
+  error(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'error', message, transform);
+  }
+  warn(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'warn', message, transform);
+  }
+  info(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'info', message, transform);
+  }
+  debug(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'debug', message, transform);
+  }
+  trace(
+    component: MongoLoggableComponent,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    this.log(component, 'trace', message, transform);
+  }
 
-  alert(component: any, message: any): void {}
-
-  critical(component: any, message: any): void {}
-
-  error(component: any, message: any): void {}
-
-  warn(component: any, message: any): void {}
-
-  notice(component: any, message: any): void {}
-
-  info(component: any, message: any): void {}
-
-  debug(component: any, message: any): void {}
-
-  trace(component: any, message: any): void {}
+  private log(
+    component: MongoLoggableComponent,
+    severity: SeverityLevel,
+    message: Record<string, any> | string,
+    transform?: LogTransform
+  ): void {
+    if (compareSeverity(severity, this.componentSeverities[component]) <= 0) {
+      let logMessage: Log = { t: new Date(), c: component, s: severity };
+      if (typeof message === 'string') {
+        logMessage.message = message;
+      } else {
+        if (transform) {
+          logMessage = { ...logMessage, ...transform(message) };
+        } else {
+          logMessage = { ...logMessage, ...message };
+        }
+      }
+      this.logDestination.write(logMessage);
+    }
+  }
 
   /**
    * Merges options set through environment variables and the MongoClient, preferring environment

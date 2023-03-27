@@ -386,6 +386,12 @@ describe('class MongoLogger', function () {
             }
           }
         });
+        context('when mongodbLogPath is an object that implements MongoDBLogWritable', function () {
+          it('successfully writes logs to the MongoDBLogWritable');
+        });
+        context('when mongodbLogPath implements nodejs:stream.Writable', function () {
+          it('successfully writes logs to the Writable');
+        });
       });
 
       context(
@@ -518,6 +524,15 @@ describe('class MongoLogger', function () {
 
           logger[severityLevel]('topology', 'message');
           expect(stream.buffer).to.have.lengthOf(0);
+        });
+
+        context('when the log severity is lower than what was configured', function () {
+          it('does not call Loggable.toLog');
+          it('does not write to logDestination');
+        });
+        context('when log severity is equal to or greater than what was configured', function () {
+          it('successfully writes to a newly created Writable');
+          it('successfully writes to a previously used Writable');
         });
       });
     }
