@@ -155,16 +155,6 @@ const socketLeakCheckBeforeAll = function socketLeakCheckBeforeAll() {
   };
 };
 
-const knownSockets = new Set();
-const socketLeakCheckBeforeEach = () => {
-  const sockets: net.Socket[] = (process as any)
-    ._getActiveHandles()
-    .filter(handle => filterHandlesForSockets(handle));
-  for (const socket of sockets) {
-    knownSockets.add(socket[kSocketId]);
-  }
-};
-
 const filterHandlesForSockets = function (handle: any): handle is net.Socket {
   // Stdio are instanceof Socket so look for fd to be null
   return handle?.fd == null && handle instanceof net.Socket && handle?.destroyed !== true;
@@ -174,21 +164,18 @@ const socketLeakCheckAfterEach: Mocha.AsyncFunc = async function socketLeakCheck
   const indent = '  '.repeat(this.currentTest.titlePath().length + 1);
 
   const handles = (process as any)._getActiveHandles();
-  const sockets: net.Socket[] = handles
-    .filter(handle => filterHandlesForSockets(handle))
-    .filter(socket => !knownSockets.has(socket[kSocketId]));
+  const sockets: net.Socket[] = handles.filter(handle => filterHandlesForSockets(handle));
 
   for (const socket of sockets) {
-    const type = socket[Symbol.for('@@mdb.connectionType')];
     console.log(
       chalk.yellow(
-        `${indent}⚡︎ socket of type ${type} with id ${socket[kSocketId]} not destroyed [${socket.localAddress}:${socket.localPort} → ${socket.remoteAddress}:${socket.remotePort}]`
+        `${indent}⚡︎ socket ${socket[kSocketId]} not destroyed [${socket.localAddress}:${socket.localPort} → ${socket.remoteAddress}:${socket.remotePort}]`
       )
     );
   }
 };
 
 const beforeAll = TRACE_SOCKETS ? [socketLeakCheckBeforeAll] : [];
-const beforeEach = [leakCheckerBeforeEach, ...(TRACE_SOCKETS ? [socketLeakCheckBeforeEach] : [])];
+const beforeEach = [leakCheckerBeforeEach];
 const afterEach = [leakCheckerAfterEach, ...(TRACE_SOCKETS ? [socketLeakCheckAfterEach] : [])];
 module.exports = { mochaHooks: { beforeAll, beforeEach, afterEach } };
