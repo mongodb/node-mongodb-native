@@ -138,12 +138,12 @@ describe('GridFS', () => {
       });
 
       context('when passed an ObjectId instance as the filter', () => {
-        it('wraps the objectId in a document with _id as the key', async () => {
+        it('wraps the objectId in a document with _id as the only key', async () => {
           const oid = new ObjectId();
           await bucket.find(oid).toArray();
           expect(findsStarted).to.have.lengthOf(1);
           expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
-          expect(findsStarted[0].filter).to.have.all.keys(['_id']);
+          expect(findsStarted[0].filter).to.have.all.keys('_id');
         });
       });
     });

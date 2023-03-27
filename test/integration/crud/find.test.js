@@ -2596,24 +2596,24 @@ describe('Find', function () {
     });
 
     context('find(oid)', () => {
-      it('wraps the objectId in a document with _id as the key', async () => {
+      it('wraps the objectId in a document with _id as the only key', async () => {
         const collection = client.db('test').collection('test');
         const oid = new ObjectId();
         await collection.find(oid).toArray();
         expect(findsStarted).to.have.lengthOf(1);
         expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
-        expect(findsStarted[0].filter).to.have.all.keys(['_id']);
+        expect(findsStarted[0].filter).to.have.all.keys('_id');
       });
     });
 
     context('findOne(oid)', () => {
-      it('wraps the objectId in a document with _id as the key', async () => {
+      it('wraps the objectId in a document with _id as the only key', async () => {
         const collection = client.db('test').collection('test');
         const oid = new ObjectId();
         await collection.findOne(oid);
         expect(findsStarted).to.have.lengthOf(1);
         expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
-        expect(findsStarted[0].filter).to.have.all.keys(['_id']);
+        expect(findsStarted[0].filter).to.have.all.keys('_id');
       });
     });
   });
