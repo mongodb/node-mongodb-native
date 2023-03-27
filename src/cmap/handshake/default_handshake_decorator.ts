@@ -35,7 +35,7 @@ export class DefaultHandshakeDecorator implements HandshakeDecorator {
     } else {
       handshake[LEGACY_HELLO_COMMAND] = 1;
     }
-    // Always send helloOk in the handhsake.
+    // Always send helloOk in the handshake.
     handshake.helloOk = true;
     return handshake;
   }

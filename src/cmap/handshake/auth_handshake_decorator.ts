@@ -18,10 +18,10 @@ export class AuthHandshakeDecorator implements HandshakeDecorator {
       if (credentials.mechanism === AuthMechanism.MONGODB_DEFAULT && credentials.username) {
         handshake.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
         const provider = getProvider(AuthMechanism.MONGODB_SCRAM_SHA256);
-        await provider.prepare(handshake, context);
+        return provider.prepare(handshake, context);
       } else {
         const provider = getProvider(credentials.mechanism);
-        await provider.prepare(handshake, context);
+        return provider.prepare(handshake, context);
       }
     }
     return handshake;

@@ -128,7 +128,6 @@ export * from '../src/cmap/handshake/default_handshake_decorator';
 export * from '../src/cmap/handshake/handshake_decorator';
 export * from '../src/cmap/handshake/handshake_document';
 export * from '../src/cmap/handshake/handshake_generator';
-export * from '../src/cmap/handshake/monitor_handshake_decorator';
 export * from '../src/cmap/message_stream';
 export * from '../src/cmap/metrics';
 export * from '../src/cmap/stream_description';
