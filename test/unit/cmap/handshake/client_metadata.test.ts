@@ -36,7 +36,7 @@ describe('ClientMetadata [module]', function () {
       context('when driver info is not provided', function () {
         const metadata = makeClientMetadata({});
 
-        it('appends the driver info to the metadata', function () {
+        it('does not append the driver info to the metadata', function () {
           expect(metadata).to.deep.equal({
             driver: {
               name: 'nodejs',

@@ -5,9 +5,11 @@ import * as sinon from 'sinon';
 import {
   AuthHandshakeDecorator,
   AuthMechanism,
+  AUTH_PROVIDERS,
   Connection,
   HostAddress,
-  MongoCredentials
+  MongoCredentials,
+  MongoInvalidArgumentError
 } from '../../../mongodb';
 
 describe('AuthHandshakeDecorator', function () {
@@ -36,7 +38,45 @@ describe('AuthHandshakeDecorator', function () {
   };
 
   describe('#decorate', function () {
+    context('when no credentials are provided', () => {
+      const authContext = {
+        connection: mockConnection,
+        options: options
+      };
+      const decorator = new AuthHandshakeDecorator();
+
+      it('does not modify the handshake doc', async function () {
+        const handshake = await decorator.decorate({ hello: 1 }, authContext);
+        expect(handshake).to.deep.equal({ hello: 1 });
+      });
+    })
+
+    context('when an invalid mechanism is provided', () => {
+      const authContext = {
+        credentials: new MongoCredentials({
+          username: 'foo',
+          password: 'bar',
+          mechanism: 'invalid mechanism',
+          source: 'invalid mechanism',
+          mechanismProperties: {}
+        }),
+        connection: mockConnection,
+        options: options
+      };
+      const decorator = new AuthHandshakeDecorator();
+
+      it('returns the handshake with default auth', async function () {
+        const error = await decorator.decorate({}, authContext).catch(e => e);
+        expect(error).to.be.instanceOf(MongoInvalidArgumentError)
+          .to.match(/No AuthProvider for/);
+      });
+    })
+
     context('when no mechanism provided', function () {
+      after(() => sinon.restore());
+      const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256)!;
+      const providerSpy = sinon.stub(provider, 'prepare');
+      providerSpy.callsFake(async (doc, _) => doc)
       const authContext = {
         credentials: new MongoCredentials({
           username: 'foo',
@@ -51,6 +91,7 @@ describe('AuthHandshakeDecorator', function () {
 
       it('returns the handshake with default auth', async function () {
         const handshake = await decorator.decorate({}, authContext);
+        expect(providerSpy).to.have.been.called;
         expect(handshake).to.deep.equal({ saslSupportedMechs: '$external.foo' });
       });
     });
