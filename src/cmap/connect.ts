@@ -3,6 +3,7 @@ import * as net from 'net';
 import { SocksClient } from 'socks';
 import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
 import * as tls from 'tls';
+import { promisify } from 'util';
 
 import type { Document } from '../bson';
 import { Int32 } from '../bson';
@@ -72,6 +73,8 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
     );
   });
 }
+
+export const connectAsync = promisify(connect);
 
 function checkSupportedServer(hello: Document, options: ConnectionOptions) {
   const serverVersionHighEnough =

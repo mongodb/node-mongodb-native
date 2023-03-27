@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { Document, Long } from '../bson';
-import { connect } from '../cmap/connect';
+import { connect, connectAsync } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
@@ -82,6 +82,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   [kMonitorId]?: MonitorInterval;
   [kRTTPinger]?: RTTPinger;
+
+  connectPromise?: Promise<Connection | undefined>;
 
   get connection(): Connection | undefined {
     return this[kConnection];
@@ -200,6 +202,7 @@ function resetMonitorState(monitor: Monitor) {
 
   monitor[kRTTPinger]?.close();
   monitor[kRTTPinger] = undefined;
+  monitor.connectPromise = undefined;
 
   monitor[kCancellationToken].emit('cancel');
 
@@ -300,34 +303,44 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     return;
   }
 
-  // connecting does an implicit `hello`
-  connect(monitor.connectOptions, (err, conn) => {
-    if (err) {
-      monitor[kConnection] = undefined;
+  if (monitor.connectPromise == null) {
+    monitor.connectPromise = connectAsync(monitor.connectOptions);
+  }
 
-      failureHandler(err);
-      return;
-    }
-
-    if (conn) {
+  monitor.connectPromise.then(
+    conn => {
       // Tell the connection that we are using the streaming protocol so that the
       // connection's message stream will only read the last hello on the buffer.
-      conn.isMonitoringConnection = true;
+      conn!.isMonitoringConnection = true;
 
       if (isInCloseState(monitor)) {
-        conn.destroy({ force: true });
+        conn!.destroy({ force: true });
         return;
       }
 
       monitor[kConnection] = conn;
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, calculateDurationInMs(start), conn.hello)
+        new ServerHeartbeatSucceededEvent(
+          monitor.address,
+          calculateDurationInMs(start),
+          conn!.hello
+        )
       );
 
-      callback(undefined, conn.hello);
+      // monitor.connectPromise = undefined;
+
+      callback(undefined, conn!.hello);
+    },
+    err => {
+      if (!err) {
+        return;
+      }
+      monitor[kConnection] = undefined;
+
+      failureHandler(err);
     }
-  });
+  );
 }
 
 function monitorServer(monitor: Monitor) {
