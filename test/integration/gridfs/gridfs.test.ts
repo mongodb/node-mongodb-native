@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { CommandStartedEvent, type Db, GridFSBucket, type MongoClient } from '../../mongodb';
+import {
+  CommandStartedEvent,
+  type Db,
+  GridFSBucket,
+  type MongoClient,
+  ObjectId
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('GridFS', () => {
@@ -114,6 +120,31 @@ describe('GridFS', () => {
       // But since it found them, we didn't attempt creation
       const createIndexes = commandStartedEvents.filter(e => e.commandName === 'createIndexes');
       expect(createIndexes).to.have.lengthOf(0);
+    });
+
+    context('find(oid)', () => {
+      let findsStarted;
+
+      beforeEach(async function () {
+        findsStarted = [];
+        client.on('commandStarted', ev => {
+          if (ev.commandName === 'find') findsStarted.push(ev.command);
+        });
+      });
+
+      afterEach(async function () {
+        findsStarted = undefined;
+        await client.close();
+      });
+
+      context('when passed an ObjectId instance as the filter', () => {
+        it('wraps the objectId in a document with _id as the key', async () => {
+          const oid = new ObjectId();
+          await bucket.find(oid).toArray();
+          expect(findsStarted).to.have.lengthOf(1);
+          expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+        });
+      });
     });
   });
 });

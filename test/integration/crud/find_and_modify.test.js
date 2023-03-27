@@ -4,6 +4,8 @@ const { format: f } = require('util');
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
 
+const { ObjectId, MongoServerError } = require('../../mongodb');
+
 describe('Find and Modify', function () {
   before(function () {
     return setupDatabase(this.configuration);
@@ -317,5 +319,58 @@ describe('Find and Modify', function () {
       .catch(error => error);
     expect(error.message).to.match(/must not contain atomic operators/);
     await client.close();
+  });
+
+  context('when passed an ObjectId instance as the filter', () => {
+    let client;
+    let findAndModifyStarted;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      findAndModifyStarted = [];
+      client.on('commandStarted', ev => {
+        if (ev.commandName === 'findAndModify') findAndModifyStarted.push(ev.command);
+      });
+    });
+
+    afterEach(async function () {
+      findAndModifyStarted = undefined;
+      await client.close();
+    });
+
+    context('findOneAndDelete(oid)', () => {
+      it('sets the query to be the ObjectId instance', async () => {
+        const collection = client.db('test').collection('test');
+        const oid = new ObjectId();
+        const error = await collection.findOneAndDelete(oid).catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(findAndModifyStarted).to.have.lengthOf(1);
+        expect(findAndModifyStarted[0]).to.have.property('query', oid);
+      });
+    });
+
+    context('findOneAndReplace(oid)', () => {
+      it('sets the query to be the ObjectId instance', async () => {
+        const collection = client.db('test').collection('test');
+        const oid = new ObjectId();
+        const error = await collection.findOneAndReplace(oid, {}).catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(findAndModifyStarted).to.have.lengthOf(1);
+        expect(findAndModifyStarted[0]).to.have.property('query', oid);
+      });
+    });
+
+    context('findOneAndUpdate(oid)', () => {
+      it('sets the query to be the ObjectId instance', async () => {
+        const collection = client.db('test').collection('test');
+        const oid = new ObjectId();
+        const error = await collection
+          .findOneAndUpdate(oid, { $set: { a: 1 } })
+          .catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(findAndModifyStarted).to.have.lengthOf(1);
+        expect(findAndModifyStarted[0]).to.have.property('query', oid);
+      });
+    });
   });
 });
