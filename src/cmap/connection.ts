@@ -47,7 +47,6 @@ import {
 import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
 import type { ClientMetadata } from './handshake/client_metadata';
-import type { HandshakeGenerator } from './handshake/handshake_generator';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
@@ -135,8 +134,6 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
-  /** @internal */
-  handshakeGenerator?: HandshakeGenerator;
 }
 
 /** @internal */

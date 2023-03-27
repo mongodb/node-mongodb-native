@@ -197,10 +197,10 @@ async function performInitialHandshake(
 export async function prepareHandshakeDocument(
   authContext: AuthContext
 ): Promise<HandshakeDocument> {
-  const { options } = authContext;
-  const generator = options.handshakeGenerator
-    ? options.handshakeGenerator
-    : new HandshakeGenerator([new DefaultHandshakeDecorator(), new AuthHandshakeDecorator()]);
+  const generator = new HandshakeGenerator([
+    new DefaultHandshakeDecorator(),
+    new AuthHandshakeDecorator()
+  ]);
   return generator.generate(authContext);
 }
 
