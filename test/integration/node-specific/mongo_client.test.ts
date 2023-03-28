@@ -516,6 +516,65 @@ describe('class MongoClient', function () {
     );
   });
 
+  context('concurrent #connect()', () => {
+    let client: MongoClient;
+    let topologyOpenEvents;
+
+    /** Keep track number of call to client connect to close as many as connect (otherwise leak_checker hook will failed) */
+    let clientConnectCounter: number;
+
+    /**
+     * Wrap the connect method of the client to keep track
+     * of number of times connect is called
+     */
+    async function clientConnect() {
+      if (!client) {
+        return;
+      }
+      clientConnectCounter++;
+      return client.connect();
+    }
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+      topologyOpenEvents = [];
+      clientConnectCounter = 0;
+      client.on('open', event => topologyOpenEvents.push(event));
+    });
+
+    afterEach(async function () {
+      // close `clientConnectCounter` times
+      const clientClosePromises = Array.from({ length: clientConnectCounter }, () =>
+        client.close()
+      );
+      await Promise.all(clientClosePromises);
+    });
+
+    it('parallel client connect calls only create one topology', async function () {
+      await Promise.all([clientConnect(), clientConnect(), clientConnect()]);
+
+      expect(topologyOpenEvents).to.have.lengthOf(1);
+      expect(client.topology?.isConnected()).to.be.true;
+    });
+
+    it('when connect rejects lock is released regardless', async function () {
+      const internalConnectStub = sinon.stub(client, '_connect' as keyof MongoClient);
+      internalConnectStub.onFirstCall().rejects(new Error('cannot connect'));
+
+      // first call rejected to simulate a connection failure
+      const error = await clientConnect().catch(error => error);
+      expect(error).to.match(/cannot connect/);
+
+      internalConnectStub.restore();
+
+      // second call should connect
+      await clientConnect();
+
+      expect(topologyOpenEvents).to.have.lengthOf(1);
+      expect(client.topology?.isConnected()).to.be.true;
+    });
+  });
+
   context('#close()', () => {
     let client: MongoClient;
     let db: Db;

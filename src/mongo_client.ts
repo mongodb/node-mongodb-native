@@ -343,6 +343,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   topology?: Topology;
   /** @internal */
   readonly mongoLogger: MongoLogger;
+  /** @internal */
+  private connectionLock?: Promise<this>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
