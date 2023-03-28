@@ -30,7 +30,6 @@ export interface MessageStreamOptions extends DuplexOptions {
 export interface OperationDescription extends BSONSerializeOptions {
   started: number;
   cb: Callback<Document>;
-  command: boolean;
   documentsReturnedIn?: string;
   noResponse: boolean;
   raw: boolean;

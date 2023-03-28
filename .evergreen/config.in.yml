@@ -94,6 +94,15 @@ functions:
           - .evergreen/run-kms-servers.sh
         env:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        working_dir: src
+        binary: bash
+        args:
+          - .evergreen/run-azure-kms-mock-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
 
   "bootstrap oidc":
     - command: ec2.assume_role
@@ -1136,6 +1145,46 @@ tasks:
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
 
+
+  - name: "test-azurekms-task"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        type: setup
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - src/.evergreen/copy-driver-to-azure.sh
+      - command: subprocess.exec
+        type: test
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            AZUREKMS_CMD: "env EXPECTED_AZUREKMS_OUTCOME=success bash src/.evergreen/run-azure-kms-tests.sh"
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh
+
+  - name: "test-azurekms-fail-task"
+    commands:
+      - func: "install dependencies"
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+          AUTH: noauth
+      - command: subprocess.exec
+        type: test
+        params:
+          binary: bash
+          env:
+            EXPECTED_AZUREKMS_OUTCOME: "failure"
+          args:
+            - src/.evergreen/run-azure-kms-tests.sh
+
+
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -1207,6 +1256,33 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
     tasks:
       - test-gcpkms-task
+
+  - name: test_azurekms_task_group
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800 # 30 minutes
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: "src"
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/setup-azure-vm.sh
+      - command: expansions.update
+        # Load AZUREKMS_VMNAME into the expansions.
+        params:
+          file: src/testazurekms-expansions.yml
+
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
+    tasks:
+      - test-azurekms-task
 
 pre:
   - func: "fetch source"

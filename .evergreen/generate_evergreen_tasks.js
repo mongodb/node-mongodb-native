@@ -456,9 +456,8 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${
-    versions.find(version => version.codeName === LATEST_LTS).versionNumber
-  }`,
+  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber
+    }`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_NAME: LATEST_LTS,
@@ -596,7 +595,7 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = [];
 
-const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c';
+const FLE_PINNED_COMMIT = 'cd7e938619aa52ce652d13690780df5f383bbef0';
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
@@ -666,6 +665,14 @@ BUILD_VARIANTS.push({
   display_name: 'GCP KMS Test',
   run_on: 'debian11-small',
   tasks: ['test_gcpkms_task_group', 'test-gcpkms-fail-task']
+});
+
+BUILD_VARIANTS.push({
+  name: 'debian11-test-azure-kms',
+  display_name: 'Azure KMS Test',
+  run_on: 'debian11-small',
+  batchtime: 20160,
+  tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
 BUILD_VARIANTS.push({

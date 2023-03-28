@@ -1,18 +1,24 @@
 import type { Document } from '../../bson';
 import { MongoRuntimeError } from '../../error';
-import type { Callback, ClientMetadataOptions } from '../../utils';
+import type { ClientMetadataOptions } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
 
+/** @internal */
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
-/** Context used during authentication */
+/**
+ * Context used during authentication
+ * @internal
+ */
 export class AuthContext {
   /** The connection to authenticate */
   connection: Connection;
   /** The credentials to use for authentication */
   credentials?: MongoCredentials;
+  /** If the context is for reauthentication. */
+  reauthenticating = false;
   /** The options passed to the `connect` method */
   options: AuthContextOptions;
 
@@ -32,29 +38,40 @@ export class AuthContext {
   }
 }
 
-export class AuthProvider {
+export abstract class AuthProvider {
   /**
    * Prepare the handshake document before the initial handshake.
    *
    * @param handshakeDoc - The document used for the initial handshake on a connection
    * @param authContext - Context for authentication flow
    */
-  prepare(
+  async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback<HandshakeDocument>
-  ): void {
-    callback(undefined, handshakeDoc);
+    _authContext: AuthContext
+  ): Promise<HandshakeDocument> {
+    return handshakeDoc;
   }
 
   /**
    * Authenticate
    *
    * @param context - A shared context for authentication flow
-   * @param callback - The callback to return the result from the authentication
    */
-  auth(context: AuthContext, callback: Callback): void {
-    // TODO(NODE-3483): Replace this with MongoMethodOverrideError
-    callback(new MongoRuntimeError('`auth` method must be overridden by subclass'));
+  abstract auth(context: AuthContext): Promise<void>;
+
+  /**
+   * Reauthenticate.
+   * @param context - The shared auth context.
+   */
+  async reauth(context: AuthContext): Promise<void> {
+    if (context.reauthenticating) {
+      throw new MongoRuntimeError('Reauthentication already in progress.');
+    }
+    try {
+      context.reauthenticating = true;
+      await this.auth(context);
+    } finally {
+      context.reauthenticating = false;
+    }
   }
 }

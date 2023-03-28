@@ -403,7 +403,7 @@ export function parseOptions(
     ) {
       // If authSource was explicitly given and its incorrect, we error
       throw new MongoParseError(
-        `${mongoOptions.credentials} can only have authSource set to '$external'`
+        `authMechanism ${mongoOptions.credentials.mechanism} requires an authSource of '$external'`
       );
     }
 
@@ -531,7 +531,8 @@ export function parseOptions(
       MONGODB_LOG_CONNECTION: process.env.MONGODB_LOG_CONNECTION,
       MONGODB_LOG_ALL: process.env.MONGODB_LOG_ALL,
       MONGODB_LOG_MAX_DOCUMENT_LENGTH: process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH,
-      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH
+      MONGODB_LOG_PATH: process.env.MONGODB_LOG_PATH,
+      ...mongoOptions[Symbol.for('@@mdb.internalLoggerConfig')]
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath
@@ -1282,7 +1283,10 @@ export const OPTIONS = {
   index: { type: 'any' },
   // Legacy Options, these are unused but left here to avoid errors with CSFLE lib
   useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
-  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor
+  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor,
+  // MongoLogger
+  // TODO(NODE-4849): Tighten the type of mongodbLogPath
+  mongodbLogPath: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(

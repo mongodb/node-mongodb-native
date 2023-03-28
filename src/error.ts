@@ -58,7 +58,8 @@ export const MONGODB_ERROR_CODES = Object.freeze({
   IllegalOperation: 20,
   MaxTimeMSExpired: 50,
   UnknownReplWriteConcern: 79,
-  UnsatisfiableWriteConcern: 100
+  UnsatisfiableWriteConcern: 100,
+  Reauthenticate: 391
 } as const);
 
 // From spec@https://github.com/mongodb/specifications/blob/f93d78191f3db2898a59013a7ed5650352ef6da8/source/change-streams/change-streams.rst#resumable-error
@@ -96,7 +97,7 @@ export const MongoErrorLabel = Object.freeze({
 } as const);
 
 /** @public */
-export type MongoErrorLabel = typeof MongoErrorLabel[keyof typeof MongoErrorLabel];
+export type MongoErrorLabel = (typeof MongoErrorLabel)[keyof typeof MongoErrorLabel];
 
 /** @public */
 export interface ErrorDescription extends Document {

@@ -237,6 +237,18 @@ describe('Connection String', function () {
     expect(options).to.not.have.property('credentials');
   });
 
+  for (const mechanism of ['GSSAPI', 'MONGODB-X509']) {
+    context(`when the authMechanism is ${mechanism} and authSource is NOT $external`, function () {
+      it('throws a MongoParseError', function () {
+        expect(() =>
+          parseOptions(`mongodb+srv://hostname/?authMechanism=${mechanism}&authSource=invalid`)
+        )
+          .to.throw(MongoParseError)
+          .to.match(/requires an authSource of '\$external'/);
+      });
+    });
+  }
+
   it('should omit credentials and not throw a MongoAPIError if the only auth related option is authSource', async () => {
     // The error we're looking to **not** see is
     // `new MongoInvalidArgumentError('No AuthProvider for ${credentials.mechanism} defined.')`

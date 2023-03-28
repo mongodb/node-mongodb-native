@@ -16,8 +16,11 @@ import {
   CONNECTION_READY
 } from '../constants';
 import {
+  AnyError,
+  MONGODB_ERROR_CODES,
   MongoError,
   MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
   MongoNetworkError,
   MongoRuntimeError,
   MongoServerError
@@ -25,7 +28,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Callback, eachAsync, List, makeCounter } from '../utils';
-import { connect } from './connect';
+import { AUTH_PROVIDERS, connect } from './connect';
 import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
 import {
   ConnectionCheckedInEvent,
@@ -135,7 +138,7 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
-  [kPoolState]: typeof PoolState[keyof typeof PoolState];
+  [kPoolState]: (typeof PoolState)[keyof typeof PoolState];
   [kServer]: Server;
   [kConnections]: List<Connection>;
   [kPending]: number;
@@ -537,32 +540,30 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   withConnection(
     conn: Connection | undefined,
     fn: WithConnectionCallback,
-    callback?: Callback<Connection>
+    callback: Callback<Connection>
   ): void {
     if (conn) {
       // use the provided connection, and do _not_ check it in after execution
       fn(undefined, conn, (fnErr, result) => {
-        if (typeof callback === 'function') {
-          if (fnErr) {
-            callback(fnErr);
-          } else {
-            callback(undefined, result);
-          }
+        if (fnErr) {
+          return this.withReauthentication(fnErr, conn, fn, callback);
         }
+        callback(undefined, result);
       });
-
       return;
     }
 
     this.checkOut((err, conn) => {
       // don't callback with `err` here, we might want to act upon it inside `fn`
       fn(err as MongoError, conn, (fnErr, result) => {
-        if (typeof callback === 'function') {
-          if (fnErr) {
-            callback(fnErr);
+        if (fnErr) {
+          if (conn) {
+            this.withReauthentication(fnErr, conn, fn, callback);
           } else {
-            callback(undefined, result);
+            callback(fnErr);
           }
+        } else {
+          callback(undefined, result);
         }
 
         if (conn) {
@@ -570,6 +571,66 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         }
       });
     });
+  }
+
+  private withReauthentication(
+    fnErr: AnyError,
+    conn: Connection,
+    fn: WithConnectionCallback,
+    callback: Callback<Connection>
+  ) {
+    if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
+      this.reauthenticate(conn, fn, (error, res) => {
+        if (error) {
+          return callback(error);
+        }
+        callback(undefined, res);
+      });
+    } else {
+      callback(fnErr);
+    }
+  }
+
+  /**
+   * Reauthenticate on the same connection and then retry the operation.
+   */
+  private reauthenticate(
+    connection: Connection,
+    fn: WithConnectionCallback,
+    callback: Callback
+  ): void {
+    const authContext = connection.authContext;
+    if (!authContext) {
+      return callback(new MongoRuntimeError('No auth context found on connection.'));
+    }
+    const credentials = authContext.credentials;
+    if (!credentials) {
+      return callback(
+        new MongoMissingCredentialsError(
+          'Connection is missing credentials when asked to reauthenticate'
+        )
+      );
+    }
+    const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello || undefined);
+    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    if (!provider) {
+      return callback(
+        new MongoMissingCredentialsError(
+          `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
+        )
+      );
+    }
+    provider.reauth(authContext).then(
+      () => {
+        fn(undefined, connection, (fnErr, fnResult) => {
+          if (fnErr) {
+            return callback(fnErr);
+          }
+          callback(undefined, fnResult);
+        });
+      },
+      error => callback(error)
+    );
   }
 
   /** Clear the min pool size timer */

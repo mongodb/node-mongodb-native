@@ -1,4 +1,4 @@
-import { type Document, Binary, BSON } from 'bson';
+import { Binary, BSON, type Document } from 'bson';
 
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
@@ -58,7 +58,11 @@ export class CallbackWorkflow implements Workflow {
    *   - put the new entry in the cache.
    *   - execute step two.
    */
-  async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+  async execute(
+    connection: Connection,
+    credentials: MongoCredentials,
+    reauthenticate = false
+  ): Promise<Document> {
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
 
@@ -69,8 +73,8 @@ export class CallbackWorkflow implements Workflow {
       refresh || null
     );
     if (entry) {
-      // Check if the entry is not expired.
-      if (entry.isValid()) {
+      // Check if the entry is not expired and if we are reauthenticating.
+      if (!reauthenticate && entry.isValid()) {
         // Skip step one and execute the step two saslContinue.
         try {
           const result = await finishAuth(entry.tokenResult, undefined, connection, credentials);

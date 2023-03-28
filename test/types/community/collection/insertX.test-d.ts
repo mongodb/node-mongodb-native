@@ -44,7 +44,7 @@ type TestModelWithId = TestModel & { _id: ObjectId };
 const collection = db.collection<TestModel>('testCollection');
 
 const testDoc: OptionalId<TestModelWithId> = { stringField: 'a', fruitTags: [] };
-expectType<Parameters<typeof collection['insertOne']>[0]>(testDoc);
+expectType<Parameters<(typeof collection)['insertOne']>[0]>(testDoc);
 
 const resultOne = await collection.insertOne({
   stringField: 'hola',

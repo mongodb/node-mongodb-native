@@ -6,7 +6,7 @@ import type { MongoClient } from '../../mongodb';
 import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
 import { ejson } from '../utils';
 import { EntitiesMap, UnifiedMongoClient } from './entities';
-import { matchesEvents } from './match';
+import { compareLogs, matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';
 import { isAnyRequirementSatisfied, patchVersion, zip } from './unified-utils';
@@ -216,6 +216,16 @@ async function runUnifiedTest(
           testClient!.getCapturedEvents(eventType ?? 'command'),
           entities
         );
+      }
+    }
+
+    if (test.expectLogMessages) {
+      for (const expectedLogsForClient of test.expectLogMessages) {
+        const clientId = expectedLogsForClient.client;
+        const testClient = clientList.get(clientId);
+
+        expect(testClient, `No client entity found with id ${clientId}`).to.exist;
+        compareLogs(expectedLogsForClient.messages, testClient!.collectedLogs, entities);
       }
     }
 

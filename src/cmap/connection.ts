@@ -37,6 +37,7 @@ import {
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
+import type { AuthContext } from './auth/auth_provider';
 import type { MongoCredentials } from './auth/mongo_credentials';
 import {
   CommandFailedEvent,
@@ -74,7 +75,6 @@ const INVALID_QUEUE_SIZE = 'Connection internal queue contains more than 1 opera
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
-  command?: boolean;
   secondaryOk?: boolean;
   /** Specify read preference if command supports it */
   readPreference?: ReadPreferenceLike;
@@ -127,7 +127,6 @@ export interface ConnectionOptions
   noDelay?: boolean;
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
-
   metadata: ClientMetadata;
 }
 
@@ -165,6 +164,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     cmd: Document,
     options: CommandOptions | undefined
   ) => Promise<Document>;
+  /** @internal */
+  authContext?: AuthContext;
 
   /**@internal */
   [kDelayedTimeoutId]: NodeJS.Timeout | null;
@@ -401,22 +402,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
       }
 
-      if (operationDescription.command) {
-        if (document.writeConcernError) {
-          callback(new MongoWriteConcernError(document.writeConcernError, document), document);
-          return;
-        }
+      if (document.writeConcernError) {
+        callback(new MongoWriteConcernError(document.writeConcernError, document), document);
+        return;
+      }
 
-        if (document.ok === 0 || document.$err || document.errmsg || document.code) {
-          callback(new MongoServerError(document));
-          return;
-        }
-      } else {
-        // Pre 3.2 support
-        if (document.ok === 0 || document.$err || document.errmsg) {
-          callback(new MongoServerError(document));
-          return;
-        }
+      if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+        callback(new MongoServerError(document));
+        return;
       }
     }
 
@@ -538,7 +531,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const commandOptions: Document = Object.assign(
       {
-        command: true,
         numberToSkip: 0,
         numberToReturn: -1,
         checkKeys: false,
@@ -678,7 +670,6 @@ function write(
     session: options.session,
     noResponse: typeof options.noResponse === 'boolean' ? options.noResponse : false,
     documentsReturnedIn: options.documentsReturnedIn,
-    command: !!options.command,
 
     // for BSON parsing
     useBigInt64: typeof options.useBigInt64 === 'boolean' ? options.useBigInt64 : false,

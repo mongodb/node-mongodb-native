@@ -15,7 +15,6 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
-  MongoServerError,
   needsRetryableWriteLabel
 } from '../error';
 import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
@@ -28,7 +27,7 @@ import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
-import { Connection, ConnectionOptions, CryptoConnection } from './connection';
+import { CommandOptions, Connection, ConnectionOptions, CryptoConnection } from './connection';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
@@ -36,7 +35,8 @@ import {
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
 
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
+/** @internal */
+export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
   [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
   [AuthMechanism.MONGODB_CR, new MongoCR()],
   [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
@@ -60,7 +60,16 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
     if (options.autoEncrypter) {
       ConnectionType = CryptoConnection;
     }
-    performInitialHandshake(new ConnectionType(socket, options), options, callback);
+
+    const connection = new ConnectionType(socket, options);
+
+    performInitialHandshake(connection, options).then(
+      () => callback(undefined, connection),
+      error => {
+        connection.destroy({ force: false });
+        callback(error);
+      }
+    );
   });
 }
 
@@ -91,119 +100,89 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
   return new MongoCompatibilityError(message);
 }
 
-function performInitialHandshake(
+async function performInitialHandshake(
   conn: Connection,
-  options: ConnectionOptions,
-  _callback: Callback
-) {
-  const callback: Callback<Document> = function (err, ret) {
-    if (err && conn) {
-      conn.destroy({ force: false });
-    }
-    _callback(err, ret);
-  };
-
+  options: ConnectionOptions
+): Promise<void> {
   const credentials = options.credentials;
+
   if (credentials) {
     if (
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
       !AUTH_PROVIDERS.get(credentials.mechanism)
     ) {
-      callback(
-        new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`)
-      );
-      return;
+      throw new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`);
     }
   }
 
   const authContext = new AuthContext(conn, credentials, options);
-  prepareHandshakeDocument(authContext, (err, handshakeDoc) => {
-    if (err || !handshakeDoc) {
-      return callback(err);
+  conn.authContext = authContext;
+
+  const handshakeDoc = await prepareHandshakeDocument(authContext);
+
+  // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
+  const handshakeOptions: CommandOptions = { ...options };
+  if (typeof options.connectTimeoutMS === 'number') {
+    // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
+    handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
+  }
+
+  const start = new Date().getTime();
+  const response = await conn.commandAsync(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
+
+  if (!('isWritablePrimary' in response)) {
+    // Provide hello-style response document.
+    response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
+  }
+
+  if (response.helloOk) {
+    conn.helloOk = true;
+  }
+
+  const supportedServerErr = checkSupportedServer(response, options);
+  if (supportedServerErr) {
+    throw supportedServerErr;
+  }
+
+  if (options.loadBalanced) {
+    if (!response.serviceId) {
+      throw new MongoCompatibilityError(
+        'Driver attempted to initialize in load balancing mode, ' +
+          'but the server does not support this mode.'
+      );
+    }
+  }
+
+  // NOTE: This is metadata attached to the connection while porting away from
+  //       handshake being done in the `Server` class. Likely, it should be
+  //       relocated, or at very least restructured.
+  conn.hello = response;
+  conn.lastHelloMS = new Date().getTime() - start;
+
+  if (!response.arbiterOnly && credentials) {
+    // store the response on auth context
+    authContext.response = response;
+
+    const resolvedCredentials = credentials.resolveAuthMechanism(response);
+    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    if (!provider) {
+      throw new MongoInvalidArgumentError(
+        `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
+      );
     }
 
-    const handshakeOptions: Document = Object.assign({}, options);
-    if (typeof options.connectTimeoutMS === 'number') {
-      // The handshake technically is a monitoring check, so its socket timeout should be connectTimeoutMS
-      handshakeOptions.socketTimeoutMS = options.connectTimeoutMS;
+    try {
+      await provider.auth(authContext);
+    } catch (error) {
+      if (error instanceof MongoError) {
+        error.addErrorLabel(MongoErrorLabel.HandshakeError);
+        if (needsRetryableWriteLabel(error, response.maxWireVersion)) {
+          error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+        }
+      }
+      throw error;
     }
-
-    const start = new Date().getTime();
-    conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions, (err, response) => {
-      if (err) {
-        callback(err);
-        return;
-      }
-
-      if (response?.ok === 0) {
-        callback(new MongoServerError(response));
-        return;
-      }
-
-      if (!('isWritablePrimary' in response)) {
-        // Provide hello-style response document.
-        response.isWritablePrimary = response[LEGACY_HELLO_COMMAND];
-      }
-
-      if (response.helloOk) {
-        conn.helloOk = true;
-      }
-
-      const supportedServerErr = checkSupportedServer(response, options);
-      if (supportedServerErr) {
-        callback(supportedServerErr);
-        return;
-      }
-
-      if (options.loadBalanced) {
-        if (!response.serviceId) {
-          return callback(
-            new MongoCompatibilityError(
-              'Driver attempted to initialize in load balancing mode, ' +
-                'but the server does not support this mode.'
-            )
-          );
-        }
-      }
-
-      // NOTE: This is metadata attached to the connection while porting away from
-      //       handshake being done in the `Server` class. Likely, it should be
-      //       relocated, or at very least restructured.
-      conn.hello = response;
-      conn.lastHelloMS = new Date().getTime() - start;
-
-      if (!response.arbiterOnly && credentials) {
-        // store the response on auth context
-        authContext.response = response;
-
-        const resolvedCredentials = credentials.resolveAuthMechanism(response);
-        const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
-        if (!provider) {
-          return callback(
-            new MongoInvalidArgumentError(
-              `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
-            )
-          );
-        }
-        provider.auth(authContext, err => {
-          if (err) {
-            if (err instanceof MongoError) {
-              err.addErrorLabel(MongoErrorLabel.HandshakeError);
-              if (needsRetryableWriteLabel(err, response.maxWireVersion)) {
-                err.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-              }
-            }
-            return callback(err);
-          }
-          callback(undefined, conn);
-        });
-
-        return;
-      }
-
-      callback(undefined, conn);
-    });
-  });
+  }
 }
 
 export interface HandshakeDocument extends Document {
@@ -224,10 +203,9 @@ export interface HandshakeDocument extends Document {
  *
  * This function is only exposed for testing purposes.
  */
-export function prepareHandshakeDocument(
-  authContext: AuthContext,
-  callback: Callback<HandshakeDocument>
-) {
+export async function prepareHandshakeDocument(
+  authContext: AuthContext
+): Promise<HandshakeDocument> {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
   const { serverApi } = authContext.connection;
@@ -251,23 +229,19 @@ export function prepareHandshakeDocument(
       const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256);
       if (!provider) {
         // This auth mechanism is always present.
-        return callback(
-          new MongoInvalidArgumentError(
-            `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
-          )
+        throw new MongoInvalidArgumentError(
+          `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
         );
       }
-      return provider.prepare(handshakeDoc, authContext, callback);
+      return provider.prepare(handshakeDoc, authContext);
     }
     const provider = AUTH_PROVIDERS.get(credentials.mechanism);
     if (!provider) {
-      return callback(
-        new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`)
-      );
+      throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
-    return provider.prepare(handshakeDoc, authContext, callback);
+    return provider.prepare(handshakeDoc, authContext);
   }
-  callback(undefined, handshakeDoc);
+  return handshakeDoc;
 }
 
 /** @public */
@@ -349,7 +323,7 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
 }
 
 const SOCKET_ERROR_EVENT_LIST = ['error', 'close', 'timeout', 'parseError'] as const;
-type ErrorHandlerEventName = typeof SOCKET_ERROR_EVENT_LIST[number] | 'cancel';
+type ErrorHandlerEventName = (typeof SOCKET_ERROR_EVENT_LIST)[number] | 'cancel';
 const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stream>) {

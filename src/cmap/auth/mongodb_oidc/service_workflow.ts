@@ -1,4 +1,4 @@
-import { type Document, BSON } from 'bson';
+import { BSON, type Document } from 'bson';
 
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';

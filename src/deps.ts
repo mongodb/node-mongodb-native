@@ -188,7 +188,7 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
 
 /** @public */
 export type AutoEncryptionLoggerLevel =
-  typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
+  (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
 export interface AutoEncryptionTlsOptions {
@@ -266,7 +266,8 @@ export interface AutoEncryptionOptions {
            * If present, an access token to authenticate with Azure.
            */
           accessToken: string;
-        };
+        }
+      | Record<string, never>;
     /** Configuration options for using 'gcp' as your KMS provider */
     gcp?:
       | {

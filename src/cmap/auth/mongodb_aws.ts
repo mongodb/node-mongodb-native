@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import * as http from 'http';
 import * as url from 'url';
+import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
@@ -11,7 +12,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, Callback, maxWireVersion, ns } from '../../utils';
+import { ByteUtils, maxWireVersion, ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -35,36 +36,35 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
-  override auth(authContext: AuthContext, callback: Callback): void {
-    const { connection, credentials } = authContext;
-    if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+  randomBytesAsync: (size: number) => Promise<Buffer>;
+
+  constructor() {
+    super();
+    this.randomBytesAsync = promisify(crypto.randomBytes);
+  }
+
+  override async auth(authContext: AuthContext): Promise<void> {
+    const { connection } = authContext;
+    if (!authContext.credentials) {
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
     if ('kModuleError' in aws4) {
-      return callback(aws4['kModuleError']);
+      throw aws4['kModuleError'];
     }
     const { sign } = aws4;
 
     if (maxWireVersion(connection) < 9) {
-      callback(
-        new MongoCompatibilityError(
-          'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
-        )
+      throw new MongoCompatibilityError(
+        'MONGODB-AWS authentication requires MongoDB version 4.4 or later'
       );
-      return;
     }
 
-    if (!credentials.username) {
-      makeTempCredentials(credentials, (err, tempCredentials) => {
-        if (err || !tempCredentials) return callback(err);
-
-        authContext.credentials = tempCredentials;
-        this.auth(authContext, callback);
-      });
-
-      return;
+    if (!authContext.credentials.username) {
+      authContext.credentials = await makeTempCredentials(authContext.credentials);
     }
+
+    const { credentials } = authContext;
 
     const accessKeyId = credentials.username;
     const secretAccessKey = credentials.password;
@@ -79,87 +79,75 @@ export class MongoDBAWS extends AuthProvider {
         : undefined;
 
     const db = credentials.source;
-    crypto.randomBytes(32, (err, nonce) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+    const nonce = await this.randomBytesAsync(32);
 
-      const saslStart = {
-        saslStart: 1,
-        mechanism: 'MONGODB-AWS',
-        payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
-      };
+    const saslStart = {
+      saslStart: 1,
+      mechanism: 'MONGODB-AWS',
+      payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
+    };
 
-      connection.command(ns(`${db}.$cmd`), saslStart, undefined, (err, res) => {
-        if (err) return callback(err);
+    const saslStartResponse = await connection.commandAsync(ns(`${db}.$cmd`), saslStart, undefined);
 
-        const serverResponse = BSON.deserialize(res.payload.buffer, bsonOptions) as {
-          s: Binary;
-          h: string;
-        };
-        const host = serverResponse.h;
-        const serverNonce = serverResponse.s.buffer;
-        if (serverNonce.length !== 64) {
-          callback(
-            // TODO(NODE-3483)
-            new MongoRuntimeError(`Invalid server nonce length ${serverNonce.length}, expected 64`)
-          );
+    const serverResponse = BSON.deserialize(saslStartResponse.payload.buffer, bsonOptions) as {
+      s: Binary;
+      h: string;
+    };
+    const host = serverResponse.h;
+    const serverNonce = serverResponse.s.buffer;
+    if (serverNonce.length !== 64) {
+      // TODO(NODE-3483)
+      throw new MongoRuntimeError(`Invalid server nonce length ${serverNonce.length}, expected 64`);
+    }
 
-          return;
-        }
+    if (!ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
+      // throw because the serverNonce's leading 32 bytes must equal the client nonce's 32 bytes
+      // https://github.com/mongodb/specifications/blob/875446db44aade414011731840831f38a6c668df/source/auth/auth.rst#id11
 
-        if (!ByteUtils.equals(serverNonce.subarray(0, nonce.byteLength), nonce)) {
-          // throw because the serverNonce's leading 32 bytes must equal the client nonce's 32 bytes
-          // https://github.com/mongodb/specifications/blob/875446db44aade414011731840831f38a6c668df/source/auth/auth.rst#id11
+      // TODO(NODE-3483)
+      throw new MongoRuntimeError('Server nonce does not begin with client nonce');
+    }
 
-          // TODO(NODE-3483)
-          callback(new MongoRuntimeError('Server nonce does not begin with client nonce'));
-          return;
-        }
+    if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
+      // TODO(NODE-3483)
+      throw new MongoRuntimeError(`Server returned an invalid host: "${host}"`);
+    }
 
-        if (host.length < 1 || host.length > 255 || host.indexOf('..') !== -1) {
-          // TODO(NODE-3483)
-          callback(new MongoRuntimeError(`Server returned an invalid host: "${host}"`));
-          return;
-        }
+    const body = 'Action=GetCallerIdentity&Version=2011-06-15';
+    const options = sign(
+      {
+        method: 'POST',
+        host,
+        region: deriveRegion(serverResponse.h),
+        service: 'sts',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': body.length,
+          'X-MongoDB-Server-Nonce': ByteUtils.toBase64(serverNonce),
+          'X-MongoDB-GS2-CB-Flag': 'n'
+        },
+        path: '/',
+        body
+      },
+      awsCredentials
+    );
 
-        const body = 'Action=GetCallerIdentity&Version=2011-06-15';
-        const options = sign(
-          {
-            method: 'POST',
-            host,
-            region: deriveRegion(serverResponse.h),
-            service: 'sts',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Content-Length': body.length,
-              'X-MongoDB-Server-Nonce': ByteUtils.toBase64(serverNonce),
-              'X-MongoDB-GS2-CB-Flag': 'n'
-            },
-            path: '/',
-            body
-          },
-          awsCredentials
-        );
+    const payload: AWSSaslContinuePayload = {
+      a: options.headers.Authorization,
+      d: options.headers['X-Amz-Date']
+    };
 
-        const payload: AWSSaslContinuePayload = {
-          a: options.headers.Authorization,
-          d: options.headers['X-Amz-Date']
-        };
-        if (sessionToken) {
-          payload.t = sessionToken;
-        }
+    if (sessionToken) {
+      payload.t = sessionToken;
+    }
 
-        const saslContinue = {
-          saslContinue: 1,
-          conversationId: 1,
-          payload: BSON.serialize(payload, bsonOptions)
-        };
+    const saslContinue = {
+      saslContinue: 1,
+      conversationId: 1,
+      payload: BSON.serialize(payload, bsonOptions)
+    };
 
-        connection.command(ns(`${db}.$cmd`), saslContinue, undefined, callback);
-      });
-    });
+    await connection.commandAsync(ns(`${db}.$cmd`), saslContinue, undefined);
   }
 }
 
@@ -179,27 +167,21 @@ export interface AWSCredentials {
   expiration?: Date;
 }
 
-function makeTempCredentials(credentials: MongoCredentials, callback: Callback<MongoCredentials>) {
-  function done(creds: AWSTempCredentials) {
+async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
+  function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
-      callback(
-        new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials')
-      );
-      return;
+      throw new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials');
     }
 
-    callback(
-      undefined,
-      new MongoCredentials({
-        username: creds.AccessKeyId,
-        password: creds.SecretAccessKey,
-        source: credentials.source,
-        mechanism: AuthMechanism.MONGODB_AWS,
-        mechanismProperties: {
-          AWS_SESSION_TOKEN: creds.Token
-        }
-      })
-    );
+    return new MongoCredentials({
+      username: creds.AccessKeyId,
+      password: creds.SecretAccessKey,
+      source: credentials.source,
+      mechanism: AuthMechanism.MONGODB_AWS,
+      mechanismProperties: {
+        AWS_SESSION_TOKEN: creds.Token
+      }
+    });
   }
 
   const credentialProvider = getAwsCredentialProvider();
@@ -210,47 +192,32 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-      request(
-        `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`,
-        undefined,
-        (err, res) => {
-          if (err) return callback(err);
-          done(res);
-        }
+      return makeMongoCredentialsFromAWSTemp(
+        await request(`${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`)
       );
-
-      return;
     }
 
     // Otherwise assume we are on an EC2 instance
 
     // get a token
-    request(
-      `${AWS_EC2_URI}/latest/api/token`,
-      { method: 'PUT', json: false, headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 } },
-      (err, token) => {
-        if (err) return callback(err);
+    const token = await request(`${AWS_EC2_URI}/latest/api/token`, {
+      method: 'PUT',
+      json: false,
+      headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 }
+    });
 
-        // get role name
-        request(
-          `${AWS_EC2_URI}/${AWS_EC2_PATH}`,
-          { json: false, headers: { 'X-aws-ec2-metadata-token': token } },
-          (err, roleName) => {
-            if (err) return callback(err);
+    // get role name
+    const roleName = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}`, {
+      json: false,
+      headers: { 'X-aws-ec2-metadata-token': token }
+    });
 
-            // get temp credentials
-            request(
-              `${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`,
-              { headers: { 'X-aws-ec2-metadata-token': token } },
-              (err, creds) => {
-                if (err) return callback(err);
-                done(creds);
-              }
-            );
-          }
-        );
-      }
-    );
+    // get temp credentials
+    const creds = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`, {
+      headers: { 'X-aws-ec2-metadata-token': token }
+    });
+
+    return makeMongoCredentialsFromAWSTemp(creds);
   } else {
     /*
      * Creates a credential provider that will attempt to find credentials from the
@@ -264,18 +231,17 @@ function makeTempCredentials(credentials: MongoCredentials, callback: Callback<M
      */
     const { fromNodeProviderChain } = credentialProvider;
     const provider = fromNodeProviderChain();
-    provider()
-      .then((creds: AWSCredentials) => {
-        done({
-          AccessKeyId: creds.accessKeyId,
-          SecretAccessKey: creds.secretAccessKey,
-          Token: creds.sessionToken,
-          Expiration: creds.expiration
-        });
-      })
-      .catch((error: Error) => {
-        callback(new MongoAWSError(error.message));
+    try {
+      const creds = await provider();
+      return makeMongoCredentialsFromAWSTemp({
+        AccessKeyId: creds.accessKeyId,
+        SecretAccessKey: creds.secretAccessKey,
+        Token: creds.sessionToken,
+        Expiration: creds.expiration
       });
+    } catch (error) {
+      throw new MongoAWSError(error.message);
+    }
   }
 }
 
@@ -295,42 +261,53 @@ interface RequestOptions {
   headers?: http.OutgoingHttpHeaders;
 }
 
-function request(uri: string, _options: RequestOptions | undefined, callback: Callback) {
-  const options = Object.assign(
-    {
+async function request(uri: string): Promise<Record<string, any>>;
+async function request(
+  uri: string,
+  options?: { json?: true } & RequestOptions
+): Promise<Record<string, any>>;
+async function request(uri: string, options?: { json: false } & RequestOptions): Promise<string>;
+async function request(
+  uri: string,
+  options: RequestOptions = {}
+): Promise<string | Record<string, any>> {
+  return new Promise<string | Record<string, any>>((resolve, reject) => {
+    const requestOptions = {
       method: 'GET',
       timeout: 10000,
-      json: true
-    },
-    url.parse(uri),
-    _options
-  );
+      json: true,
+      ...url.parse(uri),
+      ...options
+    };
 
-  const req = http.request(options, res => {
-    res.setEncoding('utf8');
+    const req = http.request(requestOptions, res => {
+      res.setEncoding('utf8');
 
-    let data = '';
-    res.on('data', d => (data += d));
-    res.on('end', () => {
-      if (options.json === false) {
-        callback(undefined, data);
-        return;
-      }
+      let data = '';
+      res.on('data', d => {
+        data += d;
+      });
 
-      try {
-        const parsed = JSON.parse(data);
-        callback(undefined, parsed);
-      } catch (err) {
-        // TODO(NODE-3483)
-        callback(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
-      }
+      res.once('end', () => {
+        if (options.json === false) {
+          resolve(data);
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed);
+        } catch {
+          // TODO(NODE-3483)
+          reject(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
+        }
+      });
     });
-  });
 
-  req.on('timeout', () => {
-    req.destroy(new MongoAWSError(`AWS request to ${uri} timed out after ${options.timeout} ms`));
+    req.once('timeout', () =>
+      req.destroy(new MongoAWSError(`AWS request to ${uri} timed out after ${options.timeout} ms`))
+    );
+    req.once('error', error => reject(error));
+    req.end();
   });
-
-  req.on('error', err => callback(err));
-  req.end();
 }

@@ -10,7 +10,7 @@ export const ReadConcernLevel = Object.freeze({
 } as const);
 
 /** @public */
-export type ReadConcernLevel = typeof ReadConcernLevel[keyof typeof ReadConcernLevel];
+export type ReadConcernLevel = (typeof ReadConcernLevel)[keyof typeof ReadConcernLevel];
 
 /** @public */
 export type ReadConcernLike = ReadConcern | { level: ReadConcernLevel } | ReadConcernLevel;
