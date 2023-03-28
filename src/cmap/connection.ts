@@ -25,7 +25,6 @@ import {
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
-import type { TopologyVersion } from '../sdam/server_description';
 import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
@@ -267,10 +266,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
-  }
-
-  get topologyVersion(): TopologyVersion | null {
-    return this[kHello]?.topologyVersion;
   }
 
   // Set the whether the message stream is for a monitoring connection.
