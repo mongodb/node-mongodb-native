@@ -318,6 +318,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   topology?: Topology;
   /** @internal */
   readonly mongoLogger: MongoLogger;
+  /** @internal */
+  private connectionLock?: Promise<this>;
 
   /**
    * The consolidate, parsed, transformed and merged options.
@@ -405,6 +407,28 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @see docs.mongodb.org/manual/reference/connection-string/
    */
   async connect(): Promise<this> {
+    if (this.connectionLock) {
+      return this.connectionLock;
+    }
+
+    try {
+      this.connectionLock = this._connect();
+      await this.connectionLock;
+    } finally {
+      // release
+      this.connectionLock = undefined;
+    }
+
+    return this;
+  }
+
+  /**
+   * Create a topology to open the connection, must be locked to avoid topology leaks in concurrency scenario.
+   * Locking is enforced by the connect method.
+   *
+   * @internal
+   */
+  private async _connect(): Promise<this> {
     if (this.topology && this.topology.isConnected()) {
       return this;
     }
