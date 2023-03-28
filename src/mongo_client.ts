@@ -426,9 +426,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * Create a topology to open the connection, must be locked to avoid topology leaks in concurrency scenario.
    * Locking is enforced by the connect method.
    *
-   * When decorators available put implementation back to original connect methods
-   * and enforce locking via a dedicated decorator.
-   * @see https://github.com/mongodb/node-mongodb-native/pull/3596#discussion_r1134211500
+   * @internal
    */
   private async _connect(): Promise<this> {
     if (this.topology && this.topology.isConnected()) {
