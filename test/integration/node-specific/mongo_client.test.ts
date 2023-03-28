@@ -528,7 +528,7 @@ describe('class MongoClient', function () {
      * Wrap the connect method of the client to keep track
      * of number of times connect is called
      */
-    function clientConnect() {
+    async function clientConnect() {
       if (!client) {
         return;
       }
@@ -563,7 +563,7 @@ describe('class MongoClient', function () {
       internalConnectStub.onFirstCall().rejects(new Error('cannot connect'));
 
       // first call rejected to simulate a connection failure
-      const error = await clientConnect()!.catch(error => error);
+      const error = await clientConnect().catch(error => error);
       expect(error).to.match(/cannot connect/);
 
       internalConnectStub.restore();
