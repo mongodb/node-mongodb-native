@@ -51,6 +51,32 @@ tests:
         options:
             replicaset: "test"
     -
+        description: "List option with one empty option specified"
+        uri: "mongodb://example.com/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny&readPreferenceTags="
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options:
+            replicaset: "test"
+    -
+        description: "List option with an invalid option specified"
+        uri: "mongodb://example.com/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny&readPreferenceTags=foobarbaz"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options:
+            replicaset: "test"
+    -
         description: "Error on empty integer option values"
         uri: "mongodb://localhost/?maxIdleTimeMS="
         valid: false

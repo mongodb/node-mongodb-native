@@ -215,12 +215,12 @@ function getUIntFromOptions(name: string, value: unknown): number {
   return parsedValue;
 }
 
-function* entriesFromString(value: string): Generator<[string, string]> {
+function* entriesFromString(optionName: string, value: string): Generator<[string, string]> {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(':');
     if (value == null) {
-      throw new MongoParseError('Cannot have undefined values in key value pairs');
+      throw new MongoParseError(`malformed entry for key ${optionName}: ${value}`);
     }
 
     yield [key, value];
@@ -651,7 +651,7 @@ interface OptionDescriptor {
   transform?: (args: { name: string; options: MongoOptions; values: unknown[] }) => unknown;
 }
 
-export const OPTIONS = {
+export const OPTIONS: Record<string, OptionDescriptor> = {
   appName: {
     target: 'metadata',
     transform({ options, values: [value] }): DriverInfo {
@@ -710,7 +710,7 @@ export const OPTIONS = {
 
       for (const optionValue of values) {
         if (typeof optionValue === 'string') {
-          for (const [key, value] of entriesFromString(optionValue)) {
+          for (const [key, value] of entriesFromString('authMechanismProperties', optionValue)) {
             try {
               mechanismProperties[key] = getBoolean(key, value);
             } catch {
@@ -1059,7 +1059,7 @@ export const OPTIONS = {
       for (const tag of tags) {
         const readPreferenceTag: TagSet = Object.create(null);
         if (typeof tag === 'string') {
-          for (const [k, v] of entriesFromString(tag)) {
+          for (const [k, v] of entriesFromString('readPreferenceTags', tag)) {
             readPreferenceTag[k] = v;
           }
         }
