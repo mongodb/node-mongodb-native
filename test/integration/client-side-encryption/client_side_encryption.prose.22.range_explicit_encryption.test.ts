@@ -224,27 +224,30 @@ describe('Range Explicit Encryption', function () {
         encryptedTwoHundred = await clientEncryption.encrypt(factory(200), opts);
 
         const key = `encrypted${dataType}`;
-        await encryptedClient
-          .db('db')
-          .collection('explicit_encryption')
-          .insertMany([
-            {
-              [key]: encryptedZero,
-              _id: 0
-            },
-            {
-              [key]: encryptedSix,
-              _id: 1
-            },
-            {
-              [key]: encryptedThirty,
-              _id: 2
-            },
-            {
-              [key]: encryptedTwoHundred,
-              _id: 3
-            }
-          ]);
+        const documents = [
+          {
+            [key]: encryptedZero,
+            _id: 0
+          },
+          {
+            [key]: encryptedSix,
+            _id: 1
+          },
+          {
+            [key]: encryptedThirty,
+            _id: 2
+          },
+          {
+            [key]: encryptedTwoHundred,
+            _id: 3
+          }
+        ];
+
+        // Queryable encryption only supports single document inserts, so we must insert the documents
+        // one at a time.
+        for (const doc of documents) {
+          await encryptedClient.db('db').collection('explicit_encryption').insertOne(doc);
+        }
 
         await utilClient.close();
       });
