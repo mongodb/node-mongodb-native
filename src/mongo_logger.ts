@@ -274,9 +274,8 @@ function DEFAULT_LOG_TRANSFORM(logObject: Record<string, any>): Omit<Log, 's' | 
           maxConnecting,
           waitQueueTimeoutMS
         };
+        log.waitQueueSize = ev.waitQueueSize;
       }
-      // TODO: Get waitQueueSize
-      // TODO: Get waitQueueMultiple
       break;
     case ConnectionPoolReadyEvent:
       ev = logObject as ConnectionPoolReadyEvent;
@@ -314,7 +313,10 @@ function DEFAULT_LOG_TRANSFORM(logObject: Record<string, any>): Omit<Log, 's' | 
       log.message = 'Connection closed';
       log.driverConnectionId = ev.connectionId;
       log.reason = ev.reason;
-      // log.error FIXME
+      if (ev.reason === 'error') {
+        // TODO: Set log.error
+        // log.error = ev
+      }
       break;
     case ConnectionCheckOutStartedEvent:
       ev = logObject as ConnectionCheckOutStartedEvent;

@@ -29,11 +29,14 @@ export class ConnectionPoolMonitoringEvent {
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
   options?: ConnectionPoolOptions;
+  /** The size of the ConnectionPool's waitQueue */
+  waitQueueSize: number;
 
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
     this.options = pool.options;
+    this.waitQueueSize = pool.waitQueueSize;
   }
 }
 
