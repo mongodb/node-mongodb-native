@@ -1,0 +1,100 @@
+tests:
+    -
+        description: "Error on unrecognized option keys"
+        uri: "mongodb://example.com/?foo=bar"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options: ~
+    -
+        description: "Error on unsupported option values"
+        uri: "mongodb://example.com/?fsync=ifPossible"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options: ~
+    -
+        description: "Repeated option keys with the same value"
+        uri: "mongodb://example.com/?replicaSet=test&replicaSet=test"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options:
+            replicaset: "test"
+
+    -
+        description: "Repeated option keys with different values"
+        uri: "mongodb://example.com/?replicaSet=test1&replicaSet=test2"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options:
+            replicaset: "test"
+    -
+        description: "Error on empty integer option values"
+        uri: "mongodb://localhost/?maxIdleTimeMS="
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "localhost"
+                port: ~
+        auth: ~
+        options: ~
+    -
+        description: "Error on empty non-integer value for integer option"
+        uri: "mongodb://localhost/?maxIdleTimeMS="
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "localhost"
+                port: ~
+        auth: ~
+        options: ~
+    -
+        description: "Error on empty boolean option value"
+        uri: "mongodb://localhost/?journal="
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "localhost"
+                port: ~
+        auth: ~
+        options: ~
+    -
+        description: "Error on non-empty invalid value for boolean option"
+        uri: "mongodb://localhost/?journal=stringValue"
+        valid: false
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "localhost"
+                port: ~
+        auth: ~
+        options: ~

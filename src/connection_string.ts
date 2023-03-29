@@ -301,11 +301,19 @@ export function parseOptions(
     urlOptions.set('auth', [auth]);
   }
 
+  const validListOptions = Object.entries(OPTIONS)
+    .filter(([_, { multipleValuesAllowed }]) => multipleValuesAllowed)
+    .map(([key, _]) => key);
+
   for (const key of url.searchParams.keys()) {
     const values = [...url.searchParams.getAll(key)];
 
     if (values.includes('')) {
       throw new MongoAPIError('URI cannot contain options with no value');
+    }
+
+    if (!validListOptions.includes(key) && values.length > 1) {
+      throw new MongoAPIError(`URI option ${key} cannot be specified multiple times.`);
     }
 
     if (!urlOptions.has(key)) {
@@ -632,6 +640,7 @@ interface OptionDescriptor {
   target?: string;
   type?: 'boolean' | 'int' | 'uint' | 'record' | 'string' | 'any';
   default?: any;
+  multipleValuesAllowed?: true;
 
   deprecated?: boolean | string;
   /**
@@ -718,7 +727,8 @@ export const OPTIONS = {
       return MongoCredentials.merge(options.credentials, {
         mechanismProperties
       });
-    }
+    },
+    multipleValuesAllowed: true
   },
   authSource: {
     target: 'credentials',
@@ -784,7 +794,8 @@ export const OPTIONS = {
         }
       }
       return [...compressionList];
-    }
+    },
+    multipleValuesAllowed: true
   },
   connectTimeoutMS: {
     default: 30000,
@@ -1063,7 +1074,8 @@ export const OPTIONS = {
         readPreference: options.readPreference,
         readPreferenceTags
       });
-    }
+    },
+    multipleValuesAllowed: true
   },
   replicaSet: {
     type: 'string'
