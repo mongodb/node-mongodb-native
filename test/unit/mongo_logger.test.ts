@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
-import { MongoLogger, MongoLoggerOptions, SeverityLevel } from '../mongodb';
+import { MongoLogger, MongoLoggerOptions, SEVERITY_LEVEL_MAP, SeverityLevel } from '../mongodb';
 
 class BufferingStream extends Writable {
-  buffer: string[] = [];
+  buffer: any[] = [];
 
   constructor(options = {}) {
     super({ ...options, objectMode: true });
@@ -526,13 +526,106 @@ describe('class MongoLogger', function () {
           expect(stream.buffer).to.have.lengthOf(0);
         });
 
-        context('when the log severity is lower than what was configured', function () {
-          it('does not call Loggable.toLog');
-          it('does not write to logDestination');
+        context('when the log severity is greater than what was configured', function () {
+          it('does not write to logDestination', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: {
+                command: severityLevel
+              } as any,
+              logDestination: stream
+            } as any);
+
+            const TRACE = 8;
+            for (
+              let l = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel) + 1;
+              l <= TRACE;
+              l++
+            ) {
+              const severity = SEVERITY_LEVEL_MAP.getSeverityLevelName(l);
+              logger[severity as SeverityLevel]('command', 'Hello');
+            }
+
+            expect(stream.buffer).to.have.lengthOf(0);
+          });
         });
-        context('when log severity is equal to or greater than what was configured', function () {
-          it('successfully writes to a newly created Writable');
-          it('successfully writes to a previously used Writable');
+        context('when log severity is equal to or less than what was configured', function () {
+          it('writes log to logDestination', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: {
+                command: severityLevel
+              } as any,
+              logDestination: stream
+            } as any);
+
+            const EMERGENCY = 0;
+            // Calls all severity logging methods with a level less than or equal to what severityLevel
+            for (
+              let l = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel);
+              l >= EMERGENCY;
+              l--
+            ) {
+              const severity = SEVERITY_LEVEL_MAP.getSeverityLevelName(l);
+              logger[severity as SeverityLevel]('command', 'Hello');
+            }
+
+            expect(stream.buffer).to.have.lengthOf(
+              SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel) + 1
+            );
+          });
+        });
+
+        context('when object with toLog method is being logged', function () {
+          const obj = {
+            a: 10,
+            b: 12,
+            toLog() {
+              return { sum: this.a + this.b };
+            }
+          };
+          it('calls toLog and constructs log message with the result of toLog', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: { command: severityLevel } as any,
+              logDestination: stream
+            } as any);
+
+            logger[severityLevel]('command', obj);
+
+            expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.have.property('sum', 22);
+          });
+        });
+
+        context('when object without toLog method is being logged', function () {
+          const obj = { a: 10, b: 12 };
+          it('uses the existing fields to build the log message', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: { command: severityLevel } as any,
+              logDestination: stream
+            } as any);
+
+            logger[severityLevel]('command', obj);
+            expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.have.property('a', 10);
+            expect(stream.buffer[0]).to.have.property('b', 12);
+          });
+        });
+        context('when string is being logged', function () {
+          const message = 'Hello world';
+          it('puts the string in the message field of the emitted log message', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: { command: severityLevel } as any,
+              logDestination: stream
+            } as any);
+
+            logger[severityLevel]('command', message);
+            expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.have.property('message', message);
+          });
         });
       });
     }
