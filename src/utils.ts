@@ -20,7 +20,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { Explain } from './explain';
-import type { MongoClient } from './mongo_client';
+import type { MongoClient, MongoOptions } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
@@ -545,9 +545,7 @@ export interface ClientMetadataOptions {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../package.json').version;
 
-export function makeClientMetadata(options?: ClientMetadataOptions): ClientMetadata {
-  options = options ?? {};
-
+export function makeClientMetadata(options: MongoOptions): ClientMetadata {
   const metadata: ClientMetadata = {
     driver: {
       name: 'nodejs',

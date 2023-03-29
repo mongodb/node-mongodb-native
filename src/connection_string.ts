@@ -797,10 +797,7 @@ export const OPTIONS = {
   },
   driverInfo: {
     default: {},
-    transform({ values: [value] }) {
-      if (!isRecord(value)) throw new MongoParseError('DriverInfo must be an object');
-      return value;
-    }
+    type: 'record'
   },
   enableUtf8Validation: { type: 'boolean', default: true },
   family: {

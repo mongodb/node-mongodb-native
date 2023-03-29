@@ -667,6 +667,7 @@ export interface MongoOptions
   extends Required<
       Pick<
         MongoClientOptions,
+        | 'appName'
         | 'autoEncryption'
         | 'connectTimeoutMS'
         | 'directConnection'
