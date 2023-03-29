@@ -1,4 +1,4 @@
-import { Document, EJSON } from 'bson';
+import { EJSON } from 'bson';
 import { Writable } from 'stream';
 
 import {
@@ -7,11 +7,16 @@ import {
   CommandSucceededEvent
 } from './cmap/command_monitoring_events';
 import {
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
   ConnectionClosedEvent,
   ConnectionCreatedEvent,
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
+  ConnectionPoolMonitoringEvent,
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
@@ -35,7 +40,28 @@ export const SeverityLevel = Object.freeze({
 export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
-export const SeverityLevelMap: Map<string | number, string | number> = new Map([
+class SeverityLevelMap extends Map<SeverityLevel | number, SeverityLevel | number> {
+  constructor(entries: [SeverityLevel | number, SeverityLevel | number][]) {
+    const newEntries: [number | SeverityLevel, SeverityLevel | number][] = [];
+    for (const [level, value] of entries) {
+      newEntries.push([value, level]);
+    }
+
+    newEntries.push(...entries);
+    super(newEntries);
+  }
+
+  getNumericSeverityLevel(severity: SeverityLevel): number {
+    return this.get(severity) as number;
+  }
+
+  getSeverityLevelName(level: number): SeverityLevel | undefined {
+    return this.get(level) as SeverityLevel | undefined;
+  }
+}
+
+/** @internal */
+export const SEVERITY_LEVEL_MAP = new SeverityLevelMap([
   [SeverityLevel.OFF, -Infinity],
   [SeverityLevel.EMERGENCY, 0],
   [SeverityLevel.ALERT, 1],
@@ -47,10 +73,6 @@ export const SeverityLevelMap: Map<string | number, string | number> = new Map([
   [SeverityLevel.DEBUG, 7],
   [SeverityLevel.TRACE, 8]
 ]);
-
-for (const [level, value] of SeverityLevelMap) {
-  SeverityLevelMap.set(value, level);
-}
 
 /** @internal */
 export const MongoLoggableComponent = Object.freeze({
@@ -170,66 +192,158 @@ export interface MongoDBLogWritable {
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
-  const s0Num = SeverityLevelMap.get(s0) as number;
-  const s1Num = SeverityLevelMap.get(s1) as number;
+  const s0Num = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(s0);
+  const s1Num = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(s1);
 
   return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
 }
 
-type LogTransform = (message: Record<string, any>) => Record<string, any>;
+function DEFAULT_LOG_TRANSFORM(logObject: Record<string, any>): Omit<Log, 's' | 't' | 'c'> {
+  let log: Omit<Log, 's' | 't' | 'c'> = {};
 
-const DEFAULT_LOG_TRANSFORM = (message: Record<string, any>): Record<string, any> => {
-  const commandCommonFields = (
-    message: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+  const getHostPort = (s: string): { host: string; port: number } => {
+    const lastColon = s.lastIndexOf(':');
+    const host = s.slice(0, lastColon);
+    const port = Number.parseInt(s.slice(lastColon + 1));
+    return { host, port };
+  };
+
+  const attachCommandFields = (
+    l: any,
+    ev: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
   ) => {
-    return {
-      commandName: message.commandName,
-      requestId: message.requestId,
-      driverConnectionId: message.connectionId,
-      serverHost: message.address,
-      serverPort: message.address,
-      serviceId: message.serviceId
-    };
-  };
-  const maybeTruncate = (doc: Document, len: number): string => {
-    const rv = EJSON.stringify(doc);
-    return rv.length > len ? rv.slice(0, len) + '...' : rv;
+    l.commandName = ev.commandName;
+    l.requestId = ev.requestId;
+    //log.operationId = ev.
+    if (ev.connectionId) {
+      l.driverConnectionId = ev.connectionId;
+    }
+    const { host, port } = getHostPort(ev.address);
+    l.serverHost = host;
+    l.serverPort = port;
+    if (ev.serviceId) {
+      l.serviceId = ev.serviceId;
+    }
+
+    return l;
   };
 
-  if (message instanceof CommandStartedEvent) {
-    return {
-      ...commandCommonFields(message),
-      message: 'Command started',
-      command: maybeTruncate(message.command, 1000),
-      databaseName: message.databaseName
-    };
-  } else if (message instanceof CommandSucceededEvent) {
-    return {
-      ...commandCommonFields(message),
-      message: 'Command succeeded',
-      durationMS: message.duration,
-      reply: maybeTruncate(message.reply as Document, 1000)
-    };
-  } else if (message instanceof CommandFailedEvent) {
-    return {
-      ...commandCommonFields(message),
-      message: 'Command failed',
-      durationMS: message.duration,
-      failure: message.failure
-    };
-  } else if (message instanceof ConnectionReadyEvent) {
-  } else if (message instanceof ConnectionClosedEvent) {
-  } else if (message instanceof ConnectionCreatedEvent) {
-  } else if (message instanceof ConnectionPoolReadyEvent) {
-  } else if (message instanceof ConnectionPoolClosedEvent) {
-  } else if (message instanceof ConnectionPoolClearedEvent) {
-  } else if (message instanceof ConnectionPoolCreatedEvent) {
-  } else {
-    return message;
+  const attachConnectionFields = (l: any, ev: ConnectionPoolMonitoringEvent) => {
+    const { host, port } = getHostPort(ev.address);
+    l.serverHost = host;
+    l.serverPort = port;
+
+    return l;
+  };
+
+  let ev;
+  switch (logObject.constructor) {
+    case CommandStartedEvent:
+      ev = logObject as CommandStartedEvent;
+      log = attachCommandFields(log, ev);
+      log.message = 'Command started';
+      log.command = EJSON.stringify(ev.command);
+      log.databaseName = ev.databaseName;
+      break;
+    case CommandSucceededEvent:
+      ev = logObject as CommandSucceededEvent;
+      log = attachCommandFields(log, ev);
+      log.message = 'Command succeeded';
+      log.durationMS = ev.duration;
+      log.reply = EJSON.stringify(ev.reply);
+      break;
+    case CommandFailedEvent:
+      ev = logObject as CommandFailedEvent;
+      log = attachCommandFields(log, ev);
+      log.message = 'Command failed';
+      log.durationMS = ev.duration;
+      log.failure = ev.failure;
+      break;
+    case ConnectionPoolCreatedEvent:
+      ev = logObject as ConnectionPoolCreatedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection pool created';
+      if (ev.options) {
+        const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
+          ev.options;
+        log = {
+          ...log,
+          maxIdleTimeMS,
+          minPoolSize,
+          maxPoolSize,
+          maxConnecting,
+          waitQueueTimeoutMS
+        };
+      }
+      // TODO: Get waitQueueSize
+      // TODO: Get waitQueueMultiple
+      break;
+    case ConnectionPoolReadyEvent:
+      ev = logObject as ConnectionPoolReadyEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection pool ready';
+      break;
+    case ConnectionPoolClearedEvent:
+      ev = logObject as ConnectionPoolClearedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection pool cleared';
+      if (ev.serviceId) {
+        log.serviceId = ev.serviceId;
+      }
+      break;
+    case ConnectionPoolClosedEvent:
+      ev = logObject as ConnectionPoolClosedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection pool closed';
+      break;
+    case ConnectionCreatedEvent:
+      ev = logObject as ConnectionCreatedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection created';
+      log.driverConnectionId = ev.connectionId;
+      break;
+    case ConnectionReadyEvent:
+      ev = logObject as ConnectionReadyEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection ready';
+      log.driverConnectionId = ev.connectionId;
+      break;
+    case ConnectionClosedEvent:
+      ev = logObject as ConnectionClosedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection closed';
+      log.driverConnectionId = ev.connectionId;
+      log.reason = ev.reason;
+      // log.error FIXME
+      break;
+    case ConnectionCheckOutStartedEvent:
+      ev = logObject as ConnectionCheckOutStartedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection checkout started';
+      break;
+    case ConnectionCheckOutFailedEvent:
+      ev = logObject as ConnectionCheckOutFailedEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection checkout failed';
+      log.reason = ev.reason;
+      break;
+    case ConnectionCheckedOutEvent:
+      ev = logObject as ConnectionCheckedOutEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection checked out';
+      log.driverConnectionId = ev.connectionId;
+      break;
+    case ConnectionCheckedInEvent:
+      ev = logObject as ConnectionCheckedInEvent;
+      log = attachConnectionFields(log, ev);
+      log.message = 'Connection checked in';
+      log.driverConnectionId = ev.connectionId;
+      break;
+    default:
+      log = { ...log, ...logObject };
   }
-
-  return {};
-};
+  return log;
+}
 
 /** @internal */
 export class MongoLogger {
@@ -243,78 +357,57 @@ export class MongoLogger {
     this.logDestination = options.logDestination;
   }
 
-  emergency(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'emergency', message, transform);
+  /** @experimental */
+  emergency(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'emergency', message);
   }
-  alert(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'alert', message, transform);
+  /** @experimental */
+  alert(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'alert', message);
   }
-  critical(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform: LogTransform = DEFAULT_LOG_TRANSFORM
-  ): void {
-    this.log(component, 'critical', message, transform);
+  /** @experimental */
+  critical(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'critical', message);
   }
-  error(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'error', message, transform);
+  /** @experimental */
+  error(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'error', message);
   }
-  warn(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'warn', message, transform);
+  /** @experimental */
+  notice(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'notice', message);
   }
-  info(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'info', message, transform);
+  /** @experimental */
+  warn(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'warn', message);
   }
-  debug(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'debug', message, transform);
+  /** @experimental */
+  info(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'info', message);
   }
-  trace(
-    component: MongoLoggableComponent,
-    message: Record<string, any> | string,
-    transform?: LogTransform
-  ): void {
-    this.log(component, 'trace', message, transform);
+  /** @experimental */
+  debug(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'debug', message);
+  }
+  /** @experimental */
+  trace(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+    this.log(component, 'trace', message);
   }
 
   private log(
     component: MongoLoggableComponent,
     severity: SeverityLevel,
-    message: Record<string, any> | string,
-    transform?: LogTransform
+    message: Record<string, any> | string
   ): void {
     if (compareSeverity(severity, this.componentSeverities[component]) <= 0) {
       let logMessage: Log = { t: new Date(), c: component, s: severity };
       if (typeof message === 'string') {
         logMessage.message = message;
       } else {
-        if (transform) {
-          logMessage = { ...logMessage, ...transform(message) };
+        if (message.toLog && typeof message.toLog === 'function') {
+          logMessage = { ...logMessage, ...message.toLog() };
         } else {
-          logMessage = { ...logMessage, ...message };
+          logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };
         }
       }
       this.logDestination.write(logMessage);
