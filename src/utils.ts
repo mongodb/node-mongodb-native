@@ -513,7 +513,10 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
-/** @public */
+/**
+ * @public
+ * https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
+ */
 export interface ClientMetadata {
   driver: {
     name: string;
@@ -526,8 +529,6 @@ export interface ClientMetadata {
     version: string;
   };
   platform: string;
-  /**  */
-  version?: string;
   application?: {
     name: string;
   };
@@ -535,8 +536,6 @@ export interface ClientMetadata {
 
 /**
  * @public
- *
- * @deprecated This type will be removed in the next major version.
  */
 export interface ClientMetadataOptions {
   driverInfo?: {
