@@ -1,44 +1,38 @@
 import type { Document } from '../../bson';
 import { MongoMissingCredentialsError } from '../../error';
-import { Callback, ns } from '../../utils';
+import { ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 
 export class X509 extends AuthProvider {
-  override prepare(
+  override async prepare(
     handshakeDoc: HandshakeDocument,
-    authContext: AuthContext,
-    callback: Callback
-  ): void {
+    authContext: AuthContext
+  ): Promise<HandshakeDocument> {
     const { credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
-    Object.assign(handshakeDoc, {
-      speculativeAuthenticate: x509AuthenticateCommand(credentials)
-    });
-
-    callback(undefined, handshakeDoc);
+    return { ...handshakeDoc, speculativeAuthenticate: x509AuthenticateCommand(credentials) };
   }
 
-  override auth(authContext: AuthContext, callback: Callback): void {
+  override async auth(authContext: AuthContext) {
     const connection = authContext.connection;
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
     const response = authContext.response;
 
-    if (response && response.speculativeAuthenticate) {
-      return callback();
+    if (response?.speculativeAuthenticate) {
+      return;
     }
 
-    connection.command(
+    await connection.commandAsync(
       ns('$external.$cmd'),
       x509AuthenticateCommand(credentials),
-      undefined,
-      callback
+      undefined
     );
   }
 }

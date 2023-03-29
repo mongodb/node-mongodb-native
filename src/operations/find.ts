@@ -104,7 +104,7 @@ export class FindOperation extends CommandOperation<Document> {
     }
 
     // special case passing in an ObjectId as a filter
-    this.filter = filter != null && filter._bsontype === 'ObjectID' ? { _id: filter } : filter;
+    this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
   override execute(

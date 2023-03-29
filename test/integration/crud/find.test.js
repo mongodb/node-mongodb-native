@@ -2577,4 +2577,44 @@ describe('Find', function () {
       });
     }
   });
+
+  context('when passed an ObjectId instance as the filter', () => {
+    let client;
+    let findsStarted;
+
+    beforeEach(function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      findsStarted = [];
+      client.on('commandStarted', ev => {
+        if (ev.commandName === 'find') findsStarted.push(ev.command);
+      });
+    });
+
+    afterEach(async function () {
+      findsStarted = undefined;
+      await client.close();
+    });
+
+    context('find(oid)', () => {
+      it('wraps the objectId in a document with _id as the only key', async () => {
+        const collection = client.db('test').collection('test');
+        const oid = new ObjectId();
+        await collection.find(oid).toArray();
+        expect(findsStarted).to.have.lengthOf(1);
+        expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+        expect(findsStarted[0].filter).to.have.all.keys('_id');
+      });
+    });
+
+    context('findOne(oid)', () => {
+      it('wraps the objectId in a document with _id as the only key', async () => {
+        const collection = client.db('test').collection('test');
+        const oid = new ObjectId();
+        await collection.findOne(oid);
+        expect(findsStarted).to.have.lengthOf(1);
+        expect(findsStarted[0]).to.have.nested.property('filter._id', oid);
+        expect(findsStarted[0].filter).to.have.all.keys('_id');
+      });
+    });
+  });
 });

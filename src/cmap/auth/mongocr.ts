@@ -1,47 +1,42 @@
 import * as crypto from 'crypto';
 
 import { MongoMissingCredentialsError } from '../../error';
-import { Callback, ns } from '../../utils';
+import { ns } from '../../utils';
 import { AuthContext, AuthProvider } from './auth_provider';
 
 export class MongoCR extends AuthProvider {
-  override auth(authContext: AuthContext, callback: Callback): void {
+  override async auth(authContext: AuthContext): Promise<void> {
     const { connection, credentials } = authContext;
     if (!credentials) {
-      return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
+      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
-    const username = credentials.username;
-    const password = credentials.password;
-    const source = credentials.source;
-    connection.command(ns(`${source}.$cmd`), { getnonce: 1 }, undefined, (err, r) => {
-      let nonce = null;
-      let key = null;
 
-      // Get nonce
-      if (err == null) {
-        nonce = r.nonce;
+    const { username, password, source } = credentials;
 
-        // Use node md5 generator
-        let md5 = crypto.createHash('md5');
+    const { nonce } = await connection.commandAsync(
+      ns(`${source}.$cmd`),
+      { getnonce: 1 },
+      undefined
+    );
 
-        // Generate keys used for authentication
-        md5.update(`${username}:mongo:${password}`, 'utf8');
-        const hash_password = md5.digest('hex');
+    const hashPassword = crypto
+      .createHash('md5')
+      .update(`${username}:mongo:${password}`, 'utf8')
+      .digest('hex');
 
-        // Final key
-        md5 = crypto.createHash('md5');
-        md5.update(nonce + username + hash_password, 'utf8');
-        key = md5.digest('hex');
-      }
+    // Final key
+    const key = crypto
+      .createHash('md5')
+      .update(`${nonce}${username}${hashPassword}`, 'utf8')
+      .digest('hex');
 
-      const authenticateCommand = {
-        authenticate: 1,
-        user: username,
-        nonce,
-        key
-      };
+    const authenticateCommand = {
+      authenticate: 1,
+      user: username,
+      nonce,
+      key
+    };
 
-      connection.command(ns(`${source}.$cmd`), authenticateCommand, undefined, callback);
-    });
+    await connection.commandAsync(ns(`${source}.$cmd`), authenticateCommand, undefined);
   }
 }
