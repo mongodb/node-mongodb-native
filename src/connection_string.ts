@@ -727,8 +727,7 @@ export const OPTIONS: Record<string, OptionDescriptor> = {
       return MongoCredentials.merge(options.credentials, {
         mechanismProperties
       });
-    },
-    multipleValuesAllowed: true
+    }
   },
   authSource: {
     target: 'credentials',
@@ -794,8 +793,7 @@ export const OPTIONS: Record<string, OptionDescriptor> = {
         }
       }
       return [...compressionList];
-    },
-    multipleValuesAllowed: true
+    }
   },
   connectTimeoutMS: {
     default: 30000,
