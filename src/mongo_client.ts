@@ -667,7 +667,6 @@ export interface MongoOptions
   extends Required<
       Pick<
         MongoClientOptions,
-        | 'appName'
         | 'autoEncryption'
         | 'connectTimeoutMS'
         | 'directConnection'
@@ -701,6 +700,7 @@ export interface MongoOptions
       >
     >,
     SupportedNodeConnectionOptions {
+  appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
   credentials?: MongoCredentials;

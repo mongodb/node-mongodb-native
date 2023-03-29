@@ -372,7 +372,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
 
   let metadata;
   if (poolOptions.appName) {
-    metadata = makeClientMetadata({ appName: poolOptions.appName });
+    metadata = makeClientMetadata({ appName: poolOptions.appName, driverInfo: {} });
     delete poolOptions.appName;
   }
 

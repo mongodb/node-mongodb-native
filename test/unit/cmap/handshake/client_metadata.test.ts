@@ -6,77 +6,93 @@ import { makeClientMetadata } from '../../../mongodb';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
 
-describe('ClientMetadata [module]', function () {
-  describe('.makeClientMetadata', function () {
-    context('when options are provided', function () {
-      context('when driver info is provided', function () {
-        const options = {
-          driverInfo: { platform: 'myPlatform', name: 'myName', version: 'myVersion' }
-        };
-        const metadata = makeClientMetadata(options);
+describe('makeClientMetadata()', () => {
+  context('when driverInfo.platform is provided', () => {
+    it('appends driverInfo.platform to the platform field', () => {
+      const options = {
+        driverInfo: { platform: 'myPlatform' }
+      };
+      const metadata = makeClientMetadata(options);
+      expect(metadata).to.have.property(
+        'platform',
+        `Node.js ${process.version}, ${os.endianness()} (unified)|myPlatform`
+      );
+    });
+  });
+  context('when driverInfo.name is provided', () => {
+    it('appends driverInfo.name to the driver.name field', () => {
+      const options = {
+        driverInfo: { name: 'myName' }
+      };
+      const metadata = makeClientMetadata(options);
+      expect(metadata).to.have.nested.property('driver.name', `nodejs|myName`);
+    });
+  });
+  context('when driverInfo.version is provided', () => {
+    it('appends driverInfo.version to the version field', () => {
+      const options = {
+        driverInfo: { version: 'myVersion' }
+      };
+      const metadata = makeClientMetadata(options);
+      expect(metadata).to.have.nested.property(
+        'driver.version',
+        `${NODE_DRIVER_VERSION}|myVersion`
+      );
+    });
+  });
 
-        it('appends the driver info to the metadata', function () {
-          expect(metadata).to.deep.equal({
-            driver: {
-              name: 'nodejs|myName',
-              version: NODE_DRIVER_VERSION
-            },
-            os: {
-              type: os.type(),
-              name: process.platform,
-              architecture: process.arch,
-              version: os.release()
-            },
-            platform: `Node.js ${process.version}, ${os.endianness()} (unified)|myPlatform`,
-            version: `${NODE_DRIVER_VERSION}|myVersion`
-          });
-        });
+  context('when no custom driverInto is provided', () => {
+    const metadata = makeClientMetadata({ driverInfo: {} });
+
+    it('does not append the driver info to the metadata', () => {
+      expect(metadata).to.deep.equal({
+        driver: {
+          name: 'nodejs',
+          version: NODE_DRIVER_VERSION
+        },
+        os: {
+          type: os.type(),
+          name: process.platform,
+          architecture: process.arch,
+          version: os.release()
+        },
+        platform: `Node.js ${process.version}, ${os.endianness()} (unified)`
       });
+    });
 
-      context('when driver info is not provided', function () {
-        const metadata = makeClientMetadata({});
+    it('does not set the application field', () => {
+      expect(metadata).not.to.have.property('application');
+    });
+  });
 
-        it('does not append the driver info to the metadata', function () {
-          expect(metadata).to.deep.equal({
-            driver: {
-              name: 'nodejs',
-              version: NODE_DRIVER_VERSION
-            },
-            os: {
-              type: os.type(),
-              name: process.platform,
-              architecture: process.arch,
-              version: os.release()
-            },
-            platform: `Node.js ${process.version}, ${os.endianness()} (unified)`
-          });
-        });
+  context('when app name is provided', () => {
+    context('when the app name is over 128 bytes', () => {
+      const longString = 'a'.repeat(300);
+      const exactString = 'a'.repeat(128);
+      const options = {
+        appName: longString,
+        driverInfo: {}
+      };
+      const metadata = makeClientMetadata(options);
+
+      it('truncates the application name to 128 bytes', () => {
+        expect(metadata.application?.name).to.equal(exactString);
+        // the above assertion fails if `metadata.application?.name` is undefined, so
+        // we can safely assert that it exists
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(128);
       });
+    });
 
-      context('when app name is provided', function () {
-        context('when the app name is over 128 bytes', function () {
-          const longString = new Array(300).join('a');
-          const exactString = new Array(128 + 1).join('a');
-          const options = {
-            appName: longString
-          };
-          const metadata = makeClientMetadata(options);
+    context('when the app name is under 128 bytes', () => {
+      const options = {
+        appName: 'myApplication',
+        driverInfo: {}
+      };
+      const metadata = makeClientMetadata(options);
 
-          it('truncates the application name to 128 bytes', function () {
-            expect(metadata.application?.name).to.equal(exactString);
-          });
-        });
-
-        context('when the app name is under 128 bytes', function () {
-          const options = {
-            appName: 'myApplication'
-          };
-          const metadata = makeClientMetadata(options);
-
-          it('sets the application name to the value', function () {
-            expect(metadata.application?.name).to.equal('myApplication');
-          });
-        });
+      it('sets the application name to the value', () => {
+        expect(metadata.application?.name).to.equal('myApplication');
       });
     });
   });
