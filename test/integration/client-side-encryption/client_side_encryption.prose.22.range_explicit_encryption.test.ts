@@ -241,6 +241,8 @@ describe('Range Explicit Encryption', function () {
           }
         ];
 
+        // Queryable encryption only supports single document inserts, so we must insert the documents
+        // one at a time.
         for (const doc of documents) {
           await encryptedClient.db('db').collection('explicit_encryption').insertOne(doc);
         }
