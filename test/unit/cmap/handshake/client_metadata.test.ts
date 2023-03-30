@@ -15,7 +15,7 @@ describe('makeClientMetadata()', () => {
       const metadata = makeClientMetadata(options);
       expect(metadata).to.have.property(
         'platform',
-        `Node.js ${process.version}, ${os.endianness()} (unified)|myPlatform`
+        `Node.js ${process.version}, ${os.endianness()}|myPlatform`
       );
     });
   });
@@ -56,7 +56,7 @@ describe('makeClientMetadata()', () => {
           architecture: process.arch,
           version: os.release()
         },
-        platform: `Node.js ${process.version}, ${os.endianness()} (unified)`
+        platform: `Node.js ${process.version}, ${os.endianness()}`
       });
     });
 
@@ -68,21 +68,40 @@ describe('makeClientMetadata()', () => {
   context('when app name is provided', () => {
     context('when the app name is over 128 bytes', () => {
       const longString = 'a'.repeat(300);
-      const exactString = 'a'.repeat(128);
       const options = {
         appName: longString,
         driverInfo: {}
       };
       const metadata = makeClientMetadata(options);
 
-      it('truncates the application name to 128 bytes', () => {
-        expect(metadata.application?.name).to.equal(exactString);
+      it('truncates the application name to <=128 bytes', () => {
+        expect(metadata.application?.name).to.be.a('string');
         // the above assertion fails if `metadata.application?.name` is undefined, so
         // we can safely assert that it exists
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(128);
       });
     });
+
+    context(
+      'TODO(NODE-5150): fix appName truncation when multi-byte unicode charaters straddle byte 128',
+      () => {
+        const longString = '€'.repeat(300);
+        const options = {
+          appName: longString,
+          driverInfo: {}
+        };
+        const metadata = makeClientMetadata(options);
+
+        it('truncates the application name to 129 bytes', () => {
+          expect(metadata.application?.name).to.be.a('string');
+          // the above assertion fails if `metadata.application?.name` is undefined, so
+          // we can safely assert that it exists
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          expect(Buffer.byteLength(metadata.application!.name, 'utf8')).to.equal(129);
+        });
+      }
+    );
 
     context('when the app name is under 128 bytes', () => {
       const options = {

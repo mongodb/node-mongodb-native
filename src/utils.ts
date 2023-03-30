@@ -515,7 +515,7 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
 
 /**
  * @public
- * https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
+ * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
  */
 export interface ClientMetadata {
   driver: {
@@ -534,9 +534,7 @@ export interface ClientMetadata {
   };
 }
 
-/**
- * @public
- */
+/** @public */
 export interface ClientMetadataOptions {
   driverInfo?: {
     name?: string;
@@ -557,8 +555,8 @@ export function makeClientMetadata(
     ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
     : NODE_DRIVER_VERSION;
   const platform = options.driverInfo.platform
-    ? `Node.js ${process.version}, ${os.endianness()} (unified)|${options.driverInfo.platform}`
-    : `Node.js ${process.version}, ${os.endianness()} (unified)`;
+    ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
+    : `Node.js ${process.version}, ${os.endianness()}`;
 
   const metadata: ClientMetadata = {
     driver: {
