@@ -13,31 +13,63 @@ describe('makeClientMetadata()', () => {
         driverInfo: { platform: 'myPlatform' }
       };
       const metadata = makeClientMetadata(options);
-      expect(metadata).to.have.property(
-        'platform',
-        `Node.js ${process.version}, ${os.endianness()}|myPlatform`
-      );
+      expect(metadata).to.deep.equal({
+        driver: {
+          name: 'nodejs',
+          version: NODE_DRIVER_VERSION
+        },
+        os: {
+          type: os.type(),
+          name: process.platform,
+          architecture: process.arch,
+          version: os.release()
+        },
+        platform: `Node.js ${process.version}, ${os.endianness()}|myPlatform`
+      });
     });
   });
+
   context('when driverInfo.name is provided', () => {
     it('appends driverInfo.name to the driver.name field', () => {
       const options = {
         driverInfo: { name: 'myName' }
       };
       const metadata = makeClientMetadata(options);
-      expect(metadata).to.have.nested.property('driver.name', `nodejs|myName`);
+      expect(metadata).to.deep.equal({
+        driver: {
+          name: 'nodejs|myName',
+          version: NODE_DRIVER_VERSION
+        },
+        os: {
+          type: os.type(),
+          name: process.platform,
+          architecture: process.arch,
+          version: os.release()
+        },
+        platform: `Node.js ${process.version}, ${os.endianness()}`
+      });
     });
   });
+
   context('when driverInfo.version is provided', () => {
     it('appends driverInfo.version to the version field', () => {
       const options = {
         driverInfo: { version: 'myVersion' }
       };
       const metadata = makeClientMetadata(options);
-      expect(metadata).to.have.nested.property(
-        'driver.version',
-        `${NODE_DRIVER_VERSION}|myVersion`
-      );
+      expect(metadata).to.deep.equal({
+        driver: {
+          name: 'nodejs',
+          version: `${NODE_DRIVER_VERSION}|myVersion`
+        },
+        os: {
+          type: os.type(),
+          name: process.platform,
+          architecture: process.arch,
+          version: os.release()
+        },
+        platform: `Node.js ${process.version}, ${os.endianness()}`
+      });
     });
   });
 
