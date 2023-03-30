@@ -46,7 +46,7 @@ describe('Topology (unit)', function () {
       done();
     });
 
-    it('should report the correct platform in client metadata', function (done) {
+    it('should report the correct platform in client metadata', async function () {
       const helloRequests = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -59,22 +59,17 @@ describe('Topology (unit)', function () {
       });
 
       client = new MongoClient(`mongodb://${mockServer.uri()}/`);
-      client.connect(err => {
-        expect(err).to.not.exist;
 
-        client.db().command({ ping: 1 }, err => {
-          expect(err).to.not.exist;
+      await client.connect();
 
-          expect(helloRequests).to.have.length.greaterThan(1);
-          helloRequests.forEach(helloRequest =>
-            expect(helloRequest)
-              .nested.property('client.platform')
-              .to.match(/unified/)
-          );
+      await client.db().command({ ping: 1 });
 
-          done();
-        });
-      });
+      expect(helloRequests).to.have.length.greaterThan(1);
+      for (const request of helloRequests) {
+        expect(request)
+          .nested.property('client.platform')
+          .to.match(/Node.js /);
+      }
     });
   });
 
