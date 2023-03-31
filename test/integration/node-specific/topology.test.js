@@ -1,11 +1,14 @@
 'use strict';
 const { expect } = require('chai');
+const { makeClientMetadata } = require('../../mongodb');
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
     metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
     test: function (done) {
-      const topology = this.configuration.newTopology();
+      const topology = this.configuration.newTopology({
+        metadata: makeClientMetadata({ driverInfo: {} })
+      });
 
       const states = [];
       topology.on('stateChanged', (_, newState) => states.push(newState));

@@ -770,6 +770,7 @@ export interface MongoOptions
       >
     >,
     SupportedNodeConnectionOptions {
+  appName?: string;
   hosts: HostAddress[];
   srvHost?: string;
   credentials?: MongoCredentials;

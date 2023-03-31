@@ -7,14 +7,17 @@ import type { MongoCredentials } from './mongo_credentials';
 
 export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
-/** Context used during authentication */
+/**
+ * Context used during authentication
+ * @internal
+ */
 export class AuthContext {
   /** The connection to authenticate */
   connection: Connection;
   /** The credentials to use for authentication */
   credentials?: MongoCredentials;
   /** The options passed to the `connect` method */
-  options: AuthContextOptions;
+  options: ConnectionOptions;
 
   /** A response from an initial auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
@@ -24,7 +27,7 @@ export class AuthContext {
   constructor(
     connection: Connection,
     credentials: MongoCredentials | undefined,
-    options: AuthContextOptions
+    options: ConnectionOptions
   ) {
     this.connection = connection;
     this.credentials = credentials;
