@@ -1,3 +1,4 @@
+import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
@@ -549,6 +550,7 @@ describe('class MongoLogger', function () {
             expect(stream.buffer).to.have.lengthOf(0);
           });
         });
+
         context('when log severity is equal to or less than what was configured', function () {
           it('writes log to logDestination', function () {
             const stream = new BufferingStream();
@@ -613,6 +615,7 @@ describe('class MongoLogger', function () {
             expect(stream.buffer[0]).to.have.property('b', 12);
           });
         });
+
         context('when string is being logged', function () {
           const message = 'Hello world';
           it('puts the string in the message field of the emitted log message', function () {
@@ -625,6 +628,287 @@ describe('class MongoLogger', function () {
             logger[severityLevel]('command', message);
             expect(stream.buffer).to.have.lengthOf(1);
             expect(stream.buffer[0]).to.have.property('message', message);
+          });
+        });
+
+        context('spec-required logs', function () {
+          let stream: BufferingStream | undefined;
+          let logger: MongoLogger | undefined;
+
+          beforeEach(function () {
+            stream = new BufferingStream();
+            logger = new MongoLogger({
+              componentSeverities: {
+                command: 'trace',
+                connection: 'trace'
+              } as any,
+              logDestination: stream
+            } as any);
+          });
+
+          context('command component', function () {
+            let log;
+            const commandStarted = {
+              commandName: 'find',
+              requestId: 0,
+              connectionId: 0,
+              address: '127.0.0.1:27017',
+              serviceId: '0x1234567890',
+              databaseName: 'db',
+              name: 'CommandStarted'
+            };
+            const commandSucceeded = {
+              commandName: 'find',
+              requestId: 0,
+              connectionId: 0,
+              duration: 0,
+              address: '127.0.0.1:27017',
+              serviceId: '0x1234567890',
+              databaseName: 'db',
+              name: 'CommandSucceeded'
+            };
+            const commandFailed = {
+              commandName: 'find',
+              requestId: 0,
+              duration: 0,
+              connectionId: 0,
+              address: '127.0.0.1:27017',
+              serviceId: '0x1234567890',
+              databaseName: 'db',
+              name: 'CommandFailed'
+            };
+
+            function commonCommandComponentAssertions() {
+              const fields = [
+                ['commandName', 'string'],
+                ['requestId', 'number'],
+                ['driverConnectionId', 'number'],
+                ['serverHost', 'string'],
+                ['serverPort', 'number'],
+                ['serviceId', 'string']
+              ];
+              for (const [fieldName, type] of fields) {
+                it(`emits a log with field \`${fieldName}\` that is of type ${type}`, function () {
+                  expect(log).to.have.property(fieldName).that.is.a(type);
+                });
+              }
+            }
+
+            context('when CommandStartedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('command', commandStarted);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+
+              commonCommandComponentAssertions();
+
+              it('emits a log with field `message` = "Command started"', function () {
+                expect(log).to.have.property('message', 'Command started');
+              });
+
+              it('emits a log with field `command` that is an EJSON string', function () {
+                expect(log).to.have.property('command').that.is.a('string');
+                expect(() => EJSON.parse(log.command)).to.not.throw();
+              });
+
+              it('emits a log with field `databaseName` that is a string', function () {
+                expect(log).to.have.property('databaseName').that.is.a('string');
+              });
+            });
+
+            context('when CommandSucceededEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('command', commandSucceeded);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0] as any;
+              });
+
+              commonCommandComponentAssertions();
+              it('emits a log with field `message` = "Command succeeded"', function () {
+                expect(log).to.have.property('message', 'Command succeeded');
+              });
+
+              it('emits a log with field `durationMS` that is a number', function () {
+                expect(log).to.have.property('durationMS').that.is.a('number');
+              });
+
+              it('emits a log with field `reply` that is an EJSON string', function () {
+                expect(log).to.have.property('reply').that.is.a('string');
+
+                expect(() => EJSON.parse(log.reply)).to.not.throw();
+              });
+            });
+
+            context('when CommandFailedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('command', commandFailed);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0] as any;
+              });
+
+              commonCommandComponentAssertions();
+              it('emits a log with field `message` = "Command failed"', function () {
+                expect(log).to.have.property('message', 'Command failed');
+              });
+
+              it('emits a log with field `durationMS` that is a number', function () {
+                expect(log).to.have.property('durationMS').that.is.a('number');
+              });
+
+              it('emits a log with field `failure`', function () {
+                expect(log).to.have.property('failure');
+              });
+            });
+          });
+
+          context('connection component', function () {
+            let log;
+            const options = {
+              maxIdleTimeMS: 0,
+              minPoolSize: 0,
+              maxPoolSize: 0,
+              maxConnecting: 0,
+              waitQueueTimeoutMS: 100
+            };
+            const connectionPoolCreated = {
+              name: 'ConnectionPoolCreated',
+              waitQueueSize: 0,
+              options
+            };
+            const connectionPoolReady = {
+              name: 'ConnectionPoolReady',
+              options
+            };
+            const connectionPoolCleared = {
+              name: 'ConnectionPoolCleared',
+              serviceId: 0,
+              options
+            };
+            const connectionPoolClosed = {
+              name: 'ConnectionPoolClosed',
+              options
+            };
+            const connectionCreated = {
+              name: 'ConnectionCreated',
+              connectionId: 0,
+              options
+            };
+            const connectionCheckOutStarted = {
+              name: 'ConnectionCheckOutStarted',
+              options
+            };
+            const connectionCheckOutFailed = {
+              name: 'ConnectionCheckoutFailed',
+              reason: 'wups',
+              options
+            };
+            const connectionCheckedOut = {
+              name: 'ConnectionCheckedOut',
+              connectionId: 0,
+              options
+            };
+            const connectionCheckedIn = {
+              name: 'ConnectionCheckedIn',
+              connectionId: 0,
+              options
+            };
+            function commonConnectionComponentAssertions() {
+              const fields = [
+                ['serverPort', 'number'],
+                ['serverHost', 'string']
+              ];
+              for (const [fieldName, type] of fields) {
+                it(`emits a log with field \`${fieldName}\` that is of type ${type}`, function () {
+                  expect(stream?.buffer).to.have.lengthOf(1);
+                  expect(stream?.buffer[0]).to.have.property(fieldName).that.is.a(type);
+                });
+              }
+            }
+            context('when ConnectionPoolCreatedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionPoolCreated);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+              it('emits a log with field `message` = "Connection pool created"', function () {});
+              it('emits a log with field `maxIdleTimeMS` that is a number');
+              it('emits a log with field `minPoolSize` that is a number');
+              it('emits a log with field `maxPoolSize` that is a number');
+              it('emits a log with field `maxConnecting` that is a number');
+              it('emits a log with field `waitQueueTimeoutMS` that is a number');
+              it('emits a log with field `waitQueueSize` that is a number');
+            });
+            context('when ConnectionPoolReadyEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionPoolReady);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+              it('emits a log with field `message` = "Connection pool ready"');
+            });
+            context('when ConnectionPoolClearedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionPoolCleared);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+              it('emits a log with field `message` = "Connection pool cleared"');
+              it('emits a log with field `serviceId` that is a string'); // TODO: Only in LB mode
+            });
+            context('when ConnectionPoolClosedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionPoolClosed);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+              it('emits a log with field `message` = "Connection pool closed"');
+            });
+
+            context('when ConnectionCreatedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionCreated);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+            });
+            context('when ConnectionCheckOutStartedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionCheckOutStarted);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+            });
+            context('when ConnectionCheckOutFailedEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionCheckOutFailed);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+            });
+            context('when ConnectionCheckedInEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionCheckedIn);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+            });
+            context('when ConnectionCheckedOutEvent is logged', function () {
+              beforeEach(function () {
+                (logger as MongoLogger)[severityLevel]('connection', connectionCheckedOut);
+                expect(stream?.buffer).to.have.lengthOf(1);
+                log = stream?.buffer[0];
+              });
+              commonConnectionComponentAssertions();
+            });
           });
         });
       });

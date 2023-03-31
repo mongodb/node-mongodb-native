@@ -38,6 +38,10 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
     this.options = pool.options;
     this.waitQueueSize = pool.waitQueueSize;
   }
+
+  get name(): string {
+    return 'ConnectionPoolCreated';
+  }
 }
 
 /**
@@ -50,6 +54,9 @@ export class ConnectionPoolReadyEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool) {
     super(pool);
   }
+  get name(): string {
+    return 'ConnectionPoolReady';
+  }
 }
 
 /**
@@ -61,6 +68,9 @@ export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
+  }
+  get name(): string {
+    return 'ConnectionPoolClosed';
   }
 }
 
@@ -78,6 +88,9 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
     super(pool);
     this.connectionId = connection.id;
   }
+  get name(): string {
+    return 'ConnectionCreated';
+  }
 }
 
 /**
@@ -93,6 +106,9 @@ export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
+  }
+  get name(): string {
+    return 'ConnectionReady';
   }
 }
 
@@ -119,6 +135,9 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
     this.reason = reason || 'unknown';
     this.serviceId = connection.serviceId;
   }
+  get name(): string {
+    return 'ConnectionClosed';
+  }
 }
 
 /**
@@ -130,6 +149,9 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
+  }
+  get name(): string {
+    return 'ConnectionCheckOutStarted';
   }
 }
 
@@ -147,6 +169,9 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
     super(pool);
     this.reason = reason;
   }
+  get name(): string {
+    return 'ConnectionCheckOutFailed';
+  }
 }
 
 /**
@@ -163,6 +188,9 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
     super(pool);
     this.connectionId = connection.id;
   }
+  get name(): string {
+    return 'ConnectionCheckedOut';
+  }
 }
 
 /**
@@ -178,6 +206,9 @@ export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   constructor(pool: ConnectionPool, connection: Connection) {
     super(pool);
     this.connectionId = connection.id;
+  }
+  get name(): string {
+    return 'ConnectionCheckedIn';
   }
 }
 
@@ -200,5 +231,9 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
     super(pool);
     this.serviceId = options.serviceId;
     this.interruptInUseConnections = options.interruptInUseConnections;
+  }
+
+  get name(): string {
+    return 'ConnectionPoolCleared';
   }
 }

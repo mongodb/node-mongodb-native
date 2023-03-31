@@ -50,6 +50,10 @@ export class CommandStartedEvent {
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
+
+  get name(): string {
+    return 'CommandStarted';
+  }
 }
 
 /**
@@ -97,6 +101,10 @@ export class CommandSucceededEvent {
   /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
+  }
+
+  get name(): string {
+    return 'CommandSucceeded';
   }
 }
 
@@ -146,6 +154,10 @@ export class CommandFailedEvent {
   /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
+  }
+
+  get name(): string {
+    return 'CommandFailed';
   }
 }
 
