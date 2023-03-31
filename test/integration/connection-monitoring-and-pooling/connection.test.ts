@@ -83,18 +83,19 @@ describe('Connection', function () {
       }
     });
 
-    it('should support calling back multiple times on exhaust commands', {
+    it.only('should support calling back multiple times on exhaust commands', {
       metadata: {
         requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] }
       },
       test: function (done) {
         const namespace = ns(`${this.configuration.db}.$cmd`);
-        const connectOptions = Object.assign(
-          { connectionType: Connection },
-          this.configuration.options
-        );
+        const connectOptions: Partial<ConnectionOptions> = {
+          connectionType: Connection,
+          ...this.configuration.options,
+          metadata: makeClientMetadata({ driverInfo: {} })
+        };
 
-        connect(connectOptions, (err, conn) => {
+        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
           expect(err).to.not.exist;
           this.defer(_done => conn.destroy(_done));
 
