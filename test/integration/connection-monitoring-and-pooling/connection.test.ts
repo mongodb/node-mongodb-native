@@ -83,7 +83,7 @@ describe('Connection', function () {
       }
     });
 
-    it.only('should support calling back multiple times on exhaust commands', {
+    it('should support calling back multiple times on exhaust commands', {
       metadata: {
         requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] }
       },
