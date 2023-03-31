@@ -73,7 +73,7 @@ describe('makeClientMetadata()', () => {
     });
   });
 
-  context('when no custom driverInto is provided', () => {
+  context('when no custom driverInfo is provided', () => {
     const metadata = makeClientMetadata({ driverInfo: {} });
 
     it('does not append the driver info to the metadata', () => {
