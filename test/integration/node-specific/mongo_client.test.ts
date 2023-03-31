@@ -574,6 +574,16 @@ describe('class MongoClient', function () {
       expect(topologyOpenEvents).to.have.lengthOf(1);
       expect(client.topology?.isConnected()).to.be.true;
     });
+
+    it('releases the lock if the topology is closed before connection is complete', function (done) {
+      clientConnect();
+      client.close();
+      client.once('topologyClosed', async () => {
+        await clientConnect();
+        expect(client.topology?.isConnected()).to.be.true;
+        done();
+      });
+    });
   });
 
   context('#close()', () => {
