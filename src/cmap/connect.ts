@@ -17,7 +17,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { Callback, ClientMetadata, HostAddress, makeClientMetadata, ns } from '../utils';
+import { Callback, ClientMetadata, HostAddress, ns } from '../utils';
 import { AuthContext, AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
@@ -213,7 +213,7 @@ export async function prepareHandshakeDocument(
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
     helloOk: true,
-    client: options.metadata || makeClientMetadata(options),
+    client: options.metadata,
     compression: compressors
   };
 
