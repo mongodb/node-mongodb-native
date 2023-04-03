@@ -1,12 +1,12 @@
 import { EJSON } from 'bson';
 import { Writable } from 'stream';
 
-import {
+import type {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent
 } from './cmap/command_monitoring_events';
-import {
+import type {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
   ConnectionCheckOutFailedEvent,
@@ -20,7 +20,7 @@ import {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
-import { parseUnsignedInteger } from './utils';
+import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -201,10 +201,12 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 function DEFAULT_LOG_TRANSFORM(logObject: Record<string, any>): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = {};
 
-  const getHostPort = (s: string): { host: string; port: number } => {
-    const lastColon = s.lastIndexOf(':');
-    const host = s.slice(0, lastColon);
-    const port = Number.parseInt(s.slice(lastColon + 1));
+  const getHostPort = (address: string): { host: string; port: number } => {
+    const hostAddress = new HostAddress(address);
+
+    // Should only default when the address is a socket address
+    const host = hostAddress.host ?? '';
+    const port = hostAddress.port ?? 0;
     return { host, port };
   };
 
