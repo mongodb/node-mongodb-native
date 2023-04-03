@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
-import * as os from 'os';
 import * as sinon from 'sinon';
 
 import {

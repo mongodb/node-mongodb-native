@@ -395,7 +395,7 @@ describe('client metadata module', () => {
           platform: 'Node.js v16.17.0, LE',
           application: { name: 'applicationName' },
           env: { name: 'aws.lambda' }
-        })
+        }
       ],
       [
         'removes `env` entirely next',

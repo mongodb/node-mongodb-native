@@ -712,13 +712,12 @@ export interface MongoOptions
   compressors: CompressorName[];
   writeConcern: WriteConcern;
   dbName: string;
+  metadata: ClientMetadata;
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;
   proxyUsername?: string;
   proxyPassword?: string;
-
-  metadata: ClientMetadata;
 
   /** @internal */
   connectionType?: typeof Connection;
