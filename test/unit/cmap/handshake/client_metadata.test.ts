@@ -368,6 +368,16 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation order', function () {
+    /**
+     * These tests demonstrate that the order in which metadata truncation occurs is spec
+     * compliant.  There are tests in `connection_string.test.ts` that demonstrate that when
+     * the metadata is greater than 512 bytes, the metadata is truncated.
+     *
+     * Together, these tests demonstrate that
+     * - truncation happens in the correct order
+     * - truncation occurs when necessary
+     */
+
     const longDocument = 'a'.repeat(512);
 
     const tests: Array<[string, ClientMetadata, TruncatedClientMetadata]> = [
