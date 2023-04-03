@@ -6,6 +6,7 @@ import { URLSearchParams } from 'url';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
+import { makeClientMetadata, truncateClientMetadata } from './cmap/handshake/client_metadata';
 import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import {
@@ -32,7 +33,6 @@ import {
   emitWarningOnce,
   HostAddress,
   isRecord,
-  makeClientMetadata,
   parseInteger,
   setDifference
 } from './utils';
@@ -543,6 +543,8 @@ export function parseOptions(
   );
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
+  Object.freeze(mongoOptions.metadata);
+  mongoOptions.truncatedClientMetadata = truncateClientMetadata(mongoOptions.metadata);
 
   return mongoOptions;
 }

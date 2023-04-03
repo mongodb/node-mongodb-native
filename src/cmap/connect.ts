@@ -17,7 +17,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { Callback, ClientMetadata, HostAddress, ns } from '../utils';
+import { Callback, HostAddress, ns } from '../utils';
 import { AuthContext, AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
@@ -28,6 +28,7 @@ import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
 import { CommandOptions, Connection, ConnectionOptions, CryptoConnection } from './connection';
+import type { TruncatedClientMetadata } from './handshake/client_metadata';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
@@ -192,7 +193,7 @@ export interface HandshakeDocument extends Document {
   ismaster?: boolean;
   hello?: boolean;
   helloOk?: boolean;
-  client: ClientMetadata;
+  client: TruncatedClientMetadata;
   compression: string[];
   saslSupportedMechs?: string;
   loadBalanced?: boolean;
@@ -213,7 +214,7 @@ export async function prepareHandshakeDocument(
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
     helloOk: true,
-    client: options.metadata,
+    client: options.truncatedClientMetadata,
     compression: compressors
   };
 

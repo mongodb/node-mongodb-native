@@ -641,4 +641,38 @@ describe('Connection String', function () {
       ]);
     });
   });
+
+  context('when the metadata is >512 bytes', () => {
+    it('truncates the metadata', () => {
+      const client = new MongoClient('mongodb://localhost:27017', {
+        appName: 'my app',
+        driverInfo: { name: 'a'.repeat(512) }
+      });
+      expect(client.options.truncatedClientMetadata).to.deep.equal({
+        application: { name: 'my app' }
+      });
+    });
+
+    it('preserves the untruncated metadata on the `metadata` property', () => {
+      const client = new MongoClient('mongodb://localhost:27017', {
+        appName: 'my app',
+        driverInfo: { name: 'a'.repeat(512) }
+      });
+      console.error(client.options.metadata);
+      expect(client.options.metadata).to.deep.equal({
+        driver: {
+          name: 'nodejs|mongodb-legacy|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          version: '5.1.0|5.0.0'
+        },
+        os: {
+          type: 'Darwin',
+          name: 'darwin',
+          architecture: 'x64',
+          version: '21.6.0'
+        },
+        platform: 'Node.js v16.17.0, LE',
+        application: { name: 'my app' }
+      });
+    });
+  });
 });

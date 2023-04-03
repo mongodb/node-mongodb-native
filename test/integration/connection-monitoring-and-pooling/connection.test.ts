@@ -36,7 +36,7 @@ describe('Connection', function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          truncatedClientMetadata: makeClientMetadata({ driverInfo: {} })
         };
 
         connect(connectOptions as any as ConnectionOptions, (err, conn) => {
@@ -60,7 +60,7 @@ describe('Connection', function () {
           connectionType: Connection,
           monitorCommands: true,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          truncatedClientMetadata: makeClientMetadata({ driverInfo: {} })
         };
 
         connect(connectOptions as any as ConnectionOptions, (err, conn) => {
@@ -92,7 +92,7 @@ describe('Connection', function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          truncatedClientMetadata: makeClientMetadata({ driverInfo: {} })
         };
 
         connect(connectOptions as any as ConnectionOptions, (err, conn) => {

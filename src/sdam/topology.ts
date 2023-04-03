@@ -5,6 +5,7 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import type { ClientMetadata, TruncatedClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
@@ -37,7 +38,6 @@ import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
   Callback,
-  ClientMetadata,
   EventEmitterWithState,
   HostAddress,
   List,
@@ -138,15 +138,14 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** The name of the replica set to connect to */
   replicaSet?: string;
   srvHost?: string;
-  /** @internal */
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
   loadBalanced: boolean;
   metadata: ClientMetadata;
+  truncatedClientMetadata: TruncatedClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
-  /** @internal */
   [featureFlag: symbol]: any;
 }
 
@@ -661,8 +660,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (typeof callback === 'function') callback(undefined, true);
   }
 
-  get clientMetadata(): ClientMetadata {
-    return this.s.options.metadata;
+  get clientMetadata(): TruncatedClientMetadata {
+    return this.s.options.truncatedClientMetadata;
   }
 
   isConnected(): boolean {
