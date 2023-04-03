@@ -1,4 +1,4 @@
-import { calculateObjectSize } from 'bson';
+import { calculateObjectSize, Int32 } from 'bson';
 import * as os from 'os';
 
 import type { MongoOptions } from '../../mongo_client';
@@ -27,8 +27,8 @@ export interface ClientMetadata {
   /** Data containing information about the environment, if the driver is running in a FAAS environment. */
   env?: {
     name: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
-    timeout_sec?: number;
-    memory_mb?: number;
+    timeout_sec?: Int32;
+    memory_mb?: Int32;
     region?: string;
     url?: string;
   };

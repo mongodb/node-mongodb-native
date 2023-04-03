@@ -5,6 +5,7 @@ import {
   ClientMetadata,
   determineFAASProvider,
   FAASProvider,
+  Int32,
   makeClientMetadata,
   truncateClientMetadata
 } from '../../../mongodb';
@@ -251,7 +252,7 @@ describe('client metadata module', () => {
           ],
           outcome: {
             name: 'aws.lambda',
-            memory_mb: 3
+            memory_mb: new Int32(3)
           }
         }
       ],
@@ -280,7 +281,7 @@ describe('client metadata module', () => {
           ],
           outcome: {
             name: 'gcp.func',
-            memory_mb: 1024
+            memory_mb: new Int32(1024)
           }
         },
         {

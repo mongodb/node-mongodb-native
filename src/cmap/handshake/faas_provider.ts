@@ -1,3 +1,5 @@
+import { Int32 } from 'bson';
+
 import { identity } from '../../utils';
 import type { ClientMetadata } from './client_metadata';
 
@@ -38,13 +40,13 @@ function applyAzureMetadata(m: ClientMetadata): ClientMetadata {
 function applyGCPMetadata(m: ClientMetadata): ClientMetadata {
   m.env = { name: 'gcp.func' };
 
-  const memory_mb = Number.parseInt(process.env.FUNCTION_MEMORY_MB ?? '');
-  if (!Number.isNaN(memory_mb)) {
-    m.env.memory_mb = memory_mb;
+  const memory_mb = Number(process.env.FUNCTION_MEMORY_MB);
+  if (Number.isInteger(memory_mb)) {
+    m.env.memory_mb = new Int32(memory_mb);
   }
-  const timeout_sec = Number.parseInt(process.env.FUNCTION_TIMEOUT_SEC ?? '');
-  if (!Number.isNaN(timeout_sec)) {
-    m.env.timeout_sec = timeout_sec;
+  const timeout_sec = Number(process.env.FUNCTION_TIMEOUT_SEC);
+  if (Number.isInteger(timeout_sec)) {
+    m.env.timeout_sec = new Int32(timeout_sec);
   }
   if (isNonEmptyString(process.env.FUNCTION_REGION)) {
     m.env.region = process.env.FUNCTION_REGION;
@@ -58,9 +60,9 @@ function applyAWSMetadata(m: ClientMetadata): ClientMetadata {
   if (isNonEmptyString(process.env.AWS_REGION)) {
     m.env.region = process.env.AWS_REGION;
   }
-  const memory_mb = Number.parseInt(process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE ?? '');
-  if (!Number.isNaN(memory_mb)) {
-    m.env.memory_mb = memory_mb;
+  const memory_mb = Number(process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE);
+  if (Number.isInteger(memory_mb)) {
+    m.env.memory_mb = new Int32(memory_mb);
   }
   return m;
 }
