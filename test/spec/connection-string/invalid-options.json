@@ -5,13 +5,7 @@
       "uri": "mongodb://example.com/?foo=bar",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     },
@@ -20,13 +14,7 @@
       "uri": "mongodb://example.com/?fsync=ifPossible",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     },
@@ -35,96 +23,52 @@
       "uri": "mongodb://example.com/?replicaSet=test&replicaSet=test",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
-      "options": {
-        "replicaset": "test"
-      }
+      "options": null
     },
     {
       "description": "Repeated option keys with different values",
       "uri": "mongodb://example.com/?replicaSet=test1&replicaSet=test2",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
-      "options": {
-        "replicaset": "test"
-      }
+      "options": null
     },
     {
       "description": "List option with one empty option specified",
       "uri": "mongodb://example.com/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny&readPreferenceTags=",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
-      "options": {
-        "replicaset": "test"
-      }
+      "options": null
     },
     {
       "description": "List option with an invalid option specified",
       "uri": "mongodb://example.com/?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:ny&readPreferenceTags=foobarbaz",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "example.com",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
-      "options": {
-        "replicaset": "test"
-      }
+      "options": null
     },
     {
       "description": "Error on empty integer option values",
       "uri": "mongodb://localhost/?maxIdleTimeMS=",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "localhost",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     },
     {
-      "description": "Error on empty non-integer value for integer option",
-      "uri": "mongodb://localhost/?maxIdleTimeMS=",
+      "description": "Error on non-empty invalid value for integer option",
+      "uri": "mongodb://localhost/?maxIdleTimeMS=aString",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "localhost",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     },
@@ -133,13 +77,7 @@
       "uri": "mongodb://localhost/?journal=",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "localhost",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     },
@@ -148,13 +86,7 @@
       "uri": "mongodb://localhost/?journal=stringValue",
       "valid": false,
       "warning": false,
-      "hosts": [
-        {
-          "type": "hostname",
-          "host": "localhost",
-          "port": null
-        }
-      ],
+      "hosts": null,
       "auth": null,
       "options": null
     }
