@@ -1,4 +1,4 @@
-import { EJSON } from 'bson';
+import { EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
@@ -96,7 +96,7 @@ describe('class MongoLogger', function () {
 
         context('when MONGODB_LOG_ALL is valid', () => {
           for (const [validOption, expectedValue] of validNonDefaultOptions) {
-            context(`{ MONGODB_LOG_ALL: '${validOption} }'`, () => {
+            context(`{ MONGODB_LOG_ALL: '${validOption}' }`, () => {
               it('sets default to the value of MONGODB_LOG_ALL', () => {
                 const { componentSeverities } = MongoLogger.resolveOptions(
                   {
@@ -493,7 +493,11 @@ describe('class MongoLogger', function () {
         context('when mongodbLogPath is set to valid client option', function () {
           for (const validEnvironmentOption of validEnvironmentOptions) {
             for (const validValue of validClientOptions) {
-              it(`{environment: "${validEnvironmentOption}", client: "${validValue}"} uses the value from the client options`, function () {
+              it(`{environment: "${validEnvironmentOption}", client: ${
+                typeof validValue === 'object'
+                  ? 'new ' + validValue.constructor.name + '(...)'
+                  : '"' + validValue.toString() + '"'
+              }} uses the value from the client options`, function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: validEnvironmentOption
@@ -616,6 +620,28 @@ describe('class MongoLogger', function () {
           });
         });
 
+        context('when object with nullish top level fields is being logged', function () {
+          const obj = {
+            A: undefined,
+            B: null,
+            C: 'Hello World!'
+          };
+          it('emits a log message that omits the nullish top-level fields by default', function () {
+            const stream = new BufferingStream();
+            const logger = new MongoLogger({
+              componentSeverities: { command: severityLevel } as any,
+              logDestination: stream
+            } as any);
+
+            logger[severityLevel]('command', obj);
+
+            expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.not.have.property('A');
+            expect(stream.buffer[0]).to.not.have.property('B');
+            expect(stream.buffer[0]).to.have.property('C', 'Hello World!');
+          });
+        });
+
         context('when string is being logged', function () {
           const message = 'Hello world';
           it('puts the string in the message field of the emitted log message', function () {
@@ -653,7 +679,7 @@ describe('class MongoLogger', function () {
               requestId: 0,
               connectionId: 0,
               address: '127.0.0.1:27017',
-              serviceId: '0x1234567890',
+              serviceId: new ObjectId(),
               databaseName: 'db',
               name: 'CommandStarted'
             };
@@ -663,7 +689,7 @@ describe('class MongoLogger', function () {
               connectionId: 0,
               duration: 0,
               address: '127.0.0.1:27017',
-              serviceId: '0x1234567890',
+              serviceId: new ObjectId(),
               databaseName: 'db',
               name: 'CommandSucceeded'
             };
@@ -673,7 +699,7 @@ describe('class MongoLogger', function () {
               duration: 0,
               connectionId: 0,
               address: '127.0.0.1:27017',
-              serviceId: '0x1234567890',
+              serviceId: new ObjectId(),
               databaseName: 'db',
               name: 'CommandFailed'
             };
@@ -784,7 +810,7 @@ describe('class MongoLogger', function () {
             };
             const connectionPoolCleared = {
               name: 'ConnectionPoolCleared',
-              serviceId: 'abcdef',
+              serviceId: new ObjectId(),
               address: '127.0.0.1:27017',
               options
             };
@@ -890,8 +916,7 @@ describe('class MongoLogger', function () {
 
               // TODO: Only in LB mode
               it('emits a log with field `serviceId` that is a string when it is present', function () {
-                expect(stream.buffer).to.have.lengthOf(1);
-                expect(stream.buffer[0]).to.have.property('serviceId').that.is.a('string');
+                expect(log).to.have.property('serviceId').that.is.a('string');
               });
             });
 
