@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
+import * as os from 'os';
 import * as sinon from 'sinon';
 
 import {
@@ -658,19 +659,22 @@ describe('Connection String', function () {
         appName: 'my app',
         driverInfo: { name: 'a'.repeat(512) }
       });
-      console.error(client.options.metadata);
+
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const NODE_DRIVER_VERSION = require('../../package.json').version;
+
       expect(client.options.metadata).to.deep.equal({
         driver: {
           name: 'nodejs|mongodb-legacy|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-          version: '5.1.0|5.0.0'
+          version: `${NODE_DRIVER_VERSION}|5.0.0`
         },
         os: {
-          type: 'Darwin',
-          name: 'darwin',
-          architecture: 'x64',
-          version: '21.6.0'
+          type: os.type(),
+          name: process.platform,
+          architecture: process.arch,
+          version: os.release()
         },
-        platform: 'Node.js v16.17.0, LE',
+        platform: `Node.js ${process.version}, ${os.endianness()}`,
         application: { name: 'my app' }
       });
     });
