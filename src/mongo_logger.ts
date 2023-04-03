@@ -198,13 +198,17 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
   return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
 }
 
-function DEFAULT_LOG_TRANSFORM(logObject: Record<string, any>): Omit<Log, 's' | 't' | 'c'> {
+export interface Loggable extends Record<string, any> {
+  toLog?(): Record<string, any>;
+}
+
+function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = {};
 
   const getHostPort = (address: string): { host: string; port: number } => {
     const hostAddress = new HostAddress(address);
 
-    // Should only default when the address is a socket address
+    // NOTE: Should only default when the address is a socket address
     const host = hostAddress.host ?? '';
     const port = hostAddress.port ?? 0;
     return { host, port };
@@ -355,46 +359,46 @@ export class MongoLogger {
   }
 
   /** @experimental */
-  emergency(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  emergency(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'emergency', message);
   }
   /** @experimental */
-  alert(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  alert(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'alert', message);
   }
   /** @experimental */
-  critical(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  critical(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'critical', message);
   }
   /** @experimental */
-  error(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  error(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'error', message);
   }
   /** @experimental */
-  notice(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  notice(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'notice', message);
   }
   /** @experimental */
-  warn(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  warn(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'warn', message);
   }
   /** @experimental */
-  info(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  info(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'info', message);
   }
   /** @experimental */
-  debug(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  debug(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'debug', message);
   }
   /** @experimental */
-  trace(component: MongoLoggableComponent, message: Record<string, any> | string): void {
+  trace(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'trace', message);
   }
 
   private log(
     component: MongoLoggableComponent,
     severity: SeverityLevel,
-    message: Record<string, any> | string
+    message: Loggable | string
   ): void {
     if (compareSeverity(severity, this.componentSeverities[component]) <= 0) {
       let logMessage: Log = { t: new Date(), c: component, s: severity };
