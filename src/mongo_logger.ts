@@ -224,7 +224,7 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
     const { host, port } = getHostPort(ev.address);
     l.serverHost = host;
     l.serverPort = port;
-    l.serviceId = ev?.serviceId;
+    l.serviceId = ev?.serviceId?.toHexString();
 
     return l;
   };
@@ -287,7 +287,9 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
       ev = logObject as ConnectionPoolClearedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection pool cleared';
-      log.serviceId = ev?.serviceId;
+      if (ev.serviceId?._bsontype === 'ObjectId') {
+        log.serviceId = ev.serviceId.toHexString();
+      }
       break;
     case 'ConnectionPoolClosed':
       ev = logObject as ConnectionPoolClosedEvent;
@@ -341,7 +343,12 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
       log.driverConnectionId = ev.connectionId;
       break;
     default:
-      log = { ...log, ...logObject };
+      for (const key in logObject) {
+        const value = logObject[key];
+        // eslint-disable-next-line no-restricted-syntax
+        if (value === undefined || value === null) continue;
+        log[key] = value;
+      }
   }
   return log;
 }
