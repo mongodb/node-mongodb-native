@@ -2,7 +2,6 @@ import { calculateObjectSize } from 'bson';
 import * as os from 'os';
 
 import type { MongoOptions } from '../../mongo_client';
-import { deepCopy } from '../../utils';
 import { applyFaasEnvMetadata } from './faas_provider';
 
 /**
@@ -41,15 +40,25 @@ export interface ClientMetadata {
  * https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#limitations
  */
 export function truncateClientMetadata(metadata: ClientMetadata): ClientMetadata {
-  const copiedMetadata: ClientMetadata = deepCopy(metadata);
+  if (calculateObjectSize(metadata) <= 512) {
+    return metadata;
+  }
+  // 1. Truncate ``platform``.
+  // no-op - we don't truncate because the `platform` field is essentially a fixed length in Node
+  // and there isn't anything we can truncate that without removing useful information.
 
-  // if ()
-
-  //   1. Truncate ``platform``.
   // 2. Omit fields from ``env`` except ``env.name``.
-  // 3. Omit the ``env`` document entirely.
+  if (metadata.env) {
+    metadata.env = { name: metadata.env.name };
+  }
+  if (calculateObjectSize(metadata) <= 512) {
+    return metadata;
+  }
 
-  return copiedMetadata;
+  // 3. Omit the ``env`` document entirely.
+  delete metadata.env;
+
+  return metadata;
 }
 
 /** @public */
@@ -99,5 +108,5 @@ export function makeClientMetadata(
     metadata.application = { name };
   }
 
-  return applyFaasEnvMetadata(metadata);
+  return truncateClientMetadata(applyFaasEnvMetadata(metadata));
 }

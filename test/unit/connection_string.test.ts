@@ -642,41 +642,4 @@ describe('Connection String', function () {
       ]);
     });
   });
-
-  context('when the metadata is >512 bytes', () => {
-    it('truncates the metadata', () => {
-      const client = new MongoClient('mongodb://localhost:27017', {
-        appName: 'my app',
-        driverInfo: { name: 'a'.repeat(512) }
-      });
-      expect(client.options.metadata).to.deep.equal({
-        application: { name: 'my app' }
-      });
-    });
-
-    it('preserves the untruncated metadata on the `metadata` property', () => {
-      const client = new MongoClient('mongodb://localhost:27017', {
-        appName: 'my app',
-        driverInfo: { name: 'a'.repeat(512) }
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const NODE_DRIVER_VERSION = require('../../package.json').version;
-
-      expect(client.options.metadata).to.deep.equal({
-        driver: {
-          name: 'nodejs|mongodb-legacy|aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-          version: `${NODE_DRIVER_VERSION}|5.0.0`
-        },
-        os: {
-          type: os.type(),
-          name: process.platform,
-          architecture: process.arch,
-          version: os.release()
-        },
-        platform: `Node.js ${process.version}, ${os.endianness()}`,
-        application: { name: 'my app' }
-      });
-    });
-  });
 });

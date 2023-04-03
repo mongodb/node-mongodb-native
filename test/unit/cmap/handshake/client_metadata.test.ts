@@ -12,7 +12,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
 
-describe.only('client metadata module', () => {
+describe('client metadata module', () => {
   describe('determineCloudProvider()', function () {
     const tests: Array<[string, FAASProvider]> = [
       ['AWS_EXECUTION_ENV', 'aws'],
@@ -366,48 +366,12 @@ describe.only('client metadata module', () => {
     });
   });
 
-  describe('metadata truncation order', function () {
-    /**
-     * These tests demonstrate that the order in which metadata truncation occurs is spec
-     * compliant.  There are tests in `connection_string.test.ts` that demonstrate that when
-     * the metadata is greater than 512 bytes, the metadata is truncated.
-     *
-     * Together, these tests demonstrate that
-     * - truncation happens in the correct order
-     * - truncation occurs when necessary
-     */
-
+  describe('metadata truncation', function () {
     const longDocument = 'a'.repeat(512);
 
     const tests: Array<[string, ClientMetadata, ClientMetadata]> = [
       [
-        'only removes platform first',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: longDocument,
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        },
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        }
-      ],
-      [
-        'truncates environment metadata after platform',
+        'removes extra fields in `env` first',
         {
           driver: { name: 'nodejs', version: '5.1.0' },
           os: {
@@ -418,10 +382,7 @@ describe.only('client metadata module', () => {
           },
           platform: 'Node.js v16.17.0, LE',
           application: { name: 'applicationName' },
-          env: {
-            name: 'aws.lambda',
-            region: longDocument
-          }
+          env: { name: 'aws.lambda', region: longDocument }
         },
         {
           driver: { name: 'nodejs', version: '5.1.0' },
@@ -431,33 +392,13 @@ describe.only('client metadata module', () => {
             architecture: 'x64',
             version: '21.6.0'
           },
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        }
-      ],
-      [
-        'truncates os metadata after env metadata',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: longDocument,
-            version: '21.6.0'
-          },
           platform: 'Node.js v16.17.0, LE',
           application: { name: 'applicationName' },
           env: { name: 'aws.lambda' }
-        },
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: { type: 'Darwin' },
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        }
+        })
       ],
       [
-        'removes env after truncating os metadata',
+        'removes `env` entirely next',
         {
           driver: { name: 'nodejs', version: '5.1.0' },
           os: {
@@ -474,65 +415,15 @@ describe.only('client metadata module', () => {
         },
         {
           driver: { name: 'nodejs', version: '5.1.0' },
-          os: { type: 'Darwin' },
-          application: { name: 'applicationName' }
-        }
-      ],
-      [
-        'removes os after removing env',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: longDocument,
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: 'Node.js v16.17.0, LE',
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        },
-        {
-          application: { name: 'applicationName' },
-          driver: { name: 'nodejs', version: '5.1.0' }
-        }
-      ],
-      [
-        'removes driver after removing env',
-        {
-          driver: {
-            name: longDocument,
-            version: '5.1.0'
-          },
           os: {
             type: 'Darwin',
             name: 'darwin',
             architecture: 'x64',
             version: '21.6.0'
           },
-          platform: 'Node.js v16.17.0, LE',
           application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        },
-        { application: { name: 'applicationName' } }
-      ],
-      [
-        'returns nothing when everything is too large (should never happen)',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: 'Node.js v16.17.0, LE',
-          application: {
-            name: longDocument
-          },
-          env: { name: 'aws.lambda' }
-        },
-        {}
+          platform: 'Node.js v16.17.0, LE'
+        }
       ]
     ];
 
