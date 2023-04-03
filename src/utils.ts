@@ -38,13 +38,6 @@ export type Callback<T = any> = (error?: AnyError, result?: T) => void;
 
 export type AnyOptions = Document;
 
-/** @internal */
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-
 export const ByteUtils = {
   toLocalBufferType(this: void, buffer: Buffer | Uint8Array): Buffer {
     return Buffer.isBuffer(buffer)

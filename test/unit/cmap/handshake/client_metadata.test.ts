@@ -3,7 +3,7 @@ import * as os from 'os';
 
 import {
   ClientMetadata,
-  determineCloudProvider,
+  determineFAASProvider,
   FAASProvider,
   makeClientMetadata,
   truncateClientMetadata
@@ -12,7 +12,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
 
-describe('client metadata module', () => {
+describe.only('client metadata module', () => {
   describe('determineCloudProvider()', function () {
     const tests: Array<[string, FAASProvider]> = [
       ['AWS_EXECUTION_ENV', 'aws'],
@@ -31,14 +31,14 @@ describe('client metadata module', () => {
           delete process.env[envVariable];
         });
         it('determines the correct provider', () => {
-          expect(determineCloudProvider()).to.equal(provider);
+          expect(determineFAASProvider()).to.equal(provider);
         });
       });
     }
 
     context('when there is no FAAS provider data in the env', () => {
       it('parses no FAAS provider', () => {
-        expect(determineCloudProvider()).to.equal('none');
+        expect(determineFAASProvider()).to.equal('none');
       });
     });
 
@@ -52,7 +52,7 @@ describe('client metadata module', () => {
         delete process.env.FUNCTIONS_WORKER_RUNTIME;
       });
       it('parses no FAAS provider', () => {
-        expect(determineCloudProvider()).to.equal('none');
+        expect(determineFAASProvider()).to.equal('none');
       });
     });
   });

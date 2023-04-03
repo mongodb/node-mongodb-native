@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { determineCloudProvider, FAASProvider, MongoClient } from '../../mongodb';
+import { determineFAASProvider, FAASProvider, MongoClient } from '../../mongodb';
 
 context('FAAS Environment Prose Tests', function () {
   let client: MongoClient;
@@ -89,14 +89,19 @@ context('FAAS Environment Prose Tests', function () {
       });
 
       before(`metadata confirmation test for ${name}`, function () {
-        expect(determineCloudProvider()).to.equal(
+        expect(determineFAASProvider()).to.equal(
           expectedProvider,
           'determined the wrong cloud provider'
         );
       });
 
       it('runs a hello successfully', async function () {
-        client = this.configuration.newClient({ serverSelectionTimeoutMS: 3000 });
+        client = this.configuration.newClient({
+          // if the handshake is not truncated, the `hello`s fail and the client does
+          // not connect.  Lowering the server selection timeout causes the tests
+          // to fail more quickly in that scenario.
+          serverSelectionTimeoutMS: 3000
+        });
         await client.connect();
       });
     });

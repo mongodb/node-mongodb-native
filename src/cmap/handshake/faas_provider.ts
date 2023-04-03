@@ -3,11 +3,18 @@ import type { ClientMetadata } from './client_metadata';
 
 export type FAASProvider = 'aws' | 'gcp' | 'azure' | 'vercel' | 'none';
 
-export function determineCloudProvider(): FAASProvider {
-  const awsPresent = process.env.AWS_EXECUTION_ENV || process.env.AWS_LAMBDA_RUNTIME_API;
-  const azurePresent = process.env.FUNCTIONS_WORKER_RUNTIME;
-  const gcpPresent = process.env.K_SERVICE || process.env.FUNCTION_NAME;
-  const vercelPresent = process.env.VERCEL;
+function isNonEmptyString(s: string | undefined): s is string {
+  return typeof s === 'string' && s.length > 0;
+}
+
+export function determineFAASProvider(): FAASProvider {
+  const awsPresent =
+    isNonEmptyString(process.env.AWS_EXECUTION_ENV) ||
+    isNonEmptyString(process.env.AWS_LAMBDA_RUNTIME_API);
+  const azurePresent = isNonEmptyString(process.env.FUNCTIONS_WORKER_RUNTIME);
+  const gcpPresent =
+    isNonEmptyString(process.env.K_SERVICE) || isNonEmptyString(process.env.FUNCTION_NAME);
+  const vercelPresent = isNonEmptyString(process.env.VERCEL);
 
   const numberOfProvidersPresent = [awsPresent, azurePresent, gcpPresent, vercelPresent].filter(
     identity
@@ -39,7 +46,7 @@ function applyGCPMetadata(m: ClientMetadata): ClientMetadata {
   if (!Number.isNaN(timeout_sec)) {
     m.env.timeout_sec = timeout_sec;
   }
-  if (process.env.FUNCTION_REGION) {
+  if (isNonEmptyString(process.env.FUNCTION_REGION)) {
     m.env.region = process.env.FUNCTION_REGION;
   }
 
@@ -48,7 +55,7 @@ function applyGCPMetadata(m: ClientMetadata): ClientMetadata {
 
 function applyAWSMetadata(m: ClientMetadata): ClientMetadata {
   m.env = { name: 'aws.lambda' };
-  if (process.env.AWS_REGION) {
+  if (isNonEmptyString(process.env.AWS_REGION)) {
     m.env.region = process.env.AWS_REGION;
   }
   const memory_mb = Number.parseInt(process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE ?? '');
@@ -60,10 +67,10 @@ function applyAWSMetadata(m: ClientMetadata): ClientMetadata {
 
 function applyVercelMetadata(m: ClientMetadata): ClientMetadata {
   m.env = { name: 'vercel' };
-  if (process.env.VERCEL_URL) {
+  if (isNonEmptyString(process.env.VERCEL_URL)) {
     m.env.url = process.env.VERCEL_URL;
   }
-  if (process.env.VERCEL_REGION) {
+  if (isNonEmptyString(process.env.VERCEL_REGION)) {
     m.env.region = process.env.VERCEL_REGION;
   }
   return m;
@@ -77,8 +84,8 @@ export function applyFaasEnvMetadata(metadata: ClientMetadata): ClientMetadata {
     vercel: applyVercelMetadata,
     none: identity
   };
-  const cloudProvider = determineCloudProvider();
+  const faasProvider = determineFAASProvider();
 
-  const faasMetadataProvider = handlerMap[cloudProvider];
+  const faasMetadataProvider = handlerMap[faasProvider];
   return faasMetadataProvider(metadata);
 }

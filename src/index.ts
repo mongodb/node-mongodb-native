@@ -464,7 +464,6 @@ export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,
   Callback,
-  DeepPartial,
   EventEmitterWithState,
   HostAddress,
   List,
