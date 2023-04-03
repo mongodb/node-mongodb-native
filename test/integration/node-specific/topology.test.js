@@ -7,7 +7,7 @@ describe('Topology', function () {
     metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
     test: function (done) {
       const topology = this.configuration.newTopology({
-        truncatedClientMetadata: makeClientMetadata({ driverInfo: {} })
+        metadata: makeClientMetadata({ driverInfo: {} })
       });
 
       const states = [];

@@ -227,7 +227,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       minPoolSizeCheckFrequencyMS: options.minPoolSizeCheckFrequencyMS ?? 100,
       autoEncrypter: options.autoEncrypter,
-      truncatedClientMetadata: options.truncatedClientMetadata
+      metadata: options.metadata
     });
 
     if (this.options.minPoolSize > this.options.maxPoolSize) {

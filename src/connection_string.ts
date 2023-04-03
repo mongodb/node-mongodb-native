@@ -543,8 +543,6 @@ export function parseOptions(
   );
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
-  Object.freeze(mongoOptions.metadata);
-  mongoOptions.truncatedClientMetadata = truncateClientMetadata(mongoOptions.metadata);
 
   return mongoOptions;
 }

@@ -2,7 +2,7 @@ import { calculateObjectSize } from 'bson';
 import * as os from 'os';
 
 import type { MongoOptions } from '../../mongo_client';
-import { deepCopy, DeepPartial } from '../../utils';
+import { deepCopy } from '../../utils';
 import { applyFaasEnvMetadata } from './faas_provider';
 
 /**
@@ -35,40 +35,19 @@ export interface ClientMetadata {
   };
 }
 
-/** @internal */
-export type TruncatedClientMetadata = DeepPartial<ClientMetadata>;
-
 /**
  * @internal
  * truncates the client metadata according to the priority outlined here
  * https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#limitations
  */
-export function truncateClientMetadata(metadata: ClientMetadata): TruncatedClientMetadata {
-  const copiedMetadata: TruncatedClientMetadata = deepCopy(metadata);
-  const truncations: Array<(arg0: TruncatedClientMetadata) => void> = [
-    m => delete m.platform,
-    m => {
-      if (m.env) {
-        m.env = { name: m.env.name };
-      }
-    },
-    m => {
-      if (m.os) {
-        m.os = { type: m.os.type };
-      }
-    },
-    m => delete m.env,
-    m => delete m.os,
-    m => delete m.driver,
-    m => delete m.application
-  ];
+export function truncateClientMetadata(metadata: ClientMetadata): ClientMetadata {
+  const copiedMetadata: ClientMetadata = deepCopy(metadata);
 
-  for (const truncation of truncations) {
-    if (calculateObjectSize(copiedMetadata) <= 512) {
-      return copiedMetadata;
-    }
-    truncation(copiedMetadata);
-  }
+  // if ()
+
+  //   1. Truncate ``platform``.
+  // 2. Omit fields from ``env`` except ``env.name``.
+  // 3. Omit the ``env`` document entirely.
 
   return copiedMetadata;
 }

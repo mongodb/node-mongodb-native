@@ -8,7 +8,7 @@ import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mong
 import type { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
-import type { ClientMetadata, TruncatedClientMetadata } from './cmap/handshake/client_metadata';
+import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -719,16 +719,6 @@ export interface MongoOptions
   proxyPassword?: string;
 
   metadata: ClientMetadata;
-
-  /**
-   * @internal
-   * `metadata` truncated to be less than 512 bytes, if necessary, to attach to handshakes.
-   * `metadata` is left untouched because it is public and to provide users a document they
-   * inspect to confirm their metadata was parsed correctly.
-   *
-   * If `metadata` `<=` 512 bytes, these fields are the same but the driver only uses `truncatedMetadata`.
-   */
-  truncatedClientMetadata: TruncatedClientMetadata;
 
   /** @internal */
   connectionType?: typeof Connection;

@@ -45,7 +45,7 @@ import {
 } from './command_monitoring_events';
 import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
-import type { ClientMetadata, TruncatedClientMetadata } from './handshake/client_metadata';
+import type { ClientMetadata } from './handshake/client_metadata';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
@@ -128,9 +128,6 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
-
-  /** @internal */
-  truncatedClientMetadata: TruncatedClientMetadata;
 }
 
 /** @internal */

@@ -370,7 +370,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
-  const truncatedClientMetadata = makeClientMetadata({
+  const metadata = makeClientMetadata({
     appName: poolOptions.appName,
     driverInfo: {}
   });
@@ -387,7 +387,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
 
   threadContext.createPool({
     ...poolOptions,
-    truncatedClientMetadata,
+    metadata,
     minPoolSizeCheckFrequencyMS
   });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent

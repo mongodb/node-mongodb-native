@@ -6,8 +6,7 @@ import {
   determineCloudProvider,
   FAASProvider,
   makeClientMetadata,
-  truncateClientMetadata,
-  TruncatedClientMetadata
+  truncateClientMetadata
 } from '../../../mongodb';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -380,7 +379,7 @@ describe('client metadata module', () => {
 
     const longDocument = 'a'.repeat(512);
 
-    const tests: Array<[string, ClientMetadata, TruncatedClientMetadata]> = [
+    const tests: Array<[string, ClientMetadata, ClientMetadata]> = [
       [
         'only removes platform first',
         {

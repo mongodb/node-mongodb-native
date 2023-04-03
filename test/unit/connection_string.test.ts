@@ -649,7 +649,7 @@ describe('Connection String', function () {
         appName: 'my app',
         driverInfo: { name: 'a'.repeat(512) }
       });
-      expect(client.options.truncatedClientMetadata).to.deep.equal({
+      expect(client.options.metadata).to.deep.equal({
         application: { name: 'my app' }
       });
     });

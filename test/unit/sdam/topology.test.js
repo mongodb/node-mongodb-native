@@ -36,7 +36,7 @@ describe('Topology (unit)', function () {
 
     it('should correctly pass appname', function (done) {
       const server = new Topology([`localhost:27017`], {
-        truncatedClientMetadata: makeClientMetadata({
+        metadata: makeClientMetadata({
           appName: 'My application name',
           driverInfo: {}
         })
