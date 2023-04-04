@@ -397,6 +397,7 @@ export abstract class AbstractCursor<
    * If the iterator returns `false`, iteration will stop.
    *
    * @param iterator - The iteration callback.
+   * @deprecated - Will be removed in a future release. Use for await...of instead.
    */
   async forEach(iterator: (doc: TSchema) => boolean | void): Promise<void> {
     if (typeof iterator !== 'function') {
