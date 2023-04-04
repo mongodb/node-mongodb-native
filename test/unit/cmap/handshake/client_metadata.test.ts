@@ -1,26 +1,21 @@
 import { expect } from 'chai';
 import * as os from 'os';
+import * as process from 'process';
+import * as sinon from 'sinon';
 
-import {
-  ClientMetadata,
-  determineFAASProvider,
-  FAASProvider,
-  Int32,
-  makeClientMetadata,
-  truncateClientMetadata
-} from '../../../mongodb';
+import { getFAASEnv, Int32, makeClientMetadata } from '../../../mongodb';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
 
 describe('client metadata module', () => {
   describe('determineCloudProvider()', function () {
-    const tests: Array<[string, FAASProvider]> = [
-      ['AWS_EXECUTION_ENV', 'aws'],
-      ['AWS_LAMBDA_RUNTIME_API', 'aws'],
-      ['FUNCTIONS_WORKER_RUNTIME', 'azure'],
-      ['K_SERVICE', 'gcp'],
-      ['FUNCTION_NAME', 'gcp'],
+    const tests: Array<[string, string]> = [
+      ['AWS_EXECUTION_ENV', 'aws.lambda'],
+      ['AWS_LAMBDA_RUNTIME_API', 'aws.lambda'],
+      ['FUNCTIONS_WORKER_RUNTIME', 'azure.func'],
+      ['K_SERVICE', 'gcp.func'],
+      ['FUNCTION_NAME', 'gcp.func'],
       ['VERCEL', 'vercel']
     ];
     for (const [envVariable, provider] of tests) {
@@ -32,14 +27,14 @@ describe('client metadata module', () => {
           delete process.env[envVariable];
         });
         it('determines the correct provider', () => {
-          expect(determineFAASProvider()).to.equal(provider);
+          expect(getFAASEnv()?.get('name')).to.equal(provider);
         });
       });
     }
 
     context('when there is no FAAS provider data in the env', () => {
       it('parses no FAAS provider', () => {
-        expect(determineFAASProvider()).to.equal('none');
+        expect(getFAASEnv()).to.be.null;
       });
     });
 
@@ -53,7 +48,7 @@ describe('client metadata module', () => {
         delete process.env.FUNCTIONS_WORKER_RUNTIME;
       });
       it('parses no FAAS provider', () => {
-        expect(determineFAASProvider()).to.equal('none');
+        expect(getFAASEnv()).to.be.null;
       });
     });
   });
@@ -368,70 +363,41 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    const longDocument = 'a'.repeat(512);
+    beforeEach(() => {
+      sinon.stub(process, 'env').get(() => ({
+        AWS_EXECUTION_ENV: 'iLoveJavaScript',
+        AWS_REGION: 'a'.repeat(512)
+      }));
+    });
 
-    const tests: Array<[string, ClientMetadata, ClientMetadata]> = [
-      [
-        'removes extra fields in `env` first',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: 'Node.js v16.17.0, LE',
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda', region: longDocument }
-        },
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: 'Node.js v16.17.0, LE',
-          application: { name: 'applicationName' },
-          env: { name: 'aws.lambda' }
-        }
-      ],
-      [
-        'removes `env` entirely next',
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          platform: 'Node.js v16.17.0, LE',
-          application: { name: 'applicationName' },
-          env: {
-            name: longDocument as any
-          }
-        },
-        {
-          driver: { name: 'nodejs', version: '5.1.0' },
-          os: {
-            type: 'Darwin',
-            name: 'darwin',
-            architecture: 'x64',
-            version: '21.6.0'
-          },
-          application: { name: 'applicationName' },
-          platform: 'Node.js v16.17.0, LE'
-        }
-      ]
-    ];
+    afterEach(() => {
+      sinon.restore();
+    });
 
-    for (const [description, input, expected] of tests) {
-      it(description, function () {
-        expect(truncateClientMetadata(input)).to.deep.equal(expected);
+    context('when faas region is too large', () => {
+      it('only includes env.name', () => {
+        const metadata = makeClientMetadata({ driverInfo: {} });
+        expect(metadata).to.not.have.nested.property('env.region');
+        expect(metadata).to.have.nested.property('env.name', 'aws.lambda');
+        expect(metadata.env).to.have.all.keys('name');
       });
-    }
+    });
+
+    context('when os information is too large', () => {
+      beforeEach(() => {
+        sinon.stub(os, 'release').returns('a'.repeat(512));
+      });
+
+      afterEach(() => {
+        sinon.restore();
+      });
+
+      it('only includes env.name', () => {
+        const metadata = makeClientMetadata({ driverInfo: {} });
+        expect(metadata).to.not.have.property('env');
+        expect(metadata).to.have.nested.property('os.type', os.type());
+        expect(metadata.os).to.have.all.keys('type');
+      });
+    });
   });
 });

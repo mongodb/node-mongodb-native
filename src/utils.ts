@@ -1205,12 +1205,3 @@ export function parseUnsignedInteger(value: unknown): number | null {
 
   return parsedInt != null && parsedInt >= 0 ? parsedInt : null;
 }
-
-/**
- * returns the object that was provided
- *
- * @internal
- */
-export function identity<T>(obj: T): T {
-  return obj;
-}
