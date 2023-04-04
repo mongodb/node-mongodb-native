@@ -15,7 +15,6 @@ import {
   MongoParseError
 } from './error';
 import {
-  DriverInfo,
   MongoClient,
   MongoClientOptions,
   MongoOptions,
@@ -543,6 +542,8 @@ export function parseOptions(
     loggerClientOptions
   );
 
+  mongoOptions.metadata = makeClientMetadata(mongoOptions);
+
   return mongoOptions;
 }
 
@@ -644,10 +645,7 @@ interface OptionDescriptor {
 
 export const OPTIONS = {
   appName: {
-    target: 'metadata',
-    transform({ options, values: [value] }): DriverInfo {
-      return makeClientMetadata({ ...options.driverInfo, appName: String(value) });
-    }
+    type: 'string'
   },
   auth: {
     target: 'credentials',
@@ -798,15 +796,8 @@ export const OPTIONS = {
     type: 'boolean'
   },
   driverInfo: {
-    target: 'metadata',
-    default: makeClientMetadata(),
-    transform({ options, values: [value] }) {
-      if (!isRecord(value)) throw new MongoParseError('DriverInfo must be an object');
-      return makeClientMetadata({
-        driverInfo: value,
-        appName: options.metadata?.application?.name
-      });
-    }
+    default: {},
+    type: 'record'
   },
   enableUtf8Validation: { type: 'boolean', default: true },
   family: {

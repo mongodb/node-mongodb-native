@@ -1,12 +1,8 @@
 import type { Document } from '../../bson';
 import { MongoRuntimeError } from '../../error';
-import type { ClientMetadataOptions } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import type { Connection, ConnectionOptions } from '../connection';
 import type { MongoCredentials } from './mongo_credentials';
-
-/** @internal */
-export type AuthContextOptions = ConnectionOptions & ClientMetadataOptions;
 
 /**
  * Context used during authentication
@@ -20,7 +16,7 @@ export class AuthContext {
   /** If the context is for reauthentication. */
   reauthenticating = false;
   /** The options passed to the `connect` method */
-  options: AuthContextOptions;
+  options: ConnectionOptions;
 
   /** A response from an initial auth attempt, only some mechanisms use this (e.g, SCRAM) */
   response?: Document;
@@ -30,7 +26,7 @@ export class AuthContext {
   constructor(
     connection: Connection,
     credentials: MongoCredentials | undefined,
-    options: AuthContextOptions
+    options: ConnectionOptions
   ) {
     this.connection = connection;
     this.credentials = credentials;
