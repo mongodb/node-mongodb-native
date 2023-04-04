@@ -169,7 +169,6 @@ function resolveLogPath(
       : process.stdout) as unknown as MongoDBLogWritable;
   }
 
-  // TODO(NODE-4813): check for minimal interface instead of instanceof Writable
   if (
     typeof mongodbLogPath === 'object' &&
     Object.prototype.hasOwnProperty.call(mongodbLogPath, 'write')
@@ -233,7 +232,9 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
     const { host, port } = getHostPort(ev.address);
     l.serverHost = host;
     l.serverPort = port;
-    l.serviceId = ev?.serviceId?.toHexString();
+    if (ev?.serviceId) {
+      l.serviceId = ev.serviceId.toHexString();
+    }
 
     return l;
   };
