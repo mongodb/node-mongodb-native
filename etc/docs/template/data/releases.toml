@@ -30,6 +30,13 @@ usesMongoDBManual = true
 tag = "5.0"
 
 [[versions]]
+version = "4.15 Driver"
+status = "supported"
+api = "./4.15"
+usesMongoDBManual = true
+tag = "4.15"
+
+[[versions]]
 version = "4.14 Driver"
 status = "supported"
 api = "./4.14"
