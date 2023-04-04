@@ -2,7 +2,13 @@ import { EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
-import { MongoLogger, MongoLoggerOptions, SEVERITY_LEVEL_MAP, SeverityLevel } from '../mongodb';
+import {
+  Log,
+  MongoLogger,
+  MongoLoggerOptions,
+  SEVERITY_LEVEL_MAP,
+  SeverityLevel
+} from '../mongodb';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
@@ -45,6 +51,44 @@ describe('class MongoLogger', function () {
       expect(logger).to.have.property('componentSeverities', componentSeverities);
       expect(logger).to.have.property('maxDocumentLength', 10);
       expect(logger).to.have.property('logDestination', stream);
+    });
+
+    context('when logDestination is an object that implements MongoDBLogWritable', function () {
+      it('successfully writes logs to the MongoDBLogWritable', function () {
+        const logDestination = {
+          buffer: [],
+          write(log: Log) {
+            this.buffer.push(log);
+          }
+        } as { buffer: any[]; write: (log: Log) => void };
+        const logger = new MongoLogger({
+          componentSeverities: { command: 'emergency' } as any,
+          logDestination
+        } as any);
+
+        logger.emergency('command', 'Hello world!');
+        expect(logDestination.buffer).to.have.lengthOf(1);
+      });
+    });
+
+    context('when logDestination implements nodejs:stream.Writable', function () {
+      it('successfully writes logs to the Writable', function () {
+        const buffer: any[] = [];
+        const logDestination = new Writable({
+          objectMode: true,
+          write(log: Log): void {
+            buffer.push(log);
+          }
+        });
+
+        const logger = new MongoLogger({
+          componentSeverities: { command: 'emergency' } as any,
+          logDestination
+        } as any);
+
+        logger.emergency('command', 'Hello world!');
+        expect(buffer).to.have.lengthOf(1);
+      });
     });
   });
 
@@ -386,12 +430,6 @@ describe('class MongoLogger', function () {
               });
             }
           }
-        });
-        context('when mongodbLogPath is an object that implements MongoDBLogWritable', function () {
-          it('successfully writes logs to the MongoDBLogWritable');
-        });
-        context('when mongodbLogPath implements nodejs:stream.Writable', function () {
-          it('successfully writes logs to the Writable');
         });
       });
 
