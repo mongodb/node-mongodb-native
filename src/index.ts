@@ -289,6 +289,9 @@ export type {
   WithSessionCallback
 } from './mongo_client';
 export type {
+  Log,
+  Loggable,
+  MongoDBLogWritable,
   MongoLoggableComponent,
   MongoLogger,
   MongoLoggerEnvOptions,

@@ -1,5 +1,4 @@
 import { EJSON } from 'bson';
-import { Writable } from 'stream';
 
 import type {
   CommandFailedEvent,
@@ -107,7 +106,7 @@ export interface MongoLoggerEnvOptions {
 /** @internal */
 export interface MongoLoggerMongoClientOptions {
   /** Destination for log messages */
-  mongodbLogPath?: 'stdout' | 'stderr' | Writable;
+  mongodbLogPath?: 'stdout' | 'stderr' | MongoDBLogWritable;
 }
 
 /** @internal */
@@ -161,25 +160,33 @@ function resolveLogPath(
   }: {
     mongodbLogPath?: unknown;
   }
-): Writable {
+): MongoDBLogWritable {
   const isValidLogDestinationString = (destination: string) =>
     ['stdout', 'stderr'].includes(destination.toLowerCase());
   if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
-    return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+    return (mongodbLogPath.toLowerCase() === 'stderr'
+      ? process.stderr
+      : process.stdout) as unknown as MongoDBLogWritable;
   }
 
   // TODO(NODE-4813): check for minimal interface instead of instanceof Writable
-  if (typeof mongodbLogPath === 'object' && mongodbLogPath instanceof Writable) {
-    return mongodbLogPath;
+  if (
+    typeof mongodbLogPath === 'object' &&
+    Object.prototype.hasOwnProperty.call(mongodbLogPath, 'write')
+  ) {
+    return mongodbLogPath as MongoDBLogWritable;
   }
 
   if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
-    return MONGODB_LOG_PATH.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+    return (MONGODB_LOG_PATH.toLowerCase() === 'stderr'
+      ? process.stderr
+      : process.stdout) as unknown as MongoDBLogWritable;
   }
 
-  return process.stderr;
+  return process.stderr as unknown as MongoDBLogWritable;
 }
 
+/** @internal */
 export interface Log extends Record<string, any> {
   s: SeverityLevel;
   t: Date;
@@ -187,6 +194,7 @@ export interface Log extends Record<string, any> {
   message?: string;
 }
 
+/** @internal */
 export interface MongoDBLogWritable {
   write(log: Log): unknown;
 }
@@ -198,6 +206,7 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
   return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
 }
 
+/** @internal */
 export interface Loggable extends Record<string, any> {
   toLog?(): Record<string, any>;
 }
@@ -368,38 +377,6 @@ export class MongoLogger {
   /** @experimental */
   emergency(component: MongoLoggableComponent, message: Loggable | string): void {
     this.log(component, 'emergency', message);
-  }
-  /** @experimental */
-  alert(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'alert', message);
-  }
-  /** @experimental */
-  critical(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'critical', message);
-  }
-  /** @experimental */
-  error(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'error', message);
-  }
-  /** @experimental */
-  notice(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'notice', message);
-  }
-  /** @experimental */
-  warn(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'warn', message);
-  }
-  /** @experimental */
-  info(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'info', message);
-  }
-  /** @experimental */
-  debug(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'debug', message);
-  }
-  /** @experimental */
-  trace(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'trace', message);
   }
 
   private log(
