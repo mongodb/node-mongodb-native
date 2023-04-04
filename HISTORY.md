@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.15.0](https://github.com/mongodb/node-mongodb-native/compare/v4.14.0...v4.15.0) (2023-04-04)
+
+
+### Features
+
+* **NODE-5054:** add AssumeRoleWithWebIdentity support to 4x driver ([#3566](https://github.com/mongodb/node-mongodb-native/issues/3566)) ([8a8c386](https://github.com/mongodb/node-mongodb-native/commit/8a8c386a8dc9263aa68826a8705c7800752a7153))
+
+
+### Bug Fixes
+
+* **NODE-5097:** set timeout on write and reset on message ([#3590](https://github.com/mongodb/node-mongodb-native/issues/3590)) ([2d3576b](https://github.com/mongodb/node-mongodb-native/commit/2d3576bf154843f0b8f63710c530d07cdc7a2ea6))
+
 ## [4.14.0](https://github.com/mongodb/node-mongodb-native/compare/v4.13.0...v4.14.0) (2023-02-07)
 
 
