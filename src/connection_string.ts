@@ -864,12 +864,14 @@ export const OPTIONS = {
       return wc;
     }
   },
+  /** @deprecated - Will not be able to turn off in the future. */
   keepAlive: {
     default: true,
     type: 'boolean'
   },
+  /** @deprecated - Will not be configurable in the future. */
   keepAliveInitialDelay: {
-    default: 120000,
+    default: 300000,
     type: 'uint'
   },
   loadBalanced: {

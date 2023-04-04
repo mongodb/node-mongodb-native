@@ -610,7 +610,7 @@ describe('MongoOptions', function () {
       ['forceserverobjectid', false],
       ['heartbeatfrequencyms', 10000],
       ['keepalive', true],
-      ['keepaliveinitialdelay', 120000],
+      ['keepaliveinitialdelay', 300000],
       ['localthresholdms', 15],
       ['maxidletimems', 0],
       ['maxpoolsize', 100],
