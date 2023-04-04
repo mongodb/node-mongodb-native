@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
 
 if [ -z ${SERVERLESS+omitted} ]; then echo "SERVERLESS is unset" && exit 1; fi
 if [ -z ${SERVERLESS_URI+omitted} ]; then echo "SERVERLESS_URI is unset" && exit 1; fi

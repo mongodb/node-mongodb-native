@@ -370,11 +370,8 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
     delete poolOptions.backgroundThreadIntervalMS;
   }
 
-  let metadata;
-  if (poolOptions.appName) {
-    metadata = makeClientMetadata({ appName: poolOptions.appName });
-    delete poolOptions.appName;
-  }
+  const metadata = makeClientMetadata({ appName: poolOptions.appName, driverInfo: {} });
+  delete poolOptions.appName;
 
   const operations = test.operations;
   const expectedError = test.error;
