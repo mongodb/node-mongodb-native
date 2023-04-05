@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.2.0](https://github.com/mongodb/node-mongodb-native/compare/v5.1.0...v5.2.0) (2023-04-04)
+
+
+### Features
+
+* **NODE-5035:** enable OIDC authentication ([#3577](https://github.com/mongodb/node-mongodb-native/issues/3577)) ([35879f6](https://github.com/mongodb/node-mongodb-native/commit/35879f66dd1bd906d6b38cb7cd21ff1fb51c52a1))
+* **NODE-5036:** reauthenticate OIDC and retry ([#3589](https://github.com/mongodb/node-mongodb-native/issues/3589)) ([a41846d](https://github.com/mongodb/node-mongodb-native/commit/a41846db3d769e2c10aedbf6feec53271fdb0a48))
+* **NODE-5077:** automatic Azure kms credential refresh ([#3599](https://github.com/mongodb/node-mongodb-native/issues/3599)) ([8e87e5c](https://github.com/mongodb/node-mongodb-native/commit/8e87e5c5be04902a75887c968f06325c1c7f0477))
+
+
+### Bug Fixes
+
+* **NODE-3998:** metadata duplication in handshake ([#3615](https://github.com/mongodb/node-mongodb-native/issues/3615)) ([6d894d6](https://github.com/mongodb/node-mongodb-native/commit/6d894d6652d6a286d8a699f4be0a7127a795b1ac))
+* **NODE-4518:** error message with invalid authMechanism is provided (#undefined) ([1a16b7e](https://github.com/mongodb/node-mongodb-native/commit/1a16b7e2c4c2de9890591e9ac0196705684eb62c))
+* **NODE-4854:** set timeout on write and reset on message ([#3582](https://github.com/mongodb/node-mongodb-native/issues/3582)) ([4a7b5ec](https://github.com/mongodb/node-mongodb-native/commit/4a7b5ec7dfcc3d0c4825ee939cb3eaf7bc79347b))
+* **NODE-5106:** prevent multiple mongo client connect()s from leaking topology ([#3596](https://github.com/mongodb/node-mongodb-native/issues/3596)) ([eb836bb](https://github.com/mongodb/node-mongodb-native/commit/eb836bbd1d0029c78acead0ec985ec11ea94f978))
+* **NODE-5126:** find operations fail when passed an ObjectId as filter ([#3604](https://github.com/mongodb/node-mongodb-native/issues/3604)) ([2647b61](https://github.com/mongodb/node-mongodb-native/commit/2647b6154069731f566a4066a01e5d75bc2318b0))
+
 ## [5.1.0](https://github.com/mongodb/node-mongodb-native/compare/v5.0.1...v5.1.0) (2023-02-23)
 
 

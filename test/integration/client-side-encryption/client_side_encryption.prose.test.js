@@ -1960,7 +1960,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           );
 
           expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
-          expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('nModified', 1);
+          expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
 
           // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
           const decryptResult1 = await clientEncryption1.decrypt(cipherText);
