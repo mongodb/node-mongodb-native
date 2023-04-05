@@ -33,9 +33,11 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
       faasEnv.set('region', AWS_REGION);
     }
 
-    const memory_mb = Number(AWS_LAMBDA_FUNCTION_MEMORY_SIZE);
-    if (Number.isInteger(memory_mb)) {
-      faasEnv.set('memory_mb', new Int32(memory_mb));
+    if (
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE.length > 0 &&
+      Number.isInteger(+AWS_LAMBDA_FUNCTION_MEMORY_SIZE)
+    ) {
+      faasEnv.set('memory_mb', new Int32(AWS_LAMBDA_FUNCTION_MEMORY_SIZE));
     }
 
     return faasEnv;
@@ -49,14 +51,12 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
       faasEnv.set('region', FUNCTION_REGION);
     }
 
-    const memory_mb = Number(FUNCTION_MEMORY_MB);
-    if (Number.isInteger(memory_mb)) {
-      faasEnv.set('memory_mb', new Int32(memory_mb));
+    if (FUNCTION_MEMORY_MB.length > 0 && Number.isInteger(+FUNCTION_MEMORY_MB)) {
+      faasEnv.set('memory_mb', new Int32(FUNCTION_MEMORY_MB));
     }
 
-    const timeout_sec = Number(FUNCTION_TIMEOUT_SEC);
-    if (Number.isInteger(timeout_sec)) {
-      faasEnv.set('timeout_sec', new Int32(timeout_sec));
+    if (FUNCTION_TIMEOUT_SEC.length > 0 && Number.isInteger(+FUNCTION_TIMEOUT_SEC)) {
+      faasEnv.set('timeout_sec', new Int32(FUNCTION_TIMEOUT_SEC));
     }
 
     return faasEnv;
