@@ -2,8 +2,11 @@ import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, Int32 } from '../../bson';
+import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
-import { getFAASEnv } from './faas_env';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const NODE_DRIVER_VERSION = require('../../../package.json').version;
 
 /**
  * @public
@@ -24,7 +27,7 @@ export interface ClientMetadata {
   application?: {
     name: string;
   };
-  /** Data containing information about the environment, if the driver is running in a FAAS environment. */
+  /** FaaS environment information */
   env?: {
     name: 'aws.lambda' | 'gcp.func' | 'azure.func' | 'vercel';
     timeout_sec?: Int32;
@@ -44,91 +47,181 @@ export interface ClientMetadataOptions {
   appName?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const NODE_DRIVER_VERSION = require('../../../package.json').version;
-
 /** @internal */
-class LimitedSizeDocument extends Map {
-  private static MAX_SIZE = 512;
+export class LimitedSizeDocument {
+  private document = new Map();
+  constructor(private maxSize: number) {}
 
-  private get bsonByteLength() {
-    return BSON.serialize(this).byteLength;
+  private getBsonByteLength() {
+    return BSON.serialize(this.document).byteLength;
   }
 
-  /** Only adds key/value if the bsonByteLength is less than or equal to MAX_SIZE */
-  public setIfFits(key: string, value: Record<string, any> | string): boolean {
-    if (this.bsonByteLength >= LimitedSizeDocument.MAX_SIZE) {
-      return false;
-    }
+  /** Only adds key/value if the bsonByteLength is less than MAX_SIZE */
+  public ifFitsSets(key: string, value: Record<string, any> | string): boolean {
+    this.document.set(key, value);
 
-    this.set(key, value);
-
-    if (this.bsonByteLength >= LimitedSizeDocument.MAX_SIZE) {
-      this.delete(key);
+    if (this.getBsonByteLength() > this.maxSize) {
+      this.document.delete(key);
       return false;
     }
 
     return true;
   }
+
+  toObject(): ClientMetadata {
+    return BSON.deserialize(BSON.serialize(this.document), {
+      promoteLongs: false,
+      promoteBuffers: false,
+      promoteValues: false,
+      useBigInt64: false
+    }) as ClientMetadata;
+  }
 }
 
 type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'driverInfo'>;
+/**
+ * From the specs:
+ * Implementors SHOULD cumulatively update fields in the following order until the document is under the size limit:
+ * 1. Omit fields from `env` except `env.name`.
+ * 2. Omit fields from `os` except `os.type`.
+ * 3. Omit the `env` document entirely.
+ * 4. Truncate `platform`. -- special we do not truncate this field
+ */
 export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMetadata {
-  const metadataDocument = new LimitedSizeDocument();
+  const metadataDocument = new LimitedSizeDocument(512);
 
+  const { appName = '' } = options;
   // Add app name first, it must be sent
-  if (typeof options.appName === 'string' && options.appName.length > 0) {
+  if (appName.length > 0) {
     const name =
-      Buffer.byteLength(options.appName, 'utf8') <= 128
+      Buffer.byteLength(appName, 'utf8') <= 128
         ? options.appName
-        : Buffer.from(options.appName, 'utf8').subarray(0, 128).toString('utf8');
-    metadataDocument.setIfFits('application', { name });
+        : Buffer.from(appName, 'utf8').subarray(0, 128).toString('utf8');
+    metadataDocument.ifFitsSets('application', { name });
   }
 
-  // Driver info goes next, we're not going to be at the limit yet, max bytes used ~128
-  const name =
-    typeof options.driverInfo.name === 'string' && options.driverInfo.name.length > 0
-      ? `nodejs|${options.driverInfo.name}`
-      : 'nodejs';
+  const { name = '', version = '', platform = '' } = options.driverInfo;
 
-  const version =
-    typeof options.driverInfo.version === 'string' && options.driverInfo.version.length > 0
-      ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
-      : NODE_DRIVER_VERSION;
-
-  metadataDocument.setIfFits('driver', { name, version });
-
-  // Platform likely to make it in, depending on driverInfo.name length
-  const platform =
-    typeof options.driverInfo.platform === 'string' && options.driverInfo.platform.length > 0
-      ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
-      : `Node.js ${process.version}, ${os.endianness()}`;
-
-  metadataDocument.setIfFits('platform', platform);
-
-  const osInfo = {
-    type: os.type(),
-    name: process.platform,
-    architecture: process.arch,
-    version: os.release()
+  const driverInfo = {
+    name: name.length > 0 ? `nodejs|${name}` : 'nodejs',
+    version: version.length > 0 ? `${NODE_DRIVER_VERSION}|${version}` : NODE_DRIVER_VERSION
   };
 
-  if (!metadataDocument.setIfFits('os', osInfo)) {
-    // Could not add full OS info, add only type
-    metadataDocument.setIfFits('os', { type: osInfo.type });
+  if (!metadataDocument.ifFitsSets('driver', driverInfo)) {
+    throw new MongoInvalidArgumentError('driverInfo name and version exceed limit of 512 bytes');
+  }
+
+  const platformInfo =
+    platform.length > 0
+      ? `Node.js ${process.version}, ${os.endianness()}|${platform}`
+      : `Node.js ${process.version}, ${os.endianness()}`;
+
+  if (!metadataDocument.ifFitsSets('platform', platformInfo)) {
+    throw new MongoInvalidArgumentError('driverInfo platform exceeds the limit of 512 bytes');
+  }
+
+  // Note: order matters, os.type is last so it will be removed last if we're at maxSize
+  const osInfo = new Map()
+    .set('name', process.platform)
+    .set('architecture', process.arch)
+    .set('version', os.release())
+    .set('type', os.type());
+
+  if (!metadataDocument.ifFitsSets('os', osInfo)) {
+    for (const key of osInfo.keys()) {
+      osInfo.delete(key);
+      if (osInfo.size === 0) break;
+      if (metadataDocument.ifFitsSets('os', osInfo)) break;
+    }
   }
 
   const faasEnv = getFAASEnv();
   if (faasEnv != null) {
-    if (!metadataDocument.setIfFits('env', faasEnv)) {
-      metadataDocument.setIfFits('env', { name: faasEnv.get('name') });
+    if (!metadataDocument.ifFitsSets('env', faasEnv)) {
+      for (const key of faasEnv.keys()) {
+        faasEnv.delete(key);
+        if (faasEnv.size === 0) break;
+        if (metadataDocument.ifFitsSets('env', faasEnv)) break;
+      }
     }
   }
 
-  return BSON.deserialize(BSON.serialize(metadataDocument), {
-    promoteLongs: false,
-    promoteBuffers: false,
-    promoteValues: false,
-    useBigInt64: false
-  }) as ClientMetadata;
+  return metadataDocument.toObject();
+}
+
+/**
+ * Collects FaaS metadata.
+ * - `name` MUST be the last key in the Map returned.
+ */
+export function getFAASEnv(): Map<string, string | Int32> | null {
+  const {
+    AWS_EXECUTION_ENV = '',
+    AWS_LAMBDA_RUNTIME_API = '',
+    FUNCTIONS_WORKER_RUNTIME = '',
+    K_SERVICE = '',
+    FUNCTION_NAME = '',
+    VERCEL = '',
+    AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '',
+    AWS_REGION = '',
+    FUNCTION_MEMORY_MB = '',
+    FUNCTION_REGION = '',
+    FUNCTION_TIMEOUT_SEC = '',
+    VERCEL_URL = '',
+    VERCEL_REGION = ''
+  } = process.env;
+
+  const isAWSFaaS = AWS_EXECUTION_ENV.length > 0 || AWS_LAMBDA_RUNTIME_API.length > 0;
+  const isAzureFaaS = FUNCTIONS_WORKER_RUNTIME.length > 0;
+  const isGCPFaaS = K_SERVICE.length > 0 || FUNCTION_NAME.length > 0;
+  const isVercelFaaS = VERCEL.length > 0;
+
+  // Note: order matters, name must always be the last key
+  const faasEnv = new Map();
+
+  if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS || isVercelFaaS)) {
+    if (AWS_REGION.length > 0) {
+      faasEnv.set('region', AWS_REGION);
+    }
+
+    if (
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE.length > 0 &&
+      Number.isInteger(+AWS_LAMBDA_FUNCTION_MEMORY_SIZE)
+    ) {
+      faasEnv.set('memory_mb', new Int32(AWS_LAMBDA_FUNCTION_MEMORY_SIZE));
+    }
+
+    faasEnv.set('name', 'aws.lambda');
+    return faasEnv;
+  } else if (isAzureFaaS && !(isAWSFaaS || isGCPFaaS || isVercelFaaS)) {
+    faasEnv.set('name', 'azure.func');
+    return faasEnv;
+  } else if (isGCPFaaS && !(isAWSFaaS || isAzureFaaS || isVercelFaaS)) {
+    if (FUNCTION_REGION.length > 0) {
+      faasEnv.set('region', FUNCTION_REGION);
+    }
+
+    if (FUNCTION_MEMORY_MB.length > 0 && Number.isInteger(+FUNCTION_MEMORY_MB)) {
+      faasEnv.set('memory_mb', new Int32(FUNCTION_MEMORY_MB));
+    }
+
+    if (FUNCTION_TIMEOUT_SEC.length > 0 && Number.isInteger(+FUNCTION_TIMEOUT_SEC)) {
+      faasEnv.set('timeout_sec', new Int32(FUNCTION_TIMEOUT_SEC));
+    }
+
+    faasEnv.set('name', 'gcp.func');
+    return faasEnv;
+  } else if (isVercelFaaS && !(isAWSFaaS || isAzureFaaS || isGCPFaaS)) {
+    if (VERCEL_URL.length > 0) {
+      faasEnv.set('url', VERCEL_URL);
+    }
+
+    if (VERCEL_REGION.length > 0) {
+      faasEnv.set('region', VERCEL_REGION);
+    }
+
+    faasEnv.set('name', 'vercel');
+    return faasEnv;
+  } else {
+    return null;
+  }
 }

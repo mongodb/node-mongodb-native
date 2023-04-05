@@ -3,12 +3,37 @@ import * as os from 'os';
 import * as process from 'process';
 import * as sinon from 'sinon';
 
-import { getFAASEnv, Int32, makeClientMetadata } from '../../../mongodb';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const NODE_DRIVER_VERSION = require('../../../../package.json').version;
+import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
+import {
+  getFAASEnv,
+  Int32,
+  LimitedSizeDocument,
+  makeClientMetadata,
+  MongoInvalidArgumentError,
+  ObjectId
+} from '../../../mongodb';
 
 describe('client metadata module', () => {
+  describe('class LimitedSizeDocument', () => {
+    // For the sake of testing the size limiter features
+    // We test document: { _id: ObjectId() }
+    // 4 bytes + 1 type byte + 4 bytes for key + 12 bytes Oid + 1 null term byte
+    // = 22 bytes
+
+    it('sets key and value that fit within maxSize', () => {
+      const doc = new LimitedSizeDocument(22);
+      expect(doc.ifFitsSets('_id', new ObjectId())).to.be.true;
+      expect(doc.toObject()).to.have.all.keys('_id');
+    });
+
+    it('ignores ifFitsSets that are over size', () => {
+      const doc = new LimitedSizeDocument(22);
+      expect(doc.ifFitsSets('_id', new ObjectId())).to.be.true;
+      expect(doc.ifFitsSets('_id2', '')).to.be.false;
+      expect(doc.toObject()).to.have.all.keys('_id');
+    });
+  });
+
   describe('getFAASEnv()', function () {
     const tests: Array<[string, string]> = [
       ['AWS_EXECUTION_ENV', 'aws.lambda'],
@@ -76,6 +101,7 @@ describe('client metadata module', () => {
         });
       });
     });
+
     context('when driverInfo.platform is provided', () => {
       it('appends driverInfo.platform to the platform field', () => {
         const options = {
@@ -289,6 +315,17 @@ describe('client metadata module', () => {
             name: 'gcp.func',
             region: 'region'
           }
+        },
+        {
+          context: 'FUNCTION_TIMEOUT_SEC provided',
+          env: [
+            ['FUNCTION_NAME', 'non-empty'],
+            ['FUNCTION_TIMEOUT_SEC', '12345']
+          ],
+          outcome: {
+            name: 'gcp.func',
+            timeout_sec: new Int32(12345)
+          }
         }
       ],
       vercel: [
@@ -324,21 +361,40 @@ describe('client metadata module', () => {
       ]
     };
 
-    for (const [provider, _tests] of Object.entries(tests)) {
+    for (const [provider, testsForEnv] of Object.entries(tests)) {
       context(provider, () => {
-        for (const { context, env: _env, outcome } of _tests) {
-          it(context, () => {
-            for (const [k, v] of _env) {
+        for (const { context, env: faasVariables, outcome } of testsForEnv) {
+          const setupEnv = () => {
+            for (const [k, v] of faasVariables) {
               if (v != null) {
                 process.env[k] = v;
               }
             }
+          };
 
-            const { env } = makeClientMetadata({ driverInfo: {} });
-            expect(env).to.deep.equal(outcome);
-
-            for (const [k] of _env) {
+          const cleanupEnv = () => {
+            for (const [k] of faasVariables) {
               delete process.env[k];
+            }
+          };
+
+          it(context, () => {
+            try {
+              setupEnv();
+              const { env } = makeClientMetadata({ driverInfo: {} });
+              expect(env).to.deep.equal(outcome);
+            } finally {
+              cleanupEnv();
+            }
+          });
+
+          it('always places name as the last key', () => {
+            try {
+              setupEnv();
+              const keys = Array.from(getFAASEnv()?.keys() ?? []);
+              expect(keys).to.have.property(`${keys.length - 1}`, 'name');
+            } finally {
+              cleanupEnv();
             }
           });
         }
@@ -347,13 +403,13 @@ describe('client metadata module', () => {
 
     context('when a numeric FAAS env variable is not numerically parsable', () => {
       before(() => {
-        process.env['AWS_EXECUTION_ENV'] = 'non-empty-string';
-        process.env['AWS_LAMBDA_FUNCTION_MEMORY_SIZE'] = 'not numeric';
+        process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+        process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '123not numeric';
       });
 
       after(() => {
-        delete process.env['AWS_EXECUTION_ENV'];
-        delete process.env['AWS_LAMBDA_FUNCTION_MEMORY_SIZE'];
+        delete process.env.AWS_EXECUTION_ENV;
+        delete process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
       });
 
       it('does not attach it to the metadata', () => {
@@ -364,6 +420,29 @@ describe('client metadata module', () => {
 
   describe('metadata truncation', function () {
     afterEach(() => sinon.restore());
+
+    context('when driverInfo is too large', () => {
+      it('throws an error relating to name', () => {
+        expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /name/
+        );
+      });
+
+      it('throws an error relating to version', () => {
+        expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /version/
+        );
+      });
+
+      it('throws an error relating to platform', () => {
+        expect(() => makeClientMetadata({ driverInfo: { platform: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /platform/
+        );
+      });
+    });
 
     context('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
@@ -382,19 +461,36 @@ describe('client metadata module', () => {
     });
 
     context('when os information is too large', () => {
-      beforeEach('2. Omit fields from `os` except `os.type`.', () => {
-        sinon.stub(process, 'env').get(() => ({
-          AWS_EXECUTION_ENV: 'iLoveJavaScript',
-          AWS_REGION: 'abc'
-        }));
-        sinon.stub(os, 'release').returns('a'.repeat(512));
+      context('release too large', () => {
+        beforeEach('2. Omit fields from `os` except `os.type`.', () => {
+          sinon.stub(process, 'env').get(() => ({
+            AWS_EXECUTION_ENV: 'iLoveJavaScript',
+            AWS_REGION: 'abc'
+          }));
+          sinon.stub(os, 'release').returns('a'.repeat(512));
+        });
+
+        it('only includes env.name', () => {
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata).to.have.property('env');
+          expect(metadata).to.have.nested.property('env.region', 'abc');
+          expect(metadata.os).to.have.all.keys('type');
+        });
       });
 
-      it('only includes env.name', () => {
-        const metadata = makeClientMetadata({ driverInfo: {} });
-        expect(metadata).to.have.property('env');
-        expect(metadata).to.have.nested.property('env.region', 'abc');
-        expect(metadata.os).to.have.all.keys('type');
+      context('os.type too large', () => {
+        beforeEach(() => {
+          sinon.stub(process, 'env').get(() => ({
+            AWS_EXECUTION_ENV: 'iLoveJavaScript',
+            AWS_REGION: 'abc'
+          }));
+          sinon.stub(os, 'type').returns('a'.repeat(512));
+        });
+
+        it('omits os information', () => {
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata).to.not.have.property('os');
+        });
       });
     });
 

@@ -364,6 +364,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     };
   }
 
+  /** {@inheritdoc MongoOptions} */
   get options(): Readonly<MongoOptions> {
     return Object.freeze({ ...this[kOptions] });
   }
@@ -661,7 +662,22 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 }
 
 /**
- * Mongo Client Options
+ * Parsed Mongo Client Options.
+ *
+ * User supplied options are documented by `MongoClientOptions`.
+ *
+ * **NOTE:** The client's options parsing is subject to change to support new features.
+ * This type is provided to aid with inspection of options after parsing, it should not be relied upon programmatically.
+ *
+ * Options are sourced from:
+ * - connection string
+ * - options object passed to the MongoClient constructor
+ * - file system (ex. tls settings)
+ * - environment variables
+ * - DNS SRV records and TXT records
+ *
+ * Not all options may be present after client construction as some are obtained from asynchronous operations.
+ *
  * @public
  */
 export interface MongoOptions
