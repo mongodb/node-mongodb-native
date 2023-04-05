@@ -20,6 +20,8 @@ import type {
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
 import {
+  APM_EVENTS,
+  CMAP_EVENTS,
   COMMAND_FAILED,
   COMMAND_STARTED,
   COMMAND_SUCCEEDED,
@@ -266,117 +268,123 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
   };
 
   let ev;
-  switch (logObject.name) {
-    case COMMAND_STARTED:
-      ev = logObject as CommandStartedEvent;
-      log = attachCommandFields(log, ev);
-      log.message = 'Command started';
-      log.command = EJSON.stringify(ev.command);
-      log.databaseName = ev.databaseName;
-      break;
-    case COMMAND_SUCCEEDED:
-      ev = logObject as CommandSucceededEvent;
-      log = attachCommandFields(log, ev);
-      log.message = 'Command succeeded';
-      log.durationMS = ev.duration;
-      log.reply = EJSON.stringify(ev.reply);
-      break;
-    case COMMAND_FAILED:
-      ev = logObject as CommandFailedEvent;
-      log = attachCommandFields(log, ev);
-      log.message = 'Command failed';
-      log.durationMS = ev.duration;
-      log.failure = ev.failure;
-      break;
-    case CONNECTION_POOL_CREATED:
-      ev = logObject as ConnectionPoolCreatedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection pool created';
-      if (ev.options) {
-        const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
-          ev.options;
-        log = {
-          ...log,
-          maxIdleTimeMS,
-          minPoolSize,
-          maxPoolSize,
-          maxConnecting,
-          waitQueueTimeoutMS
-        };
-        log.waitQueueSize = ev.waitQueueSize;
-      }
-      break;
-    case CONNECTION_POOL_READY:
-      ev = logObject as ConnectionPoolReadyEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection pool ready';
-      break;
-    case CONNECTION_POOL_CLEARED:
-      ev = logObject as ConnectionPoolClearedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection pool cleared';
-      if (ev.serviceId?._bsontype === 'ObjectId') {
-        log.serviceId = ev.serviceId.toHexString();
-      }
-      break;
-    case CONNECTION_POOL_CLOSED:
-      ev = logObject as ConnectionPoolClosedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection pool closed';
-      break;
-    case CONNECTION_CREATED:
-      ev = logObject as ConnectionCreatedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection created';
-      log.driverConnectionId = ev.connectionId;
-      break;
-    case CONNECTION_READY:
-      ev = logObject as ConnectionReadyEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection ready';
-      log.driverConnectionId = ev.connectionId;
-      break;
-    case CONNECTION_CLOSED:
-      ev = logObject as ConnectionClosedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection closed';
-      log.driverConnectionId = ev.connectionId;
-      log.reason = ev.reason;
-      if (ev.reason === 'error') {
-        // TODO: Set log.error
-        // log.error = ev
-      }
-      break;
-    case CONNECTION_CHECK_OUT_STARTED:
-      ev = logObject as ConnectionCheckOutStartedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection checkout started';
-      break;
-    case CONNECTION_CHECK_OUT_FAILED:
-      ev = logObject as ConnectionCheckOutFailedEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection checkout failed';
-      log.reason = ev.reason;
-      break;
-    case CONNECTION_CHECKED_OUT:
-      ev = logObject as ConnectionCheckedOutEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection checked out';
-      log.driverConnectionId = ev.connectionId;
-      break;
-    case CONNECTION_CHECKED_IN:
-      ev = logObject as ConnectionCheckedInEvent;
-      log = attachConnectionFields(log, ev);
-      log.message = 'Connection checked in';
-      log.driverConnectionId = ev.connectionId;
-      break;
-    default:
-      for (const key in logObject) {
-        const value = logObject[key];
-        // eslint-disable-next-line no-restricted-syntax
-        if (value === undefined || value === null) continue;
-        log[key] = value;
-      }
+  if (APM_EVENTS.findIndex(e => e === logObject.name) !== -1) {
+    log = attachCommandFields(log, logObject as any);
+    switch (logObject.name) {
+      case COMMAND_STARTED:
+        ev = logObject as CommandStartedEvent;
+        log.message = 'Command started';
+        log.command = EJSON.stringify(ev.command);
+        log.databaseName = ev.databaseName;
+        break;
+      case COMMAND_SUCCEEDED:
+        ev = logObject as CommandSucceededEvent;
+        log.message = 'Command succeeded';
+        log.durationMS = ev.duration;
+        log.reply = EJSON.stringify(ev.reply);
+        break;
+      case COMMAND_FAILED:
+        ev = logObject as CommandFailedEvent;
+        log.message = 'Command failed';
+        log.durationMS = ev.duration;
+        log.failure = ev.failure;
+        break;
+    }
+  } else if (CMAP_EVENTS.findIndex(e => e === logObject.name) !== -1) {
+    log = attachConnectionFields(log, logObject as ConnectionPoolMonitoringEvent);
+    switch (logObject.name) {
+      case CONNECTION_POOL_CREATED:
+        ev = logObject as ConnectionPoolCreatedEvent;
+        log.message = 'Connection pool created';
+        if (ev.options) {
+          const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
+            ev.options;
+          log = {
+            ...log,
+            maxIdleTimeMS,
+            minPoolSize,
+            maxPoolSize,
+            maxConnecting,
+            waitQueueTimeoutMS
+          };
+          log.waitQueueSize = ev.waitQueueSize;
+        }
+        break;
+      case CONNECTION_POOL_READY:
+        ev = logObject as ConnectionPoolReadyEvent;
+        log.message = 'Connection pool ready';
+        break;
+      case CONNECTION_POOL_CLEARED:
+        ev = logObject as ConnectionPoolClearedEvent;
+        log.message = 'Connection pool cleared';
+        if (ev.serviceId?._bsontype === 'ObjectId') {
+          log.serviceId = ev.serviceId.toHexString();
+        }
+        break;
+      case CONNECTION_POOL_CLOSED:
+        ev = logObject as ConnectionPoolClosedEvent;
+        log.message = 'Connection pool closed';
+        break;
+      case CONNECTION_CREATED:
+        ev = logObject as ConnectionCreatedEvent;
+        log.message = 'Connection created';
+        log.driverConnectionId = ev.connectionId;
+        break;
+      case CONNECTION_READY:
+        ev = logObject as ConnectionReadyEvent;
+        log.message = 'Connection ready';
+        log.driverConnectionId = ev.connectionId;
+        break;
+      case CONNECTION_CLOSED:
+        ev = logObject as ConnectionClosedEvent;
+        log.message = 'Connection closed';
+        log.driverConnectionId = ev.connectionId;
+        switch (ev.reason) {
+          case 'stale':
+            log.reason = 'Connection became stale because the pool was cleared';
+            break;
+          case 'idle':
+            log.reason =
+              'Connection has been available but unused for longer than the configured max idle time';
+            break;
+          case 'error':
+            log.reason = 'An error occurred while using the connection';
+            // TODO: we need to expose the error on the ConnectionClosedEvent object if it exists
+            break;
+          case 'poolClosed':
+            log.reason = 'Connection pool was closed';
+            break;
+          default:
+          // Omit if we have some other reason as it would be invalid
+        }
+        break;
+      case CONNECTION_CHECK_OUT_STARTED:
+        ev = logObject as ConnectionCheckOutStartedEvent;
+        log.message = 'Connection checkout started';
+        break;
+      case CONNECTION_CHECK_OUT_FAILED:
+        ev = logObject as ConnectionCheckOutFailedEvent;
+        log.message = 'Connection checkout failed';
+        log.reason = ev.reason;
+        break;
+      case CONNECTION_CHECKED_OUT:
+        ev = logObject as ConnectionCheckedOutEvent;
+        log.message = 'Connection checked out';
+        log.driverConnectionId = ev.connectionId;
+        break;
+      case CONNECTION_CHECKED_IN:
+        ev = logObject as ConnectionCheckedInEvent;
+        log.message = 'Connection checked in';
+        log.driverConnectionId = ev.connectionId;
+        break;
+    }
+  } else {
+    for (const key in logObject) {
+      const value = logObject[key];
+      // eslint-disable-next-line no-restricted-syntax
+      if (value === undefined || value === null) continue;
+      log[key] = value;
+    }
   }
   return log;
 }
