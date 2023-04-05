@@ -18,6 +18,7 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY,
   Log,
+  MongoDBLogWritable,
   MongoLogger,
   MongoLoggerOptions,
   SEVERITY_LEVEL_MAP,
@@ -384,13 +385,13 @@ describe('class MongoLogger', function () {
 
     context('logDestination', function () {
       const stream = new Writable();
-      const validOptions: Map<any, Writable> = new Map([
+      const validOptions: Map<any, MongoDBLogWritable> = new Map([
         ['stdout', process.stdout],
         ['stderr', process.stderr],
         [stream, stream],
         ['stdOut', process.stdout],
         ['stdErr', process.stderr]
-      ] as Array<[any, Writable]>);
+      ] as Array<[any, MongoDBLogWritable]>);
       const unsetOptions = ['', undefined];
       const invalidEnvironmentOptions = ['non-acceptable-string'];
       const invalidClientOptions = ['', '     ', undefined, null, 0, false, new Readable()];

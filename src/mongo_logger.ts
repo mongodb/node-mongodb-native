@@ -176,7 +176,7 @@ function resolveLogPath(
   {
     mongodbLogPath
   }: {
-    mongodbLogPath?: unknown;
+    mongodbLogPath?: string | MongoDBLogWritable;
   }
 ): MongoDBLogWritable {
   const isValidLogDestinationString = (destination: string) =>
@@ -187,13 +187,8 @@ function resolveLogPath(
       : process.stdout) as unknown as MongoDBLogWritable;
   }
 
-  if (
-    typeof mongodbLogPath === 'object' &&
-    // eslint-disable-next-line no-restricted-syntax
-    mongodbLogPath !== null &&
-    Object.prototype.hasOwnProperty.call(mongodbLogPath, 'write')
-  ) {
-    return mongodbLogPath as MongoDBLogWritable;
+  if (mongodbLogPath && typeof mongodbLogPath === 'object') {
+    return mongodbLogPath;
   }
 
   if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
@@ -268,7 +263,7 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
   };
 
   let ev;
-  if (APM_EVENTS.findIndex(e => e === logObject.name) !== -1) {
+  if (APM_EVENTS.includes(logObject.name)) {
     log = attachCommandFields(log, logObject as any);
     switch (logObject.name) {
       case COMMAND_STARTED:
@@ -290,7 +285,7 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         log.failure = ev.failure;
         break;
     }
-  } else if (CMAP_EVENTS.findIndex(e => e === logObject.name) !== -1) {
+  } else if (CMAP_EVENTS.includes(logObject.name)) {
     log = attachConnectionFields(log, logObject as ConnectionPoolMonitoringEvent);
     switch (logObject.name) {
       case CONNECTION_POOL_CREATED:
