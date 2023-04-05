@@ -56,7 +56,7 @@ class LimitedSizeDocument extends Map {
   }
 
   /** Only adds key/value if the bsonByteLength is less than or equal to MAX_SIZE */
-  public ifFitsSits(key: string, value: Record<string, any> | string): boolean {
+  public setIfFits(key: string, value: Record<string, any> | string): boolean {
     if (this.bsonByteLength >= LimitedSizeDocument.MAX_SIZE) {
       return false;
     }
@@ -82,23 +82,29 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       Buffer.byteLength(options.appName, 'utf8') <= 128
         ? options.appName
         : Buffer.from(options.appName, 'utf8').subarray(0, 128).toString('utf8');
-    metadataDocument.ifFitsSits('application', { name });
+    metadataDocument.setIfFits('application', { name });
   }
 
   // Driver info goes next, we're not going to be at the limit yet, max bytes used ~128
-  const name = options.driverInfo.name ? `nodejs|${options.driverInfo.name}` : 'nodejs';
-  const version = options.driverInfo.version
-    ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
-    : NODE_DRIVER_VERSION;
+  const name =
+    typeof options.driverInfo.name === 'string' && options.driverInfo.name.length > 0
+      ? `nodejs|${options.driverInfo.name}`
+      : 'nodejs';
 
-  metadataDocument.ifFitsSits('driver', { name, version });
+  const version =
+    typeof options.driverInfo.version === 'string' && options.driverInfo.version.length > 0
+      ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
+      : NODE_DRIVER_VERSION;
+
+  metadataDocument.setIfFits('driver', { name, version });
 
   // Platform likely to make it in, depending on driverInfo.name length
-  const platform = options.driverInfo.platform
-    ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
-    : `Node.js ${process.version}, ${os.endianness()}`;
+  const platform =
+    typeof options.driverInfo.platform === 'string' && options.driverInfo.platform.length > 0
+      ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
+      : `Node.js ${process.version}, ${os.endianness()}`;
 
-  metadataDocument.ifFitsSits('platform', platform);
+  metadataDocument.setIfFits('platform', platform);
 
   const osInfo = {
     type: os.type(),
@@ -107,16 +113,15 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     version: os.release()
   };
 
-  if (!metadataDocument.ifFitsSits('os', osInfo)) {
+  if (!metadataDocument.setIfFits('os', osInfo)) {
     // Could not add full OS info, add only type
-    metadataDocument.ifFitsSits('os', { type: osInfo.type });
-  } else {
-    // full OS data was able to fit, try FAAS
-    const faasEnv = getFAASEnv();
-    if (faasEnv != null) {
-      if (!metadataDocument.ifFitsSits('env', faasEnv)) {
-        metadataDocument.ifFitsSits('env', { name: faasEnv.get('name') });
-      }
+    metadataDocument.setIfFits('os', { type: osInfo.type });
+  }
+
+  const faasEnv = getFAASEnv();
+  if (faasEnv != null) {
+    if (!metadataDocument.setIfFits('env', faasEnv)) {
+      metadataDocument.setIfFits('env', { name: faasEnv.get('name') });
     }
   }
 

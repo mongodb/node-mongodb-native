@@ -2,63 +2,72 @@ import * as process from 'process';
 
 import { Int32 } from '../../bson';
 
-function isNonEmptyString(s: string | undefined): s is string {
-  return typeof s === 'string' && s.length > 0;
-}
-
 export function getFAASEnv(): Map<string, string | Int32> | null {
-  const awsPresent =
-    isNonEmptyString(process.env.AWS_EXECUTION_ENV) ||
-    isNonEmptyString(process.env.AWS_LAMBDA_RUNTIME_API);
-  const azurePresent = isNonEmptyString(process.env.FUNCTIONS_WORKER_RUNTIME);
-  const gcpPresent =
-    isNonEmptyString(process.env.K_SERVICE) || isNonEmptyString(process.env.FUNCTION_NAME);
-  const vercelPresent = isNonEmptyString(process.env.VERCEL);
+  const {
+    AWS_EXECUTION_ENV = '',
+    AWS_LAMBDA_RUNTIME_API = '',
+    FUNCTIONS_WORKER_RUNTIME = '',
+    K_SERVICE = '',
+    FUNCTION_NAME = '',
+    VERCEL = '',
+    AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '',
+    AWS_REGION = '',
+    FUNCTION_MEMORY_MB = '',
+    FUNCTION_REGION = '',
+    FUNCTION_TIMEOUT_SEC = '',
+    VERCEL_URL = '',
+    VERCEL_REGION = ''
+  } = process.env;
+
+  const isAWSFaaS = AWS_EXECUTION_ENV.length > 0 || AWS_LAMBDA_RUNTIME_API.length > 0;
+  const isAzureFaaS = FUNCTIONS_WORKER_RUNTIME.length > 0;
+  const isGCPFaaS = K_SERVICE.length > 0 || FUNCTION_NAME.length > 0;
+  const isVercelFaaS = VERCEL.length > 0;
 
   const faasEnv = new Map();
 
-  if (awsPresent && !(azurePresent || gcpPresent || vercelPresent)) {
+  if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS || isVercelFaaS)) {
     faasEnv.set('name', 'aws.lambda');
 
-    if (isNonEmptyString(process.env.AWS_REGION)) {
-      faasEnv.set('region', process.env.AWS_REGION);
+    if (AWS_REGION.length > 0) {
+      faasEnv.set('region', AWS_REGION);
     }
 
-    const memory_mb = Number(process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE);
+    const memory_mb = Number(AWS_LAMBDA_FUNCTION_MEMORY_SIZE);
     if (Number.isInteger(memory_mb)) {
       faasEnv.set('memory_mb', new Int32(memory_mb));
     }
 
     return faasEnv;
-  } else if (azurePresent && !(awsPresent || gcpPresent || vercelPresent)) {
+  } else if (isAzureFaaS && !(isAWSFaaS || isGCPFaaS || isVercelFaaS)) {
     faasEnv.set('name', 'azure.func');
     return faasEnv;
-  } else if (gcpPresent && !(awsPresent || azurePresent || vercelPresent)) {
+  } else if (isGCPFaaS && !(isAWSFaaS || isAzureFaaS || isVercelFaaS)) {
     faasEnv.set('name', 'gcp.func');
 
-    if (isNonEmptyString(process.env.FUNCTION_REGION)) {
-      faasEnv.set('region', process.env.FUNCTION_REGION);
+    if (FUNCTION_REGION.length > 0) {
+      faasEnv.set('region', FUNCTION_REGION);
     }
 
-    const memory_mb = Number(process.env.FUNCTION_MEMORY_MB);
+    const memory_mb = Number(FUNCTION_MEMORY_MB);
     if (Number.isInteger(memory_mb)) {
       faasEnv.set('memory_mb', new Int32(memory_mb));
     }
 
-    const timeout_sec = Number(process.env.FUNCTION_TIMEOUT_SEC);
+    const timeout_sec = Number(FUNCTION_TIMEOUT_SEC);
     if (Number.isInteger(timeout_sec)) {
       faasEnv.set('timeout_sec', new Int32(timeout_sec));
     }
 
     return faasEnv;
-  } else if (vercelPresent && !(awsPresent || azurePresent || gcpPresent)) {
+  } else if (isVercelFaaS && !(isAWSFaaS || isAzureFaaS || isGCPFaaS)) {
     faasEnv.set('name', 'vercel');
 
-    if (isNonEmptyString(process.env.VERCEL_URL)) {
+    if (VERCEL_URL.length > 0) {
       faasEnv.set('url', process.env.VERCEL_URL);
     }
 
-    if (isNonEmptyString(process.env.VERCEL_REGION)) {
+    if (VERCEL_REGION.length > 0) {
       faasEnv.set('region', process.env.VERCEL_REGION);
     }
 

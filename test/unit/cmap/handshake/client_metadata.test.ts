@@ -363,18 +363,16 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    beforeEach(() => {
-      sinon.stub(process, 'env').get(() => ({
-        AWS_EXECUTION_ENV: 'iLoveJavaScript',
-        AWS_REGION: 'a'.repeat(512)
-      }));
-    });
-
-    afterEach(() => {
-      sinon.restore();
-    });
+    afterEach(() => sinon.restore());
 
     context('when faas region is too large', () => {
+      beforeEach('1. Omit fields from `env` except `env.name`.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'iLoveJavaScript',
+          AWS_REGION: 'a'.repeat(512)
+        }));
+      });
+
       it('only includes env.name', () => {
         const metadata = makeClientMetadata({ driverInfo: {} });
         expect(metadata).to.not.have.nested.property('env.region');
@@ -384,19 +382,34 @@ describe('client metadata module', () => {
     });
 
     context('when os information is too large', () => {
-      beforeEach(() => {
+      beforeEach('2. Omit fields from `os` except `os.type`.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'iLoveJavaScript',
+          AWS_REGION: 'abc'
+        }));
         sinon.stub(os, 'release').returns('a'.repeat(512));
-      });
-
-      afterEach(() => {
-        sinon.restore();
       });
 
       it('only includes env.name', () => {
         const metadata = makeClientMetadata({ driverInfo: {} });
-        expect(metadata).to.not.have.property('env');
-        expect(metadata).to.have.nested.property('os.type', os.type());
+        expect(metadata).to.have.property('env');
+        expect(metadata).to.have.nested.property('env.region', 'abc');
         expect(metadata.os).to.have.all.keys('type');
+      });
+    });
+
+    context('when there is no space for FaaS env', () => {
+      beforeEach('3. Omit the `env` document entirely.', () => {
+        sinon.stub(process, 'env').get(() => ({
+          AWS_EXECUTION_ENV: 'iLoveJavaScript',
+          AWS_REGION: 'abc'
+        }));
+        sinon.stub(os, 'type').returns('a'.repeat(50));
+      });
+
+      it('omits the faas env', () => {
+        const metadata = makeClientMetadata({ driverInfo: { name: 'a'.repeat(350) } });
+        expect(metadata).to.not.have.property('env');
       });
     });
   });
