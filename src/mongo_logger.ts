@@ -1,4 +1,6 @@
 import { EJSON } from 'bson';
+import { Writable } from 'stream';
+import { inspect } from 'util';
 
 import type {
   CommandFailedEvent,
@@ -145,7 +147,7 @@ export interface MongoLoggerOptions {
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
-  logDestination: MongoDBLogWritable;
+  logDestination: Writable | MongoDBLogWritable;
 }
 
 /**
@@ -176,25 +178,25 @@ function resolveLogPath(
   {
     mongodbLogPath
   }: {
-    mongodbLogPath?: string | MongoDBLogWritable;
+    mongodbLogPath?: string | Writable | MongoDBLogWritable;
   }
-): MongoDBLogWritable {
+): Writable | MongoDBLogWritable {
   const isValidLogDestinationString = (destination: string) =>
     ['stdout', 'stderr'].includes(destination.toLowerCase());
   if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
     return (mongodbLogPath.toLowerCase() === 'stderr'
       ? process.stderr
-      : process.stdout) as unknown as MongoDBLogWritable;
+      : process.stdout);
   }
 
-  if (mongodbLogPath && typeof mongodbLogPath === 'object') {
+  if (mongodbLogPath && typeof mongodbLogPath === 'object' && (mongodbLogPath instanceof Writable || mongodbLogPath?.write)) {
     return mongodbLogPath;
   }
 
   if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
     return (MONGODB_LOG_PATH.toLowerCase() === 'stderr'
       ? process.stderr
-      : process.stdout) as unknown as MongoDBLogWritable;
+      : process.stdout);
   }
 
   return process.stderr as unknown as MongoDBLogWritable;
@@ -390,12 +392,14 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
 export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
-  logDestination: MongoDBLogWritable;
+  logDestination: MongoDBLogWritable | Writable;
+  writeStringifiedLogs: boolean;
 
   constructor(options: MongoLoggerOptions) {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
+    this.writeStringifiedLogs = this.logDestination === process.stderr || this.logDestination === process.stdout;
   }
 
   /** @experimental */
@@ -419,7 +423,11 @@ export class MongoLogger {
           logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };
         }
       }
-      this.logDestination.write(logMessage);
+      if (this.writeStringifiedLogs) {
+        (this.logDestination as Writable).write(inspect(logMessage, { compact: true, breakLength: Infinity }), 'utf-8');
+      } else {
+        (this.logDestination as MongoDBLogWritable).write(logMessage);
+      }
     }
   }
 
