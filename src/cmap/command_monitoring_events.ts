@@ -1,5 +1,11 @@
 import type { Document, ObjectId } from '../bson';
-import { LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE } from '../constants';
+import {
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
+  LEGACY_HELLO_COMMAND,
+  LEGACY_HELLO_COMMAND_CAMEL_CASE
+} from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
 import { Msg, WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
@@ -18,6 +24,7 @@ export class CommandStartedEvent {
   address: string;
   connectionId?: string | number;
   serviceId?: ObjectId;
+  name: string = COMMAND_STARTED;
 
   /**
    * Create a started event
@@ -50,10 +57,6 @@ export class CommandStartedEvent {
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
-
-  get name(): string {
-    return 'CommandStarted';
-  }
 }
 
 /**
@@ -69,6 +72,7 @@ export class CommandSucceededEvent {
   commandName: string;
   reply: unknown;
   serviceId?: ObjectId;
+  name: string = COMMAND_SUCCEEDED;
 
   /**
    * Create a succeeded event
@@ -102,10 +106,6 @@ export class CommandSucceededEvent {
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
-
-  get name(): string {
-    return 'CommandSucceeded';
-  }
 }
 
 /**
@@ -121,6 +121,7 @@ export class CommandFailedEvent {
   commandName: string;
   failure: Error;
   serviceId?: ObjectId;
+  name: string = COMMAND_FAILED;
 
   /**
    * Create a failure event
@@ -154,10 +155,6 @@ export class CommandFailedEvent {
   /* @internal */
   get hasServiceId(): boolean {
     return !!this.serviceId;
-  }
-
-  get name(): string {
-    return 'CommandFailed';
   }
 }
 

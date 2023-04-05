@@ -19,6 +19,22 @@ import type {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
+import {
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
+  CONNECTION_CHECK_OUT_FAILED,
+  CONNECTION_CHECK_OUT_STARTED,
+  CONNECTION_CHECKED_IN,
+  CONNECTION_CHECKED_OUT,
+  CONNECTION_CLOSED,
+  CONNECTION_CREATED,
+  CONNECTION_POOL_CLEARED,
+  CONNECTION_POOL_CLOSED,
+  CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
+  CONNECTION_READY
+} from './constants';
 import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -171,6 +187,8 @@ function resolveLogPath(
 
   if (
     typeof mongodbLogPath === 'object' &&
+    // eslint-disable-next-line no-restricted-syntax
+    mongodbLogPath !== null &&
     Object.prototype.hasOwnProperty.call(mongodbLogPath, 'write')
   ) {
     return mongodbLogPath as MongoDBLogWritable;
@@ -249,28 +267,28 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
 
   let ev;
   switch (logObject.name) {
-    case 'CommandStarted':
+    case COMMAND_STARTED:
       ev = logObject as CommandStartedEvent;
       log = attachCommandFields(log, ev);
       log.message = 'Command started';
       log.command = EJSON.stringify(ev.command);
       log.databaseName = ev.databaseName;
       break;
-    case 'CommandSucceeded':
+    case COMMAND_SUCCEEDED:
       ev = logObject as CommandSucceededEvent;
       log = attachCommandFields(log, ev);
       log.message = 'Command succeeded';
       log.durationMS = ev.duration;
       log.reply = EJSON.stringify(ev.reply);
       break;
-    case 'CommandFailed':
+    case COMMAND_FAILED:
       ev = logObject as CommandFailedEvent;
       log = attachCommandFields(log, ev);
       log.message = 'Command failed';
       log.durationMS = ev.duration;
       log.failure = ev.failure;
       break;
-    case 'ConnectionPoolCreated':
+    case CONNECTION_POOL_CREATED:
       ev = logObject as ConnectionPoolCreatedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection pool created';
@@ -288,12 +306,12 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         log.waitQueueSize = ev.waitQueueSize;
       }
       break;
-    case 'ConnectionPoolReady':
+    case CONNECTION_POOL_READY:
       ev = logObject as ConnectionPoolReadyEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection pool ready';
       break;
-    case 'ConnectionPoolCleared':
+    case CONNECTION_POOL_CLEARED:
       ev = logObject as ConnectionPoolClearedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection pool cleared';
@@ -301,24 +319,24 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         log.serviceId = ev.serviceId.toHexString();
       }
       break;
-    case 'ConnectionPoolClosed':
+    case CONNECTION_POOL_CLOSED:
       ev = logObject as ConnectionPoolClosedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection pool closed';
       break;
-    case 'ConnectionCreated':
+    case CONNECTION_CREATED:
       ev = logObject as ConnectionCreatedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection created';
       log.driverConnectionId = ev.connectionId;
       break;
-    case 'ConnectionReady':
+    case CONNECTION_READY:
       ev = logObject as ConnectionReadyEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection ready';
       log.driverConnectionId = ev.connectionId;
       break;
-    case 'ConnectionClosed':
+    case CONNECTION_CLOSED:
       ev = logObject as ConnectionClosedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection closed';
@@ -329,24 +347,24 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         // log.error = ev
       }
       break;
-    case 'ConnectionCheckOutStarted':
+    case CONNECTION_CHECK_OUT_STARTED:
       ev = logObject as ConnectionCheckOutStartedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection checkout started';
       break;
-    case 'ConnectionCheckOutFailed':
+    case CONNECTION_CHECK_OUT_FAILED:
       ev = logObject as ConnectionCheckOutFailedEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection checkout failed';
       log.reason = ev.reason;
       break;
-    case 'ConnectionCheckedOut':
+    case CONNECTION_CHECKED_OUT:
       ev = logObject as ConnectionCheckedOutEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection checked out';
       log.driverConnectionId = ev.connectionId;
       break;
-    case 'ConnectionCheckedIn':
+    case CONNECTION_CHECKED_IN:
       ev = logObject as ConnectionCheckedInEvent;
       log = attachConnectionFields(log, ev);
       log.message = 'Connection checked in';
