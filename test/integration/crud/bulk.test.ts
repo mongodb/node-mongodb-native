@@ -161,7 +161,7 @@ describe('Bulk', function () {
         result = err.result;
 
         // Basic properties check
-        test.equal(1, result.nInserted);
+        test.equal(1, result.insertedCount);
         test.equal(true, result.hasWriteErrors());
         test.equal(1, result.getWriteErrorCount());
 
@@ -322,7 +322,7 @@ describe('Bulk', function () {
         // Basic properties check
         result = err.result;
         test.equal(err instanceof Error, true);
-        test.equal(1, result.nInserted);
+        test.equal(1, result.insertedCount);
         test.equal(true, result.hasWriteErrors());
         test.ok(1, result.getWriteErrorCount());
 
@@ -387,7 +387,7 @@ describe('Bulk', function () {
     // Execute the operations
     batch.execute(function (err, result) {
       // Basic properties check
-      test.equal(6, result.nInserted);
+      test.equal(6, result.insertedCount);
       test.equal(false, result.hasWriteErrors());
 
       // Finish up test
@@ -412,10 +412,10 @@ describe('Bulk', function () {
 
     // Test basic settings
     const result = thrownError.result;
-    expect(result).to.have.property('nInserted', 1);
-    expect(result).to.have.property('nMatched', 1);
+    expect(result).to.have.property('insertedCount', 1);
+    expect(result).to.have.property('matchedCount', 1);
     expect(result)
-      .to.have.property('nModified')
+      .to.have.property('modifiedCount')
       .that.satisfies(v => v == null || v === 1);
     expect(result).to.have.property('hasWriteErrors').that.is.a('function');
     expect(result).to.have.property('getWriteErrorCount').that.is.a('function');
@@ -455,10 +455,10 @@ describe('Bulk', function () {
 
     // Test basic settings
     const result = originalError.result;
-    test.equal(1, result.nInserted);
-    test.equal(2, result.nUpserted);
-    test.equal(1, result.nMatched);
-    test.ok(1 === result.nModified || result.nModified == null);
+    test.equal(1, result.insertedCount);
+    test.equal(2, result.upsertedCount);
+    test.equal(1, result.matchedCount);
+    test.ok(1 === result.modifiedCount || result.modifiedCount == null);
     test.equal(true, result.hasWriteErrors());
     test.equal(1, result.getWriteErrorCount());
 
@@ -470,7 +470,7 @@ describe('Bulk', function () {
     test.equal(1, error.getOperation().b);
 
     // Check for upserted values
-    const ids = result.getUpsertedIds();
+    const ids = result.result.upserted;
     test.equal(2, ids.length);
     test.equal(2, ids[0].index);
     test.ok(ids[0]._id != null);
@@ -498,13 +498,13 @@ describe('Bulk', function () {
         // Execute the operations
         batch.execute(function (err, result) {
           // Check state of result
-          test.equal(1, result.nUpserted);
-          test.equal(0, result.nInserted);
-          test.equal(0, result.nMatched);
-          test.ok(0 === result.nModified || result.nModified == null);
-          test.equal(0, result.nRemoved);
+          test.equal(1, result.upsertedCount);
+          test.equal(0, result.insertedCount);
+          test.equal(0, result.matchedCount);
+          test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+          test.equal(0, result.deletedCount);
 
-          const upserts = result.getUpsertedIds();
+          const upserts = result.result.upserted;
           test.equal(1, upserts.length);
           test.equal(0, upserts[0].index);
           test.equal(2, upserts[0]._id);
@@ -551,11 +551,11 @@ describe('Bulk', function () {
 
       bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
         expect(err).to.not.exist;
-        test.equal(0, result.nUpserted);
-        test.equal(0, result.nInserted);
-        test.equal(0, result.nMatched);
-        test.ok(0 === result.nModified || result.nModified == null);
-        test.equal(0, result.nRemoved);
+        test.equal(0, result.upsertedCount);
+        test.equal(0, result.insertedCount);
+        test.equal(0, result.matchedCount);
+        test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+        test.equal(0, result.deletedCount);
         test.equal(false, result.hasWriteErrors());
 
         client.close(done);
@@ -591,10 +591,10 @@ describe('Bulk', function () {
           // Basic properties check
           result = err.result;
           test.equal(err instanceof Error, true);
-          test.equal(2, result.nInserted);
-          test.equal(0, result.nUpserted);
-          test.equal(0, result.nMatched);
-          test.ok(0 === result.nModified || result.nModified == null);
+          test.equal(2, result.insertedCount);
+          test.equal(0, result.upsertedCount);
+          test.equal(0, result.matchedCount);
+          test.ok(0 === result.modifiedCount || result.modifiedCount == null);
           test.equal(true, result.hasWriteErrors());
           test.equal(1, result.getWriteErrorCount());
 
@@ -644,7 +644,7 @@ describe('Bulk', function () {
 
           // Basic properties check
           result = err.result;
-          expect(result.nInserted).to.equal(1);
+          expect(result.insertedCount).to.equal(1);
           expect(result.hasWriteErrors()).to.equal(true);
           expect(result.getWriteErrorCount()).to.equal(1);
 
@@ -718,7 +718,7 @@ describe('Bulk', function () {
         // Execute the operations
         batch.execute(function (err, result) {
           // Basic properties check
-          test.equal(6, result.nInserted);
+          test.equal(6, result.insertedCount);
           test.equal(false, result.hasWriteErrors());
 
           // Finish up test
@@ -760,7 +760,7 @@ describe('Bulk', function () {
 
           // Test basic settings
           result = err.result;
-          test.equal(2, result.nInserted);
+          test.equal(2, result.insertedCount);
           test.equal(true, result.hasWriteErrors());
           test.ok(result.getWriteErrorCount() === 4 || result.getWriteErrorCount() === 3);
 
@@ -808,7 +808,7 @@ describe('Bulk', function () {
 
             // Test basic settings
             result = err.result;
-            expect(result.nInserted).to.equal(1);
+            expect(result.insertedCount).to.equal(1);
             expect(result.hasWriteErrors()).to.equal(true);
             expect(result.getWriteErrorCount() === 1).to.equal(true);
 
@@ -863,10 +863,10 @@ describe('Bulk', function () {
 
               // Test basic settings
               result = err.result;
-              test.equal(2, result.nInserted);
-              test.equal(2, result.nUpserted);
-              test.ok(0 === result.nModified || result.nModified == null);
-              test.equal(0, result.nRemoved);
+              test.equal(2, result.insertedCount);
+              test.equal(2, result.upsertedCount);
+              test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+              test.equal(0, result.deletedCount);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
@@ -877,7 +877,7 @@ describe('Bulk', function () {
               test.equal(1, error.getOperation().u['$set'].b);
 
               // Check for upserted values
-              const ids = result.getUpsertedIds();
+              const ids = result.result.upserted;
               test.equal(2, ids.length);
               test.equal(2, ids[0].index);
               test.ok(ids[0]._id != null);
@@ -907,13 +907,13 @@ describe('Bulk', function () {
       // Execute the operations
       batch.execute({}, function (err, result) {
         // Check state of result
-        test.equal(1, result.nUpserted);
-        test.equal(0, result.nInserted);
-        test.equal(0, result.nMatched);
-        test.ok(0 === result.nModified || result.nModified == null);
-        test.equal(0, result.nRemoved);
+        test.equal(1, result.upsertedCount);
+        test.equal(0, result.insertedCount);
+        test.equal(0, result.matchedCount);
+        test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+        test.equal(0, result.deletedCount);
 
-        const upserts = result.getUpsertedIds();
+        const upserts = result.result.upserted;
         test.equal(1, upserts.length);
         test.equal(0, upserts[0].index);
         test.equal(2, upserts[0]._id);
@@ -991,11 +991,11 @@ describe('Bulk', function () {
 
         bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
           expect(err).to.not.exist;
-          test.equal(0, result.nUpserted);
-          test.equal(0, result.nInserted);
-          test.equal(0, result.nMatched);
-          test.ok(0 === result.nModified || result.nModified == null);
-          test.equal(0, result.nRemoved);
+          test.equal(0, result.upsertedCount);
+          test.equal(0, result.insertedCount);
+          test.equal(0, result.matchedCount);
+          test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+          test.equal(0, result.deletedCount);
           test.equal(false, result.hasWriteErrors());
 
           client.close(done);
