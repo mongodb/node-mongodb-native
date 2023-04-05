@@ -128,17 +128,20 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   reason: string;
   serviceId?: ObjectId;
   name: string = CONNECTION_CLOSED;
+  error: Error | undefined;
 
   /** @internal */
   constructor(
     pool: ConnectionPool,
     connection: Pick<Connection, 'id' | 'serviceId'>,
-    reason: string
+    reason: string,
+    error?: Error
   ) {
     super(pool);
     this.connectionId = connection.id;
     this.reason = reason || 'unknown';
     this.serviceId = connection.serviceId;
+    this.error = error;
   }
 }
 

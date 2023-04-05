@@ -975,21 +975,43 @@ describe('class MongoLogger', function () {
                 expect(log).to.have.property('message', 'Connection pool ready');
               });
             });
+
             context('when ConnectionPoolClearedEvent is logged', function () {
-              beforeEach(function () {
-                logger[severityLevel]('connection', connectionPoolCleared);
-                expect(stream.buffer).to.have.lengthOf(1);
-                log = stream.buffer[0];
+              context('when serviceId is present', function () {
+                beforeEach(function () {
+                  logger[severityLevel]('connection', connectionPoolCleared);
+                  expect(stream.buffer).to.have.lengthOf(1);
+                  log = stream.buffer[0];
+                });
+
+                commonConnectionComponentAssertions();
+                it('emits a log with field `message` = "Connection pool cleared"', function () {
+                  expect(log).to.have.property('message', 'Connection pool cleared');
+                });
+
+                it('emits a log with field `serviceId` that is a string when it is present', function () {
+                  expect(log).to.have.property('serviceId').that.is.a('string');
+                });
               });
 
-              commonConnectionComponentAssertions();
-              it('emits a log with field `message` = "Connection pool cleared"', function () {
-                expect(log).to.have.property('message', 'Connection pool cleared');
-              });
+              context('when serviceId is not present', function () {
+                beforeEach(function () {
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { serviceId: _, ...connectionPoolClearedNoServiceId } =
+                    connectionPoolCleared;
+                  logger[severityLevel]('connection', connectionPoolClearedNoServiceId);
+                  expect(stream.buffer).to.have.lengthOf(1);
+                  log = stream.buffer[0];
+                });
 
-              // TODO: Only in LB mode
-              it('emits a log with field `serviceId` that is a string when it is present', function () {
-                expect(log).to.have.property('serviceId').that.is.a('string');
+                commonConnectionComponentAssertions();
+                it('emits a log with field `message` = "Connection pool cleared"', function () {
+                  expect(log).to.have.property('message', 'Connection pool cleared');
+                });
+
+                it('emits a log without field `serviceId`', function () {
+                  expect(log).to.not.have.property('serviceId');
+                });
               });
             });
 
@@ -1085,7 +1107,6 @@ describe('class MongoLogger', function () {
               });
             });
 
-            // TODO: Write tests for ConnectionClosedEvent
             context('when ConnectionClosedEvent is logged', function () {
               for (const [reason, message] of [
                 ['error', 'An error occurred while using the connection'],
@@ -1098,7 +1119,11 @@ describe('class MongoLogger', function () {
               ]) {
                 context(`with reason = "${reason}"`, function () {
                   beforeEach(function () {
-                    logger[severityLevel]('connection', { ...connectionClosed, reason });
+                    const event =
+                      reason === 'error'
+                        ? { ...connectionClosed, reason, error: new Error('this is an error') }
+                        : { ...connectionClosed, reason };
+                    logger[severityLevel]('connection', event);
                     expect(stream.buffer).to.have.lengthOf(1);
                     log = stream.buffer[0];
                   });
@@ -1109,9 +1134,7 @@ describe('class MongoLogger', function () {
                   });
 
                   if (reason === 'error') {
-                    // TODO(NODE-5169): We need to expose the error on the ConnectionClosedEvent if
-                    // it exists
-                    it.skip('emits a log with field `error`', function () {
+                    it('emits a log with field `error`', function () {
                       expect(log).to.have.property('error');
                     });
                   }

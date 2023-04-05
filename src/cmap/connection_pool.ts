@@ -701,7 +701,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         this[kPending]--;
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
+          new ConnectionClosedEvent(
+            this,
+            { id: connectOptions.id, serviceId: undefined },
+            'error',
+            err
+          )
         );
         if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
           err.connectionGeneration = connectOptions.generation;

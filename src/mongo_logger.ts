@@ -349,7 +349,9 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
             break;
           case 'error':
             log.reason = 'An error occurred while using the connection';
-            // TODO: we need to expose the error on the ConnectionClosedEvent object if it exists
+            if (ev.error) {
+              log.error = ev.error;
+            }
             break;
           case 'poolClosed':
             log.reason = 'Connection pool was closed';
