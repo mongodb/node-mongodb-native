@@ -3,6 +3,20 @@ import { expect } from 'chai';
 import { Readable, Writable } from 'stream';
 
 import {
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
+  CONNECTION_CHECK_OUT_FAILED,
+  CONNECTION_CHECK_OUT_STARTED,
+  CONNECTION_CHECKED_IN,
+  CONNECTION_CHECKED_OUT,
+  CONNECTION_CLOSED,
+  CONNECTION_CREATED,
+  CONNECTION_POOL_CLEARED,
+  CONNECTION_POOL_CLOSED,
+  CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
+  CONNECTION_READY,
   Log,
   MongoLogger,
   MongoLoggerOptions,
@@ -721,7 +735,7 @@ describe('class MongoLogger', function () {
               address: '127.0.0.1:27017',
               serviceId: new ObjectId(),
               databaseName: 'db',
-              name: 'CommandStarted'
+              name: COMMAND_STARTED
             };
             const commandSucceeded = {
               commandName: 'find',
@@ -731,7 +745,7 @@ describe('class MongoLogger', function () {
               address: '127.0.0.1:27017',
               serviceId: new ObjectId(),
               databaseName: 'db',
-              name: 'CommandSucceeded'
+              name: COMMAND_SUCCEEDED
             };
             const commandFailed = {
               commandName: 'find',
@@ -741,7 +755,7 @@ describe('class MongoLogger', function () {
               address: '127.0.0.1:27017',
               serviceId: new ObjectId(),
               databaseName: 'db',
-              name: 'CommandFailed'
+              name: COMMAND_FAILED
             };
 
             function commonCommandComponentAssertions() {
@@ -846,52 +860,63 @@ describe('class MongoLogger', function () {
               waitQueueTimeoutMS: 100
             };
             const connectionPoolCreated = {
-              name: 'ConnectionPoolCreated',
+              name: CONNECTION_POOL_CREATED,
               waitQueueSize: 0,
               address: '127.0.0.1:27017',
               options
             };
             const connectionPoolReady = {
-              name: 'ConnectionPoolReady',
+              name: CONNECTION_POOL_READY,
               address: '127.0.0.1:27017',
               options
             };
             const connectionPoolCleared = {
-              name: 'ConnectionPoolCleared',
+              name: CONNECTION_POOL_CLEARED,
               serviceId: new ObjectId(),
               address: '127.0.0.1:27017',
               options
             };
             const connectionPoolClosed = {
-              name: 'ConnectionPoolClosed',
+              name: CONNECTION_POOL_CLOSED,
               address: '127.0.0.1:27017',
               options
             };
             const connectionCreated = {
-              name: 'ConnectionCreated',
+              name: CONNECTION_CREATED,
               connectionId: 0,
               address: '127.0.0.1:27017',
               options
             };
             const connectionCheckOutStarted = {
-              name: 'ConnectionCheckOutStarted',
+              name: CONNECTION_CHECK_OUT_STARTED,
               address: '127.0.0.1:27017',
               options
             };
             const connectionCheckOutFailed = {
-              name: 'ConnectionCheckOutFailed',
-              reason: 'wups',
+              name: CONNECTION_CHECK_OUT_FAILED,
               address: '127.0.0.1:27017',
               options
             };
             const connectionCheckedOut = {
-              name: 'ConnectionCheckedOut',
+              name: CONNECTION_CHECKED_OUT,
               connectionId: 0,
               address: '127.0.0.1:27017',
               options
             };
             const connectionCheckedIn = {
-              name: 'ConnectionCheckedIn',
+              name: CONNECTION_CHECKED_IN,
+              connectionId: 0,
+              address: '127.0.0.1:27017',
+              options
+            };
+            const connectionReady = {
+              name: CONNECTION_READY,
+              connectionId: 0,
+              address: '127.0.0.1:27017',
+              options
+            };
+            const connectionClosed = {
+              name: CONNECTION_CLOSED,
               connectionId: 0,
               address: '127.0.0.1:27017',
               options
@@ -1044,6 +1069,66 @@ describe('class MongoLogger', function () {
               commonConnectionComponentAssertions();
               it('emits a log with field `message` = "Connection checked out"', function () {
                 expect(log).to.have.property('message', 'Connection checked out');
+              });
+            });
+
+            context('when ConnectionReadyEvent is logged', function () {
+              beforeEach(function () {
+                logger[severityLevel]('connection', connectionReady);
+                expect(stream.buffer).to.have.lengthOf(1);
+                log = stream.buffer[0];
+              });
+
+              commonConnectionComponentAssertions();
+              it('emits a log with field `message` = "Connection checked out"', function () {
+                expect(log).to.have.property('message', 'Connection ready');
+              });
+            });
+
+            // TODO: Write tests for ConnectionClosedEvent
+            context('when ConnectionClosedEvent is logged', function () {
+              for (const [reason, message] of [
+                ['error', 'An error occurred while using the connection'],
+                [
+                  'idle',
+                  'Connection has been available but unused for longer than the configured max idle time'
+                ],
+                ['stale', 'Connection became stale because the pool was cleared'],
+                ['poolClosed', 'Connection pool was closed']
+              ]) {
+                context(`with reason = "${reason}"`, function () {
+                  beforeEach(function () {
+                    logger[severityLevel]('connection', { ...connectionClosed, reason });
+                    expect(stream.buffer).to.have.lengthOf(1);
+                    log = stream.buffer[0];
+                  });
+
+                  commonConnectionComponentAssertions();
+                  it(`emits a log with field \`reason\` = "${message}"`, function () {
+                    expect(log).to.have.property('reason', message);
+                  });
+
+                  if (reason === 'error') {
+                    // TODO(NODE-5169): We need to expose the error on the ConnectionClosedEvent if
+                    // it exists
+                    it.skip('emits a log with field `error`', function () {
+                      expect(log).to.have.property('error');
+                    });
+                  }
+                });
+              }
+
+              context('with invalid reason', function () {
+                beforeEach(function () {
+                  logger[severityLevel]('connection', { ...connectionClosed, reason: 'woops' });
+                  expect(stream.buffer).to.have.lengthOf(1);
+                  log = stream.buffer[0];
+                });
+
+                commonConnectionComponentAssertions();
+                it('emits a log without field `reason`', function () {
+                  expect(log).to.not.have.property('reason');
+                });
               });
             });
           });
