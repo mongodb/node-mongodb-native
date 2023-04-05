@@ -3,10 +3,16 @@
         "version": "Next"
     },
     {
+        "version": "5.2"
+    },
+    {
         "version": "5.1"
     },
     {
         "version": "5.0"
+    },
+    {
+        "version": "4.15"
     },
     {
         "version": "4.14"
