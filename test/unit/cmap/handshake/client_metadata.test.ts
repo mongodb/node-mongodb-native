@@ -9,7 +9,7 @@ import { getFAASEnv, Int32, makeClientMetadata } from '../../../mongodb';
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
 
 describe('client metadata module', () => {
-  describe('determineCloudProvider()', function () {
+  describe('getFAASEnv()', function () {
     const tests: Array<[string, string]> = [
       ['AWS_EXECUTION_ENV', 'aws.lambda'],
       ['AWS_LAMBDA_RUNTIME_API', 'aws.lambda'],

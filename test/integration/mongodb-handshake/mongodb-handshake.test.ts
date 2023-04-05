@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection, LEGACY_HELLO_COMMAND, MongoServerSelectionError } from '../../mongodb';
+import {
+  Connection,
+  LEGACY_HELLO_COMMAND,
+  MongoServerError,
+  MongoServerSelectionError
+} from '../../mongodb';
 
 describe('MongoDB Handshake Node tests', () => {
   let client;
@@ -29,7 +34,11 @@ describe('MongoDB Handshake Node tests', () => {
     it('client fails to connect with an error relating to size', async function () {
       client = this.configuration.newClient({ serverSelectionTimeoutMS: 2000 });
       const error = await client.connect().catch(error => error);
-      expect(error).to.be.instanceOf(MongoServerSelectionError);
+      if (this.configuration.isLoadBalanced) {
+        expect(error).to.be.instanceOf(MongoServerError);
+      } else {
+        expect(error).to.be.instanceOf(MongoServerSelectionError);
+      }
       expect(error).to.match(/client metadata document must be less/);
     });
   });
