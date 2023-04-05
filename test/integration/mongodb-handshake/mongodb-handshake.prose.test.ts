@@ -1,8 +1,15 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-import { determineFAASProvider, FAASProvider, MongoClient } from '../../mongodb';
+import {
+  Connection,
+  getFAASEnv,
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  MongoServerSelectionError
+} from '../../mongodb';
 
-context('FAAS Environment Prose Tests', function () {
+describe.only('FAAS Environment Prose Tests', function () {
   let client: MongoClient;
 
   afterEach(async function () {
@@ -12,12 +19,12 @@ context('FAAS Environment Prose Tests', function () {
   type EnvironmentVariables = Array<[string, string]>;
   const tests: Array<{
     context: string;
-    expectedProvider: FAASProvider;
+    expectedProvider: string | undefined;
     env: EnvironmentVariables;
   }> = [
     {
       context: '1. Valid AWS',
-      expectedProvider: 'aws',
+      expectedProvider: 'aws.lambda',
       env: [
         ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
         ['AWS_REGION', 'us-east-2'],
@@ -26,12 +33,12 @@ context('FAAS Environment Prose Tests', function () {
     },
     {
       context: '2. Valid Azure',
-      expectedProvider: 'azure',
+      expectedProvider: 'azure.func',
       env: [['FUNCTIONS_WORKER_RUNTIME', 'node']]
     },
     {
       context: '3. Valid GCP',
-      expectedProvider: 'gcp',
+      expectedProvider: 'gcp.func',
       env: [
         ['K_SERVICE', 'servicename'],
         ['FUNCTION_MEMORY_MB', '1024'],
@@ -49,7 +56,7 @@ context('FAAS Environment Prose Tests', function () {
       ]
     },
     {
-      expectedProvider: 'none',
+      expectedProvider: undefined,
       context: '5. Invalid - multiple providers',
       env: [
         ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
@@ -57,7 +64,7 @@ context('FAAS Environment Prose Tests', function () {
       ]
     },
     {
-      expectedProvider: 'aws',
+      expectedProvider: 'aws.lambda',
       context: '6. Invalid - long string',
       env: [
         ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
@@ -65,7 +72,7 @@ context('FAAS Environment Prose Tests', function () {
       ]
     },
     {
-      expectedProvider: 'aws',
+      expectedProvider: 'aws.lambda',
       context: '7. Invalid - wrong types',
       env: [
         ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
@@ -82,14 +89,13 @@ context('FAAS Environment Prose Tests', function () {
         }
       });
       after(() => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for (const [key, _] of env) {
+        for (const [key] of env) {
           delete process.env[key];
         }
       });
 
-      before(`metadata confirmation test for ${name}`, function () {
-        expect(determineFAASProvider()).to.equal(
+      it(`metadata confirmation test for ${name}`, function () {
+        expect(getFAASEnv()?.get('name')).to.equal(
           expectedProvider,
           'determined the wrong cloud provider'
         );
@@ -106,4 +112,31 @@ context('FAAS Environment Prose Tests', function () {
       });
     });
   }
+
+  context('when hello is too large', () => {
+    before(() => {
+      sinon.stub(Connection.prototype, 'command').callsFake(function (ns, cmd, options, callback) {
+        const command = Connection.prototype.command.wrappedMethod.bind(this);
+
+        if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+          return command(
+            ns,
+            { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } },
+            options,
+            callback
+          );
+        }
+        return command(ns, cmd, options, callback);
+      });
+    });
+
+    after(() => sinon.restore());
+
+    it('client fails to connect with an error relating to size', async function () {
+      client = this.configuration.newClient({ serverSelectionTimeoutMS: 2000 });
+      const error = await client.connect().catch(error => error);
+      expect(error).to.be.instanceOf(MongoServerSelectionError);
+      expect(error).to.match(/client metadata document must be less/);
+    });
+  });
 });
