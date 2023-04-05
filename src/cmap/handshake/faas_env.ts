@@ -64,11 +64,11 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
     faasEnv.set('name', 'vercel');
 
     if (VERCEL_URL.length > 0) {
-      faasEnv.set('url', process.env.VERCEL_URL);
+      faasEnv.set('url', VERCEL_URL);
     }
 
     if (VERCEL_REGION.length > 0) {
-      faasEnv.set('region', process.env.VERCEL_REGION);
+      faasEnv.set('region', VERCEL_REGION);
     }
 
     return faasEnv;
