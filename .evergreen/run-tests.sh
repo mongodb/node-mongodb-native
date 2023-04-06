@@ -53,8 +53,8 @@ else
 fi
 
 npm install --force 'mongodb-client-encryption@alpha'
-npm install @mongodb-js/zstd
-npm install snappy
+npm install --force @mongodb-js/zstd
+npm install --force snappy
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
