@@ -9,6 +9,7 @@ source ".evergreen/init-nvm.sh"
 
 set -o xtrace
 
+# TODO(NODE-5180): remove --force option
 npm install --force 'mongodb-client-encryption@alpha'
 npm install --force 'gcp-metadata'
 

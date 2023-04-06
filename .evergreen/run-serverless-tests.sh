@@ -10,6 +10,7 @@ if [ -z ${MONGODB_URI+omitted} ]; then echo "MONGODB_URI is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_USER+omitted} ]; then echo "SERVERLESS_ATLAS_USER is unset" && exit 1; fi
 if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASSWORD is unset" && exit 1; fi
 
+# TODO(NODE-5180): remove --force option
 npm install --force 'mongodb-client-encryption@alpha'
 
 npx mocha \
