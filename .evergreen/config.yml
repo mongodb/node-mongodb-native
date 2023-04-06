@@ -2531,7 +2531,6 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
@@ -2547,7 +2546,6 @@ tasks:
         vars:
           VERSION: '5.0'
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
@@ -2563,7 +2561,6 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
@@ -2579,7 +2576,6 @@ tasks:
         vars:
           VERSION: rapid
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
@@ -2595,7 +2591,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
@@ -2611,7 +2606,6 @@ tasks:
         vars:
           VERSION: latest
           TOPOLOGY: replica_set
-          ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:

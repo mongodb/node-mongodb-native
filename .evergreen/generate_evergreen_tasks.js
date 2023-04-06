@@ -613,8 +613,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: version,
-            TOPOLOGY: 'replica_set',
-            ENABLE_featureFlagFLE2ProtocolVersion2: 'ON'
+            TOPOLOGY: 'replica_set'
           }
         },
         { func: 'bootstrap kms servers' },
