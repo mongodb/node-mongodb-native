@@ -342,9 +342,9 @@ describe('CRUD API', function () {
             { ordered: false, writeConcern: { w: 1 } },
             function (err, r) {
               expect(err).to.not.exist;
-              test.equal(3, r.nInserted);
-              test.equal(1, r.nUpserted);
-              test.equal(1, r.nRemoved);
+              test.equal(3, r.insertedCount);
+              test.equal(1, r.upsertedCount);
+              test.equal(1, r.deletedCount);
 
               // Crud fields
               test.equal(3, r.insertedCount);
@@ -384,9 +384,9 @@ describe('CRUD API', function () {
               { ordered: false, writeConcern: { w: 1 } },
               function (err, r) {
                 expect(err).to.not.exist;
-                test.equal(1, r.nInserted);
-                test.equal(2, r.nUpserted);
-                test.equal(2, r.nRemoved);
+                test.equal(1, r.insertedCount);
+                test.equal(2, r.upsertedCount);
+                test.equal(2, r.deletedCount);
 
                 // Crud fields
                 test.equal(1, r.insertedCount);
@@ -425,9 +425,9 @@ describe('CRUD API', function () {
             { ordered: true, writeConcern: { w: 1 } },
             function (err, r) {
               expect(err).to.not.exist;
-              test.equal(3, r.nInserted);
-              test.equal(1, r.nUpserted);
-              test.equal(1, r.nRemoved);
+              test.equal(3, r.insertedCount);
+              test.equal(1, r.upsertedCount);
+              test.equal(1, r.deletedCount);
 
               // Crud fields
               test.equal(3, r.insertedCount);
@@ -463,9 +463,9 @@ describe('CRUD API', function () {
             { ordered: true, writeConcern: { w: 1 } },
             function (err, r) {
               // expect(err).to.not.exist;
-              test.equal(1, r.nInserted);
-              test.equal(2, r.nUpserted);
-              test.equal(1, r.nRemoved);
+              test.equal(1, r.insertedCount);
+              test.equal(2, r.upsertedCount);
+              test.equal(1, r.deletedCount);
 
               // Crud fields
               test.equal(1, r.insertedCount);
