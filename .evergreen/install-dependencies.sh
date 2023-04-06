@@ -110,4 +110,5 @@ fi
 
 echo "npm version: $(npm -v)"
 
-npm install "${NPM_OPTIONS}"
+# TODO(NODE-5180): remove --force option
+npm install --force "${NPM_OPTIONS}"

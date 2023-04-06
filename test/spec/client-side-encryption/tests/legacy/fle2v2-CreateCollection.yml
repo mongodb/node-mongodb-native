@@ -1,0 +1,1266 @@
+# This test requires libmongocrypt 1.5.0-alpha2.
+# Requires libmongocrypt 1.8.0.
+runOn:
+  - minServerVersion: "7.0.0"
+    serverless: "forbid"
+    # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded", "load-balanced" ]
+    
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+
+tests:
+  - description: "state collections and index are created"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: &encrypted_fields0 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields0
+            command_name: create
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+  - description: "default state collection names are applied"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: &encrypted_fields1 {
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }},
+                        "queries": {
+                            "queryType": "equality",
+                            "contention": {
+                                "$numberLong": "0"
+                            }
+                        }
+                    }
+                ]
+            }
+
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+      
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields1
+            command_name: create
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+  - description: "drop removes all state collections"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: &encrypted_fields2 {
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }},
+                        "queries": {
+                            "queryType": "equality",
+                            "contention": {
+                                "$numberLong": "0"
+                            }
+                        }
+                    }
+                ]
+            }
+
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+      
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields2
+            command_name: create
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+  - description: "encryptedFieldsMap with cyclic entries does not loop"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          # encryptedCollection has encryptedCollection.esc as the escCollection.
+          # encryptedCollection.esc has encryptedCollection as the escCollection.
+          default.encryptedCollection: &encrypted_fields3 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+          default.encryptedCollection.esc: {
+              "escCollection": "enxcol_.encryptedCollection.esc",
+              "eccCollection": "enxcol_.encryptedCollection.ecc",
+              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+              "fields": [
+                  {
+                      "path": "firstName",
+                      "bsonType": "string",
+                      "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                  }
+              ]
+          }
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields3
+            command_name: create
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+  - description: "CreateCollection without encryptedFields."
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "plaintextCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "plaintextCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "plaintextCollection"
+
+    expectations:
+        # events from dropCollection ... begin
+        # expect listCollections to be sent on drop to check for remote encryptedFields.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "plaintextCollection" }
+            command_name: listCollections
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "plaintextCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        - command_started_event:
+            command:
+              create: "plaintextCollection"
+            command_name: create
+            database_name: *database_name
+  - description: "CreateCollection from encryptedFieldsMap."
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: &encrypted_fields4 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields4
+            command_name: create
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+  - description: "CreateCollection from encryptedFields."
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+    operations:
+      # Do initial drops to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: &encrypted_fields5 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        # State collections are created first.
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        # Data collection is created after.
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields5
+            command_name: create
+            database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+
+  - description: "DropCollection from encryptedFieldsMap"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+    operations:
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+  - description: "DropCollection from encryptedFields"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap: {}
+    operations:
+      # Do initial drops to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: &encrypted_fields6 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields6
+            command_name: create
+            database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+
+  - description: "DropCollection from remote encryptedFields"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap: {}
+
+    operations:
+      # Do initial drops to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+          encryptedFields: &encrypted_fields7 {
+                "escCollection": "enxcol_.encryptedCollection.esc",
+                "eccCollection": "enxcol_.encryptedCollection.ecc",
+                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "subType": "04", "base64": "AAAAAAAAAAAAAAAAAAAAAA==" }}
+                    }
+                ]
+            }
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+      - name: assertIndexExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+          index: __safeContent___1
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.esc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: "encryptedCollection"
+
+    expectations:
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
+        # events from createCollection ... begin
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.esc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "enxcol_.encryptedCollection.ecoc"
+              clusteredIndex: {key: {_id: 1}, unique: true}
+            command_name: create
+            database_name: *database_name
+        - command_started_event:
+            command:
+              create: "encryptedCollection"
+              encryptedFields: *encrypted_fields7
+            command_name: create
+            database_name: *database_name
+        # libmongocrypt requests listCollections to get a schema for the "createIndexes" command.
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
+        # Index on __safeContents__ is then created.
+        - command_started_event:
+            command:
+              createIndexes: "encryptedCollection"
+              indexes:
+                - name: __safeContent___1
+                  key: { __safeContent__: 1 }
+            command_name: createIndexes
+            database_name: *database_name
+        # events from createCollection ... end
+        # events from dropCollection ... begin
+        - command_started_event:
+            command:
+              listCollections: 1
+              filter: { name: "encryptedCollection" }
+            command_name: listCollections
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.esc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "enxcol_.encryptedCollection.ecoc"
+            command_name: drop
+            database_name: *database_name
+        - command_started_event:
+            command:
+              drop: "encryptedCollection"
+            command_name: drop
+            database_name: *database_name
+        # events from dropCollection ... end
