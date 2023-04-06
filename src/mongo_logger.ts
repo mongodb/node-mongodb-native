@@ -184,19 +184,19 @@ function resolveLogPath(
   const isValidLogDestinationString = (destination: string) =>
     ['stdout', 'stderr'].includes(destination.toLowerCase());
   if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
-    return (mongodbLogPath.toLowerCase() === 'stderr'
-      ? process.stderr
-      : process.stdout);
+    return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
   }
 
-  if (mongodbLogPath && typeof mongodbLogPath === 'object' && (mongodbLogPath instanceof Writable || mongodbLogPath?.write)) {
+  if (
+    mongodbLogPath &&
+    typeof mongodbLogPath === 'object' &&
+    (mongodbLogPath instanceof Writable || mongodbLogPath?.write)
+  ) {
     return mongodbLogPath;
   }
 
   if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
-    return (MONGODB_LOG_PATH.toLowerCase() === 'stderr'
-      ? process.stderr
-      : process.stdout);
+    return MONGODB_LOG_PATH.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
   }
 
   return process.stderr as unknown as MongoDBLogWritable;
@@ -399,7 +399,8 @@ export class MongoLogger {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
-    this.writeStringifiedLogs = this.logDestination === process.stderr || this.logDestination === process.stdout;
+    this.writeStringifiedLogs =
+      this.logDestination === process.stderr || this.logDestination === process.stdout;
   }
 
   /** @experimental */
@@ -424,7 +425,10 @@ export class MongoLogger {
         }
       }
       if (this.writeStringifiedLogs) {
-        (this.logDestination as Writable).write(inspect(logMessage, { compact: true, breakLength: Infinity }), 'utf-8');
+        (this.logDestination as Writable).write(
+          inspect(logMessage, { compact: true, breakLength: Infinity }),
+          'utf-8'
+        );
       } else {
         (this.logDestination as MongoDBLogWritable).write(logMessage);
       }
