@@ -212,37 +212,58 @@ export class BulkWriteResult {
     return this.result.ok;
   }
 
-  /** The number of inserted documents */
+  /**
+   * The number of inserted documents
+   * @deprecated Use insertedCount instead.
+   */
   get nInserted(): number {
     return this.result.nInserted;
   }
 
-  /** Number of upserted documents */
+  /**
+   * Number of upserted documents
+   * @deprecated User upsertedCount instead.
+   */
   get nUpserted(): number {
     return this.result.nUpserted;
   }
 
-  /** Number of matched documents */
+  /**
+   * Number of matched documents
+   * @deprecated Use matchedCount instead.
+   */
   get nMatched(): number {
     return this.result.nMatched;
   }
 
-  /** Number of documents updated physically on disk */
+  /**
+   * Number of documents updated physically on disk
+   * @deprecated Use modifiedCount instead.
+   */
   get nModified(): number {
     return this.result.nModified;
   }
 
-  /** Number of removed documents */
+  /**
+   * Number of removed documents
+   * @deprecated Use deletedCount instead.
+   */
   get nRemoved(): number {
     return this.result.nRemoved;
   }
 
-  /** Returns an array of all inserted ids */
+  /**
+   * Returns an array of all inserted ids
+   * @deprecated Use insertedIds instead.
+   */
   getInsertedIds(): Document[] {
     return this.result.insertedIds;
   }
 
-  /** Returns an array of all upserted ids */
+  /**
+   * Returns an array of all upserted ids
+   * @deprecated Use upsertedIds instead.
+   */
   getUpsertedIds(): Document[] {
     return this.result.upserted;
   }

@@ -106,6 +106,8 @@ export class Admin {
    * @param username - The username for the new user
    * @param passwordOrOptions - An optional password for the new user, or the options for the command
    * @param options - Optional settings for the command
+   * @deprecated Use the createUser command in `db.command()` instead.
+   * @see https://www.mongodb.com/docs/manual/reference/command/createUser/
    */
   async addUser(
     username: string,

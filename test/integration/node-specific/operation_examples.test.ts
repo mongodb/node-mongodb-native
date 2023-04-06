@@ -3776,15 +3776,15 @@ describe('Operations', function () {
         // Execute the operations
         return batch.execute().then(function (result) {
           // Check state of result
-          expect(result.nInserted).to.equal(2);
-          expect(result.nUpserted).to.equal(1);
-          expect(result.nMatched).to.equal(1);
+          expect(result.insertedCount).to.equal(2);
+          expect(result.upsertedCount).to.equal(1);
+          expect(result.matchedCount).to.equal(1);
           expect(
-            1 === result.nModified || result.nModified === 0 || result.nModified == null
+            1 === result.modifiedCount || result.modifiedCount === 0 || result.modifiedCount == null
           ).to.exist;
-          expect(result.nRemoved).to.equal(1);
+          expect(result.deletedCount).to.equal(1);
 
-          const upserts = result.getUpsertedIds();
+          const upserts = result.result.upserted;
           expect(upserts.length).to.equal(1);
           expect(upserts[0].index).to.equal(2);
           expect(upserts[0]._id != null).to.exist;
@@ -3845,15 +3845,15 @@ describe('Operations', function () {
         // Execute the operations
         return batch.execute().then(function (result) {
           // Check state of result
-          expect(result.nInserted).to.equal(2);
-          expect(result.nUpserted).to.equal(1);
-          expect(result.nMatched).to.equal(1);
+          expect(result.insertedCount).to.equal(2);
+          expect(result.upsertedCount).to.equal(1);
+          expect(result.matchedCount).to.equal(1);
           expect(
-            1 === result.nModified || result.nModified === 0 || result.nModified == null
+            1 === result.modifiedCount || result.modifiedCount === 0 || result.modifiedCount == null
           ).to.exist;
-          expect(result.nRemoved).to.equal(1);
+          expect(result.deletedCount).to.equal(1);
 
-          const upserts = result.getUpsertedIds();
+          const upserts = result.result.upserted;
           expect(upserts.length).to.equal(1);
           expect(upserts[0].index).to.equal(2);
           expect(upserts[0]._id != null).to.exist;
@@ -4169,9 +4169,9 @@ describe('Operations', function () {
             { ordered: true, writeConcern: { w: 1 } }
           )
           .then(function (r) {
-            expect(r.nInserted).to.equal(1);
-            expect(r.nUpserted).to.equal(2);
-            expect(r.nRemoved).to.equal(0);
+            expect(r.insertedCount).to.equal(1);
+            expect(r.upsertedCount).to.equal(2);
+            expect(r.deletedCount).to.equal(0);
             // Crud fields
             expect(r.insertedCount).to.equal(1);
             expect(Object.keys(r.insertedIds).length).to.equal(1);
