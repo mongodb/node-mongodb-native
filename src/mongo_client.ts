@@ -364,7 +364,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     };
   }
 
-  /** {@inheritdoc MongoOptions} */
+  /** @see MongoOptions */
   get options(): Readonly<MongoOptions> {
     return Object.freeze({ ...this[kOptions] });
   }
