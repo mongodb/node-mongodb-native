@@ -52,7 +52,7 @@ popd # mongo-c-driver
 
 pushd libmongocrypt/bindings/node
 
-npm install --production --ignore-scripts
+npm install --force --production --ignore-scripts
 bash ./etc/build-static.sh
 
 popd # libmongocrypt/bindings/node
@@ -81,7 +81,7 @@ pushd ../csfle-deps-tmp/libmongocrypt/bindings/node
 killall mongocryptd || true
 
 # only prod deps were installed earlier, install devDependencies here (except for mongodb!)
-npm install --ignore-scripts
+npm install --force --ignore-scripts
 
 # copy mongodb into CSFLE's node_modules
 rm -rf node_modules/mongodb

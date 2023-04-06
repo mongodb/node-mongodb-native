@@ -105,4 +105,4 @@ fi
 
 echo "npm version: $(npm -v)"
 
-npm install "${NPM_OPTIONS}"
+npm install --force "${NPM_OPTIONS}"
