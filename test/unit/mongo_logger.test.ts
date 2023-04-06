@@ -819,10 +819,6 @@ describe('class MongoLogger', function () {
 
                 expect(() => EJSON.parse(log.reply)).to.not.throw();
               });
-
-              context('when the command is sensitive', function () {
-                it('redacts the `reply` field');
-              });
             });
 
             context('when CommandFailedEvent is logged', function () {
@@ -843,10 +839,6 @@ describe('class MongoLogger', function () {
 
               it('emits a log with field `failure`', function () {
                 expect(log).to.have.property('failure');
-              });
-
-              context('when the command is sensitive', function () {
-                it('redacts the `failure` field');
               });
             });
           });
