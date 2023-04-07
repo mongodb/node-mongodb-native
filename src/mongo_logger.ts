@@ -1,5 +1,5 @@
 import { EJSON } from 'bson';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import { inspect } from 'util';
 
 import type {
@@ -167,6 +167,18 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
   return null;
 }
 
+type ClientLogPathOptions = {
+  mongodbLogPath?: string | Writable | MongoDBLogWritable;
+};
+
+function createStdLogger(stream: { write: NodeJS.WriteStream['write'] }): MongoDBLogWritable {
+  return {
+    write: (log: Log): unknown => {
+      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
+      return;
+    }
+  };
+}
 /**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
  * mongo client options respectively.
@@ -175,38 +187,26 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
  */
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
-  {
-    mongodbLogPath
-  }: {
-    mongodbLogPath?: string | Writable | MongoDBLogWritable;
-  }
-): Writable | MongoDBLogWritable {
-  const isValidLogDestinationString = (destination: string) =>
-    ['stdout', 'stderr'].includes(destination.toLowerCase());
-  if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
-    return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
-  }
+  { mongodbLogPath }: ClientLogPathOptions
+): MongoDBLogWritable {
+  if (mongodbLogPath === 'stderr') return createStdLogger(process.stderr);
+  if (mongodbLogPath === 'stdout') return createStdLogger(process.stdout);
 
-  if (
-    mongodbLogPath &&
-    typeof mongodbLogPath === 'object' &&
-    (mongodbLogPath instanceof Writable || mongodbLogPath?.write)
-  ) {
+  if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
     return mongodbLogPath;
   }
 
-  if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
-    return MONGODB_LOG_PATH.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
-  }
+  if (MONGODB_LOG_PATH === 'stderr') return createStdLogger(process.stderr);
+  if (MONGODB_LOG_PATH === 'stdout') return createStdLogger(process.stdout);
 
-  return process.stderr as unknown as MongoDBLogWritable;
+  return createStdLogger(process.stderr);
 }
 
 /** @internal */
 export interface Log extends Record<string, any> {
-  s: SeverityLevel;
   t: Date;
   c: MongoLoggableComponent;
+  s: SeverityLevel;
   message?: string;
 }
 
@@ -227,42 +227,42 @@ export interface Loggable extends Record<string, any> {
   toLog?(): Record<string, any>;
 }
 
+function getHostPort(address: string): { host: string; port: number } {
+  const hostAddress = new HostAddress(address);
+
+  // NOTE: Should only default when the address is a socket address
+  const host = hostAddress.host ?? '';
+  const port = hostAddress.port ?? 0;
+  return { host, port };
+}
+
+function attachCommandFields(
+  l: any,
+  ev: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+) {
+  l.commandName = ev.commandName;
+  l.requestId = ev.requestId;
+  l.driverConnectionId = ev?.connectionId;
+  const { host, port } = getHostPort(ev.address);
+  l.serverHost = host;
+  l.serverPort = port;
+  if (ev?.serviceId) {
+    l.serviceId = ev.serviceId.toHexString();
+  }
+
+  return l;
+}
+
+function attachConnectionFields(l: any, ev: ConnectionPoolMonitoringEvent) {
+  const { host, port } = getHostPort(ev.address);
+  l.serverHost = host;
+  l.serverPort = port;
+
+  return l;
+}
+
 function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> {
-  let log: Omit<Log, 's' | 't' | 'c'> = {};
-
-  const getHostPort = (address: string): { host: string; port: number } => {
-    const hostAddress = new HostAddress(address);
-
-    // NOTE: Should only default when the address is a socket address
-    const host = hostAddress.host ?? '';
-    const port = hostAddress.port ?? 0;
-    return { host, port };
-  };
-
-  const attachCommandFields = (
-    l: any,
-    ev: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
-  ) => {
-    l.commandName = ev.commandName;
-    l.requestId = ev.requestId;
-    l.driverConnectionId = ev?.connectionId;
-    const { host, port } = getHostPort(ev.address);
-    l.serverHost = host;
-    l.serverPort = port;
-    if (ev?.serviceId) {
-      l.serviceId = ev.serviceId.toHexString();
-    }
-
-    return l;
-  };
-
-  const attachConnectionFields = (l: any, ev: ConnectionPoolMonitoringEvent) => {
-    const { host, port } = getHostPort(ev.address);
-    l.serverHost = host;
-    l.serverPort = port;
-
-    return l;
-  };
+  let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
   let ev;
   if (APM_EVENTS.includes(logObject.name)) {
@@ -378,11 +378,8 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         break;
     }
   } else {
-    for (const key in logObject) {
-      const value = logObject[key];
-      // eslint-disable-next-line no-restricted-syntax
-      if (value === undefined || value === null) continue;
-      log[key] = value;
+    for (const [key, value] of Object.entries(logObject)) {
+      if (value != null) log[key] = value;
     }
   }
   return log;
@@ -393,46 +390,34 @@ export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
-  writeStringifiedLogs: boolean;
 
   constructor(options: MongoLoggerOptions) {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
-    this.writeStringifiedLogs =
-      this.logDestination === process.stderr || this.logDestination === process.stdout;
   }
 
   /** @experimental */
-  emergency(component: MongoLoggableComponent, message: Loggable | string): void {
-    this.log(component, 'emergency', message);
-  }
+  emergency = this.log.bind(this, 'emergency');
 
   private log(
-    component: MongoLoggableComponent,
     severity: SeverityLevel,
+    component: MongoLoggableComponent,
     message: Loggable | string
   ): void {
-    if (compareSeverity(severity, this.componentSeverities[component]) <= 0) {
-      let logMessage: Log = { t: new Date(), c: component, s: severity };
-      if (typeof message === 'string') {
-        logMessage.message = message;
+    if (compareSeverity(severity, this.componentSeverities[component]) > 0) return;
+
+    let logMessage: Log = { t: new Date(), c: component, s: severity };
+    if (typeof message === 'string') {
+      logMessage.message = message;
+    } else {
+      if (message.toLog && typeof message.toLog === 'function') {
+        logMessage = { ...logMessage, ...message.toLog() };
       } else {
-        if (message.toLog && typeof message.toLog === 'function') {
-          logMessage = { ...logMessage, ...message.toLog() };
-        } else {
-          logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };
-        }
-      }
-      if (this.writeStringifiedLogs) {
-        (this.logDestination as Writable).write(
-          inspect(logMessage, { compact: true, breakLength: Infinity }),
-          'utf-8'
-        );
-      } else {
-        (this.logDestination as MongoDBLogWritable).write(logMessage);
+        logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };
       }
     }
+    this.logDestination.write(logMessage);
   }
 
   /**

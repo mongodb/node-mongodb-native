@@ -24,7 +24,7 @@ export class CommandStartedEvent {
   address: string;
   connectionId?: string | number;
   serviceId?: ObjectId;
-  name: string = COMMAND_STARTED;
+  name = COMMAND_STARTED;
 
   /**
    * Create a started event
@@ -72,7 +72,7 @@ export class CommandSucceededEvent {
   commandName: string;
   reply: unknown;
   serviceId?: ObjectId;
-  name: string = COMMAND_SUCCEEDED;
+  name = COMMAND_SUCCEEDED;
 
   /**
    * Create a succeeded event
@@ -121,7 +121,7 @@ export class CommandFailedEvent {
   commandName: string;
   failure: Error;
   serviceId?: ObjectId;
-  name: string = COMMAND_FAILED;
+  name = COMMAND_FAILED;
 
   /**
    * Create a failure event
