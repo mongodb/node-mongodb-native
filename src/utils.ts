@@ -20,7 +20,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { Explain } from './explain';
-import type { MongoClient } from './mongo_client';
+import type { MongoClient, MongoOptions } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { PromiseProvider } from './promise_provider';
@@ -657,7 +657,10 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
   };
 }
 
-/** @public */
+/**
+ * @public
+ * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
+ */
 export interface ClientMetadata {
   driver: {
     name: string;
@@ -670,7 +673,6 @@ export interface ClientMetadata {
     version: string;
   };
   platform: string;
-  version?: string;
   application?: {
     name: string;
   };
@@ -689,13 +691,21 @@ export interface ClientMetadataOptions {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../package.json').version;
 
-export function makeClientMetadata(options?: ClientMetadataOptions): ClientMetadata {
-  options = options ?? {};
+export function makeClientMetadata(
+  options: Pick<MongoOptions, 'appName' | 'driverInfo'>
+): ClientMetadata {
+  const name = options.driverInfo.name ? `nodejs|${options.driverInfo.name}` : 'nodejs';
+  const version = options.driverInfo.version
+    ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
+    : NODE_DRIVER_VERSION;
+  const platform = options.driverInfo.platform
+    ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
+    : `Node.js ${process.version}, ${os.endianness()}`;
 
   const metadata: ClientMetadata = {
     driver: {
-      name: 'nodejs',
-      version: NODE_DRIVER_VERSION
+      name,
+      version
     },
     os: {
       type: os.type(),
@@ -703,30 +713,16 @@ export function makeClientMetadata(options?: ClientMetadataOptions): ClientMetad
       architecture: process.arch,
       version: os.release()
     },
-    platform: `Node.js ${process.version}, ${os.endianness()} (unified)`
+    platform
   };
-
-  // support optionally provided wrapping driver info
-  if (options.driverInfo) {
-    if (options.driverInfo.name) {
-      metadata.driver.name = `${metadata.driver.name}|${options.driverInfo.name}`;
-    }
-
-    if (options.driverInfo.version) {
-      metadata.version = `${metadata.driver.version}|${options.driverInfo.version}`;
-    }
-
-    if (options.driverInfo.platform) {
-      metadata.platform = `${metadata.platform}|${options.driverInfo.platform}`;
-    }
-  }
 
   if (options.appName) {
     // MongoDB requires the appName not exceed a byte length of 128
-    const buffer = Buffer.from(options.appName);
-    metadata.application = {
-      name: buffer.byteLength > 128 ? buffer.slice(0, 128).toString('utf8') : options.appName
-    };
+    const name =
+      Buffer.byteLength(options.appName, 'utf8') <= 128
+        ? options.appName
+        : Buffer.from(options.appName, 'utf8').subarray(0, 128).toString('utf8');
+    metadata.application = { name };
   }
 
   return metadata;

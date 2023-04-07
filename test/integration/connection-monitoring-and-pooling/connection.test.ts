@@ -5,7 +5,7 @@ import { connect } from '../../../src/cmap/connect';
 import { Connection } from '../../../src/cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
-import { ns } from '../../../src/utils';
+import { makeClientMetadata, ns } from '../../../src/utils';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
 
@@ -27,12 +27,13 @@ describe('Connection', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: function (done) {
-        const connectOptions = Object.assign(
-          { connectionType: Connection },
-          this.configuration.options
-        );
+        const connectOptions: Partial<ConnectionOptions> = {
+          connectionType: Connection,
+          ...this.configuration.options,
+          metadata: makeClientMetadata({ driverInfo: {} })
+        };
 
-        connect(connectOptions, (err, conn) => {
+        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
           expect(err).to.not.exist;
           this.defer(_done => conn.destroy(_done));
 
@@ -49,12 +50,14 @@ describe('Connection', function () {
     it('should emit command monitoring events', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: function (done) {
-        const connectOptions = Object.assign(
-          { connectionType: Connection, monitorCommands: true },
-          this.configuration.options
-        );
+        const connectOptions: Partial<ConnectionOptions> = {
+          connectionType: Connection,
+          monitorCommands: true,
+          ...this.configuration.options,
+          metadata: makeClientMetadata({ driverInfo: {} })
+        };
 
-        connect(connectOptions, (err, conn) => {
+        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
           expect(err).to.not.exist;
           this.defer(_done => conn.destroy(_done));
 
@@ -80,12 +83,13 @@ describe('Connection', function () {
       },
       test: function (done) {
         const namespace = ns(`${this.configuration.db}.$cmd`);
-        const connectOptions = Object.assign(
-          { connectionType: Connection },
-          this.configuration.options
-        );
+        const connectOptions: Partial<ConnectionOptions> = {
+          connectionType: Connection,
+          ...this.configuration.options,
+          metadata: makeClientMetadata({ driverInfo: {} })
+        };
 
-        connect(connectOptions, (err, conn) => {
+        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
           expect(err).to.not.exist;
           this.defer(_done => conn.destroy(_done));
 
