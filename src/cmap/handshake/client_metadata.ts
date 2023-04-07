@@ -192,7 +192,9 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
     faasEnv.set('name', 'vercel');
     return faasEnv;
-  } else if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS || isVercelFaaS)) {
+  }
+
+  if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS || isVercelFaaS)) {
     if (AWS_REGION.length > 0) {
       faasEnv.set('region', AWS_REGION);
     }
@@ -206,10 +208,14 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
     faasEnv.set('name', 'aws.lambda');
     return faasEnv;
-  } else if (isAzureFaaS && !(isGCPFaaS || isAWSFaaS || isVercelFaaS)) {
+  }
+
+  if (isAzureFaaS && !(isGCPFaaS || isAWSFaaS || isVercelFaaS)) {
     faasEnv.set('name', 'azure.func');
     return faasEnv;
-  } else if (isGCPFaaS && !(isAzureFaaS || isAWSFaaS || isVercelFaaS)) {
+  }
+
+  if (isGCPFaaS && !(isAzureFaaS || isAWSFaaS || isVercelFaaS)) {
     if (FUNCTION_REGION.length > 0) {
       faasEnv.set('region', FUNCTION_REGION);
     }
