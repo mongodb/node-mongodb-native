@@ -22,14 +22,14 @@ describe('client metadata module', () => {
 
     it('sets key and value that fit within maxSize', () => {
       const doc = new LimitedSizeDocument(22);
-      expect(doc.ifFitsSets('_id', new ObjectId())).to.be.true;
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
       expect(doc.toObject()).to.have.all.keys('_id');
     });
 
-    it('ignores ifFitsSets that are over size', () => {
+    it('ignores ifItFitsItSits that are over size', () => {
       const doc = new LimitedSizeDocument(22);
-      expect(doc.ifFitsSets('_id', new ObjectId())).to.be.true;
-      expect(doc.ifFitsSets('_id2', '')).to.be.false;
+      expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
+      expect(doc.ifItFitsItSits('_id2', '')).to.be.false;
       expect(doc.toObject()).to.have.all.keys('_id');
     });
   });
@@ -64,16 +64,39 @@ describe('client metadata module', () => {
     });
 
     context('when there is data from multiple cloud providers in the env', () => {
-      before(() => {
-        process.env.AWS_EXECUTION_ENV = 'non-empty-string';
-        process.env.FUNCTIONS_WORKER_RUNTIME = 'non-empty-string';
+      context('unrelated environments', () => {
+        before(() => {
+          // aws
+          process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+          // azure
+          process.env.FUNCTIONS_WORKER_RUNTIME = 'non-empty-string';
+        });
+        after(() => {
+          delete process.env.AWS_EXECUTION_ENV;
+          delete process.env.FUNCTIONS_WORKER_RUNTIME;
+        });
+        it('parses no FAAS provider', () => {
+          expect(getFAASEnv()).to.be.null;
+        });
       });
-      after(() => {
-        delete process.env.AWS_EXECUTION_ENV;
-        delete process.env.FUNCTIONS_WORKER_RUNTIME;
-      });
-      it('parses no FAAS provider', () => {
-        expect(getFAASEnv()).to.be.null;
+
+      context('vercel and aws which share env variables', () => {
+        before(() => {
+          // vercel
+          process.env.VERCEL = 'non-empty-string';
+          // aws
+          process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+          process.env.AWS_LAMBDA_RUNTIME_API = 'non-empty-string';
+        });
+        after(() => {
+          delete process.env.VERCEL;
+          delete process.env.AWS_EXECUTION_ENV;
+          delete process.env.AWS_LAMBDA_RUNTIME_API;
+        });
+
+        it('parses vercel', () => {
+          expect(getFAASEnv()?.get('name')).to.equal('vercel');
+        });
       });
     });
   });

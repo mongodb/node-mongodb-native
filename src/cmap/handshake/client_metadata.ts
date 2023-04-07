@@ -55,8 +55,8 @@ export class LimitedSizeDocument {
   constructor(private maxSize: number) {}
 
   /** Only adds key/value if the bsonByteLength is less than MAX_SIZE */
-  public ifFitsSets(key: string, value: Record<string, any> | string): boolean {
-    // The BSON byteLength of the new element is the same as serializing it to it's own document
+  public ifItFitsItSits(key: string, value: Record<string, any> | string): boolean {
+    // The BSON byteLength of the new element is the same as serializing it to its own document
     // subtracting the document size int32 and the null terminator.
     const newElementSize = BSON.serialize(new Map().set(key, value)).byteLength - 5;
 
@@ -100,7 +100,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       Buffer.byteLength(appName, 'utf8') <= 128
         ? options.appName
         : Buffer.from(appName, 'utf8').subarray(0, 128).toString('utf8');
-    metadataDocument.ifFitsSets('application', { name });
+    metadataDocument.ifItFitsItSits('application', { name });
   }
 
   const { name = '', version = '', platform = '' } = options.driverInfo;
@@ -110,7 +110,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     version: version.length > 0 ? `${NODE_DRIVER_VERSION}|${version}` : NODE_DRIVER_VERSION
   };
 
-  if (!metadataDocument.ifFitsSets('driver', driverInfo)) {
+  if (!metadataDocument.ifItFitsItSits('driver', driverInfo)) {
     throw new MongoInvalidArgumentError('driverInfo name and version exceed limit of 512 bytes');
   }
 
@@ -119,7 +119,7 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       ? `Node.js ${process.version}, ${os.endianness()}|${platform}`
       : `Node.js ${process.version}, ${os.endianness()}`;
 
-  if (!metadataDocument.ifFitsSets('platform', platformInfo)) {
+  if (!metadataDocument.ifItFitsItSits('platform', platformInfo)) {
     throw new MongoInvalidArgumentError('driverInfo platform exceeds the limit of 512 bytes');
   }
 
@@ -130,21 +130,21 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     .set('version', os.release())
     .set('type', os.type());
 
-  if (!metadataDocument.ifFitsSets('os', osInfo)) {
+  if (!metadataDocument.ifItFitsItSits('os', osInfo)) {
     for (const key of osInfo.keys()) {
       osInfo.delete(key);
       if (osInfo.size === 0) break;
-      if (metadataDocument.ifFitsSets('os', osInfo)) break;
+      if (metadataDocument.ifItFitsItSits('os', osInfo)) break;
     }
   }
 
   const faasEnv = getFAASEnv();
   if (faasEnv != null) {
-    if (!metadataDocument.ifFitsSets('env', faasEnv)) {
+    if (!metadataDocument.ifItFitsItSits('env', faasEnv)) {
       for (const key of faasEnv.keys()) {
         faasEnv.delete(key);
         if (faasEnv.size === 0) break;
-        if (metadataDocument.ifFitsSets('env', faasEnv)) break;
+        if (metadataDocument.ifItFitsItSits('env', faasEnv)) break;
       }
     }
   }
@@ -181,7 +181,20 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
   // Note: order matters, name must always be the last key
   const faasEnv = new Map();
 
-  if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS || isVercelFaaS)) {
+  if (isVercelFaaS && !(isAzureFaaS || isGCPFaaS)) {
+    if (VERCEL_URL.length > 0) {
+      faasEnv.set('url', VERCEL_URL);
+    }
+
+    if (VERCEL_REGION.length > 0) {
+      faasEnv.set('region', VERCEL_REGION);
+    }
+
+    faasEnv.set('name', 'vercel');
+    return faasEnv;
+  }
+
+  if (isAWSFaaS && !(isAzureFaaS || isGCPFaaS)) {
     if (AWS_REGION.length > 0) {
       faasEnv.set('region', AWS_REGION);
     }
@@ -195,10 +208,14 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
     faasEnv.set('name', 'aws.lambda');
     return faasEnv;
-  } else if (isAzureFaaS && !(isAWSFaaS || isGCPFaaS || isVercelFaaS)) {
+  }
+
+  if (isAzureFaaS && !isGCPFaaS) {
     faasEnv.set('name', 'azure.func');
     return faasEnv;
-  } else if (isGCPFaaS && !(isAWSFaaS || isAzureFaaS || isVercelFaaS)) {
+  }
+
+  if (isGCPFaaS) {
     if (FUNCTION_REGION.length > 0) {
       faasEnv.set('region', FUNCTION_REGION);
     }
@@ -213,18 +230,7 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
     faasEnv.set('name', 'gcp.func');
     return faasEnv;
-  } else if (isVercelFaaS && !(isAWSFaaS || isAzureFaaS || isGCPFaaS)) {
-    if (VERCEL_URL.length > 0) {
-      faasEnv.set('url', VERCEL_URL);
-    }
-
-    if (VERCEL_REGION.length > 0) {
-      faasEnv.set('region', VERCEL_REGION);
-    }
-
-    faasEnv.set('name', 'vercel');
-    return faasEnv;
-  } else {
-    return null;
   }
+
+  return null;
 }
