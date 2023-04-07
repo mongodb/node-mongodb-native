@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as os from 'os';
 
-import { makeClientMetadata } from '../../../mongodb';
+import { makeClientMetadata } from '../../../../src/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../../package.json').version;
