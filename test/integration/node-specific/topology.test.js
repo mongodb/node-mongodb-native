@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { makeClientMetadata } = require('../../mongodb');
+const { makeClientMetadata } = require('../../../src/utils');
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
