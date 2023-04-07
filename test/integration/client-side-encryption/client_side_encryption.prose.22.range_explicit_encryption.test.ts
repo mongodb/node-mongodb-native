@@ -18,8 +18,9 @@ const metaData: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
 
-    // The Range Explicit Encryption tests require MongoDB server 6.2+. The tests must not run against a standalone.
-    mongodb: '>=6.2.0',
+    // The Range Explicit Encryption tests require MongoDB server 7.0+ for QE v2.
+    // The tests must not run against a standalone.
+    mongodb: '>=7.0.0',
     topology: '!single'
   }
 };

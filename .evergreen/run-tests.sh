@@ -52,9 +52,10 @@ else
   source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 fi
 
-npm install 'mongodb-client-encryption@latest'
-npm install @mongodb-js/zstd
-npm install snappy
+# TODO(NODE-5180): remove --force option
+npm install --force 'mongodb-client-encryption@alpha'
+npm install --force @mongodb-js/zstd
+npm install --force snappy
 
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}

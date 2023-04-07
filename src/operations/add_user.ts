@@ -9,7 +9,10 @@ import { Callback, emitWarningOnce, getTopology } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
-/** @public */
+/**
+ * @public
+ * @deprecated Use the createUser command directly instead.
+ */
 export interface RoleSpecification {
   /**
    * A role grants privileges to perform sets of actions on defined resources.
@@ -20,7 +23,10 @@ export interface RoleSpecification {
   db: string;
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated Use the createUser command directly instead.
+ */
 export interface AddUserOptions extends CommandOperationOptions {
   /** Roles associated with the created user */
   roles?: string | string[] | RoleSpecification | RoleSpecification[];

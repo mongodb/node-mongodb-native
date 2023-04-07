@@ -46,7 +46,7 @@ const metadata = {
 const eeMetadata = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=6.0.0',
+    mongodb: '>=7.0.0',
     topology: ['replicaset', 'sharded']
   }
 };
