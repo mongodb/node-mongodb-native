@@ -181,6 +181,7 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
   // Note: order matters, name must always be the last key
   const faasEnv = new Map();
 
+  // When isVercelFaaS is true so is isAWSFaaS; Vercel inherits the AWS env
   if (isVercelFaaS && !(isAzureFaaS || isGCPFaaS)) {
     if (VERCEL_URL.length > 0) {
       faasEnv.set('url', VERCEL_URL);
