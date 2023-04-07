@@ -50,20 +50,23 @@ export interface ClientMetadataOptions {
 /** @internal */
 export class LimitedSizeDocument {
   private document = new Map();
+  /** BSON overhead: Int32 + Null byte */
+  private documentSize = 5;
   constructor(private maxSize: number) {}
-
-  private getBsonByteLength() {
-    return BSON.serialize(this.document).byteLength;
-  }
 
   /** Only adds key/value if the bsonByteLength is less than MAX_SIZE */
   public ifFitsSets(key: string, value: Record<string, any> | string): boolean {
-    this.document.set(key, value);
+    // The BSON byteLength of the new element is the same as serializing it to it's own document
+    // subtracting the document size int32 and the null terminator.
+    const newElementSize = BSON.serialize(new Map().set(key, value)).byteLength - 5;
 
-    if (this.getBsonByteLength() > this.maxSize) {
-      this.document.delete(key);
+    if (newElementSize + this.documentSize > this.maxSize) {
       return false;
     }
+
+    this.documentSize += newElementSize;
+
+    this.document.set(key, value);
 
     return true;
   }
