@@ -5,7 +5,7 @@ import { connect } from '../../../src/cmap/connect';
 import { Connection } from '../../../src/cmap/connection';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
-import { ns } from '../../../src/utils';
+import { makeClientMetadata, ns } from '../../../src/utils';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
 
