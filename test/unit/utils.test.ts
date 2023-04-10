@@ -9,6 +9,7 @@ import {
   isHello,
   LEGACY_HELLO_COMMAND,
   List,
+  matchesParentDomain,
   maybeCallback,
   MongoDBNamespace,
   MongoRuntimeError,
@@ -896,6 +897,45 @@ describe('driver utils', function () {
 
       it('converts a Uint8Array to a base64 string', () => {
         expect(ByteUtils.toBase64(new Uint8Array([1, 2, 3]))).to.equal(oneTwoThreeBase64);
+      });
+    });
+  });
+
+  describe('matchesParentDomain()', () => {
+    const exampleSrvName = 'i-love-javascript.mongodb.io';
+    const exampleHostNamesWithoutDots = [
+      'i-love-javascript-00.mongodb.io',
+      'i-love-javascript-01.mongodb.io',
+      'i-love-javascript-02.mongodb.io'
+    ];
+    const exampleHostNamesWithDots = exampleHostNamesWithoutDots.map(hn => hn + '.');
+    const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evilJsHaters.io';
+    const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evilJsHaters.io.';
+
+    context('when address does not match parent domain', () => {
+      it('without a trailing dot returns false', () => {
+        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParent, exampleSrvName)).to.be.false;
+      });
+
+      it('with a trailing dot returns false', () => {
+        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParentWithDot, exampleSrvName)).to.be
+          .false;
+      });
+    });
+
+    context('when addresses in SRV record end with dots', () => {
+      it('accepts address since it is considered to still match the parent domain', () => {
+        for (const host of exampleHostNamesWithDots) {
+          expect(matchesParentDomain(host, exampleSrvName)).to.be.true;
+        }
+      });
+    });
+
+    context('when addresses in SRV record end without dots', () => {
+      it('accepts address since it matches the parent domain', () => {
+        for (const host of exampleHostNamesWithoutDots) {
+          expect(matchesParentDomain(host, exampleSrvName)).to.be.true;
+        }
       });
     });
   });

@@ -1277,3 +1277,21 @@ export function parseUnsignedInteger(value: unknown): number | null {
 
   return parsedInt != null && parsedInt >= 0 ? parsedInt : null;
 }
+
+/**
+ * Determines whether a provided address matches the provided parent domain.
+ *
+ * If a DNS server were to become compromised SRV records would still need to
+ * advertise addresses that are under the same domain as the srvHost.
+ *
+ * @param address - The address to check against a domain
+ * @param srvHost - The domain to check the provided address against
+ * @returns Whether the provided address matches the parent domain
+ */
+export function matchesParentDomain(address: string, srvHost: string): boolean {
+  const regex = /^.*?\./;
+  const srvAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
+  const srv = `.${srvAddress.replace(regex, '')}`;
+  const parent = `.${srvHost.replace(regex, '')}`;
+  return srv.endsWith(parent);
+}
