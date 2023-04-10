@@ -3149,6 +3149,10 @@ task_groups:
         params:
           file: src/testazurekms-expansions.yml
     teardown_group:
+      # Load expansions again. The setup task may have failed before running `expansions.update`.
+      - command: expansions.update
+        params:
+          file: testazurekms-expansions.yml
       - command: subprocess.exec
         params:
           binary: bash
