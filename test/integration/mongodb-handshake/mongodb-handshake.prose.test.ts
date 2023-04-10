@@ -44,7 +44,6 @@ describe('FAAS Environment Prose Tests', function () {
       expectedProvider: 'vercel',
       env: [
         ['VERCEL', '1'],
-        ['VERCEL_URL', '*.vercel.app'],
         ['VERCEL_REGION', 'cdg1']
       ]
     },

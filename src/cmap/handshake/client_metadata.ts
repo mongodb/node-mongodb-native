@@ -173,7 +173,6 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
     FUNCTION_MEMORY_MB = '',
     FUNCTION_REGION = '',
     FUNCTION_TIMEOUT_SEC = '',
-    VERCEL_URL = '',
     VERCEL_REGION = ''
   } = process.env;
 
@@ -187,10 +186,6 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
   // When isVercelFaaS is true so is isAWSFaaS; Vercel inherits the AWS env
   if (isVercelFaaS && !(isAzureFaaS || isGCPFaaS)) {
-    if (VERCEL_URL.length > 0) {
-      faasEnv.set('url', VERCEL_URL);
-    }
-
     if (VERCEL_REGION.length > 0) {
       faasEnv.set('region', VERCEL_REGION);
     }

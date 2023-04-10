@@ -360,17 +360,6 @@ describe('client metadata module', () => {
           }
         },
         {
-          context: 'VERCEL_URL provided',
-          env: [
-            ['VERCEL', 'non-empty'],
-            ['VERCEL_URL', 'provided-url']
-          ],
-          outcome: {
-            name: 'vercel',
-            url: 'provided-url'
-          }
-        },
-        {
           context: 'VERCEL_REGION provided',
           env: [
             ['VERCEL', 'non-empty'],
