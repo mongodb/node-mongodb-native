@@ -418,7 +418,7 @@ export class MongoLogger {
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
-    message: LoggableEvent | LogConvertible | string
+    message: Loggable | string
   ): void {
     if (compareSeverity(severity, this.componentSeverities[component]) > 0) return;
 
