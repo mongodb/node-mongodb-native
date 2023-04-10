@@ -111,7 +111,9 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   };
 
   if (!metadataDocument.ifItFitsItSits('driver', driverInfo)) {
-    throw new MongoInvalidArgumentError('driverInfo name and version exceed limit of 512 bytes');
+    throw new MongoInvalidArgumentError(
+      'Unable to include driverInfo name and version, metadata cannot exceed 512 bytes'
+    );
   }
 
   const platformInfo =
@@ -120,7 +122,9 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       : `Node.js ${process.version}, ${os.endianness()}`;
 
   if (!metadataDocument.ifItFitsItSits('platform', platformInfo)) {
-    throw new MongoInvalidArgumentError('driverInfo platform exceeds the limit of 512 bytes');
+    throw new MongoInvalidArgumentError(
+      'Unable to include driverInfo platform, metadata cannot exceed 512 bytes'
+    );
   }
 
   // Note: order matters, os.type is last so it will be removed last if we're at maxSize
