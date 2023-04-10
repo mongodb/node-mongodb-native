@@ -301,6 +301,7 @@ export type {
   MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
+export { createStdLogger } from './mongo_logger';
 export type {
   CommonEvents,
   EventsDescription,

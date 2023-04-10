@@ -171,7 +171,10 @@ type ClientLogPathOptions = {
   mongodbLogPath?: string | Writable | MongoDBLogWritable;
 };
 
-function createStdLogger(stream: { write: NodeJS.WriteStream['write'] }): MongoDBLogWritable {
+/** @internal */
+export function createStdLogger(stream: {
+  write: NodeJS.WriteStream['write'];
+}): MongoDBLogWritable {
   return {
     write: (log: Log): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
@@ -179,6 +182,7 @@ function createStdLogger(stream: { write: NodeJS.WriteStream['write'] }): MongoD
     }
   };
 }
+
 /**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
  * mongo client options respectively.
@@ -250,7 +254,7 @@ export type Loggable = LoggableEvent | LogConvertible;
 function isLogConvertible(obj: Loggable): obj is LogConvertible {
   const objAsLogConvertible = obj as LogConvertible;
   // eslint-disable-next-line no-restricted-syntax
-  return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible === 'function';
+  return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible.toLog === 'function';
 }
 
 function getHostPort(address: string): { host: string; port: number } {
