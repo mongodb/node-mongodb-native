@@ -223,14 +223,44 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 }
 
 /** @internal */
-export interface Loggable extends Record<string, any> {
-  toLog?(): Record<string, any>;
+export type LoggableEvent =
+  | CommandStartedEvent
+  | CommandSucceededEvent
+  | CommandFailedEvent
+  | ConnectionPoolCreatedEvent
+  | ConnectionPoolReadyEvent
+  | ConnectionPoolClosedEvent
+  | ConnectionPoolClearedEvent
+  | ConnectionCreatedEvent
+  | ConnectionReadyEvent
+  | ConnectionClosedEvent
+  | ConnectionCheckedInEvent
+  | ConnectionCheckedOutEvent
+  | ConnectionCheckOutStartedEvent
+  | ConnectionCheckOutFailedEvent;
+
+/** @internal */
+export interface LogConvertible extends Record<string, any> {
+  toLog(): Record<string, any>;
+}
+
+/** @internal */
+export type Loggable = LoggableEvent | LogConvertible;
+
+function isLogConvertible(obj: Loggable): obj is LogConvertible {
+  const objAsLogConvertible = obj as LogConvertible;
+  // eslint-disable-next-line no-restricted-syntax
+  return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible === 'function';
 }
 
 function getHostPort(address: string): { host: string; port: number } {
   const hostAddress = new HostAddress(address);
 
   // NOTE: Should only default when the address is a socket address
+  if (hostAddress.socketPath) {
+    return { host: hostAddress.socketPath, port: 0 };
+  }
+
   const host = hostAddress.host ?? '';
   const port = hostAddress.port ?? 0;
   return { host, port };
@@ -264,38 +294,33 @@ function attachConnectionFields(l: any, ev: ConnectionPoolMonitoringEvent) {
 function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
-  let ev;
   if (APM_EVENTS.includes(logObject.name)) {
     log = attachCommandFields(log, logObject as any);
     switch (logObject.name) {
       case COMMAND_STARTED:
-        ev = logObject as CommandStartedEvent;
         log.message = 'Command started';
-        log.command = EJSON.stringify(ev.command);
-        log.databaseName = ev.databaseName;
+        log.command = EJSON.stringify(logObject.command);
+        log.databaseName = logObject.databaseName;
         break;
       case COMMAND_SUCCEEDED:
-        ev = logObject as CommandSucceededEvent;
         log.message = 'Command succeeded';
-        log.durationMS = ev.duration;
-        log.reply = EJSON.stringify(ev.reply);
+        log.durationMS = logObject.duration;
+        log.reply = EJSON.stringify(logObject.reply);
         break;
       case COMMAND_FAILED:
-        ev = logObject as CommandFailedEvent;
         log.message = 'Command failed';
-        log.durationMS = ev.duration;
-        log.failure = ev.failure;
+        log.durationMS = logObject.duration;
+        log.failure = logObject.failure;
         break;
     }
   } else if (CMAP_EVENTS.includes(logObject.name)) {
     log = attachConnectionFields(log, logObject as ConnectionPoolMonitoringEvent);
     switch (logObject.name) {
       case CONNECTION_POOL_CREATED:
-        ev = logObject as ConnectionPoolCreatedEvent;
         log.message = 'Connection pool created';
-        if (ev.options) {
+        if (logObject.options) {
           const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
-            ev.options;
+            logObject.options;
           log = {
             ...log,
             maxIdleTimeMS,
@@ -304,39 +329,33 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
             maxConnecting,
             waitQueueTimeoutMS
           };
-          log.waitQueueSize = ev.waitQueueSize;
+          log.waitQueueSize = logObject.waitQueueSize;
         }
         break;
       case CONNECTION_POOL_READY:
-        ev = logObject as ConnectionPoolReadyEvent;
         log.message = 'Connection pool ready';
         break;
       case CONNECTION_POOL_CLEARED:
-        ev = logObject as ConnectionPoolClearedEvent;
         log.message = 'Connection pool cleared';
-        if (ev.serviceId?._bsontype === 'ObjectId') {
-          log.serviceId = ev.serviceId.toHexString();
+        if (logObject.serviceId?._bsontype === 'ObjectId') {
+          log.serviceId = logObject.serviceId.toHexString();
         }
         break;
       case CONNECTION_POOL_CLOSED:
-        ev = logObject as ConnectionPoolClosedEvent;
         log.message = 'Connection pool closed';
         break;
       case CONNECTION_CREATED:
-        ev = logObject as ConnectionCreatedEvent;
         log.message = 'Connection created';
-        log.driverConnectionId = ev.connectionId;
+        log.driverConnectionId = logObject.connectionId;
         break;
       case CONNECTION_READY:
-        ev = logObject as ConnectionReadyEvent;
         log.message = 'Connection ready';
-        log.driverConnectionId = ev.connectionId;
+        log.driverConnectionId = logObject.connectionId;
         break;
       case CONNECTION_CLOSED:
-        ev = logObject as ConnectionClosedEvent;
         log.message = 'Connection closed';
-        log.driverConnectionId = ev.connectionId;
-        switch (ev.reason) {
+        log.driverConnectionId = logObject.connectionId;
+        switch (logObject.reason) {
           case 'stale':
             log.reason = 'Connection became stale because the pool was cleared';
             break;
@@ -346,8 +365,8 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
             break;
           case 'error':
             log.reason = 'An error occurred while using the connection';
-            if (ev.error) {
-              log.error = ev.error;
+            if (logObject.error) {
+              log.error = logObject.error;
             }
             break;
           case 'poolClosed':
@@ -358,23 +377,19 @@ function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> 
         }
         break;
       case CONNECTION_CHECK_OUT_STARTED:
-        ev = logObject as ConnectionCheckOutStartedEvent;
         log.message = 'Connection checkout started';
         break;
       case CONNECTION_CHECK_OUT_FAILED:
-        ev = logObject as ConnectionCheckOutFailedEvent;
         log.message = 'Connection checkout failed';
-        log.reason = ev.reason;
+        log.reason = logObject.reason;
         break;
       case CONNECTION_CHECKED_OUT:
-        ev = logObject as ConnectionCheckedOutEvent;
         log.message = 'Connection checked out';
-        log.driverConnectionId = ev.connectionId;
+        log.driverConnectionId = logObject.connectionId;
         break;
       case CONNECTION_CHECKED_IN:
-        ev = logObject as ConnectionCheckedInEvent;
         log.message = 'Connection checked in';
-        log.driverConnectionId = ev.connectionId;
+        log.driverConnectionId = logObject.connectionId;
         break;
     }
   } else {
@@ -403,15 +418,15 @@ export class MongoLogger {
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
-    message: Loggable | string
+    message: LoggableEvent | LogConvertible | string
   ): void {
     if (compareSeverity(severity, this.componentSeverities[component]) > 0) return;
 
     let logMessage: Log = { t: new Date(), c: component, s: severity };
     if (typeof message === 'string') {
       logMessage.message = message;
-    } else {
-      if (message.toLog && typeof message.toLog === 'function') {
+    } else if (typeof message === 'object') {
+      if (isLogConvertible(message)) {
         logMessage = { ...logMessage, ...message.toLog() };
       } else {
         logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };

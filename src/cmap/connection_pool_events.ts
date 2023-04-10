@@ -12,7 +12,7 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
-import type { AnyError, MongoError } from '../error';
+import type { AnyError } from '../error';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 
@@ -135,7 +135,7 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
     pool: ConnectionPool,
     connection: Pick<Connection, 'id' | 'serviceId'>,
     reason: 'idle' | 'stale' | 'poolClosed' | 'error',
-    error?: MongoError
+    error?: AnyError
   ) {
     super(pool);
     this.connectionId = connection.id;

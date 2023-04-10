@@ -290,7 +290,9 @@ export type {
 } from './mongo_client';
 export type {
   Log,
+  LogConvertible,
   Loggable,
+  LoggableEvent,
   MongoDBLogWritable,
   MongoLoggableComponent,
   MongoLogger,

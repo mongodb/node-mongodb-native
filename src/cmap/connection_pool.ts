@@ -641,7 +641,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
   }
 
-  private destroyConnection(connection: Connection, reason: string) {
+  private destroyConnection(
+    connection: Connection,
+    reason: 'error' | 'idle' | 'stale' | 'poolClosed'
+  ) {
     this.emit(
       ConnectionPool.CONNECTION_CLOSED,
       new ConnectionClosedEvent(this, connection, reason)
