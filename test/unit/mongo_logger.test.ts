@@ -1014,9 +1014,6 @@ describe('class MongoLogger', function () {
               it('emits a log with field `waitQueueTimeoutMS` that is a number', function () {
                 expect(log).to.have.property('waitQueueTimeoutMS').that.is.a('number');
               });
-              it('emits a log with field `waitQueueSize` that is a number', function () {
-                expect(log).to.have.property('waitQueueSize').that.is.a('number');
-              });
             });
 
             context('when ConnectionPoolReadyEvent is logged', function () {
@@ -1197,7 +1194,7 @@ describe('class MongoLogger', function () {
                 });
               }
 
-              context('with invalid reason', function () {
+              context('with unknown reason', function () {
                 beforeEach(function () {
                   logger[severityLevel]('connection', { ...connectionClosed, reason: 'woops' });
                   expect(stream.buffer).to.have.lengthOf(1);
@@ -1205,8 +1202,9 @@ describe('class MongoLogger', function () {
                 });
 
                 commonConnectionComponentAssertions();
-                it('emits a log without field `reason`', function () {
-                  expect(log).to.not.have.property('reason');
+                it('emits a log with field `reason` prefixed by "Unknown close reason: "', function () {
+                  expect(log).to.have.property('reason');
+                  expect(log.reason).to.match(/^Unknown close reason: .*$/);
                 });
               });
             });

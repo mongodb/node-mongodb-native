@@ -137,10 +137,10 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number | '<monitor>';
   /** The reason the connection was closed */
-  reason: 'idle' | 'stale' | 'poolClosed' | 'error';
+  reason: string;
   serviceId?: ObjectId;
   name = CONNECTION_CLOSED;
-  error: Error | undefined;
+  error: AnyError | null;
 
   /** @internal */
   constructor(
@@ -153,7 +153,7 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
     this.connectionId = connection.id;
     this.reason = reason;
     this.serviceId = connection.serviceId;
-    this.error = error;
+    this.error = error ?? null;
   }
 }
 

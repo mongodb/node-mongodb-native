@@ -170,7 +170,7 @@ type ClientLogPathOptions = {
 };
 
 /** @internal */
-export function createStdLogger(stream: {
+export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
@@ -191,23 +191,25 @@ function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
   { mongodbLogPath }: ClientLogPathOptions
 ): MongoDBLogWritable {
-  if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath))
-    return createStdLogger(process.stderr);
-  if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath))
-    return createStdLogger(process.stdout);
+  if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
+    return createStdioLogger(process.stderr);
+  }
+  if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath)) {
+    return createStdioLogger(process.stdout);
+  }
 
   if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
     return mongodbLogPath;
   }
 
   if (MONGODB_LOG_PATH && /^stderr$/i.test(MONGODB_LOG_PATH)) {
-    return createStdLogger(process.stderr);
+    return createStdioLogger(process.stderr);
   }
   if (MONGODB_LOG_PATH && /^stdout$/i.test(MONGODB_LOG_PATH)) {
-    return createStdLogger(process.stdout);
+    return createStdioLogger(process.stdout);
   }
 
-  return createStdLogger(process.stderr);
+  return createStdioLogger(process.stderr);
 }
 
 /** @internal */
@@ -220,7 +222,7 @@ export interface Log extends Record<string, any> {
 
 /** @internal */
 export interface MongoDBLogWritable {
-  write(log: Log): unknown;
+  write(log: Log): void;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
@@ -232,7 +234,6 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 
 /** @internal */
 export type LoggableEvent =
-  //| ConnectionPoolMonitoringEvent
   | CommandStartedEvent
   | CommandSucceededEvent
   | CommandFailedEvent
@@ -262,45 +263,35 @@ function isLogConvertible(obj: Loggable): obj is LogConvertible {
   return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible.toLog === 'function';
 }
 
-function getHostPort(address: string): { host: string; port: number } {
-  const hostAddress = new HostAddress(address);
-
-  // NOTE: Should only default when the address is a socket address
-  if (hostAddress.socketPath) {
-    return { host: hostAddress.socketPath, port: 0 };
-  }
-
-  const host = hostAddress.host ?? '';
-  const port = hostAddress.port ?? 0;
-  return { host, port };
-}
-
 function attachCommandFields(
-  l: any,
-  ev: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+  log: Record<string, any>,
+  commandEvent: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
 ) {
-  l.commandName = ev.commandName;
-  l.requestId = ev.requestId;
-  l.driverConnectionId = ev?.connectionId;
-  const { host, port } = getHostPort(ev.address);
-  l.serverHost = host;
-  l.serverPort = port;
-  if (ev?.serviceId) {
-    l.serviceId = ev.serviceId.toHexString();
+  log.commandName = commandEvent.commandName;
+  log.requestId = commandEvent.requestId;
+  log.driverConnectionId = commandEvent?.connectionId;
+  const { host, port } = HostAddress.fromString(commandEvent.address).toHostPort();
+  log.serverHost = host;
+  log.serverPort = port;
+  if (commandEvent?.serviceId) {
+    log.serviceId = commandEvent.serviceId.toHexString();
   }
 
-  return l;
+  return log;
 }
 
-function attachConnectionFields(l: any, ev: ConnectionPoolMonitoringEvent) {
-  const { host, port } = getHostPort(ev.address);
-  l.serverHost = host;
-  l.serverPort = port;
+function attachConnectionFields(
+  log: Record<string, any>,
+  connectionPoolEvent: ConnectionPoolMonitoringEvent
+) {
+  const { host, port } = HostAddress.fromString(connectionPoolEvent.address).toHostPort();
+  log.serverHost = host;
+  log.serverPort = port;
 
-  return l;
+  return log;
 }
 
-function DEFAULT_LOG_TRANSFORM(logObject: LoggableEvent): Omit<Log, 's' | 't' | 'c'> {
+function defaultLogTransform(logObject: LoggableEvent): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
   switch (logObject.name) {
@@ -309,19 +300,19 @@ function DEFAULT_LOG_TRANSFORM(logObject: LoggableEvent): Omit<Log, 's' | 't' | 
       log.message = 'Command started';
       log.command = EJSON.stringify(logObject.command);
       log.databaseName = logObject.databaseName;
-      break;
+      return log;
     case COMMAND_SUCCEEDED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command succeeded';
       log.durationMS = logObject.duration;
       log.reply = EJSON.stringify(logObject.reply);
-      break;
+      return log;
     case COMMAND_FAILED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
       log.failure = logObject.failure;
-      break;
+      return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool created';
@@ -336,44 +327,37 @@ function DEFAULT_LOG_TRANSFORM(logObject: LoggableEvent): Omit<Log, 's' | 't' | 
           maxConnecting,
           waitQueueTimeoutMS
         };
-        log.waitQueueSize = logObject.waitQueueSize;
       }
-      break;
+      return log;
     case CONNECTION_POOL_READY:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool ready';
-      break;
+      return log;
     case CONNECTION_POOL_CLEARED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool cleared';
       if (logObject.serviceId?._bsontype === 'ObjectId') {
         log.serviceId = logObject.serviceId.toHexString();
       }
-      break;
+      return log;
     case CONNECTION_POOL_CLOSED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool closed';
-      break;
+      return log;
     case CONNECTION_CREATED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection created';
-      if ('connectionId' in logObject) {
-        log.driverConnectionId = logObject.connectionId;
-      }
-      break;
+      log.driverConnectionId = logObject.connectionId;
+      return log;
     case CONNECTION_READY:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection ready';
-      if ('connectionId' in logObject) {
-        log.driverConnectionId = logObject.connectionId;
-      }
-      break;
+      log.driverConnectionId = logObject.connectionId;
+      return log;
     case CONNECTION_CLOSED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection closed';
-      if ('connectionId' in logObject) {
-        log.driverConnectionId = logObject.connectionId;
-      }
+      log.driverConnectionId = logObject.connectionId;
       switch (logObject.reason) {
         case 'stale':
           log.reason = 'Connection became stale because the pool was cleared';
@@ -392,28 +376,28 @@ function DEFAULT_LOG_TRANSFORM(logObject: LoggableEvent): Omit<Log, 's' | 't' | 
           log.reason = 'Connection pool was closed';
           break;
         default:
-        // Omit if we have some other reason as it would be invalid
+          log.reason = `Unknown close reason: ${logObject.reason}`;
       }
-      break;
+      return log;
     case CONNECTION_CHECK_OUT_STARTED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checkout started';
-      break;
+      return log;
     case CONNECTION_CHECK_OUT_FAILED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checkout failed';
       log.reason = logObject.reason;
-      break;
+      return log;
     case CONNECTION_CHECKED_OUT:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checked out';
       log.driverConnectionId = logObject.connectionId;
-      break;
+      return log;
     case CONNECTION_CHECKED_IN:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checked in';
       log.driverConnectionId = logObject.connectionId;
-      break;
+      return log;
     default:
       for (const [key, value] of Object.entries(logObject)) {
         if (value != null) log[key] = value;
@@ -434,7 +418,6 @@ export class MongoLogger {
     this.logDestination = options.logDestination;
   }
 
-  /** @experimental */
   emergency = this.log.bind(this, 'emergency');
 
   private log(
@@ -451,7 +434,7 @@ export class MongoLogger {
       if (isLogConvertible(message)) {
         logMessage = { ...logMessage, ...message.toLog() };
       } else {
-        logMessage = { ...logMessage, ...DEFAULT_LOG_TRANSFORM(message) };
+        logMessage = { ...logMessage, ...defaultLogTransform(message) };
       }
     }
     this.logDestination.write(logMessage);

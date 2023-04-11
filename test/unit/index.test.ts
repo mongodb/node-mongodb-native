@@ -46,6 +46,7 @@ const EXPECTED_EXPORTS = [
   'ConnectionPoolMonitoringEvent',
   'ConnectionPoolReadyEvent',
   'ConnectionReadyEvent',
+  'createStdioLogger',
   'CURSOR_FLAGS',
   'Db',
   'DBRef',
