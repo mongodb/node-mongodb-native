@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { getFAASEnv, MongoClient } from '../../mongodb';
 
-describe('FAAS Environment Prose Tests', function () {
+describe('Handshake Prose Tests', function () {
   let client: MongoClient;
 
   afterEach(async function () {

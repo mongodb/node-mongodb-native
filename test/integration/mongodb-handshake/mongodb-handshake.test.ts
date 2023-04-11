@@ -8,7 +8,7 @@ import {
   MongoServerSelectionError
 } from '../../mongodb';
 
-describe('MongoDB Handshake Node tests', () => {
+describe('MongoDB Handshake', () => {
   let client;
 
   context('when hello is too large', () => {
@@ -31,7 +31,7 @@ describe('MongoDB Handshake Node tests', () => {
 
     after(() => sinon.restore());
 
-    it('client fails to connect with an error relating to size', async function () {
+    it('should fail with an error relating to size', async function () {
       client = this.configuration.newClient({ serverSelectionTimeoutMS: 2000 });
       const error = await client.connect().catch(error => error);
       if (this.configuration.isLoadBalanced) {
