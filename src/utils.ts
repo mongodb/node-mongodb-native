@@ -1291,7 +1291,7 @@ export function parseUnsignedInteger(value: unknown): number | null {
 export function matchesParentDomain(address: string, srvHost: string): boolean {
   const regex = /^.*?\./;
   const srvAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
-  const srv = `.${srvAddress.replace(regex, '')}`;
-  const parent = `.${srvHost.replace(regex, '')}`;
+  const srv = srvAddress.replace(regex, '');
+  const parent = srvHost.replace(regex, '');
   return srv.endsWith(parent);
 }
