@@ -28,7 +28,7 @@ export interface UpdateOptions extends CommandOperationOptions {
  * @public
  * `TSchema` is the schema of the collection
  */
-export interface UpdateResult<TSchema = Document> {
+export interface UpdateResult<TSchema extends Document = Document> {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
   acknowledged: boolean;
   /** The number of documents that matched the filter */
