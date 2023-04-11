@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import * as os from 'os';
 import * as process from 'process';
 import * as sinon from 'sinon';
+import { inspect } from 'util';
 
 import { version as NODE_DRIVER_VERSION } from '../../../../package.json';
 import {
@@ -14,6 +15,8 @@ import {
 } from '../../../mongodb';
 
 describe('client metadata module', () => {
+  afterEach(() => sinon.restore());
+
   describe('new LimitedSizeDocument()', () => {
     // For the sake of testing the size limiter features
     // We test document: { _id: ObjectId() }
@@ -397,43 +400,23 @@ describe('client metadata module', () => {
     };
 
     for (const [provider, testsForEnv] of Object.entries(tests)) {
-      context(provider, () => {
-        for (const { context, env: faasVariables, outcome } of testsForEnv) {
-          const setupEnv = () => {
-            for (const [k, v] of faasVariables) {
-              if (v != null) {
-                process.env[k] = v;
-              }
-            }
-          };
-
-          const cleanupEnv = () => {
-            for (const [k] of faasVariables) {
-              delete process.env[k];
-            }
-          };
-
-          it(context, () => {
-            try {
-              setupEnv();
-              const { env } = makeClientMetadata({ driverInfo: {} });
-              expect(env).to.deep.equal(outcome);
-            } finally {
-              cleanupEnv();
-            }
+      for (const { context: title, env: faasVariables, outcome } of testsForEnv) {
+        context(`${provider} - ${title}`, () => {
+          beforeEach(() => {
+            sinon.stub(process, 'env').get(() => Object.fromEntries(faasVariables));
           });
 
-          it('always places name as the last key', () => {
-            try {
-              setupEnv();
-              const keys = Array.from(getFAASEnv()?.keys() ?? []);
-              expect(keys).to.have.property(`${keys.length - 1}`, 'name');
-            } finally {
-              cleanupEnv();
-            }
+          it(`returns ${inspect(outcome)} under env property`, () => {
+            const { env } = makeClientMetadata({ driverInfo: {} });
+            expect(env).to.deep.equal(outcome);
           });
-        }
-      });
+
+          it('places name as the last key in map', () => {
+            const keys = Array.from(getFAASEnv()?.keys() ?? []);
+            expect(keys).to.have.property(`${keys.length - 1}`, 'name');
+          });
+        });
+      }
     }
 
     context('when a numeric FAAS env variable is not numerically parsable', () => {
@@ -454,8 +437,6 @@ describe('client metadata module', () => {
   });
 
   describe('metadata truncation', function () {
-    afterEach(() => sinon.restore());
-
     context('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
         sinon.stub(process, 'env').get(() => ({
