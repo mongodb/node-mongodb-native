@@ -905,8 +905,8 @@ describe('driver utils', function () {
     const exampleSrvName = 'i-love-javascript.mongodb.io';
     const exampleHostNameWithoutDot = 'i-love-javascript-00.mongodb.io';
     const exampleHostNamesWithDot = exampleHostNameWithoutDot + '.';
-    const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evilJsHaters.io';
-    const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evilJsHaters.io.';
+    const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evil-mongodb.io';
+    const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evil-mongodb.io.';
 
     context('when address does not match parent domain', () => {
       it('without a trailing dot returns false', () => {
