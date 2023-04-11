@@ -22,8 +22,6 @@ import type {
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
 import {
-  APM_EVENTS,
-  CMAP_EVENTS,
   COMMAND_FAILED,
   COMMAND_STARTED,
   COMMAND_SUCCEEDED,
@@ -193,15 +191,21 @@ function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
   { mongodbLogPath }: ClientLogPathOptions
 ): MongoDBLogWritable {
-  if (mongodbLogPath === 'stderr') return createStdLogger(process.stderr);
-  if (mongodbLogPath === 'stdout') return createStdLogger(process.stdout);
+  if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath))
+    return createStdLogger(process.stderr);
+  if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath))
+    return createStdLogger(process.stdout);
 
   if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
     return mongodbLogPath;
   }
 
-  if (MONGODB_LOG_PATH === 'stderr') return createStdLogger(process.stderr);
-  if (MONGODB_LOG_PATH === 'stdout') return createStdLogger(process.stdout);
+  if (MONGODB_LOG_PATH && /^stderr$/i.test(MONGODB_LOG_PATH)) {
+    return createStdLogger(process.stderr);
+  }
+  if (MONGODB_LOG_PATH && /^stdout$/i.test(MONGODB_LOG_PATH)) {
+    return createStdLogger(process.stdout);
+  }
 
   return createStdLogger(process.stderr);
 }
@@ -228,6 +232,7 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 
 /** @internal */
 export type LoggableEvent =
+  //| ConnectionPoolMonitoringEvent
   | CommandStartedEvent
   | CommandSucceededEvent
   | CommandFailedEvent
@@ -295,111 +300,124 @@ function attachConnectionFields(l: any, ev: ConnectionPoolMonitoringEvent) {
   return l;
 }
 
-function DEFAULT_LOG_TRANSFORM(logObject: Loggable): Omit<Log, 's' | 't' | 'c'> {
+function DEFAULT_LOG_TRANSFORM(logObject: LoggableEvent): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
-  if (APM_EVENTS.includes(logObject.name)) {
-    log = attachCommandFields(log, logObject as any);
-    switch (logObject.name) {
-      case COMMAND_STARTED:
-        log.message = 'Command started';
-        log.command = EJSON.stringify(logObject.command);
-        log.databaseName = logObject.databaseName;
-        break;
-      case COMMAND_SUCCEEDED:
-        log.message = 'Command succeeded';
-        log.durationMS = logObject.duration;
-        log.reply = EJSON.stringify(logObject.reply);
-        break;
-      case COMMAND_FAILED:
-        log.message = 'Command failed';
-        log.durationMS = logObject.duration;
-        log.failure = logObject.failure;
-        break;
-    }
-  } else if (CMAP_EVENTS.includes(logObject.name)) {
-    log = attachConnectionFields(log, logObject as ConnectionPoolMonitoringEvent);
-    switch (logObject.name) {
-      case CONNECTION_POOL_CREATED:
-        log.message = 'Connection pool created';
-        if (logObject.options) {
-          const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
-            logObject.options;
-          log = {
-            ...log,
-            maxIdleTimeMS,
-            minPoolSize,
-            maxPoolSize,
-            maxConnecting,
-            waitQueueTimeoutMS
-          };
-          log.waitQueueSize = logObject.waitQueueSize;
-        }
-        break;
-      case CONNECTION_POOL_READY:
-        log.message = 'Connection pool ready';
-        break;
-      case CONNECTION_POOL_CLEARED:
-        log.message = 'Connection pool cleared';
-        if (logObject.serviceId?._bsontype === 'ObjectId') {
-          log.serviceId = logObject.serviceId.toHexString();
-        }
-        break;
-      case CONNECTION_POOL_CLOSED:
-        log.message = 'Connection pool closed';
-        break;
-      case CONNECTION_CREATED:
-        log.message = 'Connection created';
+  switch (logObject.name) {
+    case COMMAND_STARTED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command started';
+      log.command = EJSON.stringify(logObject.command);
+      log.databaseName = logObject.databaseName;
+      break;
+    case COMMAND_SUCCEEDED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command succeeded';
+      log.durationMS = logObject.duration;
+      log.reply = EJSON.stringify(logObject.reply);
+      break;
+    case COMMAND_FAILED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command failed';
+      log.durationMS = logObject.duration;
+      log.failure = logObject.failure;
+      break;
+    case CONNECTION_POOL_CREATED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool created';
+      if (logObject.options) {
+        const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
+          logObject.options;
+        log = {
+          ...log,
+          maxIdleTimeMS,
+          minPoolSize,
+          maxPoolSize,
+          maxConnecting,
+          waitQueueTimeoutMS
+        };
+        log.waitQueueSize = logObject.waitQueueSize;
+      }
+      break;
+    case CONNECTION_POOL_READY:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool ready';
+      break;
+    case CONNECTION_POOL_CLEARED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool cleared';
+      if (logObject.serviceId?._bsontype === 'ObjectId') {
+        log.serviceId = logObject.serviceId.toHexString();
+      }
+      break;
+    case CONNECTION_POOL_CLOSED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool closed';
+      break;
+    case CONNECTION_CREATED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection created';
+      if ('connectionId' in logObject) {
         log.driverConnectionId = logObject.connectionId;
-        break;
-      case CONNECTION_READY:
-        log.message = 'Connection ready';
+      }
+      break;
+    case CONNECTION_READY:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection ready';
+      if ('connectionId' in logObject) {
         log.driverConnectionId = logObject.connectionId;
-        break;
-      case CONNECTION_CLOSED:
-        log.message = 'Connection closed';
+      }
+      break;
+    case CONNECTION_CLOSED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection closed';
+      if ('connectionId' in logObject) {
         log.driverConnectionId = logObject.connectionId;
-        switch (logObject.reason) {
-          case 'stale':
-            log.reason = 'Connection became stale because the pool was cleared';
-            break;
-          case 'idle':
-            log.reason =
-              'Connection has been available but unused for longer than the configured max idle time';
-            break;
-          case 'error':
-            log.reason = 'An error occurred while using the connection';
-            if (logObject.error) {
-              log.error = logObject.error;
-            }
-            break;
-          case 'poolClosed':
-            log.reason = 'Connection pool was closed';
-            break;
-          default:
-          // Omit if we have some other reason as it would be invalid
-        }
-        break;
-      case CONNECTION_CHECK_OUT_STARTED:
-        log.message = 'Connection checkout started';
-        break;
-      case CONNECTION_CHECK_OUT_FAILED:
-        log.message = 'Connection checkout failed';
-        log.reason = logObject.reason;
-        break;
-      case CONNECTION_CHECKED_OUT:
-        log.message = 'Connection checked out';
-        log.driverConnectionId = logObject.connectionId;
-        break;
-      case CONNECTION_CHECKED_IN:
-        log.message = 'Connection checked in';
-        log.driverConnectionId = logObject.connectionId;
-        break;
-    }
-  } else {
-    for (const [key, value] of Object.entries(logObject)) {
-      if (value != null) log[key] = value;
-    }
+      }
+      switch (logObject.reason) {
+        case 'stale':
+          log.reason = 'Connection became stale because the pool was cleared';
+          break;
+        case 'idle':
+          log.reason =
+            'Connection has been available but unused for longer than the configured max idle time';
+          break;
+        case 'error':
+          log.reason = 'An error occurred while using the connection';
+          if (logObject.error) {
+            log.error = logObject.error;
+          }
+          break;
+        case 'poolClosed':
+          log.reason = 'Connection pool was closed';
+          break;
+        default:
+        // Omit if we have some other reason as it would be invalid
+      }
+      break;
+    case CONNECTION_CHECK_OUT_STARTED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checkout started';
+      break;
+    case CONNECTION_CHECK_OUT_FAILED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checkout failed';
+      log.reason = logObject.reason;
+      break;
+    case CONNECTION_CHECKED_OUT:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checked out';
+      log.driverConnectionId = logObject.connectionId;
+      break;
+    case CONNECTION_CHECKED_IN:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checked in';
+      log.driverConnectionId = logObject.connectionId;
+      break;
+    default:
+      for (const [key, value] of Object.entries(logObject)) {
+        if (value != null) log[key] = value;
+      }
   }
   return log;
 }

@@ -21,11 +21,23 @@ import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
  * @public
  * @category Event
  */
-export class ConnectionPoolMonitoringEvent {
+export abstract class ConnectionPoolMonitoringEvent {
   /** A timestamp when the event was created  */
   time: Date;
   /** The address (host/port pair) of the pool */
   address: string;
+  abstract name:
+    | typeof CONNECTION_CHECK_OUT_FAILED
+    | typeof CONNECTION_CHECK_OUT_STARTED
+    | typeof CONNECTION_CHECKED_IN
+    | typeof CONNECTION_CHECKED_OUT
+    | typeof CONNECTION_CLOSED
+    | typeof CONNECTION_CREATED
+    | typeof CONNECTION_POOL_CLEARED
+    | typeof CONNECTION_POOL_CLOSED
+    | typeof CONNECTION_POOL_CREATED
+    | typeof CONNECTION_POOL_READY
+    | typeof CONNECTION_READY;
 
   /** @internal */
   constructor(pool: ConnectionPool) {

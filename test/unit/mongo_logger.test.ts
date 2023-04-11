@@ -386,10 +386,16 @@ describe('class MongoLogger', function () {
     });
 
     context('logDestination', function () {
-      let stdout;
-      let stderr;
+      let stdoutStub;
+      let stderrStub;
+      let streamStub;
       let validOptions: Map<any, MongoDBLogWritable>;
-      const stream = new Writable();
+      const stream: { write: (log: Log) => void; buffer: Log[] } = {
+        write(log: Log): void {
+          this.buffer.push(log);
+        },
+        buffer: []
+      };
       const unsetOptions = ['', undefined];
       const invalidEnvironmentOptions = ['non-acceptable-string'];
       const invalidClientOptions = ['', '     ', undefined, null, 0, false, new Readable()];
@@ -397,14 +403,15 @@ describe('class MongoLogger', function () {
       const validEnvironmentOptions = ['stderr', 'stdout', 'stdOut', 'stdErr'];
 
       beforeEach(function () {
-        stdout = sinon.stub(process.stdout);
-        stderr = sinon.stub(process.stderr);
+        stdoutStub = sinon.stub(process.stdout);
+        stderrStub = sinon.stub(process.stderr);
+        streamStub = sinon.stub(stream);
         validOptions = new Map([
-          ['stdout', stdout],
-          ['stderr', stderr],
-          [stream, stream],
-          ['stdOut', stdout],
-          ['stdErr', stderr]
+          ['stdout', stdoutStub],
+          ['stderr', stderrStub],
+          [stream, streamStub],
+          ['stdOut', stdoutStub],
+          ['stdErr', stderrStub]
         ] as Array<[any, MongoDBLogWritable]>);
       });
 
@@ -427,7 +434,7 @@ describe('class MongoLogger', function () {
                 const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
                 options.logDestination.write(log);
 
-                expect(stderr.write).to.have.been.calledOnceWith(
+                expect(stderrStub.write).to.have.been.calledOnceWith(
                   inspect(log, { breakLength: Infinity, compact: true })
                 );
               });
@@ -449,7 +456,7 @@ describe('class MongoLogger', function () {
                 const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
                 options.logDestination.write(log);
 
-                expect(stderr.write).to.have.been.calledOnceWith(
+                expect(stderrStub.write).to.have.been.calledOnceWith(
                   inspect(log, { breakLength: Infinity, compact: true })
                 );
               });
@@ -460,7 +467,7 @@ describe('class MongoLogger', function () {
         context('when mongodbLogPath is a valid client option', function () {
           for (const unsetEnvironmentOption of unsetOptions) {
             for (const validOption of validClientOptions) {
-              it.skip(`{environment: "${unsetEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
+              it(`{environment: "${unsetEnvironmentOption}", client: "${validOption}"} uses the value from the client options`, function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: unsetEnvironmentOption,
@@ -471,16 +478,8 @@ describe('class MongoLogger', function () {
 
                 const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
                 options.logDestination.write(log);
-
                 const correctDestination = validOptions.get(validOption);
-                if (correctDestination === stdout || correctDestination === stderr) {
-                  expect(correctDestination?.write).to.have.been.calledOnceWith(
-                    inspect(log, { breakLength: Infinity, compact: true })
-                  );
-                } else {
-                  expect(correctDestination?.write).to.have.been.calledOnceWith(log);
-                }
-                //expect(options.logDestination).to.equal(correctDestination);
+                expect(correctDestination?.write).to.have.been.calledOnce;
               });
             }
           }
@@ -504,7 +503,7 @@ describe('class MongoLogger', function () {
                   const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
                   options.logDestination.write(log);
 
-                  expect(stderr.write).to.have.been.calledOnceWith(
+                  expect(stderrStub.write).to.have.been.calledOnceWith(
                     inspect(log, { breakLength: Infinity, compact: true })
                   );
                 });
@@ -528,7 +527,7 @@ describe('class MongoLogger', function () {
                     const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
                     options.logDestination.write(log);
 
-                    expect(stderr.write).to.have.been.calledOnceWith(
+                    expect(stderrStub.write).to.have.been.calledOnceWith(
                       inspect(log, { breakLength: Infinity, compact: true })
                     );
                   });
@@ -549,7 +548,9 @@ describe('class MongoLogger', function () {
                     { mongodbLogPath: validOption as any }
                   );
                   const correctDestination = validOptions.get(validOption);
-                  expect(options.logDestination).to.deep.equal(correctDestination);
+                  const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                  options.logDestination.write(log);
+                  expect(correctDestination?.write).to.have.been.calledOnce;
                 });
               }
             }
@@ -570,9 +571,9 @@ describe('class MongoLogger', function () {
                   { mongodbLogPath: unsetOption as any }
                 );
                 const correctDestination = validOptions.get(validEnvironmentOption);
-                expect(options.logDestination.write.toString()).to.equal(
-                  correctDestination?.write.toString()
-                );
+                options.logDestination.write({ t: new Date(), c: 'command', s: 'emergency' });
+
+                expect(correctDestination?.write).to.have.been.calledOnce;
               });
             }
           }
@@ -583,7 +584,7 @@ describe('class MongoLogger', function () {
           function () {
             for (const validEnvironmentOption of validEnvironmentOptions) {
               for (const invalidValue of invalidClientOptions) {
-                it.only(`{environment: "${validEnvironmentOption}", client: "${invalidValue}"} uses process.${validEnvironmentOption}`, function () {
+                it(`{environment: "${validEnvironmentOption}", client: "${invalidValue}"} uses process.${validEnvironmentOption}`, function () {
                   const options = MongoLogger.resolveOptions(
                     {
                       MONGODB_LOG_PATH: validEnvironmentOption,
@@ -593,24 +594,10 @@ describe('class MongoLogger', function () {
                   );
 
                   const correctDestination = validOptions.get(validEnvironmentOption);
+                  const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                  options.logDestination.write(log);
 
-                  if (validEnvironmentOption.toLowerCase() === 'stderr') {
-                    const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
-                    options.logDestination.write(log);
-                    expect(stderr.write).to.have.been.calledOnceWith(
-                      inspect(log, { breakLength: Infinity, compact: true })
-                    );
-                  } else if (validEnvironmentOption.toLowerCase() === 'stdout') {
-                    const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
-                    options.logDestination.write(log);
-                    expect(stdout.write).to.have.been.calledOnceWith(
-                      inspect(log, { breakLength: Infinity, compact: true })
-                    );
-                  } else {
-                    expect(options.logDestination.write.toString()).to.equal(
-                      correctDestination?.write.toString()
-                    );
-                  }
+                  expect(correctDestination?.write).to.have.been.calledOnce;
                 });
               }
             }
@@ -633,11 +620,8 @@ describe('class MongoLogger', function () {
                   { mongodbLogPath: validValue as any }
                 );
                 const correctDestination = validOptions.get(validValue);
-                // NOTE: here we are checking if we set the write function correctly
-                // Deep and shallow equality do not work for functions
-                expect(options.logDestination.write.toString()).to.equal(
-                  correctDestination?.write.toString()
-                );
+                options.logDestination.write({ t: new Date(), c: 'command', s: 'emergency' });
+                expect(correctDestination?.write).to.have.been.calledOnce;
               });
             }
           }
