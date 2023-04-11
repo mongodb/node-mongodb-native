@@ -1,6 +1,7 @@
-import type { Document, ObjectId } from '../bson';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
+import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { Callback, hasAtomicOperators, MongoDBNamespace } from '../utils';
@@ -32,7 +33,7 @@ export interface UpdateResult<TSchema = Document> {
   acknowledged: boolean;
   /** The number of documents that matched the filter */
   matchedCount: number;
-  /** The number of documents ∂that were modified */
+  /** The number of documents that were modified */
   modifiedCount: number;
   /** The number of documents that were upserted */
   upsertedCount: number;
