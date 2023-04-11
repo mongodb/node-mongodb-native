@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "5.1.0",
+  "version": "5.2.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -25,7 +25,7 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "bson": "^5.0.1",
+    "bson": "^5.2.0",
     "mongodb-connection-string-url": "^2.6.0",
     "socks": "^2.7.1"
   },
@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.201.0",
-    "mongodb-client-encryption": "^2.3.0",
+    "mongodb-client-encryption": ">=2.3.0 <3",
     "snappy": "^7.2.2"
   },
   "peerDependenciesMeta": {
