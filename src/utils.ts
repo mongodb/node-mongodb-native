@@ -1289,9 +1289,17 @@ export function parseUnsignedInteger(value: unknown): number | null {
  * @returns Whether the provided address matches the parent domain
  */
 export function matchesParentDomain(address: string, srvHost: string): boolean {
-  const regex = /^.*?\./;
-  const srvAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
-  const srv = `.${srvAddress.replace(regex, '')}`;
-  const parent = `.${srvHost.replace(regex, '')}`;
-  return srv.endsWith(parent);
+  // Remove trailing dot if exists on either the resolved address or the srv hostname
+  const normalizedAddress = address.endsWith('.') ? address.slice(0, address.length - 1) : address;
+  const normalizedSrvHost = srvHost.endsWith('.') ? srvHost.slice(0, srvHost.length - 1) : srvHost;
+
+  const allCharacterBeforeFirstDot = /^.*?\./;
+  // Remove all characters before first dot
+  // Add leading dot back to string so
+  //   an srvHostDomain = '.trusted.site'
+  //   will not satisfy an addressDomain that endsWith '.fake-trusted.site'
+  const addressDomain = `.${normalizedAddress.replace(allCharacterBeforeFirstDot, '')}`;
+  const srvHostDomain = `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
+
+  return addressDomain.endsWith(srvHostDomain);
 }

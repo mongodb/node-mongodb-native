@@ -903,6 +903,7 @@ describe('driver utils', function () {
 
   describe('matchesParentDomain()', () => {
     const exampleSrvName = 'i-love-javascript.mongodb.io';
+    const exampleSrvNameWithDot = 'i-love-javascript.mongodb.io.';
     const exampleHostNameWithoutDot = 'i-love-javascript-00.mongodb.io';
     const exampleHostNamesWithDot = exampleHostNameWithoutDot + '.';
     const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evil-mongodb.io';
@@ -919,9 +920,19 @@ describe('driver utils', function () {
       });
     });
 
-    context('when addresses in SRV record end with dots', () => {
+    context('when addresses in SRV record end with a dot', () => {
       it('accepts address since it is considered to still match the parent domain', () => {
         expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+      });
+    });
+
+    context('when SRV host ends with a dot', () => {
+      it('accepts address if it ends with a dot', () => {
+        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.be.true;
+      });
+
+      it('accepts address if it does not end with a dot', () => {
+        expect(matchesParentDomain(exampleHostNameWithoutDot, exampleSrvName)).to.be.true;
       });
     });
 
