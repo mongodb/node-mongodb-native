@@ -75,7 +75,7 @@ describe('client metadata module', () => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
-        it('returns null, () => {
+        it('returns null', () => {
           expect(getFAASEnv()).to.be.null;
         });
       });
