@@ -14,19 +14,19 @@ import {
 } from '../../../mongodb';
 
 describe('client metadata module', () => {
-  describe('class LimitedSizeDocument', () => {
+  describe('new LimitedSizeDocument()', () => {
     // For the sake of testing the size limiter features
     // We test document: { _id: ObjectId() }
     // 4 bytes + 1 type byte + 4 bytes for key + 12 bytes Oid + 1 null term byte
     // = 22 bytes
 
-    it('sets key and value that fit within maxSize', () => {
+    it('allows setting a key and value that fit within maxSize', () => {
       const doc = new LimitedSizeDocument(22);
       expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
       expect(doc.toObject()).to.have.all.keys('_id');
     });
 
-    it('ignores ifItFitsItSits that are over size', () => {
+    it('ignores attempts to set key-value pairs that are over size', () => {
       const doc = new LimitedSizeDocument(22);
       expect(doc.ifItFitsItSits('_id', new ObjectId())).to.be.true;
       expect(doc.ifItFitsItSits('_id2', '')).to.be.false;
@@ -58,7 +58,7 @@ describe('client metadata module', () => {
     }
 
     context('when there is no FAAS provider data in the env', () => {
-      it('parses no FAAS provider', () => {
+      it('returns null', () => {
         expect(getFAASEnv()).to.be.null;
       });
     });
@@ -75,7 +75,7 @@ describe('client metadata module', () => {
           delete process.env.AWS_EXECUTION_ENV;
           delete process.env.FUNCTIONS_WORKER_RUNTIME;
         });
-        it('parses no FAAS provider', () => {
+        it('returns null, () => {
           expect(getFAASEnv()).to.be.null;
         });
       });
