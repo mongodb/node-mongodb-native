@@ -125,6 +125,29 @@ describe('client metadata module', () => {
       });
     });
 
+    context('when driverInfo is too large', () => {
+      it('throws an error relating to name', () => {
+        expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /name/
+        );
+      });
+
+      it('throws an error relating to version', () => {
+        expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /version/
+        );
+      });
+
+      it('throws an error relating to platform', () => {
+        expect(() => makeClientMetadata({ driverInfo: { platform: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /platform/
+        );
+      });
+    });
+
     context('when driverInfo.platform is provided', () => {
       it('appends driverInfo.platform to the platform field', () => {
         const options = {
@@ -432,29 +455,6 @@ describe('client metadata module', () => {
 
   describe('metadata truncation', function () {
     afterEach(() => sinon.restore());
-
-    context('when driverInfo is too large', () => {
-      it('throws an error relating to name', () => {
-        expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
-          MongoInvalidArgumentError,
-          /name/
-        );
-      });
-
-      it('throws an error relating to version', () => {
-        expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
-          MongoInvalidArgumentError,
-          /version/
-        );
-      });
-
-      it('throws an error relating to platform', () => {
-        expect(() => makeClientMetadata({ driverInfo: { platform: 'a'.repeat(512) } })).to.throw(
-          MongoInvalidArgumentError,
-          /platform/
-        );
-      });
-    });
 
     context('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
