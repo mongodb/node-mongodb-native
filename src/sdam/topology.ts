@@ -5,6 +5,7 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
@@ -37,7 +38,6 @@ import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
   Callback,
-  ClientMetadata,
   EventEmitterWithState,
   HostAddress,
   List,
@@ -138,7 +138,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   /** The name of the replica set to connect to */
   replicaSet?: string;
   srvHost?: string;
-  /** @internal */
   srvPoller?: SrvPoller;
   /** Indicates that a client should directly connect to a node without attempting to discover its topology type */
   directConnection: boolean;
@@ -146,7 +145,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
-  /** @internal */
   [featureFlag: symbol]: any;
 }
 

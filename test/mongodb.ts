@@ -122,6 +122,7 @@ export * from '../src/cmap/connection';
 export * from '../src/cmap/connection_pool';
 export * from '../src/cmap/connection_pool_events';
 export * from '../src/cmap/errors';
+export * from '../src/cmap/handshake/client_metadata';
 export * from '../src/cmap/message_stream';
 export * from '../src/cmap/metrics';
 export * from '../src/cmap/stream_description';
