@@ -344,18 +344,10 @@ describe('client metadata module', () => {
           expect(delete globalThis.Bun, 'failed to delete Bun global').to.be.true;
         });
 
-        it('sets platform to Bun if typeof is object', () => {
-          globalThis.Bun = { version: '1.2.3' };
-          const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Bun v1.2.3, LE');
-        });
-
-        it('sets platform to Bun if typeof is function', () => {
-          function Bun() {
-            return null;
-          }
-          Bun.version = '1.2.3';
-          globalThis.Bun = Bun;
+        it('sets platform to Bun', () => {
+          globalThis.Bun = class {
+            static version = '1.2.3';
+          };
           const metadata = makeClientMetadata({ driverInfo: {} });
           expect(metadata.platform).to.equal('Bun v1.2.3, LE');
         });

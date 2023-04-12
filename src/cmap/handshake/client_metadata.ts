@@ -249,7 +249,7 @@ declare const Deno: { version?: { deno?: string } } | undefined;
  * expect it to satisfy. In order to not ship code in the driver that would break
  * future versions of this runtime assume all properties are nullish.
  */
-declare const Bun: { version?: string } | undefined;
+declare const Bun: { (): void; version?: string } | undefined;
 
 /**
  * @internal
@@ -278,7 +278,7 @@ function getRuntimeInfo(): string {
   if ('Bun' in globalThis) {
     const version =
       Bun != null &&
-      (typeof Bun === 'function' || typeof Bun === 'object') &&
+      typeof Bun === 'function' &&
       'version' in Bun &&
       typeof Bun.version === 'string'
         ? Bun.version
