@@ -277,7 +277,10 @@ function getRuntimeInfo(): string {
 
   if ('Bun' in globalThis) {
     const version =
-      Bun != null && typeof Bun === 'object' && 'version' in Bun && typeof Bun.version === 'string'
+      Bun != null &&
+      (typeof Bun === 'function' || typeof Bun === 'object') &&
+      'version' in Bun &&
+      typeof Bun.version === 'string'
         ? Bun.version
         : '0.0.0';
 
