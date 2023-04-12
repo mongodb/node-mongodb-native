@@ -238,6 +238,7 @@ export type {
   WaitQueueMember,
   WithConnectionCallback
 } from './cmap/connection_pool';
+export type { ClientMetadata, ClientMetadataOptions } from './cmap/handshake/client_metadata';
 export type {
   MessageStream,
   MessageStreamOptions,
@@ -463,8 +464,6 @@ export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,
   Callback,
-  ClientMetadata,
-  ClientMetadataOptions,
   EventEmitterWithState,
   HostAddress,
   List,

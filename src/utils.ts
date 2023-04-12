@@ -1,6 +1,5 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
-import * as os from 'os';
 import { URL } from 'url';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';
@@ -20,7 +19,7 @@ import {
   MongoRuntimeError
 } from './error';
 import type { Explain } from './explain';
-import type { MongoClient, MongoOptions } from './mongo_client';
+import type { MongoClient } from './mongo_client';
 import type { CommandOperationOptions, OperationParent } from './operations/command';
 import type { Hint, OperationOptions } from './operations/operation';
 import { ReadConcern } from './read_concern';
@@ -511,77 +510,6 @@ export function makeStateMachine(stateTable: StateTable): StateTransitionFunctio
     target.emit('stateChanged', target.s.state, newState);
     target.s.state = newState;
   };
-}
-
-/**
- * @public
- * @see https://github.com/mongodb/specifications/blob/master/source/mongodb-handshake/handshake.rst#hello-command
- */
-export interface ClientMetadata {
-  driver: {
-    name: string;
-    version: string;
-  };
-  os: {
-    type: string;
-    name: NodeJS.Platform;
-    architecture: string;
-    version: string;
-  };
-  platform: string;
-  application?: {
-    name: string;
-  };
-}
-
-/** @public */
-export interface ClientMetadataOptions {
-  driverInfo?: {
-    name?: string;
-    version?: string;
-    platform?: string;
-  };
-  appName?: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const NODE_DRIVER_VERSION = require('../package.json').version;
-
-export function makeClientMetadata(
-  options: Pick<MongoOptions, 'appName' | 'driverInfo'>
-): ClientMetadata {
-  const name = options.driverInfo.name ? `nodejs|${options.driverInfo.name}` : 'nodejs';
-  const version = options.driverInfo.version
-    ? `${NODE_DRIVER_VERSION}|${options.driverInfo.version}`
-    : NODE_DRIVER_VERSION;
-  const platform = options.driverInfo.platform
-    ? `Node.js ${process.version}, ${os.endianness()}|${options.driverInfo.platform}`
-    : `Node.js ${process.version}, ${os.endianness()}`;
-
-  const metadata: ClientMetadata = {
-    driver: {
-      name,
-      version
-    },
-    os: {
-      type: os.type(),
-      name: process.platform,
-      architecture: process.arch,
-      version: os.release()
-    },
-    platform
-  };
-
-  if (options.appName) {
-    // MongoDB requires the appName not exceed a byte length of 128
-    const name =
-      Buffer.byteLength(options.appName, 'utf8') <= 128
-        ? options.appName
-        : Buffer.from(options.appName, 'utf8').subarray(0, 128).toString('utf8');
-    metadata.application = { name };
-  }
-
-  return metadata;
 }
 
 /** @internal */
