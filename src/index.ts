@@ -314,7 +314,6 @@ export type {
   MongoLoggerOptions,
   SeverityLevel
 } from './mongo_logger';
-export { createStdioLogger } from './mongo_logger';
 export type {
   CommonEvents,
   EventsDescription,
