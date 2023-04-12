@@ -335,7 +335,7 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
   // Default to delay to 300 seconds. Node automatically then sets TCP_KEEPINTVL to 1 second
   // which is acceptable to the recommendation of 10 seconds and also cannot be configured.
   // TCP_KEEPCNT is also set to 10 in Node and cannot be configured. (Recommendation is 9)
-  const keepAliveInitialDelay = options.keepAliveInitialDelay || 300000;
+  const keepAliveInitialDelay = options.keepAliveInitialDelay;
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
