@@ -238,6 +238,7 @@ export interface CollectionOrDatabaseOptions {
 export interface CollectionData {
   collectionName: string;
   databaseName: string;
+  createOptions?: Document;
   documents: Document[];
 }
 export interface Test {

@@ -1,0 +1,42 @@
+description: collectionData-createOptions
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "3.6"
+    # Capped collections cannot be created on serverless instances.
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+initialData:
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    createOptions:
+      capped: true
+      # With MMAPv1, the size field cannot be less than 4096.
+      size: &cappedSize 4096
+    documents:
+      - { _id: 1, x: 11 }
+
+tests:
+  - description: collection is created with the correct options
+    operations:
+      - object: *collection0
+        name: aggregate
+        arguments:
+          pipeline:
+            - $collStats: { storageStats: {} }
+            - $project: { capped: '$storageStats.capped', maxSize: '$storageStats.maxSize'}
+        expectResult:
+          - { capped: true, maxSize: *cappedSize }
