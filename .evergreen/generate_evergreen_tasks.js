@@ -603,7 +603,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-const FLE_PINNED_COMMIT = '77b51c00ab4ff58916dd39f55657e1ecc0af281c'
+const FLE_PINNED_COMMIT = '1524eac203e4145e9f4835e519f1e4663ff15953'
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
