@@ -11,11 +11,8 @@ import type { Workflow } from './mongodb_oidc/workflow';
  * @experimental
  */
 export interface OIDCMechanismServerStep1 {
-  authorizationEndpoint?: string;
-  tokenEndpoint?: string;
-  deviceAuthorizationEndpoint?: string;
+  issuer?: string;
   clientId: string;
-  clientSecret?: string;
   requestScopes?: string[];
 }
 
@@ -33,10 +30,19 @@ export interface OIDCRequestTokenResult {
  * @public
  * @experimental
  */
+export interface OIDCClientInfo {
+  principalName: string;
+  timeoutSeconds?: number;
+  timeoutContext?: AbortSignal;
+}
+
+/**
+ * @public
+ * @experimental
+ */
 export type OIDCRequestFunction = (
-  principalName: string,
-  serverResult: OIDCMechanismServerStep1,
-  timeout: AbortSignal | number
+  clientInfo: OIDCClientInfo,
+  serverInfo: OIDCMechanismServerStep1
 ) => Promise<OIDCRequestTokenResult>;
 
 /**
@@ -44,10 +50,9 @@ export type OIDCRequestFunction = (
  * @experimental
  */
 export type OIDCRefreshFunction = (
-  principalName: string,
-  serverResult: OIDCMechanismServerStep1,
-  result: OIDCRequestTokenResult,
-  timeout: AbortSignal | number
+  clientInfo: OIDCClientInfo,
+  serverInfo: OIDCMechanismServerStep1,
+  tokenResult: OIDCRequestTokenResult
 ) => Promise<OIDCRequestTokenResult>;
 
 type ProviderName = 'aws' | 'callback';

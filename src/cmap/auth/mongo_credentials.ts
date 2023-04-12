@@ -43,6 +43,8 @@ export interface AuthMechanismProperties extends Document {
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
   /** @experimental */
   PROVIDER_NAME?: 'aws';
+  /** @experimental */
+  ALLOWED_HOSTS?: string[];
 }
 
 /** @public */

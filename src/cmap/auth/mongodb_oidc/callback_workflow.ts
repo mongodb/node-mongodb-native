@@ -9,8 +9,8 @@ import { AuthMechanism } from '../providers';
 import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
 
-/* 5 minutes in milliseconds */
-const TIMEOUT_MS = 300000;
+/* 5 minutes in seconds */
+const TIMEOUT_S = 300;
 
 /**
  * OIDC implementation of a callback based workflow.
@@ -134,12 +134,8 @@ export class CallbackWorkflow implements Workflow {
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // If a refresh callback exists, use it. Otherwise use the request callback.
     if (refresh) {
-      const result: OIDCRequestTokenResult = await refresh(
-        credentials.username,
-        stepOneResult,
-        tokenResult,
-        TIMEOUT_MS
-      );
+      const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
+      const result: OIDCRequestTokenResult = await refresh(clientInfo, stepOneResult, tokenResult);
       // Validate the result.
       if (!result || !result.accessToken) {
         throw new MongoMissingCredentialsError(
@@ -182,7 +178,8 @@ export class CallbackWorkflow implements Workflow {
         'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
-    const tokenResult = await request(credentials.username, stepOneResult, TIMEOUT_MS);
+    const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
+    const tokenResult = await request(clientInfo, stepOneResult);
     // Validate the result.
     if (!tokenResult || !tokenResult.accessToken) {
       throw new MongoMissingCredentialsError(

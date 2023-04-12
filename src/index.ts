@@ -204,6 +204,7 @@ export type {
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
 export type {
+  OIDCClientInfo,
   OIDCMechanismServerStep1,
   OIDCRefreshFunction,
   OIDCRequestFunction,
