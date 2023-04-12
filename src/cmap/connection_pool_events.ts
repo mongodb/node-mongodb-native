@@ -12,7 +12,7 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
-import type { AnyError } from '../error';
+import type { AnyError, MongoError } from '../error';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 
@@ -54,15 +54,12 @@ export abstract class ConnectionPoolMonitoringEvent {
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
   options?: ConnectionPoolOptions;
-  /** The size of the ConnectionPool's waitQueue */
-  waitQueueSize: number;
   name = CONNECTION_POOL_CREATED;
 
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
     this.options = pool.options;
-    this.waitQueueSize = pool.waitQueueSize;
   }
 }
 
@@ -140,14 +137,14 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   reason: string;
   serviceId?: ObjectId;
   name = CONNECTION_CLOSED;
-  error: AnyError | null;
+  error: MongoError | null;
 
   /** @internal */
   constructor(
     pool: ConnectionPool,
     connection: Pick<Connection, 'id' | 'serviceId'>,
     reason: 'idle' | 'stale' | 'poolClosed' | 'error',
-    error?: AnyError
+    error?: MongoError
   ) {
     super(pool);
     this.connectionId = connection.id;

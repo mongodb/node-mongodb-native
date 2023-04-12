@@ -708,7 +708,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             this,
             { id: connectOptions.id, serviceId: undefined },
             'error',
-            err
+            // TODO(NODE-5192): Remove this cast
+            err as MongoError
           )
         );
         if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
