@@ -128,30 +128,14 @@ describe('client metadata module', () => {
       });
     });
 
-    context('when driverInfo is too large', () => {
-      it('throws an error relating to name', () => {
-        expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
-          MongoInvalidArgumentError,
-          /name/
-        );
-      });
-
-      it('throws an error relating to version', () => {
-        expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
-          MongoInvalidArgumentError,
-          /version/
-        );
-      });
-
-      it('throws an error relating to platform', () => {
+    context('when driverInfo.platform is provided', () => {
+      it('throws an error if driverInfo.platform is too large', () => {
         expect(() => makeClientMetadata({ driverInfo: { platform: 'a'.repeat(512) } })).to.throw(
           MongoInvalidArgumentError,
           /platform/
         );
       });
-    });
 
-    context('when driverInfo.platform is provided', () => {
       it('appends driverInfo.platform to the platform field', () => {
         const options = {
           driverInfo: { platform: 'myPlatform' }
@@ -174,6 +158,13 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.name is provided', () => {
+      it('throws an error if driverInfo.name is too large', () => {
+        expect(() => makeClientMetadata({ driverInfo: { name: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /name/
+        );
+      });
+
       it('appends driverInfo.name to the driver.name field', () => {
         const options = {
           driverInfo: { name: 'myName' }
@@ -196,6 +187,13 @@ describe('client metadata module', () => {
     });
 
     context('when driverInfo.version is provided', () => {
+      it('throws an error if driverInfo.version is too large', () => {
+        expect(() => makeClientMetadata({ driverInfo: { version: 'a'.repeat(512) } })).to.throw(
+          MongoInvalidArgumentError,
+          /version/
+        );
+      });
+
       it('appends driverInfo.version to the version field', () => {
         const options = {
           driverInfo: { version: 'myVersion' }
