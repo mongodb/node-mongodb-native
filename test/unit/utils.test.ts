@@ -11,6 +11,7 @@ import {
   HostAddress,
   isHello,
   List,
+  matchesParentDomain,
   maybeCallback,
   MongoDBNamespace,
   shuffle
@@ -857,5 +858,47 @@ describe('driver utils', function () {
       // @ts-expect-error: not narrowed based on numeric result, but these values are correct
       it(title, () => expect(compareObjectId(oid1, oid2)).to.equal(result));
     }
+  });
+
+  describe('matchesParentDomain()', () => {
+    const exampleSrvName = 'i-love-javascript.mongodb.io';
+    const exampleSrvNameWithDot = 'i-love-javascript.mongodb.io.';
+    const exampleHostNameWithoutDot = 'i-love-javascript-00.mongodb.io';
+    const exampleHostNamesWithDot = exampleHostNameWithoutDot + '.';
+    const exampleHostNamThatDoNotMatchParent = 'i-love-javascript-00.evil-mongodb.io';
+    const exampleHostNamThatDoNotMatchParentWithDot = 'i-love-javascript-00.evil-mongodb.io.';
+
+    context('when address does not match parent domain', () => {
+      it('without a trailing dot returns false', () => {
+        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParent, exampleSrvName)).to.be.false;
+      });
+
+      it('with a trailing dot returns false', () => {
+        expect(matchesParentDomain(exampleHostNamThatDoNotMatchParentWithDot, exampleSrvName)).to.be
+          .false;
+      });
+    });
+
+    context('when addresses in SRV record end with a dot', () => {
+      it('accepts address since it is considered to still match the parent domain', () => {
+        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+      });
+    });
+
+    context('when SRV host ends with a dot', () => {
+      it('accepts address if it ends with a dot', () => {
+        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvNameWithDot)).to.be.true;
+      });
+
+      it('accepts address if it does not end with a dot', () => {
+        expect(matchesParentDomain(exampleHostNameWithoutDot, exampleSrvName)).to.be.true;
+      });
+    });
+
+    context('when addresses in SRV record end without dots', () => {
+      it('accepts address since it matches the parent domain', () => {
+        expect(matchesParentDomain(exampleHostNamesWithDot, exampleSrvName)).to.be.true;
+      });
+    });
   });
 });
