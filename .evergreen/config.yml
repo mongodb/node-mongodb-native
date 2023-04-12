@@ -3149,6 +3149,9 @@ task_groups:
         params:
           file: src/testazurekms-expansions.yml
     teardown_group:
+      - command: expansions.update
+        params:
+          file: testazurekms-expansions.yml
       - command: subprocess.exec
         params:
           binary: bash
