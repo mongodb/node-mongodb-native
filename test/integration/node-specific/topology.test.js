@@ -1,6 +1,6 @@
 'use strict';
 const { expect } = require('chai');
-const { makeClientMetadata } = require('../../../src/utils');
+const { makeClientMetadata } = require('../../../src/cmap/handshake/client_metadata');
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {

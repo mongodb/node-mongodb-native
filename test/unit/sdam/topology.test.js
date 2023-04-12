@@ -9,13 +9,14 @@ const { MongoClient, MongoServerSelectionError, ReadPreference } = require('../.
 const { Topology } = require('../../../src/sdam/topology');
 const { Server } = require('../../../src/sdam/server');
 const { ServerDescription } = require('../../../src/sdam/server_description');
-const { ns, makeClientMetadata, isHello } = require('../../../src/utils');
+const { ns, isHello } = require('../../../src/utils');
 const { TopologyDescriptionChangedEvent } = require('../../../src/sdam/events');
 const { TopologyDescription } = require('../../../src/sdam/topology_description');
 const { TopologyType } = require('../../../src/sdam/common');
 const { SrvPoller, SrvPollingEvent } = require('../../../src/sdam/srv_polling');
 const { getSymbolFrom } = require('../../tools/utils');
 const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../../src/error');
+const { makeClientMetadata } = require('../../../src/cmap/handshake/client_metadata');
 
 describe('Topology (unit)', function () {
   let client, topology;
