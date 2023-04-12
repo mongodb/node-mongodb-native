@@ -290,7 +290,7 @@ describe('client metadata module', () => {
       });
     });
 
-    context.only('when globalThis indicates alternative runtime', () => {
+    context('when globalThis indicates alternative runtime', () => {
       context('deno', () => {
         afterEach(() => {
           expect(delete globalThis.Deno, 'failed to delete Deno global').to.be.true;
