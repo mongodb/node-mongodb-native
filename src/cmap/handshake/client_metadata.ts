@@ -237,17 +237,13 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
 
 /**
  * @internal
- * This type represents the global Deno object and the minimal type contract we
- * expect it to satisfy. In order to not ship code in the driver that would break
- * future versions of this runtime assume all properties are nullish.
+ * This type represents the global Deno object and the minimal type contract we expect it to satisfy.
  */
 declare const Deno: { version?: { deno?: string } } | undefined;
 
 /**
  * @internal
- * This type represents the global Bun object and the minimal type contract we
- * expect it to satisfy. In order to not ship code in the driver that would break
- * future versions of this runtime assume all properties are nullish.
+ * This type represents the global Bun object and the minimal type contract we expect it to satisfy.
  */
 declare const Bun: { (): void; version?: string } | undefined;
 
@@ -255,9 +251,9 @@ declare const Bun: { (): void; version?: string } | undefined;
  * @internal
  * Get current JavaScript runtime platform
  *
- * NOTE: The version information fetching is intentionally written aggressively defensive
+ * NOTE: The version information fetching is intentionally written defensively
  * to avoid having a released driver version that becomes incompatible
- * with a future change to these global objects
+ * with a future change to these global objects.
  */
 function getRuntimeInfo(): string {
   if ('Deno' in globalThis) {
