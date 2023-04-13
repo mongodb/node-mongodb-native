@@ -7,7 +7,10 @@ import type { Callback } from '../utils';
 import { CommandOperation, CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
-/** @public */
+/**
+ * @public
+ * @deprecated the `collStats` operation will be removed in the next major release.
+ */
 export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
   scale?: number;
@@ -77,6 +80,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
 }
 
 /**
+ * @deprecated the `collStats` operation will be removed in the next major release.
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/command/collStats/
  */
@@ -130,7 +134,10 @@ export interface CollStats extends Document {
   scaleFactor: number;
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated the `collStats` operation will be removed in the next major release.
+ */
 export interface WiredTigerData extends Document {
   LSM: {
     'bloom filter false positives': number;
