@@ -212,9 +212,12 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   sslCRL?: string;
   /** TCP Connection no delay */
   noDelay?: boolean;
-  /** TCP Connection keep alive enabled */
+  /** @deprecated TCP Connection keep alive enabled. Will not be able to turn off in the future. */
   keepAlive?: boolean;
-  /** The number of milliseconds to wait before initiating keepAlive on the TCP socket */
+  /**
+   * @deprecated The number of milliseconds to wait before initiating keepAlive on the TCP socket.
+   *             Will not be configurable in the future.
+   */
   keepAliveInitialDelay?: number;
   /** Force server to assign `_id` values instead of driver */
   forceServerObjectId?: boolean;
