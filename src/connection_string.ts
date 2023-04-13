@@ -870,7 +870,7 @@ export const OPTIONS = {
     deprecated: 'Will not be able to turn off in the future.'
   },
   keepAliveInitialDelay: {
-    default: 300000,
+    default: 120000,
     type: 'uint',
     deprecated: 'Will not be configurable in the future.'
   },
