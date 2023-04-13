@@ -1,8 +1,19 @@
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import { expect } from 'chai';
 
-import { MongoClient, MongoInvalidArgumentError, OIDC_WORKFLOWS } from '../mongodb';
+import {
+  MongoClient,
+  MongoInvalidArgumentError,
+  OIDC_WORKFLOWS,
+  OIDCClientInfo,
+  OIDCMechanismServerStep1,
+  OIDCRefreshFunction,
+  OIDCRequestFunction,
+  OIDCRequestTokenResult,
+  Collection
+} from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {
@@ -12,13 +23,81 @@ describe('MONGODB-OIDC', function () {
   });
 
   describe('OIDC Auth Spec Prose Tests', function () {
+    // Set up the cache variable.
+    const cache = OIDC_WORKFLOWS.get('callback').cache;
+    // Creates a request function for use in the test.
+    const createRequestCallback = (username = 'test_user1', expiresInSeconds?: number) => {
+      return async (clientInfo: OIDCClientInfo, serverInfo: OIDCMechanismServerStep1) => {
+        const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, username), {
+          encoding: 'utf8'
+        });
+        // Do some basic property assertions.
+        expect(clientInfo).to.have.property('timeoutSeconds');
+        expect(serverInfo).to.have.property('issuer');
+        expect(serverInfo).to.have.property('clientId');
+        const response: OIDCRequestTokenResult = { accessToken: token };
+        if (expiresInSeconds) {
+          response.expiresInSeconds = expiresInSeconds;
+        }
+        return response;
+      };
+    };
+
+    // Creates a refresh function for use in the test.
+    const createRefreshCallback = (username = 'test_user1', expiresInSeconds?: number) => {
+      return async (
+        clientInfo: OIDCClientInfo,
+        serverInfo: OIDCMechanismServerStep1,
+        tokenResult: OIDCRequestTokenResult
+      ) => {
+        const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, username), {
+          encoding: 'utf8'
+        });
+        // Do some basic property assertions.
+        expect(clientInfo).to.have.property('timeoutSeconds');
+        expect(serverInfo).to.have.property('issuer');
+        expect(serverInfo).to.have.property('clientId');
+        expect(tokenResult).to.have.property('accessToken');
+        const response: OIDCRequestTokenResult = { accessToken: token };
+        if (expiresInSeconds) {
+          response.expiresInSeconds = expiresInSeconds;
+        }
+        return response;
+      };
+    };
+
     describe('1. Callback-Driven Auth', function () {
+      let client: MongoClient;
+      let collection: Collection;
+
+      beforeEach(function () {
+        cache.clear();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
       describe('1.1 Single Principal Implicit Username', function () {
+        before(function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback()
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create a request callback returns a valid token.
         // Create a client that uses the default OIDC url and the request callback.
         // Perform a find operation. that succeeds.
         // Close the client.
+        it('successfully authenticates', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.not.throw;
+        });
       });
 
       describe('1.2 Single Principal Explicit Username', function () {
