@@ -311,31 +311,25 @@ describe('client metadata module', () => {
         it('ignores version if Deno.version.deno is not a string', () => {
           globalThis.Deno = { version: { deno: 1 } };
           const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Deno v0.0.0, LE');
-        });
-
-        it('ignores version if Deno.version.deno is not a string and sets driverInfo.platform', () => {
-          globalThis.Deno = { version: { deno: 1 } };
-          const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
-          expect(metadata.platform).to.equal('Deno v0.0.0, LE|myPlatform');
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
         it('ignores version if Deno.version does not have a deno property', () => {
           globalThis.Deno = { version: { somethingElse: '1.2.3' } };
           const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Deno v0.0.0, LE');
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
         it('ignores version if Deno.version is null', () => {
           globalThis.Deno = { version: null };
           const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Deno v0.0.0, LE');
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
 
-        it('ignores version if Deno does not have a version property', () => {
-          globalThis.Deno = { version: null };
+        it('ignores version if Deno is nullish', () => {
+          globalThis.Deno = null;
           const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Deno v0.0.0, LE');
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
         });
       });
 
@@ -365,7 +359,7 @@ describe('client metadata module', () => {
             static version = 1;
           };
           const metadata = makeClientMetadata({ driverInfo: {} });
-          expect(metadata.platform).to.equal('Bun v0.0.0, LE');
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE');
         });
 
         it('ignores version if Bun.version is not a string and sets driverInfo.platform', () => {
@@ -373,13 +367,13 @@ describe('client metadata module', () => {
             static version = 1;
           };
           const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
-          expect(metadata.platform).to.equal('Bun v0.0.0, LE|myPlatform');
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
 
-        it('ignores version if Bun is not a function', () => {
-          globalThis.Bun = { version: '1.2.3' };
+        it('ignores version if Bun is nullish', () => {
+          globalThis.Bun = null;
           const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
-          expect(metadata.platform).to.equal('Bun v0.0.0, LE|myPlatform');
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
         });
       });
     });

@@ -261,28 +261,13 @@ declare const Bun: { (): void; version?: string } | undefined;
  */
 function getRuntimeInfo(): string {
   if ('Deno' in globalThis) {
-    const version =
-      Deno != null &&
-      typeof Deno === 'object' &&
-      'version' in Deno &&
-      Deno.version != null &&
-      typeof Deno.version === 'object' &&
-      'deno' in Deno.version &&
-      typeof Deno.version.deno === 'string'
-        ? Deno.version.deno
-        : '0.0.0';
+    const version = typeof Deno?.version?.deno === 'string' ? Deno?.version?.deno : '0.0.0-unknown';
 
     return `Deno v${version}, ${os.endianness()}`;
   }
 
   if ('Bun' in globalThis) {
-    const version =
-      Bun != null &&
-      typeof Bun === 'function' &&
-      'version' in Bun &&
-      typeof Bun.version === 'string'
-        ? Bun.version
-        : '0.0.0';
+    const version = typeof Bun?.version === 'string' ? Bun?.version : '0.0.0-unknown';
 
     return `Bun v${version}, ${os.endianness()}`;
   }
