@@ -784,8 +784,8 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Get all the collection statistics.
    *
-   * @deprecated The `collStats` command is deprecated on server version 7.0.0 and greater.
-   * Please use an aggregation pipeline with a `$collStats` stage instead.
+   * @deprecated the `collStats` operation will be removed in the next major release.  Please
+   * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
    *
    * @param options - Optional settings for the command
    */

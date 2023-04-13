@@ -9,7 +9,8 @@ import { Aspect, defineAspects } from './operation';
 
 /**
  * @public
- * @deprecated the `collStats` operation will be removed in the next major release.
+ * @deprecated the `collStats` operation will be removed in the next major release.  Please
+ * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
  */
 export interface CollStatsOptions extends CommandOperationOptions {
   /** Divide the returned sizes by scale value. */
@@ -80,7 +81,8 @@ export class DbStatsOperation extends CommandOperation<Document> {
 }
 
 /**
- * @deprecated the `collStats` operation will be removed in the next major release.
+ * @deprecated the `collStats` operation will be removed in the next major release.  Please
+ * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
  * @public
  * @see https://www.mongodb.com/docs/manual/reference/command/collStats/
  */
@@ -136,7 +138,8 @@ export interface CollStats extends Document {
 
 /**
  * @public
- * @deprecated the `collStats` operation will be removed in the next major release.
+ * @deprecated the `collStats` operation will be removed in the next major release.  Please
+ * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
  */
 export interface WiredTigerData extends Document {
   LSM: {
