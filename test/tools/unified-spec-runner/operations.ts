@@ -592,11 +592,22 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
     maxCommitTimeMS: operation.arguments!.maxCommitTimeMS
   };
 
-  return session.withTransaction(async () => {
-    for (const callbackOperation of operation.arguments!.callback) {
-      await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
+  let errorFromOperations = null;
+  const result = await session.withTransaction(async () => {
+    try {
+      await (async () => {
+        for (const callbackOperation of operation.arguments!.callback) {
+          await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
+        }
+      })();
+    } catch (error) {
+      errorFromOperations = error;
     }
   }, options);
+
+  if (result == null) {
+    throw errorFromOperations ?? Error('transaction not committed');
+  }
 });
 
 operations.set('countDocuments', async ({ entities, operation }) => {

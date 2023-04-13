@@ -1,0 +1,372 @@
+{
+  "description": "runCommand spec requirements",
+  "schemaVersion": "1.0",
+  "runOnRequirements": {},
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "plainDb",
+        "client": "client",
+        "databaseName": "plainDb"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "plainDb",
+        "collectionName": "collection"
+      }
+    },
+    {
+      "database": {
+        "id": "dbWithRC",
+        "client": "client",
+        "databaseName": "dbWithRC",
+        "readConcern": {
+          "level": "local"
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "dbWithWC",
+        "client": "client",
+        "databaseName": "dbWithWC",
+        "writeConcern": {
+          "w": 0
+        }
+      }
+    },
+    {
+      "session": {
+        "id": "session",
+        "client": "client"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "executes a ping with $db attached",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "plainDb",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$db": "plainDb"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping with lsid attached",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "plainDb",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            },
+            "session": "session"
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "$db": "plainDb"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping with $readPreference attached",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "plainDb",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            },
+            "readPreference": "nearest"
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$readPreference": {
+                    "mode": "nearest"
+                  },
+                  "$db": "plainDb"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping without attaching readConcern",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "dbWithRC",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "$db": "dbWithRC"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping without attaching writeConcern",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "dbWithWC",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "$db": "dbWithWC"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping and does not retry retryable error",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "ping"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "plainDb",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectError": {
+            "isError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "executes a ping inside a transaction",
+      "operations": [
+        {
+          "name": "withTransaction",
+          "object": "session",
+          "arguments": {
+            "callback": [
+              {
+                "name": "runCommand",
+                "object": "plainDb",
+                "arguments": {
+                  "session": "session",
+                  "commandName": "insert",
+                  "command": {
+                    "insert": "collection",
+                    "documents": [
+                      {
+                        "_id": 1
+                      }
+                    ],
+                    "ordered": true
+                  }
+                },
+                "expectResult": {
+                  "$$unsetOrMatches": {
+                    "insertedId": {
+                      "$$unsetOrMatches": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "collection",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ],
+                  "ordered": true,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "txnNumber": 1,
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "readConcern": {
+                    "level": "local"
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "plainDb"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  },
+                  "txnNumber": 1,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "w": 1
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

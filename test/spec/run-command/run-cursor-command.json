@@ -1,0 +1,160 @@
+{
+  "description": "run some cursor commands",
+  "schemaVersion": "1.0",
+  "runOnRequirements": {},
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": [
+        {
+          "_id": 0,
+          "x": 20
+        },
+        {
+          "_id": 1,
+          "x": 21
+        },
+        {
+          "_id": 2,
+          "x": 22
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "a find is run by runCursorCommand",
+      "operations": [
+        {
+          "name": "runCursorCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "find",
+            "command": {
+              "find": "collection0",
+              "batchSize": 1
+            },
+            "comment": "manually running a find"
+          },
+          "saveResultAsEntity": "manualFindCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "manualFindCursor",
+          "expectResult": {
+            "_id": 0,
+            "x": 20
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "manualFindCursor",
+          "expectResult": {
+            "_id": 1,
+            "x": 21
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "manualFindCursor",
+          "expectResult": {
+            "_id": 2,
+            "x": 22
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "manualFindCursor",
+          "expectResult": null
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "manualFindCursor",
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "collection0",
+                  "$db": "database0",
+                  "comment": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "id": {
+                      "$$type": "binData"
+                    }
+                  },
+                  "batchSize": 1,
+                  "$clusterTime": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": "long"
+                  },
+                  "collection": "collection0",
+                  "comment": "manually running a find",
+                  "$db": "database0",
+                  "lsid": {
+                    "id": {
+                      "$$type": "binData"
+                    }
+                  },
+                  "$clusterTime": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "getMore"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
