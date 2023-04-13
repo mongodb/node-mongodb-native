@@ -152,8 +152,10 @@ async function runUnifiedTest(
           });
         }
 
-        trace('insertMany');
-        await collection.insertMany(documents);
+        if (documents.length > 0) {
+          trace('insertMany');
+          await collection.insertMany(documents);
+        }
       }
     }
 
