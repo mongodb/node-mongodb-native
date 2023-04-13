@@ -26,6 +26,7 @@ export abstract class ConnectionPoolMonitoringEvent {
   time: Date;
   /** The address (host/port pair) of the pool */
   address: string;
+  /** @internal */
   abstract name:
     | typeof CONNECTION_CHECK_OUT_FAILED
     | typeof CONNECTION_CHECK_OUT_STARTED
@@ -54,6 +55,7 @@ export abstract class ConnectionPoolMonitoringEvent {
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
   options?: ConnectionPoolOptions;
+  /** @internal */
   name = CONNECTION_POOL_CREATED;
 
   /** @internal */
@@ -69,6 +71,7 @@ export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
  * @category Event
  */
 export class ConnectionPoolReadyEvent extends ConnectionPoolMonitoringEvent {
+  /** @internal */
   name = CONNECTION_POOL_READY;
 
   /** @internal */
@@ -83,6 +86,7 @@ export class ConnectionPoolReadyEvent extends ConnectionPoolMonitoringEvent {
  * @category Event
  */
 export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
+  /** @internal */
   name = CONNECTION_POOL_CLOSED;
 
   /** @internal */
@@ -99,6 +103,7 @@ export class ConnectionPoolClosedEvent extends ConnectionPoolMonitoringEvent {
 export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** A monotonically increasing, per-pool id for the newly created connection */
   connectionId: number | '<monitor>';
+  /** @internal */
   name = CONNECTION_CREATED;
 
   /** @internal */
@@ -116,6 +121,7 @@ export class ConnectionCreatedEvent extends ConnectionPoolMonitoringEvent {
 export class ConnectionReadyEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number | '<monitor>';
+  /** @internal */
   name = CONNECTION_READY;
 
   /** @internal */
@@ -136,7 +142,9 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the connection was closed */
   reason: string;
   serviceId?: ObjectId;
+  /** @internal */
   name = CONNECTION_CLOSED;
+  /** @internal */
   error: MongoError | null;
 
   /** @internal */
@@ -160,6 +168,7 @@ export class ConnectionClosedEvent extends ConnectionPoolMonitoringEvent {
  * @category Event
  */
 export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEvent {
+  /** @internal */
   name = CONNECTION_CHECK_OUT_STARTED;
 
   /** @internal */
@@ -175,13 +184,21 @@ export class ConnectionCheckOutStartedEvent extends ConnectionPoolMonitoringEven
  */
 export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent {
   /** The reason the attempt to check out failed */
-  reason: AnyError | string;
+  reason: string;
+  /** @internal */
+  error?: AnyError;
+  /** @internal */
   name = CONNECTION_CHECK_OUT_FAILED;
 
   /** @internal */
-  constructor(pool: ConnectionPool, reason: AnyError | string) {
+  constructor(
+    pool: ConnectionPool,
+    reason: 'poolClosed' | 'timeout' | 'connectionError',
+    error?: AnyError
+  ) {
     super(pool);
     this.reason = reason;
+    this.error = error;
   }
 }
 
@@ -193,6 +210,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
 export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number | '<monitor>';
+  /** @internal */
   name = CONNECTION_CHECKED_OUT;
 
   /** @internal */
@@ -210,6 +228,7 @@ export class ConnectionCheckedOutEvent extends ConnectionPoolMonitoringEvent {
 export class ConnectionCheckedInEvent extends ConnectionPoolMonitoringEvent {
   /** The id of the connection */
   connectionId: number | '<monitor>';
+  /** @internal */
   name = CONNECTION_CHECKED_IN;
 
   /** @internal */
@@ -229,6 +248,7 @@ export class ConnectionPoolClearedEvent extends ConnectionPoolMonitoringEvent {
   serviceId?: ObjectId;
 
   interruptInUseConnections?: boolean;
+  /** @internal */
   name = CONNECTION_POOL_CLEARED;
 
   /** @internal */

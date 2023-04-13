@@ -165,10 +165,6 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
   return null;
 }
 
-type ClientLogPathOptions = {
-  mongodbLogPath?: string | Writable | MongoDBLogWritable;
-};
-
 /** @internal */
 export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
@@ -183,13 +179,14 @@ export function createStdioLogger(stream: {
 
 /**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
- * mongo client options respectively.
+ * mongo client options respectively. The mongodbLogPath can be either 'stdout', 'stderr', a NodeJS
+ * Writable or an object which has a `write` method with the signature (log: Log) => void
  *
- * @returns the Writable stream to write logs to
+ * @returns the MongoDBLogWritable object to write logs to
  */
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
-  { mongodbLogPath }: ClientLogPathOptions
+  { mongodbLogPath }: { mongodbLogPath?: string | Writable | MongoDBLogWritable } 
 ): MongoDBLogWritable {
   if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
     return createStdioLogger(process.stderr);
@@ -386,11 +383,27 @@ function defaultLogTransform(logObject: LoggableEvent): Omit<Log, 's' | 't' | 'c
     case CONNECTION_CHECK_OUT_FAILED:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checkout failed';
-      log.reason = logObject.reason;
+      switch (logObject.reason) {
+        case 'poolClosed':
+          log.reason = 'Connection pool was closed';
+          break;
+        case 'timeout':
+          log.reason = 'Wait queue timeout elapsed without a connection becoming available';
+          break;
+        case 'connectionError':
+          log.reason = 'An error occurred while trying to establish a new connection';
+          if (logObject.error) {
+            log.error = logObject.error;
+          }
+          break;
+        default:
+          log.reason = `Unknown close reason: ${logObject.reason}`;
+      }
       return log;
     case CONNECTION_CHECKED_OUT:
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checked out';
+
       log.driverConnectionId = logObject.connectionId;
       return log;
     case CONNECTION_CHECKED_IN:

@@ -821,7 +821,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
         this.emit(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(this, reason)
+          new ConnectionCheckOutFailedEvent(
+            this,
+            reason,
+            reason === 'connectionError' ? error : undefined
+          )
         );
         if (waitQueueMember.timer) {
           clearTimeout(waitQueueMember.timer);
@@ -874,7 +878,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           if (err) {
             this.emit(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              new ConnectionCheckOutFailedEvent(this, 'connectionError')
+              new ConnectionCheckOutFailedEvent(this, 'connectionError', err)
             );
           } else if (connection) {
             this[kCheckedOut].add(connection);

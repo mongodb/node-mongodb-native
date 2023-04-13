@@ -1109,16 +1109,42 @@ describe('class MongoLogger', function () {
             });
 
             context('when ConnectionCheckOutFailedEvent is logged', function () {
-              beforeEach(function () {
-                logger[severityLevel]('connection', connectionCheckOutFailed);
-                expect(stream.buffer).to.have.lengthOf(1);
-                log = stream.buffer[0];
-              });
-              commonConnectionComponentAssertions();
+              for (const [reason, message] of [
+                ['connectionError', 'An error occurred while trying to establish a new connection'],
+                ['timeout', 'Wait queue timeout elapsed without a connection becoming available'],
+                ['poolClosed', 'Connection pool was closed']
+              ]) {
+                context(`with reason = "${reason}"`, function () {
+                  beforeEach(function () {
+                    const event =
+                      reason === 'connectionError'
+                        ? {
+                            ...connectionCheckOutFailed,
+                            reason,
+                            error: new Error('this is an error')
+                          }
+                        : { ...connectionCheckOutFailed, reason };
+                    logger[severityLevel]('connection', event);
+                    expect(stream.buffer).to.have.lengthOf(1);
+                    log = stream.buffer[0];
+                  });
+                  commonConnectionComponentAssertions();
 
-              it('emits a log with field `message` = "Connection checkout failed"', function () {
-                expect(log).to.have.property('message', 'Connection checkout failed');
-              });
+                  it('emits a log with field `message` = "Connection checkout failed"', function () {
+                    expect(log).to.have.property('message', 'Connection checkout failed');
+                  });
+
+                  it(`emits a log with field \`reason\` = "${message}"`, function () {
+                    expect(log).to.have.property('reason', message);
+                  });
+
+                  if (reason === 'connectionError') {
+                    it('emits a log with field `error`', function () {
+                      expect(log).to.have.property('error').that.is.instanceOf(Error);
+                    });
+                  }
+                });
+              }
             });
 
             context('when ConnectionCheckedInEvent is logged', function () {
