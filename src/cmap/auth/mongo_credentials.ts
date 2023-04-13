@@ -5,6 +5,7 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
+import { isString } from '../../utils';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
@@ -29,6 +30,18 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   // Default for wireprotocol < 3
   return AuthMechanism.MONGODB_CR;
 }
+
+const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
+
+/** @internal */
+export const DEFAULT_ALLOWED_HOSTS = [
+  '*.mongodb.net',
+  '*.mongodb-dev.net',
+  '*.mongodbgov.net',
+  'localhost',
+  '127.0.0.1',
+  '::1'
+];
 
 /** @public */
 export interface AuthMechanismProperties extends Document {
@@ -101,6 +114,10 @@ export class MongoCredentials {
           AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN
         };
       }
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_OIDC && !this.mechanismProperties.ALLOWED_HOSTS) {
+      this.mechanismProperties.ALLOWED_HOSTS = DEFAULT_ALLOWED_HOSTS;
     }
 
     Object.freeze(this.mechanismProperties);
@@ -182,6 +199,18 @@ export class MongoCredentials {
         throw new MongoInvalidArgumentError(
           `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
+      }
+
+      if (this.mechanismProperties.ALLOWED_HOSTS) {
+        const hosts = this.mechanismProperties.ALLOWED_HOSTS;
+        if (!Array.isArray(hosts)) {
+          throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
+        }
+        for (const host of hosts) {
+          if (!isString(host)) {
+            throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
+          }
+        }
       }
     }
 
