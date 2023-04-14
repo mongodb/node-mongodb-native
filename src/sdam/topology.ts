@@ -148,6 +148,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   metadata: ClientMetadata;
   /** MongoDB server API version */
   serverApi?: ServerApi;
+  /** @internal */
   [featureFlag: symbol]: any;
 }
 
