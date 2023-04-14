@@ -4,15 +4,12 @@ import path from 'node:path';
 import { expect } from 'chai';
 
 import {
+  Collection,
   MongoClient,
-  MongoInvalidArgumentError,
   OIDC_WORKFLOWS,
   OIDCClientInfo,
   OIDCMechanismServerStep1,
-  OIDCRefreshFunction,
-  OIDCRequestFunction,
-  OIDCRequestTokenResult,
-  Collection
+  OIDCRequestTokenResult
 } from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
@@ -101,34 +98,99 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('1.2 Single Principal Explicit Username', function () {
+        before(function () {
+          client = new MongoClient('mongodb://test_user@localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback()
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create a request callback that returns a valid token.
         // Create a client with a url of the form mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC and the OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully authenticates', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.not.throw;
+        });
       });
 
       describe('1.3 Multiple Principal User 1', function () {
+        before(function () {
+          client = new MongoClient(
+            'mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: createRequestCallback()
+              }
+            }
+          );
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create a request callback that returns a valid token.
         // Create a client with a url of the form mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully authenticates', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.not.throw;
+        });
       });
 
       describe('1.4 Multiple Principal User 2', function () {
+        before(function () {
+          client = new MongoClient(
+            'mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: createRequestCallback()
+              }
+            }
+          );
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create a request callback that reads in the generated test_user2 token file.
         // Create a client with a url of the form mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully authenticates', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.not.throw;
+        });
       });
 
       describe('1.5  Multiple Principal No User', function () {
+        before(function () {
+          client = new MongoClient(
+            'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
+            {
+              authMechanismProperties: {
+                REQUEST_TOKEN_CALLBACK: createRequestCallback()
+              }
+            }
+          );
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Assert that a find operation fails.
         // Close the client.
+        it('fails authentication', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.throw;
+        });
       });
 
       describe('1.6 Allowed Hosts Blocked', function () {
@@ -144,24 +206,75 @@ describe('MONGODB-OIDC', function () {
   });
 
   describe('2. AWS Automatic Auth', function () {
+    let client: MongoClient;
+    let collection: Collection;
+
+    afterEach(async function () {
+      await client?.close();
+    });
+
     describe('2.1 Single Principal', function () {
+      before(function () {
+        client = new MongoClient(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
+        );
+        collection = client.db('test').collection('test');
+      });
+
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws.
       // Perform a find operation that succeeds.
       // Close the client.
+      it('successfully authenticates', function () {
+        expect(async () => {
+          await collection.findOne();
+        }).to.not.throw;
+      });
     });
 
     describe('2.2 Multiple Principal User 1', function () {
+      before(function () {
+        client = new MongoClient(
+          'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+        );
+        collection = client.db('test').collection('test');
+      });
+
       // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred.
       // Perform a find operation that succeeds.
       // Close the client.
+      it('successfully authenticates', function () {
+        expect(async () => {
+          await collection.findOne();
+        }).to.not.throw;
+      });
     });
 
     describe('2.3 Multiple Principal User 2', function () {
+      let tokenFile;
+
+      before(function () {
+        tokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
+        process.env.AWS_WEB_IDENTITY_TOKEN_FILE = path.join(process.env.OIDC_TOKEN_DIR, 'test2');
+        client = new MongoClient(
+          'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
+        );
+        collection = client.db('test').collection('test');
+      });
+
+      after(function () {
+        process.env.AWS_WEB_IDENTITY_TOKEN_FILE = tokenFile;
+      });
+
       // Set the AWS_WEB_IDENTITY_TOKEN_FILE environment variable to the location of valid test_user2 credentials.
       // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred.
       // Perform a find operation that succeeds.
       // Close the client.
       // Restore the AWS_WEB_IDENTITY_TOKEN_FILE environment variable to the location of valid test_user2 credentials.
+      it('successfully authenticates', function () {
+        expect(async () => {
+          await collection.findOne();
+        }).to.not.throw;
+      });
     });
 
     describe('2.4 Allowed Hosts Ignored', function () {
