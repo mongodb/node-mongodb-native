@@ -248,7 +248,20 @@ export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { CollectionOptions, CollectionPrivate, ModifyResult } from './collection';
-export type { MONGO_CLIENT_EVENTS } from './constants';
+export type {
+  CONNECTION_CHECK_OUT_FAILED,
+  CONNECTION_CHECK_OUT_STARTED,
+  CONNECTION_CHECKED_IN,
+  CONNECTION_CHECKED_OUT,
+  CONNECTION_CLOSED,
+  CONNECTION_CREATED,
+  CONNECTION_POOL_CLEARED,
+  CONNECTION_POOL_CLOSED,
+  CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
+  CONNECTION_READY,
+  MONGO_CLIENT_EVENTS
+} from './constants';
 export type {
   AbstractCursorEvents,
   AbstractCursorOptions,
@@ -290,6 +303,11 @@ export type {
   WithSessionCallback
 } from './mongo_client';
 export type {
+  Log,
+  LogConvertible,
+  Loggable,
+  LoggableEvent,
+  MongoDBLogWritable,
   MongoLoggableComponent,
   MongoLogger,
   MongoLoggerEnvOptions,

@@ -140,4 +140,49 @@ describe('Feature Flags', () => {
       });
     }
   });
+
+  describe('@@mdb.internalLoggerConfig', () => {
+    let cachedEnv: NodeJS.ProcessEnv;
+
+    before(() => {
+      cachedEnv = process.env;
+    });
+    after(() => {
+      process.env = cachedEnv;
+    });
+
+    context('when undefined', function () {
+      before(() => {
+        process.env.MONGODB_LOG_COMMAND = SeverityLevel.EMERGENCY;
+      });
+
+      it('falls back to environment options', function () {
+        const client = new MongoClient('mongodb://localhost:27017', {
+          [Symbol.for('@@mdb.enableMongoLogger')]: true,
+          [Symbol.for('@@mdb.internalLoggerConfig')]: undefined
+        });
+
+        expect(client.mongoLogger.componentSeverities).to.have.property(
+          'command',
+          SeverityLevel.EMERGENCY
+        );
+      });
+    });
+
+    context('when defined', function () {
+      it('overrides environment options', function () {
+        const client = new MongoClient('mongodb://localhost:27017', {
+          [Symbol.for('@@mdb.enableMongoLogger')]: true,
+          [Symbol.for('@@mdb.internalLoggerConfig')]: {
+            MONGODB_LOG_COMMAND: SeverityLevel.ALERT
+          }
+        });
+
+        expect(client.mongoLogger.componentSeverities).to.have.property(
+          'command',
+          SeverityLevel.ALERT
+        );
+      });
+    });
+  });
 });

@@ -23,16 +23,27 @@ export const SERVER_DESCRIPTION_CHANGED = 'serverDescriptionChanged' as const;
 export const TOPOLOGY_OPENING = 'topologyOpening' as const;
 export const TOPOLOGY_CLOSED = 'topologyClosed' as const;
 export const TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as const;
+/** @internal */
 export const CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
+/** @internal */
 export const CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
+/** @internal */
 export const CONNECTION_POOL_CLEARED = 'connectionPoolCleared' as const;
+/** @internal */
 export const CONNECTION_POOL_READY = 'connectionPoolReady' as const;
+/** @internal */
 export const CONNECTION_CREATED = 'connectionCreated' as const;
+/** @internal */
 export const CONNECTION_READY = 'connectionReady' as const;
+/** @internal */
 export const CONNECTION_CLOSED = 'connectionClosed' as const;
+/** @internal */
 export const CONNECTION_CHECK_OUT_STARTED = 'connectionCheckOutStarted' as const;
+/** @internal */
 export const CONNECTION_CHECK_OUT_FAILED = 'connectionCheckOutFailed' as const;
+/** @internal */
 export const CONNECTION_CHECKED_OUT = 'connectionCheckedOut' as const;
+/** @internal */
 export const CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
 export const CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
 export const COMMAND_STARTED = 'commandStarted' as const;

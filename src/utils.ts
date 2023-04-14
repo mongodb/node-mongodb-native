@@ -1011,6 +1011,16 @@ export class HostAddress {
   static fromSrvRecord({ name, port }: SrvRecord): HostAddress {
     return HostAddress.fromHostPort(name, port);
   }
+
+  toHostPort(): { host: string; port: number } {
+    if (this.socketPath) {
+      return { host: this.socketPath, port: 0 };
+    }
+
+    const host = this.host ?? '';
+    const port = this.port ?? 0;
+    return { host, port };
+  }
 }
 
 export const DEFAULT_PK_FACTORY = {
