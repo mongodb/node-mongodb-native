@@ -42,7 +42,7 @@ export const ServerApiVersion = Object.freeze({
 } as const);
 
 /** @public */
-export type ServerApiVersion = (typeof ServerApiVersion)[keyof typeof ServerApiVersion];
+export type ServerApiVersion = typeof ServerApiVersion[keyof typeof ServerApiVersion];
 
 /** @public */
 export interface ServerApi {
@@ -74,19 +74,19 @@ export interface PkFactory {
 /** @public */
 export type SupportedTLSConnectionOptions = Pick<
   TLSConnectionOptions,
-  Extract<keyof TLSConnectionOptions, (typeof LEGAL_TLS_SOCKET_OPTIONS)[number]>
+  Extract<keyof TLSConnectionOptions, typeof LEGAL_TLS_SOCKET_OPTIONS[number]>
 >;
 
 /** @public */
 export type SupportedTLSSocketOptions = Pick<
   TLSSocketOptions,
-  Extract<keyof TLSSocketOptions, (typeof LEGAL_TLS_SOCKET_OPTIONS)[number]>
+  Extract<keyof TLSSocketOptions, typeof LEGAL_TLS_SOCKET_OPTIONS[number]>
 >;
 
 /** @public */
 export type SupportedSocketOptions = Pick<
   TcpNetConnectOpts,
-  (typeof LEGAL_TCP_SOCKET_OPTIONS)[number]
+  typeof LEGAL_TCP_SOCKET_OPTIONS[number]
 >;
 
 /** @public */
@@ -308,7 +308,7 @@ export interface MongoClientPrivate {
 }
 
 /** @public */
-export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS)[number]> & {
+export type MongoClientEvents = Pick<TopologyEvents, typeof MONGO_CLIENT_EVENTS[number]> & {
   // In previous versions the open event emitted a topology, in an effort to no longer
   // expose internals but continue to expose this useful event API, it now emits a mongoClient
   open(mongoClient: MongoClient): void;
