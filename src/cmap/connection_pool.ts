@@ -824,7 +824,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           new ConnectionCheckOutFailedEvent(
             this,
             reason,
-            reason === 'connectionError' ? error : undefined
+            error
           )
         );
         if (waitQueueMember.timer) {
@@ -878,7 +878,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           if (err) {
             this.emit(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              new ConnectionCheckOutFailedEvent(this, 'connectionError', err)
+              // TODO(NODE-5192): Remove this cast
+              new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
             );
           } else if (connection) {
             this[kCheckedOut].add(connection);

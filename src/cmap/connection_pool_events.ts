@@ -186,7 +186,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
   /** The reason the attempt to check out failed */
   reason: string;
   /** @internal */
-  error?: AnyError;
+  error?: MongoError;
   /** @internal */
   name = CONNECTION_CHECK_OUT_FAILED;
 
@@ -194,7 +194,7 @@ export class ConnectionCheckOutFailedEvent extends ConnectionPoolMonitoringEvent
   constructor(
     pool: ConnectionPool,
     reason: 'poolClosed' | 'timeout' | 'connectionError',
-    error?: AnyError
+    error?: MongoError
   ) {
     super(pool);
     this.reason = reason;
