@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { Writable } from 'stream';
 
 import {
   AbstractCursor,
@@ -26,6 +25,7 @@ import {
   Document,
   GridFSBucket,
   HostAddress,
+  Log,
   MongoClient,
   MongoCredentials,
   ReadConcern,
@@ -107,33 +107,12 @@ function getClient(address) {
   return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
 }
 
-// TODO(NODE-4813): Remove this class in favour of a simple object with a write method
-/* TODO(NODE-4813): Ensure that the object that we replace this with has logic to convert the
- * collected log into the format require by the unified spec runner
- * (see ExpectedLogMessage type in schema.ts) */
-export class UnifiedLogCollector extends Writable {
-  collectedLogs: LogMessage[] = [];
-
-  constructor() {
-    super({ objectMode: true });
-  }
-
-  _write(
-    log: LogMessage,
-    _: string,
-    callback: (e: Error | null, l: LogMessage | undefined) => void
-  ) {
-    this.collectedLogs.push(log);
-    callback(null, log);
-  }
-}
-
 export class UnifiedMongoClient extends MongoClient {
   commandEvents: CommandEvent[] = [];
   cmapEvents: CmapEvent[] = [];
   sdamEvents: SdamEvent[] = [];
   failPoints: Document[] = [];
-  logCollector: UnifiedLogCollector;
+  logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
@@ -186,7 +165,18 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   constructor(uri: string, description: ClientEntity) {
-    const logCollector = new UnifiedLogCollector();
+    const logCollector: { buffer: LogMessage[]; write: (log: Log) => void } = {
+      buffer: [],
+      write(log: Log): void {
+        const transformedLog = {
+          level: log.s,
+          component: log.c,
+          data: { ...log, s: undefined, c: undefined }
+        };
+
+        this.buffer.push(transformedLog);
+      }
+    };
     const componentSeverities = {
       MONGODB_LOG_ALL: 'off'
     };
@@ -206,7 +196,7 @@ export class UnifiedMongoClient extends MongoClient {
       mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
-    });
+    } as any);
     this.logCollector = logCollector;
 
     this.ignoredEvents = [
@@ -297,7 +287,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
-    return this.logCollector.collectedLogs;
+    return this.logCollector.buffer;
   }
 }
 
