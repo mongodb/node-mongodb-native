@@ -180,13 +180,16 @@ export function createStdioLogger(stream: {
 /**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
  * mongo client options respectively. The mongodbLogPath can be either 'stdout', 'stderr', a NodeJS
- * Writable or an object which has a `write` method with the signature (log: Log) => void
+ * Writable or an object which has a `write` method with the signature:
+ * ```ts
+ * write(log: Log): void
+ * ```
  *
  * @returns the MongoDBLogWritable object to write logs to
  */
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
-  { mongodbLogPath }: { mongodbLogPath?: string | Writable | MongoDBLogWritable } 
+  { mongodbLogPath }: { mongodbLogPath?: string | Writable | MongoDBLogWritable }
 ): MongoDBLogWritable {
   if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
     return createStdioLogger(process.stderr);
