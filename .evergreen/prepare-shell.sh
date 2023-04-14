@@ -31,7 +31,7 @@ export PATH="$MONGODB_BINARIES:$PATH"
 
 if [ ! -d "$DRIVERS_TOOLS" ]; then
   # Only clone driver tools if it does not exist
-  git clone --depth=1 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
+  git clone --depth=1 --branch NODE-4693 "https://github.com/mongodb-labs/drivers-evergreen-tools.git" "${DRIVERS_TOOLS}"
 fi
 
 cat <<EOT > "$MONGO_ORCHESTRATION_HOME/orchestration.config"
