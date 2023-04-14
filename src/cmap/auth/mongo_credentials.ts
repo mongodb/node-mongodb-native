@@ -117,7 +117,10 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC && !this.mechanismProperties.ALLOWED_HOSTS) {
-      this.mechanismProperties.ALLOWED_HOSTS = DEFAULT_ALLOWED_HOSTS;
+      this.mechanismProperties = {
+        ...this.mechanismProperties,
+        ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
+      };
     }
 
     Object.freeze(this.mechanismProperties);

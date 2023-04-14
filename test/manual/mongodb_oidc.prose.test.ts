@@ -12,7 +12,6 @@ import {
   OIDCMechanismServerStep1,
   OIDCRequestTokenResult
 } from '../mongodb';
-import { request } from 'node:http';
 
 describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {
@@ -351,11 +350,29 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.3 Refresh Callback Returns Null', function () {
+        before(function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+              REFRESH_TOKEN_CALLBACK: () => {
+                return Promise.resolve(null);
+              }
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
         // Clear the cache.
         // Create request callback that returns a valid token that will expire in a minute, and a refresh callback that returns null.
         // Perform a find operation that succeeds.
         // Perform a find operation that fails.
         // Close the client.
+        it('fails authentication on refresh', async function () {
+          await collection.findOne();
+          expect(async () => {
+            await collection.findOne();
+          }).to.throw;
+        });
       });
 
       describe('3.4 Request Callback Returns Invalid Data', function () {
