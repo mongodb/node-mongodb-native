@@ -3,9 +3,10 @@ import { expect } from 'chai';
 import { MongoClient, MongoServerError, ServerHeartbeatStartedEvent } from '../../../src';
 import { connect } from '../../../src/cmap/connect';
 import { Connection } from '../../../src/cmap/connection';
+import { makeClientMetadata } from '../../../src/cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../../../src/constants';
 import { Topology } from '../../../src/sdam/topology';
-import { makeClientMetadata, ns } from '../../../src/utils';
+import { ns } from '../../../src/utils';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
 
