@@ -31,7 +31,22 @@ createEntities:
   - session:
       id: session
       client: client
+  # Stable API test
+  - client:
+      id: stableApiClient
+      observeEvents: [commandStartedEvent]
+      serverApi:
+        version: "1"
+        strict: true
+  - database:
+      id: stableApiDb
+      client: stableApiClient
+      databaseName: stableApiDb
 
+initialData:
+- collectionName: collection
+  databaseName: plainDb
+  documents: [ { _id: 0 } ]
 
 tests:
   - description: executes a ping with $db attached
@@ -156,7 +171,7 @@ tests:
         expectError:
           isError: true
 
-  - description: executes a ping inside a transaction
+  - description: executes a insert via runCommand inside a transaction
     operations:
       - name: withTransaction
         object: session
@@ -184,8 +199,8 @@ tests:
                 txnNumber: 1
                 startTransaction: true
                 autocommit: false
-                readConcern: { level: local }
                 # omitted fields
+                readConcern: { $$exists: false }
                 writeConcern: { $$exists: false }
               commandName: insert
               databaseName: plainDb
@@ -195,11 +210,30 @@ tests:
                 lsid: { $$sessionLsid: session }
                 txnNumber: 1
                 autocommit: false
-                writeConcern: { w: 1 }
                 # omitted fields
+                writeConcern: { $$exists: false }
                 readConcern: { $$exists: false }
-                startTransaction: { $$exists: false }
               commandName: commitTransaction
               databaseName: admin
 
-# TODO - Stable API coverage
+  - description: executes a ping with stableApi fields attached
+    operations:
+      - name: runCommand
+        object: stableApiDb
+        arguments:
+          commandName: ping
+          command:
+            ping: 1
+        expectResult:
+          ok: 1
+    expectEvents:
+      - client: stableApiClient
+        events:
+        - commandStartedEvent:
+              command:
+                ping: 1
+                $db: stableApiDb
+                apiVersion: "1"
+                apiStrict: true
+                apiDeprecationErrors: { $$unsetOrMatches: false }
+              commandName: ping

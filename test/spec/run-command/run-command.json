@@ -50,6 +50,36 @@
         "id": "session",
         "client": "client"
       }
+    },
+    {
+      "client": {
+        "id": "stableApiClient",
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "serverApi": {
+          "version": "1",
+          "strict": true
+        }
+      }
+    },
+    {
+      "database": {
+        "id": "stableApiDb",
+        "client": "stableApiClient",
+        "databaseName": "stableApiDb"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection",
+      "databaseName": "plainDb",
+      "documents": [
+        {
+          "_id": 0
+        }
+      ]
     }
   ],
   "tests": [
@@ -275,7 +305,7 @@
       ]
     },
     {
-      "description": "executes a ping inside a transaction",
+      "description": "executes a insert via runCommand inside a transaction",
       "operations": [
         {
           "name": "withTransaction",
@@ -331,7 +361,7 @@
                   "startTransaction": true,
                   "autocommit": false,
                   "readConcern": {
-                    "level": "local"
+                    "$$exists": false
                   },
                   "writeConcern": {
                     "$$exists": false
@@ -351,17 +381,53 @@
                   "txnNumber": 1,
                   "autocommit": false,
                   "writeConcern": {
-                    "w": 1
-                  },
-                  "readConcern": {
                     "$$exists": false
                   },
-                  "startTransaction": {
+                  "readConcern": {
                     "$$exists": false
                   }
                 },
                 "commandName": "commitTransaction",
                 "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "executes a ping with stableApi fields attached",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "stableApiDb",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "stableApiClient",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$db": "stableApiDb",
+                  "apiVersion": "1",
+                  "apiStrict": true,
+                  "apiDeprecationErrors": {
+                    "$$unsetOrMatches": false
+                  }
+                },
+                "commandName": "ping"
               }
             }
           ]
