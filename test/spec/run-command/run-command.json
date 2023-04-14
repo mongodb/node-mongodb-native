@@ -316,7 +316,8 @@
             "sharded-replicaset",
             "load-balanced",
             "sharded"
-          ]
+          ],
+          "minServerVersion": "4.4"
         }
       ],
       "operations": [
