@@ -3,6 +3,7 @@ import { expectAssignable, expectError, expectNotAssignable, expectNotType } fro
 import type {
   AddToSetOperators,
   ArrayOperator,
+  Collection,
   MatchKeysAndValues,
   PullAllOperator,
   PullOperator,
@@ -421,5 +422,27 @@ export async function testPushWithId(): Promise<void> {
         foo: { _id: 'foo', name: 'Foo' }
       }
     }
+  );
+}
+
+{
+  // NODE-5171 - UpdateResult is generic over the collection schema and infers the id type
+  const collection = {} as any as Collection;
+  expectAssignable<Promise<{ upsertedId: ObjectId | null }>>(collection.updateOne({}, {}));
+  expectAssignable<Promise<{ upsertedId: ObjectId | null }>>(collection.updateMany({}, {}));
+
+  expectNotAssignable<Promise<{ upsertedId: number | null }>>(collection.updateOne({}, {}));
+  expectNotAssignable<Promise<{ upsertedId: number | null }>>(collection.updateMany({}, {}));
+
+  const collectionWithSchema = {} as any as Collection<{ _id: number }>;
+  expectAssignable<Promise<{ upsertedId: number | null }>>(
+    collectionWithSchema.updateOne({ _id: 1234 }, {})
+  );
+  expectAssignable<Promise<{ upsertedId: number | null }>>(collectionWithSchema.updateMany({}, {}));
+  expectNotAssignable<Promise<{ upsertedId: ObjectId | null }>>(
+    collectionWithSchema.updateOne({ _id: 1234 }, {})
+  );
+  expectNotAssignable<Promise<{ upsertedId: ObjectId | null }>>(
+    collectionWithSchema.updateMany({}, {})
   );
 }

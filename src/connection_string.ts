@@ -852,11 +852,13 @@ export const OPTIONS = {
   },
   keepAlive: {
     default: true,
-    type: 'boolean'
+    type: 'boolean',
+    deprecated: 'Will not be able to turn off in the future.'
   },
   keepAliveInitialDelay: {
     default: 120000,
-    type: 'uint'
+    type: 'uint',
+    deprecated: 'Will not be configurable in the future.'
   },
   loadBalanced: {
     default: false,
