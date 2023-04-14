@@ -289,6 +289,94 @@ describe('client metadata module', () => {
         });
       });
     });
+
+    context('when globalThis indicates alternative runtime', () => {
+      context('deno', () => {
+        afterEach(() => {
+          expect(delete globalThis.Deno, 'failed to delete Deno global').to.be.true;
+        });
+
+        it('sets platform to Deno', () => {
+          globalThis.Deno = { version: { deno: '1.2.3' } };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Deno v1.2.3, LE');
+        });
+
+        it('sets platform to Deno with driverInfo.platform', () => {
+          globalThis.Deno = { version: { deno: '1.2.3' } };
+          const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
+          expect(metadata.platform).to.equal('Deno v1.2.3, LE|myPlatform');
+        });
+
+        it('ignores version if Deno.version.deno is not a string', () => {
+          globalThis.Deno = { version: { deno: 1 } };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
+        });
+
+        it('ignores version if Deno.version does not have a deno property', () => {
+          globalThis.Deno = { version: { somethingElse: '1.2.3' } };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
+        });
+
+        it('ignores version if Deno.version is null', () => {
+          globalThis.Deno = { version: null };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
+        });
+
+        it('ignores version if Deno is nullish', () => {
+          globalThis.Deno = null;
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Deno v0.0.0-unknown, LE');
+        });
+      });
+
+      context('bun', () => {
+        afterEach(() => {
+          expect(delete globalThis.Bun, 'failed to delete Bun global').to.be.true;
+        });
+
+        it('sets platform to Bun', () => {
+          globalThis.Bun = class {
+            static version = '1.2.3';
+          };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Bun v1.2.3, LE');
+        });
+
+        it('sets platform to Bun with driverInfo.platform', () => {
+          globalThis.Bun = class {
+            static version = '1.2.3';
+          };
+          const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
+          expect(metadata.platform).to.equal('Bun v1.2.3, LE|myPlatform');
+        });
+
+        it('ignores version if Bun.version is not a string', () => {
+          globalThis.Bun = class {
+            static version = 1;
+          };
+          const metadata = makeClientMetadata({ driverInfo: {} });
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE');
+        });
+
+        it('ignores version if Bun.version is not a string and sets driverInfo.platform', () => {
+          globalThis.Bun = class {
+            static version = 1;
+          };
+          const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
+        });
+
+        it('ignores version if Bun is nullish', () => {
+          globalThis.Bun = null;
+          const metadata = makeClientMetadata({ driverInfo: { platform: 'myPlatform' } });
+          expect(metadata.platform).to.equal('Bun v0.0.0-unknown, LE|myPlatform');
+        });
+      });
+    });
   });
 
   describe('FAAS metadata application to handshake', () => {
