@@ -28,7 +28,6 @@ import { applySession, ClientSession, updateSessionFromResponse } from '../sessi
 import {
   calculateDurationInMs,
   Callback,
-  ClientMetadata,
   HostAddress,
   maxWireVersion,
   MongoDBNamespace,
@@ -44,6 +43,7 @@ import {
 } from './command_monitoring_events';
 import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
+import type { ClientMetadata } from './handshake/client_metadata';
 import { MessageStream, OperationDescription } from './message_stream';
 import { StreamDescription, StreamDescriptionOptions } from './stream_description';
 import { getReadPreference, isSharded } from './wire_protocol/shared';

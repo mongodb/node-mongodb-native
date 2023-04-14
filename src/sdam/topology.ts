@@ -6,6 +6,7 @@ import { deserialize, serialize } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
@@ -38,7 +39,6 @@ import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
   Callback,
-  ClientMetadata,
   emitWarning,
   EventEmitterWithState,
   HostAddress,

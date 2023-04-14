@@ -8,6 +8,7 @@ import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mong
 import type { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
+import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -27,7 +28,6 @@ import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
 import {
   Callback,
-  ClientMetadata,
   HostAddress,
   maybeCallback,
   MongoDBNamespace,
@@ -389,6 +389,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     };
   }
 
+  /** @see MongoOptions */
   get options(): Readonly<MongoOptions> {
     return Object.freeze({ ...this[kOptions] });
   }
@@ -469,7 +470,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       topology.once(Topology.OPEN, () => this.emit('open', this));
 
       for (const event of MONGO_CLIENT_EVENTS) {
-        topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
+        topology.on(event, (...args: any[]): unknown => this.emit(event, ...(args as any)));
       }
 
       const topologyConnect = async () => {
@@ -728,7 +729,22 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 }
 
 /**
- * Mongo Client Options
+ * Parsed Mongo Client Options.
+ *
+ * User supplied options are documented by `MongoClientOptions`.
+ *
+ * **NOTE:** The client's options parsing is subject to change to support new features.
+ * This type is provided to aid with inspection of options after parsing, it should not be relied upon programmatically.
+ *
+ * Options are sourced from:
+ * - connection string
+ * - options object passed to the MongoClient constructor
+ * - file system (ex. tls settings)
+ * - environment variables
+ * - DNS SRV records and TXT records
+ *
+ * Not all options may be present after client construction as some are obtained from asynchronous operations.
+ *
  * @public
  */
 export interface MongoOptions
@@ -787,6 +803,7 @@ export interface MongoOptions
   proxyPort?: number;
   proxyUsername?: string;
   proxyPassword?: string;
+
   /** @internal */
   connectionType?: typeof Connection;
 

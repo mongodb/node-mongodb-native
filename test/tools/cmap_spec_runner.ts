@@ -5,8 +5,9 @@ import { promisify } from 'util';
 
 import { Connection, HostAddress, MongoClient, Server } from '../../src';
 import { ConnectionPool, ConnectionPoolOptions } from '../../src/cmap/connection_pool';
+import { makeClientMetadata } from '../../src/cmap/handshake/client_metadata';
 import { CMAP_EVENTS } from '../../src/constants';
-import { makeClientMetadata, shuffle } from '../../src/utils';
+import { shuffle } from '../../src/utils';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
 import { FailPoint, sleep } from './utils';
 
