@@ -19,7 +19,9 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
+  DEFAULT_MAX_DOCUMENT_LENGTH,
   Log,
+  maybeTruncate,
   MongoDBLogWritable,
   MongoLogger,
   MongoLoggerOptions,
@@ -1238,5 +1240,51 @@ describe('class MongoLogger', function () {
         });
       });
     }
+  });
+
+  describe('maybeTruncate', function () {
+    let largeEjsonString: string;
+    let smallEjsonString: string;
+    before(function () {
+      const largeDoc = {};
+      for (let i = 0; i < DEFAULT_MAX_DOCUMENT_LENGTH; i++) {
+        largeDoc[`test${i}`] = `Hello_${i}`;
+      }
+      largeEjsonString = EJSON.stringify(largeDoc);
+      const smallDoc = { test: 'Hello' };
+      smallEjsonString = EJSON.stringify(smallDoc);
+    });
+
+    context('when maxDocumentLength = 0', function () {
+      it('does not truncate document', function () {
+        expect(maybeTruncate(largeEjsonString, 0)).to.equal(largeEjsonString);
+      });
+    });
+
+    context('when maxDocumentLength is non-zero', function () {
+      context('when document has length greater than maxDocumentLength', function () {
+        it('truncates ejson string to length of maxDocumentLength + 3', function () {
+          expect(maybeTruncate(largeEjsonString)).to.have.lengthOf(DEFAULT_MAX_DOCUMENT_LENGTH + 3);
+        });
+        it('ends with "..."', function () {
+          expect(maybeTruncate(largeEjsonString)).to.match(/^.*\.\.\.$/);
+        });
+      });
+
+      context('when document has length less than or equal to maxDocumentLength', function () {
+        it('does not truncate document', function () {
+          expect(maybeTruncate(smallEjsonString)).to.equal(smallEjsonString);
+        });
+        it('does not end with "..."', function () {
+          expect(maybeTruncate(smallEjsonString)).to.not.match(/^.*\.\.\./);
+        });
+
+        it('produces valid relaxed EJSON', function () {
+          expect(() => {
+            EJSON.parse(maybeTruncate(smallEjsonString));
+          }).to.not.throw();
+        });
+      });
+    });
   });
 });
