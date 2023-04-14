@@ -648,8 +648,7 @@ describe('class MongoLogger', function () {
           expect(stream.buffer).to.have.lengthOf(0);
         });
 
-        // TODO(NODE-4814): Unskip this test
-        context.skip('when the log severity is greater than what was configured', function () {
+        context('when the log severity is greater than what was configured', function () {
           it('does not write to logDestination', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({

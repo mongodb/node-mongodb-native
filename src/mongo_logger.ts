@@ -430,13 +430,29 @@ export class MongoLogger {
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
 
+  emergency = this.log.bind(this, 'emergency');
+  /** @experimental */
+  alert = this.log.bind(this, 'alert');
+  /** @experimental */
+  critical = this.log.bind(this, 'critical');
+  /** @experimental */
+  error = this.log.bind(this, 'error');
+  /** @experimental */
+  warning = this.log.bind(this, 'warn');
+  /** @experimental */
+  notice = this.log.bind(this, 'notice');
+  /** @experimental */
+  info = this.log.bind(this, 'info');
+  /** @experimental */
+  debug = this.log.bind(this, 'debug');
+  /** @experimental */
+  trace = this.log.bind(this, 'trace');
+
   constructor(options: MongoLoggerOptions) {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
   }
-
-  emergency = this.log.bind(this, 'emergency');
 
   private log(
     severity: SeverityLevel,
