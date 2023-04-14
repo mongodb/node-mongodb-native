@@ -11,7 +11,7 @@ import type { Workflow } from './mongodb_oidc/workflow';
  * @experimental
  */
 export interface OIDCMechanismServerStep1 {
-  issuer?: string;
+  issuer: string;
   clientId: string;
   requestScopes?: string[];
 }
