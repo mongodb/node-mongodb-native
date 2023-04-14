@@ -35,6 +35,7 @@ import {
   HostAddress,
   isRecord,
   makeClientMetadata,
+  matchesParentDomain,
   parseInteger,
   setDifference
 } from './utils';
@@ -46,21 +47,6 @@ const LB_SINGLE_HOST_ERROR = 'loadBalanced option only supported with a single h
 const LB_REPLICA_SET_ERROR = 'loadBalanced option not supported with a replicaSet option';
 const LB_DIRECT_CONNECTION_ERROR =
   'loadBalanced option not supported when directConnection is provided';
-
-/**
- * Determines whether a provided address matches the provided parent domain in order
- * to avoid certain attack vectors.
- *
- * @param srvAddress - The address to check against a domain
- * @param parentDomain - The domain to check the provided address against
- * @returns Whether the provided address matches the parent domain
- */
-function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
-  const regex = /^.*?\./;
-  const srv = `.${srvAddress.replace(regex, '')}`;
-  const parent = `.${parentDomain.replace(regex, '')}`;
-  return srv.endsWith(parent);
-}
 
 /**
  * Lookup a `mongodb+srv` connection string, combine the parts and reparse it as a normal

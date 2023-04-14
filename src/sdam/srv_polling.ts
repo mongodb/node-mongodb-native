@@ -4,22 +4,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { MongoRuntimeError } from '../error';
 import { Logger, LoggerOptions } from '../logger';
 import { TypedEventEmitter } from '../mongo_types';
-import { HostAddress } from '../utils';
-
-/**
- * Determines whether a provided address matches the provided parent domain in order
- * to avoid certain attack vectors.
- *
- * @param srvAddress - The address to check against a domain
- * @param parentDomain - The domain to check the provided address against
- * @returns Whether the provided address matches the parent domain
- */
-function matchesParentDomain(srvAddress: string, parentDomain: string): boolean {
-  const regex = /^.*?\./;
-  const srv = `.${srvAddress.replace(regex, '')}`;
-  const parent = `.${parentDomain.replace(regex, '')}`;
-  return srv.endsWith(parent);
-}
+import { HostAddress, matchesParentDomain } from '../utils';
 
 /**
  * @internal
