@@ -66,6 +66,7 @@ maybeDescribe('examples(change-stream):', function () {
       // Start Changestream Example 1
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
+      await new Promise(resolve => changeStream.once('init', resolve));
       changeStream.on('change', next => {
         // process next document
       });

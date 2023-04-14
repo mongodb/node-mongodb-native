@@ -43,7 +43,7 @@ const CHANGE_DOMAIN_TYPES = {
   CLUSTER: Symbol('Cluster')
 };
 
-const CHANGE_STREAM_EVENTS = [RESUME_TOKEN_CHANGED, END, CLOSE];
+const CHANGE_STREAM_EVENTS = [INIT, RESUME_TOKEN_CHANGED, END, CLOSE];
 
 const NO_RESUME_TOKEN_ERROR =
   'A change stream document has been received that lacks a resume token (_id).';

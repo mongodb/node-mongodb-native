@@ -42,7 +42,7 @@ export type ChangeStreamAggregateRawResult<TChange> = {
 export class ChangeStreamCursor<
   TSchema extends Document = Document,
   TChange extends Document = ChangeStreamDocument<TSchema>
-> extends AbstractCursor<TChange, ChangeStreamEvents> {
+> extends AbstractCursor<TChange, ChangeStreamEvents<TSchema, TChange>> {
   _resumeToken: ResumeToken;
   startAtOperationTime?: OperationTime;
   hasReceived?: boolean;
