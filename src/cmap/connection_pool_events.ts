@@ -12,7 +12,7 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
-import type { AnyError, MongoError } from '../error';
+import type { MongoError } from '../error';
 import type { Connection } from './connection';
 import type { ConnectionPool, ConnectionPoolOptions } from './connection_pool';
 
