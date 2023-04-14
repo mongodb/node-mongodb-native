@@ -291,7 +291,9 @@ function attachConnectionFields(
   return log;
 }
 
-function defaultLogTransform(logObject: LoggableEvent): Omit<Log, 's' | 't' | 'c'> {
+function defaultLogTransform(
+  logObject: LoggableEvent | Record<string, any>
+): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
   switch (logObject.name) {
