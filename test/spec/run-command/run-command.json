@@ -1,7 +1,7 @@
 {
   "description": "runCommand spec requirements",
   "schemaVersion": "1.0",
-  "runOnRequirements": {},
+  "runOnRequirements": [],
   "createEntities": [
     {
       "client": {
@@ -306,6 +306,16 @@
     },
     {
       "description": "executes a insert via runCommand inside a transaction",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset",
+            "load-balanced",
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "withTransaction",
