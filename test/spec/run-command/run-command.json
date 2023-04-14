@@ -1,7 +1,6 @@
 {
   "description": "runCommand spec requirements",
-  "schemaVersion": "1.0",
-  "runOnRequirements": [],
+  "schemaVersion": "1.5",
   "createEntities": [
     {
       "client": {
@@ -30,8 +29,10 @@
         "id": "dbWithRC",
         "client": "client",
         "databaseName": "dbWithRC",
-        "readConcern": {
-          "level": "local"
+        "databaseOptions": {
+          "readConcern": {
+            "level": "local"
+          }
         }
       }
     },
@@ -40,8 +41,10 @@
         "id": "dbWithWC",
         "client": "client",
         "databaseName": "dbWithWC",
-        "writeConcern": {
-          "w": 0
+        "databaseOptions": {
+          "writeConcern": {
+            "w": 0
+          }
         }
       }
     },
