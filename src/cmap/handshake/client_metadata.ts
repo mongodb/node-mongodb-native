@@ -116,12 +116,12 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     );
   }
 
-  const platformInfo =
-    platform.length > 0
-      ? `Node.js ${process.version}, ${os.endianness()}|${platform}`
-      : `Node.js ${process.version}, ${os.endianness()}`;
+  let runtimeInfo = getRuntimeInfo();
+  if (platform.length > 0) {
+    runtimeInfo = `${runtimeInfo}|${platform}`;
+  }
 
-  if (!metadataDocument.ifItFitsItSits('platform', platformInfo)) {
+  if (!metadataDocument.ifItFitsItSits('platform', runtimeInfo)) {
     throw new MongoInvalidArgumentError(
       'Unable to include driverInfo platform, metadata cannot exceed 512 bytes'
     );
@@ -233,4 +233,40 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
   }
 
   return null;
+}
+
+/**
+ * @internal
+ * This type represents the global Deno object and the minimal type contract we expect it to satisfy.
+ */
+declare const Deno: { version?: { deno?: string } } | undefined;
+
+/**
+ * @internal
+ * This type represents the global Bun object and the minimal type contract we expect it to satisfy.
+ */
+declare const Bun: { (): void; version?: string } | undefined;
+
+/**
+ * @internal
+ * Get current JavaScript runtime platform
+ *
+ * NOTE: The version information fetching is intentionally written defensively
+ * to avoid having a released driver version that becomes incompatible
+ * with a future change to these global objects.
+ */
+function getRuntimeInfo(): string {
+  if ('Deno' in globalThis) {
+    const version = typeof Deno?.version?.deno === 'string' ? Deno?.version?.deno : '0.0.0-unknown';
+
+    return `Deno v${version}, ${os.endianness()}`;
+  }
+
+  if ('Bun' in globalThis) {
+    const version = typeof Bun?.version === 'string' ? Bun?.version : '0.0.0-unknown';
+
+    return `Bun v${version}, ${os.endianness()}`;
+  }
+
+  return `Node.js ${process.version}, ${os.endianness()}`;
 }
