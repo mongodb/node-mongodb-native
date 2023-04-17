@@ -254,8 +254,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     process.nextTick(() => {
       const connectionPoolCreatedEvent = new ConnectionPoolCreatedEvent(this);
       this.emit(ConnectionPool.CONNECTION_POOL_CREATED, connectionPoolCreatedEvent);
-      // TODO: replace this with the appropriate severity level
-      this.client.mongoLogger.emergency('connection', connectionPoolCreatedEvent);
+      this.client.mongoLogger.debug('connection', connectionPoolCreatedEvent);
     });
   }
 
@@ -345,8 +344,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kPoolState] = PoolState.ready;
     const connectionPoolReadyEvent = new ConnectionPoolReadyEvent(this);
     this.emit(ConnectionPool.CONNECTION_POOL_READY, connectionPoolReadyEvent);
-    // TODO: replace this with the appropriate severity level
-    this.client.mongoLogger.emergency('connection', connectionPoolReadyEvent);
+    this.client.mongoLogger.debug('connection', connectionPoolReadyEvent);
     clearTimeout(this[kMinPoolSizeTimer]);
     this.ensureMinPoolSize();
   }
@@ -359,8 +357,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   checkOut(callback: Callback<Connection>): void {
     const connectionCheckOutStartedEvent = new ConnectionCheckOutStartedEvent(this);
     this.emit(ConnectionPool.CONNECTION_CHECK_OUT_STARTED, connectionCheckOutStartedEvent);
-    // TODO: replace this with the appropriate severity level
-    this.client.mongoLogger.emergency('connection', connectionCheckOutStartedEvent);
+    this.client.mongoLogger.debug('connection', connectionCheckOutStartedEvent);
 
     const waitQueueMember: WaitQueueMember = { callback };
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
@@ -371,8 +368,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
         const connectionCheckOutFailedEvent = new ConnectionCheckOutFailedEvent(this, 'timeout');
         this.emit(ConnectionPool.CONNECTION_CHECK_OUT_FAILED, connectionCheckOutFailedEvent);
-        // TODO: replace this with the appropriate severity level
-        this.client.mongoLogger.emergency('connection', connectionCheckOutFailedEvent);
+        this.client.mongoLogger.debug('connection', connectionCheckOutFailedEvent);
         waitQueueMember.callback(
           new WaitQueueTimeoutError(
             this.loadBalanced
@@ -409,8 +405,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kCheckedOut].delete(connection);
     const connectionCheckedInEvent = new ConnectionCheckedInEvent(this, connection);
     this.emit(ConnectionPool.CONNECTION_CHECKED_IN, connectionCheckedInEvent);
-    // TODO: replace this with the appropriate severity level
-    this.client.mongoLogger.emergency('connection', connectionCheckedInEvent);
+    this.client.mongoLogger.debug('connection', connectionCheckedInEvent);
 
     if (willDestroy) {
       const reason = connection.closed ? 'error' : poolClosed ? 'poolClosed' : 'stale';
@@ -451,8 +446,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
       const connectionPoolClearedEvent = new ConnectionPoolClearedEvent(this, { serviceId });
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, connectionPoolClearedEvent);
-      // TODO: replace this with the appropriate severity level
-      this.client.mongoLogger.emergency('connection', connectionPoolClearedEvent);
+      this.client.mongoLogger.debug('connection', connectionPoolClearedEvent);
       return;
     }
     // handle non load-balanced case
@@ -468,8 +462,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         interruptInUseConnections
       });
       this.emit(ConnectionPool.CONNECTION_POOL_CLEARED, connectionPoolClearedEvent);
-      // TODO: replace this with the appropriate severity level
-      this.client.mongoLogger.emergency('connection', connectionPoolClearedEvent);
+      this.client.mongoLogger.debug('connection', connectionPoolClearedEvent);
     }
 
     if (interruptInUseConnections) {
@@ -525,16 +518,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       (conn, cb) => {
         const connectionClosedEvent = new ConnectionClosedEvent(this, conn, 'poolClosed');
         this.emit(ConnectionPool.CONNECTION_CLOSED, connectionClosedEvent);
-        // TODO: replace this with the appropriate severity level
-        this.client.mongoLogger.emergency('connection', connectionClosedEvent);
+        this.client.mongoLogger.debug('connection', connectionClosedEvent);
         conn.destroy({ force: !!options.force }, cb);
       },
       err => {
         this[kConnections].clear();
         const poolClosedEvent = new ConnectionPoolClosedEvent(this);
         this.emit(ConnectionPool.CONNECTION_POOL_CLOSED, poolClosedEvent);
-        // TODO: replace this with the appropriate severity level
-        this.client.mongoLogger.emergency('connection', poolClosedEvent);
+        this.client.mongoLogger.debug('connection', poolClosedEvent);
         callback(err);
       }
     );
@@ -664,8 +655,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   ) {
     const connectionClosedEvent = new ConnectionClosedEvent(this, connection, reason);
     this.emit(ConnectionPool.CONNECTION_CLOSED, connectionClosedEvent);
-    // TODO: replace this with the appropriate severity level
-    this.client.mongoLogger.emergency('connection', connectionClosedEvent);
+    this.client.mongoLogger.debug('connection', connectionClosedEvent);
     // destroy the connection
     process.nextTick(() => connection.destroy({ force: false }));
   }
@@ -713,8 +703,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     // This is our version of a "virtual" no-I/O connection as the spec requires
     const connectionCreatedEvent = new ConnectionCreatedEvent(this, { id: connectOptions.id });
     this.emit(ConnectionPool.CONNECTION_CREATED, connectionCreatedEvent);
-    // TODO: replace this with the appropriate severity level
-    this.client.mongoLogger.emergency('connection', connectionCreatedEvent);
+    this.client.mongoLogger.debug('connection', connectionCreatedEvent);
 
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
@@ -727,8 +716,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           err as MongoError
         );
         this.emit(ConnectionPool.CONNECTION_CLOSED, connectionClosedEvent);
-        // TODO: replace this with the appropriate severity level
-        this.client.mongoLogger.emergency('connection', connectionClosedEvent);
+        this.client.mongoLogger.debug('connection', connectionClosedEvent);
         if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
           err.connectionGeneration = connectOptions.generation;
         }
@@ -769,8 +757,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       connection.markAvailable();
       const connectionReadyEvent = new ConnectionReadyEvent(this, connection);
       this.emit(ConnectionPool.CONNECTION_READY, connectionReadyEvent);
-      // TODO: replace this with the appropriate severity level
-      this.client.mongoLogger.emergency('connection', connectionReadyEvent);
+      this.client.mongoLogger.debug('connection', connectionReadyEvent);
 
       this[kPending]--;
       callback(undefined, connection);
@@ -845,8 +832,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           error
         );
         this.emit(ConnectionPool.CONNECTION_CHECK_OUT_FAILED, connectionCheckOutFailedEvent);
-        // TODO: replace this with the appropriate severity level
-        this.client.mongoLogger.emergency('connection', connectionCheckOutFailedEvent);
+        this.client.mongoLogger.debug('connection', connectionCheckOutFailedEvent);
         if (waitQueueMember.timer) {
           clearTimeout(waitQueueMember.timer);
         }
@@ -901,8 +887,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
               err as MongoError
             );
             this.emit(ConnectionPool.CONNECTION_CHECK_OUT_FAILED, connectionCheckOutFailedEvent);
-            // TODO: replace this with the appropriate severity level
-            this.client.mongoLogger.emergency('connection', connectionCheckOutFailedEvent);
+            this.client.mongoLogger.debug('connection', connectionCheckOutFailedEvent);
           } else if (connection) {
             this[kCheckedOut].add(connection);
             const connectionCheckedOutEvent = new ConnectionCheckedOutEvent(this, connection);
