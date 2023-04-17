@@ -518,194 +518,295 @@ describe('MONGODB-OIDC', function () {
           }).to.throw;
         });
       });
+    });
 
-      describe('4. Cached Credentials', function () {
-        describe('4.1 Cache with refresh', function () {
-          let refreshSpy;
+    describe('4. Cached Credentials', function () {
+      let client: MongoClient;
+      let collection: Collection;
 
-          before(async function () {
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60)
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            await client.close();
-            refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
-          });
-          // Clear the cache.
-          // Create a new client with a request callback that gives credentials that expire in on minute.
-          // Ensure that a find operation adds credentials to the cache.
-          // Close the client.
-          // Create a new client with the same request callback and a refresh callback.
-          // Ensure that a find operation results in a call to the refresh callback.
-          // Close the client.
-          it('successfully authenticates and calls the refresh callback', async function () {
-            // Ensure credentials added to the cache.
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-                REFRESH_TOKEN_CALLBACK: refreshSpy
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            expect(refreshSpy).to.be.calledOnce;
-          });
-        });
-
-        describe('4.2 Cache with no refresh', function () {
-          let requestSpy;
-
-          before(async function () {
-            requestSpy = sinon.spy(createRefreshCallback('test_user1', 60));
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestSpy
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            await client.close();
-          });
-
-          // Clear the cache.
-          // Create a new client with a request callback that gives credentials that expire in one minute.
-          // Ensure that a find operation adds credentials to the cache.
-          // Close the client.
-          // Create a new client with the a request callback but no refresh callback.
-          // Ensure that a find operation results in a call to the request callback.
-          // Close the client.
-          it('successfully authenticates and calls only the request callback', async function () {
-            expect(cache.entries.size).to.equal(1);
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: requestSpy
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            expect(requestSpy).to.be.calledTwice;
-          });
-        });
-
-        describe('4.3 Cache key includes callback', function () {
-          const firstRequestCallback = createRequestCallback('test_user1');
-          const secondRequestCallback = createRequestCallback('test_user');
-
-          before(async function () {
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: firstRequestCallback
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            await client.close();
-          });
-
-          // Clear the cache.
-          // Create a new client with a request callback that does not give an `expiresInSeconds` value.
-          // Ensure that a find operation adds credentials to the cache.
-          // Close the client.
-          // Create a new client with a different request callback.
-          // Ensure that a find operation adds a new entry to the cache.
-          // Close the client.
-          it('includes the callback functions in the cache', async function () {
-            expect(cache.entries.size).to.equal(1);
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: secondRequestCallback
-              }
-            });
-            await client.db('test').collection('test').findOne();
-            expect(cache.entries.size).to.equal(2);
-          });
-        });
-
-        describe('4.4 Error clears cache', function () {
-          before(function () {
-            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-              authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300),
-                REFRESH_TOKEN_CALLBACK: () => {
-                  return Promise.resolve({});
-                }
-              }
-            });
-            collection = client.db('test').collection('test');
-          });
-
-          // Clear the cache.
-          // Create a new client with a valid request callback that gives credentials that expire within 5 minutes and a refresh callback that gives invalid credentials.
-          // Ensure that a find operation adds a new entry to the cache.
-          // Ensure that a subsequent find operation results in an error.
-          // Ensure that the cached token has been cleared.
-          // Close the client.
-          it('clears the cache on authentication error', async function () {
-            await collection.findOne();
-            expect(cache.entries.size).to.equal(1);
-            expect(async () => {
-              await collection.findOne();
-            }).to.throw;
-            expect(cache.entries).to.be.empty;
-          });
-        });
-
-        describe('4.5 AWS Automatic workflow does not use cache', function () {
-          before(function () {
-            client = new MongoClient(
-              'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
-            );
-            collection = client.db('test').collection('test');
-          });
-
-          // Clear the cache.
-          // Create a new client that uses the AWS automatic workflow.
-          // Ensure that a find operation does not add credentials to the cache.
-          // Close the client.
-          it('authenticates with no cache usage', async function () {
-            await collection.findOne();
-            expect(cache.entries).to.be.empty;
-          });
-        });
+      beforeEach(function () {
+        cache.clear();
       });
 
-      describe('5. Speculative Authentication', function () {
-        const setupFailPoint = async () => {
-          return await client
-            .db()
-            .admin()
-            .command({
-              configureFailPoint: 'failCommand',
-              mode: {
-                times: 2
-              },
-              data: {
-                failCommands: ['saslStart'],
-                errorCode: 18
-              }
-            });
-        };
+      afterEach(async function () {
+        await client?.close();
+      });
 
-        const removeFailPoint = async () => {
-          return await client.db().admin().command({
-            configureFailPoint: 'failCommand',
-            mode: 'off'
-          });
-        };
+      describe('4.1 Cache with refresh', function () {
+        let refreshSpy;
 
         before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60)
             }
           });
-          await setupFailPoint();
-          collection = client.db('test').collection('test');
-          await collection.findOne();
-          await removeFailPoint();
+          await client.db('test').collection('test').findOne();
+          await client.close();
+          refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
+        });
+        // Clear the cache.
+        // Create a new client with a request callback that gives credentials that expire in on minute.
+        // Ensure that a find operation adds credentials to the cache.
+        // Close the client.
+        // Create a new client with the same request callback and a refresh callback.
+        // Ensure that a find operation results in a call to the refresh callback.
+        // Close the client.
+        it('successfully authenticates and calls the refresh callback', async function () {
+          // Ensure credentials added to the cache.
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+              REFRESH_TOKEN_CALLBACK: refreshSpy
+            }
+          });
+          await client.db('test').collection('test').findOne();
+          expect(refreshSpy).to.be.calledOnce;
+        });
+      });
+
+      describe('4.2 Cache with no refresh', function () {
+        let requestSpy;
+
+        before(async function () {
+          requestSpy = sinon.spy(createRefreshCallback('test_user1', 60));
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestSpy
+            }
+          });
+          await client.db('test').collection('test').findOne();
+          await client.close();
         });
 
         // Clear the cache.
-        // Create a client with a request callback that returns a valid token that will not expire soon.
-        // Set a fail point for saslStart commands of the form:
+        // Create a new client with a request callback that gives credentials that expire in one minute.
+        // Ensure that a find operation adds credentials to the cache.
+        // Close the client.
+        // Create a new client with the a request callback but no refresh callback.
+        // Ensure that a find operation results in a call to the request callback.
+        // Close the client.
+        it('successfully authenticates and calls only the request callback', async function () {
+          expect(cache.entries.size).to.equal(1);
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestSpy
+            }
+          });
+          await client.db('test').collection('test').findOne();
+          expect(requestSpy).to.be.calledTwice;
+        });
+      });
+
+      describe('4.3 Cache key includes callback', function () {
+        const firstRequestCallback = createRequestCallback('test_user1');
+        const secondRequestCallback = createRequestCallback('test_user');
+
+        before(async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: firstRequestCallback
+            }
+          });
+          await client.db('test').collection('test').findOne();
+          await client.close();
+        });
+
+        // Clear the cache.
+        // Create a new client with a request callback that does not give an `expiresInSeconds` value.
+        // Ensure that a find operation adds credentials to the cache.
+        // Close the client.
+        // Create a new client with a different request callback.
+        // Ensure that a find operation adds a new entry to the cache.
+        // Close the client.
+        it('includes the callback functions in the cache', async function () {
+          expect(cache.entries.size).to.equal(1);
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: secondRequestCallback
+            }
+          });
+          await client.db('test').collection('test').findOne();
+          expect(cache.entries.size).to.equal(2);
+        });
+      });
+
+      describe('4.4 Error clears cache', function () {
+        before(function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300),
+              REFRESH_TOKEN_CALLBACK: () => {
+                return Promise.resolve({});
+              }
+            }
+          });
+          collection = client.db('test').collection('test');
+        });
+
+        // Clear the cache.
+        // Create a new client with a valid request callback that gives credentials that expire within 5 minutes and a refresh callback that gives invalid credentials.
+        // Ensure that a find operation adds a new entry to the cache.
+        // Ensure that a subsequent find operation results in an error.
+        // Ensure that the cached token has been cleared.
+        // Close the client.
+        it('clears the cache on authentication error', async function () {
+          await collection.findOne();
+          expect(cache.entries.size).to.equal(1);
+          expect(async () => {
+            await collection.findOne();
+          }).to.throw;
+          expect(cache.entries).to.be.empty;
+        });
+      });
+
+      describe('4.5 AWS Automatic workflow does not use cache', function () {
+        before(function () {
+          client = new MongoClient(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
+          );
+          collection = client.db('test').collection('test');
+        });
+
+        // Clear the cache.
+        // Create a new client that uses the AWS automatic workflow.
+        // Ensure that a find operation does not add credentials to the cache.
+        // Close the client.
+        it('authenticates with no cache usage', async function () {
+          await collection.findOne();
+          expect(cache.entries).to.be.empty;
+        });
+      });
+    });
+
+    describe('5. Speculative Authentication', function () {
+      let client: MongoClient;
+      let collection: Collection;
+
+      beforeEach(function () {
+        cache.clear();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
+      const setupFailPoint = async () => {
+        return await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 2
+            },
+            data: {
+              failCommands: ['saslStart'],
+              errorCode: 18
+            }
+          });
+      };
+
+      const removeFailPoint = async () => {
+        return await client.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: 'off'
+        });
+      };
+
+      before(async function () {
+        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          authMechanismProperties: {
+            REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
+          }
+        });
+        await setupFailPoint();
+        collection = client.db('test').collection('test');
+        await collection.findOne();
+        await removeFailPoint();
+      });
+
+      // Clear the cache.
+      // Create a client with a request callback that returns a valid token that will not expire soon.
+      // Set a fail point for saslStart commands of the form:
+      //
+      // {
+      //   "configureFailPoint": "failCommand",
+      //   "mode": {
+      //     "times": 2
+      //   },
+      //   "data": {
+      //     "failCommands": [
+      //       "saslStart"
+      //     ],
+      //     "errorCode": 18
+      //   }
+      // }
+      //
+      // Note
+      //
+      // The driver MUST either use a unique appName or explicitly remove the failCommand after the test to prevent leakage.
+      //
+      // Perform a find operation that succeeds.
+      // Close the client.
+      // Create a new client with the same properties without clearing the cache.
+      // Set a fail point for saslStart commands.
+      // Perform a find operation that succeeds.
+      // Close the client.
+      it('successfully speculative authenticates', async function () {
+        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          authMechanismProperties: {
+            REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
+          }
+        });
+        await setupFailPoint();
+        expect(async () => {
+          await client.db('test').collection('test').findOne();
+        }).to.not.throw;
+        await removeFailPoint();
+      });
+    });
+
+    describe('6. Reauthentication', function () {
+      describe('6.1 Succeeds', function () {
+        // Clear the cache.
+        // Create request and refresh callbacks that return valid credentials that will not expire soon.
+        // Create a client with the callbacks and an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
+        // Perform a find operation that succeeds.
+        // Assert that the refresh callback has not been called.
+        // Clear the listener state if possible.
+        // Force a reauthenication using a failCommand of the form:
+        //
+        // {
+        //   "configureFailPoint": "failCommand",
+        //   "mode": {
+        //     "times": 1
+        //   },
+        //   "data": {
+        //     "failCommands": [
+        //       "find"
+        //     ],
+        //     "errorCode": 391
+        //   }
+        // }
+        //
+        // Note
+        //
+        // the driver MUST either use a unique appName or explicitly remove the failCommand after the test to prevent leakage.
+        //
+        // Perform another find operation that succeeds.
+        // Assert that the refresh callback has been called once, if possible.
+        // Assert that the ordering of list started events is [find], , find. Note that if the listener stat could not be cleared then there will and be extra find command.
+        // Assert that the list of command succeeded events is [find].
+        // Assert that a find operation failed once during the command execution.
+        // Close the client.
+      });
+
+      describe('6.2 Retries and Succeeds with Cache', function () {
+        // Clear the cache.
+        // Create request and refresh callbacks that return valid credentials that will not expire soon.
+        // Perform a find operation that succeeds.
+        // Force a reauthenication using a failCommand of the form:
         //
         // {
         //   "configureFailPoint": "failCommand",
@@ -714,117 +815,38 @@ describe('MONGODB-OIDC', function () {
         //   },
         //   "data": {
         //     "failCommands": [
-        //       "saslStart"
+        //       "find", "saslStart"
         //     ],
-        //     "errorCode": 18
+        //     "errorCode": 391
         //   }
         // }
         //
-        // Note
-        //
-        // The driver MUST either use a unique appName or explicitly remove the failCommand after the test to prevent leakage.
-        //
         // Perform a find operation that succeeds.
         // Close the client.
-        // Create a new client with the same properties without clearing the cache.
-        // Set a fail point for saslStart commands.
-        // Perform a find operation that succeeds.
-        // Close the client.
-        it('successfully speculative authenticates', async function () {
-          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
-            }
-          });
-          await setupFailPoint();
-          expect(async () => {
-            await client.db('test').collection('test').findOne();
-          }).to.not.throw;
-          await removeFailPoint();
-        });
       });
 
-      describe('6. Reauthentication', function () {
-        describe('6.1 Succeeds', function () {
-          // Clear the cache.
-          // Create request and refresh callbacks that return valid credentials that will not expire soon.
-          // Create a client with the callbacks and an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
-          // Perform a find operation that succeeds.
-          // Assert that the refresh callback has not been called.
-          // Clear the listener state if possible.
-          // Force a reauthenication using a failCommand of the form:
-          //
-          // {
-          //   "configureFailPoint": "failCommand",
-          //   "mode": {
-          //     "times": 1
-          //   },
-          //   "data": {
-          //     "failCommands": [
-          //       "find"
-          //     ],
-          //     "errorCode": 391
-          //   }
-          // }
-          //
-          // Note
-          //
-          // the driver MUST either use a unique appName or explicitly remove the failCommand after the test to prevent leakage.
-          //
-          // Perform another find operation that succeeds.
-          // Assert that the refresh callback has been called once, if possible.
-          // Assert that the ordering of list started events is [find], , find. Note that if the listener stat could not be cleared then there will and be extra find command.
-          // Assert that the list of command succeeded events is [find].
-          // Assert that a find operation failed once during the command execution.
-          // Close the client.
-        });
-
-        describe('6.2 Retries and Succeeds with Cache', function () {
-          // Clear the cache.
-          // Create request and refresh callbacks that return valid credentials that will not expire soon.
-          // Perform a find operation that succeeds.
-          // Force a reauthenication using a failCommand of the form:
-          //
-          // {
-          //   "configureFailPoint": "failCommand",
-          //   "mode": {
-          //     "times": 2
-          //   },
-          //   "data": {
-          //     "failCommands": [
-          //       "find", "saslStart"
-          //     ],
-          //     "errorCode": 391
-          //   }
-          // }
-          //
-          // Perform a find operation that succeeds.
-          // Close the client.
-        });
-
-        describe('6.3 Retries and Fails with no Cache', function () {
-          // Clear the cache.
-          // Create request and refresh callbacks that return valid credentials that will not expire soon.
-          // Perform a find operation that succeeds (to force a speculative auth).
-          // Clear the cache.
-          // Force a reauthenication using a failCommand of the form:
-          //
-          // {
-          //   "configureFailPoint": "failCommand",
-          //   "mode": {
-          //     "times": 2
-          //   },
-          //   "data": {
-          //     "failCommands": [
-          //       "find", "saslStart"
-          //     ],
-          //     "errorCode": 391
-          //   }
-          // }
-          //
-          // Perform a find operation that fails.
-          // Close the client.
-        });
+      describe('6.3 Retries and Fails with no Cache', function () {
+        // Clear the cache.
+        // Create request and refresh callbacks that return valid credentials that will not expire soon.
+        // Perform a find operation that succeeds (to force a speculative auth).
+        // Clear the cache.
+        // Force a reauthenication using a failCommand of the form:
+        //
+        // {
+        //   "configureFailPoint": "failCommand",
+        //   "mode": {
+        //     "times": 2
+        //   },
+        //   "data": {
+        //     "failCommands": [
+        //       "find", "saslStart"
+        //     ],
+        //     "errorCode": 391
+        //   }
+        // }
+        //
+        // Perform a find operation that fails.
+        // Close the client.
       });
     });
   });
