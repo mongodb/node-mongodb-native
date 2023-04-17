@@ -23,7 +23,6 @@ import {
   MongoDBLogWritable,
   MongoLogger,
   MongoLoggerOptions,
-  SEVERITY_LEVEL_MAP,
   SeverityLevel
 } from '../mongodb';
 
@@ -79,11 +78,11 @@ describe('class MongoLogger', function () {
           }
         } as { buffer: any[]; write: (log: Log) => void };
         const logger = new MongoLogger({
-          componentSeverities: { command: 'emergency' } as any,
+          componentSeverities: { command: 'error' } as any,
           logDestination
         } as any);
 
-        logger.emergency('command', 'Hello world!');
+        logger.error('command', 'Hello world!');
         expect(logDestination.buffer).to.have.lengthOf(1);
       });
     });
@@ -99,11 +98,11 @@ describe('class MongoLogger', function () {
         });
 
         const logger = new MongoLogger({
-          componentSeverities: { command: 'emergency' } as any,
+          componentSeverities: { command: 'error' } as any,
           logDestination
         } as any);
 
-        logger.emergency('command', 'Hello world!');
+        logger.error('command', 'Hello world!');
         expect(buffer).to.have.lengthOf(1);
       });
     });
@@ -119,8 +118,8 @@ describe('class MongoLogger', function () {
       ]);
 
       function* makeValidOptions(): Generator<[string, string]> {
-        const validOptions = Object.values(SeverityLevel).filter(
-          option => option !== SeverityLevel.OFF
+        const validOptions = Object.values(SeverityLevel).filter(option =>
+          ['error', 'warn', 'info', 'debug', 'trace'].includes(option)
         );
         for (const option of validOptions) {
           yield [option, option];
@@ -427,11 +426,11 @@ describe('class MongoLogger', function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: unsetEnvironmentOption,
-                    MONGODB_LOG_COMMAND: 'emergency'
+                    MONGODB_LOG_COMMAND: 'error'
                   },
                   { mongodbLogPath: unsetOption as any }
                 );
-                const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
 
                 expect(stderrStub.write).to.have.been.calledOnceWith(
@@ -449,11 +448,11 @@ describe('class MongoLogger', function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: unsetEnvironmentOption,
-                    MONGODB_LOG_COMMAND: 'emergency'
+                    MONGODB_LOG_COMMAND: 'error'
                   },
                   { mongodbLogPath: invalidOption as any }
                 );
-                const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
 
                 expect(stderrStub.write).to.have.been.calledOnceWith(
@@ -471,12 +470,12 @@ describe('class MongoLogger', function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: unsetEnvironmentOption,
-                    MONGODB_LOG_COMMAND: 'emergency'
+                    MONGODB_LOG_COMMAND: 'error'
                   },
                   { mongodbLogPath: validOption as any }
                 );
 
-                const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
                 const correctDestination = validOptions.get(validOption);
                 expect(correctDestination?.write).to.have.been.calledOnce;
@@ -496,11 +495,11 @@ describe('class MongoLogger', function () {
                   const options = MongoLogger.resolveOptions(
                     {
                       MONGODB_LOG_PATH: invalidEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'emergency'
+                      MONGODB_LOG_COMMAND: 'error'
                     },
                     { mongodbLogPath: unsetClientOption as any }
                   );
-                  const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
                   options.logDestination.write(log);
 
                   expect(stderrStub.write).to.have.been.calledOnceWith(
@@ -520,11 +519,11 @@ describe('class MongoLogger', function () {
                     const options = MongoLogger.resolveOptions(
                       {
                         MONGODB_LOG_PATH: invalidEnvironmentOption,
-                        MONGODB_LOG_COMMAND: 'emergency'
+                        MONGODB_LOG_COMMAND: 'error'
                       },
                       { mongodbLogPath: invalidOption as any }
                     );
-                    const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                    const log: Log = { t: new Date(), c: 'command', s: 'error' };
                     options.logDestination.write(log);
 
                     expect(stderrStub.write).to.have.been.calledOnceWith(
@@ -543,12 +542,12 @@ describe('class MongoLogger', function () {
                   const options = MongoLogger.resolveOptions(
                     {
                       MONGODB_LOG_PATH: invalidEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'emergency'
+                      MONGODB_LOG_COMMAND: 'error'
                     },
                     { mongodbLogPath: validOption as any }
                   );
                   const correctDestination = validOptions.get(validOption);
-                  const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
                   options.logDestination.write(log);
                   expect(correctDestination?.write).to.have.been.calledOnce;
                 });
@@ -566,12 +565,12 @@ describe('class MongoLogger', function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: validEnvironmentOption,
-                    MONGODB_LOG_COMMAND: 'emergency'
+                    MONGODB_LOG_COMMAND: 'error'
                   },
                   { mongodbLogPath: unsetOption as any }
                 );
                 const correctDestination = validOptions.get(validEnvironmentOption);
-                options.logDestination.write({ t: new Date(), c: 'command', s: 'emergency' });
+                options.logDestination.write({ t: new Date(), c: 'command', s: 'error' });
 
                 expect(correctDestination?.write).to.have.been.calledOnce;
               });
@@ -588,13 +587,13 @@ describe('class MongoLogger', function () {
                   const options = MongoLogger.resolveOptions(
                     {
                       MONGODB_LOG_PATH: validEnvironmentOption,
-                      MONGODB_LOG_COMMAND: 'emergency'
+                      MONGODB_LOG_COMMAND: 'error'
                     },
                     { mongodbLogPath: invalidValue as any }
                   );
 
                   const correctDestination = validOptions.get(validEnvironmentOption);
-                  const log: Log = { t: new Date(), c: 'command', s: 'emergency' };
+                  const log: Log = { t: new Date(), c: 'command', s: 'error' };
                   options.logDestination.write(log);
 
                   expect(correctDestination?.write).to.have.been.calledOnce;
@@ -615,12 +614,12 @@ describe('class MongoLogger', function () {
                 const options = MongoLogger.resolveOptions(
                   {
                     MONGODB_LOG_PATH: validEnvironmentOption,
-                    MONGODB_LOG_COMMAND: 'emergency'
+                    MONGODB_LOG_COMMAND: 'error'
                   },
                   { mongodbLogPath: validValue as any }
                 );
                 const correctDestination = validOptions.get(validValue);
-                options.logDestination.write({ t: new Date(), c: 'command', s: 'emergency' });
+                options.logDestination.write({ t: new Date(), c: 'command', s: 'error' });
                 expect(correctDestination?.write).to.have.been.calledOnce;
               });
             }
@@ -632,8 +631,10 @@ describe('class MongoLogger', function () {
 
   describe('severity helpers', function () {
     // TODO(NODE-4814): Ensure we test on all valid severity levels
-    const severities = Object.values(SeverityLevel).filter(severity => severity === 'emergency');
-    for (const severityLevel of severities) {
+    const severities = Object.values(SeverityLevel).filter(severity =>
+      ['error', 'warn', 'info', 'debug', 'trace'].includes(severity)
+    );
+    for (const [index, severityLevel] of severities.entries()) {
       describe(`${severityLevel}()`, function () {
         it('does not log when logging for the component is disabled', () => {
           const stream = new BufferingStream();
@@ -658,13 +659,8 @@ describe('class MongoLogger', function () {
               logDestination: stream
             } as any);
 
-            const TRACE = 8;
-            for (
-              let l = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel) + 1;
-              l <= TRACE;
-              l++
-            ) {
-              const severity = SEVERITY_LEVEL_MAP.getSeverityLevelName(l);
+            for (let i = index + 1; i < severities.length; i++) {
+              const severity = severities[i];
               logger[severity as SeverityLevel]('command', 'Hello');
             }
 
@@ -682,20 +678,13 @@ describe('class MongoLogger', function () {
               logDestination: stream
             } as any);
 
-            const EMERGENCY = 0;
             // Calls all severity logging methods with a level less than or equal to what severityLevel
-            for (
-              let l = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel);
-              l >= EMERGENCY;
-              l--
-            ) {
-              const severity = SEVERITY_LEVEL_MAP.getSeverityLevelName(l);
+            for (let i = index; i >= 0; i--) {
+              const severity = severities[i];
               logger[severity as SeverityLevel]('command', 'Hello');
             }
 
-            expect(stream.buffer).to.have.lengthOf(
-              SEVERITY_LEVEL_MAP.getNumericSeverityLevel(severityLevel) + 1
-            );
+            expect(stream.buffer).to.have.lengthOf(index + 1);
           });
         });
 
