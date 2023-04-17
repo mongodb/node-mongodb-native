@@ -49,7 +49,7 @@ initialData:
   documents: [ { _id: 0 } ]
 
 tests:
-  - description: executes a ping with $db attached
+  - description: always attaches $db to given command
     operations:
       - name: runCommand
         object: plainDb
@@ -68,7 +68,7 @@ tests:
                 $db: plainDb
               commandName: ping
 
-  - description: executes a ping with lsid attached
+  - description: attaches the provided session lsid to ping command
     operations:
       - name: runCommand
         object: plainDb
@@ -89,7 +89,7 @@ tests:
                 $db: plainDb
               commandName: ping
 
-  - description: executes a ping with $readPreference attached
+  - description: attaches the provided $readPreference to given command
     operations:
       - name: runCommand
         object: plainDb
@@ -110,7 +110,7 @@ tests:
                 $db: plainDb
               commandName: ping
 
-  - description: executes a ping without attaching readConcern
+  - description: does not inherit readConcern specified at the db level
     operations:
       - name: runCommand
         object: dbWithRC
@@ -130,7 +130,7 @@ tests:
                 $db: dbWithRC
               commandName: ping
 
-  - description: executes a ping without attaching writeConcern
+  - description:  does not inherit writeConcern specified at the db level
     operations:
       - name: runCommand
         object: dbWithWC
@@ -150,7 +150,7 @@ tests:
                 $db: dbWithWC
               commandName: ping
 
-  - description: executes a ping and does not retry retryable error
+  - description: does not retry retryable errors on given command
     operations:
       - name: failPoint
         object: testRunner
@@ -171,7 +171,7 @@ tests:
         expectError:
           isError: true
 
-  - description: executes a insert via runCommand inside a transaction
+  - description: attaches transaction fields to given command
     runOnRequirements:
       - topologies: [ replicaset, sharded-replicaset, load-balanced, sharded ]
         minServerVersion: '4.4'
@@ -219,7 +219,7 @@ tests:
               commandName: commitTransaction
               databaseName: admin
 
-  - description: executes a ping with stableApi fields attached
+  - description: attaches apiVersion fields to given command when stableApi is configured on the client
     operations:
       - name: runCommand
         object: stableApiDb
