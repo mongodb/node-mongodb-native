@@ -206,8 +206,13 @@ operations.set('close', async ({ entities, operation }) => {
     const cursor = entities.getEntity('cursor', operation.object);
     await cursor.close();
   } catch (e) {
-    const changeStream = entities.getEntity('stream', operation.object);
-    await changeStream.close();
+    try {
+      const changeStream = entities.getEntity('stream', operation.object);
+      await changeStream.close();
+    } catch (e) {
+      const client = entities.getEntity('client', operation.object);
+      await client.close();
+    }
   }
 });
 
