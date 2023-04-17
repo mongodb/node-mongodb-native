@@ -630,7 +630,7 @@ describe('class MongoLogger', function () {
   });
 
   describe('severity helpers', function () {
-    const severities = Object.values(SeverityLevel).filter(severity =>
+    const severities: SeverityLevel[] = Object.values(SeverityLevel).filter(severity =>
       ['error', 'warn', 'info', 'debug', 'trace'].includes(severity)
     );
     for (const [index, severityLevel] of severities.entries()) {
@@ -660,7 +660,7 @@ describe('class MongoLogger', function () {
 
             for (let i = index + 1; i < severities.length; i++) {
               const severity = severities[i];
-              logger[severity as SeverityLevel]('command', 'Hello');
+              logger[severity]('command', 'Hello');
             }
 
             expect(stream.buffer).to.have.lengthOf(0);
@@ -680,7 +680,7 @@ describe('class MongoLogger', function () {
             // Calls all severity logging methods with a level less than or equal to what severityLevel
             for (let i = index; i >= 0; i--) {
               const severity = severities[i];
-              logger[severity as SeverityLevel]('command', 'Hello');
+              logger[severity]('command', 'Hello');
             }
 
             expect(stream.buffer).to.have.lengthOf(index + 1);
