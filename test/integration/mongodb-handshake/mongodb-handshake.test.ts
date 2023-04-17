@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
+import Sinon, * as sinon from 'sinon';
 
 import {
   Connection,
@@ -10,6 +10,8 @@ import {
 
 describe('MongoDB Handshake', () => {
   let client;
+
+  afterEach(() => client.close());
 
   context('when hello is too large', () => {
     before(() => {
@@ -40,6 +42,23 @@ describe('MongoDB Handshake', () => {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
       }
       expect(error).to.match(/client metadata document must be less/);
+    });
+  });
+
+  context('when compressors are provided on the mongo client', () => {
+    let spy: Sinon.SinonSpy;
+    before(() => {
+      spy = sinon.spy(Connection.prototype, 'command');
+    });
+
+    after(() => sinon.restore());
+
+    it('constructs a handshake with the specified compressors', async function () {
+      client = this.configuration.newClient({ compressors: ['snappy'] });
+      await client.connect();
+      expect(spy.called).to.be.true;
+      const handshakeDoc = spy.getCall(0).args[1];
+      expect(handshakeDoc).to.have.property('compression').to.deep.equal(['snappy']);
     });
   });
 });
