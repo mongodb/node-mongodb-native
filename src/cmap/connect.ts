@@ -401,6 +401,7 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
 
     if ('authorizationError' in socket) {
       if (socket.authorizationError && rejectUnauthorized) {
+        // TODO(NODE-5192): wrap this with a MongoError subclass
         return callback(socket.authorizationError);
       }
     }

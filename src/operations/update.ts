@@ -1,6 +1,7 @@
-import type { Document, ObjectId } from '../bson';
+import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
+import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { Callback, hasAtomicOperators, MongoDBNamespace } from '../utils';
@@ -23,8 +24,11 @@ export interface UpdateOptions extends CommandOperationOptions {
   let?: Document;
 }
 
-/** @public */
-export interface UpdateResult {
+/**
+ * @public
+ * `TSchema` is the schema of the collection
+ */
+export interface UpdateResult<TSchema extends Document = Document> {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined */
   acknowledged: boolean;
   /** The number of documents that matched the filter */
@@ -34,7 +38,7 @@ export interface UpdateResult {
   /** The number of documents that were upserted */
   upsertedCount: number;
   /** The identifier of the inserted document if an upsert took place */
-  upsertedId: ObjectId;
+  upsertedId: InferIdType<TSchema> | null;
 }
 
 /** @public */

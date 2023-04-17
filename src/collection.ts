@@ -334,7 +334,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema> | Partial<TSchema>,
     options?: UpdateOptions
-  ): Promise<UpdateResult> {
+  ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
       this.s.db.s.client,
       new UpdateOneOperation(
@@ -357,7 +357,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     options?: ReplaceOptions
-  ): Promise<UpdateResult | Document> {
+  ): Promise<UpdateResult<TSchema> | Document> {
     return executeOperation(
       this.s.db.s.client,
       new ReplaceOneOperation(
@@ -380,7 +380,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     options?: UpdateOptions
-  ): Promise<UpdateResult> {
+  ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
       this.s.db.s.client,
       new UpdateManyOperation(

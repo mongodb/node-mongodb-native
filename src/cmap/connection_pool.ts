@@ -641,7 +641,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
   }
 
-  private destroyConnection(connection: Connection, reason: string) {
+  private destroyConnection(
+    connection: Connection,
+    reason: 'error' | 'idle' | 'stale' | 'poolClosed'
+  ) {
     this.emit(
       ConnectionPool.CONNECTION_CLOSED,
       new ConnectionClosedEvent(this, connection, reason)
@@ -701,7 +704,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         this[kPending]--;
         this.emit(
           ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(this, { id: connectOptions.id, serviceId: undefined }, 'error')
+          new ConnectionClosedEvent(
+            this,
+            { id: connectOptions.id, serviceId: undefined },
+            'error',
+            // TODO(NODE-5192): Remove this cast
+            err as MongoError
+          )
         );
         if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
           err.connectionGeneration = connectOptions.generation;
@@ -812,7 +821,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
         this.emit(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(this, reason)
+          new ConnectionCheckOutFailedEvent(this, reason, error)
         );
         if (waitQueueMember.timer) {
           clearTimeout(waitQueueMember.timer);
@@ -865,7 +874,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           if (err) {
             this.emit(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              new ConnectionCheckOutFailedEvent(this, 'connectionError')
+              // TODO(NODE-5192): Remove this cast
+              new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
             );
           } else if (connection) {
             this[kCheckedOut].add(connection);

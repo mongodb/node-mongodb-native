@@ -852,11 +852,13 @@ export const OPTIONS = {
   },
   keepAlive: {
     default: true,
-    type: 'boolean'
+    type: 'boolean',
+    deprecated: 'Will not be able to turn off in the future.'
   },
   keepAliveInitialDelay: {
     default: 120000,
-    type: 'uint'
+    type: 'uint',
+    deprecated: 'Will not be configurable in the future.'
   },
   loadBalanced: {
     default: false,
@@ -1278,5 +1280,6 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
  */
 export const FEATURE_FLAGS = new Set([
   Symbol.for('@@mdb.skipPingOnConnect'),
-  Symbol.for('@@mdb.enableMongoLogger')
+  Symbol.for('@@mdb.enableMongoLogger'),
+  Symbol.for('@@mdb.internalLoggerConfig')
 ]);

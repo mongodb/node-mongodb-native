@@ -1,6 +1,43 @@
-import { Writable } from 'stream';
+import { EJSON } from 'bson';
+import type { Writable } from 'stream';
+import { inspect } from 'util';
 
-import { parseUnsignedInteger } from './utils';
+import type {
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent
+} from './cmap/command_monitoring_events';
+import type {
+  ConnectionCheckedInEvent,
+  ConnectionCheckedOutEvent,
+  ConnectionCheckOutFailedEvent,
+  ConnectionCheckOutStartedEvent,
+  ConnectionClosedEvent,
+  ConnectionCreatedEvent,
+  ConnectionPoolClearedEvent,
+  ConnectionPoolClosedEvent,
+  ConnectionPoolCreatedEvent,
+  ConnectionPoolMonitoringEvent,
+  ConnectionPoolReadyEvent,
+  ConnectionReadyEvent
+} from './cmap/connection_pool_events';
+import {
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
+  CONNECTION_CHECK_OUT_FAILED,
+  CONNECTION_CHECK_OUT_STARTED,
+  CONNECTION_CHECKED_IN,
+  CONNECTION_CHECKED_OUT,
+  CONNECTION_CLOSED,
+  CONNECTION_CREATED,
+  CONNECTION_POOL_CLEARED,
+  CONNECTION_POOL_CLOSED,
+  CONNECTION_POOL_CREATED,
+  CONNECTION_POOL_READY,
+  CONNECTION_READY
+} from './constants';
+import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -20,7 +57,28 @@ export const SeverityLevel = Object.freeze({
 export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
-export const SeverityLevelMap: Map<string | number, string | number> = new Map([
+class SeverityLevelMap extends Map<SeverityLevel | number, SeverityLevel | number> {
+  constructor(entries: [SeverityLevel | number, SeverityLevel | number][]) {
+    const newEntries: [number | SeverityLevel, SeverityLevel | number][] = [];
+    for (const [level, value] of entries) {
+      newEntries.push([value, level]);
+    }
+
+    newEntries.push(...entries);
+    super(newEntries);
+  }
+
+  getNumericSeverityLevel(severity: SeverityLevel): number {
+    return this.get(severity) as number;
+  }
+
+  getSeverityLevelName(level: number): SeverityLevel | undefined {
+    return this.get(level) as SeverityLevel | undefined;
+  }
+}
+
+/** @internal */
+export const SEVERITY_LEVEL_MAP = new SeverityLevelMap([
   [SeverityLevel.OFF, -Infinity],
   [SeverityLevel.EMERGENCY, 0],
   [SeverityLevel.ALERT, 1],
@@ -32,10 +90,6 @@ export const SeverityLevelMap: Map<string | number, string | number> = new Map([
   [SeverityLevel.DEBUG, 7],
   [SeverityLevel.TRACE, 8]
 ]);
-
-for (const [level, value] of SeverityLevelMap) {
-  SeverityLevelMap.set(value, level);
-}
 
 /** @internal */
 export const MongoLoggableComponent = Object.freeze({
@@ -70,7 +124,7 @@ export interface MongoLoggerEnvOptions {
 /** @internal */
 export interface MongoLoggerMongoClientOptions {
   /** Destination for log messages */
-  mongodbLogPath?: 'stdout' | 'stderr' | Writable;
+  mongodbLogPath?: 'stdout' | 'stderr' | MongoDBLogWritable;
 }
 
 /** @internal */
@@ -91,7 +145,7 @@ export interface MongoLoggerOptions {
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
-  logDestination: Writable;
+  logDestination: Writable | MongoDBLogWritable;
 }
 
 /**
@@ -111,43 +165,270 @@ function parseSeverityFromString(s?: string): SeverityLevel | null {
   return null;
 }
 
+/** @internal */
+export function createStdioLogger(stream: {
+  write: NodeJS.WriteStream['write'];
+}): MongoDBLogWritable {
+  return {
+    write: (log: Log): unknown => {
+      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
+      return;
+    }
+  };
+}
+
 /**
  * resolves the MONGODB_LOG_PATH and mongodbLogPath options from the environment and the
- * mongo client options respectively.
+ * mongo client options respectively. The mongodbLogPath can be either 'stdout', 'stderr', a NodeJS
+ * Writable or an object which has a `write` method with the signature:
+ * ```ts
+ * write(log: Log): void
+ * ```
  *
- * @returns the Writable stream to write logs to
+ * @returns the MongoDBLogWritable object to write logs to
  */
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
-  {
-    mongodbLogPath
-  }: {
-    mongodbLogPath?: unknown;
+  { mongodbLogPath }: { mongodbLogPath?: string | Writable | MongoDBLogWritable }
+): MongoDBLogWritable {
+  if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
+    return createStdioLogger(process.stderr);
   }
-): Writable {
-  const isValidLogDestinationString = (destination: string) =>
-    ['stdout', 'stderr'].includes(destination.toLowerCase());
-  if (typeof mongodbLogPath === 'string' && isValidLogDestinationString(mongodbLogPath)) {
-    return mongodbLogPath.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+  if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath)) {
+    return createStdioLogger(process.stdout);
   }
 
-  // TODO(NODE-4813): check for minimal interface instead of instanceof Writable
-  if (typeof mongodbLogPath === 'object' && mongodbLogPath instanceof Writable) {
+  if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
     return mongodbLogPath;
   }
 
-  if (typeof MONGODB_LOG_PATH === 'string' && isValidLogDestinationString(MONGODB_LOG_PATH)) {
-    return MONGODB_LOG_PATH.toLowerCase() === 'stderr' ? process.stderr : process.stdout;
+  if (MONGODB_LOG_PATH && /^stderr$/i.test(MONGODB_LOG_PATH)) {
+    return createStdioLogger(process.stderr);
+  }
+  if (MONGODB_LOG_PATH && /^stdout$/i.test(MONGODB_LOG_PATH)) {
+    return createStdioLogger(process.stdout);
   }
 
-  return process.stderr;
+  return createStdioLogger(process.stderr);
+}
+
+/** @internal */
+export interface Log extends Record<string, any> {
+  t: Date;
+  c: MongoLoggableComponent;
+  s: SeverityLevel;
+  message?: string;
+}
+
+/** @internal */
+export interface MongoDBLogWritable {
+  write(log: Log): void;
+}
+
+function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
+  const s0Num = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(s0);
+  const s1Num = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(s1);
+
+  return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
+}
+
+/** @internal */
+export type LoggableEvent =
+  | CommandStartedEvent
+  | CommandSucceededEvent
+  | CommandFailedEvent
+  | ConnectionPoolCreatedEvent
+  | ConnectionPoolReadyEvent
+  | ConnectionPoolClosedEvent
+  | ConnectionPoolClearedEvent
+  | ConnectionCreatedEvent
+  | ConnectionReadyEvent
+  | ConnectionClosedEvent
+  | ConnectionCheckedInEvent
+  | ConnectionCheckedOutEvent
+  | ConnectionCheckOutStartedEvent
+  | ConnectionCheckOutFailedEvent;
+
+/** @internal */
+export interface LogConvertible extends Record<string, any> {
+  toLog(): Record<string, any>;
+}
+
+/** @internal */
+export type Loggable = LoggableEvent | LogConvertible;
+
+function isLogConvertible(obj: Loggable): obj is LogConvertible {
+  const objAsLogConvertible = obj as LogConvertible;
+  // eslint-disable-next-line no-restricted-syntax
+  return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible.toLog === 'function';
+}
+
+function attachCommandFields(
+  log: Record<string, any>,
+  commandEvent: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+) {
+  log.commandName = commandEvent.commandName;
+  log.requestId = commandEvent.requestId;
+  log.driverConnectionId = commandEvent?.connectionId;
+  const { host, port } = HostAddress.fromString(commandEvent.address).toHostPort();
+  log.serverHost = host;
+  log.serverPort = port;
+  if (commandEvent?.serviceId) {
+    log.serviceId = commandEvent.serviceId.toHexString();
+  }
+
+  return log;
+}
+
+function attachConnectionFields(
+  log: Record<string, any>,
+  connectionPoolEvent: ConnectionPoolMonitoringEvent
+) {
+  const { host, port } = HostAddress.fromString(connectionPoolEvent.address).toHostPort();
+  log.serverHost = host;
+  log.serverPort = port;
+
+  return log;
+}
+
+function defaultLogTransform(
+  logObject: LoggableEvent | Record<string, any>
+): Omit<Log, 's' | 't' | 'c'> {
+  let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
+
+  switch (logObject.name) {
+    case COMMAND_STARTED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command started';
+      log.command = EJSON.stringify(logObject.command);
+      log.databaseName = logObject.databaseName;
+      return log;
+    case COMMAND_SUCCEEDED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command succeeded';
+      log.durationMS = logObject.duration;
+      log.reply = EJSON.stringify(logObject.reply);
+      return log;
+    case COMMAND_FAILED:
+      log = attachCommandFields(log, logObject);
+      log.message = 'Command failed';
+      log.durationMS = logObject.duration;
+      log.failure = logObject.failure;
+      return log;
+    case CONNECTION_POOL_CREATED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool created';
+      if (logObject.options) {
+        const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } =
+          logObject.options;
+        log = {
+          ...log,
+          maxIdleTimeMS,
+          minPoolSize,
+          maxPoolSize,
+          maxConnecting,
+          waitQueueTimeoutMS
+        };
+      }
+      return log;
+    case CONNECTION_POOL_READY:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool ready';
+      return log;
+    case CONNECTION_POOL_CLEARED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool cleared';
+      if (logObject.serviceId?._bsontype === 'ObjectId') {
+        log.serviceId = logObject.serviceId.toHexString();
+      }
+      return log;
+    case CONNECTION_POOL_CLOSED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection pool closed';
+      return log;
+    case CONNECTION_CREATED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection created';
+      log.driverConnectionId = logObject.connectionId;
+      return log;
+    case CONNECTION_READY:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection ready';
+      log.driverConnectionId = logObject.connectionId;
+      return log;
+    case CONNECTION_CLOSED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection closed';
+      log.driverConnectionId = logObject.connectionId;
+      switch (logObject.reason) {
+        case 'stale':
+          log.reason = 'Connection became stale because the pool was cleared';
+          break;
+        case 'idle':
+          log.reason =
+            'Connection has been available but unused for longer than the configured max idle time';
+          break;
+        case 'error':
+          log.reason = 'An error occurred while using the connection';
+          if (logObject.error) {
+            log.error = logObject.error;
+          }
+          break;
+        case 'poolClosed':
+          log.reason = 'Connection pool was closed';
+          break;
+        default:
+          log.reason = `Unknown close reason: ${logObject.reason}`;
+      }
+      return log;
+    case CONNECTION_CHECK_OUT_STARTED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checkout started';
+      return log;
+    case CONNECTION_CHECK_OUT_FAILED:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checkout failed';
+      switch (logObject.reason) {
+        case 'poolClosed':
+          log.reason = 'Connection pool was closed';
+          break;
+        case 'timeout':
+          log.reason = 'Wait queue timeout elapsed without a connection becoming available';
+          break;
+        case 'connectionError':
+          log.reason = 'An error occurred while trying to establish a new connection';
+          if (logObject.error) {
+            log.error = logObject.error;
+          }
+          break;
+        default:
+          log.reason = `Unknown close reason: ${logObject.reason}`;
+      }
+      return log;
+    case CONNECTION_CHECKED_OUT:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checked out';
+
+      log.driverConnectionId = logObject.connectionId;
+      return log;
+    case CONNECTION_CHECKED_IN:
+      log = attachConnectionFields(log, logObject);
+      log.message = 'Connection checked in';
+      log.driverConnectionId = logObject.connectionId;
+      return log;
+    default:
+      for (const [key, value] of Object.entries(logObject)) {
+        if (value != null) log[key] = value;
+      }
+  }
+  return log;
 }
 
 /** @internal */
 export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
-  logDestination: Writable;
+  logDestination: MongoDBLogWritable | Writable;
 
   constructor(options: MongoLoggerOptions) {
     this.componentSeverities = options.componentSeverities;
@@ -155,25 +436,27 @@ export class MongoLogger {
     this.logDestination = options.logDestination;
   }
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  emergency(component: any, message: any): void {}
+  emergency = this.log.bind(this, 'emergency');
 
-  alert(component: any, message: any): void {}
+  private log(
+    severity: SeverityLevel,
+    component: MongoLoggableComponent,
+    message: Loggable | string
+  ): void {
+    if (compareSeverity(severity, this.componentSeverities[component]) > 0) return;
 
-  critical(component: any, message: any): void {}
-
-  error(component: any, message: any): void {}
-
-  warn(component: any, message: any): void {}
-
-  notice(component: any, message: any): void {}
-
-  info(component: any, message: any): void {}
-
-  debug(component: any, message: any): void {}
-
-  trace(component: any, message: any): void {}
+    let logMessage: Log = { t: new Date(), c: component, s: severity };
+    if (typeof message === 'string') {
+      logMessage.message = message;
+    } else if (typeof message === 'object') {
+      if (isLogConvertible(message)) {
+        logMessage = { ...logMessage, ...message.toLog() };
+      } else {
+        logMessage = { ...logMessage, ...defaultLogTransform(message) };
+      }
+    }
+    this.logDestination.write(logMessage);
+  }
 
   /**
    * Merges options set through environment variables and the MongoClient, preferring environment
