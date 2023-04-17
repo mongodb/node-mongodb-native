@@ -349,9 +349,9 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('successfully authenticates with the request and refresh callbacks', async function () {
           await collection.findOne();
-          expect(requestSpy).to.be.calledOnce;
+          expect(requestSpy).to.have.been.calledOnce;
           await collection.findOne();
-          expect(refreshSpy).to.be.calledOnce;
+          expect(refreshSpy).to.have.been.calledOnce;
         });
       });
 
@@ -561,7 +561,7 @@ describe('MONGODB-OIDC', function () {
             }
           });
           await client.db('test').collection('test').findOne();
-          expect(refreshSpy).to.be.calledOnce;
+          expect(refreshSpy).to.have.been.calledOnce;
         });
       });
 
@@ -569,7 +569,7 @@ describe('MONGODB-OIDC', function () {
         let requestSpy;
 
         before(async function () {
-          requestSpy = sinon.spy(createRefreshCallback('test_user1', 60));
+          requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestSpy
@@ -594,13 +594,13 @@ describe('MONGODB-OIDC', function () {
             }
           });
           await client.db('test').collection('test').findOne();
-          expect(requestSpy).to.be.calledTwice;
+          expect(requestSpy).to.have.been.calledTwice;
         });
       });
 
       describe('4.3 Cache key includes callback', function () {
         const firstRequestCallback = createRequestCallback('test_user1');
-        const secondRequestCallback = createRequestCallback('test_user');
+        const secondRequestCallback = createRequestCallback('test_user1');
 
         before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {

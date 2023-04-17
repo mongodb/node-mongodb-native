@@ -72,9 +72,9 @@ export class CallbackWorkflow implements Workflow {
       request || null,
       refresh || null
     );
+    console.log('VIEW ENTRY', entry, entry?.isValid());
     if (entry) {
       // Check if the entry is not expired and if we are reauthenticating.
-      console.log('entry valid', entry.isValid());
       if (!reauthenticate && entry.isValid()) {
         // Skip step one and execute the step two saslContinue.
         try {
