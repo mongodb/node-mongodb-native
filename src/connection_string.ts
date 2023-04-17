@@ -1280,5 +1280,6 @@ export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
  */
 export const FEATURE_FLAGS = new Set([
   Symbol.for('@@mdb.skipPingOnConnect'),
-  Symbol.for('@@mdb.enableMongoLogger')
+  Symbol.for('@@mdb.enableMongoLogger'),
+  Symbol.for('@@mdb.internalLoggerConfig')
 ]);

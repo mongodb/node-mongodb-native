@@ -561,9 +561,10 @@ describe('Connection String', function () {
 
   describe('feature flags', () => {
     it('should be stored in the FEATURE_FLAGS Set', () => {
-      expect(FEATURE_FLAGS.size).to.equal(2);
+      expect(FEATURE_FLAGS.size).to.equal(3);
       expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.skipPingOnConnect'))).to.be.true;
       expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.enableMongoLogger'))).to.be.true;
+      expect(FEATURE_FLAGS.has(Symbol.for('@@mdb.internalLoggerConfig'))).to.be.true;
       // Add more flags here
     });
 
