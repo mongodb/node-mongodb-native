@@ -56,7 +56,7 @@
     },
     {
       "type": "ConnectionCreated"
-    },    
+    },
     {
       "type": "ConnectionPoolCleared",
       "interruptInUseConnections": true

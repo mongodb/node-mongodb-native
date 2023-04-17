@@ -1,0 +1,253 @@
+description: "connection-logging"
+
+schemaVersion: "1.13"
+
+runOnRequirements:
+  - topologies:
+    - single # The number of log messages is different for each topology since there is a connection pool per host.
+
+tests:
+  - description: "Options should be included in connection pool created message when specified"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                # Observe and wait on a connection ready event for the connection created in the background.
+                # This is to avoid raciness around whether the background thread has created the connection
+                # (and whether corresponding log messages have been generated) by the time log message assertions
+                # are made.
+                observeEvents:
+                  - connectionReadyEvent
+                observeLogMessages:
+                  connection: debug
+                uriOptions:
+                  minPoolSize: 1
+                  maxPoolSize: 5
+                  maxIdleTimeMS: 10000
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            connectionReadyEvent: {}
+          count: 1
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              minPoolSize: 1
+              maxPoolSize: 5
+              maxIdleTimeMS: 10000
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection created"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection ready"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  # Drivers who have not done DRIVERS-1943 will need to skip this test.
+  - description: "maxConnecting should be included in connection pool created message when specified"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                # Observe and wait for a poolReadyEvent so we can ensure the pool has been created and is
+                # ready by the time we assert on log messages, in order to avoid raciness around which messages
+                # are emitted.
+                observeEvents:
+                  - poolReadyEvent
+                observeLogMessages:
+                  connection: debug
+                uriOptions:
+                  maxConnecting: 5
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolReadyEvent: {}
+          count: 1
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              maxConnecting: 5
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  # Drivers that do not support waitQueueTimeoutMS will need to skip this test.
+  - description: "waitQueueTimeoutMS should be included in connection pool created message when specified"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                # Observe and wait for a poolReadyEvent so we can ensure the pool has been created and is
+                # ready by the time we assert on log messages, in order to avoid raciness around which messages
+                # are emitted.
+                observeEvents:
+                  - poolReadyEvent
+                observeLogMessages:
+                  connection: debug
+                uriOptions:
+                  waitQueueTimeoutMS: 10000
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolReadyEvent: {}
+          count: 1
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              waitQueueTimeoutMS: 10000
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  # Drivers that do not support waitQueueSize will need to skip this test.
+  - description: "waitQueueSize should be included in connection pool created message when specified"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                # Observe and wait for a poolReadyEvent so we can ensure the pool has been created and is
+                # ready by the time we assert on log messages, in order to avoid raciness around which messages
+                # are emitted.
+                observeEvents:
+                  - poolReadyEvent
+                observeLogMessages:
+                  connection: debug
+                uriOptions:
+                  waitQueueSize: 100
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolReadyEvent: {}
+          count: 1
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              waitQueueSize: 100
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  # Drivers that do not support waitQueueMultiple will need to skip this test.
+  - description: "waitQueueMultiple should be included in connection pool created message when specified"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                # Observe and wait for a poolReadyEvent so we can ensure the pool has been created and is
+                # ready by the time we assert on log messages, in order to avoid raciness around which messages
+                # are emitted.
+                observeEvents:
+                  - poolReadyEvent
+                observeLogMessages:
+                  connection: debug
+                uriOptions:
+                  waitQueueSize: 5
+
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            poolReadyEvent: {}
+          count: 1
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              waitQueueMultiple: 5
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }

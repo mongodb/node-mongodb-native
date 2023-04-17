@@ -28,15 +28,15 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
   },
   {
     description:
-      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
+      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections = false)',
     skipIfCondition: 'always',
     skipReason:
       'NodeJS does not have a background thread responsible for managing connections, and so already checked in connections are not pruned when in-use connections are interrupted.'
   }
 ];
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
-  const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
+describe.only('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function () {
+  const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling', 'cmap-format');
 
   runCmapTestSuite(tests, {
     testsToSkip: LB_SKIP_TESTS.concat(
@@ -51,4 +51,10 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
       INTERRUPT_IN_USE_SKIPPED_TESTS
     )
   });
+});
+
+describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
+  const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling', 'logging');
+
+  runCmapTestSuite(tests);
 });
