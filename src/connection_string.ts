@@ -263,7 +263,7 @@ export function parseOptions(
 
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
-  const urlOptions = new CaseInsensitiveMap<any[]>();
+  const urlOptions = new CaseInsensitiveMap<unknown[]>();
 
   if (url.pathname !== '/' && url.pathname !== '') {
     const dbName = decodeURIComponent(
@@ -298,7 +298,7 @@ export function parseOptions(
     }
   }
 
-  const objectOptions = new CaseInsensitiveMap(
+  const objectOptions = new CaseInsensitiveMap<unknown>(
     Object.entries(options).filter(([, v]) => v != null)
   );
 
@@ -326,10 +326,9 @@ export function parseOptions(
     if (objectOptionValue != null) {
       values.push(objectOptionValue);
     }
-    const urlValue = urlOptions.get(key);
-    if (urlValue != null) {
-      values.push(...urlValue);
-    }
+
+    const urlValues = urlOptions.get(key) ?? [];
+    values.push(...urlValues);
     allProvidedOptions.set(key, values);
   }
 
