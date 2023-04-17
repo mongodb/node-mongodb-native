@@ -349,9 +349,9 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('successfully authenticates with the request and refresh callbacks', async function () {
           await collection.findOne();
-          expect(requestSpy.calledOnce).to.be.true;
+          expect(requestSpy).to.be.calledOnce;
           await collection.findOne();
-          expect(refreshSpy.calledOnce).to.be.true;
+          expect(refreshSpy).to.be.calledOnce;
         });
       });
 
@@ -549,7 +549,7 @@ describe('MONGODB-OIDC', function () {
               }
             });
             await client.db('test').collection('test').findOne();
-            expect(refreshSpy.calledOnce).to.be.true;
+            expect(refreshSpy).to.be.calledOnce;
           });
         });
 
@@ -582,7 +582,7 @@ describe('MONGODB-OIDC', function () {
               }
             });
             await client.db('test').collection('test').findOne();
-            expect(requestSpy.calledTwice).to.be.true;
+            expect(requestSpy).to.be.calledTwice;
           });
         });
 
@@ -668,6 +668,41 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('5. Speculative Authentication', function () {
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 2
+              },
+              data: {
+                failCommands: ['saslStart'],
+                errorCode: 18
+              }
+            });
+        };
+
+        const removeFailPoint = async () => {
+          return await client.db().admin().command({
+            configureFailPoint: 'failCommand',
+            mode: 'off'
+          });
+        };
+
+        before(async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
+            }
+          });
+          await setupFailPoint();
+          collection = client.db('test').collection('test');
+          await collection.findOne();
+          await removeFailPoint();
+        });
+
         // Clear the cache.
         // Create a client with a request callback that returns a valid token that will not expire soon.
         // Set a fail point for saslStart commands of the form:
@@ -695,6 +730,18 @@ describe('MONGODB-OIDC', function () {
         // Set a fail point for saslStart commands.
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully speculative authenticates', async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
+            }
+          });
+          await setupFailPoint();
+          expect(async () => {
+            await client.db('test').collection('test').findOne();
+          }).to.not.throw;
+          await removeFailPoint();
+        });
       });
 
       describe('6. Reauthentication', function () {
