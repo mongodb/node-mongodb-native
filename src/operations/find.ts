@@ -93,16 +93,6 @@ export class FindOperation extends CommandOperation<Document> {
       throw new MongoInvalidArgumentError('Query filter must be a plain object or ObjectId');
     }
 
-    // If the filter is a buffer, validate that is a valid BSON document
-    if (Buffer.isBuffer(filter)) {
-      const objectSize = filter[0] | (filter[1] << 8) | (filter[2] << 16) | (filter[3] << 24);
-      if (objectSize !== filter.length) {
-        throw new MongoInvalidArgumentError(
-          `Query filter raw message size does not match message header size [${filter.length}] != [${objectSize}]`
-        );
-      }
-    }
-
     // special case passing in an ObjectId as a filter
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
