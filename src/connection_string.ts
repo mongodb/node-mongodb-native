@@ -313,7 +313,7 @@ export function parseOptions(
   const uriMechanismProperties = urlOptions.get('authMechanismProperties');
   if (uriMechanismProperties) {
     for (const property of uriMechanismProperties) {
-      if (property.includes('ALLOWED_HOSTS:')) {
+      if (/(^|,)ALLOWED_HOSTS:/.test(property)) {
         throw new MongoParseError(
           'Auth mechanism property ALLOWED_HOSTS is not allowed in the connection string.'
         );
