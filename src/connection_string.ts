@@ -316,7 +316,7 @@ export function parseOptions(
 
   // All option collection
 
-  const allProvidedOptions = new CaseInsensitiveMap();
+  const allProvidedOptions = new CaseInsensitiveMap<unknown[]>();
 
   const allProvidedKeys = new Set<string>([...urlOptions.keys(), ...objectOptions.keys()]);
 
