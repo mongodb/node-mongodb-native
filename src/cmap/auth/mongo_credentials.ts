@@ -5,7 +5,6 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
-import { isString } from '../../utils';
 import { GSSAPICanonicalizationValue } from './gssapi';
 import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
@@ -210,7 +209,7 @@ export class MongoCredentials {
           throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
         }
         for (const host of hosts) {
-          if (!isString(host)) {
+          if (typeof host !== 'string') {
             throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
           }
         }

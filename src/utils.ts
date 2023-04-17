@@ -30,8 +30,6 @@ import type { Topology } from './sdam/topology';
 import type { ClientSession } from './sessions';
 import { WriteConcern } from './write_concern';
 
-const OBJECT_STRING = '[object String]';
-
 /**
  * MongoDB Driver style callback
  * @public
@@ -59,15 +57,6 @@ export const ByteUtils = {
     return ByteUtils.toLocalBufferType(uint8array).toString('base64');
   }
 };
-
-/**
- * Use this to test if an object is a string. This is because
- * typeof new String('test') is 'object' and not 'string'.
- * @internal
- */
-export function isString(value: any): boolean {
-  return Object.prototype.toString.call(value) === OBJECT_STRING;
-}
 
 /**
  * Throws if collectionName is not a valid mongodb collection namespace.
