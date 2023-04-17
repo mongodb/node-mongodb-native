@@ -630,7 +630,6 @@ describe('class MongoLogger', function () {
   });
 
   describe('severity helpers', function () {
-    // TODO(NODE-4814): Ensure we test on all valid severity levels
     const severities = Object.values(SeverityLevel).filter(severity =>
       ['error', 'warn', 'info', 'debug', 'trace'].includes(severity)
     );
