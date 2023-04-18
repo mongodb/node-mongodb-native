@@ -106,7 +106,7 @@ describe('MONGODB-OIDC', function () {
         // Create a client that uses the default OIDC url and the request callback.
         // Perform a find operation. that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
+        it('successfully authenticates', async function () {
           await collection.findOne();
         });
       });
