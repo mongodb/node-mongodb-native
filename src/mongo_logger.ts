@@ -437,21 +437,21 @@ export class MongoLogger {
   error = this.log.bind(this, 'error');
   /**
    * This method should be used to log situations where undesirable application behaviour might
-   * occur. E.g.: encountering an unrecognized option in a connection string
+   * occur. For example, failing to end sessions on `MongoClient.close`
    **/
   warn = this.log.bind(this, 'warn');
   /**
    * This method should be used to report high-level information about normal driver behaviour.
-   * E.g.: the creation of a `MongoClient`
+   * For example, the creation of a `MongoClient`
    **/
   info = this.log.bind(this, 'info');
   /**
    * This method should be used to report information that would be helpful when debugging an
-   * application. E.g.: a command starting, succeeding or failing
+   * application. For example, a command starting, succeeding or failing
    * */
   debug = this.log.bind(this, 'debug');
   /**
-   * This method should be used to report fine-grained details related to logic flow. E.g.:
+   * This method should be used to report fine-grained details related to logic flow. For example,
    * entering and exiting a function body
    * */
   trace = this.log.bind(this, 'trace');
