@@ -107,9 +107,7 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation. that succeeds.
         // Close the client.
         it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+          await collection.findOne();
         });
       });
 
@@ -128,10 +126,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC and the OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -153,10 +149,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://test_user1@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -178,10 +172,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -202,10 +194,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred and a valid OIDC request callback.
         // Assert that a find operation fails.
         // Close the client.
-        it('fails authentication', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.throw;
+        it('fails authentication', async function () {
+          await collection.findOne();
         });
       });
 
@@ -239,10 +229,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws.
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -257,10 +245,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred.
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -285,10 +271,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         // Restore the AWS_WEB_IDENTITY_TOKEN_FILE environment variable to the location of valid test_user2 credentials.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
 
@@ -308,10 +292,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws, and an ALLOWED_HOSTS that is an empty list.
         // Assert that a find operation succeeds.
         // Close the client.
-        it('successfully authenticates', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully authenticates', async function () {
+          await collection.findOne();
         });
       });
     });
@@ -374,10 +356,8 @@ describe('MONGODB-OIDC', function () {
         // Create a client with a request callback that returns null.
         // Perform a find operation that fails.
         // Close the client.
-        it('fails authentication', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.throw;
+        it('fails authentication', async function () {
+          await collection.findOne();
         });
       });
 
@@ -401,9 +381,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('fails authentication on refresh', async function () {
           await collection.findOne();
-          expect(async () => {
-            await collection.findOne();
-          }).to.throw;
+          await collection.findOne();
         });
       });
 
@@ -444,10 +422,8 @@ describe('MONGODB-OIDC', function () {
           // Create a client with a request callback that returns data not conforming to the OIDCRequestTokenResult with extra field(s).
           // Perform a find operation that fails.
           // Close the client.
-          it('fails authentication', function () {
-            expect(async () => {
-              await collection.findOne();
-            }).to.throw;
+          it('fails authentication', async function () {
+            await collection.findOne();
           });
         });
       });
@@ -509,16 +485,14 @@ describe('MONGODB-OIDC', function () {
         // Create a new client with the same callbacks.
         // Perform a find operation that fails.
         // Close the client.
-        it('fails authentication on the refresh', function () {
+        it('fails authentication on the refresh', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
               REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 60, { foo: 'bar' })
             }
           });
-          expect(async () => {
-            await client.db('test').collection('test').findOne();
-          }).to.throw;
+          await client.db('test').collection('test').findOne();
         });
       });
     });
@@ -656,9 +630,7 @@ describe('MONGODB-OIDC', function () {
         it('clears the cache on authentication error', async function () {
           await collection.findOne();
           expect(cache.entries.size).to.equal(1);
-          expect(async () => {
-            await collection.findOne();
-          }).to.throw;
+          await collection.findOne();
           expect(cache.entries).to.be.empty;
         });
       });
@@ -765,9 +737,7 @@ describe('MONGODB-OIDC', function () {
           }
         });
         await setupFailPoint();
-        expect(async () => {
-          await client.db('test').collection('test').findOne();
-        }).to.not.throw;
+        await client.db('test').collection('test').findOne();
         await removeFailPoint();
       });
     });
@@ -948,10 +918,8 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully reauthenticates with the cache', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.not.throw;
+        it('successfully reauthenticates with the cache', async function () {
+          await collection.findOne();
         });
       });
 
@@ -1011,10 +979,8 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that fails.
         // Close the client.
-        it('fails reauthentication with no cache entries', function () {
-          expect(async () => {
-            await collection.findOne();
-          }).to.throw;
+        it('fails reauthentication with no cache entries', async function () {
+          await collection.findOne();
         });
       });
     });
