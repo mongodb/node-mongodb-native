@@ -199,6 +199,7 @@ export class CallbackWorkflow implements Workflow {
       tokenResult,
       stepOneResult
     );
+    console.log('REQUEST CALLBACK ADDED ENTRY TO CACHE', this.cache);
     return finishAuth(tokenResult, conversationId, connection, credentials);
   }
 }
