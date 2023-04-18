@@ -257,15 +257,12 @@ export interface LogConvertible extends Record<string, any> {
 }
 
 /** @internal */
-export function maybeTruncate(
-  ejson: string,
-  maxDocumentLength: number = DEFAULT_MAX_DOCUMENT_LENGTH
-): string {
-  if (maxDocumentLength === 0) {
-    return ejson;
-  }
+export function stringifyWithMaxLen(value: any, maxDocumentLength: number): string {
+  const ejson = EJSON.stringify(value);
 
-  return ejson.length > maxDocumentLength ? `${ejson.slice(0, maxDocumentLength)}...` : ejson;
+  return maxDocumentLength !== 0 && ejson.length > maxDocumentLength
+    ? `${ejson.slice(0, maxDocumentLength)}...`
+    : ejson;
 }
 
 /** @internal */
@@ -315,14 +312,14 @@ function defaultLogTransform(
     case COMMAND_STARTED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command started';
-      log.command = maybeTruncate(EJSON.stringify(logObject.command), maxDocumentLength);
+      log.command = stringifyWithMaxLen(logObject.command, maxDocumentLength);
       log.databaseName = logObject.databaseName;
       return log;
     case COMMAND_SUCCEEDED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command succeeded';
       log.durationMS = logObject.duration;
-      log.reply = maybeTruncate(EJSON.stringify(logObject.reply), maxDocumentLength);
+      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
       return log;
     case COMMAND_FAILED:
       log = attachCommandFields(log, logObject);
