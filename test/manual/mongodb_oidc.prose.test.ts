@@ -391,15 +391,17 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.3 Refresh Callback Returns Null', function () {
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+          REFRESH_TOKEN_CALLBACK: () => {
+            return Promise.resolve(null);
+          }
+        };
+
         before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: () => {
-                return Promise.resolve(null);
-              }
-            }
+            authMechanismProperties: authMechanismProperties
           });
           collection = client.db('test').collection('test');
           await collection.findOne();
@@ -413,12 +415,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('fails authentication on refresh', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: () => {
-                return Promise.resolve(null);
-              }
-            }
+            authMechanismProperties: authMechanismProperties
           });
           collection = client.db('test').collection('test');
           await collection.findOne();
@@ -481,15 +478,17 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.5 Refresh Callback Returns Missing Data', function () {
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+          REFRESH_TOKEN_CALLBACK: () => {
+            return Promise.resolve({});
+          }
+        };
+
         before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: () => {
-                return Promise.resolve({});
-              }
-            }
+            authMechanismProperties: authMechanismProperties
           });
           await client.db('test').collection('test').findOne();
           await client.close();
@@ -505,12 +504,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('fails authentication on the refresh', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: () => {
-                return Promise.resolve({});
-              }
-            }
+            authMechanismProperties: authMechanismProperties
           });
           try {
             await client.db('test').collection('test').findOne();
@@ -523,13 +517,15 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.6 Refresh Callback Returns Extra Data', function () {
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+          REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 60, { foo: 'bar' })
+        };
+
         before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 60, { foo: 'bar' })
-            }
+            authMechanismProperties: authMechanismProperties
           });
           await client.db('test').collection('test').findOne();
           await client.close();
@@ -545,10 +541,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('fails authentication on the refresh', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
-              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 60, { foo: 'bar' })
-            }
+            authMechanismProperties: authMechanismProperties
           });
           try {
             await client.db('test').collection('test').findOne();
