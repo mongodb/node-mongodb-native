@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.16.0](https://github.com/mongodb/node-mongodb-native/compare/v4.15.0...v4.16.0) (2023-04-18)
+
+
+### Features
+
+* **NODE-5159:** add FaaS env information to client metadata ([#3639](https://github.com/mongodb/node-mongodb-native/issues/3639)) ([e0b20f1](https://github.com/mongodb/node-mongodb-native/commit/e0b20f1ba4c0d8826077703a3cd77936b9be7dfd))
+* **NODE-5199:** add alternative runtime detection to client metadata ([#3647](https://github.com/mongodb/node-mongodb-native/issues/3647)) ([fba16ad](https://github.com/mongodb/node-mongodb-native/commit/fba16adb52f2ef37e87ea64bd6163711d0f09b84))
+
+
+### Bug Fixes
+
+* **NODE-5161:** metadata duplication in handshake ([#3628](https://github.com/mongodb/node-mongodb-native/issues/3628)) ([b790142](https://github.com/mongodb/node-mongodb-native/commit/b79014286c714291a1d16f12c6397e545411da0f))
+* **NODE-5200:** relax SRV record validation to account for a dot suffix ([#3640](https://github.com/mongodb/node-mongodb-native/issues/3640)) ([4272c43](https://github.com/mongodb/node-mongodb-native/commit/4272c43aed8790edcc38c69004e227c97117076a))
+
 ## [4.15.0](https://github.com/mongodb/node-mongodb-native/compare/v4.14.0...v4.15.0) (2023-04-04)
 
 
