@@ -437,6 +437,7 @@ export class MongoLogger {
   }
 
   emergency = this.log.bind(this, 'emergency');
+  debug = this.log.bind(this, 'debug');
 
   private log(
     severity: SeverityLevel,

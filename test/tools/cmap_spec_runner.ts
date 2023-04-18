@@ -357,6 +357,7 @@ export class ThreadContext {
 }
 
 async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
+  console.log(test);
   expect(CMAP_TEST_KEYS).to.include.members(Object.keys(test));
 
   const poolOptions = test.poolOptions || {};

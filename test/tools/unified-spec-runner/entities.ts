@@ -193,6 +193,7 @@ export class UnifiedMongoClient extends MongoClient {
 
     // NOTE: this is done to override the logger environment variables
     for (const key in description.observeLogMessages) {
+      console.log(UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]);
       componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
         description.observeLogMessages[key];
     }
@@ -201,7 +202,7 @@ export class UnifiedMongoClient extends MongoClient {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: componentSeverities,
+      [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
