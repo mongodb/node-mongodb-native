@@ -430,10 +430,30 @@ export class MongoLogger {
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
 
+  /**
+   * This method should be used when logging errors that do not have a public driver API for
+   * reporting errors.
+   **/
   error = this.log.bind(this, 'error');
+  /**
+   * This method should be used to log situations where undesirable application behaviour might
+   * occur. E.g.: encountering an unrecognized option in a connection string
+   **/
   warn = this.log.bind(this, 'warn');
+  /**
+   * This method should be used to report high-level information about normal driver behaviour.
+   * E.g.: the creation of a `MongoClient`
+   **/
   info = this.log.bind(this, 'info');
+  /**
+   * This method should be used to report information that would be helpful when debugging an
+   * application. E.g.: a command starting, succeeding or failing
+   * */
   debug = this.log.bind(this, 'debug');
+  /**
+   * This method should be used to report fine-grained details related to logic flow. E.g.:
+   * entering and exiting a function body
+   * */
   trace = this.log.bind(this, 'trace');
 
   constructor(options: MongoLoggerOptions) {
