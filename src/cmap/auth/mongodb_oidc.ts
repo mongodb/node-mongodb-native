@@ -80,6 +80,7 @@ export class MongoDBOIDC extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {
     const { connection, credentials, response, reauthenticating } = authContext;
 
+    console.log('RESPONSE', response);
     if (response?.speculativeAuthenticate) {
       return;
     }
@@ -90,6 +91,7 @@ export class MongoDBOIDC extends AuthProvider {
 
     const workflow = getWorkflow(credentials);
 
+    console.log('AUTH', workflow);
     await workflow.execute(connection, credentials, reauthenticating);
   }
 
@@ -109,6 +111,7 @@ export class MongoDBOIDC extends AuthProvider {
     const workflow = getWorkflow(credentials);
 
     const result = await workflow.speculativeAuth();
+    console.log('PREPARE', workflow, result);
     return { ...handshakeDoc, ...result };
   }
 }
