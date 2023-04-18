@@ -321,10 +321,6 @@ describe('MONGODB-OIDC', function () {
       let client: MongoClient;
       let collection: Collection;
 
-      beforeEach(function () {
-        cache.clear();
-      });
-
       afterEach(async function () {
         await client?.close();
       });
@@ -334,6 +330,7 @@ describe('MONGODB-OIDC', function () {
         const refreshSpy = sinon.spy(createRefreshCallback());
 
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestSpy,
@@ -367,6 +364,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('3.2 Request Callback Returns Null', function () {
         before(function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: () => {
@@ -394,6 +392,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('3.3 Refresh Callback Returns Null', function () {
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
@@ -429,6 +428,7 @@ describe('MONGODB-OIDC', function () {
       describe('3.4 Request Callback Returns Invalid Data', function () {
         context('when the request callback has missing fields', function () {
           before(function () {
+            cache.clear();
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
                 REQUEST_TOKEN_CALLBACK: () => {
@@ -456,6 +456,7 @@ describe('MONGODB-OIDC', function () {
 
         context('when the request callback has extra fields', function () {
           before(function () {
+            cache.clear();
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
                 REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60, { foo: 'bar' })
@@ -481,6 +482,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('3.5 Refresh Callback Returns Missing Data', function () {
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
@@ -522,6 +524,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('3.6 Refresh Callback Returns Extra Data', function () {
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
