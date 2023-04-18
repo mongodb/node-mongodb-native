@@ -495,7 +495,7 @@ function* makeTypescriptTasks() {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_NAME: LATEST_LTS
           }
         },
         {
@@ -514,7 +514,7 @@ function* makeTypescriptTasks() {
       {
         func: 'install dependencies',
         vars: {
-          NODE_LTS_NAME: LOWEST_LTS
+          NODE_LTS_NAME: LATEST_LTS
         }
       },
       { func: 'run typescript next' }

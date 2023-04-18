@@ -2343,7 +2343,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: hydrogen
       - func: check types
         vars:
           TS_VERSION: next
@@ -2363,7 +2363,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: hydrogen
       - func: check types
         vars:
           TS_VERSION: current
@@ -2373,7 +2373,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: erbium
+          NODE_LTS_NAME: hydrogen
       - func: check types
         vars:
           TS_VERSION: 4.1.6
