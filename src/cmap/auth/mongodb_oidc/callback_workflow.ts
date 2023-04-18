@@ -117,6 +117,7 @@ export class CallbackWorkflow implements Workflow {
         undefined
       );
       const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
+      console.log('STEP ONE', stepOne, result);
       // Call the request callback and finish auth.
       return this.requestAndFinish(connection, credentials, stepOne, result.conversationId);
     }

@@ -10,6 +10,7 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent,
   MongoClient,
+  MongoServerError,
   OIDC_WORKFLOWS,
   OIDCClientInfo,
   OIDCMechanismServerStep1,
@@ -113,7 +114,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('1.2 Single Principal Explicit Username', function () {
         before(function () {
-          client = new MongoClient('mongodb://test_user@localhost/?authMechanism=MONGODB-OIDC', {
+          client = new MongoClient('mongodb://test_user1@localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback()
             }
@@ -160,7 +161,7 @@ describe('MONGODB-OIDC', function () {
             'mongodb://test_user2@localhost:27018/?authMechanism=MONGODB-OIDC&directConnection=true&readPreference=secondaryPreferred',
             {
               authMechanismProperties: {
-                REQUEST_TOKEN_CALLBACK: createRequestCallback()
+                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user2')
               }
             }
           );
@@ -195,7 +196,13 @@ describe('MONGODB-OIDC', function () {
         // Assert that a find operation fails.
         // Close the client.
         it('fails authentication', async function () {
-          await collection.findOne();
+          try {
+            await collection.findOne();
+            expect.fail('Expected OIDC auth to fail with no user provided');
+          } catch (e) {
+            expect(e).to.be.instanceOf(MongoServerError);
+            expect(e.message).to.include('Authentication failed');
+          }
         });
       });
 
@@ -255,7 +262,10 @@ describe('MONGODB-OIDC', function () {
 
         before(function () {
           tokenFile = process.env.AWS_WEB_IDENTITY_TOKEN_FILE;
-          process.env.AWS_WEB_IDENTITY_TOKEN_FILE = path.join(process.env.OIDC_TOKEN_DIR, 'test2');
+          process.env.AWS_WEB_IDENTITY_TOKEN_FILE = path.join(
+            process.env.OIDC_TOKEN_DIR,
+            'test_user2'
+          );
           client = new MongoClient(
             'mongodb://localhost:27018/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws&directConnection=true&readPreference=secondaryPreferred'
           );
