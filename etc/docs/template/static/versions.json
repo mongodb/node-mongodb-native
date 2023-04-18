@@ -3,6 +3,7 @@
         "version": "Next"
     },
     {
+<<<<<<< HEAD
         "version": "5.3"
     },
     {
@@ -13,6 +14,9 @@
     },
     {
         "version": "5.0"
+=======
+        "version": "4.16"
+>>>>>>> 134d32ffe... chore(release): 4.16.0
     },
     {
         "version": "4.15"
