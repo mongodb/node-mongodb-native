@@ -328,14 +328,15 @@ describe('MONGODB-OIDC', function () {
       describe('3.1 Valid Callbacks', function () {
         const requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
         const refreshSpy = sinon.spy(createRefreshCallback());
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: requestSpy,
+          REFRESH_TOKEN_CALLBACK: refreshSpy
+        };
 
         before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestSpy,
-              REFRESH_TOKEN_CALLBACK: refreshSpy
-            }
+            authMechanismProperties: authMechanismProperties
           });
           collection = client.db('test').collection('test');
           await collection.findOne();
@@ -351,10 +352,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('successfully authenticates with the request and refresh callbacks', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestSpy,
-              REFRESH_TOKEN_CALLBACK: refreshSpy
-            }
+            authMechanismProperties: authMechanismProperties
           });
           collection = client.db('test').collection('test');
           await collection.findOne();
@@ -417,8 +415,13 @@ describe('MONGODB-OIDC', function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: authMechanismProperties
           });
-          collection = client.db('test').collection('test');
-          await collection.findOne();
+          try {
+            await client.db('test').collection('test').findOne();
+            expect.fail('Expected OIDC auth to fail with invlid return from request callback');
+          } catch (e) {
+            expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+            expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+          }
         });
       });
 

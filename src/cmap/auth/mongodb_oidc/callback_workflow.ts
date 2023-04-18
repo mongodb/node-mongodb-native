@@ -141,7 +141,7 @@ export class CallbackWorkflow implements Workflow {
       const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
       const result: OIDCRequestTokenResult = await refresh(clientInfo, stepOneResult, tokenResult);
       // Validate the result.
-      if (!result || !result.accessToken) {
+      if (isCallbackResultInvalid(result)) {
         throw new MongoMissingCredentialsError(
           'REFRESH_TOKEN_CALLBACK must return a valid object with an accessToken'
         );
@@ -185,7 +185,7 @@ export class CallbackWorkflow implements Workflow {
     const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
     const tokenResult = await request(clientInfo, stepOneResult);
     // Validate the result.
-    if (!tokenResult || !tokenResult.accessToken) {
+    if (isCallbackResultInvalid(tokenResult)) {
       throw new MongoMissingCredentialsError(
         'REQUEST_TOKEN_CALLBACK must return a valid object with an accessToken'
       );
@@ -202,6 +202,19 @@ export class CallbackWorkflow implements Workflow {
     console.log('REQUEST CALLBACK ADDED ENTRY TO CACHE', this.cache);
     return finishAuth(tokenResult, conversationId, connection, credentials);
   }
+}
+
+// Properties allowed on results of callbacks.
+const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
+
+/**
+ * Determines if a result returned from a request or refresh callback
+ * function is invalid.
+ */
+function isCallbackResultInvalid(tokenResult: any): boolean {
+  if (!tokenResult) return true;
+  if (!tokenResult.accessToken) return true;
+  return Object.getOwnPropertyNames(tokenResult).every(prop => RESULT_PROPERTIES.includes(prop));
 }
 
 /**
