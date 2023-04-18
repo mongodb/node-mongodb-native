@@ -72,7 +72,6 @@ export class CallbackWorkflow implements Workflow {
       request || null,
       refresh || null
     );
-    console.log('VIEW ENTRY', entry, entry?.isValid());
     if (entry) {
       // Check if the entry is not expired and if we are reauthenticating.
       if (!reauthenticate && entry.isValid()) {

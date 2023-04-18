@@ -6,6 +6,9 @@ import * as sinon from 'sinon';
 
 import {
   Collection,
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent,
   MongoClient,
   OIDC_WORKFLOWS,
   OIDCClientInfo,
@@ -691,6 +694,7 @@ describe('MONGODB-OIDC', function () {
         await client?.close();
       });
 
+      // Sets up the fail point for saslStart.
       const setupFailPoint = async () => {
         return await client
           .db()
@@ -707,6 +711,7 @@ describe('MONGODB-OIDC', function () {
           });
       };
 
+      // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
           configureFailPoint: 'failCommand',
@@ -768,7 +773,87 @@ describe('MONGODB-OIDC', function () {
     });
 
     describe('6. Reauthentication', function () {
+      let client: MongoClient;
+      let collection: Collection;
+
+      beforeEach(function () {
+        cache.clear();
+      });
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
+      // Sets up the fail point for the find to reauthenticate.
+      const setupFailPoint = async () => {
+        return await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['find'],
+              errorCode: 391
+            }
+          });
+      };
+
+      // Removes the fail point.
+      const removeFailPoint = async () => {
+        return await client.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: 'off'
+        });
+      };
+
       describe('6.1 Succeeds', function () {
+        const refreshSpy = sinon.spy(createRefreshCallback('test_user1', 600));
+        let commandStartedEvents: CommandStartedEvent[];
+        let commandSucceededEvents: CommandSucceededEvent[];
+        let commandFailedEvents: CommandFailedEvent[];
+
+        const commandStartedListener = event => {
+          commandStartedEvents.push(event);
+        };
+        const commandSucceededListener = event => {
+          commandSucceededEvents.push(event);
+        };
+        const commandFailedListener = event => {
+          commandFailedEvents.push(event);
+        };
+
+        const resetEvents = () => {
+          commandStartedEvents = [];
+          commandSucceededEvents = [];
+          commandFailedEvents = [];
+        };
+
+        before(async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
+              REFRESH_TOKEN_CALLBACK: refreshSpy
+            },
+            monitorCommands: true
+          });
+          collection = client.db('test').collection('test');
+          await collection.findOne();
+          expect(refreshSpy).to.not.be.called;
+          resetEvents();
+          await setupFailPoint();
+          client.on('commandStarted', commandStartedListener);
+          client.on('commandSucceeded', commandSucceededListener);
+          client.on('commandFailed', commandFailedListener);
+        });
+
+        after(async function () {
+          resetEvents();
+          await removeFailPoint();
+        });
+
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Create a client with the callbacks and an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
@@ -800,6 +885,13 @@ describe('MONGODB-OIDC', function () {
         // Assert that the list of command succeeded events is [find].
         // Assert that a find operation failed once during the command execution.
         // Close the client.
+        it('successfully reauthenticates', async function () {
+          await collection.findOne();
+          expect(refreshSpy).to.have.been.calledOnce;
+          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find', 'find']);
+          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find']);
+          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find']);
+        });
       });
 
       describe('6.2 Retries and Succeeds with Cache', function () {
