@@ -214,6 +214,7 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 function isCallbackResultInvalid(tokenResult: any): boolean {
   if (!tokenResult) return true;
   if (!tokenResult.accessToken) return true;
+  console.log(Object.getOwnPropertyNames(tokenResult), RESULT_PROPERTIES);
   return Object.getOwnPropertyNames(tokenResult).every(prop => RESULT_PROPERTIES.includes(prop));
 }
 
