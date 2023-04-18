@@ -65,6 +65,8 @@ export class CallbackWorkflow implements Workflow {
   ): Promise<Document> {
     const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
+    console.log('REQUEST', request);
+    console.log('REFRESH', refresh);
 
     const entry = this.cache.getEntry(
       connection.address,
@@ -72,6 +74,7 @@ export class CallbackWorkflow implements Workflow {
       request || null,
       refresh || null
     );
+    console.log('CALLBACK_WORKFLOW', entry, entry?.isValid());
     if (entry) {
       // Check if the entry is not expired and if we are reauthenticating.
       if (!reauthenticate && entry.isValid()) {
