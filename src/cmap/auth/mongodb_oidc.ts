@@ -80,7 +80,6 @@ export class MongoDBOIDC extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {
     const { connection, credentials, response, reauthenticating } = authContext;
 
-    console.log('RESPONSE', response);
     if (response?.speculativeAuthenticate) {
       return;
     }

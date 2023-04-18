@@ -10,6 +10,7 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent,
   MongoClient,
+  MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
   OIDCClientInfo,
@@ -108,7 +109,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation. that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -128,7 +130,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -151,7 +154,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -174,7 +178,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -237,7 +242,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -253,7 +259,8 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -282,7 +289,8 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         // Restore the AWS_WEB_IDENTITY_TOKEN_FILE environment variable to the location of valid test_user2 credentials.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
@@ -303,7 +311,8 @@ describe('MONGODB-OIDC', function () {
         // Assert that a find operation succeeds.
         // Close the client.
         it('successfully authenticates', async function () {
-          await collection.findOne();
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
     });
@@ -321,12 +330,10 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('3.1 Valid Callbacks', function () {
-        let requestSpy;
-        let refreshSpy;
+        const requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
+        const refreshSpy = sinon.spy(createRefreshCallback());
 
-        before(function () {
-          requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
-          refreshSpy = sinon.spy(createRefreshCallback());
+        before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestSpy,
@@ -334,6 +341,9 @@ describe('MONGODB-OIDC', function () {
             }
           });
           collection = client.db('test').collection('test');
+          await collection.findOne();
+          expect(requestSpy).to.have.been.calledOnce;
+          await client.close();
         });
 
         // Clear the cache.
@@ -343,8 +353,13 @@ describe('MONGODB-OIDC', function () {
         // Perform another find operation that succeeds. Verify that the refresh callback was called with the appropriate inputs, including the timeout parameter if possible.
         // Close the client.
         it('successfully authenticates with the request and refresh callbacks', async function () {
-          await collection.findOne();
-          expect(requestSpy).to.have.been.calledOnce;
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestSpy,
+              REFRESH_TOKEN_CALLBACK: refreshSpy
+            }
+          });
+          collection = client.db('test').collection('test');
           await collection.findOne();
           expect(refreshSpy).to.have.been.calledOnce;
         });
@@ -367,12 +382,18 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that fails.
         // Close the client.
         it('fails authentication', async function () {
-          await collection.findOne();
+          try {
+            await collection.findOne();
+            expect.fail('Expected OIDC auth to fail with null return from request callback');
+          } catch (e) {
+            expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+            expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+          }
         });
       });
 
       describe('3.3 Refresh Callback Returns Null', function () {
-        before(function () {
+        before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
@@ -382,6 +403,8 @@ describe('MONGODB-OIDC', function () {
             }
           });
           collection = client.db('test').collection('test');
+          await collection.findOne();
+          await client.close();
         });
 
         // Clear the cache.
@@ -390,7 +413,15 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that fails.
         // Close the client.
         it('fails authentication on refresh', async function () {
-          await collection.findOne();
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
+              REFRESH_TOKEN_CALLBACK: () => {
+                return Promise.resolve(null);
+              }
+            }
+          });
+          collection = client.db('test').collection('test');
           await collection.findOne();
         });
       });
@@ -412,10 +443,14 @@ describe('MONGODB-OIDC', function () {
           // Create a client with a request callback that returns data not conforming to the OIDCRequestTokenResult with missing field(s).
           // Perform a find operation that fails.
           // Close the client.
-          it('fails authentication', function () {
-            expect(async () => {
+          it('fails authentication', async function () {
+            try {
               await collection.findOne();
-            }).to.throw;
+              expect.fail('Expected OIDC auth to fail with invlid return from request callback');
+            } catch (e) {
+              expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+              expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+            }
           });
         });
 
@@ -433,7 +468,13 @@ describe('MONGODB-OIDC', function () {
           // Perform a find operation that fails.
           // Close the client.
           it('fails authentication', async function () {
-            await collection.findOne();
+            try {
+              await collection.findOne();
+              expect.fail('Expected OIDC auth to fail with extra fields from request callback');
+            } catch (e) {
+              expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+              expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+            }
           });
         });
       });
@@ -460,7 +501,7 @@ describe('MONGODB-OIDC', function () {
         // Create a new client with the same callbacks.
         // Perform a find operation that fails.
         // Close the client.
-        it('fails authentication on the refresh', function () {
+        it('fails authentication on the refresh', async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 60),
@@ -469,9 +510,13 @@ describe('MONGODB-OIDC', function () {
               }
             }
           });
-          expect(async () => {
+          try {
             await client.db('test').collection('test').findOne();
-          }).to.throw;
+            expect.fail('Expected OIDC auth to fail with missing data from request callback');
+          } catch (e) {
+            expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+            expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+          }
         });
       });
 
@@ -502,7 +547,13 @@ describe('MONGODB-OIDC', function () {
               REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 60, { foo: 'bar' })
             }
           });
-          await client.db('test').collection('test').findOne();
+          try {
+            await client.db('test').collection('test').findOne();
+            expect.fail('Expected OIDC auth to fail with extra fields from request callback');
+          } catch (e) {
+            expect(e).to.be.instanceOf(MongoMissingCredentialsError);
+            expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+          }
         });
       });
     });
@@ -520,7 +571,7 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('4.1 Cache with refresh', function () {
-        let refreshSpy;
+        const refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
 
         before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
@@ -530,7 +581,6 @@ describe('MONGODB-OIDC', function () {
           });
           await client.db('test').collection('test').findOne();
           await client.close();
-          refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
         });
         // Clear the cache.
         // Create a new client with a request callback that gives credentials that expire in on minute.
@@ -553,10 +603,9 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('4.2 Cache with no refresh', function () {
-        let requestSpy;
+        const requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
 
         before(async function () {
-          requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestSpy
