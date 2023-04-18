@@ -433,27 +433,27 @@ export class MongoLogger {
   /**
    * This method should be used when logging errors that do not have a public driver API for
    * reporting errors.
-   **/
+   */
   error = this.log.bind(this, 'error');
   /**
    * This method should be used to log situations where undesirable application behaviour might
-   * occur. For example, failing to end sessions on `MongoClient.close`
-   **/
+   * occur. For example, failing to end sessions on `MongoClient.close`.
+   */
   warn = this.log.bind(this, 'warn');
   /**
    * This method should be used to report high-level information about normal driver behaviour.
-   * For example, the creation of a `MongoClient`
-   **/
+   * For example, the creation of a `MongoClient`.
+   */
   info = this.log.bind(this, 'info');
   /**
    * This method should be used to report information that would be helpful when debugging an
-   * application. For example, a command starting, succeeding or failing
-   * */
+   * application. For example, a command starting, succeeding or failing.
+   */
   debug = this.log.bind(this, 'debug');
   /**
    * This method should be used to report fine-grained details related to logic flow. For example,
-   * entering and exiting a function body
-   * */
+   * entering and exiting a function body.
+   */
   trace = this.log.bind(this, 'trace');
 
   constructor(options: MongoLoggerOptions) {
