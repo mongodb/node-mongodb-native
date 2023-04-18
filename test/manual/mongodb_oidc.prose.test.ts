@@ -784,23 +784,6 @@ describe('MONGODB-OIDC', function () {
         await client?.close();
       });
 
-      // Sets up the fail point for the find to reauthenticate.
-      const setupFailPoint = async () => {
-        return await client
-          .db()
-          .admin()
-          .command({
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 1
-            },
-            data: {
-              failCommands: ['find'],
-              errorCode: 391
-            }
-          });
-      };
-
       // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
@@ -829,6 +812,23 @@ describe('MONGODB-OIDC', function () {
           commandStartedEvents = [];
           commandSucceededEvents = [];
           commandFailedEvents = [];
+        };
+
+        // Sets up the fail point for the find to reauthenticate.
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find'],
+                errorCode: 391
+              }
+            });
         };
 
         before(async function () {
@@ -895,6 +895,39 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('6.2 Retries and Succeeds with Cache', function () {
+        // Sets up the fail point for the find and saslStart to reauthenticate.
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 2
+              },
+              data: {
+                failCommands: ['find', 'saslStart'],
+                errorCode: 391
+              }
+            });
+        };
+
+        before(async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
+              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 600)
+            }
+          });
+          collection = client.db('test').collection('test');
+          await collection.findOne();
+          await setupFailPoint();
+        });
+
+        after(async function () {
+          await removeFailPoint();
+        });
+
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds.
@@ -915,9 +948,48 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully reauthenticates with the cache', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.not.throw;
+        });
       });
 
       describe('6.3 Retries and Fails with no Cache', function () {
+        // Sets up the fail point for the find and saslStart to reauthenticate.
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 2
+              },
+              data: {
+                failCommands: ['find', 'saslStart'],
+                errorCode: 391
+              }
+            });
+        };
+
+        before(async function () {
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
+              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 600)
+            }
+          });
+          collection = client.db('test').collection('test');
+          await collection.findOne();
+          cache.clear();
+          await setupFailPoint();
+        });
+
+        after(async function () {
+          await removeFailPoint();
+        });
+
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds (to force a speculative auth).
@@ -939,6 +1011,11 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that fails.
         // Close the client.
+        it('fails reauthentication with no cache entries', function () {
+          expect(async () => {
+            await collection.findOne();
+          }).to.throw;
+        });
       });
     });
   });
