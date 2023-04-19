@@ -410,6 +410,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
 
       if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+        console.log('DOCUMENT', document);
         callback(new MongoServerError(document));
         return;
       }

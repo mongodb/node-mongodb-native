@@ -831,27 +831,27 @@ describe('MONGODB-OIDC', function () {
           REQUEST_TOKEN_CALLBACK: requestCallback,
           REFRESH_TOKEN_CALLBACK: refreshSpy
         };
-        let commandStartedEvents: CommandStartedEvent[];
-        let commandSucceededEvents: CommandSucceededEvent[];
-        let commandFailedEvents: CommandFailedEvent[];
+        const commandStartedEvents: CommandStartedEvent[] = [];
+        const commandSucceededEvents: CommandSucceededEvent[] = [];
+        const commandFailedEvents: CommandFailedEvent[] = [];
 
         const commandStartedListener = event => {
           console.log('commandStarted', event);
-          commandStartedEvents.push(event);
+          if (event.commandName === 'find') {
+            commandStartedEvents.push(event);
+          }
         };
         const commandSucceededListener = event => {
           console.log('commandSuceeded', event);
-          commandSucceededEvents.push(event);
+          if (event.commandName === 'find') {
+            commandSucceededEvents.push(event);
+          }
         };
         const commandFailedListener = event => {
           console.log('commandFailed', event);
-          commandFailedEvents.push(event);
-        };
-
-        const resetEvents = () => {
-          commandStartedEvents = [];
-          commandSucceededEvents = [];
-          commandFailedEvents = [];
+          if (event.commandName === 'find') {
+            commandFailedEvents.push(event);
+          }
         };
 
         const addListeners = () => {
@@ -879,18 +879,14 @@ describe('MONGODB-OIDC', function () {
 
         before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: authMechanismProperties,
-            monitorCommands: true
+            authMechanismProperties: authMechanismProperties
           });
-          collection = client.db('test').collection('test');
-          await collection.findOne();
+          await client.db('test').collection('test').findOne();
           expect(refreshSpy).to.not.be.called;
-          resetEvents();
           client.close();
         });
 
-        after(async function () {
-          resetEvents();
+        afterEach(async function () {
           await removeFailPoint();
           await client.close();
         });
@@ -935,9 +931,12 @@ describe('MONGODB-OIDC', function () {
           await setupFailPoint();
           await client.db('test').collection('test').findOne();
           expect(refreshSpy).to.have.been.calledOnce;
-          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find', 'find']);
-          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find']);
-          expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find']);
+          expect(commandStartedEvents.map(event => event.commandName)).to.deep.equal([
+            'find',
+            'find'
+          ]);
+          expect(commandSucceededEvents.map(event => event.commandName)).to.deep.equal(['find']);
+          expect(commandFailedEvents.map(event => event.commandName)).to.deep.equal(['find']);
         });
       });
 
@@ -967,11 +966,13 @@ describe('MONGODB-OIDC', function () {
             }
           });
           collection = client.db('test').collection('test');
+          console.log('FIRST FIND');
           await collection.findOne();
+          console.log('SETUP FAIL POINT');
           await setupFailPoint();
         });
 
-        after(async function () {
+        afterEach(async function () {
           await removeFailPoint();
           await client.close();
         });
@@ -997,7 +998,9 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that succeeds.
         // Close the client.
         it('successfully reauthenticates with the cache', async function () {
-          await collection.findOne();
+          console.log('SECOND FIND');
+          const result = await collection.findOne();
+          expect(result).to.be.null;
         });
       });
 
