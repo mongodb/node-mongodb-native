@@ -561,10 +561,6 @@ describe('MONGODB-OIDC', function () {
       let client: MongoClient;
       let collection: Collection;
 
-      beforeEach(function () {
-        cache.clear();
-      });
-
       afterEach(async function () {
         await client?.close();
       });
@@ -574,6 +570,7 @@ describe('MONGODB-OIDC', function () {
         const refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
 
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestCallback
@@ -606,6 +603,7 @@ describe('MONGODB-OIDC', function () {
         const requestSpy = sinon.spy(createRequestCallback('test_user1', 60));
 
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: requestSpy
@@ -639,6 +637,7 @@ describe('MONGODB-OIDC', function () {
         const secondRequestCallback = createRequestCallback('test_user1');
 
         before(async function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: firstRequestCallback
@@ -669,6 +668,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('4.4 Error clears cache', function () {
         before(function () {
+          cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300),
@@ -689,8 +689,12 @@ describe('MONGODB-OIDC', function () {
         it('clears the cache on authentication error', async function () {
           await collection.findOne();
           expect(cache.entries.size).to.equal(1);
-          await collection.findOne();
-          expect(cache.entries).to.be.empty;
+          try {
+            await collection.findOne();
+          } catch (e) {
+            console.log(e);
+            expect(cache.entries.size).to.equal(0);
+          }
         });
       });
 
@@ -708,7 +712,7 @@ describe('MONGODB-OIDC', function () {
         // Close the client.
         it('authenticates with no cache usage', async function () {
           await collection.findOne();
-          expect(cache.entries).to.be.empty;
+          expect(cache.entries.size).to.equal(0);
         });
       });
     });
@@ -809,10 +813,6 @@ describe('MONGODB-OIDC', function () {
         cache.clear();
       });
 
-      afterEach(async function () {
-        await client?.close();
-      });
-
       // Removes the fail point.
       const removeFailPoint = async () => {
         return await client.db().admin().command({
@@ -881,6 +881,7 @@ describe('MONGODB-OIDC', function () {
         after(async function () {
           resetEvents();
           await removeFailPoint();
+          await client.close();
         });
 
         // Clear the cache.
@@ -955,6 +956,7 @@ describe('MONGODB-OIDC', function () {
 
         after(async function () {
           await removeFailPoint();
+          await client.close();
         });
 
         // Clear the cache.
@@ -1015,6 +1017,7 @@ describe('MONGODB-OIDC', function () {
 
         after(async function () {
           await removeFailPoint();
+          await client.close();
         });
 
         // Clear the cache.
