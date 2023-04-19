@@ -16,7 +16,7 @@ import { Db, DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import { MongoLogger, MongoLoggerOptions } from './mongo_logger';
+import { MongoDBLogWritable, MongoLogger, MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, ReadPreferenceMode } from './read_preference';
@@ -253,6 +253,12 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   proxyUsername?: string;
   /** Configures a Socks5 proxy password when the proxy in proxyHost requires username/password authentication. */
   proxyPassword?: string;
+
+  /**
+   * Configures the destination that log messages are written to.
+   * @experimental
+   */
+  mongodbLogPath?: string | MongoDBLogWritable;
 
   /** @internal */
   srvPoller?: SrvPoller;

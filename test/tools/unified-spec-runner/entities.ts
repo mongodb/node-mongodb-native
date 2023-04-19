@@ -192,7 +192,6 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
       [Symbol.for('@@mdb.internalMongoLoggerConfig')]: componentSeverities,
-      // @ts-expect-error TODO(NODE-4849): Remove this once we have support for mongodbLogPath
       mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
