@@ -24,7 +24,6 @@ import {
   MongoDBLogWritable,
   MongoLogger,
   MongoLoggerOptions,
-  SEVERITY_LEVEL_MAP,
   SeverityLevel,
   stringifyWithMaxLen
 } from '../mongodb';
