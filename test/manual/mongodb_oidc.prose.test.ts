@@ -568,13 +568,15 @@ describe('MONGODB-OIDC', function () {
       describe('4.1 Cache with refresh', function () {
         const requestCallback = createRequestCallback('test_user1', 60);
         const refreshSpy = sinon.spy(createRefreshCallback('test_user1', 60));
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: requestCallback,
+          REFRESH_TOKEN_CALLBACK: refreshSpy
+        };
 
         before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback
-            }
+            authMechanismProperties: authMechanismProperties
           });
           await client.db('test').collection('test').findOne();
           await client.close();
@@ -589,10 +591,7 @@ describe('MONGODB-OIDC', function () {
         it('successfully authenticates and calls the refresh callback', async function () {
           // Ensure credentials added to the cache.
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: requestCallback,
-              REFRESH_TOKEN_CALLBACK: refreshSpy
-            }
+            authMechanismProperties: authMechanismProperties
           });
           await client.db('test').collection('test').findOne();
           expect(refreshSpy).to.have.been.calledOnce;
@@ -700,6 +699,7 @@ describe('MONGODB-OIDC', function () {
 
       describe('4.5 AWS Automatic workflow does not use cache', function () {
         before(function () {
+          cache.clear();
           client = new MongoClient(
             'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
           );
@@ -822,7 +822,12 @@ describe('MONGODB-OIDC', function () {
       };
 
       describe('6.1 Succeeds', function () {
+        const requestCallback = createRequestCallback('test_user1', 600);
         const refreshSpy = sinon.spy(createRefreshCallback('test_user1', 600));
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: requestCallback,
+          REFRESH_TOKEN_CALLBACK: refreshSpy
+        };
         let commandStartedEvents: CommandStartedEvent[];
         let commandSucceededEvents: CommandSucceededEvent[];
         let commandFailedEvents: CommandFailedEvent[];
@@ -862,10 +867,7 @@ describe('MONGODB-OIDC', function () {
 
         before(async function () {
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
-              REFRESH_TOKEN_CALLBACK: refreshSpy
-            },
+            authMechanismProperties: authMechanismProperties,
             monitorCommands: true
           });
           collection = client.db('test').collection('test');
