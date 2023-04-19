@@ -54,6 +54,8 @@ export const SeverityLevel = Object.freeze({
 } as const);
 
 /** @internal */
+export const DEFAULT_MAX_DOCUMENT_LENGTH = 1000;
+/** @internal */
 export type SeverityLevel = (typeof SeverityLevel)[keyof typeof SeverityLevel];
 
 /** @internal */
@@ -255,6 +257,15 @@ export interface LogConvertible extends Record<string, any> {
 }
 
 /** @internal */
+export function stringifyWithMaxLen(value: any, maxDocumentLength: number): string {
+  const ejson = EJSON.stringify(value);
+
+  return maxDocumentLength !== 0 && ejson.length > maxDocumentLength
+    ? `${ejson.slice(0, maxDocumentLength)}...`
+    : ejson;
+}
+
+/** @internal */
 export type Loggable = LoggableEvent | LogConvertible;
 
 function isLogConvertible(obj: Loggable): obj is LogConvertible {
@@ -292,7 +303,8 @@ function attachConnectionFields(
 }
 
 function defaultLogTransform(
-  logObject: LoggableEvent | Record<string, any>
+  logObject: LoggableEvent | Record<string, any>,
+  maxDocumentLength: number = DEFAULT_MAX_DOCUMENT_LENGTH
 ): Omit<Log, 's' | 't' | 'c'> {
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
@@ -300,14 +312,14 @@ function defaultLogTransform(
     case COMMAND_STARTED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command started';
-      log.command = EJSON.stringify(logObject.command);
+      log.command = stringifyWithMaxLen(logObject.command, maxDocumentLength);
       log.databaseName = logObject.databaseName;
       return log;
     case COMMAND_SUCCEEDED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command succeeded';
       log.durationMS = logObject.duration;
-      log.reply = EJSON.stringify(logObject.reply);
+      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
       return log;
     case COMMAND_FAILED:
       log = attachCommandFields(log, logObject);
@@ -476,7 +488,7 @@ export class MongoLogger {
       if (isLogConvertible(message)) {
         logMessage = { ...logMessage, ...message.toLog() };
       } else {
-        logMessage = { ...logMessage, ...defaultLogTransform(message) };
+        logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }
     this.logDestination.write(logMessage);

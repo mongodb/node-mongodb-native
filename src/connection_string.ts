@@ -263,7 +263,7 @@ export function parseOptions(
 
   mongoOptions.hosts = isSRV ? [] : hosts.map(HostAddress.fromString);
 
-  const urlOptions = new CaseInsensitiveMap<any[]>();
+  const urlOptions = new CaseInsensitiveMap<unknown[]>();
 
   if (url.pathname !== '/' && url.pathname !== '') {
     const dbName = decodeURIComponent(
@@ -298,7 +298,7 @@ export function parseOptions(
     }
   }
 
-  const objectOptions = new CaseInsensitiveMap(
+  const objectOptions = new CaseInsensitiveMap<unknown>(
     Object.entries(options).filter(([, v]) => v != null)
   );
 
@@ -316,48 +316,42 @@ export function parseOptions(
 
   // All option collection
 
-  const allOptions = new CaseInsensitiveMap();
+  const allProvidedOptions = new CaseInsensitiveMap<unknown[]>();
 
-  const allKeys = new Set<string>([
-    ...urlOptions.keys(),
-    ...objectOptions.keys(),
-    ...DEFAULT_OPTIONS.keys()
-  ]);
+  const allProvidedKeys = new Set<string>([...urlOptions.keys(), ...objectOptions.keys()]);
 
-  for (const key of allKeys) {
+  for (const key of allProvidedKeys) {
     const values = [];
     const objectOptionValue = objectOptions.get(key);
     if (objectOptionValue != null) {
       values.push(objectOptionValue);
     }
-    const urlValue = urlOptions.get(key);
-    if (urlValue != null) {
-      values.push(...urlValue);
-    }
-    const defaultOptionsValue = DEFAULT_OPTIONS.get(key);
-    if (defaultOptionsValue != null) {
-      values.push(defaultOptionsValue);
-    }
-    allOptions.set(key, values);
+
+    const urlValues = urlOptions.get(key) ?? [];
+    values.push(...urlValues);
+    allProvidedOptions.set(key, values);
   }
 
-  if (allOptions.has('tlsCertificateKeyFile') && !allOptions.has('tlsCertificateFile')) {
-    allOptions.set('tlsCertificateFile', allOptions.get('tlsCertificateKeyFile'));
+  if (
+    allProvidedOptions.has('tlsCertificateKeyFile') &&
+    !allProvidedOptions.has('tlsCertificateFile')
+  ) {
+    allProvidedOptions.set('tlsCertificateFile', allProvidedOptions.get('tlsCertificateKeyFile'));
   }
 
-  if (allOptions.has('tls') || allOptions.has('ssl')) {
-    const tlsAndSslOpts = (allOptions.get('tls') || [])
-      .concat(allOptions.get('ssl') || [])
+  if (allProvidedOptions.has('tls') || allProvidedOptions.has('ssl')) {
+    const tlsAndSslOpts = (allProvidedOptions.get('tls') || [])
+      .concat(allProvidedOptions.get('ssl') || [])
       .map(getBoolean.bind(null, 'tls/ssl'));
     if (new Set(tlsAndSslOpts).size !== 1) {
       throw new MongoParseError('All values of tls/ssl must be the same.');
     }
   }
 
-  checkTLSOptions(allOptions);
+  checkTLSOptions(allProvidedOptions);
 
   const unsupportedOptions = setDifference(
-    allKeys,
+    allProvidedKeys,
     Array.from(Object.keys(OPTIONS)).map(s => s.toLowerCase())
   );
   if (unsupportedOptions.size !== 0) {
@@ -371,9 +365,20 @@ export function parseOptions(
   // Option parsing and setting
 
   for (const [key, descriptor] of Object.entries(OPTIONS)) {
-    const values = allOptions.get(key);
-    if (!values || values.length === 0) continue;
-    setOption(mongoOptions, key, descriptor, values);
+    const values = allProvidedOptions.get(key);
+    if (!values || values.length === 0) {
+      if (DEFAULT_OPTIONS.has(key)) {
+        setOption(mongoOptions, key, descriptor, [DEFAULT_OPTIONS.get(key)]);
+      }
+    } else {
+      const { deprecated } = descriptor;
+      if (deprecated) {
+        const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
+        emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
+      }
+
+      setOption(mongoOptions, key, descriptor, values);
+    }
   }
 
   if (mongoOptions.credentials) {
@@ -383,7 +388,7 @@ export function parseOptions(
     const isOidc = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_OIDC;
     if (
       (isGssapi || isX509) &&
-      allOptions.has('authSource') &&
+      allProvidedOptions.has('authSource') &&
       mongoOptions.credentials.source !== '$external'
     ) {
       // If authSource was explicitly given and its incorrect, we error
@@ -395,7 +400,7 @@ export function parseOptions(
     if (
       !(isGssapi || isX509 || isAws || isOidc) &&
       mongoOptions.dbName &&
-      !allOptions.has('authSource')
+      !allProvidedOptions.has('authSource')
     ) {
       // inherit the dbName unless GSSAPI or X509, then silently ignore dbName
       // and there was no specific authSource given
@@ -571,13 +576,8 @@ function setOption(
   descriptor: OptionDescriptor,
   values: unknown[]
 ) {
-  const { target, type, transform, deprecated } = descriptor;
+  const { target, type, transform } = descriptor;
   const name = target ?? key;
-
-  if (deprecated) {
-    const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
-    emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
-  }
 
   switch (type) {
     case 'boolean':

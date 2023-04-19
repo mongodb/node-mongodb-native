@@ -19,11 +19,14 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
+  DEFAULT_MAX_DOCUMENT_LENGTH,
   Log,
   MongoDBLogWritable,
   MongoLogger,
   MongoLoggerOptions,
-  SeverityLevel
+  SEVERITY_LEVEL_MAP,
+  SeverityLevel,
+  stringifyWithMaxLen
 } from '../mongodb';
 
 class BufferingStream extends Writable {
@@ -1225,5 +1228,53 @@ describe('class MongoLogger', function () {
         });
       });
     }
+  });
+
+  describe('stringifyWithMaxLen', function () {
+    const largeDoc = {};
+    const smallDoc = { test: 'Hello' };
+    before(function () {
+      for (let i = 0; i < DEFAULT_MAX_DOCUMENT_LENGTH; i++) {
+        largeDoc[`test${i}`] = `Hello_${i}`;
+      }
+    });
+
+    context('when maxDocumentLength = 0', function () {
+      it('does not truncate document', function () {
+        expect(stringifyWithMaxLen(largeDoc, 0)).to.equal(EJSON.stringify(largeDoc));
+      });
+    });
+
+    context('when maxDocumentLength is non-zero', function () {
+      context('when document has length greater than maxDocumentLength', function () {
+        it('truncates ejson string to length of maxDocumentLength + 3', function () {
+          expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
+            DEFAULT_MAX_DOCUMENT_LENGTH + 3
+          );
+        });
+        it('ends with "..."', function () {
+          expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.match(/^.*\.\.\.$/);
+        });
+      });
+
+      context('when document has length less than or equal to maxDocumentLength', function () {
+        it('does not truncate document', function () {
+          expect(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.equal(
+            EJSON.stringify(smallDoc)
+          );
+        });
+        it('does not end with "..."', function () {
+          expect(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.not.match(
+            /^.*\.\.\./
+          );
+        });
+
+        it('produces valid relaxed EJSON', function () {
+          expect(() => {
+            EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));
+          }).to.not.throw();
+        });
+      });
+    });
   });
 });
