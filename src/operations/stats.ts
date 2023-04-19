@@ -138,8 +138,7 @@ export interface CollStats extends Document {
 
 /**
  * @public
- * @deprecated the `collStats` operation will be removed in the next major release.  Please
- * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
+ * @deprecated This type is only used for the deprecated `collStats` operation and will be removed in the next major release.
  */
 export interface WiredTigerData extends Document {
   LSM: {
