@@ -15,8 +15,11 @@ import type {
   ChangeStreamInvalidateDocument,
   ChangeStreamNameSpace,
   ChangeStreamOptions,
+  ChangeStreamRefineCollectionShardKeyDocument,
   ChangeStreamRenameDocument,
   ChangeStreamReplaceDocument,
+  ChangeStreamReshardCollectionDocument,
+  ChangeStreamShardCollectionDocument,
   ChangeStreamUpdateDocument,
   Collection,
   Document,
@@ -24,11 +27,6 @@ import type {
   ServerSessionId,
   Timestamp,
   UpdateDescription
-} from '../../src';
-import type {
-  ChangeStreamRefineCollectionShardKeyDocument,
-  ChangeStreamReshardCollectionDocument,
-  ChangeStreamShardCollectionDocument
 } from '../mongodb';
 
 declare const changeStreamOptions: ChangeStreamOptions;
@@ -181,8 +179,8 @@ switch (change.operationType) {
 // New fields can be added with $addFields, but you have to use TChange to type it
 expectError(change.randomKeyAlwaysAccessibleBecauseOfPipelineFlexibilty);
 
-declare const collection: Collection<Schema>;
-const pipelineChangeStream = collection.watch<
+declare const collectionWithSchema: Collection<Schema>;
+const pipelineChangeStream = collectionWithSchema.watch<
   Schema,
   ChangeStreamInsertDocument<Schema> & { comment: string }
 >([{ $addFields: { comment: 'big changes' } }, { $match: { operationType: 'insert' } }]);
@@ -193,28 +191,52 @@ pipelineChangeStream.on('change', change => {
   expectType<Schema>(change.fullDocument);
 });
 
-collection.watch().on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+collectionWithSchema
+  .watch()
+  .on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
 
 // Just overriding the schema provides a typed changestream OF that schema
-collection
+collectionWithSchema
   .watch<Document>()
   .on('change', change => expectType<ChangeStreamDocument<Document>>(change));
 
-// both schema and Tchange can be made as flexible as possible (Document)
-collection.watch<Document, Document>().on('change', change => expectType<Document>(change));
+// both schema and TChange can be made as flexible as possible (Document)
+collectionWithSchema
+  .watch<Document, Document>()
+  .on('change', change => expectType<Document>(change));
 
 // first argument does not stop you from making second more generic
-collection.watch<{ a: number }, Document>().on('change', change => expectType<Document>(change));
+collectionWithSchema
+  .watch<{ a: number }, Document>()
+  .on('change', change => expectType<Document>(change));
 
 // Arguments must be objects
-expectError(collection.watch<Document, number>());
-expectError(collection.watch<number, number>());
+expectError(collectionWithSchema.watch<Document, number>());
+expectError(collectionWithSchema.watch<number, number>());
 
 // First argument no longer relates to second
-collection
+collectionWithSchema
   .watch<{ a: number }, { b: boolean }>()
   .on('change', change => expectType<{ b: boolean }>(change));
 
 expectType<AsyncGenerator<ChangeStreamDocument<Schema>, void, void>>(
-  collection.watch()[Symbol.asyncIterator]()
+  collectionWithSchema.watch()[Symbol.asyncIterator]()
+);
+
+// Change type returned to user is equivalent across next/tryNext/on/once/addListener
+const changeStream = collectionWithSchema.watch();
+expectType<ChangeStreamDocument<Schema> | null>(await changeStream.tryNext());
+expectType<ChangeStreamDocument<Schema>>(await changeStream.next());
+changeStream.on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+changeStream.once('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+changeStream.addListener('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+
+declare const noSchemaCollection: Collection;
+const changeStreamNoSchema = noSchemaCollection.watch();
+expectType<ChangeStreamDocument<Document> | null>(await changeStreamNoSchema.tryNext());
+expectType<ChangeStreamDocument<Document>>(await changeStreamNoSchema.next());
+changeStreamNoSchema.on('change', change => expectType<ChangeStreamDocument<Document>>(change));
+changeStreamNoSchema.once('change', change => expectType<ChangeStreamDocument<Document>>(change));
+changeStreamNoSchema.addListener('change', change =>
+  expectType<ChangeStreamDocument<Document>>(change)
 );
