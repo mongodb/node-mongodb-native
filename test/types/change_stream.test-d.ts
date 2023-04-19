@@ -1,7 +1,6 @@
 import { expectError, expectType } from 'tsd';
 
 import type {
-  ChangeStream,
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
   ChangeStreamCreateIndexDocument,
@@ -219,14 +218,15 @@ expectType<AsyncGenerator<ChangeStreamDocument<Schema>, void, void>>(
 );
 
 // Change type returned to user is equivalent across next/tryNext/on/once/addListener
-declare let changeStream: ChangeStream<Schema>;
+const changeStream = collection.watch();
 expectType<ChangeStreamDocument<Schema> | null>(await changeStream.tryNext());
 expectType<ChangeStreamDocument<Schema>>(await changeStream.next());
 changeStream.on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
 changeStream.once('change', change => expectType<ChangeStreamDocument<Schema>>(change));
 changeStream.addListener('change', change => expectType<ChangeStreamDocument<Schema>>(change));
 
-declare let changeStreamNoSchema: ChangeStream;
+declare const noSchemaCollection: Collection;
+const changeStreamNoSchema = noSchemaCollection.watch();
 expectType<ChangeStreamDocument<Document> | null>(await changeStreamNoSchema.tryNext());
 expectType<ChangeStreamDocument<Document>>(await changeStreamNoSchema.next());
 changeStreamNoSchema.on('change', change => expectType<ChangeStreamDocument<Document>>(change));
