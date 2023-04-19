@@ -836,12 +836,15 @@ describe('MONGODB-OIDC', function () {
         let commandFailedEvents: CommandFailedEvent[];
 
         const commandStartedListener = event => {
+          console.log('commandStarted', event);
           commandStartedEvents.push(event);
         };
         const commandSucceededListener = event => {
+          console.log('commandSuceeded', event);
           commandSucceededEvents.push(event);
         };
         const commandFailedListener = event => {
+          console.log('commandFailed', event);
           commandFailedEvents.push(event);
         };
 
@@ -849,6 +852,12 @@ describe('MONGODB-OIDC', function () {
           commandStartedEvents = [];
           commandSucceededEvents = [];
           commandFailedEvents = [];
+        };
+
+        const addListeners = () => {
+          client.on('commandStarted', commandStartedListener);
+          client.on('commandSucceeded', commandSucceededListener);
+          client.on('commandFailed', commandFailedListener);
         };
 
         // Sets up the fail point for the find to reauthenticate.
@@ -877,10 +886,7 @@ describe('MONGODB-OIDC', function () {
           await collection.findOne();
           expect(refreshSpy).to.not.be.called;
           resetEvents();
-          await setupFailPoint();
-          client.on('commandStarted', commandStartedListener);
-          client.on('commandSucceeded', commandSucceededListener);
-          client.on('commandFailed', commandFailedListener);
+          client.close();
         });
 
         after(async function () {
@@ -925,6 +931,8 @@ describe('MONGODB-OIDC', function () {
             authMechanismProperties: authMechanismProperties,
             monitorCommands: true
           });
+          addListeners();
+          await setupFailPoint();
           await client.db('test').collection('test').findOne();
           expect(refreshSpy).to.have.been.calledOnce;
           expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find', 'find']);
