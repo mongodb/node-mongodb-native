@@ -209,7 +209,8 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 
 /**
  * Determines if a result returned from a request or refresh callback
- * function is invalid.
+ * function is invalid. This means the result is nullish, doesn't contain
+ * the accessToken required field, and does not contain extra fields.
  */
 function isCallbackResultInvalid(tokenResult: any): boolean {
   if (!tokenResult) return true;
