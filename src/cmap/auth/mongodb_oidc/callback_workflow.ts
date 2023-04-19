@@ -212,6 +212,7 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
  * function is invalid.
  */
 function isCallbackResultInvalid(tokenResult: any): boolean {
+  console.log('TOKEN RESULT', tokenResult);
   if (!tokenResult) return true;
   if (!tokenResult.accessToken) return true;
   console.log(Object.getOwnPropertyNames(tokenResult), RESULT_PROPERTIES);
