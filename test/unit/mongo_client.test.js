@@ -488,9 +488,7 @@ describe('MongoOptions', function () {
       const clientViaOpt = new MongoClient('mongodb://localhost', {
         compressors: ['zlib', 'snappy']
       });
-      expect(clientViaOpt.options)
-        .to.have.property('compressors')
-        .deep.equal(['zlib', 'snappy', 'none']);
+      expect(clientViaOpt.options).to.have.property('compressors').deep.equal(['zlib', 'snappy']);
     });
 
     it('can be set when passed in as a comma-delimited string in the options object or URI', function () {
@@ -498,12 +496,8 @@ describe('MongoOptions', function () {
         compressors: 'zlib,snappy'
       });
       const clientViaUri = new MongoClient('mongodb://localhost?compressors=zlib,snappy');
-      expect(clientViaOpt.options)
-        .to.have.property('compressors')
-        .deep.equal(['zlib', 'snappy', 'none']);
-      expect(clientViaUri.options)
-        .to.have.property('compressors')
-        .deep.equal(['zlib', 'snappy', 'none']);
+      expect(clientViaOpt.options).to.have.property('compressors').deep.equal(['zlib', 'snappy']);
+      expect(clientViaUri.options).to.have.property('compressors').deep.equal(['zlib', 'snappy']);
     });
 
     it('should validate that a string or an array of strings is provided as input', function () {
