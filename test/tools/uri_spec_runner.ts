@@ -336,7 +336,7 @@ export function executeUriValidationTest(
       case 'compressors':
         expect(options, `${errorMessage} ${optionKey}`)
           .to.have.property(optionKey)
-          .deep.equal(optionValue.concat('none')); // TODO(NODE-3923): remove unnecessary appending
+          .deep.equal(optionValue);
         break;
       case 'replicaset': // replicaset appears with both casings in the test expectations
         expect(options, `${errorMessage} replicaSet`)

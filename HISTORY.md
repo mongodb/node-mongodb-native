@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.3.0](https://github.com/mongodb/node-mongodb-native/compare/v5.2.0...v5.3.0) (2023-04-18)
+
+
+### Features
+
+* **NODE-4696:** add FaaS env information to client metadata ([#3626](https://github.com/mongodb/node-mongodb-native/issues/3626)) ([0424080](https://github.com/mongodb/node-mongodb-native/commit/04240809f71bb8c2f88d50344d2b8d0d1d2ceea8))
+* **NODE-4774:** deprecate cursor forEach ([#3622](https://github.com/mongodb/node-mongodb-native/issues/3622)) ([8d76a71](https://github.com/mongodb/node-mongodb-native/commit/8d76a7173fb8ac70c0f097366830da273c8a4d94))
+* **NODE-4791:** deprecate duplicate bulk methods ([#3623](https://github.com/mongodb/node-mongodb-native/issues/3623)) ([2839e95](https://github.com/mongodb/node-mongodb-native/commit/2839e95256094cbf75fae2753d2e40551c04d87c))
+* **NODE-4795:** deprecate addUser helper ([#3624](https://github.com/mongodb/node-mongodb-native/issues/3624)) ([53a0aae](https://github.com/mongodb/node-mongodb-native/commit/53a0aae584fb33b598e16dcea5dc559c3d8dca5e))
+* **NODE-5169:** Implement emergency logger ([#3610](https://github.com/mongodb/node-mongodb-native/issues/3610)) ([d502eb0](https://github.com/mongodb/node-mongodb-native/commit/d502eb0eb1d2f56ae3603a2da665a79040bc898c))
+* **NODE-5188:** add alternative runtime detection to client metadata ([#3636](https://github.com/mongodb/node-mongodb-native/issues/3636)) ([2a26de3](https://github.com/mongodb/node-mongodb-native/commit/2a26de3a2cd95b4fc21918a96dd21dc4bc62000a))
+* **NODE-5189:** deprecate tcp keepalive options ([#3621](https://github.com/mongodb/node-mongodb-native/issues/3621)) ([cc7c75a](https://github.com/mongodb/node-mongodb-native/commit/cc7c75a64720efe40b70f952e77c1d99d269bf06))
+
+
+### Bug Fixes
+
+* **NODE-5042:** relax SRV record validation to account for a dot suffix ([#3633](https://github.com/mongodb/node-mongodb-native/issues/3633)) ([ad15881](https://github.com/mongodb/node-mongodb-native/commit/ad158811fb23f27d323f5fcada386abaa415fbe6))
+* **NODE-5171:** allow `upsertedId` to be null in `UpdateResult` ([#3631](https://github.com/mongodb/node-mongodb-native/issues/3631)) ([4b5be21](https://github.com/mongodb/node-mongodb-native/commit/4b5be2121fdcca0879447be24e8e935dfcd14764))
+* **NODE-5201:** prevent warning when default value for deprecation option is used ([#3646](https://github.com/mongodb/node-mongodb-native/issues/3646)) ([e7f6e4e](https://github.com/mongodb/node-mongodb-native/commit/e7f6e4e34faa65678a34d14ad5b72aacb5dc8dc7))
+
 ## [5.2.0](https://github.com/mongodb/node-mongodb-native/compare/v5.1.0...v5.2.0) (2023-04-04)
 
 
