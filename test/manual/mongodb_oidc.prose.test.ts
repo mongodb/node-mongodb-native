@@ -651,17 +651,20 @@ describe('MONGODB-OIDC', function () {
         // Ensure that a find operation adds credentials to the cache.
         // Close the client.
         // Create a new client with a different request callback.
-        // Ensure that a find operation adds a new entry to the cache.
+        // Ensure that a find operation replaces the one-time entry with a new entry to the cache.
         // Close the client.
-        it('includes the callback functions in the cache', async function () {
+        it('replaces expired entries in the cache', async function () {
           expect(cache.entries.size).to.equal(1);
+          const initialKey = cache.entries.keys().next().value;
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
             authMechanismProperties: {
               REQUEST_TOKEN_CALLBACK: secondRequestCallback
             }
           });
           await client.db('test').collection('test').findOne();
-          expect(cache.entries.size).to.equal(2);
+          expect(cache.entries.size).to.equal(1);
+          const newKey = cache.entries.keys().next().value;
+          expect(newKey).to.not.equal(initialKey);
         });
       });
 
@@ -918,7 +921,11 @@ describe('MONGODB-OIDC', function () {
         // Assert that a find operation failed once during the command execution.
         // Close the client.
         it('successfully reauthenticates', async function () {
-          await collection.findOne();
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: authMechanismProperties,
+            monitorCommands: true
+          });
+          await client.db('test').collection('test').findOne();
           expect(refreshSpy).to.have.been.calledOnce;
           expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find', 'find']);
           expect(commandStartedEvents.map(event => event.commandName)).to.equal(['find']);
