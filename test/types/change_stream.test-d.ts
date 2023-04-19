@@ -1,6 +1,7 @@
 import { expectError, expectType } from 'tsd';
 
 import type {
+  ChangeStream,
   ChangeStreamCollModDocument,
   ChangeStreamCreateDocument,
   ChangeStreamCreateIndexDocument,
@@ -15,8 +16,11 @@ import type {
   ChangeStreamInvalidateDocument,
   ChangeStreamNameSpace,
   ChangeStreamOptions,
+  ChangeStreamRefineCollectionShardKeyDocument,
   ChangeStreamRenameDocument,
   ChangeStreamReplaceDocument,
+  ChangeStreamReshardCollectionDocument,
+  ChangeStreamShardCollectionDocument,
   ChangeStreamUpdateDocument,
   Collection,
   Document,
@@ -24,11 +28,6 @@ import type {
   ServerSessionId,
   Timestamp,
   UpdateDescription
-} from '../../src';
-import type {
-  ChangeStreamRefineCollectionShardKeyDocument,
-  ChangeStreamReshardCollectionDocument,
-  ChangeStreamShardCollectionDocument
 } from '../mongodb';
 
 declare const changeStreamOptions: ChangeStreamOptions;
@@ -217,4 +216,21 @@ collection
 
 expectType<AsyncGenerator<ChangeStreamDocument<Schema>, void, void>>(
   collection.watch()[Symbol.asyncIterator]()
+);
+
+// Change type returned to user is equivalent across next/tryNext/on/once/addListener
+declare let changeStream: ChangeStream<Schema>;
+expectType<ChangeStreamDocument<Schema> | null>(await changeStream.tryNext());
+expectType<ChangeStreamDocument<Schema>>(await changeStream.next());
+changeStream.on('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+changeStream.once('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+changeStream.addListener('change', change => expectType<ChangeStreamDocument<Schema>>(change));
+
+declare let changeStreamNoSchema: ChangeStream;
+expectType<ChangeStreamDocument<Document> | null>(await changeStreamNoSchema.tryNext());
+expectType<ChangeStreamDocument<Document>>(await changeStreamNoSchema.next());
+changeStreamNoSchema.on('change', change => expectType<ChangeStreamDocument<Document>>(change));
+changeStreamNoSchema.once('change', change => expectType<ChangeStreamDocument<Document>>(change));
+changeStreamNoSchema.addListener('change', change =>
+  expectType<ChangeStreamDocument<Document>>(change)
 );
