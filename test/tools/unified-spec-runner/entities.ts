@@ -171,7 +171,7 @@ export class UnifiedMongoClient extends MongoClient {
         const transformedLog = {
           level: log.s,
           component: log.c,
-          data: { ...log, s: undefined, c: undefined }
+          data: { ...log }
         };
 
         this.buffer.push(transformedLog);
@@ -288,6 +288,7 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
+    console.log(this.logCollector.buffer);
     return this.logCollector.buffer;
   }
 }
