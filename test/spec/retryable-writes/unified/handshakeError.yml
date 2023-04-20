@@ -1,3 +1,5 @@
+# Tests in this file are generated from handshakeError.yml.template.
+
 description: "retryable writes handshake failures"
 
 schemaVersion: "1.3"
@@ -9,16 +11,20 @@ runOnRequirements:
 
 createEntities:
   - client:
-      id: &client0 client0
+      id: &client client
       useMultipleMongoses: false
-      observeEvents: [commandStartedEvent, connectionCheckOutStartedEvent]
+      observeEvents:
+        - connectionCheckOutStartedEvent
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
   - database:
-      id: &database0 database0
-      client: *client0
-      databaseName: &databaseName retryable-handshake-tests
+      id: &database database
+      client: *client
+      databaseName: &databaseName retryable-writes-handshake-tests
   - collection:
-      id: &collection0 collection0
-      database: *database0
+      id: &collection collection
+      database: *database
       collectionName: &collectionName coll
 
 initialData:
@@ -28,109 +34,752 @@ initialData:
       - { _id: 1, x: 11 }
 
 tests:
-  - description: "InsertOne succeeds after retryable handshake error"
+  # Because setting a failPoint creates a connection in the connection pool, run
+  # a ping operation that fails immediately after the failPoint operation in
+  # order to discard the connection before running the actual operation to be
+  # tested. The saslContinue command is used to avoid SDAM errors.
+  #
+  # Description of events:
+  # - Failpoint operation.
+  #   - Creates a connection in the connection pool that must be closed.
+  # - Ping operation.
+  #   - Triggers failpoint (first time).
+  #   - Closes the connection made by the fail point operation.
+  # - Test operation.
+  #   - New connection is created.
+  #   - Triggers failpoint (second time).
+  #   - Tests whether operation successfully retries the handshake and succeeds.
+
+  - description: "collection.insertOne succeeds after retryable handshake network error"
     operations:
-      - name: failPoint # fail the next connection establishment
+      - name: failPoint
         object: testRunner
         arguments:
-          client: *client0
+          client: *client
           failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-              failCommands: [saslContinue, ping]
+              failCommands: [ping, saslContinue]
               closeConnection: true
-
       - name: runCommand
-        object: *database0
-        arguments:
-          commandName: ping
-          command: { ping: 1 }
-        expectError:
-          isError: true
-
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
       - name: insertOne
-        object: *collection0
+        object: *collection
         arguments:
           document: { _id: 2, x: 22 }
-
     expectEvents:
-      - client: *client0
+      - client: *client
         eventType: cmap
         events:
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
-      - client: *client0
+      - client: *client
         events:
           - commandStartedEvent:
-              command:
-                ping: 1
+              command: { ping: 1 }
               databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
           - commandStartedEvent:
-              command:
-                insert: *collectionName
-                documents: [{ _id: 2, x: 22 }]
               commandName: insert
-              databaseName: *databaseName
+          - commandSucceededEvent:
+              commandName: insert
 
-    outcome:
-      - collectionName: *collectionName
-        databaseName: *databaseName
-        documents:
-          - { _id: 1, x: 11 }
-          - { _id: 2, x: 22 } # The write was still applied
-
-  - description: "InsertOne succeeds after retryable handshake error ShutdownInProgress"
+  - description: "collection.insertOne succeeds after retryable handshake server error (ShutdownInProgress)"
     operations:
-      - name: failPoint # fail the next connection establishment
+      - name: failPoint
         object: testRunner
         arguments:
-          client: *client0
+          client: *client
           failPoint:
             configureFailPoint: failCommand
             mode: { times: 2 }
             data:
-              failCommands: [saslContinue, ping]
-              errorCode: 91 # ShutdownInProgress
+              failCommands: [ping, saslContinue]
+              closeConnection: true
       - name: runCommand
-        object: *database0
-        arguments:
-          commandName: ping
-          command: { ping: 1 }
-        expectError:
-          isError: true
-
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
       - name: insertOne
-        object: *collection0
+        object: *collection
         arguments:
           document: { _id: 2, x: 22 }
-
     expectEvents:
-      - client: *client0
+      - client: *client
         eventType: cmap
         events:
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
           - { connectionCheckOutStartedEvent: {} }
-      - client: *client0
+      - client: *client
         events:
           - commandStartedEvent:
-              command:
-                ping: 1
+              command: { ping: 1 }
               databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
           - commandStartedEvent:
-              command:
-                insert: *collectionName
-                documents: [{ _id: 2, x: 22 }]
               commandName: insert
-              databaseName: *databaseName
+          - commandSucceededEvent:
+              commandName: insert
 
-    outcome:
-      - collectionName: *collectionName
-        databaseName: *databaseName
-        documents:
-          - { _id: 1, x: 11 }
-          - { _id: 2, x: 22 } # The write was still applied
+  - description: "collection.insertMany succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+
+  - description: "collection.insertMany succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+
+  - description: "collection.deleteOne succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: delete
+          - commandSucceededEvent:
+              commandName: delete
+
+  - description: "collection.deleteOne succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: delete
+          - commandSucceededEvent:
+              commandName: delete
+
+  - description: "collection.replaceOne succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: update
+          - commandSucceededEvent:
+              commandName: update
+
+  - description: "collection.replaceOne succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: update
+          - commandSucceededEvent:
+              commandName: update
+
+  - description: "collection.updateOne succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: update
+          - commandSucceededEvent:
+              commandName: update
+
+  - description: "collection.updateOne succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: update
+          - commandSucceededEvent:
+              commandName: update
+
+  - description: "collection.findOneAndDelete succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.findOneAndDelete succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.findOneAndReplace succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.findOneAndReplace succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.findOneAndUpdate succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.findOneAndUpdate succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 22 } }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: findAndModify
+          - commandSucceededEvent:
+              commandName: findAndModify
+
+  - description: "collection.bulkWrite succeeds after retryable handshake network error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
+
+  - description: "collection.bulkWrite succeeds after retryable handshake server error (ShutdownInProgress)"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ping, saslContinue]
+              closeConnection: true
+      - name: runCommand
+        object: *database
+        arguments: { commandName: ping, command: { ping: 1 } }
+        expectError: { isError: true }
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 2, x: 22 }
+    expectEvents:
+      - client: *client
+        eventType: cmap
+        events:
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+          - { connectionCheckOutStartedEvent: {} }
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command: { ping: 1 }
+              databaseName: *databaseName
+          - commandFailedEvent:
+              commandName: ping
+          - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
+              commandName: insert
