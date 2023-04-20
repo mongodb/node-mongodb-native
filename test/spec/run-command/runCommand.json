@@ -1,10 +1,11 @@
 {
-  "description": "runCommand spec requirements",
-  "schemaVersion": "1.5",
+  "description": "runCommand",
+  "schemaVersion": "1.3",
   "createEntities": [
     {
       "client": {
         "id": "client",
+        "useMultipleMongoses": false,
         "observeEvents": [
           "commandStartedEvent"
         ]
@@ -12,15 +13,15 @@
     },
     {
       "database": {
-        "id": "plainDb",
+        "id": "db",
         "client": "client",
-        "databaseName": "plainDb"
+        "databaseName": "db"
       }
     },
     {
       "collection": {
         "id": "collection",
-        "database": "plainDb",
+        "database": "db",
         "collectionName": "collection"
       }
     },
@@ -56,7 +57,7 @@
     },
     {
       "client": {
-        "id": "stableApiClient",
+        "id": "clientWithStableApi",
         "observeEvents": [
           "commandStartedEvent"
         ],
@@ -68,21 +69,17 @@
     },
     {
       "database": {
-        "id": "stableApiDb",
-        "client": "stableApiClient",
-        "databaseName": "stableApiDb"
+        "id": "dbWithStableApi",
+        "client": "clientWithStableApi",
+        "databaseName": "dbWithStableApi"
       }
     }
   ],
   "initialData": [
     {
       "collectionName": "collection",
-      "databaseName": "plainDb",
-      "documents": [
-        {
-          "_id": 0
-        }
-      ]
+      "databaseName": "db",
+      "documents": []
     }
   ],
   "tests": [
@@ -91,7 +88,7 @@
       "operations": [
         {
           "name": "runCommand",
-          "object": "plainDb",
+          "object": "db",
           "arguments": {
             "commandName": "ping",
             "command": {
@@ -111,7 +108,7 @@
               "commandStartedEvent": {
                 "command": {
                   "ping": 1,
-                  "$db": "plainDb"
+                  "$db": "db"
                 },
                 "commandName": "ping"
               }
@@ -121,11 +118,11 @@
       ]
     },
     {
-      "description": "attaches the provided session lsid to ping command",
+      "description": "attaches the provided session lsid to given command",
       "operations": [
         {
           "name": "runCommand",
-          "object": "plainDb",
+          "object": "db",
           "arguments": {
             "commandName": "ping",
             "command": {
@@ -149,7 +146,7 @@
                   "lsid": {
                     "$$sessionLsid": "session"
                   },
-                  "$db": "plainDb"
+                  "$db": "db"
                 },
                 "commandName": "ping"
               }
@@ -163,13 +160,15 @@
       "operations": [
         {
           "name": "runCommand",
-          "object": "plainDb",
+          "object": "db",
           "arguments": {
             "commandName": "ping",
             "command": {
               "ping": 1
             },
-            "readPreference": "nearest"
+            "readPreference": {
+              "mode": "nearest"
+            }
           },
           "expectResult": {
             "ok": 1
@@ -187,7 +186,7 @@
                   "$readPreference": {
                     "mode": "nearest"
                   },
-                  "$db": "plainDb"
+                  "$db": "db"
                 },
                 "commandName": "ping"
               }
@@ -203,13 +202,11 @@
           "name": "runCommand",
           "object": "dbWithRC",
           "arguments": {
-            "commandName": "ping",
+            "commandName": "aggregate",
             "command": {
-              "ping": 1
+              "aggregate": 1,
+              "pipeline": []
             }
-          },
-          "expectResult": {
-            "ok": 1
           }
         }
       ],
@@ -226,7 +223,7 @@
                   },
                   "$db": "dbWithRC"
                 },
-                "commandName": "ping"
+                "commandName": "aggregate"
               }
             }
           ]
@@ -240,9 +237,15 @@
           "name": "runCommand",
           "object": "dbWithWC",
           "arguments": {
-            "commandName": "ping",
+            "commandName": "insert",
             "command": {
-              "ping": 1
+              "insert": "collection",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true
             }
           },
           "expectResult": {
@@ -257,7 +260,7 @@
             {
               "commandStartedEvent": {
                 "command": {
-                  "ping": 1,
+                  "insert": "collection",
                   "writeConcern": {
                     "$$exists": false
                   },
@@ -294,7 +297,7 @@
         },
         {
           "name": "runCommand",
-          "object": "plainDb",
+          "object": "db",
           "arguments": {
             "commandName": "ping",
             "command": {
@@ -302,7 +305,7 @@
             }
           },
           "expectError": {
-            "isError": true
+            "isClientError": true
           }
         }
       ]
@@ -311,13 +314,17 @@
       "description": "attaches transaction fields to given command",
       "runOnRequirements": [
         {
+          "minServerVersion": "4.0",
           "topologies": [
-            "replicaset",
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.2",
+          "topologies": [
             "sharded-replicaset",
-            "load-balanced",
-            "sharded"
-          ],
-          "minServerVersion": "4.4"
+            "load-balanced"
+          ]
         }
       ],
       "operations": [
@@ -328,7 +335,7 @@
             "callback": [
               {
                 "name": "runCommand",
-                "object": "plainDb",
+                "object": "db",
                 "arguments": {
                   "session": "session",
                   "commandName": "insert",
@@ -336,7 +343,7 @@
                     "insert": "collection",
                     "documents": [
                       {
-                        "_id": 1
+                        "_id": 2
                       }
                     ],
                     "ordered": true
@@ -364,7 +371,7 @@
                   "insert": "collection",
                   "documents": [
                     {
-                      "_id": 1
+                      "_id": 2
                     }
                   ],
                   "ordered": true,
@@ -382,7 +389,7 @@
                   }
                 },
                 "commandName": "insert",
-                "databaseName": "plainDb"
+                "databaseName": "db"
               }
             },
             {
@@ -414,7 +421,7 @@
       "operations": [
         {
           "name": "runCommand",
-          "object": "stableApiDb",
+          "object": "dbWithStableApi",
           "arguments": {
             "commandName": "ping",
             "command": {
@@ -428,13 +435,13 @@
       ],
       "expectEvents": [
         {
-          "client": "stableApiClient",
+          "client": "clientWithStableApi",
           "events": [
             {
               "commandStartedEvent": {
                 "command": {
                   "ping": 1,
-                  "$db": "stableApiDb",
+                  "$db": "dbWithStableApi",
                   "apiVersion": "1",
                   "apiStrict": true,
                   "apiDeprecationErrors": {
