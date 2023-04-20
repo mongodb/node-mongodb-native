@@ -80,7 +80,9 @@ export class MongoDBOIDC extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {
     const { connection, credentials, response, reauthenticating } = authContext;
 
+    console.log('RESPONSE', response);
     if (response?.speculativeAuthenticate) {
+      console.log('SPECULATIVE RESPONSE', response.speculativeAuthenticate);
       return;
     }
 
@@ -101,7 +103,7 @@ export class MongoDBOIDC extends AuthProvider {
     handshakeDoc: HandshakeDocument,
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
-    const { credentials } = authContext;
+    const { connection, credentials } = authContext;
 
     if (!credentials) {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
@@ -109,7 +111,8 @@ export class MongoDBOIDC extends AuthProvider {
 
     const workflow = getWorkflow(credentials);
 
-    const result = await workflow.speculativeAuth();
+    const result = await workflow.speculativeAuth(connection, credentials);
+    console.log('PREPARE', result);
     return { ...handshakeDoc, ...result };
   }
 }

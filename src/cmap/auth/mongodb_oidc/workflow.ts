@@ -17,5 +17,5 @@ export interface Workflow {
   /**
    * Get the document to add for speculative authentication.
    */
-  speculativeAuth(): Promise<Document>;
+  speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document>;
 }

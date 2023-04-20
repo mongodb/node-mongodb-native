@@ -27,11 +27,22 @@ export class CallbackWorkflow implements Workflow {
   }
 
   /**
-   * Get the document to add for speculative authentication. Is empty when
-   * callbacks are in play.
+   * Get the document to add for speculative authentication. This will only return
+   * a valid document when there is a valid entry in the cache.
    */
-  speculativeAuth(): Promise<Document> {
-    return Promise.resolve({});
+  async speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document> {
+    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
+    const entry = this.cache.getEntry(
+      connection.address,
+      credentials.username,
+      request || null,
+      refresh || null
+    );
+    if (entry?.isValid()) {
+      return { speculativeAuthenticate: continueCommandDocument(entry.tokenResult.accessToken) };
+    }
+    return { speculativeAuthenticate: startCommandDocument(credentials) };
   }
 
   /**

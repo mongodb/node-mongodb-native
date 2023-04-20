@@ -580,6 +580,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     callback: Callback<Connection>
   ) {
     if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
+      console.log('REAUTHENTICATING');
       this.reauthenticate(conn, fn, (error, res) => {
         if (error) {
           return callback(error);
