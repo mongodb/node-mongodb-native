@@ -1,8 +1,6 @@
 import { loadSpecTests } from '../../spec';
-import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner'
 import { CmapTest, runCmapTestSuite, SkipDescription } from '../../tools/cmap_spec_runner';
-import { Test } from 'mocha';
-import { TestConfiguration } from '../../tools/runner/config';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 // These tests rely on a simple "pool.clear()" command, which is not sufficient
 // to properly clear the pool in LB mode, since it requires a serviceId to be passed in
@@ -38,7 +36,7 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
   }
 ];
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function() {
+describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function () {
   const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling', 'cmap-format');
 
   runCmapTestSuite(tests, {
@@ -56,14 +54,16 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-form
   });
 });
 
-describe.only('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function() {
+describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
   const tests = loadSpecTests('connection-monitoring-and-pooling', 'logging');
 
   runUnifiedSuite(tests, (test: { description: string }) => {
-    if ([
-      'waitQueueMultiple should be included in connection pool created message when specified',
-      'waitQueueSize should be included in connection pool created message when specified'
-    ].includes(test.description)) {
+    if (
+      [
+        'waitQueueMultiple should be included in connection pool created message when specified',
+        'waitQueueSize should be included in connection pool created message when specified'
+      ].includes(test.description)
+    ) {
       return 'waitQueueSize not supported';
     }
     return false;

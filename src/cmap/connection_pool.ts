@@ -734,7 +734,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
       // forward all events from the connection to the pool
       for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
-        connection.on(event, (e: any) => this.emit(event, e));
+        connection.on(event, (e: any) => {
+          this.emit(event, e);
+          if (event !== Connection.CLUSTER_TIME_RECEIVED) {
+            this.client.mongoLogger.debug('command', event);
+          }
+        });
       }
 
       if (this.loadBalanced) {
@@ -854,6 +859,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         this[kCheckedOut].add(connection);
         const connectionCheckedOutEvent = new ConnectionCheckedOutEvent(this, connection);
         this.emit(ConnectionPool.CONNECTION_CHECKED_OUT, connectionCheckedOutEvent);
+        this.client.mongoLogger.debug('connection', connectionCheckedOutEvent);
         if (waitQueueMember.timer) {
           clearTimeout(waitQueueMember.timer);
         }
@@ -892,6 +898,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             this[kCheckedOut].add(connection);
             const connectionCheckedOutEvent = new ConnectionCheckedOutEvent(this, connection);
             this.emit(ConnectionPool.CONNECTION_CHECKED_OUT, connectionCheckedOutEvent);
+            this.client.mongoLogger.debug('connection', connectionCheckedOutEvent);
           }
 
           if (waitQueueMember.timer) {

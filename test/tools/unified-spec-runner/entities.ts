@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
+import { inspect } from 'util';
 
 import {
   AbstractCursor,
@@ -174,6 +175,7 @@ export class UnifiedMongoClient extends MongoClient {
           data: { ...log }
         };
 
+        console.log(inspect(transformedLog.data.message, { breakLength: Infinity }));
         this.buffer.push(transformedLog);
       }
     };
@@ -288,7 +290,6 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   get collectedLogs(): LogMessage[] {
-    console.log(this.logCollector.buffer);
     return this.logCollector.buffer;
   }
 }
