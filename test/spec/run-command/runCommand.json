@@ -204,8 +204,9 @@
           "arguments": {
             "commandName": "aggregate",
             "command": {
-              "aggregate": 1,
-              "pipeline": []
+              "aggregate": "collection",
+              "pipeline": [],
+              "cursor": {}
             }
           }
         }
@@ -217,7 +218,7 @@
             {
               "commandStartedEvent": {
                 "command": {
-                  "ping": 1,
+                  "aggregate": "collection",
                   "readConcern": {
                     "$$exists": false
                   },
@@ -266,7 +267,7 @@
                   },
                   "$db": "dbWithWC"
                 },
-                "commandName": "ping"
+                "commandName": "insert"
               }
             }
           ]

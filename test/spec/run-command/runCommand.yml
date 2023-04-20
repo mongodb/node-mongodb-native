@@ -112,13 +112,13 @@ tests:
         # may automatically convert command responses into cursors.
         arguments:
           commandName: aggregate
-          command: { aggregate: 1, pipeline: [] }
+          command: { aggregate: *collection, pipeline: [], cursor: {} }
     expectEvents:
       - client: *client
         events:
           - commandStartedEvent:
               command:
-                ping: 1
+                aggregate: *collection
                 readConcern: { $$exists: false }
                 $db: *dbWithRC
               commandName: aggregate
@@ -142,7 +142,7 @@ tests:
                 insert: *collection
                 writeConcern: { $$exists: false }
                 $db: *dbWithWC
-              commandName: ping
+              commandName: insert
 
   - description: does not retry retryable errors on given command
     operations:
