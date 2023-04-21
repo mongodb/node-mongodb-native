@@ -36,7 +36,7 @@ describe('RunCommand API', () => {
   });
 
   it('does not support writeConcern in options', async () => {
-    const command = { insert: 'test', documents: [{ x: 1 }] };
+    const command = Object.freeze({ insert: 'test', documents: [{ x: 1 }] });
     await db.command(command, { writeConcern: new WriteConcern('majority') });
     expect(commandsStarted).to.not.have.nested.property('[0].command.writeConcern');
     expect(command).to.not.have.property('writeConcern');
@@ -44,7 +44,7 @@ describe('RunCommand API', () => {
 
   // TODO(NODE-4936): We do support readConcern in options, the spec forbids this
   it.skip('does not support readConcern in options', async () => {
-    const command = { find: 'test', filter: {} };
+    const command = Object.freeze({ find: 'test', filter: {} });
     const res = await db.command(command, { readConcern: ReadConcern.MAJORITY });
     expect(res).to.have.property('ok', 1);
     expect(commandsStarted).to.not.have.nested.property('[0].command.readConcern');
