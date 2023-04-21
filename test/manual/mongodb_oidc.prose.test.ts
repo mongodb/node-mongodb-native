@@ -734,7 +734,6 @@ describe('MONGODB-OIDC', function () {
 
     describe('5. Speculative Authentication', function () {
       let client: MongoClient;
-      let collection: Collection;
       const requestCallback = createRequestCallback('test_user1', 600);
       const authMechanismProperties = {
         REQUEST_TOKEN_CALLBACK: requestCallback
@@ -775,9 +774,8 @@ describe('MONGODB-OIDC', function () {
         client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
           authMechanismProperties: authMechanismProperties
         });
-        collection = client.db('test').collection('test');
         await setupFailPoint();
-        await collection.findOne();
+        await client.db('test').collection('test').findOne();
         await client.close();
       });
 
@@ -813,7 +811,7 @@ describe('MONGODB-OIDC', function () {
           authMechanismProperties: authMechanismProperties
         });
         await setupFailPoint();
-        const result = await collection.findOne();
+        const result = await client.db('test').collection('test').findOne();
         expect(result).to.be.null;
       });
     });
