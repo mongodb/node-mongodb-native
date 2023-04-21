@@ -639,7 +639,7 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
 
   const options = {
     readPreference: operation.arguments.readPreference,
-    session: entities.getEntity('session', operation.arguments.session, false)
+    session: operation.arguments.session
   };
 
   return db.command(command, options);
