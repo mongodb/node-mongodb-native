@@ -242,9 +242,9 @@ export class Db {
    * - `apiStrict`
    * - `apiDeprecationErrors`
    *
-   * Only when in a transaction:
-   * - `readConcern`
-   * - `writeConcern`
+   * When in a transaction:
+   * - `readConcern` - sourced from readConcern set on the TransactionOptions
+   * - `writeConcern` - sourced from writeConcern set on the TransactionOptions
    *
    * Attaching any of the above fields to the command will have no effect as the driver will overwrite the value.
    *
