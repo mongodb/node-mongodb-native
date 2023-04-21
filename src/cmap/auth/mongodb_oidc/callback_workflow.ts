@@ -163,6 +163,7 @@ export class CallbackWorkflow implements Workflow {
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
   ): Promise<OIDCRequestTokenResult> {
+    console.log('FETCH ACCESS TOKEN');
     // Get the token from the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -170,12 +171,14 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null
     );
+    console.log('ENTRY', entry);
     let result;
     const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
     // Check if there's a token in the cache.
     if (entry) {
       // If the cache entry is valid, return the token result.
       if (entry.isValid()) {
+        console.log('ENTRY IS VALID');
         return entry.tokenResult;
       }
       // If the cache entry is not valid, remove it from the cache and first attempt
@@ -183,12 +186,15 @@ export class CallbackWorkflow implements Workflow {
       // exists, then fallback to the request callback.
       if (refreshCallback) {
         result = await refreshCallback(clientInfo, startResult, entry.tokenResult);
+        console.log('USING REFRESH CALLBACK', result);
       } else {
         result = await requestCallback(clientInfo, startResult);
+        console.log('USING REQUEST CALLBACK, NO REFRESH FOUND', result);
       }
     } else {
       // With no token in the cache we use the request callback.
       result = await requestCallback(clientInfo, startResult);
+      console.log('USING REQUEST CALLBACK, NO TOKEN IN CACHE', result);
     }
     // Validate that the result returned by the callback is acceptable.
     if (isCallbackResultInvalid(result)) {
