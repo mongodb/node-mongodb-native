@@ -106,7 +106,12 @@ export class CallbackWorkflow implements Workflow {
       console.log('NO ENTRY IN CACHE');
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
-      const startDocument = await this.startAuthentication(connection, credentials, response);
+      const startDocument = await this.startAuthentication(
+        connection,
+        credentials,
+        reauthenticating,
+        response
+      );
       console.log('START DOCUMENT', startDocument);
       const conversationId = startDocument.conversationId;
       const serverResult = BSON.deserialize(
@@ -139,10 +144,11 @@ export class CallbackWorkflow implements Workflow {
   private async startAuthentication(
     connection: Connection,
     credentials: MongoCredentials,
+    reauthenticating: boolean,
     response?: Document
   ): Promise<Document> {
     let result;
-    if (response?.speculativeAuthenticate) {
+    if (!reauthenticating && response?.speculativeAuthenticate) {
       result = response.speculativeAuthenticate;
     } else {
       result = await connection.commandAsync(
