@@ -760,7 +760,7 @@ describe('MONGODB-OIDC', function () {
             },
             data: {
               failCommands: ['saslStart'],
-              errorCode: 391
+              errorCode: 18
             }
           });
       };
