@@ -69,14 +69,22 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null
     );
+    console.log('ENTRY', entry, entry?.isValid());
     let result;
     // Reauthentication must go through all the steps again regards of a cache entry
     // being present.
     if (entry && !reauthenticating) {
       if (entry.isValid()) {
+        console.log('FINISHING');
         // Presence of a valid cache entry means we can skip to the finishing step.
-        result = await this.finishAuthentication(connection, credentials, entry.tokenResult);
+        result = await this.finishAuthentication(
+          connection,
+          credentials,
+          entry.tokenResult,
+          response?.speculativeAuthenticate?.conversationId
+        );
       } else {
+        console.log('FETCH AND FINISH');
         // Presence of an expired cache entry means we must fetch a new one and
         // then execute the final step.
         const tokenResult = await this.fetchAccessToken(
@@ -87,16 +95,24 @@ export class CallbackWorkflow implements Workflow {
           requestCallback,
           refreshCallback
         );
-        result = await this.finishAuthentication(connection, credentials, tokenResult);
+        result = await this.finishAuthentication(
+          connection,
+          credentials,
+          tokenResult,
+          response?.speculativeAuthenticate?.conversationId
+        );
       }
     } else {
+      console.log('NO ENTRY IN CACHE');
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(connection, credentials, response);
+      console.log('START DOCUMENT', startDocument);
       const conversationId = startDocument.conversationId;
       const serverResult = BSON.deserialize(
         startDocument.payload.buffer
       ) as OIDCMechanismServerStep1;
+      console.log('SERVER_RESULT', serverResult);
       const tokenResult = await this.fetchAccessToken(
         connection,
         credentials,
