@@ -484,16 +484,17 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   command(
     ns: MongoDBNamespace,
-    userCommand: Document,
+    cmd: Document,
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
+    cmd = { ...cmd };
+
     const readPreference = getReadPreference(options);
     const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
-    let cmd = { ...userCommand };
 
     if (this.serverApi) {
       const { version, strict, deprecationErrors } = this.serverApi;
