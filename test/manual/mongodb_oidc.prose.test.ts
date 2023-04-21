@@ -736,6 +736,9 @@ describe('MONGODB-OIDC', function () {
       let client: MongoClient;
       let collection: Collection;
       const requestCallback = createRequestCallback('test_user1', 600);
+      const authMechanismProperties = {
+        REQUEST_TOKEN_CALLBACK: requestCallback
+      }
 
       // Removes the fail point.
       const removeFailPoint = async () => {
@@ -769,7 +772,7 @@ describe('MONGODB-OIDC', function () {
       before(async function () {
         cache.clear();
         client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-          authMechanismProperties: requestCallback
+          authMechanismProperties: authMechanismProperties
         });
         collection = client.db('test').collection('test');
         await setupFailPoint();
@@ -806,7 +809,7 @@ describe('MONGODB-OIDC', function () {
       // Close the client.
       it('successfully speculative authenticates', async function () {
         client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-          authMechanismProperties: requestCallback
+          authMechanismProperties: authMechanismProperties
         });
         await setupFailPoint();
         const result = await collection.findOne();
