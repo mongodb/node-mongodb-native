@@ -9,7 +9,7 @@ import { CommandOperation, OperationParent } from './command';
 export type RunCommandOptions = {
   /** Specify ClientSession for this command */
   session?: ClientSession;
-  /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
+  /** The read preference */
   readPreference?: ReadPreferenceLike;
 
   // The following options were "accidentally" supported
