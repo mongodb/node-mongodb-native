@@ -163,8 +163,7 @@ export class CallbackWorkflow implements Workflow {
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
   ): Promise<OIDCRequestTokenResult> {
-    // Delete expired cache entries then get the token from the cache.
-    this.cache.deleteExpiredEntries();
+    // Get the token from the cache.
     const entry = this.cache.getEntry(
       connection.address,
       credentials.username,
@@ -206,6 +205,8 @@ export class CallbackWorkflow implements Workflow {
       result,
       startResult
     );
+    // Cleanup the cache.
+    this.cache.deleteExpiredEntries();
     return result;
   }
 }
