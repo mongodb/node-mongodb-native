@@ -24,9 +24,11 @@ export abstract class ServiceWorkflow implements Workflow {
   /**
    * Get the document to add for speculative authentication.
    */
-  async speculativeAuth(): Promise<Document> {
+  async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
     const token = await this.getToken();
-    return { speculativeAuthenticate: commandDocument(token) };
+    const document = commandDocument(token);
+    document.db = credentials.source;
+    return { speculativeAuthenticate: document };
   }
 
   /**
