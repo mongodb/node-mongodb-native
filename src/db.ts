@@ -233,9 +233,11 @@ export class Db {
    * This command does not inherit options from the MongoClient.
    *
    * The driver will ensure the following fields are attached to the command sent to the server:
-   * - `lsid` (session)
-   * - `$readPreference`
-   * - `$db`
+   * - `lsid` - sourced from an implicit session or options.session
+   * - `$readPreference` - defaults to primary or can be configured by options.readPreference
+   * - `$db` - sourced from the name of this database
+   *
+   * If the client has a serverApi setting:
    * - `apiVersion`
    * - `apiStrict`
    * - `apiDeprecationErrors`
