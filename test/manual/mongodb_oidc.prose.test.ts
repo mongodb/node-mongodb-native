@@ -738,7 +738,7 @@ describe('MONGODB-OIDC', function () {
       const requestCallback = createRequestCallback('test_user1', 600);
       const authMechanismProperties = {
         REQUEST_TOKEN_CALLBACK: requestCallback
-      }
+      };
 
       // Removes the fail point.
       const removeFailPoint = async () => {
@@ -748,7 +748,7 @@ describe('MONGODB-OIDC', function () {
         });
       };
 
-      // Sets up the fail point for the find to reauthenticate.
+      // Sets up the fail point for the saslStart
       const setupFailPoint = async () => {
         return await client
           .db()

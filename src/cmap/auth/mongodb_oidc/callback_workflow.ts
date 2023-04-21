@@ -61,6 +61,7 @@ export class CallbackWorkflow implements Workflow {
         'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
+    console.log('RESPONSE', response);
     // Look for an existing entry in the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -125,8 +126,8 @@ export class CallbackWorkflow implements Workflow {
     response?: Document
   ): Promise<Document> {
     let result;
-    if (response?.speculativeAuthentication) {
-      result = response.speculativeAuthentication;
+    if (response?.speculativeAuthenticate) {
+      result = response.speculativeAuthenticate;
     } else {
       result = await connection.commandAsync(
         ns(credentials.source),
