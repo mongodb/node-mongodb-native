@@ -631,8 +631,18 @@ operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
   const db = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments!;
-  return db.command(command, opts);
+
+  if (operation.arguments?.command == null) throw new Error('runCommand requires a command');
+  const { command } = operation.arguments;
+
+  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported, skip');
+
+  const options = {
+    readPreference: operation.arguments.readPreference,
+    session: entities.getEntity('session', operation.arguments.session, false)
+  };
+
+  return db.command(command, options);
 });
 
 operations.set('updateMany', async ({ entities, operation }) => {
