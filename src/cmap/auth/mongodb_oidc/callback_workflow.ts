@@ -35,11 +35,13 @@ export class CallbackWorkflow implements Workflow {
   }
 
   /**
-   * Get the document to add for speculative authentication. This will only return
-   * a valid document when there is a valid entry in the cache.
+   * Get the document to add for speculative authentication. This also needs
+   * to add a db field from the credentials source.
    */
-  async speculativeAuth(): Promise<Document> {
-    return {};
+  async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
+    const document = startCommandDocument(credentials);
+    document.db = credentials.source;
+    return document;
   }
 
   /**

@@ -383,7 +383,9 @@ describe('MONGODB-OIDC', function () {
             expect.fail('Expected OIDC auth to fail with null return from request callback');
           } catch (e) {
             expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-            expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+            expect(e.message).to.include(
+              'User provided OIDC callbacks must return a valid object with an accessToken'
+            );
           }
         });
       });
@@ -420,7 +422,9 @@ describe('MONGODB-OIDC', function () {
             expect.fail('Expected OIDC auth to fail with invlid return from refresh callback');
           } catch (e) {
             expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-            expect(e.message).to.include('REFRESH_TOKEN_CALLBACK must return a valid object');
+            expect(e.message).to.include(
+              'User provided OIDC callbacks must return a valid object with an accessToken'
+            );
           }
         });
       });
@@ -449,7 +453,9 @@ describe('MONGODB-OIDC', function () {
               expect.fail('Expected OIDC auth to fail with invlid return from request callback');
             } catch (e) {
               expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-              expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+              expect(e.message).to.include(
+                'User provided OIDC callbacks must return a valid object with an accessToken'
+              );
             }
           });
         });
@@ -474,7 +480,9 @@ describe('MONGODB-OIDC', function () {
               expect.fail('Expected OIDC auth to fail with extra fields from request callback');
             } catch (e) {
               expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-              expect(e.message).to.include('REQUEST_TOKEN_CALLBACK must return a valid object');
+              expect(e.message).to.include(
+                'User provided OIDC callbacks must return a valid object with an accessToken'
+              );
             }
           });
         });
@@ -514,7 +522,9 @@ describe('MONGODB-OIDC', function () {
             expect.fail('Expected OIDC auth to fail with missing data from refresh callback');
           } catch (e) {
             expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-            expect(e.message).to.include('REFRESH_TOKEN_CALLBACK must return a valid object');
+            expect(e.message).to.include(
+              'User provided OIDC callbacks must return a valid object with an accessToken'
+            );
           }
         });
       });
@@ -551,7 +561,9 @@ describe('MONGODB-OIDC', function () {
             expect.fail('Expected OIDC auth to fail with extra fields from refresh callback');
           } catch (e) {
             expect(e).to.be.instanceOf(MongoMissingCredentialsError);
-            expect(e.message).to.include('REFRESH_TOKEN_CALLBACK must return a valid object');
+            expect(e.message).to.include(
+              'User provided OIDC callbacks must return a valid object with an accessToken'
+            );
           }
         });
       });
