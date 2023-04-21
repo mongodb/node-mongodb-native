@@ -7,14 +7,13 @@ import { CommandOperation, OperationParent } from './command';
 
 /** @public */
 export type RunCommandOptions = {
-  ///// OperationOptions
   /** Specify ClientSession for this command */
   session?: ClientSession;
   /** The preferred read preference (ReadPreference.primary, ReadPreference.primary_preferred, ReadPreference.secondary, ReadPreference.secondary_preferred, ReadPreference.nearest). */
   readPreference?: ReadPreferenceLike;
 
-  /// The following options were "accidentally" supported
-  /// Since the option
+  // The following options were "accidentally" supported
+  // Since the option
 
   /** @deprecated This is an internal option that has undefined behavior for this API */
   willRetryWrite?: any;
