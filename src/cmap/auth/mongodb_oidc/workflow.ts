@@ -11,11 +11,12 @@ export interface Workflow {
   execute(
     connection: Connection,
     credentials: MongoCredentials,
-    reauthenticate?: boolean
+    reauthenticating: boolean,
+    response?: Document
   ): Promise<Document>;
 
   /**
    * Get the document to add for speculative authentication.
    */
-  speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document>;
+  speculativeAuth(): Promise<Document>;
 }

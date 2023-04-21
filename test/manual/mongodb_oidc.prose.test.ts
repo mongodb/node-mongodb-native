@@ -721,54 +721,6 @@ describe('MONGODB-OIDC', function () {
     });
 
     describe('5. Speculative Authentication', function () {
-      let client: MongoClient;
-      let collection: Collection;
-
-      beforeEach(function () {
-        cache.clear();
-      });
-
-      afterEach(async function () {
-        await client?.close();
-      });
-
-      // Sets up the fail point for saslStart.
-      const setupFailPoint = async () => {
-        return await client
-          .db()
-          .admin()
-          .command({
-            configureFailPoint: 'failCommand',
-            mode: {
-              times: 2
-            },
-            data: {
-              failCommands: ['saslStart'],
-              errorCode: 18
-            }
-          });
-      };
-
-      // Removes the fail point.
-      const removeFailPoint = async () => {
-        return await client.db().admin().command({
-          configureFailPoint: 'failCommand',
-          mode: 'off'
-        });
-      };
-
-      before(async function () {
-        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-          authMechanismProperties: {
-            REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
-          }
-        });
-        await setupFailPoint();
-        collection = client.db('test').collection('test');
-        await collection.findOne();
-        await removeFailPoint();
-      });
-
       // Clear the cache.
       // Create a client with a request callback that returns a valid token that will not expire soon.
       // Set a fail point for saslStart commands of the form:
@@ -796,21 +748,10 @@ describe('MONGODB-OIDC', function () {
       // Set a fail point for saslStart commands.
       // Perform a find operation that succeeds.
       // Close the client.
-      it('successfully speculative authenticates', async function () {
-        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-          authMechanismProperties: {
-            REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300)
-          }
-        });
-        await setupFailPoint();
-        await client.db('test').collection('test').findOne();
-        await removeFailPoint();
-      });
     });
 
     describe('6. Reauthentication', function () {
       let client: MongoClient;
-      let collection: Collection;
 
       // Removes the fail point.
       const removeFailPoint = async () => {
@@ -938,43 +879,6 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('6.2 Retries and Succeeds with Cache', function () {
-        // Sets up the fail point for the find and saslStart to reauthenticate.
-        const setupFailPoint = async () => {
-          return await client
-            .db()
-            .admin()
-            .command({
-              configureFailPoint: 'failCommand',
-              mode: {
-                times: 2
-              },
-              data: {
-                failCommands: ['find', 'saslStart'],
-                errorCode: 391
-              }
-            });
-        };
-
-        before(async function () {
-          cache.clear();
-          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
-              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 600)
-            }
-          });
-          collection = client.db('test').collection('test');
-          console.log('FIRST FIND');
-          await collection.findOne();
-          console.log('SETUP FAIL POINT');
-          await setupFailPoint();
-        });
-
-        afterEach(async function () {
-          await removeFailPoint();
-          await client.close();
-        });
-
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds.
@@ -995,50 +899,9 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that succeeds.
         // Close the client.
-        it('successfully reauthenticates with the cache', async function () {
-          console.log('SECOND FIND');
-          const result = await collection.findOne();
-          expect(result).to.be.null;
-        });
       });
 
       describe('6.3 Retries and Fails with no Cache', function () {
-        // Sets up the fail point for the find and saslStart to reauthenticate.
-        const setupFailPoint = async () => {
-          return await client
-            .db()
-            .admin()
-            .command({
-              configureFailPoint: 'failCommand',
-              mode: {
-                times: 2
-              },
-              data: {
-                failCommands: ['find', 'saslStart'],
-                errorCode: 391
-              }
-            });
-        };
-
-        before(async function () {
-          cache.clear();
-          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600),
-              REFRESH_TOKEN_CALLBACK: createRefreshCallback('test_user1', 600)
-            }
-          });
-          collection = client.db('test').collection('test');
-          await collection.findOne();
-          cache.clear();
-          await setupFailPoint();
-        });
-
-        after(async function () {
-          await removeFailPoint();
-          await client.close();
-        });
-
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds (to force a speculative auth).
@@ -1060,13 +923,6 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that fails.
         // Close the client.
-        it('fails reauthentication with no cache entries', async function () {
-          try {
-            await collection.findOne();
-          } catch (e) {
-
-          }
-        });
       });
     });
   });

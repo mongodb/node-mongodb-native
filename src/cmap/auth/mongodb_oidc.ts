@@ -78,22 +78,10 @@ export class MongoDBOIDC extends AuthProvider {
    * Authenticate using OIDC
    */
   override async auth(authContext: AuthContext): Promise<void> {
-    const { connection, credentials, response, reauthenticating } = authContext;
-
-    console.log('RESPONSE', response);
-    if (response?.speculativeAuthenticate) {
-      console.log('SPECULATIVE RESPONSE', response.speculativeAuthenticate);
-      return;
-    }
-
-    if (!credentials) {
-      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-
+    const { connection, reauthenticating, response } = authContext;
+    const credentials = getCredentials(authContext);
     const workflow = getWorkflow(credentials);
-
-    console.log('AUTH', workflow);
-    await workflow.execute(connection, credentials, reauthenticating);
+    await workflow.execute(connection, credentials, reauthenticating, response);
   }
 
   /**
@@ -103,18 +91,21 @@ export class MongoDBOIDC extends AuthProvider {
     handshakeDoc: HandshakeDocument,
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
-    const { connection, credentials } = authContext;
-
-    if (!credentials) {
-      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-
-    const workflow = getWorkflow(credentials);
-
-    const result = await workflow.speculativeAuth(connection, credentials);
-    console.log('PREPARE', result);
+    const workflow = getWorkflow(getCredentials(authContext));
+    const result = await workflow.speculativeAuth();
     return { ...handshakeDoc, ...result };
   }
+}
+
+/**
+ * Get credentials from the auth context, throwing if they do not exist.
+ */
+function getCredentials(authContext: AuthContext): MongoCredentials {
+  const { credentials } = authContext;
+  if (!credentials) {
+    throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
+  }
+  return credentials;
 }
 
 /**

@@ -4,13 +4,21 @@ import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../.
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
-import type { OIDCMechanismServerStep1, OIDCRequestTokenResult } from '../mongodb_oidc';
+import type {
+  OIDCMechanismServerStep1,
+  OIDCRefreshFunction,
+  OIDCRequestFunction,
+  OIDCRequestTokenResult
+} from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
 import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
 
-/* 5 minutes in seconds */
+/** 5 minutes in seconds */
 const TIMEOUT_S = 300;
+
+/** Properties allowed on results of callbacks. */
+const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 
 /**
  * OIDC implementation of a callback based workflow.
@@ -30,243 +38,181 @@ export class CallbackWorkflow implements Workflow {
    * Get the document to add for speculative authentication. This will only return
    * a valid document when there is a valid entry in the cache.
    */
-  async speculativeAuth(connection: Connection, credentials: MongoCredentials): Promise<Document> {
-    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
-    const entry = this.cache.getEntry(
-      connection.address,
-      credentials.username,
-      request || null,
-      refresh || null
-    );
-    if (entry?.isValid()) {
-      return { speculativeAuthenticate: continueCommandDocument(entry.tokenResult.accessToken) };
-    }
-    return { speculativeAuthenticate: startCommandDocument(credentials) };
+  async speculativeAuth(): Promise<Document> {
+    return {};
   }
 
   /**
-   * Execute the workflow.
-   *
-   * Steps:
-   * - If an entry is in the cache
-   *   - If it is not expired
-   *     - Skip step one and use the entry to execute step two.
-   *   - If it is expired
-   *     - If the refresh callback exists
-   *       - remove expired entry from cache
-   *       - call the refresh callback.
-   *       - put the new entry in the cache.
-   *       - execute step two.
-   *     - If the refresh callback does not exist.
-   *       - remove expired entry from cache
-   *       - call the request callback.
-   *       - put the new entry in the cache.
-   *       - execute step two.
-   * - If no entry is in the cache.
-   *   - execute step one.
-   *   - call the refresh callback.
-   *   - put the new entry in the cache.
-   *   - execute step two.
+   * Execute the OIDC callback workflow.
    */
   async execute(
     connection: Connection,
     credentials: MongoCredentials,
-    reauthenticate = false
+    reauthenticating: boolean,
+    response?: Document
   ): Promise<Document> {
-    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
-    console.log('REQUEST', request);
-    console.log('REFRESH', refresh);
-
-    const entry = this.cache.getEntry(
-      connection.address,
-      credentials.username,
-      request || null,
-      refresh || null
-    );
-    console.log('CALLBACK_WORKFLOW', entry, entry?.isValid());
-    if (entry) {
-      // Check if the entry is not expired and if we are reauthenticating.
-      if (!reauthenticate && entry.isValid()) {
-        // Skip step one and execute the step two saslContinue.
-        try {
-          const result = await finishAuth(entry.tokenResult, undefined, connection, credentials);
-          return result;
-        } catch (error) {
-          // If authentication errors when using a cached token we remove it from
-          // the cache.
-          this.cache.deleteEntry(
-            connection.address,
-            credentials.username || '',
-            request || null,
-            refresh || null
-          );
-          throw error;
-        }
-      } else {
-        // Remove the expired entry from the cache.
-        this.cache.deleteEntry(
-          connection.address,
-          credentials.username || '',
-          request || null,
-          refresh || null
-        );
-        // Execute a refresh of the token and finish auth.
-        return this.refreshAndFinish(
-          connection,
-          credentials,
-          entry.serverResult,
-          entry.tokenResult
-        );
-      }
-    } else {
-      // No entry means to start with the step one saslStart.
-      const result = await connection.commandAsync(
-        ns(credentials.source),
-        startCommandDocument(credentials),
-        undefined
-      );
-      const stepOne = BSON.deserialize(result.payload.buffer) as OIDCMechanismServerStep1;
-      console.log('STEP ONE', stepOne, result);
-      // Call the request callback and finish auth.
-      return this.requestAndFinish(connection, credentials, stepOne, result.conversationId);
-    }
-  }
-
-  /**
-   * Execute the refresh callback if it exists, otherwise the request callback, then
-   * finish the authentication.
-   */
-  private async refreshAndFinish(
-    connection: Connection,
-    credentials: MongoCredentials,
-    stepOneResult: OIDCMechanismServerStep1,
-    tokenResult: OIDCRequestTokenResult,
-    conversationId?: number
-  ): Promise<Document> {
-    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
-    // If a refresh callback exists, use it. Otherwise use the request callback.
-    if (refresh) {
-      const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
-      const result: OIDCRequestTokenResult = await refresh(clientInfo, stepOneResult, tokenResult);
-      // Validate the result.
-      if (isCallbackResultInvalid(result)) {
-        throw new MongoMissingCredentialsError(
-          'REFRESH_TOKEN_CALLBACK must return a valid object with an accessToken'
-        );
-      }
-      // Cache a new entry and continue with the saslContinue.
-      this.cache.addEntry(
-        connection.address,
-        credentials.username || '',
-        request || null,
-        refresh,
-        result,
-        stepOneResult
-      );
-      return finishAuth(result, conversationId, connection, credentials);
-    } else {
-      // Fallback to using the request callback.
-      return this.requestAndFinish(connection, credentials, stepOneResult, conversationId);
-    }
-  }
-
-  /**
-   * Execute the request callback and finish authentication.
-   */
-  private async requestAndFinish(
-    connection: Connection,
-    credentials: MongoCredentials,
-    stepOneResult: OIDCMechanismServerStep1,
-    conversationId?: number
-  ): Promise<Document> {
-    // Call the request callback.
-    const request = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-    const refresh = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
-    // Always clear expired entries from the cache on each finish as cleanup.
-    this.cache.deleteExpiredEntries();
-    if (!request) {
-      // Request callback must be present.
+    const requestCallback = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
+    const refreshCallback = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
+    // At minimum a request callback must be provided by the user.
+    if (!requestCallback) {
       throw new MongoInvalidArgumentError(
         'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
-    const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
-    const tokenResult = await request(clientInfo, stepOneResult);
-    // Validate the result.
-    if (isCallbackResultInvalid(tokenResult)) {
-      throw new MongoMissingCredentialsError(
-        'REQUEST_TOKEN_CALLBACK must return a valid object with an accessToken'
+    // Look for an existing entry in the cache.
+    const entry = this.cache.getEntry(
+      connection.address,
+      credentials.username,
+      requestCallback,
+      refreshCallback || null
+    );
+    let result;
+    // Reauthentication must go through all the steps again regards of a cache entry
+    // being present.
+    if (entry && !reauthenticating) {
+      if (entry.isValid()) {
+        // Presence of a valid cache entry means we can skip to the finishing step.
+        result = await this.finishAuthentication(connection, credentials, entry.tokenResult);
+      } else {
+        // Presence of an expired cache entry means we must fetch a new one and
+        // then execute the final step.
+        const tokenResult = await this.fetchAccessToken(
+          connection,
+          credentials,
+          entry.serverResult,
+          requestCallback,
+          refreshCallback
+        );
+        result = await this.finishAuthentication(connection, credentials, tokenResult);
+      }
+    } else {
+      // No entry in the cache requires us to do all authentication steps
+      // from start to finish, including getting a fresh token for the cache.
+      const startDocument = await this.startAuthentication(connection, credentials, response);
+      const conversationId = startDocument.conversationId;
+      const serverResult = BSON.deserialize(
+        startDocument.payload.buffer
+      ) as OIDCMechanismServerStep1;
+      const tokenResult = await this.fetchAccessToken(
+        connection,
+        credentials,
+        serverResult,
+        requestCallback,
+        refreshCallback
+      );
+      result = await this.finishAuthentication(
+        connection,
+        credentials,
+        tokenResult,
+        conversationId
       );
     }
-    // Cache a new entry and continue with the saslContinue.
+    return result;
+  }
+
+  /**
+   * Starts the callback authentication process. If there is a speculative
+   * authentication document from the initial handshake, then we will use that
+   * value to get the issuer, otherwise we will send the saslStart command.
+   */
+  private async startAuthentication(
+    connection: Connection,
+    credentials: MongoCredentials,
+    response?: Document
+  ): Promise<Document> {
+    let result;
+    if (response?.speculativeAuthentication) {
+      result = response.speculativeAuthentication;
+    } else {
+      result = await connection.commandAsync(
+        ns(credentials.source),
+        startCommandDocument(credentials),
+        undefined
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Finishes the callback authentication process.
+   */
+  private async finishAuthentication(
+    connection: Connection,
+    credentials: MongoCredentials,
+    tokenResult: OIDCRequestTokenResult,
+    conversationId?: number
+  ): Promise<Document> {
+    const result = await connection.commandAsync(
+      ns(credentials.source),
+      finishCommandDocument(tokenResult.accessToken, conversationId),
+      undefined
+    );
+    return result;
+  }
+
+  /**
+   * Fetches an access token using either the request or refresh callbacks and
+   * puts it in the cache.
+   */
+  private async fetchAccessToken(
+    connection: Connection,
+    credentials: MongoCredentials,
+    startResult: OIDCMechanismServerStep1,
+    requestCallback: OIDCRequestFunction,
+    refreshCallback?: OIDCRefreshFunction
+  ): Promise<OIDCRequestTokenResult> {
+    // Delete expired cache entries then get the token from the cache.
+    this.cache.deleteExpiredEntries();
+    const entry = this.cache.getEntry(
+      connection.address,
+      credentials.username,
+      requestCallback || null,
+      refreshCallback || null
+    );
+    let result;
+    const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
+    // Check if there's a token in the cache.
+    if (entry) {
+      // If the cache entry is valid, return the token result.
+      if (entry.isValid()) {
+        return entry.tokenResult;
+      }
+      // If the cache entry is not valid, remove it from the cache and first attempt
+      // to use the refresh callback to get a new token. If not refresh callback
+      // exists, then fallback to the request callback.
+      if (refreshCallback) {
+        result = await refreshCallback(clientInfo, startResult, entry.tokenResult);
+      } else {
+        result = await requestCallback(clientInfo, startResult);
+      }
+    } else {
+      // With no token in the cache we use the request callback.
+      result = await requestCallback(clientInfo, startResult);
+    }
+    // Validate that the result returned by the callback is acceptable.
+    if (isCallbackResultInvalid(result)) {
+      throw new MongoMissingCredentialsError(
+        'User provided OIDC callbacks must return a valid object with an accessToken.'
+      );
+    }
+    // Put an entry into the cache.
     this.cache.addEntry(
       connection.address,
       credentials.username || '',
-      request,
-      refresh || null,
-      tokenResult,
-      stepOneResult
+      requestCallback,
+      refreshCallback || null,
+      result,
+      startResult
     );
-    console.log('REQUEST CALLBACK ADDED ENTRY TO CACHE', this.cache);
-    return finishAuth(tokenResult, conversationId, connection, credentials);
+    return result;
   }
 }
 
-// Properties allowed on results of callbacks.
-const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
-
 /**
- * Determines if a result returned from a request or refresh callback
- * function is invalid. This means the result is nullish, doesn't contain
- * the accessToken required field, and does not contain extra fields.
+ * Generate the finishing command document for authentication. Will be a
+ * saslStart or saslContinue depending on the presence of a conversation id.
  */
-function isCallbackResultInvalid(tokenResult: any): boolean {
-  if (!tokenResult) return true;
-  if (!tokenResult.accessToken) return true;
-  return !Object.getOwnPropertyNames(tokenResult).every(prop => RESULT_PROPERTIES.includes(prop));
-}
-
-/**
- * Cache the result of the user supplied callback and execute the
- * step two saslContinue.
- */
-async function finishAuth(
-  result: OIDCRequestTokenResult,
-  conversationId: number | undefined,
-  connection: Connection,
-  credentials: MongoCredentials
-): Promise<Document> {
-  // Execute the step two saslContinue.
-  return connection.commandAsync(
-    ns(credentials.source),
-    continueCommandDocument(result.accessToken, conversationId),
-    undefined
-  );
-}
-
-/**
- * Generate the saslStart command document.
- */
-function startCommandDocument(credentials: MongoCredentials): Document {
-  const payload: Document = {};
-  if (credentials.username) {
-    payload.n = credentials.username;
-  }
-  return {
-    saslStart: 1,
-    autoAuthorize: 1,
-    mechanism: AuthMechanism.MONGODB_OIDC,
-    payload: new Binary(BSON.serialize(payload))
-  };
-}
-
-/**
- * Generate the saslContinue command document.
- */
-function continueCommandDocument(token: string, conversationId?: number): Document {
+function finishCommandDocument(token: string, conversationId?: number): Document {
   if (conversationId) {
     return {
       saslContinue: 1,
@@ -282,5 +228,32 @@ function continueCommandDocument(token: string, conversationId?: number): Docume
     saslStart: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,
     payload: new Binary(BSON.serialize({ jwt: token }))
+  };
+}
+
+/**
+ * Determines if a result returned from a request or refresh callback
+ * function is invalid. This means the result is nullish, doesn't contain
+ * the accessToken required field, and does not contain extra fields.
+ */
+function isCallbackResultInvalid(tokenResult: any): boolean {
+  if (!tokenResult) return true;
+  if (!tokenResult.accessToken) return true;
+  return !Object.getOwnPropertyNames(tokenResult).every(prop => RESULT_PROPERTIES.includes(prop));
+}
+
+/**
+ * Generate the saslStart command document.
+ */
+function startCommandDocument(credentials: MongoCredentials): Document {
+  const payload: Document = {};
+  if (credentials.username) {
+    payload.n = credentials.username;
+  }
+  return {
+    saslStart: 1,
+    autoAuthorize: 1,
+    mechanism: AuthMechanism.MONGODB_OIDC,
+    payload: new Binary(BSON.serialize(payload))
   };
 }
