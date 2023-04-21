@@ -635,7 +635,7 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
   if (operation.arguments?.command == null) throw new Error('runCommand requires a command');
   const { command } = operation.arguments;
 
-  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported, skip');
+  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported');
 
   const options = {
     readPreference: operation.arguments.readPreference,
