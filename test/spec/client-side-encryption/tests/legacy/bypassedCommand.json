@@ -78,7 +78,7 @@
       ]
     },
     {
-      "description": "current op is not bypassed",
+      "description": "kill op is not bypassed",
       "clientOptions": {
         "autoEncryptOpts": {
           "kmsProviders": {
@@ -90,14 +90,15 @@
         {
           "name": "runCommand",
           "object": "database",
-          "command_name": "currentOp",
+          "command_name": "killOp",
           "arguments": {
             "command": {
-              "currentOp": 1
+              "killOp": 1,
+              "op": 1234
             }
           },
           "result": {
-            "errorContains": "command not supported for auto encryption: currentOp"
+            "errorContains": "command not supported for auto encryption: killOp"
           }
         }
       ]
