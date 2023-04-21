@@ -594,18 +594,14 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
 
   let errorFromOperations = null;
   const result = await session.withTransaction(async () => {
-    try {
-      await (async () => {
-        for (const callbackOperation of operation.arguments!.callback) {
-          await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
-        }
-      })();
-    } catch (error) {
-      errorFromOperations = error;
-    }
+    errorFromOperations = await (async () => {
+      for (const callbackOperation of operation.arguments!.callback) {
+        await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
+      }
+    })().catch(error => error);
   }, options);
 
-  if (result == null) {
+  if (result == null || errorFromOperations) {
     throw errorFromOperations ?? Error('transaction not committed');
   }
 });
