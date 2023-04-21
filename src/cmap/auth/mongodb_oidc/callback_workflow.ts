@@ -61,7 +61,6 @@ export class CallbackWorkflow implements Workflow {
         'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
       );
     }
-    console.log('RESPONSE', response);
     // Look for an existing entry in the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -69,13 +68,11 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null
     );
-    console.log('ENTRY', entry, entry?.isValid());
     let result;
     // Reauthentication must go through all the steps again regards of a cache entry
     // being present.
     if (entry && !reauthenticating) {
       if (entry.isValid()) {
-        console.log('FINISHING');
         // Presence of a valid cache entry means we can skip to the finishing step.
         result = await this.finishAuthentication(
           connection,
@@ -84,7 +81,6 @@ export class CallbackWorkflow implements Workflow {
           response?.speculativeAuthenticate?.conversationId
         );
       } else {
-        console.log('FETCH AND FINISH');
         // Presence of an expired cache entry means we must fetch a new one and
         // then execute the final step.
         const tokenResult = await this.fetchAccessToken(
@@ -103,7 +99,6 @@ export class CallbackWorkflow implements Workflow {
         );
       }
     } else {
-      console.log('NO ENTRY IN CACHE');
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(
@@ -112,12 +107,10 @@ export class CallbackWorkflow implements Workflow {
         reauthenticating,
         response
       );
-      console.log('START DOCUMENT', startDocument);
       const conversationId = startDocument.conversationId;
       const serverResult = BSON.deserialize(
         startDocument.payload.buffer
       ) as OIDCMechanismServerStep1;
-      console.log('SERVER_RESULT', serverResult);
       const tokenResult = await this.fetchAccessToken(
         connection,
         credentials,
@@ -189,7 +182,6 @@ export class CallbackWorkflow implements Workflow {
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
   ): Promise<OIDCRequestTokenResult> {
-    console.log('FETCH ACCESS TOKEN');
     // Get the token from the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -197,14 +189,12 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null
     );
-    console.log('ENTRY', entry);
     let result;
     const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
     // Check if there's a token in the cache.
     if (entry) {
       // If the cache entry is valid, return the token result.
       if (entry.isValid() && !reauthenticating) {
-        console.log('ENTRY IS VALID AND NOT REAUTHENTICATING');
         return entry.tokenResult;
       }
       // If the cache entry is not valid, remove it from the cache and first attempt
@@ -212,15 +202,12 @@ export class CallbackWorkflow implements Workflow {
       // exists, then fallback to the request callback.
       if (refreshCallback) {
         result = await refreshCallback(clientInfo, startResult, entry.tokenResult);
-        console.log('USING REFRESH CALLBACK', result);
       } else {
         result = await requestCallback(clientInfo, startResult);
-        console.log('USING REQUEST CALLBACK, NO REFRESH FOUND', result);
       }
     } else {
       // With no token in the cache we use the request callback.
       result = await requestCallback(clientInfo, startResult);
-      console.log('USING REQUEST CALLBACK, NO TOKEN IN CACHE', result);
     }
     // Validate that the result returned by the callback is acceptable.
     if (isCallbackResultInvalid(result)) {

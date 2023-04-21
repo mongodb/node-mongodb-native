@@ -706,7 +706,6 @@ describe('MONGODB-OIDC', function () {
           try {
             await collection.findOne();
           } catch (e) {
-            console.log(e);
             expect(cache.entries.size).to.equal(0);
           }
         });
@@ -764,7 +763,7 @@ describe('MONGODB-OIDC', function () {
           });
       };
 
-      after(async function () {
+      afterEach(async function () {
         await removeFailPoint();
         await client?.close();
       });
@@ -839,19 +838,16 @@ describe('MONGODB-OIDC', function () {
         const commandFailedEvents: CommandFailedEvent[] = [];
 
         const commandStartedListener = event => {
-          console.log('commandStarted', event);
           if (event.commandName === 'find') {
             commandStartedEvents.push(event);
           }
         };
         const commandSucceededListener = event => {
-          console.log('commandSuceeded', event);
           if (event.commandName === 'find') {
             commandSucceededEvents.push(event);
           }
         };
         const commandFailedListener = event => {
-          console.log('commandFailed', event);
           if (event.commandName === 'find') {
             commandFailedEvents.push(event);
           }
