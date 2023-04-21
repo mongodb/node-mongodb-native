@@ -82,6 +82,7 @@ export class CallbackWorkflow implements Workflow {
           connection,
           credentials,
           entry.serverResult,
+          reauthenticating,
           requestCallback,
           refreshCallback
         );
@@ -99,6 +100,7 @@ export class CallbackWorkflow implements Workflow {
         connection,
         credentials,
         serverResult,
+        reauthenticating,
         requestCallback,
         refreshCallback
       );
@@ -160,6 +162,7 @@ export class CallbackWorkflow implements Workflow {
     connection: Connection,
     credentials: MongoCredentials,
     startResult: OIDCMechanismServerStep1,
+    reauthenticating: boolean,
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
   ): Promise<OIDCRequestTokenResult> {
@@ -177,8 +180,8 @@ export class CallbackWorkflow implements Workflow {
     // Check if there's a token in the cache.
     if (entry) {
       // If the cache entry is valid, return the token result.
-      if (entry.isValid()) {
-        console.log('ENTRY IS VALID');
+      if (entry.isValid() && !reauthenticating) {
+        console.log('ENTRY IS VALID AND NOT REAUTHENTICATING');
         return entry.tokenResult;
       }
       // If the cache entry is not valid, remove it from the cache and first attempt
