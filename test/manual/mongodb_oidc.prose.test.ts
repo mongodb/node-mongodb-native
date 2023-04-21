@@ -733,6 +733,50 @@ describe('MONGODB-OIDC', function () {
     });
 
     describe('5. Speculative Authentication', function () {
+      let client: MongoClient;
+      let collection: Collection;
+      const requestCallback = createRequestCallback('test_user1', 600);
+
+      // Removes the fail point.
+      const removeFailPoint = async () => {
+        return await client.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: 'off'
+        });
+      };
+
+      // Sets up the fail point for the find to reauthenticate.
+      const setupFailPoint = async () => {
+        return await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 2
+            },
+            data: {
+              failCommands: ['saslStart'],
+              errorCode: 391
+            }
+          });
+      };
+
+      afterEach(async function () {
+        await client?.close();
+      });
+
+      before(async function () {
+        cache.clear();
+        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          authMechanismProperties: requestCallback
+        });
+        collection = client.db('test').collection('test');
+        await setupFailPoint();
+        await collection.findOne();
+        await client.close();
+      });
+
       // Clear the cache.
       // Create a client with a request callback that returns a valid token that will not expire soon.
       // Set a fail point for saslStart commands of the form:
@@ -760,6 +804,14 @@ describe('MONGODB-OIDC', function () {
       // Set a fail point for saslStart commands.
       // Perform a find operation that succeeds.
       // Close the client.
+      it('successfully speculative authenticates', async function () {
+        client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+          authMechanismProperties: requestCallback
+        });
+        await setupFailPoint();
+        const result = await collection.findOne();
+        expect(result).to.be.null;
+      });
     });
 
     describe('6. Reauthentication', function () {

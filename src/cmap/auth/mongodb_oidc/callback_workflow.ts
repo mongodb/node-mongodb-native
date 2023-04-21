@@ -41,7 +41,7 @@ export class CallbackWorkflow implements Workflow {
   async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
     const document = startCommandDocument(credentials);
     document.db = credentials.source;
-    return document;
+    return { speculativeAuthenticate: document };
   }
 
   /**
