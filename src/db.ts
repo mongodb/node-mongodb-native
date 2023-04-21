@@ -232,7 +232,7 @@ export class Db {
    * @remarks
    * This command does not inherit options from the MongoClient.
    *
-   * The driver is responsible for attaching the following fields
+   * The driver will ensure the following fields are attached to the command sent to the server:
    * - `lsid` (session)
    * - `$readPreference`
    * - `$db`

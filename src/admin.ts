@@ -54,7 +54,7 @@ export class Admin {
   /**
    * Execute a command
    *
-   * The driver ensure the following fields are attached to a clone
+   * The driver will ensure the following fields are attached to the command sent to the server:
    * - `lsid` (session)
    * - `$readPreference`
    * - `$db`
