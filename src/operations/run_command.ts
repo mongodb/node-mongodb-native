@@ -13,7 +13,7 @@ export type RunCommandOptions = {
   readPreference?: ReadPreferenceLike;
 
   // The following options were "accidentally" supported
-  // Since the option
+  // Since the options are generally supported through inheritance
 
   /** @deprecated This is an internal option that has undefined behavior for this API */
   willRetryWrite?: any;
