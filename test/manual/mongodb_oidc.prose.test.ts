@@ -766,6 +766,7 @@ describe('MONGODB-OIDC', function () {
       };
 
       afterEach(async function () {
+        await removeFailPoint();
         await client?.close();
       });
 
