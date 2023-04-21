@@ -91,8 +91,9 @@ export class MongoDBOIDC extends AuthProvider {
     handshakeDoc: HandshakeDocument,
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
-    const workflow = getWorkflow(getCredentials(authContext));
-    const result = await workflow.speculativeAuth();
+    const credentials = getCredentials(authContext);
+    const workflow = getWorkflow(credentials);
+    const result = await workflow.speculativeAuth(credentials);
     return { ...handshakeDoc, ...result };
   }
 }

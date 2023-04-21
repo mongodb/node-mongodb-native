@@ -168,7 +168,7 @@ export class CallbackWorkflow implements Workflow {
     const entry = this.cache.getEntry(
       connection.address,
       credentials.username,
-      requestCallback || null,
+      requestCallback,
       refreshCallback || null
     );
     let result;
@@ -180,7 +180,7 @@ export class CallbackWorkflow implements Workflow {
         return entry.tokenResult;
       }
       // If the cache entry is not valid, remove it from the cache and first attempt
-      // to use the refresh callback to get a new token. If not refresh callback
+      // to use the refresh callback to get a new token. If no refresh callback
       // exists, then fallback to the request callback.
       if (refreshCallback) {
         result = await refreshCallback(clientInfo, startResult, entry.tokenResult);
