@@ -196,7 +196,9 @@ export class CallbackWorkflow implements Workflow {
         'User provided OIDC callbacks must return a valid object with an accessToken.'
       );
     }
-    // Put an entry into the cache.
+    // Cleanup the cache.
+    this.cache.deleteExpiredEntries();
+    // Put the new entry into the cache.
     this.cache.addEntry(
       connection.address,
       credentials.username || '',
@@ -205,8 +207,6 @@ export class CallbackWorkflow implements Workflow {
       result,
       startResult
     );
-    // Cleanup the cache.
-    this.cache.deleteExpiredEntries();
     return result;
   }
 }
