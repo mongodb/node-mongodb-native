@@ -39,6 +39,9 @@ export type RunCommandOptions = {
   authdb?: any;
   /** @deprecated This is an internal option that has undefined behavior for this API */
   noResponse?: any;
+
+  /** @internal Used for transaction commands */
+  bypassPinningCheck?: boolean;
 } & BSONSerializeOptions;
 
 /** @internal */
