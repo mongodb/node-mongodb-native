@@ -54,6 +54,20 @@ export class Admin {
   /**
    * Execute a command
    *
+   * The driver ensure the following fields are attached to a clone
+   * - `lsid` (session)
+   * - `$readPreference`
+   * - `$db`
+   * - `apiVersion`
+   * - `apiStrict`
+   * - `apiDeprecationErrors`
+   *
+   * Only when in a transaction:
+   * - `readConcern`
+   * - `writeConcern`
+   *
+   * Attaching any of the above fields to the command will have no effect as the driver will overwrite the value.
+   *
    * @param command - The command to execute
    * @param options - Optional settings for the command
    */

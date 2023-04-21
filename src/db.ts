@@ -232,6 +232,20 @@ export class Db {
    * @remarks
    * This command does not inherit options from the MongoClient.
    *
+   * The driver is responsible for attaching the following fields
+   * - `lsid` (session)
+   * - `$readPreference`
+   * - `$db`
+   * - `apiVersion`
+   * - `apiStrict`
+   * - `apiDeprecationErrors`
+   *
+   * Only when in a transaction:
+   * - `readConcern`
+   * - `writeConcern`
+   *
+   * Attaching any of the above fields to the command will have no effect as the driver will overwrite the value.
+   *
    * @param command - The command to run
    * @param options - Optional settings for the command
    */
