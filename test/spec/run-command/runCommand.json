@@ -108,7 +108,22 @@
               "commandStartedEvent": {
                 "command": {
                   "ping": 1,
-                  "$db": "db"
+                  "$db": "db",
+                  "lsid": {
+                    "$$exists": true
+                  },
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "apiVersion": {
+                    "$$exists": false
+                  },
+                  "apiStrict": {
+                    "$$exists": false
+                  },
+                  "apiDeprecationErrors": {
+                    "$$exists": false
+                  }
                 },
                 "commandName": "ping"
               }
@@ -276,6 +291,11 @@
     },
     {
       "description": "does not retry retryable errors on given command",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.2"
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -419,6 +439,11 @@
     },
     {
       "description": "attaches apiVersion fields to given command when stableApi is configured on the client",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "5.0"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",

@@ -63,6 +63,11 @@ tests:
               command:
                 ping: 1
                 $db: *db
+                lsid: { $$exists: true }
+                $readPreference: { $$exists: false }
+                apiVersion: { $$exists: false }
+                apiStrict: { $$exists: false }
+                apiDeprecationErrors: { $$exists: false }
               commandName: ping
 
   - description: attaches the provided session lsid to given command
@@ -146,7 +151,7 @@ tests:
 
   - description: does not retry retryable errors on given command
     runOnRequirements:
-      - minServerVersion: "4.0"
+      - minServerVersion: "4.2"
     operations:
       - name: failPoint
         object: testRunner
@@ -217,6 +222,8 @@ tests:
               databaseName: admin
 
   - description: attaches apiVersion fields to given command when stableApi is configured on the client
+    runOnRequirements:
+      - minServerVersion: "5.0"
     operations:
       - name: runCommand
         object: *dbWithStableApi
