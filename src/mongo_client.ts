@@ -504,10 +504,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       return;
     }
 
+    // clear out references to old topology
+    const topology = this.topology;
+    this.topology = undefined;
+
     // If we would attempt to select a server and get nothing back we short circuit
     // to avoid the server selection timeout.
     const selector = readPreferenceServerSelector(ReadPreference.primaryPreferred);
-    const topologyDescription = this.topology.description;
+    const topologyDescription = topology.description;
     const serverDescriptions = Array.from(topologyDescription.servers.values());
     const servers = selector(topologyDescription, serverDescriptions);
     if (servers.length !== 0) {
@@ -521,10 +525,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
           .catch(() => null); // outcome does not matter
       }
     }
-
-    // clear out references to old topology
-    const topology = this.topology;
-    this.topology = undefined;
 
     await new Promise<void>((resolve, reject) => {
       topology.close({ force }, error => {
