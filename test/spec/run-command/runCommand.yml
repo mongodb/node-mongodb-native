@@ -48,7 +48,7 @@ initialData:
   documents: []
 
 tests:
-  - description: always attaches $db to given command
+  - description: always attaches $db and implicit lsid to given command and omits default readPreference
     operations:
       - name: runCommand
         object: *db
