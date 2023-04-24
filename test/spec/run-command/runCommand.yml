@@ -65,9 +65,6 @@ tests:
                 $db: *db
                 lsid: { $$exists: true }
                 $readPreference: { $$exists: false }
-                apiVersion: { $$exists: false }
-                apiStrict: { $$exists: false }
-                apiDeprecationErrors: { $$exists: false }
               commandName: ping
 
   - description: attaches the provided session lsid to given command

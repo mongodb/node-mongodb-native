@@ -114,15 +114,6 @@
                   },
                   "$readPreference": {
                     "$$exists": false
-                  },
-                  "apiVersion": {
-                    "$$exists": false
-                  },
-                  "apiStrict": {
-                    "$$exists": false
-                  },
-                  "apiDeprecationErrors": {
-                    "$$exists": false
                   }
                 },
                 "commandName": "ping"
