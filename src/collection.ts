@@ -784,6 +784,9 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Get all the collection statistics.
    *
+   * @deprecated the `collStats` operation will be removed in the next major release.  Please
+   * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
+   *
    * @param options - Optional settings for the command
    */
   async stats(options?: CollStatsOptions): Promise<CollStats> {

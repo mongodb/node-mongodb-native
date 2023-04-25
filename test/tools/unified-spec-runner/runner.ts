@@ -118,38 +118,44 @@ async function runUnifiedTest(
     // The test runner MUST use the internal MongoClient for these operations.
     if (unifiedSuite.initialData) {
       trace('initialData');
-      for (const collData of unifiedSuite.initialData) {
-        const db = utilClient.db(collData.databaseName);
-        const collection = db.collection(collData.collectionName, {
+      for (const { databaseName, collectionName } of unifiedSuite.initialData) {
+        const db = utilClient.db(databaseName);
+        const collection = db.collection(collectionName, {
           writeConcern: { w: 'majority' }
         });
 
         trace('listCollections');
-        const collectionList = await db
-          .listCollections({ name: collData.collectionName })
-          .toArray();
+        const collectionList = await db.listCollections({ name: collectionName }).toArray();
         if (collectionList.length !== 0) {
           trace('drop');
           expect(await collection.drop()).to.be.true;
         }
       }
 
-      for (const collData of unifiedSuite.initialData) {
-        const db = utilClient.db(collData.databaseName);
-        const collection = db.collection(collData.collectionName, {
+      for (const {
+        databaseName,
+        collectionName,
+        createOptions,
+        documents = []
+      } of unifiedSuite.initialData) {
+        const db = utilClient.db(databaseName);
+        const collection = db.collection(collectionName, {
           writeConcern: { w: 'majority' }
         });
 
-        if (!collData.documents?.length) {
+        if (createOptions || !documents.length) {
           trace('createCollection');
-          await db.createCollection(collData.collectionName, {
+          const options = createOptions ?? {};
+          await db.createCollection(collectionName, {
+            ...options,
             writeConcern: { w: 'majority' }
           });
-          continue;
         }
 
-        trace('insertMany');
-        await collection.insertMany(collData.documents);
+        if (documents.length > 0) {
+          trace('insertMany');
+          await collection.insertMany(documents);
+        }
       }
     }
 
