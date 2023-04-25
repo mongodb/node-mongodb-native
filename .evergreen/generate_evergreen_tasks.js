@@ -35,6 +35,7 @@ const OPERATING_SYSTEMS = [
 
 // TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
+const SKIPPED_WINDOWS_NODE_VERSIONS = new Set(['erbium']);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -396,6 +397,10 @@ for (const {
 
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
+    }
+
+    if (os.match(/^windows/) && SKIPPED_WINDOWS_NODE_VERSIONS.has(NODE_LTS_NAME)) {
+      continue;
     }
 
     BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
