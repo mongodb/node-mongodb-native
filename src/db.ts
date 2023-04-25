@@ -5,6 +5,7 @@ import { Collection, CollectionOptions } from './collection';
 import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
+import { RunCommandCursor, type RunCommandCursorOptions } from './cursor/run_command_cursor';
 import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
@@ -522,6 +523,19 @@ export class Db {
     }
 
     return new ChangeStream<TSchema, TChange>(this, pipeline, resolveOptions(this, options));
+  }
+
+  /**
+   * A low level cursor API providing basic driver functionality.
+   * - ClientSession management
+   * - ReadPreference for server selection
+   * - Running getMores automatically when a local batch is exhausted
+   *
+   * @param command - The command that will start a cursor on the server.
+   * @param options - Configurations for running the command, bson options will apply to getMores
+   */
+  runCursorCommand(command: Document, options?: RunCommandCursorOptions): RunCommandCursor {
+    return new RunCommandCursor(this, command, options);
   }
 }
 

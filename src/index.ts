@@ -8,6 +8,7 @@ import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
+import type { RunCommandCursor } from './cursor/run_command_cursor';
 import { Db } from './db';
 import { GridFSBucket } from './gridfs';
 import { GridFSBucketReadStream } from './gridfs/download';
@@ -87,6 +88,7 @@ export {
   ListIndexesCursor,
   MongoClient,
   OrderedBulkOperation,
+  RunCommandCursor,
   UnorderedBulkOperation
 };
 
@@ -275,6 +277,7 @@ export type {
   ChangeStreamAggregateRawResult,
   ChangeStreamCursorOptions
 } from './cursor/change_stream_cursor';
+export type { RunCommandCursorOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
 export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
