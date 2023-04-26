@@ -1,0 +1,242 @@
+description: runCommand
+
+schemaVersion: "1.3"
+
+createEntities:
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent]
+  - database:
+      id: &db db
+      client: *client
+      databaseName: *db
+  - collection:
+      id: &collection collection
+      database: *db
+      collectionName: *collection
+  - database:
+      id: &dbWithRC dbWithRC
+      client: *client
+      databaseName: *dbWithRC
+      databaseOptions:
+        readConcern: { level: 'local' }
+  - database:
+      id: &dbWithWC dbWithWC
+      client: *client
+      databaseName: *dbWithWC
+      databaseOptions:
+        writeConcern: { w: 0 }
+  - session:
+      id: &session session
+      client: *client
+  # Stable API test
+  - client:
+      id: &clientWithStableApi clientWithStableApi
+      observeEvents: [commandStartedEvent]
+      serverApi:
+        version: "1"
+        strict: true
+  - database:
+      id: &dbWithStableApi dbWithStableApi
+      client: *clientWithStableApi
+      databaseName: *dbWithStableApi
+
+initialData:
+- collectionName: *collection
+  databaseName: *db
+  documents: []
+
+tests:
+  - description: always attaches $db and implicit lsid to given command and omits default readPreference
+    operations:
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $db: *db
+                lsid: { $$exists: true }
+                $readPreference: { $$exists: false }
+              commandName: ping
+
+  - description: attaches the provided session lsid to given command
+    operations:
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+          session: *session
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                lsid: { $$sessionLsid: *session }
+                $db: *db
+              commandName: ping
+
+  - description: attaches the provided $readPreference to given command
+    operations:
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+          readPreference:  &readPreference { mode: 'nearest' }
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $readPreference: *readPreference
+                $db: *db
+              commandName: ping
+
+  - description: does not inherit readConcern specified at the db level
+    operations:
+      - name: runCommand
+        object: *dbWithRC
+        # Test with a command that supports a readConcern option.
+        # expectResult is intentionally omitted because some drivers
+        # may automatically convert command responses into cursors.
+        arguments:
+          commandName: aggregate
+          command: { aggregate: *collection, pipeline: [], cursor: {} }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection
+                readConcern: { $$exists: false }
+                $db: *dbWithRC
+              commandName: aggregate
+
+  - description: does not inherit writeConcern specified at the db level
+    operations:
+      - name: runCommand
+        object: *dbWithWC
+        arguments:
+          commandName: insert
+          command:
+            insert: *collection
+            documents: [ { _id: 1 } ]
+            ordered: true
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection
+                writeConcern: { $$exists: false }
+                $db: *dbWithWC
+              commandName: insert
+
+  - description: does not retry retryable errors on given command
+    runOnRequirements:
+      - minServerVersion: "4.2"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ping]
+              closeConnection: true
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectError:
+          isClientError: true
+
+  - description: attaches transaction fields to given command
+    runOnRequirements:
+      - minServerVersion: "4.0"
+        topologies: [ replicaset ]
+      - minServerVersion: "4.2"
+        topologies: [ sharded-replicaset, load-balanced ]
+    operations:
+      - name: withTransaction
+        object: *session
+        arguments:
+          callback:
+            - name: runCommand
+              object: *db
+              arguments:
+                session: *session
+                commandName: insert
+                command:
+                  insert: *collection
+                  documents: [ { _id: 2 } ]
+                  ordered: true
+              expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } } }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collection
+                documents: [ { _id: 2 } ]
+                ordered: true
+                lsid: { $$sessionLsid: *session }
+                txnNumber: 1
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *db
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session }
+                txnNumber: 1
+                autocommit: false
+                # omitted fields
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+
+  - description: attaches apiVersion fields to given command when stableApi is configured on the client
+    runOnRequirements:
+      - minServerVersion: "5.0"
+    operations:
+      - name: runCommand
+        object: *dbWithStableApi
+        arguments:
+          commandName: ping
+          command:
+            ping: 1
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *clientWithStableApi
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $db: *dbWithStableApi
+                apiVersion: "1"
+                apiStrict: true
+                apiDeprecationErrors: { $$unsetOrMatches: false }
+              commandName: ping

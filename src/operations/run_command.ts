@@ -1,11 +1,48 @@
-import type { Document } from '../bson';
+import type { BSONSerializeOptions, Document } from '../bson';
+import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { Callback, MongoDBNamespace } from '../utils';
-import { CommandOperation, CommandOperationOptions, OperationParent } from './command';
+import { CommandOperation, OperationParent } from './command';
 
 /** @public */
-export type RunCommandOptions = CommandOperationOptions;
+export type RunCommandOptions = {
+  /** Specify ClientSession for this command */
+  session?: ClientSession;
+  /** The read preference */
+  readPreference?: ReadPreferenceLike;
+
+  // The following options were "accidentally" supported
+  // Since the options are generally supported through inheritance
+
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  willRetryWrite?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  omitReadPreference?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  writeConcern?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  explain?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  readConcern?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  collation?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  maxTimeMS?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  comment?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  retryWrites?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  dbName?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  authdb?: any;
+  /** @deprecated This is an internal option that has undefined behavior for this API */
+  noResponse?: any;
+
+  /** @internal Used for transaction commands */
+  bypassPinningCheck?: boolean;
+} & BSONSerializeOptions;
 
 /** @internal */
 export class RunCommandOperation<T = Document> extends CommandOperation<T> {

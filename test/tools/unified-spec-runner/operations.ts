@@ -592,11 +592,18 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
     maxCommitTimeMS: operation.arguments!.maxCommitTimeMS
   };
 
-  return session.withTransaction(async () => {
-    for (const callbackOperation of operation.arguments!.callback) {
-      await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
-    }
+  let errorFromOperations = null;
+  const result = await session.withTransaction(async () => {
+    errorFromOperations = await (async () => {
+      for (const callbackOperation of operation.arguments!.callback) {
+        await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
+      }
+    })().catch(error => error);
   }, options);
+
+  if (result == null || errorFromOperations) {
+    throw errorFromOperations ?? Error('transaction not committed');
+  }
 });
 
 operations.set('countDocuments', async ({ entities, operation }) => {
@@ -624,8 +631,18 @@ operations.set('estimatedDocumentCount', async ({ entities, operation }) => {
 
 operations.set('runCommand', async ({ entities, operation }: OperationFunctionParams) => {
   const db = entities.getEntity('db', operation.object);
-  const { command, ...opts } = operation.arguments!;
-  return db.command(command, opts);
+
+  if (operation.arguments?.command == null) throw new Error('runCommand requires a command');
+  const { command } = operation.arguments;
+
+  if (operation.arguments.timeoutMS != null) throw new Error('timeoutMS not supported');
+
+  const options = {
+    readPreference: operation.arguments.readPreference,
+    session: operation.arguments.session
+  };
+
+  return db.command(command, options);
 });
 
 operations.set('updateMany', async ({ entities, operation }) => {
