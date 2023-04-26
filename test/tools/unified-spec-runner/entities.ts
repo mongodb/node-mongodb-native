@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
-import { inspect } from 'util';
 
 import {
   AbstractCursor,
@@ -175,7 +174,6 @@ export class UnifiedMongoClient extends MongoClient {
           data: { ...log }
         };
 
-        console.log(inspect(transformedLog.data.message, { breakLength: Infinity }));
         this.buffer.push(transformedLog);
       }
     };
@@ -185,7 +183,6 @@ export class UnifiedMongoClient extends MongoClient {
 
     // NOTE: this is done to override the logger environment variables
     for (const key in description.observeLogMessages) {
-      console.log(UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]);
       componentSeverities[UnifiedMongoClient.LOGGING_COMPONENT_TO_ENV_VAR_NAME[key]] =
         description.observeLogMessages[key];
     }

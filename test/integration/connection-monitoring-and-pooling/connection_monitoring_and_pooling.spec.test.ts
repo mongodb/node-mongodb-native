@@ -64,7 +64,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging',
         'waitQueueSize should be included in connection pool created message when specified'
       ].includes(test.description)
     ) {
-      return 'waitQueueSize not supported';
+      return 'not applicable: waitQueueSize not supported';
     }
     return false;
   });
