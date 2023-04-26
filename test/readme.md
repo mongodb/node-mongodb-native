@@ -270,7 +270,7 @@ The following steps will walk you through how to start and test a load balancer.
 
     Initiate the config server in the shell:
     ```shell
-    mongosh "mongodb://localhost:27217" --exec "rs.initiate( { _id: "test", configsvr: true, members: [ { _id: 0, host: "localhost:27217" } ] })"
+    mongosh "mongodb://localhost:27217" --eval "rs.initiate( { _id: 'test', configsvr: true, members: [ { _id: 0, host: 'localhost:27217' } ] })"
     ```
 
     Create shard replica sets:
@@ -280,7 +280,7 @@ The following steps will walk you through how to start and test a load balancer.
 
     Initiate replica set in the shell:
     ```shell
-    mongosh "mongodb://localhost:27218" --exec "rs.initiate( { _id: "testing", members: [ { _id: 0, host: "localhost:27218" }, { _id: 1, host: "localhost:27219" }, { _id: 2, host: "localhost:27220" }] })"
+    mongosh "mongodb://localhost:27218" --eval "rs.initiate( { _id: 'testing', members: [ { _id: 0, host: 'localhost:27218' }, { _id: 1, host: 'localhost:27219' }, { _id: 2, host: 'localhost:27220' }] })"
     ```
 
     Create two mongoses running on ports 27017 and 27018:
@@ -289,8 +289,8 @@ The following steps will walk you through how to start and test a load balancer.
 
     Initiate cluster on mongos in shell:
     ```shell
-    mongosh "mongodb://localhost:27017" --exec "sh.addShard("testing/localhost:27218,localhost:27219,localhost:27220")"
-    mongosh "mongodb://localhost:27017" --exec "sh.enableSharding("test")"
+    mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"
+    mongosh "mongodb://localhost:27017" --eval "sh.enableSharding('test')"
     ```
 
 1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
