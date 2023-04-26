@@ -1,0 +1,54 @@
+description: "retryable-writes insertOne noWritesPerformedErrors"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "6.0"
+    topologies: [ replicaset ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandFailedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName retryable-writes-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName no-writes-performed-collection
+
+tests:
+  - description: "InsertOne fails after NoWritesPerformed error"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              times: 2
+            data:
+              failCommands:
+                - insert
+              errorCode: 64
+              errorLabels:
+                - NoWritesPerformed
+                - RetryableWriteError
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document:
+            x: 1
+        expectError:
+          errorCode: 64
+          errorLabelsContain:
+            - NoWritesPerformed
+            - RetryableWriteError
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents: []

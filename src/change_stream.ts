@@ -700,7 +700,7 @@ export class ChangeStream<
   /**
    * Try to get the next available document from the Change Stream's cursor or `null` if an empty batch is returned
    */
-  async tryNext(): Promise<Document | null> {
+  async tryNext(): Promise<TChange | null> {
     this._setIsIterator();
     // Change streams must resume indefinitely while each resume event succeeds.
     // This loop continues until either a change event is received or until a resume attempt

@@ -169,17 +169,21 @@ Each YAML file has the following keys:
     the default is all topologies (i.e. ``["single", "replicaset", "sharded",
     "load-balanced"]``).
 
-  - ``serverless``: Optional string. Whether or not the test should be run on
-    serverless instances imitating sharded clusters. Valid values are "require",
-    "forbid", and "allow". If "require", the test MUST only be run on serverless
-    instances. If "forbid", the test MUST NOT be run on serverless instances. If
-    omitted or "allow", this option has no effect.
+  - ``serverless``: (optional): Whether or not the test should be run on Atlas
+    Serverless instances. Valid values are "require", "forbid", and "allow". If
+    "require", the test MUST only be run on Atlas Serverless instances. If
+    "forbid", the test MUST NOT be run on Atlas Serverless instances. If omitted
+    or "allow", this option has no effect.
 
-    The test runner MUST be informed whether or not serverless is being used in
-    order to determine if this requirement is met (e.g. through an environment
-    variable or configuration option). Since the serverless proxy imitates a
-    mongos, the runner is not capable of determining this by issuing a server
-    command such as ``buildInfo`` or ``hello``.
+    The test runner MUST be informed whether or not Atlas Serverless is being
+    used in order to determine if this requirement is met (e.g. through an
+    environment variable or configuration option).
+
+    Note: the Atlas Serverless proxy imitates mongos, so the test runner is not
+    capable of determining if Atlas Serverless is in use by issuing commands
+    such as ``buildInfo`` or ``hello``. Furthermore, connections to Atlas
+    Serverless use a load balancer, so the topology will appear as
+    "load-balanced".
 
 - ``data``: The data that should exist in the collection under test before each
   test run.
@@ -196,13 +200,14 @@ Each YAML file has the following keys:
     mongos seed addresses. If ``false`` or omitted, only a single mongos address
     should be specified.
 
-    If ``true``, and the topology type is ``LoadBalanced``, the MongoClient for
-    this test should be initialized with the URI of the load balancer fronting
-    multiple servers. If ``false`` or omitted, the MongoClient for this test
-    should be initialized with the URI of the load balancer fronting a single
-    server.
+    If ``true``, the topology type is ``LoadBalanced``, and Atlas Serverless is
+    not being used, the MongoClient for this test should be initialized with the
+    URI of the load balancer fronting multiple servers. If ``false`` or omitted,
+    the MongoClient for this test should be initialized with the URI of the load
+    balancer fronting a single server.
 
-    ``useMultipleMongoses`` only affects ``Sharded`` and ``LoadBalanced`` topologies.
+    ``useMultipleMongoses`` only affects ``Sharded`` and ``LoadBalanced``
+    topologies (excluding Atlas Serverless).
 
   - ``failPoint`` (optional): The ``configureFailPoint`` command document to run
     to configure a fail point on the primary server. Drivers must ensure that
@@ -286,11 +291,11 @@ Command Construction Tests
 
 Drivers should also assert that command documents are properly constructed with
 or without a transaction ID, depending on whether the write operation is
-supported. `Command Monitoring`_ may be used to check for the presence of a
+supported. `Command Logging and Monitoring`_ may be used to check for the presence of a
 ``txnNumber`` field in the command document. Note that command documents may
 always include an ``lsid`` field per the `Driver Session`_ specification.
 
-.. _Command Monitoring: ../../command-monitoring/command-monitoring.rst
+.. _Command Logging and Monitoring: ../../command-logging-and-monitoring/command-logging-and-monitoring.rst
 .. _Driver Session: ../../sessions/driver-sessions.rst
 
 These tests may be run against both a replica set and shard cluster.
@@ -348,7 +353,7 @@ and sharded clusters.
     retryWrites=false to your connection string.
 
    and the error code is 20.
-   
+
    **Note**: Drivers that rely on ``serverStatus`` to determine the storage engine
    in use MAY skip this test for sharded clusters, since ``mongos`` does not report
    this information in its ``serverStatus`` response.
@@ -390,11 +395,75 @@ and sharded clusters.
 
    9. Disable the failpoint.
 
+#. Test that drivers return the original error after encountering a
+   WriteConcernError with a RetryableWriteError label. This test MUST
+
+   1. be implemented by any driver that implements the Command Monitoring
+      specification,
+
+   2. only run against replica sets as mongos does not propagate the
+      NoWritesPerformed label to the drivers.
+
+   3. be run against server versions 6.0 and above.
+
+   Additionally, this test requires drivers to set a fail point after an
+   ``insertOne`` operation but before the subsequent retry. Drivers that are
+   unable to set a failCommand after the CommandSucceededEvent SHOULD use
+   mocking or write a unit test to cover the same sequence of events.
+
+
+   1. Create a client with ``retryWrites=true``.
+
+   2. Configure a fail point with error code ``91`` (ShutdownInProgress)::
+
+        db.adminCommand({
+                configureFailPoint: "failCommand",
+                mode: {times: 1},
+                data: {
+                        writeConcernError: {
+                                code: 91,
+                                errorLabels: ["RetryableWriteError"],
+                        },
+                        failCommands: ["insert"],
+                },
+        });
+
+   3. Via the command monitoring CommandSucceededEvent, configure a fail point
+      with error code ``10107`` (NotWritablePrimary) and a NoWritesPerformed
+      label::
+
+        db.adminCommand({
+                configureFailPoint: "failCommand",
+                mode: {times: 1},
+                data: {
+                        errorCode: 10107,
+                        errorLabels: ["RetryableWriteError", "NoWritesPerformed"],
+                        failCommands: ["insert"],
+                },
+        });
+
+      Drivers SHOULD only configure the ``10107`` fail point command if the the
+      succeeded event is for the ``91`` error configured in step 2.
+
+   4. Attempt an ``insertOne`` operation on any record for any database and
+      collection. For the resulting error, assert that the associated error code
+      is ``91``.
+
+   5. Disable the fail point::
+
+        db.adminCommand({
+                configureFailPoint: "failCommand",
+                mode: "off",
+        })
 
 Changelog
 =========
 
+:2022-08-30: Add prose test verifying correct error handling for errors with
+             the NoWritesPerformed label, which is to return the original
+             error.
 
+:2022-04-22: Clarifications to ``serverless`` and ``useMultipleMongoses``.
 
 :2021-08-27: Add ``serverless`` to ``runOn``. Clarify behavior of
              ``useMultipleMongoses`` for ``LoadBalanced`` topologies.
