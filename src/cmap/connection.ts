@@ -484,11 +484,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   command(
     ns: MongoDBNamespace,
-    cmd: Document,
+    command: Document,
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
-    cmd = { ...cmd };
+    let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
     const shouldUseOpMsg = supportsOpMsg(this);
