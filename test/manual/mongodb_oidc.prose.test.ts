@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs';
 import * as path from 'node:path';
 
 import { expect } from 'chai';
