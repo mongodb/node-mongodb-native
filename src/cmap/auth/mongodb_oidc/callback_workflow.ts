@@ -83,9 +83,11 @@ export class CallbackWorkflow implements Workflow {
     );
     let result;
     if (entry) {
+      console.log('ENTRY IN THE CACHE');
       // Reauthentication cannot use a token from the cache since the server has
       // stated it is invalid by the request for reauthentication.
       if (entry.isValid() && !reauthenticating) {
+        console.log('ENTRY VALID NO REAUTH');
         // Presence of a valid cache entry means we can skip to the finishing step.
         result = await this.finishAuthentication(
           connection,
@@ -94,6 +96,7 @@ export class CallbackWorkflow implements Workflow {
           response?.speculativeAuthenticate?.conversationId
         );
       } else {
+        console.log('FETCH ACCESS TOKEN');
         // Presence of an expired cache entry means we must fetch a new one and
         // then execute the final step.
         const tokenResult = await this.fetchAccessToken(
@@ -105,6 +108,7 @@ export class CallbackWorkflow implements Workflow {
           refreshCallback
         );
         try {
+          console.log('FINISH AUTH');
           result = await this.finishAuthentication(
             connection,
             credentials,
@@ -112,6 +116,7 @@ export class CallbackWorkflow implements Workflow {
             reauthenticating ? undefined : response?.speculativeAuthenticate?.conversationId
           );
         } catch (error) {
+          console.log('ERROR ON AUTH FINISH');
           // If we are reauthenticating and this errors with reauthentication
           // required, we need to do the entire process over again and clear
           // the cache entry.
@@ -133,6 +138,7 @@ export class CallbackWorkflow implements Workflow {
         }
       }
     } else {
+      console.log('NO CACHE ENTRY');
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(
@@ -227,6 +233,7 @@ export class CallbackWorkflow implements Workflow {
     if (entry) {
       // If the cache entry is valid, return the token result.
       if (entry.isValid() && !reauthenticating) {
+        console.log('FETCH - ENTRY VALID NO REAUTH');
         return entry.tokenResult;
       }
       // If the cache entry is not valid, remove it from the cache and first attempt
@@ -254,6 +261,7 @@ export class CallbackWorkflow implements Workflow {
       );
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
+    console.log('DELETING EXPIRED ENTRIES');
     // Cleanup the cache.
     this.cache.deleteExpiredEntries();
     // Put the new entry into the cache.
