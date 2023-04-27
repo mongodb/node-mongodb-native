@@ -204,11 +204,11 @@ export type {
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
 export type {
-  OIDCClientInfo,
-  OIDCMechanismServerStep1,
+  OIDCCallbackContext as OIDCClientInfo,
+  PrincipalStepRequest as OIDCMechanismServerStep1,
   OIDCRefreshFunction,
   OIDCRequestFunction,
-  OIDCRequestTokenResult
+  IdPServerResponse as OIDCRequestTokenResult
 } from './cmap/auth/mongodb_oidc';
 export type {
   BinMsg,

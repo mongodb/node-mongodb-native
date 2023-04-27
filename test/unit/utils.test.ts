@@ -6,6 +6,7 @@ import {
   compareObjectId,
   eachAsync,
   HostAddress,
+  hostMatchesWildcards,
   isHello,
   LEGACY_HELLO_COMMAND,
   List,
@@ -18,6 +19,170 @@ import {
 } from '../mongodb';
 
 describe('driver utils', function () {
+  describe('.hostMatchesWildcards', function () {
+    context('when using domains', function () {
+      context('when using exact match', function () {
+        context('when the address contains a port', function () {
+          context('when the host matches at least one', function () {
+            it('returns true', function () {
+              expect(hostMatchesWildcards('localhost:27017', ['localhost', 'other'])).to.be.true;
+            });
+          });
+
+          context('when the host does not match any', function () {
+            it('returns false', function () {
+              expect(hostMatchesWildcards('localhost:27017', ['test1', 'test2'])).to.be.false;
+            });
+          });
+
+          context('when the host matches a FQDN', function () {
+            it('returns true', function () {
+              expect(
+                hostMatchesWildcards('mongodb.net:27017', ['mongodb.net', 'other'])
+              ).to.be.true;
+            });
+          });
+
+          context('when the host does not match a FQDN', function () {
+            it('returns false', function () {
+              expect(
+                hostMatchesWildcards('mongodb.net:27017', ['mongodb.com', 'other'])
+              ).to.be.false;
+            });
+          });
+
+          context('when the host matches a FQDN with subdomain', function () {
+            it('returns true', function () {
+              expect(
+                hostMatchesWildcards('prod.mongodb.net:27017', ['prod.mongodb.net', 'other'])
+              ).to.be.true;
+            });
+          });
+
+          context('when the host does not match a FQDN with subdomain', function () {
+            it('returns false', function () {
+              expect(
+                hostMatchesWildcards('prod.mongodb.net:27017', [
+                  'dev.mongodb.net',
+                  'prod.mongodb.com'
+                ])
+              ).to.be.false;
+            });
+          });
+        });
+
+        context('when the address does not contain a port', function () {
+          context('when the host matches at least one', function () {
+            it('returns true', function () {
+              expect(hostMatchesWildcards('localhost', ['localhost', 'other'])).to.be.true;
+            });
+          });
+
+          context('when the host does not match any', function () {
+            it('returns false', function () {
+              expect(hostMatchesWildcards('localhost', ['test1', 'test2'])).to.be.false;
+            });
+          });
+        });
+      });
+
+      context('when using a leading * with domains', function () {
+        context('when the address contains a port', function () {
+          context('when the host matches at least one', function () {
+            it('returns true', function () {
+              expect(hostMatchesWildcards('localhost:27017', ['*.localhost', 'other'])).to.be.true;
+            });
+          });
+
+          context('when the host does not match any', function () {
+            it('returns false', function () {
+              expect(hostMatchesWildcards('localhost:27017', ['*.test1', 'test2'])).to.be.false;
+            });
+          });
+
+          context('when the host matches a FQDN', function () {
+            it('returns true', function () {
+              expect(
+                hostMatchesWildcards('mongodb.net:27017', ['*.mongodb.net', 'other'])
+              ).to.be.true;
+            });
+          });
+
+          context('when the host does not match a FQDN', function () {
+            it('returns false', function () {
+              expect(
+                hostMatchesWildcards('mongodb.net:27017', ['*.mongodb.com', 'other'])
+              ).to.be.false;
+            });
+          });
+
+          context('when the host matches a FQDN with subdomain', function () {
+            it('returns true', function () {
+              expect(
+                hostMatchesWildcards('prod.mongodb.net:27017', ['*.prod.mongodb.net', 'other'])
+              ).to.be.true;
+            });
+          });
+
+          context('when the host does not match a FQDN with subdomain', function () {
+            it('returns false', function () {
+              expect(
+                hostMatchesWildcards('prod.mongodb.net:27017', [
+                  '*.dev.mongodb.net',
+                  '*.prod.mongodb.com'
+                ])
+              ).to.be.false;
+            });
+          });
+        });
+
+        context('when the address does not contain a port', function () {
+          context('when the host matches at least one', function () {
+            it('returns true', function () {
+              expect(hostMatchesWildcards('localhost', ['*.localhost', 'other'])).to.be.true;
+            });
+          });
+
+          context('when the host does not match any', function () {
+            it('returns false', function () {
+              expect(hostMatchesWildcards('localhost', ['*.test1', 'test2'])).to.be.false;
+            });
+          });
+        });
+      });
+    });
+
+    context('when using IP addresses', function () {
+      context('when using IPv4', function () {
+        context('when the host matches at least one', function () {
+          it('returns true', function () {
+            expect(hostMatchesWildcards('127.0.0.1:27017', ['127.0.0.1', 'other'])).to.be.true;
+          });
+        });
+
+        context('when the host does not match any', function () {
+          it('returns false', function () {
+            expect(hostMatchesWildcards('127.0.0.1:27017', ['127.0.0.2', 'test2'])).to.be.false;
+          });
+        });
+      });
+
+      context('when using IPv6', function () {
+        context('when the host matches at least one', function () {
+          it('returns true', function () {
+            expect(hostMatchesWildcards('[::1]:27017', ['::1', 'other'])).to.be.true;
+          });
+        });
+
+        context('when the host does not match any', function () {
+          it('returns false', function () {
+            expect(hostMatchesWildcards('[::1]:27017', ['::2', 'test2'])).to.be.false;
+          });
+        });
+      });
+    });
+  });
+
   context('eachAsync()', function () {
     it('should callback with an error', function (done) {
       eachAsync(

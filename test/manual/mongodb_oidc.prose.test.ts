@@ -9,12 +9,13 @@ import {
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent,
+  IdPServerInfo,
   MongoClient,
+  MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
-  OIDCClientInfo,
-  OIDCMechanismServerStep1,
+  OIDCCallbackContext,
   OIDCRequestTokenResult
 } from '../mongodb';
 
@@ -34,14 +35,14 @@ describe('MONGODB-OIDC', function () {
       expiresInSeconds?: number,
       extraFields?: any
     ) => {
-      return async (clientInfo: OIDCClientInfo, serverInfo: OIDCMechanismServerStep1) => {
+      return async (info: IdPServerInfo, context: OIDCCallbackContext) => {
         const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, username), {
           encoding: 'utf8'
         });
         // Do some basic property assertions.
-        expect(clientInfo).to.have.property('timeoutSeconds');
-        expect(serverInfo).to.have.property('issuer');
-        expect(serverInfo).to.have.property('clientId');
+        expect(context).to.have.property('timeoutSeconds');
+        expect(info).to.have.property('issuer');
+        expect(info).to.have.property('clientId');
         return generateResult(token, expiresInSeconds, extraFields);
       };
     };
@@ -52,19 +53,15 @@ describe('MONGODB-OIDC', function () {
       expiresInSeconds?: number,
       extraFields?: any
     ) => {
-      return async (
-        clientInfo: OIDCClientInfo,
-        serverInfo: OIDCMechanismServerStep1,
-        tokenResult: OIDCRequestTokenResult
-      ) => {
+      return async (info: IdPServerInfo, context: OIDCCallbackContext) => {
         const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, username), {
           encoding: 'utf8'
         });
         // Do some basic property assertions.
-        expect(clientInfo).to.have.property('timeoutSeconds');
-        expect(serverInfo).to.have.property('issuer');
-        expect(serverInfo).to.have.property('clientId');
-        expect(tokenResult).to.have.property('accessToken');
+        expect(context).to.have.property('timeoutSeconds');
+        expect(info).to.have.property('issuer');
+        expect(info).to.have.property('clientId');
+        expect(info).to.have.property('accessToken');
         return generateResult(token, expiresInSeconds, extraFields);
       };
     };
@@ -212,13 +209,85 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('1.6 Allowed Hosts Blocked', function () {
+        before(function () {
+          cache.clear();
+        });
+
         // Clear the cache.
-        // Create a client that uses the OIDC url and a request callback, and an ALLOWED_HOSTS that is an empty list.
-        // Assert that a find operation fails with a client-side error.
+        // Create a client that uses the OIDC url and a request callback, and an
+        // ``ALLOWED_HOSTS`` that is an empty list.
+        // Assert that a ``find`` operation fails with a client-side error.
         // Close the client.
-        // Create a client that uses the OIDC url and a request callback, and an ALLOWED_HOSTS that contains ["localhost1"].
-        // Assert that a find operation fails with a client-side error.
+        context('when ALLOWED_HOSTS is empty', function () {
+          before(function () {
+            client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+              authMechanismProperties: {
+                ALLOWED_HOSTS: []
+              }
+            });
+            collection = client.db('test').collection('test');
+          });
+
+          it('fails validation', async function () {
+            try {
+              await collection.findOne();
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+            }
+          });
+        });
+
+        // Create a client that uses the url ``mongodb://localhost/?authMechanism=MONGODB-OIDC&ignored=example.com`` a request callback, and an
+        // ``ALLOWED_HOSTS`` that contains ["example.com"].
+        // Assert that a ``find`` operation fails with a client-side error.
         // Close the client.
+        context('when ALLOWED_HOSTS does not match', function () {
+          before(function () {
+            client = new MongoClient(
+              'mongodb://localhost/?authMechanism=MONGODB-OIDC&ignored=example.com',
+              {
+                authMechanismProperties: {
+                  ALLOWED_HOSTS: ['examle.com']
+                }
+              }
+            );
+            collection = client.db('test').collection('test');
+          });
+
+          it('fails validation', async function () {
+            try {
+              await collection.findOne();
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+            }
+          });
+        });
+
+        // Create a client that uses the url ``mongodb://evilmongodb.com`` a request
+        // callback, and an ``ALLOWED_HOSTS`` that contains ``*mongodb.com``.
+        // Assert that a ``find`` operation fails with a client-side error.
+        // Close the client.
+        context('when ALLOWED_HOSTS is invalid', function () {
+          before(function () {
+            client = new MongoClient('mongodb://evilmongodb.com/?authMechanism=MONGODB-OIDC', {
+              authMechanismProperties: {
+                ALLOWED_HOSTS: ['*mongodb.com']
+              }
+            });
+            collection = client.db('test').collection('test');
+          });
+
+          it('fails validation', async function () {
+            try {
+              await collection.findOne();
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+            }
+          });
+        });
       });
     });
 

@@ -1,14 +1,21 @@
 import { Binary, BSON, type Document } from 'bson';
 
-import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../../error';
+import {
+  MONGODB_ERROR_CODES,
+  MongoError,
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError
+} from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
-import type {
-  OIDCMechanismServerStep1,
+import {
+  IdPServerInfo,
+  IdPServerResponse,
+  OIDC_VERSION,
+  OIDCCallbackContext,
   OIDCRefreshFunction,
-  OIDCRequestFunction,
-  OIDCRequestTokenResult
+  OIDCRequestFunction
 } from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
 import { TokenEntryCache } from './token_entry_cache';
@@ -71,8 +78,8 @@ export class CallbackWorkflow implements Workflow {
     let result;
     // Reauthentication must go through all the steps again regards of a cache entry
     // being present.
-    if (entry && !reauthenticating) {
-      if (entry.isValid()) {
+    if (entry) {
+      if (entry.isValid() && !reauthenticating) {
         // Presence of a valid cache entry means we can skip to the finishing step.
         result = await this.finishAuthentication(
           connection,
@@ -91,12 +98,33 @@ export class CallbackWorkflow implements Workflow {
           requestCallback,
           refreshCallback
         );
-        result = await this.finishAuthentication(
-          connection,
-          credentials,
-          tokenResult,
-          response?.speculativeAuthenticate?.conversationId
-        );
+        try {
+          result = await this.finishAuthentication(
+            connection,
+            credentials,
+            tokenResult,
+            response?.speculativeAuthenticate?.conversationId
+          );
+        } catch (error) {
+          // If we are reauthenticating and this errors with reauthentication
+          // required, we need to do the entire process over again and clear
+          // the cache entry.
+          if (
+            reauthenticating &&
+            error instanceof MongoError &&
+            error.code === MONGODB_ERROR_CODES.Reauthenticate
+          ) {
+            this.cache.deleteEntry(
+              connection.address,
+              credentials.username || '',
+              requestCallback,
+              refreshCallback || null
+            );
+            result = await this.execute(connection, credentials, reauthenticating);
+          } else {
+            throw error;
+          }
+        }
       }
     } else {
       // No entry in the cache requires us to do all authentication steps
@@ -108,9 +136,7 @@ export class CallbackWorkflow implements Workflow {
         response
       );
       const conversationId = startDocument.conversationId;
-      const serverResult = BSON.deserialize(
-        startDocument.payload.buffer
-      ) as OIDCMechanismServerStep1;
+      const serverResult = BSON.deserialize(startDocument.payload.buffer) as IdPServerInfo;
       const tokenResult = await this.fetchAccessToken(
         connection,
         credentials,
@@ -159,7 +185,7 @@ export class CallbackWorkflow implements Workflow {
   private async finishAuthentication(
     connection: Connection,
     credentials: MongoCredentials,
-    tokenResult: OIDCRequestTokenResult,
+    tokenResult: IdPServerResponse,
     conversationId?: number
   ): Promise<Document> {
     const result = await connection.commandAsync(
@@ -177,11 +203,11 @@ export class CallbackWorkflow implements Workflow {
   private async fetchAccessToken(
     connection: Connection,
     credentials: MongoCredentials,
-    startResult: OIDCMechanismServerStep1,
+    serverInfo: IdPServerInfo,
     reauthenticating: boolean,
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
-  ): Promise<OIDCRequestTokenResult> {
+  ): Promise<IdPServerResponse> {
     // Get the token from the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -190,7 +216,7 @@ export class CallbackWorkflow implements Workflow {
       refreshCallback || null
     );
     let result;
-    const clientInfo = { principalName: credentials.username, timeoutSeconds: TIMEOUT_S };
+    const context: OIDCCallbackContext = { timeoutSeconds: TIMEOUT_S, version: OIDC_VERSION };
     // Check if there's a token in the cache.
     if (entry) {
       // If the cache entry is valid, return the token result.
@@ -201,13 +227,14 @@ export class CallbackWorkflow implements Workflow {
       // to use the refresh callback to get a new token. If no refresh callback
       // exists, then fallback to the request callback.
       if (refreshCallback) {
-        result = await refreshCallback(clientInfo, startResult, entry.tokenResult);
+        context.refreshToken = entry.tokenResult.refreshToken;
+        result = await refreshCallback(serverInfo, context);
       } else {
-        result = await requestCallback(clientInfo, startResult);
+        result = await requestCallback(serverInfo, context);
       }
     } else {
       // With no token in the cache we use the request callback.
-      result = await requestCallback(clientInfo, startResult);
+      result = await requestCallback(serverInfo, context);
     }
     // Validate that the result returned by the callback is acceptable.
     if (isCallbackResultInvalid(result)) {
@@ -224,7 +251,7 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null,
       result,
-      startResult
+      serverInfo
     );
     return result;
   }

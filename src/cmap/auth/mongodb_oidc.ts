@@ -1,16 +1,23 @@
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
+import { hostMatchesWildcards } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
-import type { MongoCredentials } from './mongo_credentials';
+import { DEFAULT_ALLOWED_HOSTS, MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
 
 /**
+ * @internal
+ * The current version of OIDC implementation.
+ */
+export const OIDC_VERSION = 0;
+
+/**
  * @public
  * @experimental
  */
-export interface OIDCMechanismServerStep1 {
+export interface IdPServerInfo {
   issuer: string;
   clientId: string;
   requestScopes?: string[];
@@ -20,7 +27,7 @@ export interface OIDCMechanismServerStep1 {
  * @public
  * @experimental
  */
-export interface OIDCRequestTokenResult {
+export interface IdPServerResponse {
   accessToken: string;
   expiresInSeconds?: number;
   refreshToken?: string;
@@ -30,10 +37,11 @@ export interface OIDCRequestTokenResult {
  * @public
  * @experimental
  */
-export interface OIDCClientInfo {
-  principalName: string;
+export interface OIDCCallbackContext {
+  refreshToken?: string;
   timeoutSeconds?: number;
   timeoutContext?: AbortSignal;
+  version: number;
 }
 
 /**
@@ -41,19 +49,18 @@ export interface OIDCClientInfo {
  * @experimental
  */
 export type OIDCRequestFunction = (
-  clientInfo: OIDCClientInfo,
-  serverInfo: OIDCMechanismServerStep1
-) => Promise<OIDCRequestTokenResult>;
+  info: IdPServerInfo,
+  context: OIDCCallbackContext
+) => Promise<IdPServerResponse>;
 
 /**
  * @public
  * @experimental
  */
 export type OIDCRefreshFunction = (
-  clientInfo: OIDCClientInfo,
-  serverInfo: OIDCMechanismServerStep1,
-  tokenResult: OIDCRequestTokenResult
-) => Promise<OIDCRequestTokenResult>;
+  info: IdPServerInfo,
+  context: OIDCCallbackContext
+) => Promise<IdPServerResponse>;
 
 type ProviderName = 'aws' | 'callback';
 
@@ -92,6 +99,11 @@ export class MongoDBOIDC extends AuthProvider {
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
     const credentials = getCredentials(authContext);
+    const { connection } = authContext;
+    const allowedHosts = credentials.mechanismProperties.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
+    if (!hostMatchesWildcards(connection.address, allowedHosts)) {
+      throw new MongoInvalidArgumentError('Host does not match provided ALLOWED_HOSTS values');
+    }
     const workflow = getWorkflow(credentials);
     const result = await workflow.speculativeAuth(credentials);
     return { ...handshakeDoc, ...result };
