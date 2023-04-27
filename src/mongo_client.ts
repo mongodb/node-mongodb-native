@@ -447,16 +447,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         options.hosts[index] = host;
       }
     }
-    console.log('OPTIONS', options);
+
+    // This logic is here rather than validating in the connection_string module
+    // or elsewhere for 2 reasons. The OIDC auth spec states that the hostname
+    // validation against the user provided ALLOWED_HOSTS entries or the
+    // default values MUST happen after SRV record resolution. At the same time,
+    // however, we don't even want an attempted connection via a SDAM monitor
+    // to even attempt to contact a host that is not allowed. So this is placed
+    // here directly after SRV resolution and before the creation of the
+    // topology to short circuit as quickly as possible.
     if (options.credentials?.mechanism === AuthMechanism.MONGODB_OIDC) {
       const allowedHosts =
         options.credentials?.mechanismProperties?.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
       const isServiceAuth = !!options.credentials?.mechanismProperties?.PROVIDER_NAME;
       if (!isServiceAuth) {
         for (const host of options.hosts) {
-          // Validation of allowed hosts is required by the spec to happen immediately
-          // after SRV record resolution.
-          console.log('HOST', host.host);
           if (!hostMatchesWildcards(host.host || 'localhost', allowedHosts)) {
             throw new MongoInvalidArgumentError(
               `Host '${host}' is not valid for OIDC authentication with ALLOWED_HOSTS of '${allowedHosts.join(

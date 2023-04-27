@@ -289,7 +289,6 @@ describe('MONGODB-OIDC', function () {
             try {
               await collection.findOne();
             } catch (error) {
-              console.log(error);
               expect(error).to.be.instanceOf(MongoInvalidArgumentError);
               expect(error.message).to.include(
                 'is not valid for OIDC authentication with ALLOWED_HOSTS'
