@@ -232,6 +232,22 @@ export class Db {
    * @remarks
    * This command does not inherit options from the MongoClient.
    *
+   * The driver will ensure the following fields are attached to the command sent to the server:
+   * - `lsid` - sourced from an implicit session or options.session
+   * - `$readPreference` - defaults to primary or can be configured by options.readPreference
+   * - `$db` - sourced from the name of this database
+   *
+   * If the client has a serverApi setting:
+   * - `apiVersion`
+   * - `apiStrict`
+   * - `apiDeprecationErrors`
+   *
+   * When in a transaction:
+   * - `readConcern` - sourced from readConcern set on the TransactionOptions
+   * - `writeConcern` - sourced from writeConcern set on the TransactionOptions
+   *
+   * Attaching any of the above fields to the command will have no effect as the driver will overwrite the value.
+   *
    * @param command - The command to run
    * @param options - Optional settings for the command
    */

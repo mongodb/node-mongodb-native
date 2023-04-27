@@ -1,4 +1,3 @@
-import type { Document } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { ReadPreferenceLike } from '../../read_preference';
 import { ReadPreference } from '../../read_preference';
@@ -13,9 +12,9 @@ export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
 }
 
-export function getReadPreference(cmd: Document, options?: ReadPreferenceOption): ReadPreference {
+export function getReadPreference(options?: ReadPreferenceOption): ReadPreference {
   // Default to command version of the readPreference
-  let readPreference = cmd.readPreference || ReadPreference.primary;
+  let readPreference = options?.readPreference ?? ReadPreference.primary;
   // If we have an option readPreference override the command one
   if (options?.readPreference) {
     readPreference = options.readPreference;

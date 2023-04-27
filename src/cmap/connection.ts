@@ -484,22 +484,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   command(
     ns: MongoDBNamespace,
-    cmd: Document,
+    command: Document,
     options: CommandOptions | undefined,
     callback: Callback
   ): void {
-    const readPreference = getReadPreference(cmd, options);
+    let cmd = { ...command };
+
+    const readPreference = getReadPreference(options);
     const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
-    let finalCmd = Object.assign({}, cmd);
 
     if (this.serverApi) {
       const { version, strict, deprecationErrors } = this.serverApi;
-      finalCmd.apiVersion = version;
-      if (strict != null) finalCmd.apiStrict = strict;
-      if (deprecationErrors != null) finalCmd.apiDeprecationErrors = deprecationErrors;
+      cmd.apiVersion = version;
+      if (strict != null) cmd.apiStrict = strict;
+      if (deprecationErrors != null) cmd.apiDeprecationErrors = deprecationErrors;
     }
 
     if (hasSessionSupport(this) && session) {
@@ -511,7 +512,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      const err = applySession(session, finalCmd, options);
+      const err = applySession(session, cmd, options);
       if (err) {
         return callback(err);
       }
@@ -521,12 +522,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // if we have a known cluster time, gossip it
     if (clusterTime) {
-      finalCmd.$clusterTime = clusterTime;
+      cmd.$clusterTime = clusterTime;
     }
 
     if (isSharded(this) && !shouldUseOpMsg && readPreference && readPreference.mode !== 'primary') {
-      finalCmd = {
-        $query: finalCmd,
+      cmd = {
+        $query: cmd,
         $readPreference: readPreference.toJSON()
       };
     }
@@ -544,8 +545,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const cmdNs = `${ns.db}.$cmd`;
     const message = shouldUseOpMsg
-      ? new Msg(cmdNs, finalCmd, commandOptions)
-      : new Query(cmdNs, finalCmd, commandOptions);
+      ? new Msg(cmdNs, cmd, commandOptions)
+      : new Query(cmdNs, cmd, commandOptions);
 
     try {
       write(this, message, commandOptions, callback);
