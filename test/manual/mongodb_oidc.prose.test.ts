@@ -233,7 +233,9 @@ describe('MONGODB-OIDC', function () {
               await collection.findOne();
             } catch (error) {
               expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+              expect(error.message).to.include(
+                'is not valid for OIDC authentication with ALLOWED_HOSTS'
+              );
             }
           });
         });
@@ -289,7 +291,9 @@ describe('MONGODB-OIDC', function () {
             } catch (error) {
               console.log(error);
               expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+              expect(error.message).to.include(
+                'is not valid for OIDC authentication with ALLOWED_HOSTS'
+              );
             }
           });
         });
