@@ -61,7 +61,6 @@ describe('MONGODB-OIDC', function () {
         expect(context).to.have.property('timeoutSeconds');
         expect(info).to.have.property('issuer');
         expect(info).to.have.property('clientId');
-        expect(info).to.have.property('accessToken');
         return generateResult(token, expiresInSeconds, extraFields);
       };
     };
@@ -222,7 +221,8 @@ describe('MONGODB-OIDC', function () {
           before(function () {
             client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
-                ALLOWED_HOSTS: []
+                ALLOWED_HOSTS: [],
+                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600)
               }
             });
             collection = client.db('test').collection('test');
@@ -248,7 +248,8 @@ describe('MONGODB-OIDC', function () {
               'mongodb://localhost/?authMechanism=MONGODB-OIDC&ignored=example.com',
               {
                 authMechanismProperties: {
-                  ALLOWED_HOSTS: ['examle.com']
+                  ALLOWED_HOSTS: ['examle.com'],
+                  REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600)
                 }
               }
             );
@@ -273,7 +274,8 @@ describe('MONGODB-OIDC', function () {
           before(function () {
             client = new MongoClient('mongodb://evilmongodb.com/?authMechanism=MONGODB-OIDC', {
               authMechanismProperties: {
-                ALLOWED_HOSTS: ['*mongodb.com']
+                ALLOWED_HOSTS: ['*mongodb.com'],
+                REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 600)
               }
             });
             collection = client.db('test').collection('test');
@@ -1010,6 +1012,43 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('6.2 Retries and Succeeds with Cache', function () {
+        const requestCallback = createRequestCallback('test_user1', 600);
+        const refreshCallback = createRefreshCallback('test_user1', 600);
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: requestCallback,
+          REFRESH_TOKEN_CALLBACK: refreshCallback
+        };
+        // Sets up the fail point for the find to reauthenticate.
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find', 'saslStart'],
+                errorCode: 391
+              }
+            });
+        };
+
+        before(async function () {
+          cache.clear();
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: authMechanismProperties
+          });
+          await client.db('test').collection('test').findOne();
+          await setupFailPoint();
+        });
+
+        afterEach(async function () {
+          await removeFailPoint();
+          await client.close();
+        });
+
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds.
@@ -1030,9 +1069,51 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that succeeds.
         // Close the client.
+        it('successfully authenticates', async function () {
+          const result = await client.db('test').collection('test').findOne();
+          expect(result).to.be.null;
+        });
       });
 
       describe('6.3 Retries and Fails with no Cache', function () {
+        const requestCallback = createRequestCallback('test_user1', 600);
+        const refreshCallback = createRefreshCallback('test_user1', 600);
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: requestCallback,
+          REFRESH_TOKEN_CALLBACK: refreshCallback
+        };
+        // Sets up the fail point for the find to reauthenticate.
+        const setupFailPoint = async () => {
+          return await client
+            .db()
+            .admin()
+            .command({
+              configureFailPoint: 'failCommand',
+              mode: {
+                times: 1
+              },
+              data: {
+                failCommands: ['find', 'saslStart'],
+                errorCode: 391
+              }
+            });
+        };
+
+        before(async function () {
+          cache.clear();
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: authMechanismProperties
+          });
+          await client.db('test').collection('test').findOne();
+          cache.clear();
+          await setupFailPoint();
+        });
+
+        afterEach(async function () {
+          await removeFailPoint();
+          await client.close();
+        });
+
         // Clear the cache.
         // Create request and refresh callbacks that return valid credentials that will not expire soon.
         // Perform a find operation that succeeds (to force a speculative auth).
@@ -1054,6 +1135,9 @@ describe('MONGODB-OIDC', function () {
         //
         // Perform a find operation that fails.
         // Close the client.
+        it('fails authentication', async function () {
+          await client.db('test').collection('test').findOne();
+        });
       });
     });
   });

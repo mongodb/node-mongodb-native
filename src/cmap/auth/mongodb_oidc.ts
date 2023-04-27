@@ -100,8 +100,11 @@ export class MongoDBOIDC extends AuthProvider {
   ): Promise<HandshakeDocument> {
     const credentials = getCredentials(authContext);
     const { connection } = authContext;
-    const allowedHosts = credentials.mechanismProperties.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
-    if (!hostMatchesWildcards(connection.address, allowedHosts)) {
+    const mechanismProperties = credentials.mechanismProperties;
+    const allowedHosts = mechanismProperties.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
+    const providerName = mechanismProperties.PROVIDER_NAME;
+    // Cloud provider automatic auth does not validate allowed hosts.
+    if (!providerName && !hostMatchesWildcards(connection.address, allowedHosts)) {
       throw new MongoInvalidArgumentError('Host does not match provided ALLOWED_HOSTS values');
     }
     const workflow = getWorkflow(credentials);
