@@ -130,13 +130,13 @@ describe('driver utils', function () {
       context('when using IPv6', function () {
         context('when the host matches at least one', function () {
           it('returns true', function () {
-            expect(hostMatchesWildcards('[::1]', ['::1', 'other'])).to.be.true;
+            expect(hostMatchesWildcards('::1', ['::1', 'other'])).to.be.true;
           });
         });
 
         context('when the host does not match any', function () {
           it('returns false', function () {
-            expect(hostMatchesWildcards('[::1]', ['::2', 'test2'])).to.be.false;
+            expect(hostMatchesWildcards('::1', ['::2', 'test2'])).to.be.false;
           });
         });
       });

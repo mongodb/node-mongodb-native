@@ -35,7 +35,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('adds the server result', function () {
-        expect(entry.serverResult).to.deep.equal(serverResult);
+        expect(entry.serverInfo).to.deep.equal(serverResult);
       });
 
       it('creates an expiration', function () {
