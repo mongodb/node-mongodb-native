@@ -1,10 +1,14 @@
 import type { TcpNetConnectOpts } from 'net';
-import { DEFAULT_ECDH_CURVE, ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
+import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 import { promisify } from 'util';
 
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
-import { AuthMechanismProperties, DEFAULT_ALLOWED_HOSTS, MongoCredentials } from './cmap/auth/mongo_credentials';
+import {
+  AuthMechanismProperties,
+  DEFAULT_ALLOWED_HOSTS,
+  MongoCredentials
+} from './cmap/auth/mongo_credentials';
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
@@ -25,7 +29,7 @@ import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
-import { HostAddress, MongoDBNamespace, hostMatchesWildcards, ns, resolveOptions } from './utils';
+import { HostAddress, hostMatchesWildcards, MongoDBNamespace, ns, resolveOptions } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */

@@ -76,9 +76,9 @@ export class CallbackWorkflow implements Workflow {
       refreshCallback || null
     );
     let result;
-    // Reauthentication must go through all the steps again regards of a cache entry
-    // being present.
     if (entry) {
+      // Reauthentication cannot use a token from the cache since the server has
+      // stated it is invalid by the request for reauthentication.
       if (entry.isValid() && !reauthenticating) {
         // Presence of a valid cache entry means we can skip to the finishing step.
         result = await this.finishAuthentication(
@@ -127,7 +127,6 @@ export class CallbackWorkflow implements Workflow {
         }
       }
     } else {
-      console.log('NO ENTRY IN THE CACHE', reauthenticating);
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(

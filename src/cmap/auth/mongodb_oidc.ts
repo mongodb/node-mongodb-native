@@ -1,8 +1,7 @@
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
-import { hostMatchesWildcards } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
-import { DEFAULT_ALLOWED_HOSTS, MongoCredentials } from './mongo_credentials';
+import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
