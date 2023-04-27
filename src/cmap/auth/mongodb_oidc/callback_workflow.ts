@@ -127,6 +127,7 @@ export class CallbackWorkflow implements Workflow {
         }
       }
     } else {
+      console.log('NO ENTRY IN THE CACHE', reauthenticating);
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(

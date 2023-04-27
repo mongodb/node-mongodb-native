@@ -1096,7 +1096,7 @@ describe('MONGODB-OIDC', function () {
             .command({
               configureFailPoint: 'failCommand',
               mode: {
-                times: 1
+                times: 2
               },
               data: {
                 failCommands: ['find', 'saslStart'],
