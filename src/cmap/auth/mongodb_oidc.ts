@@ -12,6 +12,9 @@ import type { Workflow } from './mongodb_oidc/workflow';
  */
 export const OIDC_VERSION = 0;
 
+/** Error when credentials are missing. */
+const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
+
 /**
  * @public
  * @experimental
@@ -110,7 +113,7 @@ export class MongoDBOIDC extends AuthProvider {
 function getCredentials(authContext: AuthContext): MongoCredentials {
   const { credentials } = authContext;
   if (!credentials) {
-    throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
+    throw new MongoMissingCredentialsError(MISSING_CREDENTIALS_ERROR);
   }
   return credentials;
 }

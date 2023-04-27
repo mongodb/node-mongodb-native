@@ -783,7 +783,9 @@ describe('MONGODB-OIDC', function () {
           try {
             await collection.findOne();
             expect.fail('Expected OIDC auth to fail with invalid fields from refresh callback');
-          } catch (e) {
+          } catch (error) {
+            expect(error).to.be.instanceOf(MongoMissingCredentialsError);
+            expect(error.message).to.include('');
             expect(cache.entries.size).to.equal(0);
           }
         });

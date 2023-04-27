@@ -27,6 +27,14 @@ const TIMEOUT_S = 300;
 /** Properties allowed on results of callbacks. */
 const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 
+/** Error message when the callback result is invalid. */
+const CALLBACK_RESULT_ERROR =
+  'User provided OIDC callbacks must return a valid object with an accessToken.';
+
+/** Error message for when request callback is missing. */
+const REQUEST_CALLBACK_REQUIRED_ERROR =
+  'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.';
+
 /**
  * OIDC implementation of a callback based workflow.
  * @internal
@@ -64,9 +72,7 @@ export class CallbackWorkflow implements Workflow {
     const refreshCallback = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     // At minimum a request callback must be provided by the user.
     if (!requestCallback) {
-      throw new MongoInvalidArgumentError(
-        'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.'
-      );
+      throw new MongoInvalidArgumentError(REQUEST_CALLBACK_REQUIRED_ERROR);
     }
     // Look for an existing entry in the cache.
     const entry = this.cache.getEntry(
@@ -239,15 +245,14 @@ export class CallbackWorkflow implements Workflow {
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
+      console.log('GOT ERROR, DELETE FROM CACHE AND THROW');
       this.cache.deleteEntry(
         connection.address,
         credentials.username || '',
         requestCallback,
         refreshCallback || null
       );
-      throw new MongoMissingCredentialsError(
-        'User provided OIDC callbacks must return a valid object with an accessToken.'
-      );
+      throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
     // Cleanup the cache.
     this.cache.deleteExpiredEntries();
