@@ -32,6 +32,7 @@ import {
   emitWarning,
   emitWarningOnce,
   HostAddress,
+  hostMatchesWildcards,
   isRecord,
   matchesParentDomain,
   parseInteger,

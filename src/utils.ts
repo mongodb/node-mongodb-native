@@ -62,8 +62,7 @@ export const ByteUtils = {
  * Determines if a connection's address matches a user provided list
  * of domain wildcards.
  */
-export function hostMatchesWildcards(address: string, wildcards: string[]): boolean {
-  const host = HostAddress.fromString(address).host;
+export function hostMatchesWildcards(host: string, wildcards: string[]): boolean {
   for (const wildcard of wildcards) {
     if (
       host === wildcard ||

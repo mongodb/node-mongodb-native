@@ -447,6 +447,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         options.hosts[index] = host;
       }
     }
+    console.log('OPTIONS', options);
+    for (const host of options.hosts) {
+      // Validation of allowed hosts is required by the spec to happen immediately
+      // after SRV record resolution.
+      console.log('HOST', host.host);
+      //if (!hostMatchesWildcards(hostAddress.host, allowedHosts)) {
+      //}
+    }
 
     const topology = new Topology(options.hosts, options);
     // Events can be emitted before initialization is complete so we have to
