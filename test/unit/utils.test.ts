@@ -100,6 +100,14 @@ describe('driver utils', function () {
             });
           });
 
+          context('when the wildcard does not start with *.', function () {
+            it('returns false', function () {
+              expect(
+                hostMatchesWildcards('evilmongodb.com:27017', ['*mongodb.com', 'test2'])
+              ).to.be.false;
+            });
+          });
+
           context('when the host matches a FQDN', function () {
             it('returns true', function () {
               expect(
