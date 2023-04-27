@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { expect } from 'chai';

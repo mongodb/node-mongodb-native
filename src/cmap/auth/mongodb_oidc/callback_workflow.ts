@@ -79,7 +79,9 @@ export class CallbackWorkflow implements Workflow {
     // Reauthentication must go through all the steps again regards of a cache entry
     // being present.
     if (entry) {
+      console.log('FOUND ENTRY');
       if (entry.isValid() && !reauthenticating) {
+        console.log('ENTRY VALID, NOT REAUTH');
         // Presence of a valid cache entry means we can skip to the finishing step.
         result = await this.finishAuthentication(
           connection,
@@ -88,6 +90,7 @@ export class CallbackWorkflow implements Workflow {
           response?.speculativeAuthenticate?.conversationId
         );
       } else {
+        console.log('NEED FETCH TOKEN', reauthenticating, response);
         // Presence of an expired cache entry means we must fetch a new one and
         // then execute the final step.
         const tokenResult = await this.fetchAccessToken(
@@ -106,6 +109,7 @@ export class CallbackWorkflow implements Workflow {
             response?.speculativeAuthenticate?.conversationId
           );
         } catch (error) {
+          console.log('ERROR', error, reauthenticating);
           // If we are reauthenticating and this errors with reauthentication
           // required, we need to do the entire process over again and clear
           // the cache entry.
@@ -127,6 +131,7 @@ export class CallbackWorkflow implements Workflow {
         }
       }
     } else {
+      console.log('NO TOKEN');
       // No entry in the cache requires us to do all authentication steps
       // from start to finish, including getting a fresh token for the cache.
       const startDocument = await this.startAuthentication(
