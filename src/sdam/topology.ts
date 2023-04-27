@@ -227,9 +227,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
+  constructor(
+    client: MongoClient,
+    seeds: string | string[] | HostAddress | HostAddress[],
+    options: TopologyOptions
+  ) {
     super();
 
+    this.client = client;
     this.selectServerAsync = promisify(
       (
         selector: string | ReadPreference | ServerSelector,

@@ -9,11 +9,19 @@ const { setImmediate } = require('timers');
 const { ns, isHello } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
+const { topologyWithPlaceholderClient } = require('../../tools/utils');
 
 describe('Connection Pool', function () {
   let server;
   after(() => mock.cleanup());
-  before(() => mock.createServer().then(s => (server = s)));
+  before(() =>
+    mock.createServer().then(s => {
+      server = s;
+      server.s = {
+        topology: topologyWithPlaceholderClient([], {})
+      };
+    })
+  );
 
   it('should destroy connections which have been closed', function (done) {
     server.setMessageHandler(request => {

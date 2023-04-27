@@ -148,9 +148,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       options,
       state: STATE_CLOSED,
       topology,
-      pool: new ConnectionPool(this, poolOptions),
       operationCount: 0
-    };
+    } as any;
+    // NOTE: this is done so that the connection pool can access the topology in its constructor
+    this.s.pool = new ConnectionPool(this, poolOptions);
 
     for (const event of [...CMAP_EVENTS, ...APM_EVENTS]) {
       this.s.pool.on(event, (e: any) => this.emit(event, e));

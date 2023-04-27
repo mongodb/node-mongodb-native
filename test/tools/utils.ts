@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { Document, OP_MSG } from '../mongodb';
+import { Document, HostAddress, OP_MSG, Topology, TopologyOptions } from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
@@ -472,3 +472,27 @@ export const sorted = <T>(iterable: Iterable<T>, how: (a: T, b: T) => 0 | 1 | -1
   items.sort(how);
   return items;
 };
+
+/**
+ * This helper method is necessary as the changes in NODE-4720 required the Topology constructor to
+ * accept a client with access to a logger. This helper serves to keep old tests working with minimal
+ * changes*/
+export function topologyWithPlaceholderClient(
+  seeds: string | string[] | HostAddress | HostAddress[],
+  options: TopologyOptions
+): Topology {
+  return new Topology(
+    {
+      mongoLogger: {
+        debug: () => null,
+        info: () => null,
+        trace: () => null,
+        warn: () => null,
+        error: () => null,
+        topology: this
+      }
+    } as any,
+    seeds,
+    options
+  );
+}

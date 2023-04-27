@@ -2,7 +2,8 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { promisify } from 'util';
 
-import { FindOperation, ns, Server, ServerDescription, Topology } from '../../mongodb';
+import { FindOperation, ns, Server, ServerDescription } from '../../mongodb';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('FindOperation', function () {
   const namespace = ns('db.coll');
@@ -36,11 +37,8 @@ describe('FindOperation', function () {
   describe('#execute', function () {
     context('command construction', () => {
       const namespace = ns('db.collection');
-      const server = new Server(
-        new Topology([], {} as any),
-        new ServerDescription('a:1'),
-        {} as any
-      );
+      const topology = topologyWithPlaceholderClient([], {} as any);
+      const server = new Server(topology, new ServerDescription('a:1'), {} as any);
 
       it('should build basic find command with filter', async () => {
         const findOperation = new FindOperation(undefined, namespace, filter);

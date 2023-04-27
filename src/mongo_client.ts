@@ -448,11 +448,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       }
     }
 
-    const topology = new Topology(options.hosts, options);
+    const topology = new Topology(this, options.hosts, options);
     // Events can be emitted before initialization is complete so we have to
     // save the reference to the topology on the client ASAP if the event handlers need to access it
     this.topology = topology;
-    topology.client = this;
+    //topology.client = this;
 
     topology.once(Topology.OPEN, () => this.emit('open', this));
 

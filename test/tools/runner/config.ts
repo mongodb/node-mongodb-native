@@ -7,11 +7,10 @@ import {
   AuthMechanism,
   HostAddress,
   MongoClient,
-  Topology,
   TopologyType,
   WriteConcernSettings
 } from '../../mongodb';
-import { getEnvironmentalOptions } from '../utils';
+import { getEnvironmentalOptions, topologyWithPlaceholderClient } from '../utils';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -250,7 +249,7 @@ export class TestConfiguration {
     options = Object.assign({}, options);
     const hosts =
       host == null ? [].concat(this.options.hostAddresses) : [new HostAddress(`${host}:${port}`)];
-    return new Topology(hosts, options);
+    return topologyWithPlaceholderClient(hosts, options);
   }
 
   /**

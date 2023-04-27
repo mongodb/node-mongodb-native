@@ -13,10 +13,9 @@ import {
   Server,
   ServerDescription,
   ServerType,
-  Topology,
   TopologyType
 } from '../../mongodb';
-import { sleep } from '../../tools/utils';
+import { sleep, topologyWithPlaceholderClient } from '../../tools/utils';
 
 const handledErrors = [
   {
@@ -59,7 +58,11 @@ describe('Server', () => {
   describe('#handleError', () => {
     let server: Server, connection: Connection | undefined;
     beforeEach(() => {
-      server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
+      server = new Server(
+        topologyWithPlaceholderClient([], {} as any),
+        new ServerDescription('a:1'),
+        {} as any
+      );
     });
     for (const loadBalanced of [true, false]) {
       const mode = loadBalanced ? 'loadBalanced' : 'non-loadBalanced';
