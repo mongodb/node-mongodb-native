@@ -236,8 +236,15 @@ export class CallbackWorkflow implements Workflow {
       // With no token in the cache we use the request callback.
       result = await requestCallback(serverInfo, context);
     }
-    // Validate that the result returned by the callback is acceptable.
+    // Validate that the result returned by the callback is acceptable. If it is not
+    // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
+      this.cache.deleteEntry(
+        connection.address,
+        credentials.username || '',
+        requestCallback,
+        refreshCallback || null
+      );
       throw new MongoMissingCredentialsError(
         'User provided OIDC callbacks must return a valid object with an accessToken.'
       );
