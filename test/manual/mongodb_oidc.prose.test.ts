@@ -229,12 +229,12 @@ describe('MONGODB-OIDC', function () {
           });
 
           it('fails validation', async function () {
-            //try {
-            await collection.findOne();
-            //} catch (error) {
-            //  expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-            //  expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
-            //}
+            try {
+              await collection.findOne();
+            } catch (error) {
+              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+              expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
+            }
           });
         });
 

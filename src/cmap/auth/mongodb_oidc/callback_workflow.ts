@@ -106,7 +106,7 @@ export class CallbackWorkflow implements Workflow {
             connection,
             credentials,
             tokenResult,
-            response?.speculativeAuthenticate?.conversationId
+            reauthenticating ? undefined : response?.speculativeAuthenticate?.conversationId
           );
         } catch (error) {
           console.log('ERROR', error, reauthenticating);
