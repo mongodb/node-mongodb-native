@@ -1,8 +1,8 @@
 import type {
-  PrincipalStepRequest,
+  IdPServerInfo,
+  IdPServerResponse,
   OIDCRefreshFunction,
-  OIDCRequestFunction,
-  IdPServerResponse
+  OIDCRequestFunction
 } from '../mongodb_oidc';
 
 /* 5 minutes in milliseonds */
@@ -23,19 +23,15 @@ FN_HASHES.set(NO_FUNCTION, FN_HASH_COUNTER);
 /** @internal */
 export class TokenEntry {
   tokenResult: IdPServerResponse;
-  serverResult: PrincipalStepRequest;
+  serverInfo: IdPServerInfo;
   expiration: number;
 
   /**
    * Instantiate the entry.
    */
-  constructor(
-    tokenResult: IdPServerResponse,
-    serverResult: PrincipalStepRequest,
-    expiration: number
-  ) {
+  constructor(tokenResult: IdPServerResponse, serverInfo: IdPServerInfo, expiration: number) {
     this.tokenResult = tokenResult;
-    this.serverResult = serverResult;
+    this.serverInfo = serverInfo;
     this.expiration = expiration;
   }
 
@@ -68,11 +64,11 @@ export class TokenEntryCache {
     requestFn: OIDCRequestFunction | null,
     refreshFn: OIDCRefreshFunction | null,
     tokenResult: IdPServerResponse,
-    serverResult: PrincipalStepRequest
+    serverInfo: IdPServerInfo
   ): TokenEntry {
     const entry = new TokenEntry(
       tokenResult,
-      serverResult,
+      serverInfo,
       expirationTime(tokenResult.expiresInSeconds)
     );
     this.entries.set(cacheKey(address, username, requestFn, refreshFn), entry);
