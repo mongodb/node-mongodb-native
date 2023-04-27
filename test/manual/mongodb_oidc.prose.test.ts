@@ -758,17 +758,21 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('4.4 Error clears cache', function () {
-        before(function () {
+        const authMechanismProperties = {
+          REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300),
+          REFRESH_TOKEN_CALLBACK: () => {
+            return Promise.resolve({});
+          }
+        };
+
+        before(async function () {
           cache.clear();
           client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
-            authMechanismProperties: {
-              REQUEST_TOKEN_CALLBACK: createRequestCallback('test_user1', 300),
-              REFRESH_TOKEN_CALLBACK: () => {
-                return Promise.resolve({});
-              }
-            }
+            authMechanismProperties: authMechanismProperties
           });
-          collection = client.db('test').collection('test');
+          await client.db('test').collection('test').findOne();
+          expect(cache.entries.size).to.equal(1);
+          await client.close();
         });
 
         // Clear the cache.
@@ -778,10 +782,11 @@ describe('MONGODB-OIDC', function () {
         // Ensure that the cached token has been cleared.
         // Close the client.
         it('clears the cache on authentication error', async function () {
-          await collection.findOne();
-          expect(cache.entries.size).to.equal(1);
+          client = new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: authMechanismProperties
+          });
           try {
-            await collection.findOne();
+            await client.db('test').collection('test').findOne();
             expect.fail('Expected OIDC auth to fail with invalid fields from refresh callback');
           } catch (error) {
             expect(error).to.be.instanceOf(MongoMissingCredentialsError);
