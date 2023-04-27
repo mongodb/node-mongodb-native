@@ -287,6 +287,7 @@ describe('MONGODB-OIDC', function () {
             try {
               await collection.findOne();
             } catch (error) {
+              console.log(error);
               expect(error).to.be.instanceOf(MongoInvalidArgumentError);
               expect(error.message).to.include('Host does not match provided ALLOWED_HOSTS values');
             }
