@@ -782,6 +782,7 @@ describe('MONGODB-OIDC', function () {
           expect(cache.entries.size).to.equal(1);
           try {
             await collection.findOne();
+            expect.fail('Expected OIDC auth to fail with invalid fields from refresh callback');
           } catch (e) {
             expect(cache.entries.size).to.equal(0);
           }
@@ -1142,7 +1143,13 @@ describe('MONGODB-OIDC', function () {
         // Perform a find operation that fails.
         // Close the client.
         it('fails authentication', async function () {
-          await client.db('test').collection('test').findOne();
+          try {
+            await client.db('test').collection('test').findOne();
+            expect.fail('Reauthentication must fail on the saslStart error');
+          } catch (error) {
+            // This is the saslStart failCommand bubbled up.
+            expect(error).to.be.instanceOf(MongoServerError);
+          }
         });
       });
     });
