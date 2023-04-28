@@ -7,18 +7,11 @@ describe('TokenEntryCache', function () {
     accessToken: 'test',
     expiresInSeconds: 100
   });
-
   const serverResult = Object.freeze({
+    issuer: 'test',
     clientId: '1'
   });
-
-  const fnOne = () => {
-    return { accessToken: 'test' };
-  };
-
-  const fnTwo = () => {
-    return { accessToken: 'test' };
-  };
+  const callbackHash = '1';
 
   describe('#addEntry', function () {
     context('when expiresInSeconds is provided', function () {
@@ -26,8 +19,8 @@ describe('TokenEntryCache', function () {
       let entry;
 
       before(function () {
-        cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
-        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
+        cache.addEntry('localhost', 'user', callbackHash, tokenResultWithExpiration, serverResult);
+        entry = cache.getEntry('localhost', 'user', callbackHash);
       });
 
       it('adds the token result', function () {
@@ -50,8 +43,8 @@ describe('TokenEntryCache', function () {
       const expiredResult = Object.freeze({ accessToken: 'test' });
 
       before(function () {
-        cache.addEntry('localhost', 'user', fnOne, fnTwo, expiredResult, serverResult);
-        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
+        cache.addEntry('localhost', 'user', callbackHash, expiredResult, serverResult);
+        entry = cache.getEntry('localhost', 'user', callbackHash);
       });
 
       it('sets an immediate expiration', function () {
@@ -69,8 +62,8 @@ describe('TokenEntryCache', function () {
       });
 
       before(function () {
-        cache.addEntry('localhost', 'user', fnOne, fnTwo, expiredResult, serverResult);
-        entry = cache.getEntry('localhost', 'user', fnOne, fnTwo);
+        cache.addEntry('localhost', 'user', callbackHash, expiredResult, serverResult);
+        entry = cache.getEntry('localhost', 'user', callbackHash);
       });
 
       it('sets an immediate expiration', function () {
@@ -83,7 +76,7 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user', callbackHash, tokenResultWithExpiration, serverResult);
       cache.clear();
     });
 
@@ -101,15 +94,15 @@ describe('TokenEntryCache', function () {
     });
 
     before(function () {
-      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
-      cache.addEntry('localhost', 'user2', fnOne, fnTwo, nonExpiredResult, serverResult);
+      cache.addEntry('localhost', 'user', callbackHash, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user2', callbackHash, nonExpiredResult, serverResult);
       cache.deleteExpiredEntries();
     });
 
     it('deletes all expired tokens from the cache 5 minutes before expiredInSeconds', function () {
       expect(cache.entries.size).to.equal(1);
-      expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)).to.not.exist;
-      expect(cache.getEntry('localhost', 'user2', fnOne, fnTwo)).to.exist;
+      expect(cache.getEntry('localhost', 'user', callbackHash)).to.not.exist;
+      expect(cache.getEntry('localhost', 'user2', callbackHash)).to.exist;
     });
   });
 
@@ -117,12 +110,12 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
-      cache.deleteEntry('localhost', 'user', fnOne, fnTwo);
+      cache.addEntry('localhost', 'user', callbackHash, tokenResultWithExpiration, serverResult);
+      cache.deleteEntry('localhost', 'user', callbackHash);
     });
 
     it('deletes the entry', function () {
-      expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)).to.not.exist;
+      expect(cache.getEntry('localhost', 'user', callbackHash)).to.not.exist;
     });
   });
 
@@ -130,13 +123,13 @@ describe('TokenEntryCache', function () {
     const cache = new TokenEntryCache();
 
     before(function () {
-      cache.addEntry('localhost', 'user', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
-      cache.addEntry('localhost', 'user2', fnOne, fnTwo, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user', callbackHash, tokenResultWithExpiration, serverResult);
+      cache.addEntry('localhost', 'user2', callbackHash, tokenResultWithExpiration, serverResult);
     });
 
     context('when there is a matching entry', function () {
       it('returns the entry', function () {
-        expect(cache.getEntry('localhost', 'user', fnOne, fnTwo)?.tokenResult).to.equal(
+        expect(cache.getEntry('localhost', 'user', callbackHash)?.tokenResult).to.equal(
           tokenResultWithExpiration
         );
       });
@@ -144,7 +137,7 @@ describe('TokenEntryCache', function () {
 
     context('when there is no matching entry', function () {
       it('returns undefined', function () {
-        expect(cache.getEntry('localhost', 'user1', fnOne, fnTwo)).to.equal(undefined);
+        expect(cache.getEntry('localhost', 'user1', callbackHash)).to.equal(undefined);
       });
     });
   });

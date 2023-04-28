@@ -65,18 +65,13 @@ export class CallbackWorkflow implements Workflow {
     response?: Document
   ): Promise<Document> {
     // Get the callbacks with locks from the callback lock cache.
-    const { requestCallback, refreshCallback } = this.callbackCache.getCallbacks(
+    const { requestCallback, refreshCallback, callbackHash } = this.callbackCache.getCallbacks(
       connection,
       credentials
     );
     console.log('CALLBACKS', requestCallback, refreshCallback);
     // Look for an existing entry in the cache.
-    const entry = this.cache.getEntry(
-      connection.address,
-      credentials.username,
-      requestCallback,
-      refreshCallback || null
-    );
+    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
     console.log('ENTRY', entry);
     let result;
     if (entry) {
@@ -98,6 +93,7 @@ export class CallbackWorkflow implements Workflow {
           credentials,
           entry.serverInfo,
           reauthenticating,
+          callbackHash,
           requestCallback,
           refreshCallback
         );
@@ -117,12 +113,7 @@ export class CallbackWorkflow implements Workflow {
             error instanceof MongoError &&
             error.code === MONGODB_ERROR_CODES.Reauthenticate
           ) {
-            this.cache.deleteEntry(
-              connection.address,
-              credentials.username || '',
-              requestCallback,
-              refreshCallback || null
-            );
+            this.cache.deleteEntry(connection.address, credentials.username || '', callbackHash);
             result = await this.execute(connection, credentials, reauthenticating);
           } else {
             throw error;
@@ -145,6 +136,7 @@ export class CallbackWorkflow implements Workflow {
         credentials,
         serverResult,
         reauthenticating,
+        callbackHash,
         requestCallback,
         refreshCallback
       );
@@ -208,16 +200,12 @@ export class CallbackWorkflow implements Workflow {
     credentials: MongoCredentials,
     serverInfo: IdPServerInfo,
     reauthenticating: boolean,
+    callbackHash: string,
     requestCallback: OIDCRequestFunction,
     refreshCallback?: OIDCRefreshFunction
   ): Promise<IdPServerResponse> {
     // Get the token from the cache.
-    const entry = this.cache.getEntry(
-      connection.address,
-      credentials.username,
-      requestCallback,
-      refreshCallback || null
-    );
+    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
     let result;
     const context: OIDCCallbackContext = { timeoutSeconds: TIMEOUT_S, version: OIDC_VERSION };
     // Check if there's a token in the cache.
@@ -243,12 +231,7 @@ export class CallbackWorkflow implements Workflow {
     // we must clear the token result from the cache.
     console.log('RESULT', result);
     if (isCallbackResultInvalid(result)) {
-      this.cache.deleteEntry(
-        connection.address,
-        credentials.username || '',
-        requestCallback,
-        refreshCallback || null
-      );
+      this.cache.deleteEntry(connection.address, credentials.username || '', callbackHash);
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
     // Cleanup the cache.
@@ -257,8 +240,7 @@ export class CallbackWorkflow implements Workflow {
     this.cache.addEntry(
       connection.address,
       credentials.username || '',
-      requestCallback,
-      refreshCallback || null,
+      callbackHash,
       result,
       serverInfo
     );

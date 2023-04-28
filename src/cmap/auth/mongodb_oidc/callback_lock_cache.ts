@@ -12,6 +12,16 @@ import type {
 /** Error message for when request callback is missing. */
 const REQUEST_CALLBACK_REQUIRED_ERROR =
   'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.';
+/* Counter for function "hashes".*/
+let FN_HASH_COUNTER = 0;
+/* No function present function */
+const NO_FUNCTION: OIDCRequestFunction = () => {
+  return Promise.resolve({ accessToken: 'test' });
+};
+/* The map of function hashes */
+const FN_HASHES = new WeakMap<OIDCRequestFunction | OIDCRefreshFunction, number>();
+/* Put the no function hash in the map. */
+FN_HASHES.set(NO_FUNCTION, FN_HASH_COUNTER);
 
 /**
  * An entry of callbacks in the cache.
@@ -19,6 +29,7 @@ const REQUEST_CALLBACK_REQUIRED_ERROR =
 interface CallbacksEntry {
   requestCallback: OIDCRequestFunction;
   refreshCallback?: OIDCRefreshFunction;
+  callbackHash: string;
 }
 
 /**
@@ -46,27 +57,35 @@ export class CallbackLockCache {
    * exist a new one will get set.
    */
   getCallbacks(connection: Connection, credentials: MongoCredentials): CallbacksEntry {
-    const entry = this.entries.get(cacheKey(connection, credentials));
-    if (entry) {
-      return entry;
-    }
-    return this.setCallbacks(connection, credentials);
-  }
-
-  /**
-   * Set locked callbacks on for connection and credentials.
-   */
-  private setCallbacks(connection: Connection, credentials: MongoCredentials): CallbacksEntry {
     const requestCallback = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     const refreshCallback = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     if (!requestCallback) {
       throw new MongoInvalidArgumentError(REQUEST_CALLBACK_REQUIRED_ERROR);
     }
+    const callbackHash = hashFunctions(requestCallback, refreshCallback);
+    const key = cacheKey(connection, credentials, callbackHash);
+    const entry = this.entries.get(key);
+    if (entry) {
+      return entry;
+    }
+    return this.setCallbacks(key, callbackHash, requestCallback, refreshCallback);
+  }
+
+  /**
+   * Set locked callbacks on for connection and credentials.
+   */
+  private setCallbacks(
+    key: string,
+    callbackHash: string,
+    requestCallback: OIDCRequestFunction,
+    refreshCallback?: OIDCRefreshFunction
+  ): CallbacksEntry {
     const entry = {
       requestCallback: withLock(requestCallback),
-      refreshCallback: refreshCallback ? withLock(refreshCallback) : undefined
+      refreshCallback: refreshCallback ? withLock(refreshCallback) : undefined,
+      callbackHash: callbackHash
     };
-    this.entries.set(cacheKey(connection, credentials), entry);
+    this.entries.set(key, entry);
     return entry;
   }
 }
@@ -74,8 +93,12 @@ export class CallbackLockCache {
 /**
  * Get a cache key based on connection and credentials.
  */
-function cacheKey(connection: Connection, credentials: MongoCredentials): string {
-  return `${connection.address}-${credentials.username}`;
+function cacheKey(
+  connection: Connection,
+  credentials: MongoCredentials,
+  callbackHash: string
+): string {
+  return `${connection.address}-${credentials.username}=${callbackHash}`;
 }
 
 /**
@@ -88,4 +111,25 @@ function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
     lock = lock.then(() => callback(info, context));
     return lock;
   };
+}
+
+/**
+ * Get the hash string for the request and refresh functions.
+ */
+function hashFunctions(requestFn: OIDCRequestFunction, refreshFn?: OIDCRefreshFunction): string {
+  let requestHash = FN_HASHES.get(requestFn || NO_FUNCTION);
+  let refreshHash = FN_HASHES.get(refreshFn || NO_FUNCTION);
+  if (!requestHash && requestFn) {
+    // Create a new one for the function and put it in the map.
+    FN_HASH_COUNTER++;
+    requestHash = FN_HASH_COUNTER;
+    FN_HASHES.set(requestFn, FN_HASH_COUNTER);
+  }
+  if (!refreshHash && refreshFn) {
+    // Create a new one for the function and put it in the map.
+    FN_HASH_COUNTER++;
+    refreshHash = FN_HASH_COUNTER;
+    FN_HASHES.set(refreshFn, FN_HASH_COUNTER);
+  }
+  return `${requestHash}-${refreshHash}`;
 }

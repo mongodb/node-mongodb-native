@@ -71,7 +71,10 @@ describe('CallbackLockCache', function () {
           }
         });
         const cache = new CallbackLockCache();
-        const { requestCallback, refreshCallback } = cache.getCallbacks(connection, credentials);
+        const { requestCallback, refreshCallback, callbackHash } = cache.getCallbacks(
+          connection,
+          credentials
+        );
 
         it('puts a new entry in the cache', function () {
           expect(cache.entries.size).to.equal(1);
@@ -80,6 +83,7 @@ describe('CallbackLockCache', function () {
         it('returns the new entry', function () {
           expect(requestCallback).to.exist;
           expect(refreshCallback).to.exist;
+          expect(callbackHash).to.exist;
         });
 
         it('locks the callbacks', async function () {
@@ -116,7 +120,10 @@ describe('CallbackLockCache', function () {
           }
         });
         const cache = new CallbackLockCache();
-        const { requestCallback, refreshCallback } = cache.getCallbacks(connection, credentials);
+        const { requestCallback, refreshCallback, callbackHash } = cache.getCallbacks(
+          connection,
+          credentials
+        );
 
         it('puts a new entry in the cache', function () {
           expect(cache.entries.size).to.equal(1);
@@ -125,6 +132,7 @@ describe('CallbackLockCache', function () {
         it('returns the new entry', function () {
           expect(requestCallback).to.exist;
           expect(refreshCallback).to.not.exist;
+          expect(callbackHash).to.exist;
         });
 
         it('locks the callbacks', async function () {
