@@ -29,6 +29,7 @@ describe('MONGODB-OIDC', function () {
   describe('OIDC Auth Spec Prose Tests', function () {
     // Set up the cache variable.
     const cache = OIDC_WORKFLOWS.get('callback').cache;
+    const callbackCache = OIDC_WORKFLOWS.get('callback').callbackCache;
     // Creates a request function for use in the test.
     const createRequestCallback = (
       username = 'test_user1',
@@ -76,6 +77,10 @@ describe('MONGODB-OIDC', function () {
       }
       return response;
     };
+
+    beforeEach(function () {
+      callbackCache.clear();
+    });
 
     describe('1. Callback-Driven Auth', function () {
       let client: MongoClient;

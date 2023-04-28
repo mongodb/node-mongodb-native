@@ -35,6 +35,13 @@ export class CallbackLockCache {
   }
 
   /**
+   * Clear the cache.
+   */
+  clear() {
+    this.entries.clear();
+  }
+
+  /**
    * Get the callbacks for the connection and credentials. If an entry does not
    * exist a new one will get set.
    */
