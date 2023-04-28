@@ -69,6 +69,7 @@ export class CallbackWorkflow implements Workflow {
       connection,
       credentials
     );
+    console.log('CALLBACKS', requestCallback, refreshCallback);
     // Look for an existing entry in the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -76,6 +77,7 @@ export class CallbackWorkflow implements Workflow {
       requestCallback,
       refreshCallback || null
     );
+    console.log('ENTRY', entry);
     let result;
     if (entry) {
       // Reauthentication cannot use a token from the cache since the server has
@@ -239,6 +241,7 @@ export class CallbackWorkflow implements Workflow {
     }
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
+    console.log('RESULT', result);
     if (isCallbackResultInvalid(result)) {
       this.cache.deleteEntry(
         connection.address,
