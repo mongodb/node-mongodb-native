@@ -326,8 +326,11 @@ function startCommandDocument(credentials: MongoCredentials): Document {
 function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
   let lock: Promise<void | IdPServerResponse> = Promise.resolve();
   return async (info: IdPServerInfo, context: OIDCCallbackContext) => {
-    await lock;
-    lock = lock.then(() => callback(info, context));
-    return lock;
+    const result = lock
+      .then(() => callback(info, context))
+      .finally(() => {
+        lock = Promise.resolve();
+      });
+    return result;
   };
 }
