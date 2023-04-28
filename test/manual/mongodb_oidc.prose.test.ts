@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
@@ -15,8 +16,7 @@ import {
   MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
-  OIDCCallbackContext,
-  OIDCRequestTokenResult
+  OIDCCallbackContext
 } from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
@@ -295,6 +295,63 @@ describe('MONGODB-OIDC', function () {
               );
             }
           });
+        });
+      });
+
+      describe('1.7 Lock Avoids Extra Callback Calls', function () {
+        before(function () {
+          cache.clear();
+        });
+
+        const requestCallback = async () => {
+          const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
+            encoding: 'utf8'
+          });
+          await setTimeout(2000);
+          return generateResult(token, 300);
+        };
+        const refreshCallback = createRefreshCallback();
+        const requestSpy = sinon.spy(requestCallback);
+        const refreshSpy = sinon.spy(refreshCallback);
+
+        const createClient = () => {
+          return new MongoClient('mongodb://localhost/?authMechanism=MONGODB-OIDC', {
+            authMechanismProperties: {
+              REQUEST_TOKEN_CALLBACK: requestSpy,
+              REFRESH_TOKEN_CALLBACK: refreshSpy
+            }
+          });
+        };
+
+        const authenticate = async () => {
+          const client = createClient();
+          await client.db('test').collection('test').findOne();
+          await client.close();
+        };
+
+        const testPromise = async () => {
+          await authenticate();
+          await authenticate();
+        };
+
+        // Clear the cache.
+        // Create a request callback that returns a token that will expire soon, and
+        // a refresh callback.  Ensure that the request callback has a time delay, and
+        // that we can record the number of times each callback is called.
+        // Spawn two threads that do the following:
+        // - Create a client with the callbacks.
+        // - Run a find operation that succeeds.
+        // - Close the client.
+        // - Create a new client with the callbacks.
+        // - Run a find operation that succeeds.
+        // - Close the client.
+        // Join the two threads.
+        // Ensure that the request callback has been called once, and the refresh
+        // callback has been called twice.
+        it('does not simultaneously enter a callback', async function () {
+          await Promise.allSettled([testPromise(), testPromise()]);
+          expect(requestSpy).to.have.been.calledOnce;
+          expect(refreshSpy).to.have.been.calledTwice;
         });
       });
     });
