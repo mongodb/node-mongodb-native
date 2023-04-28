@@ -1,11 +1,6 @@
 import { Binary, BSON, type Document } from 'bson';
 
-import {
-  MONGODB_ERROR_CODES,
-  MongoError,
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError
-} from '../../../error';
+import { MONGODB_ERROR_CODES, MongoError, MongoMissingCredentialsError } from '../../../error';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
@@ -17,6 +12,7 @@ import type {
   OIDCRequestFunction
 } from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
+import { CallbackLockCache } from './callback_lock_cache';
 import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
 
@@ -33,22 +29,20 @@ const RESULT_PROPERTIES = ['accessToken', 'expiresInSeconds', 'refreshToken'];
 const CALLBACK_RESULT_ERROR =
   'User provided OIDC callbacks must return a valid object with an accessToken.';
 
-/** Error message for when request callback is missing. */
-const REQUEST_CALLBACK_REQUIRED_ERROR =
-  'Auth mechanism property REQUEST_TOKEN_CALLBACK is required.';
-
 /**
  * OIDC implementation of a callback based workflow.
  * @internal
  */
 export class CallbackWorkflow implements Workflow {
   cache: TokenEntryCache;
+  callbackCache: CallbackLockCache;
 
   /**
    * Instantiate the workflow
    */
   constructor() {
     this.cache = new TokenEntryCache();
+    this.callbackCache = new CallbackLockCache();
   }
 
   /**
@@ -70,12 +64,11 @@ export class CallbackWorkflow implements Workflow {
     reauthenticating: boolean,
     response?: Document
   ): Promise<Document> {
-    const requestCallback = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
-    const refreshCallback = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
-    // At minimum a request callback must be provided by the user.
-    if (!requestCallback) {
-      throw new MongoInvalidArgumentError(REQUEST_CALLBACK_REQUIRED_ERROR);
-    }
+    // Get the callbacks with locks from the callback lock cache.
+    const { requestCallback, refreshCallback } = this.callbackCache.getCallbacks(
+      connection,
+      credentials
+    );
     // Look for an existing entry in the cache.
     const entry = this.cache.getEntry(
       connection.address,
@@ -236,13 +229,13 @@ export class CallbackWorkflow implements Workflow {
       // exists, then fallback to the request callback.
       if (refreshCallback) {
         context.refreshToken = entry.tokenResult.refreshToken;
-        result = await withLock(refreshCallback)(serverInfo, context);
+        result = await refreshCallback(serverInfo, context);
       } else {
-        result = await withLock(requestCallback)(serverInfo, context);
+        result = await requestCallback(serverInfo, context);
       }
     } else {
       // With no token in the cache we use the request callback.
-      result = await withLock(requestCallback)(serverInfo, context);
+      result = await requestCallback(serverInfo, context);
     }
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
@@ -263,10 +256,10 @@ export class CallbackWorkflow implements Workflow {
       credentials.username || '',
       requestCallback,
       refreshCallback || null,
-      result as IdPServerResponse,
+      result,
       serverInfo
     );
-    return result as IdPServerResponse;
+    return result;
   }
 }
 
@@ -317,20 +310,5 @@ function startCommandDocument(credentials: MongoCredentials): Document {
     autoAuthorize: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,
     payload: new Binary(BSON.serialize(payload))
-  };
-}
-
-/**
- * Ensure the callback is only executed one at a time.
- */
-function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
-  let lock: Promise<void | IdPServerResponse> = Promise.resolve();
-  return async (info: IdPServerInfo, context: OIDCCallbackContext) => {
-    const result = lock
-      .then(() => callback(info, context))
-      .finally(() => {
-        lock = Promise.resolve();
-      });
-    return result;
   };
 }
