@@ -98,7 +98,7 @@ function cacheKey(
   credentials: MongoCredentials,
   callbackHash: string
 ): string {
-  return `${connection.address}-${credentials.username}=${callbackHash}`;
+  return JSON.stringify([connection.address, credentials.username, callbackHash]);
 }
 
 /**

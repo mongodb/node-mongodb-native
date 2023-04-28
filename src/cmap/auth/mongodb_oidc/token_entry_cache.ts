@@ -102,5 +102,5 @@ function expirationTime(expiresInSeconds?: number): number {
  * Create a cache key from the address and username.
  */
 function cacheKey(address: string, username: string, callbackHash: string): string {
-  return `${address}-${username}-${callbackHash}`;
+  return JSON.stringify([address, username, callbackHash]);
 }
