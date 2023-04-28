@@ -9,10 +9,9 @@ import {
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
-import {
+import type {
   IdPServerInfo,
   IdPServerResponse,
-  OIDC_VERSION,
   OIDCCallbackContext,
   OIDCRefreshFunction,
   OIDCRequestFunction
@@ -20,6 +19,9 @@ import {
 import { AuthMechanism } from '../providers';
 import { TokenEntryCache } from './token_entry_cache';
 import type { Workflow } from './workflow';
+
+/** The current version of OIDC implementation. */
+const OIDC_VERSION = 0;
 
 /** 5 minutes in seconds */
 const TIMEOUT_S = 300;

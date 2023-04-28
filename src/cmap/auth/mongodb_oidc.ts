@@ -1,16 +1,10 @@
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
-import { type AuthContext, AuthProvider } from './auth_provider';
+import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 import type { Workflow } from './mongodb_oidc/workflow';
-
-/**
- * @internal
- * The current version of OIDC implementation.
- */
-export const OIDC_VERSION = 0;
 
 /** Error when credentials are missing. */
 const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
