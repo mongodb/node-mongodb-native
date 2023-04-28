@@ -304,10 +304,12 @@ describe('MONGODB-OIDC', function () {
         });
 
         const requestCallback = async () => {
+          console.log('REFRESH ENTER');
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
           await setTimeout(2000);
+          console.log('REFRESH EXIT');
           return generateResult(token, 300);
         };
         const refreshCallback = createRefreshCallback();
