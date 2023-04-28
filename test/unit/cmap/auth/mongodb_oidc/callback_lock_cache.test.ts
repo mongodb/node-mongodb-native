@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'timers';
 
 import {
   CallbackLockCache,
@@ -45,7 +45,7 @@ describe('CallbackLockCache', function () {
           if (requestCount > 1) {
             throw new Error('Cannot execute request simultaneously.');
           }
-          await setTimeout(1000);
+          await new Promise(resolve => setTimeout(() => resolve(), 1000));
           requestCount--;
           return Promise.resolve({ accessToken: '' });
         };
@@ -54,7 +54,7 @@ describe('CallbackLockCache', function () {
           if (refreshCount > 1) {
             throw new Error('Cannot execute refresh simultaneously.');
           }
-          await setTimeout(1000);
+          await new Promise(resolve => setTimeout(() => resolve(), 1000));
           refreshCount--;
           return Promise.resolve({ accessToken: '' });
         };
@@ -105,7 +105,7 @@ describe('CallbackLockCache', function () {
           if (requestCount > 1) {
             throw new Error('Cannot execute request simultaneously.');
           }
-          await setTimeout(1000);
+          await new Promise(resolve => setTimeout(() => resolve(), 1000));
           requestCount--;
           return Promise.resolve({ accessToken: '' });
         };

@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers/promises';
+import { setTimeout } from 'timers';
 
 import {
   Collection,
@@ -318,7 +318,7 @@ describe('MONGODB-OIDC', function () {
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
-          await setTimeout(3000);
+          await new Promise(resolve => setTimeout(() => resolve(), 3000));
           requestCounter--;
           return generateResult(token, 300);
         };
