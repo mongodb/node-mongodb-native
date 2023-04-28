@@ -236,13 +236,13 @@ export class CallbackWorkflow implements Workflow {
       // exists, then fallback to the request callback.
       if (refreshCallback) {
         context.refreshToken = entry.tokenResult.refreshToken;
-        result = await refreshCallback(serverInfo, context);
+        result = await withLock(refreshCallback)(serverInfo, context);
       } else {
-        result = await requestCallback(serverInfo, context);
+        result = await withLock(requestCallback)(serverInfo, context);
       }
     } else {
       // With no token in the cache we use the request callback.
-      result = await requestCallback(serverInfo, context);
+      result = await withLock(requestCallback)(serverInfo, context);
     }
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
@@ -263,10 +263,10 @@ export class CallbackWorkflow implements Workflow {
       credentials.username || '',
       requestCallback,
       refreshCallback || null,
-      result,
+      result as IdPServerResponse,
       serverInfo
     );
-    return result;
+    return result as IdPServerResponse;
   }
 }
 
@@ -317,5 +317,17 @@ function startCommandDocument(credentials: MongoCredentials): Document {
     autoAuthorize: 1,
     mechanism: AuthMechanism.MONGODB_OIDC,
     payload: new Binary(BSON.serialize(payload))
+  };
+}
+
+/**
+ * Ensure the callback is only executed one at a time.
+ */
+function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
+  let lock: Promise<void | IdPServerResponse> = Promise.resolve();
+  return async (info: IdPServerInfo, context: OIDCCallbackContext) => {
+    await lock;
+    lock = lock.then(() => callback(info, context));
+    return lock;
   };
 }
