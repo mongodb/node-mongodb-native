@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers/promises';
 
 import {
   Collection,
