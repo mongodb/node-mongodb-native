@@ -466,7 +466,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       const isServiceAuth = !!options.credentials?.mechanismProperties?.PROVIDER_NAME;
       if (!isServiceAuth) {
         for (const host of options.hosts) {
-          if (!hostMatchesWildcards(host.host || 'localhost', allowedHosts)) {
+          if (!hostMatchesWildcards(host.host || host.socketPath || 'localhost', allowedHosts)) {
             throw new MongoInvalidArgumentError(
               `Host '${host}' is not valid for OIDC authentication with ALLOWED_HOSTS of '${allowedHosts.join(
                 ','

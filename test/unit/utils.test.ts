@@ -141,6 +141,24 @@ describe('driver utils', function () {
         });
       });
     });
+
+    context('when using unix domain sockets', function () {
+      context('when the host matches at least one', function () {
+        it('returns true', function () {
+          expect(
+            hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongodb-27017.sock', 'other'])
+          ).to.be.true;
+        });
+      });
+
+      context('when the host does not match any', function () {
+        it('returns false', function () {
+          expect(
+            hostMatchesWildcards('/tmp/mongodb-27017.sock', ['*/mongod-27017.sock', 'test2'])
+          ).to.be.false;
+        });
+      });
+    });
   });
 
   context('eachAsync()', function () {

@@ -66,7 +66,8 @@ export function hostMatchesWildcards(host: string, wildcards: string[]): boolean
   for (const wildcard of wildcards) {
     if (
       host === wildcard ||
-      (wildcard.startsWith('*.') && host?.endsWith(wildcard.substring(2, wildcard.length)))
+      (wildcard.startsWith('*.') && host?.endsWith(wildcard.substring(2, wildcard.length))) ||
+      (wildcard.startsWith('*/') && host?.endsWith(wildcard.substring(2, wildcard.length)))
     ) {
       return true;
     }
