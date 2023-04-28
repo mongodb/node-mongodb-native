@@ -304,15 +304,22 @@ describe('MONGODB-OIDC', function () {
       });
 
       describe('1.7 Lock Avoids Extra Callback Calls', function () {
+        let requestCounter = 0;
+
         before(function () {
           cache.clear();
         });
 
         const requestCallback = async () => {
+          requestCounter++;
+          if (requestCounter > 1) {
+            throw new Error('Request callback was entered simultaneously.');
+          }
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
           await setTimeout(3000);
+          requestCounter--;
           return generateResult(token, 300);
         };
         const refreshCallback = createRefreshCallback();
@@ -355,7 +362,10 @@ describe('MONGODB-OIDC', function () {
         // callback has been called twice.
         it('does not simultaneously enter a callback', async function () {
           await Promise.all([testPromise(), testPromise()]);
-          expect(requestSpy).to.have.been.calledOnce;
+          // The request callback will get called twice, but will not be entered
+          // simultaneously. If it does, the function will throw and we'll have
+          // and exception here.
+          expect(requestSpy).to.have.been.calledTwice;
           expect(refreshSpy).to.have.been.calledTwice;
         });
       });
