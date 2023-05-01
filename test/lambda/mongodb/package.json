@@ -1,0 +1,10 @@
+{
+  "name": "mongodb",
+  "version": "1.0.0",
+  "description": "MongoDB Lambda Function Example",
+  "main": "app.mjs",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^5.0.1"
+  }
+}
