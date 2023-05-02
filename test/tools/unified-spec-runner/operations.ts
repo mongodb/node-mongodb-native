@@ -184,7 +184,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
   const client = entities.getEntity('client', operation.arguments!.client);
   const servers = Array.from(client.topology!.s.servers.values());
   const checkedOutConnections = servers.reduce((count, server) => {
-    const pool = server.s.pool;
+    const pool = server.pool;
     return count + pool.currentCheckedOutCount;
   }, 0);
 
