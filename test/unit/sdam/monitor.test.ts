@@ -17,10 +17,10 @@ import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 class MockServer {
-  s: any;
+  pool: any;
   description: ServerDescription;
   constructor(options) {
-    this.s = { pool: { generation: 1 } };
+    this.pool = { generation: 1 };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
   }

@@ -111,8 +111,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     const connectOptions = Object.assign(
       {
         id: '<monitor>' as const,
-        // NOTE: this is here to get tests to pass when using MockServer
-        generation: server.s?.pool?.generation ?? server.pool.generation,
+        generation: server.pool.generation,
         connectionType: Connection,
         cancellationToken,
         hostAddress: server.description.hostAddress
