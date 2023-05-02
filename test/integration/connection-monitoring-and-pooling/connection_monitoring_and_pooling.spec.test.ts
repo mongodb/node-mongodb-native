@@ -57,7 +57,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-form
 describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
   const tests = loadSpecTests('connection-monitoring-and-pooling', 'logging');
 
-  runUnifiedSuite(tests, (test: { description: string }) => {
+  runUnifiedSuite(tests, test => {
     if (
       [
         'waitQueueMultiple should be included in connection pool created message when specified',

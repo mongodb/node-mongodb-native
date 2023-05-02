@@ -48,7 +48,7 @@ describe('monitoring', function () {
     // set `heartbeatFrequencyMS` to 250ms to force a quick monitoring check, and wait 500ms to validate below
     const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {
       heartbeatFrequencyMS: 250
-    } as any);
+    });
     topology.connect(err => {
       expect(err).to.not.exist;
 

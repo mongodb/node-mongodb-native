@@ -87,10 +87,8 @@ export interface ServerPrivate {
   options: ServerOptions;
   /** The current state of the Server */
   state: string;
-  /** The topology this server is a part of */
-  topology: Topology;
-  /** A connection pool for this server */
-  pool: ConnectionPool;
+  topology?: Topology;
+  pool?: ConnectionPool;
   /** MongoDB server API version */
   serverApi?: ServerApi;
   /** A count of the operations currently running against the server. */
@@ -114,6 +112,10 @@ export type ServerEvents = {
 export class Server extends TypedEventEmitter<ServerEvents> {
   /** @internal */
   s: ServerPrivate;
+  /** @internal */
+  topology: Topology;
+  /** @internal */
+  pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
   [kMonitor]: Monitor | null;
@@ -143,21 +145,21 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     const poolOptions = { hostAddress: description.hostAddress, ...options };
 
+    this.topology = topology;
+    this.pool = new ConnectionPool(this, poolOptions);
+
     this.s = {
       description,
       options,
       state: STATE_CLOSED,
-      topology,
       operationCount: 0
-    } as any;
-    // NOTE: this is done so that the connection pool can access the topology in its constructor
-    this.s.pool = new ConnectionPool(this, poolOptions);
+    };
 
     for (const event of [...CMAP_EVENTS, ...APM_EVENTS]) {
-      this.s.pool.on(event, (e: any) => this.emit(event, e));
+      this.pool.on(event, (e: any) => this.emit(event, e));
     }
 
-    this.s.pool.on(Connection.CLUSTER_TIME_RECEIVED, (clusterTime: ClusterTime) => {
+    this.pool.on(Connection.CLUSTER_TIME_RECEIVED, (clusterTime: ClusterTime) => {
       this.clusterTime = clusterTime;
     });
 
@@ -193,11 +195,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   get clusterTime(): ClusterTime | undefined {
-    return this.s.topology.clusterTime;
+    return this.topology.clusterTime;
   }
 
   set clusterTime(clusterTime: ClusterTime | undefined) {
-    this.s.topology.clusterTime = clusterTime;
+    this.topology.clusterTime = clusterTime;
   }
 
   get description(): ServerDescription {
@@ -216,7 +218,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   get loadBalanced(): boolean {
-    return this.s.topology.description.type === TopologyType.LoadBalanced;
+    return this.topology.description.type === TopologyType.LoadBalanced;
   }
 
   /**
@@ -262,7 +264,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this[kMonitor]?.close();
     }
 
-    this.s.pool.close(options, err => {
+    this.pool.close(options, err => {
       stateTransition(this, STATE_CLOSED);
       this.emit('closed');
       if (typeof callback === 'function') {
@@ -331,7 +333,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       balanced code makes a recursive call).  Instead, we increment the count after this
     //       check.
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
-      this.s.pool.checkOut((err, checkedOut) => {
+      this.pool.checkOut((err, checkedOut) => {
         if (err || checkedOut == null) {
           if (callback) return callback(err);
           return;
@@ -345,7 +347,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     this.s.operationCount += 1;
 
-    this.s.pool.withConnection(
+    this.pool.withConnection(
       conn,
       (err, conn, cb) => {
         if (err || !conn) {
@@ -383,7 +385,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     const isStaleError =
-      error.connectionGeneration && error.connectionGeneration < this.s.pool.generation;
+      error.connectionGeneration && error.connectionGeneration < this.pool.generation;
     if (isStaleError) {
       return;
     }
@@ -399,14 +401,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         error.addErrorLabel(MongoErrorLabel.ResetPool);
         markServerUnknown(this, error);
       } else if (connection) {
-        this.s.pool.clear({ serviceId: connection.serviceId });
+        this.pool.clear({ serviceId: connection.serviceId });
       }
     } else {
       if (isSDAMUnrecoverableError(error)) {
         if (shouldHandleStateChangeError(this, error)) {
           const shouldClearPool = maxWireVersion(this) <= 7 || isNodeShuttingDownError(error);
           if (this.loadBalanced && connection && shouldClearPool) {
-            this.s.pool.clear({ serviceId: connection.serviceId });
+            this.pool.clear({ serviceId: connection.serviceId });
           }
 
           if (!this.loadBalanced) {
@@ -515,7 +517,7 @@ function makeOperationHandler(
       return callback(error);
     }
 
-    if (connectionIsStale(server.s.pool, connection)) {
+    if (connectionIsStale(server.pool, connection)) {
       return callback(error);
     }
 
@@ -533,7 +535,7 @@ function makeOperationHandler(
       }
 
       if (
-        (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
+        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
         supportsRetryableWrites(server) &&
         !inActiveTransaction(session, cmd)
       ) {
@@ -541,7 +543,7 @@ function makeOperationHandler(
       }
     } else {
       if (
-        (isRetryableWritesEnabled(server.s.topology) || isTransactionCommand(cmd)) &&
+        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
         needsRetryableWriteLabel(error, maxWireVersion(server)) &&
         !inActiveTransaction(session, cmd)
       ) {

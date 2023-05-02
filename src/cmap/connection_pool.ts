@@ -325,7 +325,13 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   get client() {
-    return this[kServer].s.topology.client;
+    // NOTE: This is here to get tests to pass when using MockServer. Looking into a way to modify the testing
+    // infrastructure so it is unnecessary.
+    if (this[kServer].s?.topology) {
+      return this[kServer].s.topology.client;
+    }
+
+    return this[kServer].topology.client;
   }
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.

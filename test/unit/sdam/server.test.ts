@@ -59,7 +59,7 @@ describe('Server', () => {
     let server: Server, connection: Connection | undefined;
     beforeEach(() => {
       server = new Server(
-        topologyWithPlaceholderClient([], {} as any),
+        topologyWithPlaceholderClient([], {}),
         new ServerDescription('a:1'),
         {} as any
       );
@@ -70,9 +70,9 @@ describe('Server', () => {
       context(`in ${mode} mode${contextSuffix}`, () => {
         beforeEach(() => {
           if (loadBalanced) {
-            server.s.topology.description.type = TopologyType.LoadBalanced;
+            server.topology.description.type = TopologyType.LoadBalanced;
             connection = { serviceId: new ObjectId() } as Connection;
-            server.s.pool.clear = sinon.stub();
+            server.pool.clear = sinon.stub();
           } else {
             connection = undefined;
           }
@@ -108,7 +108,7 @@ describe('Server', () => {
               expect(newDescription).to.have.nested.property('[0].type', ServerType.Unknown);
             } else {
               expect(newDescription).to.be.undefined;
-              expect(server.s.pool.clear).to.have.been.calledOnceWith({
+              expect(server.pool.clear).to.have.been.calledOnceWith({
                 serviceId: connection!.serviceId
               });
             }
@@ -123,7 +123,7 @@ describe('Server', () => {
 
             error.connectionGeneration = -1;
             expect(
-              server.s.pool.generation,
+              server.pool.generation,
               'expected test server to have a pool of generation 0'
             ).to.equal(0); // sanity check
 

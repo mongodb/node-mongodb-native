@@ -792,7 +792,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
           MongoErrorLabel.InterruptInUseConnections
         );
 
-        server.s.pool.clear({ interruptInUseConnections });
+        server.pool.clear({ interruptInUseConnections });
       } else if (incomingServerDescription.error == null) {
         const newTopologyType = topology.s.description.type;
         const shouldMarkPoolReady =
@@ -800,7 +800,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
           (incomingServerDescription.type !== ServerType.Unknown &&
             newTopologyType === TopologyType.Single);
         if (shouldMarkPoolReady) {
-          server.s.pool.ready();
+          server.pool.ready();
         }
       }
     }

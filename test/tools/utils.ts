@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { Document, HostAddress, OP_MSG, Topology, TopologyOptions } from '../mongodb';
+import { Document, HostAddress, MongoClient, OP_MSG, Topology, TopologyOptions } from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
   CollectionData,
@@ -479,20 +479,11 @@ export const sorted = <T>(iterable: Iterable<T>, how: (a: T, b: T) => 0 | 1 | -1
  * changes*/
 export function topologyWithPlaceholderClient(
   seeds: string | string[] | HostAddress | HostAddress[],
-  options: TopologyOptions
+  options: Partial<TopologyOptions>
 ): Topology {
   return new Topology(
-    {
-      mongoLogger: {
-        debug: () => null,
-        info: () => null,
-        trace: () => null,
-        warn: () => null,
-        error: () => null,
-        topology: this
-      }
-    } as any,
+    new MongoClient('mongodb://iLoveJavaScript'),
     seeds,
-    options
+    options as TopologyOptions
   );
 }

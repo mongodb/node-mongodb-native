@@ -10,7 +10,7 @@ import {
   TopologyType,
   WriteConcernSettings
 } from '../../mongodb';
-import { getEnvironmentalOptions, topologyWithPlaceholderClient } from '../utils';
+import { getEnvironmentalOptions } from '../utils';
 
 interface ProxyParams {
   proxyHost?: string;
@@ -237,19 +237,6 @@ export class TestConfiguration {
     }
 
     return new MongoClient(connectionString, serverOptions);
-  }
-
-  newTopology(host, port, options) {
-    if (typeof host === 'object') {
-      options = host;
-      host = null;
-      port = null;
-    }
-
-    options = Object.assign({}, options);
-    const hosts =
-      host == null ? [].concat(this.options.hostAddresses) : [new HostAddress(`${host}:${port}`)];
-    return topologyWithPlaceholderClient(hosts, options);
   }
 
   /**
