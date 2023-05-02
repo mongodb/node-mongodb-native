@@ -327,6 +327,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   get client() {
     return this[kServer].topology.client;
   }
+
   /**
    * Get the metrics information for the pool when a wait queue timeout occurs.
    */

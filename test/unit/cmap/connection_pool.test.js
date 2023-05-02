@@ -13,19 +13,18 @@ const { topologyWithPlaceholderClient } = require('../../tools/utils');
 
 describe('Connection Pool', function () {
   let mockMongod;
-  let stubServer;
+  const stubServer = {
+    topology: {
+      client: {
+        mongoLogger: {
+          debug: () => null
+        }
+      }
+    }
+  };
   after(() => mock.cleanup());
   before(() =>
     mock.createServer().then(s => {
-      stubServer = {
-        topology: {
-          client: {
-            mongoLogger: {
-              debug: () => null
-            }
-          }
-        }
-      };
       mockMongod = s;
       mockMongod.s = {
         topology: topologyWithPlaceholderClient([], {})

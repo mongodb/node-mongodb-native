@@ -87,8 +87,6 @@ export interface ServerPrivate {
   options: ServerOptions;
   /** The current state of the Server */
   state: string;
-  topology?: Topology;
-  pool?: ConnectionPool;
   /** MongoDB server API version */
   serverApi?: ServerApi;
   /** A count of the operations currently running against the server. */
