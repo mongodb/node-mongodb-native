@@ -5,9 +5,9 @@ import {
   CallbackLockCache,
   Connection,
   MongoCredentials,
-  MongoInvalidArgumentError,
-  sleep
+  MongoInvalidArgumentError
 } from '../../../../mongodb';
+import { sleep } from '../../../../tools/utils';
 
 describe('CallbackLockCache', function () {
   describe('#getCallbacks', function () {

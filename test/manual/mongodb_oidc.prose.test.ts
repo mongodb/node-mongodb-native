@@ -15,9 +15,9 @@ import {
   MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
-  OIDCCallbackContext,
-  sleep
+  OIDCCallbackContext
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 
 describe('MONGODB-OIDC', function () {
   context('when running in the environment', function () {

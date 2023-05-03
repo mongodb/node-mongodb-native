@@ -1,6 +1,5 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
-import { setTimeout } from 'timers';
 import { URL } from 'url';
 
 import { Document, ObjectId, resolveBSONOptions } from './bson';
@@ -1085,13 +1084,6 @@ export function emitWarningOnce(message: string): void {
  */
 export function enumToString(en: Record<string, unknown>): string {
   return Object.values(en).join(', ');
-}
-
-/**
- * Sleeps for provided duration in milliseconds.
- */
-export function sleep(milliseconds: number): Promise<void> {
-  return new Promise(resolve => setTimeout(() => resolve(), milliseconds));
 }
 
 /**
