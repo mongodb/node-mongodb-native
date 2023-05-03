@@ -34,6 +34,7 @@ describe('Socks5 Connectivity', function () {
   }
   rsConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
   singleConnectionString.searchParams.set('serverSelectionTimeoutMS', '2000');
+  singleConnectionString.searchParams.set('readPreference', 'primaryPreferred');
 
   installNodeDNSWorkaroundHooks();
 
