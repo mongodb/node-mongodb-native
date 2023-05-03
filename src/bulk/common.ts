@@ -47,7 +47,7 @@ export const BatchType = Object.freeze({
 } as const);
 
 /** @public */
-export type BatchType = typeof BatchType[keyof typeof BatchType];
+export type BatchType = (typeof BatchType)[keyof typeof BatchType];
 
 /** @public */
 export interface InsertOneModel<TSchema extends Document = Document> {

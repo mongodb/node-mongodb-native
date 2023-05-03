@@ -209,7 +209,7 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
 
 /** @public */
 export type AutoEncryptionLoggerLevel =
-  typeof AutoEncryptionLoggerLevel[keyof typeof AutoEncryptionLoggerLevel];
+  (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
 
 /** @public */
 export interface AutoEncryptionTlsOptions {

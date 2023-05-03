@@ -96,7 +96,7 @@ export const MongoErrorLabel = Object.freeze({
 } as const);
 
 /** @public */
-export type MongoErrorLabel = typeof MongoErrorLabel[keyof typeof MongoErrorLabel];
+export type MongoErrorLabel = (typeof MongoErrorLabel)[keyof typeof MongoErrorLabel];
 
 /** @public */
 export interface ErrorDescription extends Document {

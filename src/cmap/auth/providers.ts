@@ -11,7 +11,7 @@ export const AuthMechanism = Object.freeze({
 } as const);
 
 /** @public */
-export type AuthMechanism = typeof AuthMechanism[keyof typeof AuthMechanism];
+export type AuthMechanism = (typeof AuthMechanism)[keyof typeof AuthMechanism];
 
 /** @internal */
 export const AUTH_MECHS_AUTH_SRC_EXTERNAL = new Set<AuthMechanism>([

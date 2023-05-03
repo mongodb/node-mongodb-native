@@ -17,7 +17,7 @@ export const ReturnDocument = Object.freeze({
 } as const);
 
 /** @public */
-export type ReturnDocument = typeof ReturnDocument[keyof typeof ReturnDocument];
+export type ReturnDocument = (typeof ReturnDocument)[keyof typeof ReturnDocument];
 
 /** @public */
 export interface FindOneAndDeleteOptions extends CommandOperationOptions {

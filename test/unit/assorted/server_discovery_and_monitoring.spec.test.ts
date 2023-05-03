@@ -106,7 +106,7 @@ type SDAMPhase =
     };
 
 interface MonitoringOutcome {
-  events: typeof SDAM_EVENT_CLASSES[keyof typeof SDAM_EVENT_CLASSES][];
+  events: (typeof SDAM_EVENT_CLASSES)[keyof typeof SDAM_EVENT_CLASSES][];
 }
 interface OutcomeServerDescription {
   type?: string;

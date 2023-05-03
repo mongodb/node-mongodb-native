@@ -74,7 +74,7 @@ export interface CursorStreamOptions {
 }
 
 /** @public */
-export type CursorFlag = typeof CURSOR_FLAGS[number];
+export type CursorFlag = (typeof CURSOR_FLAGS)[number];
 
 /** @public */
 export interface AbstractCursorOptions extends BSONSerializeOptions {
