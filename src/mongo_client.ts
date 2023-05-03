@@ -321,7 +321,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   topology?: Topology;
   /** @internal */
-  readonly mongoLogger: MongoLogger;
+  override readonly mongoLogger: MongoLogger;
   /** @internal */
   private connectionLock?: Promise<this>;
 
@@ -458,9 +458,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const topologyConnect = async () => {
       try {
-        await promisify(callback => this.topology!.connect(options, callback))();
+        await promisify(callback => this.topology?.connect(options, callback))();
       } catch (error) {
-        this.topology!.close({ force: true });
+        this.topology?.close({ force: true });
         throw error;
       }
     };
