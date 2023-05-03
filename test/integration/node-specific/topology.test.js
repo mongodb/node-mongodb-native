@@ -1,6 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 const { makeClientMetadata, Topology } = require('../../mongodb');
+const { promisify } = require('util');
 
 describe('Topology', function () {
   it('should correctly track states of a topology', {
@@ -16,19 +17,8 @@ describe('Topology', function () {
         states.push(newState);
       });
 
-      await new Promise((resolve, reject) => {
-        topology.connect(err => {
-          if (err) reject(err);
-          else resolve(null);
-        });
-      });
-
-      await new Promise((resolve, reject) => {
-        topology.close({}, err => {
-          if (err) reject(err);
-          else resolve(null);
-        });
-      });
+      await promisify(callback => topology.connect(callback))();
+      await promisify(callback => topology.close({}, callback))();
 
       expect(topology.isDestroyed()).to.be.true;
       expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);

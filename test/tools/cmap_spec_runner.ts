@@ -329,7 +329,7 @@ export class ThreadContext {
   }
 
   closePool() {
-    this.#server.s.pool = this.#originalServerPool;
+    this.#server.pool = this.#originalServerPool;
     return new Promise(resolve => {
       ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
       this.pool.close(resolve);
