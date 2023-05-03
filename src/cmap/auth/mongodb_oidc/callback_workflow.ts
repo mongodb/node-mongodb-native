@@ -70,7 +70,7 @@ export class CallbackWorkflow implements Workflow {
       credentials
     );
     // Look for an existing entry in the cache.
-    const entry = this.cache.getEntry(connection.address, credentials.username ?? '', callbackHash);
+    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
     let result;
     if (entry) {
       // Reauthentication cannot use a token from the cache since the server has
@@ -111,7 +111,7 @@ export class CallbackWorkflow implements Workflow {
             error instanceof MongoError &&
             error.code === MONGODB_ERROR_CODES.Reauthenticate
           ) {
-            this.cache.deleteEntry(connection.address, credentials.username ?? '', callbackHash);
+            this.cache.deleteEntry(connection.address, credentials.username, callbackHash);
             result = await this.execute(connection, credentials, reauthenticating);
           } else {
             throw error;
@@ -203,7 +203,7 @@ export class CallbackWorkflow implements Workflow {
     refreshCallback?: OIDCRefreshFunction
   ): Promise<IdPServerResponse> {
     // Get the token from the cache.
-    const entry = this.cache.getEntry(connection.address, credentials.username ?? '', callbackHash);
+    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
     let result;
     const context: OIDCCallbackContext = { timeoutSeconds: TIMEOUT_S, version: OIDC_VERSION };
     // Check if there's a token in the cache.
@@ -228,7 +228,7 @@ export class CallbackWorkflow implements Workflow {
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
-      this.cache.deleteEntry(connection.address, credentials.username ?? '', callbackHash);
+      this.cache.deleteEntry(connection.address, credentials.username, callbackHash);
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
     // Cleanup the cache.

@@ -58,7 +58,7 @@ export class GSSAPI extends AuthProvider {
       saslContinue(negotiatedPayload, saslStartResponse.conversationId)
     );
 
-    const finalizePayload = await finalize(client, username ?? '', saslContinueResponse.payload);
+    const finalizePayload = await finalize(client, username, saslContinueResponse.payload);
 
     await externalCommand(connection, {
       saslContinue: 1,

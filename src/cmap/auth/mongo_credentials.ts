@@ -75,7 +75,7 @@ export interface MongoCredentialsOptions {
  */
 export class MongoCredentials {
   /** The username used for authentication */
-  readonly username?: string;
+  readonly username: string;
   /** The password used for authentication */
   readonly password: string;
   /** The database that the user should authenticate against */
@@ -86,7 +86,7 @@ export class MongoCredentials {
   readonly mechanismProperties: AuthMechanismProperties;
 
   constructor(options: MongoCredentialsOptions) {
-    this.username = options.username;
+    this.username = options.username ?? '';
     this.password = options.password;
     this.source = options.source;
     if (!this.source && options.db) {

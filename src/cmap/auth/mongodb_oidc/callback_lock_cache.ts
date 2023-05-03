@@ -46,7 +46,7 @@ export class CallbackLockCache extends Cache<CallbacksEntry> {
       throw new MongoInvalidArgumentError(REQUEST_CALLBACK_REQUIRED_ERROR);
     }
     const callbackHash = hashFunctions(requestCallback, refreshCallback);
-    const key = this.cacheKey(connection.address, credentials.username ?? '', callbackHash);
+    const key = this.cacheKey(connection.address, credentials.username, callbackHash);
     const entry = this.entries.get(key);
     if (entry) {
       return entry;
