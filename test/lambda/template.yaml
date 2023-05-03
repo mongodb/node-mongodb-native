@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Node driver lambda function test
+
+Parameters:
+  MongoDbUri:
+    Type: String
+    Description: The MongoDB connection string.
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  MongoDBFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: mongodb/
+      Handler: app.lambdaHandler
+      Runtime: nodejs18.x
+      Environment:
+        Variables:
+          MONGODB_URI: !Ref MongoDbUri
+      Architectures:
+      - x86_64
+      Events:
+        MongoDB:
+          Type: Api
+          Properties:
+            Path: /mongodb
+            Method: get
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Join:
+        - ''
+        - - ApplicationInsights-SAM-
+          - Ref: AWS::StackName
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Fn::Join:
+        - ''
+        - - ApplicationInsights-SAM-
+          - Ref: AWS::StackName
+      AutoConfigurationEnabled: 'true'
+    DependsOn: ApplicationResourceGroup
+Outputs:
+  MongoDBApi:
+    Description: API Gateway endpoint URL for Prod stage for MongoDB function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/mongodb/"
+  MongoDBFunction:
+    Description: MongoDB Lambda Function ARN
+    Value: !GetAtt MongoDBFunction.Arn
+  MongoDBFunctionIamRole:
+    Description: Implicit IAM Role created for MongoDB function
+    Value: !GetAtt MongoDBFunctionRole.Arn
