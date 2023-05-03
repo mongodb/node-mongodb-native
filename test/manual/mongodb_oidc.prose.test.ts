@@ -3,7 +3,6 @@ import * as path from 'node:path';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
 
 import {
   Collection,
@@ -16,7 +15,8 @@ import {
   MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
-  OIDCCallbackContext
+  OIDCCallbackContext,
+  sleep
 } from '../mongodb';
 
 describe('MONGODB-OIDC', function () {
@@ -234,14 +234,11 @@ describe('MONGODB-OIDC', function () {
           });
 
           it('fails validation', async function () {
-            try {
-              await collection.findOne();
-            } catch (error) {
-              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-              expect(error.message).to.include(
-                'is not valid for OIDC authentication with ALLOWED_HOSTS'
-              );
-            }
+            const error = await collection.findOne().catch(error => error);
+            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+            expect(error.message).to.include(
+              'is not valid for OIDC authentication with ALLOWED_HOSTS'
+            );
           });
         });
 
@@ -291,14 +288,11 @@ describe('MONGODB-OIDC', function () {
           });
 
           it('fails validation', async function () {
-            try {
-              await collection.findOne();
-            } catch (error) {
-              expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-              expect(error.message).to.include(
-                'is not valid for OIDC authentication with ALLOWED_HOSTS'
-              );
-            }
+            const error = await collection.findOne().catch(error => error);
+            expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+            expect(error.message).to.include(
+              'is not valid for OIDC authentication with ALLOWED_HOSTS'
+            );
           });
         });
       });
@@ -318,7 +312,7 @@ describe('MONGODB-OIDC', function () {
           const token = await readFile(path.join(process.env.OIDC_TOKEN_DIR, 'test_user1'), {
             encoding: 'utf8'
           });
-          await new Promise(resolve => setTimeout(() => resolve(), 3000));
+          await sleep(3000);
           requestCounter--;
           return generateResult(token, 300);
         };

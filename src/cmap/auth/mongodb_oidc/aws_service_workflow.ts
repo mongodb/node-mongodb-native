@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import * as fs from 'fs';
 
 import { MongoAWSError } from '../../../error';
 import { ServiceWorkflow } from './service_workflow';
@@ -24,6 +24,6 @@ export class AwsServiceWorkflow extends ServiceWorkflow {
     if (!tokenFile) {
       throw new MongoAWSError(TOKEN_MISSING_ERROR);
     }
-    return readFile(tokenFile, 'utf8');
+    return fs.promises.readFile(tokenFile, 'utf8');
   }
 }

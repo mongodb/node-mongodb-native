@@ -1,10 +1,12 @@
+import type { Document } from 'bson';
+
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
+import type { Connection } from '../connection';
 import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
-import type { Workflow } from './mongodb_oidc/workflow';
 
 /** Error when credentials are missing. */
 const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
@@ -59,6 +61,24 @@ export type OIDCRefreshFunction = (
 ) => Promise<IdPServerResponse>;
 
 type ProviderName = 'aws' | 'callback';
+
+export interface Workflow {
+  /**
+   * All device workflows must implement this method in order to get the access
+   * token and then call authenticate with it.
+   */
+  execute(
+    connection: Connection,
+    credentials: MongoCredentials,
+    reauthenticating: boolean,
+    response?: Document
+  ): Promise<Document>;
+
+  /**
+   * Get the document to add for speculative authentication.
+   */
+  speculativeAuth(credentials: MongoCredentials): Promise<Document>;
+}
 
 /** @internal */
 export const OIDC_WORKFLOWS: Map<ProviderName, Workflow> = new Map();

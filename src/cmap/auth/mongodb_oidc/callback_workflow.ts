@@ -9,12 +9,12 @@ import type {
   IdPServerResponse,
   OIDCCallbackContext,
   OIDCRefreshFunction,
-  OIDCRequestFunction
+  OIDCRequestFunction,
+  Workflow
 } from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
 import { CallbackLockCache } from './callback_lock_cache';
 import { TokenEntryCache } from './token_entry_cache';
-import type { Workflow } from './workflow';
 
 /** The current version of OIDC implementation. */
 const OIDC_VERSION = 0;
@@ -70,7 +70,7 @@ export class CallbackWorkflow implements Workflow {
       credentials
     );
     // Look for an existing entry in the cache.
-    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
+    const entry = this.cache.getEntry(connection.address, credentials.username ?? '', callbackHash);
     let result;
     if (entry) {
       // Reauthentication cannot use a token from the cache since the server has
@@ -111,7 +111,7 @@ export class CallbackWorkflow implements Workflow {
             error instanceof MongoError &&
             error.code === MONGODB_ERROR_CODES.Reauthenticate
           ) {
-            this.cache.deleteEntry(connection.address, credentials.username || '', callbackHash);
+            this.cache.deleteEntry(connection.address, credentials.username ?? '', callbackHash);
             result = await this.execute(connection, credentials, reauthenticating);
           } else {
             throw error;
@@ -203,7 +203,7 @@ export class CallbackWorkflow implements Workflow {
     refreshCallback?: OIDCRefreshFunction
   ): Promise<IdPServerResponse> {
     // Get the token from the cache.
-    const entry = this.cache.getEntry(connection.address, credentials.username, callbackHash);
+    const entry = this.cache.getEntry(connection.address, credentials.username ?? '', callbackHash);
     let result;
     const context: OIDCCallbackContext = { timeoutSeconds: TIMEOUT_S, version: OIDC_VERSION };
     // Check if there's a token in the cache.
@@ -228,7 +228,7 @@ export class CallbackWorkflow implements Workflow {
     // Validate that the result returned by the callback is acceptable. If it is not
     // we must clear the token result from the cache.
     if (isCallbackResultInvalid(result)) {
-      this.cache.deleteEntry(connection.address, credentials.username || '', callbackHash);
+      this.cache.deleteEntry(connection.address, credentials.username ?? '', callbackHash);
       throw new MongoMissingCredentialsError(CALLBACK_RESULT_ERROR);
     }
     // Cleanup the cache.
@@ -250,7 +250,7 @@ export class CallbackWorkflow implements Workflow {
  * saslStart or saslContinue depending on the presence of a conversation id.
  */
 function finishCommandDocument(token: string, conversationId?: number): Document {
-  if (conversationId) {
+  if (conversationId != null && typeof conversationId === 'number') {
     return {
       saslContinue: 1,
       conversationId: conversationId,
@@ -273,9 +273,9 @@ function finishCommandDocument(token: string, conversationId?: number): Document
  * function is invalid. This means the result is nullish, doesn't contain
  * the accessToken required field, and does not contain extra fields.
  */
-function isCallbackResultInvalid(tokenResult: any): boolean {
-  if (!tokenResult) return true;
-  if (!tokenResult.accessToken) return true;
+function isCallbackResultInvalid(tokenResult: unknown): boolean {
+  if (tokenResult == null || typeof tokenResult !== 'object') return true;
+  if (!('accessToken' in tokenResult)) return true;
   return !Object.getOwnPropertyNames(tokenResult).every(prop => RESULT_PROPERTIES.includes(prop));
 }
 

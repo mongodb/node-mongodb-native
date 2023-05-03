@@ -61,7 +61,7 @@ export interface AuthMechanismProperties extends Document {
 
 /** @public */
 export interface MongoCredentialsOptions {
-  username: string;
+  username?: string;
   password: string;
   source: string;
   db?: string;
@@ -75,7 +75,7 @@ export interface MongoCredentialsOptions {
  */
 export class MongoCredentials {
   /** The username used for authentication */
-  readonly username: string;
+  readonly username?: string;
   /** The password used for authentication */
   readonly password: string;
   /** The database that the user should authenticate against */

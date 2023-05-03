@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers';
 
 import {
   CallbackLockCache,
   Connection,
   MongoCredentials,
-  MongoInvalidArgumentError
+  MongoInvalidArgumentError,
+  sleep
 } from '../../../../mongodb';
 
 describe('CallbackLockCache', function () {
@@ -26,6 +26,7 @@ describe('CallbackLockCache', function () {
       it('raises an error', function () {
         try {
           cache.getCallbacks(connection, credentials);
+          expect.fail('Must raise error when no request callback exists.');
         } catch (error) {
           expect(error).to.be.instanceOf(MongoInvalidArgumentError);
           expect(error.message).to.include(
@@ -45,16 +46,16 @@ describe('CallbackLockCache', function () {
           if (requestCount > 1) {
             throw new Error('Cannot execute request simultaneously.');
           }
-          await new Promise(resolve => setTimeout(() => resolve(), 1000));
+          await sleep(1000);
           requestCount--;
-          return Promise.resolve({ accessToken: '' });
+          return { accessToken: '' };
         };
         const refresh = async () => {
           refreshCount++;
           if (refreshCount > 1) {
             throw new Error('Cannot execute refresh simultaneously.');
           }
-          await new Promise(resolve => setTimeout(() => resolve(), 1000));
+          await sleep(1000);
           refreshCount--;
           return Promise.resolve({ accessToken: '' });
         };
@@ -76,7 +77,7 @@ describe('CallbackLockCache', function () {
         );
 
         it('puts a new entry in the cache', function () {
-          expect(cache.entries.size).to.equal(1);
+          expect(cache.entries).to.have.lengthOf(1);
         });
 
         it('returns the new entry', function () {
@@ -105,7 +106,7 @@ describe('CallbackLockCache', function () {
           if (requestCount > 1) {
             throw new Error('Cannot execute request simultaneously.');
           }
-          await new Promise(resolve => setTimeout(() => resolve(), 1000));
+          await sleep(1000);
           requestCount--;
           return Promise.resolve({ accessToken: '' });
         };
@@ -125,7 +126,7 @@ describe('CallbackLockCache', function () {
         );
 
         it('puts a new entry in the cache', function () {
-          expect(cache.entries.size).to.equal(1);
+          expect(cache.entries).to.have.lengthOf(1);
         });
 
         it('returns the new entry', function () {

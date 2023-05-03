@@ -8,6 +8,7 @@ import type {
   OIDCRefreshFunction,
   OIDCRequestFunction
 } from '../mongodb_oidc';
+import { Cache } from './cache';
 
 /** Error message for when request callback is missing. */
 const REQUEST_CALLBACK_REQUIRED_ERROR =
@@ -15,9 +16,7 @@ const REQUEST_CALLBACK_REQUIRED_ERROR =
 /* Counter for function "hashes".*/
 let FN_HASH_COUNTER = 0;
 /* No function present function */
-const NO_FUNCTION: OIDCRequestFunction = () => {
-  return Promise.resolve({ accessToken: 'test' });
-};
+const NO_FUNCTION: OIDCRequestFunction = async () => ({ accessToken: 'test' });
 /* The map of function hashes */
 const FN_HASHES = new WeakMap<OIDCRequestFunction | OIDCRefreshFunction, number>();
 /* Put the no function hash in the map. */
@@ -35,23 +34,7 @@ interface CallbacksEntry {
 /**
  * A cache of request and refresh callbacks per server/user.
  */
-export class CallbackLockCache {
-  entries: Map<string, CallbacksEntry>;
-
-  /**
-   * Instantiate the new cache.
-   */
-  constructor() {
-    this.entries = new Map<string, CallbacksEntry>();
-  }
-
-  /**
-   * Clear the cache.
-   */
-  clear() {
-    this.entries.clear();
-  }
-
+export class CallbackLockCache extends Cache<CallbacksEntry> {
   /**
    * Get the callbacks for the connection and credentials. If an entry does not
    * exist a new one will get set.
@@ -63,7 +46,7 @@ export class CallbackLockCache {
       throw new MongoInvalidArgumentError(REQUEST_CALLBACK_REQUIRED_ERROR);
     }
     const callbackHash = hashFunctions(requestCallback, refreshCallback);
-    const key = cacheKey(connection, credentials, callbackHash);
+    const key = this.cacheKey(connection.address, credentials.username ?? '', callbackHash);
     const entry = this.entries.get(key);
     if (entry) {
       return entry;
@@ -91,17 +74,6 @@ export class CallbackLockCache {
 }
 
 /**
- * Get a cache key based on connection and credentials.
- */
-function cacheKey(
-  connection: Connection,
-  credentials: MongoCredentials,
-  callbackHash: string
-): string {
-  return JSON.stringify([connection.address, credentials.username, callbackHash]);
-}
-
-/**
  * Ensure the callback is only executed one at a time.
  */
 function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
@@ -117,15 +89,15 @@ function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
  * Get the hash string for the request and refresh functions.
  */
 function hashFunctions(requestFn: OIDCRequestFunction, refreshFn?: OIDCRefreshFunction): string {
-  let requestHash = FN_HASHES.get(requestFn || NO_FUNCTION);
-  let refreshHash = FN_HASHES.get(refreshFn || NO_FUNCTION);
-  if (!requestHash && requestFn) {
+  let requestHash = FN_HASHES.get(requestFn);
+  let refreshHash = FN_HASHES.get(refreshFn ?? NO_FUNCTION);
+  if (requestHash == null) {
     // Create a new one for the function and put it in the map.
     FN_HASH_COUNTER++;
     requestHash = FN_HASH_COUNTER;
     FN_HASHES.set(requestFn, FN_HASH_COUNTER);
   }
-  if (!refreshHash && refreshFn) {
+  if (refreshHash == null && refreshFn) {
     // Create a new one for the function and put it in the map.
     FN_HASH_COUNTER++;
     refreshHash = FN_HASH_COUNTER;

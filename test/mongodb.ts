@@ -111,7 +111,6 @@ export * from '../src/cmap/auth/mongodb_oidc/callback_lock_cache';
 export * from '../src/cmap/auth/mongodb_oidc/callback_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/service_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/token_entry_cache';
-export * from '../src/cmap/auth/mongodb_oidc/workflow';
 export * from '../src/cmap/auth/plain';
 export * from '../src/cmap/auth/providers';
 export * from '../src/cmap/auth/scram';

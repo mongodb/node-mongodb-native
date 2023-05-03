@@ -1,6 +1,7 @@
 import type { IdPServerInfo, IdPServerResponse } from '../mongodb_oidc';
+import { Cache } from './cache';
 
-/* 5 minutes in milliseonds */
+/* 5 minutes in milliseconds */
 const EXPIRATION_BUFFER_MS = 300000;
 /* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
@@ -32,13 +33,7 @@ export class TokenEntry {
  * Cache of OIDC token entries.
  * @internal
  */
-export class TokenEntryCache {
-  entries: Map<string, TokenEntry>;
-
-  constructor() {
-    this.entries = new Map();
-  }
-
+export class TokenEntryCache extends Cache<TokenEntry> {
   /**
    * Set an entry in the token cache.
    */
@@ -54,29 +49,22 @@ export class TokenEntryCache {
       serverInfo,
       expirationTime(tokenResult.expiresInSeconds)
     );
-    this.entries.set(cacheKey(address, username, callbackHash), entry);
+    this.entries.set(this.cacheKey(address, username, callbackHash), entry);
     return entry;
-  }
-
-  /**
-   * Clear the cache.
-   */
-  clear(): void {
-    this.entries.clear();
   }
 
   /**
    * Delete an entry from the cache.
    */
   deleteEntry(address: string, username: string, callbackHash: string): void {
-    this.entries.delete(cacheKey(address, username, callbackHash));
+    this.entries.delete(this.cacheKey(address, username, callbackHash));
   }
 
   /**
    * Get an entry from the cache.
    */
   getEntry(address: string, username: string, callbackHash: string): TokenEntry | undefined {
-    return this.entries.get(cacheKey(address, username, callbackHash));
+    return this.entries.get(this.cacheKey(address, username, callbackHash));
   }
 
   /**
@@ -96,11 +84,4 @@ export class TokenEntryCache {
  */
 function expirationTime(expiresInSeconds?: number): number {
   return Date.now() + (expiresInSeconds ?? DEFAULT_EXPIRATION_SECS) * 1000;
-}
-
-/**
- * Create a cache key from the address and username.
- */
-function cacheKey(address: string, username: string, callbackHash: string): string {
-  return JSON.stringify([address, username, callbackHash]);
 }

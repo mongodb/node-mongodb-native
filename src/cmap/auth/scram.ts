@@ -86,7 +86,7 @@ function makeFirstMessage(
   credentials: MongoCredentials,
   nonce: Buffer
 ) {
-  const username = cleanUsername(credentials.username);
+  const username = cleanUsername(credentials.username ?? '');
   const mechanism =
     cryptoMethod === 'sha1' ? AuthMechanism.MONGODB_SCRAM_SHA1 : AuthMechanism.MONGODB_SCRAM_SHA256;
 
@@ -135,7 +135,7 @@ async function continueScramConversation(
   const nonce = authContext.nonce;
 
   const db = credentials.source;
-  const username = cleanUsername(credentials.username);
+  const username = cleanUsername(credentials.username ?? '');
   const password = credentials.password;
 
   let processedPassword;
