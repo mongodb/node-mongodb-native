@@ -6,7 +6,7 @@ import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configur
 const metadata: MongoDBMetadataUI = {
   requires: {
     clientSideEncryption: true,
-    mongodb: '>=6.0.0',
+    mongodb: '>=7.0.0',
     topology: '!single'
   }
 } as const;

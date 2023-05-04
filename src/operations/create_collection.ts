@@ -101,7 +101,8 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
 }
 
 /* @internal */
-const INVALID_QE_VERSION = 'Cannot create Queryable Encryption collections on servers before 7.0.0';
+const INVALID_QE_VERSION =
+  'Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.';
 
 /** @internal */
 export class CreateCollectionOperation extends CommandOperation<Collection> {
