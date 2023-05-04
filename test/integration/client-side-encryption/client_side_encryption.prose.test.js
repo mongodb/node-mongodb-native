@@ -1103,9 +1103,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO(NODE-2422): Implement bypass prose tests
   describe('Bypass spawning mongocryptd', function () {
-    describe.only('via mongocryptdBypassSpawn', function () {
+    describe('via mongocryptdBypassSpawn', function () {
       let clientEncrypted;
       // Create a MongoClient configured with auto encryption
       // Configure the required options. use the `local` KMS provider as follows:
@@ -1129,6 +1128,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             autoEncryption: {
               keyVaultNamespace,
               kmsProviders: { local: { key: LOCAL_KEY } },
+              schemaMap: { dataNamespace: externalSchema },
               // Configure the following `extraOptions`
               // {
               //    "mongocryptdBypassSpawn": true
@@ -1136,15 +1136,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               //    "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
               // }
               extraOptions: {
-                ...getEncryptExtraOptions(),
                 mongocryptdBypassSpawn: true,
                 mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
                 ]
-              },
-              schemaMap: externalSchema
+              }
             }
           }
         );
@@ -1159,17 +1157,21 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       it('does not spawn mongocryptd', metadata, async function () {
         // Use client_encrypted to insert the document {"encrypted": "test"} into db.coll.
         // Expect a server selection error propagated from the internal MongoClient failing to connect to mongocryptd on port 27021.
-        expect(async function () {
-          await clientEncrypted.connect();
-          await clientEncrypted
-            .db(dataDbName)
-            .collection(dataCollName)
-            .insertOne({ encrypted: 'test' });
-        }).to.throw(MongoServerSelectionError, /27021/);
+        const insertResult = await clientEncrypted
+          .db(dataDbName)
+          .collection(dataCollName)
+          .insertOne({ encrypted: 'test' })
+          .then(
+            () => 'Insert Succeeded',
+            err => err
+          );
+
+        expect(insertResult).to.be.instanceOf(Error);
+        expect(insertResult).to.have.property('name', 'MongoServerSelectionError');
       });
     });
 
-    describe.only('via bypassAutoEncryption', function () {
+    describe('via bypassAutoEncryption', function () {
       let clientEncrypted;
       let client;
       // Create a MongoClient configured with auto encryption
@@ -1189,8 +1191,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
             // ```
             // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+            // Configure with bypassAutoEncryption=true.
             autoEncryption: {
               keyVaultNamespace,
+              bypassAutoEncryption: true,
               kmsProviders: { local: { key: LOCAL_KEY } },
               extraOptions: {
                 // Configure the following extraOptions
@@ -1199,7 +1203,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
                 //    "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
                 // }
                 //```
-                ...getEncryptExtraOptions(),
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
@@ -1210,13 +1213,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         );
 
         // Use client_encrypted to insert the document {"unencrypted": "test"} into db.coll.
-        // Expect this to succeed.
         await clientEncrypted.connect();
         const insertResult = await clientEncrypted
           .db(dataDbName)
           .collection(dataCollName)
           .insertOne({ unencrypted: 'test' });
 
+        // Expect this to succeed.
         expect(insertResult).to.have.property('insertedId');
       });
 
@@ -1259,6 +1262,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             autoEncryption: {
               keyVaultNamespace,
               kmsProviders: { local: { key: LOCAL_KEY } },
+              schemaMap: { dataNamespace: externalSchema },
               // Configure the following `extraOptions`
               // {
               //    "mongocryptdURI": "mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000",
@@ -1267,15 +1271,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               //    "cryptSharedRequired": true
               // }
               extraOptions: {
-                ...getEncryptExtraOptions(),
+                ...getEncryptExtraOptions(), // sets cryptSharedLibPath if it exists
                 mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
                 ],
                 cryptdSharedLibRequired: true
-              },
-              schemaMap: externalSchema
+              }
             }
           }
         );
