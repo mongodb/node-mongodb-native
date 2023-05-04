@@ -5,6 +5,7 @@ import * as sinon from 'sinon';
 import {
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
   AuthMechanism,
+  DEFAULT_ALLOWED_HOSTS,
   FEATURE_FLAGS,
   MongoAPIError,
   MongoClient,
@@ -209,6 +210,72 @@ describe('Connection String', function () {
     const options = parseOptions('mongodb://localhost/?readConcernLevel=local');
     expect(options).to.have.property('readConcern');
     expect(options.readConcern.level).to.equal('local');
+  });
+
+  context('when auth mechanism is MONGODB-OIDC', function () {
+    context('when ALLOWED_HOSTS is in the URI', function () {
+      it('raises an error', function () {
+        expect(() => {
+          parseOptions(
+            'mongodb://localhost/?authMechanismProperties=PROVIDER_NAME:aws,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC'
+          );
+        }).to.throw(
+          MongoParseError,
+          'Auth mechanism property ALLOWED_HOSTS is not allowed in the connection string.'
+        );
+      });
+    });
+
+    context('when ALLOWED_HOSTS is in the options', function () {
+      context('when it is an array of strings', function () {
+        const hosts = ['*.example.com'];
+
+        it('sets the allowed hosts property', function () {
+          const options = parseOptions(
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
+            {
+              authMechanismProperties: {
+                ALLOWED_HOSTS: hosts
+              }
+            }
+          );
+          expect(options.credentials.mechanismProperties).to.deep.equal({
+            PROVIDER_NAME: 'aws',
+            ALLOWED_HOSTS: hosts
+          });
+        });
+      });
+
+      context('when it is not an array of strings', function () {
+        it('raises an error', function () {
+          expect(() => {
+            parseOptions(
+              'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
+              {
+                authMechanismProperties: {
+                  ALLOWED_HOSTS: [1, 2, 3]
+                }
+              }
+            );
+          }).to.throw(
+            MongoInvalidArgumentError,
+            'Auth mechanism property ALLOWED_HOSTS must be an array of strings.'
+          );
+        });
+      });
+    });
+
+    context('when ALLOWED_HOSTS is not in the options', function () {
+      it('sets the default value', function () {
+        const options = parseOptions(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
+        );
+        expect(options.credentials.mechanismProperties).to.deep.equal({
+          PROVIDER_NAME: 'aws',
+          ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
+        });
+      });
+    });
   });
 
   it('should parse `authMechanismProperties`', function () {
