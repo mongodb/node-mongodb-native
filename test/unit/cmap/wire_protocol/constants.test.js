@@ -14,8 +14,8 @@ describe('Wire Protocol Constants', function () {
   });
 
   describe('MAX_SUPPORTED_SERVER_VERSION', function () {
-    it('returns 6.0', function () {
-      expect(MAX_SUPPORTED_SERVER_VERSION).to.equal('6.0');
+    it('returns 7.0', function () {
+      expect(MAX_SUPPORTED_SERVER_VERSION).to.equal('7.0');
     });
   });
 
@@ -26,8 +26,8 @@ describe('Wire Protocol Constants', function () {
   });
 
   describe('MAX_SUPPORTED_WIRE_VERSION', function () {
-    it('returns 17', function () {
-      expect(MAX_SUPPORTED_WIRE_VERSION).to.equal(17);
+    it('returns 21', function () {
+      expect(MAX_SUPPORTED_WIRE_VERSION).to.equal(21);
     });
   });
 });
