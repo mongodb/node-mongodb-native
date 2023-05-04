@@ -137,6 +137,20 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
         if (server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION) {
           throw new MongoCompatibilityError(INVALID_QE_VERSION);
         }
+        // Create auxilliary collections for queryable encryption support.
+        const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
+        const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
+
+        for (const collectionName of [escCollection, ecocCollection]) {
+          const createOp = new CreateCollectionOperation(db, collectionName, {
+            clusteredIndex: {
+              key: { _id: 1 },
+              unique: true
+            }
+          });
+          await createOp.executeWithoutEncryptedFieldsCheck(server, session);
+        }
+
         if (!options.encryptedFields) {
           this.options = { ...this.options, encryptedFields };
         }
