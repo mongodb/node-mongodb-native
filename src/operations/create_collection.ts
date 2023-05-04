@@ -1,5 +1,8 @@
 import type { Document } from '../bson';
-import { MIN_SUPPORTED_QE_SERVER_VERSION, MIN_SUPPORTED_QE_WIRE_VERSION } from '../cmap/wire_protocol/constants';
+import {
+  MIN_SUPPORTED_QE_SERVER_VERSION,
+  MIN_SUPPORTED_QE_WIRE_VERSION
+} from '../cmap/wire_protocol/constants';
 import { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoCompatibilityError } from '../error';
