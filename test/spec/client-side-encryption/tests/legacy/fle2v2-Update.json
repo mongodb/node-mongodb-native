@@ -14,9 +14,6 @@
   "collection_name": "default",
   "data": [],
   "encrypted_fields": {
-    "escCollection": "enxcol_.default.esc",
-    "eccCollection": "enxcol_.default.ecc",
-    "ecocCollection": "enxcol_.default.ecoc",
     "fields": [
       {
         "keyId": {
@@ -187,7 +184,6 @@
                 "schema": {
                   "default.default": {
                     "escCollection": "enxcol_.default.esc",
-                    "eccCollection": "enxcol_.default.ecc",
                     "ecocCollection": "enxcol_.default.ecoc",
                     "fields": [
                       {
@@ -247,12 +243,12 @@
                   }
                 }
               ],
+              "ordered": true,
               "encryptionInformation": {
                 "type": 1,
                 "schema": {
                   "default.default": {
                     "escCollection": "enxcol_.default.esc",
-                    "eccCollection": "enxcol_.default.ecc",
                     "ecocCollection": "enxcol_.default.ecoc",
                     "fields": [
                       {
@@ -433,7 +429,6 @@
                 "schema": {
                   "default.default": {
                     "escCollection": "enxcol_.default.esc",
-                    "eccCollection": "enxcol_.default.ecc",
                     "ecocCollection": "enxcol_.default.ecoc",
                     "fields": [
                       {
@@ -495,12 +490,12 @@
                   }
                 }
               ],
+              "ordered": true,
               "encryptionInformation": {
                 "type": 1,
                 "schema": {
                   "default.default": {
                     "escCollection": "enxcol_.default.esc",
-                    "eccCollection": "enxcol_.default.ecc",
                     "ecocCollection": "enxcol_.default.ecoc",
                     "fields": [
                       {

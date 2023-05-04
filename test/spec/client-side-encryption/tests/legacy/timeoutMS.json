@@ -1,0 +1,200 @@
+{
+  "runOn": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "database_name": "cse-timeouts-db",
+  "collection_name": "cse-timeouts-coll",
+  "data": [],
+  "json_schema": {
+    "properties": {
+      "encrypted_w_altname": {
+        "encrypt": {
+          "keyId": "/altname",
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+        }
+      },
+      "encrypted_string": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$binary": {
+                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                "subType": "04"
+              }
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        }
+      },
+      "random": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$binary": {
+                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                "subType": "04"
+              }
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Random"
+        }
+      },
+      "encrypted_string_equivalent": {
+        "encrypt": {
+          "keyId": [
+            {
+              "$binary": {
+                "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+                "subType": "04"
+              }
+            }
+          ],
+          "bsonType": "string",
+          "algorithm": "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic"
+        }
+      }
+    },
+    "bsonType": "object"
+  },
+  "key_vault_data": [
+    {
+      "status": 1,
+      "_id": {
+        "$binary": {
+          "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+          "subType": "04"
+        }
+      },
+      "masterKey": {
+        "provider": "aws",
+        "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0",
+        "region": "us-east-1"
+      },
+      "updateDate": {
+        "$date": {
+          "$numberLong": "1552949630483"
+        }
+      },
+      "keyMaterial": {
+        "$binary": {
+          "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gEqnsxXlR51T5EbEVezUqqKAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDHa4jo6yp0Z18KgbUgIBEIB74sKxWtV8/YHje5lv5THTl0HIbhSwM6EqRlmBiFFatmEWaeMk4tO4xBX65eq670I5TWPSLMzpp8ncGHMmvHqRajNBnmFtbYxN3E3/WjxmdbOOe+OXpnGJPcGsftc7cB2shRfA4lICPnE26+oVNXT6p0Lo20nY5XC7jyCO",
+          "subType": "00"
+        }
+      },
+      "creationDate": {
+        "$date": {
+          "$numberLong": "1552949630483"
+        }
+      },
+      "keyAltNames": [
+        "altname",
+        "another_altname"
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS applied to listCollections to get collection schema",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "listCollections"
+          ],
+          "blockConnection": true,
+          "blockTimeMS": 60
+        }
+      },
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "aws": {}
+          }
+        },
+        "timeoutMS": 50
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0",
+              "random": "abc"
+            }
+          },
+          "result": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "listCollections": 1,
+              "filter": {
+                "name": "cse-timeouts-coll"
+              },
+              "maxTimeMS": {
+                "$$type": [
+                  "int",
+                  "long"
+                ]
+              }
+            },
+            "command_name": "listCollections"
+          }
+        }
+      ]
+    },
+    {
+      "description": "remaining timeoutMS applied to find to get keyvault data",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 3
+        },
+        "data": {
+          "failCommands": [
+            "listCollections",
+            "find"
+          ],
+          "blockConnection": true,
+          "blockTimeMS": 20
+        }
+      },
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "aws": {}
+          }
+        },
+        "timeoutMS": 50
+      },
+      "operations": [
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1,
+              "encrypted_string": "string0",
+              "random": "abc"
+            }
+          },
+          "result": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    }
+  ]
+}

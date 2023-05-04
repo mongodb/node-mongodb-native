@@ -1,6 +1,8 @@
 import type { Document } from '../bson';
+import { MIN_SUPPORTED_QE_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { Collection } from '../collection';
 import type { Db } from '../db';
+import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -98,6 +100,9 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   changeStreamPreAndPostImages?: { enabled: boolean };
 }
 
+/* @internal */
+const INVALID_QE_VERSION = 'Cannot create Queryable Encryption collections on servers before 7.0.0';
+
 /** @internal */
 export class CreateCollectionOperation extends CommandOperation<Collection> {
   override options: CreateCollectionOptions;
@@ -127,21 +132,10 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
         db.s.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
       if (encryptedFields) {
-        // Create auxilliary collections for queryable encryption support.
-        const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
-        const eccCollection = encryptedFields.eccCollection ?? `enxcol_.${name}.ecc`;
-        const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
-
-        for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
-          const createOp = new CreateCollectionOperation(db, collectionName, {
-            clusteredIndex: {
-              key: { _id: 1 },
-              unique: true
-            }
-          });
-          await createOp.executeWithoutEncryptedFieldsCheck(server, session);
+        // Creating a QE collection required min server of 7.0.0
+        if (server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION) {
+          throw new MongoCompatibilityError(INVALID_QE_VERSION);
         }
-
         if (!options.encryptedFields) {
           this.options = { ...this.options, encryptedFields };
         }
