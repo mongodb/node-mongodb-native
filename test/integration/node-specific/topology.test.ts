@@ -1,46 +1,42 @@
-'use strict';
-
-import { MongoClientOptions, makeClientMetadata, Topology, MongoClient } from "../../mongodb";
+import { MongoClientOptions, Topology, MongoClient } from "../../mongodb";
 import { expect } from 'chai';
-import { promisify } from 'util';
-import sinon from "sinon";
-
-
-class SpiableClient {
-  client: MongoClient;
-  constructor(client: MongoClient) {
-    this.client = client;
-  }
-
-  get topology(): Topology | undefined {
-    return this.client.topology;
-  }
-}
 
 describe('Topology', function() {
   it('should correctly track states of a topology', {
     // @ts-ignore-next-line
     metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
     test: async function() {
-      const options = { ...this.configuration.options, metadata: makeClientMetadata({ driverInfo: {} }) };
 
-      const topology = new Topology(
-        {} as any,
-        this.configuration.options.hostAddresses,
-        options
-      );
+      class WrappedClient extends MongoClient {
+        _topology: Topology | undefined = undefined;
+        states: string[] = [];
 
-      const states: any[] = [];
-      topology.on('stateChanged', (_, newState) => {
-        states.push(newState);
-      });
+        constructor(uri: string, options?: MongoClientOptions) {
+          super(uri, options);
+        }
 
-      await promisify(callback => topology.connect(callback))();
+        // @ts-expect-error
+        override get topology(): Topology | undefined {
+          return this._topology;
+        }
 
-      await promisify(callback => topology.close({}, callback))();
+        override set topology(top: Topology | undefined) {
+          if (!top) return;
+          this._topology = top;
+          this._topology?.on('stateChanged', (_, newState) => {
+            this.states.push(newState);
+          });
+        }
+      }
 
-      expect(topology.isDestroyed()).to.be.true;
-      expect(states).to.eql(['connecting', 'connected', 'closing', 'closed']);
+      const client = new WrappedClient(this.configuration.url());
+
+      await client.connect();
+
+      await client.close();
+
+      expect(client._topology?.isDestroyed()).to.be.true;
+      expect(client.states).to.deep.equal(['connecting', 'connected', 'closing', 'closed']);
     }
   });
 });
