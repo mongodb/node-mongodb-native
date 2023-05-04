@@ -59,6 +59,23 @@ export const ByteUtils = {
 };
 
 /**
+ * Determines if a connection's address matches a user provided list
+ * of domain wildcards.
+ */
+export function hostMatchesWildcards(host: string, wildcards: string[]): boolean {
+  for (const wildcard of wildcards) {
+    if (
+      host === wildcard ||
+      (wildcard.startsWith('*.') && host?.endsWith(wildcard.substring(2, wildcard.length))) ||
+      (wildcard.startsWith('*/') && host?.endsWith(wildcard.substring(2, wildcard.length)))
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Throws if collectionName is not a valid mongodb collection namespace.
  * @internal
  */
