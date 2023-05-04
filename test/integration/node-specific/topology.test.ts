@@ -1,12 +1,11 @@
-import { MongoClientOptions, Topology, MongoClient } from "../../mongodb";
 import { expect } from 'chai';
 
-describe('Topology', function() {
-  it('should correctly track states of a topology', {
-    // @ts-ignore-next-line
-    metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
-    test: async function() {
+import { MongoClient, MongoClientOptions, Topology } from '../../mongodb';
 
+describe('Topology', function () {
+  it('should correctly track states of a topology', {
+    metadata: { requires: { apiVersion: false, topology: '!load-balanced' } }, // apiVersion not supported by newTopology()
+    test: async function () {
       class WrappedClient extends MongoClient {
         _topology: Topology | undefined = undefined;
         states: string[] = [];
@@ -15,7 +14,7 @@ describe('Topology', function() {
           super(uri, options);
         }
 
-        // @ts-expect-error
+        // @ts-expect-error Needed for testing
         override get topology(): Topology | undefined {
           return this._topology;
         }
