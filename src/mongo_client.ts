@@ -4,8 +4,12 @@ import { promisify } from 'util';
 
 import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
 import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
-import type { AuthMechanismProperties, MongoCredentials } from './cmap/auth/mongo_credentials';
-import type { AuthMechanism } from './cmap/auth/providers';
+import {
+  AuthMechanismProperties,
+  DEFAULT_ALLOWED_HOSTS,
+  MongoCredentials
+} from './cmap/auth/mongo_credentials';
+import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import type { ClientMetadata } from './cmap/handshake/client_metadata';
@@ -25,7 +29,7 @@ import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, TopologyEvents } from './sdam/topology';
 import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
-import { HostAddress, MongoDBNamespace, ns, resolveOptions } from './utils';
+import { HostAddress, hostMatchesWildcards, MongoDBNamespace, ns, resolveOptions } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */
@@ -445,6 +449,25 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
       for (const [index, host] of hosts.entries()) {
         options.hosts[index] = host;
+      }
+    }
+
+    // It is important to perform validation of hosts AFTER SRV resolution, to check the real hostname,
+    // but BEFORE we even attempt connecting with a potentially not allowed hostname
+    if (options.credentials?.mechanism === AuthMechanism.MONGODB_OIDC) {
+      const allowedHosts =
+        options.credentials?.mechanismProperties?.ALLOWED_HOSTS || DEFAULT_ALLOWED_HOSTS;
+      const isServiceAuth = !!options.credentials?.mechanismProperties?.PROVIDER_NAME;
+      if (!isServiceAuth) {
+        for (const host of options.hosts) {
+          if (!hostMatchesWildcards(host.toHostPort().host, allowedHosts)) {
+            throw new MongoInvalidArgumentError(
+              `Host '${host}' is not valid for OIDC authentication with ALLOWED_HOSTS of '${allowedHosts.join(
+                ','
+              )}'`
+            );
+          }
+        }
       }
     }
 

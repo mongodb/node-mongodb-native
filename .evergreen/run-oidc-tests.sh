@@ -10,5 +10,6 @@ MONGODB_URI_SINGLE="${MONGODB_URI}/?authMechanism=MONGODB-OIDC&authMechanismProp
 echo $MONGODB_URI_SINGLE
 
 export MONGODB_URI="$MONGODB_URI_SINGLE"
+export OIDC_TOKEN_DIR=${OIDC_TOKEN_DIR}
 
 npm run check:oidc

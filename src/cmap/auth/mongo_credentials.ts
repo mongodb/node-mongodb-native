@@ -30,6 +30,18 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
+const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
+
+/** @internal */
+export const DEFAULT_ALLOWED_HOSTS = [
+  '*.mongodb.net',
+  '*.mongodb-dev.net',
+  '*.mongodbgov.net',
+  'localhost',
+  '127.0.0.1',
+  '::1'
+];
+
 /** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
@@ -43,11 +55,13 @@ export interface AuthMechanismProperties extends Document {
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
   /** @experimental */
   PROVIDER_NAME?: 'aws';
+  /** @experimental */
+  ALLOWED_HOSTS?: string[];
 }
 
 /** @public */
 export interface MongoCredentialsOptions {
-  username: string;
+  username?: string;
   password: string;
   source: string;
   db?: string;
@@ -72,7 +86,7 @@ export class MongoCredentials {
   readonly mechanismProperties: AuthMechanismProperties;
 
   constructor(options: MongoCredentialsOptions) {
-    this.username = options.username;
+    this.username = options.username ?? '';
     this.password = options.password;
     this.source = options.source;
     if (!this.source && options.db) {
@@ -99,6 +113,13 @@ export class MongoCredentials {
           AWS_SESSION_TOKEN: process.env.AWS_SESSION_TOKEN
         };
       }
+    }
+
+    if (this.mechanism === AuthMechanism.MONGODB_OIDC && !this.mechanismProperties.ALLOWED_HOSTS) {
+      this.mechanismProperties = {
+        ...this.mechanismProperties,
+        ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
+      };
     }
 
     Object.freeze(this.mechanismProperties);
@@ -180,6 +201,18 @@ export class MongoCredentials {
         throw new MongoInvalidArgumentError(
           `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
+      }
+
+      if (this.mechanismProperties.ALLOWED_HOSTS) {
+        const hosts = this.mechanismProperties.ALLOWED_HOSTS;
+        if (!Array.isArray(hosts)) {
+          throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
+        }
+        for (const host of hosts) {
+          if (typeof host !== 'string') {
+            throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
+          }
+        }
       }
     }
 
