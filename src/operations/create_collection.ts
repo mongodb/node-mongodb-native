@@ -1,5 +1,5 @@
 import type { Document } from '../bson';
-import { MIN_SUPPORTED_QE_WIRE_VERSION } from '../cmap/wire_protocol/constants';
+import { MIN_SUPPORTED_QE_SERVER_VERSION, MIN_SUPPORTED_QE_WIRE_VERSION } from '../cmap/wire_protocol/constants';
 import { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoCompatibilityError } from '../error';
@@ -135,7 +135,9 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       if (encryptedFields) {
         // Creating a QE collection required min server of 7.0.0
         if (server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION) {
-          throw new MongoCompatibilityError(INVALID_QE_VERSION);
+          throw new MongoCompatibilityError(
+            `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
+          );
         }
         // Create auxilliary collections for queryable encryption support.
         const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
