@@ -1,21 +1,23 @@
+import type { Document } from 'bson';
+
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
-import { type AuthContext, AuthProvider } from './auth_provider';
+import type { Connection } from '../connection';
+import { AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
-import type { Workflow } from './mongodb_oidc/workflow';
+
+/** Error when credentials are missing. */
+const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
 
 /**
  * @public
  * @experimental
  */
-export interface OIDCMechanismServerStep1 {
-  authorizationEndpoint?: string;
-  tokenEndpoint?: string;
-  deviceAuthorizationEndpoint?: string;
+export interface IdPServerInfo {
+  issuer: string;
   clientId: string;
-  clientSecret?: string;
   requestScopes?: string[];
 }
 
@@ -23,7 +25,7 @@ export interface OIDCMechanismServerStep1 {
  * @public
  * @experimental
  */
-export interface OIDCRequestTokenResult {
+export interface IdPServerResponse {
   accessToken: string;
   expiresInSeconds?: number;
   refreshToken?: string;
@@ -33,24 +35,50 @@ export interface OIDCRequestTokenResult {
  * @public
  * @experimental
  */
+export interface OIDCCallbackContext {
+  refreshToken?: string;
+  timeoutSeconds?: number;
+  timeoutContext?: AbortSignal;
+  version: number;
+}
+
+/**
+ * @public
+ * @experimental
+ */
 export type OIDCRequestFunction = (
-  principalName: string,
-  serverResult: OIDCMechanismServerStep1,
-  timeout: AbortSignal | number
-) => Promise<OIDCRequestTokenResult>;
+  info: IdPServerInfo,
+  context: OIDCCallbackContext
+) => Promise<IdPServerResponse>;
 
 /**
  * @public
  * @experimental
  */
 export type OIDCRefreshFunction = (
-  principalName: string,
-  serverResult: OIDCMechanismServerStep1,
-  result: OIDCRequestTokenResult,
-  timeout: AbortSignal | number
-) => Promise<OIDCRequestTokenResult>;
+  info: IdPServerInfo,
+  context: OIDCCallbackContext
+) => Promise<IdPServerResponse>;
 
 type ProviderName = 'aws' | 'callback';
+
+export interface Workflow {
+  /**
+   * All device workflows must implement this method in order to get the access
+   * token and then call authenticate with it.
+   */
+  execute(
+    connection: Connection,
+    credentials: MongoCredentials,
+    reauthenticating: boolean,
+    response?: Document
+  ): Promise<Document>;
+
+  /**
+   * Get the document to add for speculative authentication.
+   */
+  speculativeAuth(credentials: MongoCredentials): Promise<Document>;
+}
 
 /** @internal */
 export const OIDC_WORKFLOWS: Map<ProviderName, Workflow> = new Map();
@@ -73,19 +101,10 @@ export class MongoDBOIDC extends AuthProvider {
    * Authenticate using OIDC
    */
   override async auth(authContext: AuthContext): Promise<void> {
-    const { connection, credentials, response, reauthenticating } = authContext;
-
-    if (response?.speculativeAuthenticate) {
-      return;
-    }
-
-    if (!credentials) {
-      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-
+    const { connection, reauthenticating, response } = authContext;
+    const credentials = getCredentials(authContext);
     const workflow = getWorkflow(credentials);
-
-    await workflow.execute(connection, credentials, reauthenticating);
+    await workflow.execute(connection, credentials, reauthenticating, response);
   }
 
   /**
@@ -95,17 +114,22 @@ export class MongoDBOIDC extends AuthProvider {
     handshakeDoc: HandshakeDocument,
     authContext: AuthContext
   ): Promise<HandshakeDocument> {
-    const { credentials } = authContext;
-
-    if (!credentials) {
-      throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-
+    const credentials = getCredentials(authContext);
     const workflow = getWorkflow(credentials);
-
-    const result = await workflow.speculativeAuth();
+    const result = await workflow.speculativeAuth(credentials);
     return { ...handshakeDoc, ...result };
   }
+}
+
+/**
+ * Get credentials from the auth context, throwing if they do not exist.
+ */
+function getCredentials(authContext: AuthContext): MongoCredentials {
+  const { credentials } = authContext;
+  if (!credentials) {
+    throw new MongoMissingCredentialsError(MISSING_CREDENTIALS_ERROR);
+  }
+  return credentials;
 }
 
 /**
