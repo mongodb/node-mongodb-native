@@ -1170,7 +1170,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
       // whatever was passed via `--port` with serverSelectionTimeoutMS=1000.) Run a handshake
       // command and ensure it fails with a server selection timeout
-      it('should not spawn mongocryptd', async function () {
+      it('should not spawn mongocryptd', metadata, async function () {
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
         const error = await client.connect().then(
           () => null,
