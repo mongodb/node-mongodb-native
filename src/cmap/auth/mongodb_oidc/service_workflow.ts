@@ -3,8 +3,8 @@ import { BSON, type Document } from 'bson';
 import { ns } from '../../../utils';
 import type { Connection } from '../../connection';
 import type { MongoCredentials } from '../mongo_credentials';
+import type { Workflow } from '../mongodb_oidc';
 import { AuthMechanism } from '../providers';
-import type { Workflow } from './workflow';
 
 /**
  * Common behaviour for OIDC device workflows.
@@ -24,9 +24,11 @@ export abstract class ServiceWorkflow implements Workflow {
   /**
    * Get the document to add for speculative authentication.
    */
-  async speculativeAuth(): Promise<Document> {
+  async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
     const token = await this.getToken();
-    return { speculativeAuthenticate: commandDocument(token) };
+    const document = commandDocument(token);
+    document.db = credentials.source;
+    return { speculativeAuthenticate: document };
   }
 
   /**
