@@ -152,7 +152,7 @@ functions:
           ${PREPARE_SHELL}
 
           OIDC_TOKEN_DIR="/tmp/tokens" \
-          AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test1" \
+          AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test_user1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
 
