@@ -11,7 +11,7 @@ runOn:
 database_name: &database_name "default"
 collection_name: &collection_name "default"
 data: []
-encrypted_fields: &encrypted_fields {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedDouble', 'bsonType': 'double', 'queries': {'queryType': 'rangePreview', 'contention': {'$numberLong': '0'}, 'sparsity': {'$numberLong': '1'}}}]}
+encrypted_fields: &encrypted_fields {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedDoubleNoPrecision', 'bsonType': 'double', 'queries': {'queryType': 'rangePreview', 'contention': {'$numberLong': '0'}, 'sparsity': {'$numberLong': '1'}}}]}
 key_vault_data: [ {'_id': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'keyMaterial': {'$binary': {'base64': 'sHe0kz57YW7v8g9VP9sf/+K1ex4JqKc5rf/URX3n3p8XdZ6+15uXPaSayC6adWbNxkFskuMCOifDoTT+rkqMtFkDclOy884RuGGtUysq3X7zkAWYTKi8QAfKkajvVbZl2y23UqgVasdQu3OVBQCrH/xY00nNAs/52e958nVjBuzQkSb1T8pKJAyjZsHJ60+FtnfafDZSTAIBJYn7UWBCwQ==', 'subType': '00'}}, 'creationDate': {'$date': {'$numberLong': '1648914851981'}}, 'updateDate': {'$date': {'$numberLong': '1648914851981'}}, 'status': {'$numberInt': '0'}, 'masterKey': {'provider': 'local'}} ]
 tests:
   - description: "Find with $gt"
@@ -22,13 +22,13 @@ tests:
     operations:
       - name: insertOne
         arguments:
-          document: &doc0 { _id: 0, encryptedDouble: { $numberDouble: "0.0" } }
+          document: &doc0 { _id: 0, encryptedDoubleNoPrecision: { $numberDouble: "0.0" } }
       - name: insertOne
         arguments:
-          document: &doc1 { _id: 1, encryptedDouble: { $numberDouble: "1.0" } }
+          document: &doc1 { _id: 1, encryptedDoubleNoPrecision: { $numberDouble: "1.0" } }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $gt: { $numberDouble: "0.0" } }}
+          filter: { encryptedDoubleNoPrecision: { $gt: { $numberDouble: "0.0" } }}
         result: [*doc1]
 
   - description: "Find with $gte"
@@ -43,7 +43,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $gte: { $numberDouble: "0.0" } }}
+          filter: { encryptedDoubleNoPrecision: { $gte: { $numberDouble: "0.0" } }}
           # sort so results from range queries are ordered.
           sort: { _id: 1 }
         result: [*doc0, *doc1]
@@ -60,7 +60,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $gt: { $numberDouble: "1.0" } }}
+          filter: { encryptedDoubleNoPrecision: { $gt: { $numberDouble: "1.0" } }}
         result: []
 
   - description: "Find with $lt"
@@ -75,7 +75,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $lt: { $numberDouble: "1.0" } }}
+          filter: { encryptedDoubleNoPrecision: { $lt: { $numberDouble: "1.0" } }}
         result: [*doc0]
 
   - description: "Find with $lte"
@@ -90,7 +90,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $lte: { $numberDouble: "1.0" } }}
+          filter: { encryptedDoubleNoPrecision: { $lte: { $numberDouble: "1.0" } }}
           # sort so results from range queries are ordered.
           sort: { _id: 1 }
         result: [*doc0, *doc1]
@@ -107,7 +107,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $gt: { $numberDouble: "0.0" }, $lt: { $numberDouble: "2.0"} }}
+          filter: { encryptedDoubleNoPrecision: { $gt: { $numberDouble: "0.0" }, $lt: { $numberDouble: "2.0"} }}
         result: [*doc1]
 
   - description: "Find with equality"
@@ -122,11 +122,11 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $numberDouble: "0.0" } }
+          filter: { encryptedDoubleNoPrecision: { $numberDouble: "0.0" } }
         result: [*doc0]
       - name: find
         arguments:
-          filter: { encryptedDouble: { $numberDouble: "1.0" } }
+          filter: { encryptedDoubleNoPrecision: { $numberDouble: "1.0" } }
         result: [*doc1]
 
   - description: "Find with $in"
@@ -141,7 +141,7 @@ tests:
         arguments: { document: *doc1 }
       - name: find
         arguments:
-          filter: { encryptedDouble: { $in: [ {$numberDouble: "0.0"} ] } }
+          filter: { encryptedDoubleNoPrecision: { $in: [ {$numberDouble: "0.0"} ] } }
         result: [*doc0]
 
   - description: "Aggregate with $gte"
@@ -157,7 +157,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $gte: { $numberDouble: "0.0" } }} }
+          - { $match: { encryptedDoubleNoPrecision: { $gte: { $numberDouble: "0.0" } }} }
           # sort so results from range queries are ordered.
           - { $sort: { _id: 1 }}
         result: [*doc0, *doc1]
@@ -175,7 +175,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $gt: { $numberDouble: "1.0" } }} }
+          - { $match: { encryptedDoubleNoPrecision: { $gt: { $numberDouble: "1.0" } }} }
         result: []
 
   - description: "Aggregate with $lt"
@@ -191,7 +191,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $lt: { $numberDouble: "1.0" } }} }
+          - { $match: { encryptedDoubleNoPrecision: { $lt: { $numberDouble: "1.0" } }} }
         result: [*doc0]
 
   - description: "Aggregate with $lte"
@@ -207,7 +207,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $lte: { $numberDouble: "1.0" } }} }
+          - { $match: { encryptedDoubleNoPrecision: { $lte: { $numberDouble: "1.0" } }} }
           # sort so results from range queries are ordered.
           - { $sort: { _id: 1 }}
         result: [*doc0, *doc1]
@@ -225,7 +225,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $gt: { $numberDouble: "0.0" }, $lt: { $numberDouble: "2.0"} }} }
+          - { $match: { encryptedDoubleNoPrecision: { $gt: { $numberDouble: "0.0" }, $lt: { $numberDouble: "2.0"} }} }
         result: [*doc1]
 
   - description: "Aggregate with equality"
@@ -241,12 +241,12 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $numberDouble: "0.0" } } }
+          - { $match: { encryptedDoubleNoPrecision: { $numberDouble: "0.0" } } }
         result: [*doc0]
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $numberDouble: "1.0" } } }
+          - { $match: { encryptedDoubleNoPrecision: { $numberDouble: "1.0" } } }
         result: [*doc1]
 
   - description: "Aggregate with $in"
@@ -262,7 +262,7 @@ tests:
       - name: aggregate
         arguments:
           pipeline:
-          - { $match: { encryptedDouble: { $in: [ {$numberDouble: "0.0"} ] } } }
+          - { $match: { encryptedDoubleNoPrecision: { $in: [ {$numberDouble: "0.0"} ] } } }
         result: [*doc0]
 
   - description: "Wrong type: Insert Int"
@@ -272,7 +272,7 @@ tests:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
     operations:
       - name: insertOne
-        arguments: { document: { _id: 0, encryptedDouble: { $numberInt: "0" }} }
+        arguments: { document: { _id: 0, encryptedDoubleNoPrecision: { $numberInt: "0" }} }
         result:
           # Expect an error from mongocryptd.
           errorContains: "cannot encrypt element"
@@ -285,7 +285,7 @@ tests:
     operations:
       - name: find
         arguments:
-          filter: { encryptedDouble: { $gte: { $numberInt: "0" } }}
+          filter: { encryptedDoubleNoPrecision: { $gte: { $numberInt: "0" } }}
           # sort so results from range queries are ordered.
           sort: { _id: 1 }
         result:
