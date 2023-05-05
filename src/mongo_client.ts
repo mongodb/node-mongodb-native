@@ -478,6 +478,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     topology.client = this;
 
     topology.once(Topology.OPEN, () => this.emit('open', this));
+    topology.on(Topology.TOPOLOGY_CLOSED, () => {
+      this.connectionLock = undefined;
+    });
 
     for (const event of MONGO_CLIENT_EVENTS) {
       topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
