@@ -22,7 +22,7 @@ fi
 
 function get_ts_version() {
     if [ "$TS_VERSION" == "current" ]; then
-        echo $(node -e "console.log(require('./package-lock.json').dependencies.typescript.version)")
+        echo $(node -e "console.log(require('./package-lock.json').packages['node_modules/typescript'].version)")
     else
         echo $TS_VERSION
     fi
