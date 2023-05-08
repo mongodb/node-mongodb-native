@@ -7,7 +7,7 @@ const { isHello } = require('../../mongodb');
 
 const minCompatErrMsg = `minimum wire version ${
   Number.MAX_SAFE_INTEGER - 1
-}, but this version of the Node.js Driver requires at most 17`;
+}, but this version of the Node.js Driver requires at most 21`;
 const maxCompatErrMsg = `reports maximum wire version 1, but this version of the Node.js Driver requires at least 6`;
 
 describe('Wire Protocol Version', () => {

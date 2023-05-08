@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.4.0](https://github.com/mongodb/node-mongodb-native/compare/v5.3.0...v5.4.0) (2023-05-04)
+
+
+### Features
+
+* **NODE-4814:** implement remaining severity logging methods ([#3629](https://github.com/mongodb/node-mongodb-native/issues/3629)) ([d7a8079](https://github.com/mongodb/node-mongodb-native/commit/d7a80790d8f629e25ff090ef8c2d8c6a7b0b0a07))
+* **NODE-4815:** stringify and truncate BSON documents in log messages ([#3635](https://github.com/mongodb/node-mongodb-native/issues/3635)) ([d6bd1d1](https://github.com/mongodb/node-mongodb-native/commit/d6bd1d1602c213e5c46a702163351d1865cdc727))
+* **NODE-4970:** deprecate collStats collection helper ([#3638](https://github.com/mongodb/node-mongodb-native/issues/3638)) ([325c4bc](https://github.com/mongodb/node-mongodb-native/commit/325c4bc37decdf12e957bfad8bd4ee4d28b1bf95))
+* **NODE-5166:** bump max wire version for 7.0 ([#3659](https://github.com/mongodb/node-mongodb-native/issues/3659)) ([561229b](https://github.com/mongodb/node-mongodb-native/commit/561229ba53c2ea422da01625adf5597556332fee))
+* **NODE-5191:** OIDC Auth Updates ([#3637](https://github.com/mongodb/node-mongodb-native/issues/3637)) ([c52a4ed](https://github.com/mongodb/node-mongodb-native/commit/c52a4edfb79934249ea58703b9ddd4a94ef34418))
+* **NODE-5207:** deprecate unsupported runCommand options and add spec tests ([#3643](https://github.com/mongodb/node-mongodb-native/issues/3643)) ([d6d76b4](https://github.com/mongodb/node-mongodb-native/commit/d6d76b4f239ab3d53e867a5c9ace9e18aa12886a))
+
+
+### Bug Fixes
+
+* **NODE-5213:** `ChangeStream.tryNext()` should return TChange type ([#3649](https://github.com/mongodb/node-mongodb-native/issues/3649)) ([3b58ca1](https://github.com/mongodb/node-mongodb-native/commit/3b58ca1ec873bab3ed56b2de970f9c513a81c741))
+
 ## [5.3.0](https://github.com/mongodb/node-mongodb-native/compare/v5.2.0...v5.3.0) (2023-04-18)
 
 
