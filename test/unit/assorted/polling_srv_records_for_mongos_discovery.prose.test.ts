@@ -9,13 +9,12 @@ import {
   SrvPoller,
   SrvPollerOptions,
   SrvPollingEvent,
-  Topology,
   TopologyOptions,
   TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
-import { processTick } from '../../tools/utils';
+import { processTick, topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 /*
@@ -125,7 +124,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         HostAddress.fromString(`${record.name}:${record.port}`)
       );
 
-      context.topology = new Topology(seedlist, {
+      context.topology = topologyWithPlaceholderClient(seedlist, {
         srvPoller: srvPoller as SrvPoller,
         srvHost: SRV_HOST
       } as TopologyOptions);

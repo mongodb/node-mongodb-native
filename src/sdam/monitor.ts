@@ -111,7 +111,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     const connectOptions = Object.assign(
       {
         id: '<monitor>' as const,
-        generation: server.s.pool.generation,
+        generation: server.pool.generation,
         connectionType: Connection,
         cancellationToken,
         hostAddress: server.description.hostAddress

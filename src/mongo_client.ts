@@ -325,7 +325,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   topology?: Topology;
   /** @internal */
-  readonly mongoLogger: MongoLogger;
+  override readonly mongoLogger: MongoLogger;
   /** @internal */
   private connectionLock?: Promise<this>;
 
@@ -471,23 +471,21 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       }
     }
 
-    const topology = new Topology(options.hosts, options);
+    this.topology = new Topology(this, options.hosts, options);
     // Events can be emitted before initialization is complete so we have to
     // save the reference to the topology on the client ASAP if the event handlers need to access it
-    this.topology = topology;
-    topology.client = this;
 
-    topology.once(Topology.OPEN, () => this.emit('open', this));
+    this.topology.once(Topology.OPEN, () => this.emit('open', this));
 
     for (const event of MONGO_CLIENT_EVENTS) {
-      topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
+      this.topology.on(event, (...args: any[]) => this.emit(event, ...(args as any)));
     }
 
     const topologyConnect = async () => {
       try {
-        await promisify(callback => topology.connect(options, callback))();
+        await promisify(callback => this.topology?.connect(options, callback))();
       } catch (error) {
-        topology.close({ force: true });
+        this.topology?.close({ force: true });
         throw error;
       }
     };

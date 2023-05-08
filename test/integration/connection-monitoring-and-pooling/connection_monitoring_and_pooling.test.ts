@@ -1,12 +1,13 @@
 import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 describe('Connection Monitoring and Pooling (Node Driver)', function () {
-  const tests: CmapTest[] = loadSpecTests(
+  const cmapTests: CmapTest[] = loadSpecTests(
     '../integration/connection-monitoring-and-pooling/cmap-node-specs'
   );
 
-  runCmapTestSuite(tests, {
+  runCmapTestSuite(cmapTests, {
     injectPoolStats: true,
     testsToSkip: [
       {
@@ -16,4 +17,10 @@ describe('Connection Monitoring and Pooling (Node Driver)', function () {
       }
     ]
   });
+
+  // TODO(NODE-5230): Remove this once the actual unified tests (test/spec/connection-monitoring-and-pooling/logging) are passing
+  const unifiedTests = loadSpecTests(
+    '../integration/connection-monitoring-and-pooling/unified-cmap-node-specs'
+  );
+  runUnifiedSuite(unifiedTests);
 });
