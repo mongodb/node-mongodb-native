@@ -50,6 +50,9 @@ describe('client metadata module', () => {
       context(`when ${envVariable} is in the environment`, () => {
         before(() => {
           process.env[envVariable] = 'non empty string';
+          if (envVariable === 'AWS_EXECUTION_ENV') {
+            process.env[envVariable] = 'AWS_Lambda_non empty string';
+          }
         });
         after(() => {
           delete process.env[envVariable];
@@ -70,7 +73,7 @@ describe('client metadata module', () => {
       context('unrelated environments', () => {
         before(() => {
           // aws
-          process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+          process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_non-empty-string';
           // azure
           process.env.FUNCTIONS_WORKER_RUNTIME = 'non-empty-string';
         });
@@ -384,7 +387,7 @@ describe('client metadata module', () => {
       aws: [
         {
           context: 'no additional metadata',
-          env: [['AWS_EXECUTION_ENV', 'non-empty string']],
+          env: [['AWS_EXECUTION_ENV', 'AWS_Lambda_non-empty string']],
           outcome: {
             name: 'aws.lambda'
           }
@@ -392,7 +395,7 @@ describe('client metadata module', () => {
         {
           context: 'AWS_REGION provided',
           env: [
-            ['AWS_EXECUTION_ENV', 'non-empty string'],
+            ['AWS_EXECUTION_ENV', 'AWS_Lambda_non-empty string'],
             ['AWS_REGION', 'non-null']
           ],
           outcome: {
@@ -403,7 +406,7 @@ describe('client metadata module', () => {
         {
           context: 'AWS_LAMBDA_FUNCTION_MEMORY_SIZE provided',
           env: [
-            ['AWS_EXECUTION_ENV', 'non-empty string'],
+            ['AWS_EXECUTION_ENV', 'AWS_Lambda_non-empty string'],
             ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '3']
           ],
           outcome: {
@@ -526,7 +529,7 @@ describe('client metadata module', () => {
     context('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
         sinon.stub(process, 'env').get(() => ({
-          AWS_EXECUTION_ENV: 'iLoveJavaScript',
+          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
           AWS_REGION: 'a'.repeat(512)
         }));
       });
@@ -543,7 +546,7 @@ describe('client metadata module', () => {
       context('release too large', () => {
         beforeEach('2. Omit fields from `os` except `os.type`.', () => {
           sinon.stub(process, 'env').get(() => ({
-            AWS_EXECUTION_ENV: 'iLoveJavaScript',
+            AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
             AWS_REGION: 'abc'
           }));
           sinon.stub(os, 'release').returns('a'.repeat(512));
