@@ -11,9 +11,9 @@ import {
   ns,
   ReadPreference,
   Server,
-  ServerDescription,
-  Topology
+  ServerDescription
 } from '../../mongodb';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('GetMoreOperation', function () {
   const namespace = ns('db.coll');
@@ -28,7 +28,8 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#constructor', function () {
-    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
+    const topology = topologyWithPlaceholderClient([], {} as any);
+    const server = new Server(topology, new ServerDescription('a:1'), {} as any);
     const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     it('sets the namespace', function () {
@@ -48,7 +49,7 @@ describe('GetMoreOperation', function () {
     context('when the server is the same as the instance', function () {
       it('executes a getMore on the provided server', async function () {
         const server = new Server(
-          new Topology([], {} as any),
+          topologyWithPlaceholderClient([], {} as any),
           new ServerDescription('a:1'),
           {} as any
         );
@@ -75,12 +76,12 @@ describe('GetMoreOperation', function () {
     context('when the server is not the same as the instance', function () {
       it('errors in the callback', function (done) {
         const server1 = new Server(
-          new Topology([], {} as any),
+          topologyWithPlaceholderClient([], {} as any),
           new ServerDescription('a:1'),
           {} as any
         );
         const server2 = new Server(
-          new Topology([], {} as any),
+          topologyWithPlaceholderClient([], {} as any),
           new ServerDescription('a:1'),
           {} as any
         );
@@ -100,7 +101,7 @@ describe('GetMoreOperation', function () {
       const cursorId = Long.fromBigInt(0xffff_ffffn);
       const namespace = ns('db.collection');
       const server = new Server(
-        new Topology([], {} as any),
+        topologyWithPlaceholderClient([], {} as any),
         new ServerDescription('a:1'),
         {} as any
       );
@@ -183,7 +184,7 @@ describe('GetMoreOperation', function () {
           const state = serverVersion < 9 ? 'less than 9' : 'greater than or equal to 9';
           it(`${verb} set the comment on the command if the server wire version is ${state}`, async () => {
             const server = new Server(
-              new Topology([], {} as any),
+              topologyWithPlaceholderClient([], {} as any),
               new ServerDescription('a:1'),
               {} as any
             );
@@ -201,7 +202,7 @@ describe('GetMoreOperation', function () {
 
     context('error cases', () => {
       const server = new Server(
-        new Topology([], {} as any),
+        topologyWithPlaceholderClient([], {} as any),
         new ServerDescription('a:1'),
         {} as any
       );
@@ -253,7 +254,11 @@ describe('GetMoreOperation', function () {
   });
 
   describe('#hasAspect', function () {
-    const server = new Server(new Topology([], {} as any), new ServerDescription('a:1'), {} as any);
+    const server = new Server(
+      topologyWithPlaceholderClient([], {} as any),
+      new ServerDescription('a:1'),
+      {} as any
+    );
     const operation = new GetMoreOperation(namespace, cursorId, server, options);
 
     context('when the aspect is must select same server', function () {

@@ -12,6 +12,7 @@ import {
   Topology,
   TopologyType
 } from '../../mongodb';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';
 
 interface ServerSelectionLatencyWindowTest {
@@ -97,7 +98,7 @@ function calculateObservedFrequencies(observedServers: ReadonlyArray<Server>): F
 
 function setupTest(test: ServerSelectionLatencyWindowTest): Topology {
   const allHosts = test.topology_description.servers.map(({ address }) => address);
-  const topology = new Topology(allHosts, {} as any);
+  const topology = topologyWithPlaceholderClient(allHosts, {} as any);
 
   topology.s.description.type = test.topology_description.type;
   topology.s.state = STATE_CONNECTED;

@@ -505,7 +505,7 @@ export function maybeClearPinnedConnection(
     const loadBalancer = servers[0];
 
     if (options?.error == null || options?.force) {
-      loadBalancer.s.pool.checkIn(conn);
+      loadBalancer.pool.checkIn(conn);
       conn.emit(
         UNPINNED,
         session.transaction.state !== TxnState.NO_TRANSACTION
@@ -514,7 +514,7 @@ export function maybeClearPinnedConnection(
       );
 
       if (options?.forceClear) {
-        loadBalancer.s.pool.clear({ serviceId: conn.serviceId });
+        loadBalancer.pool.clear({ serviceId: conn.serviceId });
       }
     }
 

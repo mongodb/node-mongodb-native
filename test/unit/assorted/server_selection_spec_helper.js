@@ -8,6 +8,7 @@ const ServerSelectors = require('../../mongodb');
 
 const sinon = require('sinon');
 const { expect } = require('chai');
+const { topologyWithPlaceholderClient } = require('../../tools/utils');
 
 function serverDescriptionFromDefinition(definition, hosts) {
   hosts = hosts || [];
@@ -96,7 +97,7 @@ function executeServerSelectionTest(testDefinition, testDone) {
     loadBalanced: topologyDescription.type === TopologyType.LoadBalanced
   };
 
-  const topology = new Topology(seedData.seedlist, topologyOptions);
+  const topology = topologyWithPlaceholderClient(seedData.seedlist, topologyOptions);
   // Each test will attempt to connect by doing server selection. We want to make the first
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon

@@ -251,8 +251,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kProcessingWaitQueue] = false;
 
+    this.mongoLogger = this[kServer].topology.client.mongoLogger;
+    this.component = 'connection';
+
     process.nextTick(() => {
-      this.emit(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
+      this.emitAndLog(ConnectionPool.CONNECTION_POOL_CREATED, new ConnectionPoolCreatedEvent(this));
     });
   }
 
@@ -337,7 +340,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       return;
     }
     this[kPoolState] = PoolState.ready;
-    this.emit(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
+    this.emitAndLog(ConnectionPool.CONNECTION_POOL_READY, new ConnectionPoolReadyEvent(this));
     clearTimeout(this[kMinPoolSizeTimer]);
     this.ensureMinPoolSize();
   }
@@ -348,7 +351,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * explicitly destroyed by the new owner.
    */
   checkOut(callback: Callback<Connection>): void {
-    this.emit(
+    this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
     );
@@ -360,7 +363,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timer = undefined;
 
-        this.emit(
+        this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, 'timeout')
         );
@@ -398,7 +401,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kCheckedOut].delete(connection);
-    this.emit(ConnectionPool.CONNECTION_CHECKED_IN, new ConnectionCheckedInEvent(this, connection));
+    this.emitAndLog(
+      ConnectionPool.CONNECTION_CHECKED_IN,
+      new ConnectionCheckedInEvent(this, connection)
+    );
 
     if (willDestroy) {
       const reason = connection.closed ? 'error' : poolClosed ? 'poolClosed' : 'stale';
@@ -437,7 +443,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         // Increment the generation for the service id.
         this.serviceGenerations.set(sid, generation + 1);
       }
-      this.emit(
+      this.emitAndLog(
         ConnectionPool.CONNECTION_POOL_CLEARED,
         new ConnectionPoolClearedEvent(this, { serviceId })
       );
@@ -452,9 +458,11 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this.clearMinPoolSizeTimer();
     if (!alreadyPaused) {
-      this.emit(
+      this.emitAndLog(
         ConnectionPool.CONNECTION_POOL_CLEARED,
-        new ConnectionPoolClearedEvent(this, { interruptInUseConnections })
+        new ConnectionPoolClearedEvent(this, {
+          interruptInUseConnections
+        })
       );
     }
 
@@ -509,7 +517,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     eachAsync<Connection>(
       this[kConnections].toArray(),
       (conn, cb) => {
-        this.emit(
+        this.emitAndLog(
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(this, conn, 'poolClosed')
         );
@@ -517,7 +525,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       },
       err => {
         this[kConnections].clear();
-        this.emit(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
+        this.emitAndLog(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
         callback(err);
       }
     );
@@ -645,7 +653,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     connection: Connection,
     reason: 'error' | 'idle' | 'stale' | 'poolClosed'
   ) {
-    this.emit(
+    this.emitAndLog(
       ConnectionPool.CONNECTION_CLOSED,
       new ConnectionClosedEvent(this, connection, reason)
     );
@@ -694,7 +702,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPending]++;
     // This is our version of a "virtual" no-I/O connection as the spec requires
-    this.emit(
+    this.emitAndLog(
       ConnectionPool.CONNECTION_CREATED,
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
@@ -702,7 +710,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     connect(connectOptions, (err, connection) => {
       if (err || !connection) {
         this[kPending]--;
-        this.emit(
+        this.emitAndLog(
           ConnectionPool.CONNECTION_CLOSED,
           new ConnectionClosedEvent(
             this,
@@ -750,7 +758,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
 
       connection.markAvailable();
-      this.emit(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
+      this.emitAndLog(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
 
       this[kPending]--;
       callback(undefined, connection);
@@ -819,7 +827,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (this[kPoolState] !== PoolState.ready) {
         const reason = this.closed ? 'poolClosed' : 'connectionError';
         const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
-        this.emit(
+        this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, error)
         );
@@ -842,7 +850,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
       if (!this.destroyConnectionIfPerished(connection)) {
         this[kCheckedOut].add(connection);
-        this.emit(
+        this.emitAndLog(
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection)
         );
@@ -872,14 +880,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           }
         } else {
           if (err) {
-            this.emit(
+            this.emitAndLog(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
               // TODO(NODE-5192): Remove this cast
               new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
             );
           } else if (connection) {
             this[kCheckedOut].add(connection);
-            this.emit(
+            this.emitAndLog(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection)
             );

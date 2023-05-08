@@ -12,6 +12,7 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
+import type { MongoLoggableComponent, MongoLogger } from './mongo_logger';
 import type { Sort } from './sort';
 
 /** @internal */
@@ -397,8 +398,21 @@ export declare interface TypedEventEmitter<Events extends EventsDescription> ext
  * Typescript type safe event emitter
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export class TypedEventEmitter<Events extends EventsDescription> extends EventEmitter {}
+
+export class TypedEventEmitter<Events extends EventsDescription> extends EventEmitter {
+  /** @internal */
+  protected mongoLogger?: MongoLogger;
+  /** @internal */
+  protected component?: MongoLoggableComponent;
+  /** @internal */
+  protected emitAndLog<EventKey extends keyof Events>(
+    event: EventKey | symbol,
+    ...args: Parameters<Events[EventKey]>
+  ): void {
+    this.emit(event, ...args);
+    if (this.component) this.mongoLogger?.debug(this.component, args[0]);
+  }
+}
 
 /** @public */
 export class CancellationToken extends TypedEventEmitter<{ cancel(): void }> {}
