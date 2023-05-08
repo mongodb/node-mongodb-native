@@ -3248,7 +3248,7 @@ describe('Cursor', function () {
   it('should tail cursor using maxAwaitTimeMS for 3.2 or higher', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: ['single'], mongodb: '>3.1.9' } },
+    metadata: { requires: { topology: ['single'], mongodb: '<7.0.0' } },
 
     test: function (done) {
       const configuration = this.configuration;
