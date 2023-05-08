@@ -880,9 +880,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           }
         } else {
           if (err) {
-            // TODO(NODE-5192): Remove this cast
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+              // TODO(NODE-5192): Remove this cast
               new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
             );
           } else if (connection) {
