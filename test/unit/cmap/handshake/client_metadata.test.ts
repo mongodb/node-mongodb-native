@@ -38,17 +38,17 @@ describe('client metadata module', () => {
   });
 
   describe('getFAASEnv()', function () {
-    const tests: Array<[envVariable: string, envValue: string, provider: string]> = [
-      ['AWS_LAMBDA_RUNTIME_API', 'non_empty_string', 'aws.lambda'],
-      ['FUNCTIONS_WORKER_RUNTIME', 'non_empty_string', 'azure.func'],
-      ['K_SERVICE', 'non_empty_string', 'gcp.func'],
-      ['FUNCTION_NAME', 'non_empty_string', 'gcp.func'],
-      ['VERCEL', 'non_empty_string', 'vercel']
+    const tests: Array<[envVariable: string, provider: string]> = [
+      ['AWS_LAMBDA_RUNTIME_API', 'aws.lambda'],
+      ['FUNCTIONS_WORKER_RUNTIME', 'azure.func'],
+      ['K_SERVICE', 'gcp.func'],
+      ['FUNCTION_NAME', 'gcp.func'],
+      ['VERCEL', 'vercel']
     ];
-    for (const [envVariable, envValue, provider] of tests) {
+    for (const [envVariable, provider] of tests) {
       context(`when ${envVariable} is set to a non-empty string`, () => {
         before(() => {
-          process.env[envVariable] = envValue;
+          process.env[envVariable] = 'non_empty_string';
         });
         after(() => {
           delete process.env[envVariable];
