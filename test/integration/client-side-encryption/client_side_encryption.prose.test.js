@@ -1116,6 +1116,10 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       let client;
       // Setup
       beforeEach(async function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (!cryptSharedLibPath) {
+          this.currentTest.skip();
+        }
         // 1. Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
         clientEncrypted = this.configuration.newClient(
           {},
@@ -1138,13 +1142,13 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               //    "cryptSharedRequired": true
               // }
               extraOptions: {
-                ...getEncryptExtraOptions(),
                 mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
                 ],
-                cryptdSharedLibRequired: true
+                cryptdSharedLibRequired: true,
+                cryptSharedLibPath
               },
               schemaMap: externalSchema
             }
