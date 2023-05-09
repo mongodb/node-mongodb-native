@@ -34,7 +34,7 @@ export const LoggerLevel = Object.freeze({
  * @public
  * @deprecated The Legacy Logger is deprecated and will be removed in the next major version.
  */
-export type LoggerLevel = typeof LoggerLevel[keyof typeof LoggerLevel];
+export type LoggerLevel = (typeof LoggerLevel)[keyof typeof LoggerLevel];
 
 /**
  * @public

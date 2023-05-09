@@ -23,7 +23,7 @@ export const GSSAPICanonicalizationValue = Object.freeze({
 
 /** @public */
 export type GSSAPICanonicalizationValue =
-  typeof GSSAPICanonicalizationValue[keyof typeof GSSAPICanonicalizationValue];
+  (typeof GSSAPICanonicalizationValue)[keyof typeof GSSAPICanonicalizationValue];
 
 type MechanismProperties = {
   /** @deprecated use `CANONICALIZE_HOST_NAME` instead */

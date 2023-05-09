@@ -348,7 +348,7 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
 }
 
 const SOCKET_ERROR_EVENT_LIST = ['error', 'close', 'timeout', 'parseError'] as const;
-type ErrorHandlerEventName = typeof SOCKET_ERROR_EVENT_LIST[number] | 'cancel';
+type ErrorHandlerEventName = (typeof SOCKET_ERROR_EVENT_LIST)[number] | 'cancel';
 const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stream>) {

@@ -725,7 +725,7 @@ describe('Aggregation', function () {
       // is executed
       const command = db.command.bind(db);
       // Validate the command
-      db.command = function (...args: Parameters<typeof db['command']>) {
+      db.command = function (...args: Parameters<(typeof db)['command']>) {
         const c = args[0];
         expect(err).to.not.exist;
         expect(c.maxTimeMS).to.equal(1000);
@@ -741,7 +741,7 @@ describe('Aggregation', function () {
         expect(result.authors).to.eql(['bob']);
 
         // Validate the command
-        db.command = function (...args: Parameters<typeof db['command']>) {
+        db.command = function (...args: Parameters<(typeof db)['command']>) {
           const c = args[0];
           expect(err).to.not.exist;
           expect(c.maxTimeMS).to.equal(1000);
@@ -792,7 +792,7 @@ describe('Aggregation', function () {
 
     const command = db.command.bind(db);
 
-    db.command = function (...args: Parameters<typeof db['command']>) {
+    db.command = function (...args: Parameters<(typeof db)['command']>) {
       const c = args[0];
       expect(c).to.be.an('object');
       expect(c.comment).to.be.a('string').and.to.equal('comment');

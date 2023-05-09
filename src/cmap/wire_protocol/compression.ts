@@ -15,7 +15,7 @@ export const Compressor = Object.freeze({
 } as const);
 
 /** @public */
-export type Compressor = typeof Compressor[CompressorName];
+export type Compressor = (typeof Compressor)[CompressorName];
 
 /** @public */
 export type CompressorName = keyof typeof Compressor;

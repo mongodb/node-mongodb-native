@@ -188,7 +188,7 @@ export const BSONType = Object.freeze({
 } as const);
 
 /** @public */
-export type BSONType = typeof BSONType[keyof typeof BSONType];
+export type BSONType = (typeof BSONType)[keyof typeof BSONType];
 /** @public */
 export type BSONTypeAlias = keyof typeof BSONType;
 

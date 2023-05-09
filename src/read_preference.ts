@@ -16,7 +16,7 @@ export const ReadPreferenceMode = Object.freeze({
 } as const);
 
 /** @public */
-export type ReadPreferenceMode = typeof ReadPreferenceMode[keyof typeof ReadPreferenceMode];
+export type ReadPreferenceMode = (typeof ReadPreferenceMode)[keyof typeof ReadPreferenceMode];
 
 /** @public */
 export interface HedgeOptions {
