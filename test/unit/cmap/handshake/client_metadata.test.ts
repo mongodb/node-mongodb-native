@@ -37,7 +37,7 @@ describe('client metadata module', () => {
     });
   });
 
-  describe.only('getFAASEnv()', function () {
+  describe('getFAASEnv()', function () {
     const tests: Array<[envVariable: string, envValue: string, provider: string]> = [
       ['AWS_EXECUTION_ENV', 'AWS_Lambda_non_empty_string', 'aws.lambda'],
       ['AWS_LAMBDA_RUNTIME_API', 'non_empty_string', 'aws.lambda'],
