@@ -1165,10 +1165,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
 
       afterEach(async function () {
-        await clientEncrypted.close();
-        if (client) {
-          await client.close();
-        }
+        await clientEncrypted?.close();
+        await client?.close();
       });
 
       // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
