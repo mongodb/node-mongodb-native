@@ -39,7 +39,6 @@ describe('client metadata module', () => {
 
   describe('getFAASEnv()', function () {
     const tests: Array<[envVariable: string, envValue: string, provider: string]> = [
-      ['AWS_EXECUTION_ENV', 'AWS_Lambda_non_empty_string', 'aws.lambda'],
       ['AWS_LAMBDA_RUNTIME_API', 'non_empty_string', 'aws.lambda'],
       ['FUNCTIONS_WORKER_RUNTIME', 'non_empty_string', 'azure.func'],
       ['K_SERVICE', 'non_empty_string', 'gcp.func'],
@@ -47,7 +46,7 @@ describe('client metadata module', () => {
       ['VERCEL', 'non_empty_string', 'vercel']
     ];
     for (const [envVariable, envValue, provider] of tests) {
-      context(`when ${envVariable} is set to "${envValue}" in the environment`, () => {
+      context(`when ${envVariable} is set to a non-empty string`, () => {
         before(() => {
           process.env[envVariable] = envValue;
         });
@@ -57,8 +56,32 @@ describe('client metadata module', () => {
         it('determines the correct provider', () => {
           expect(getFAASEnv()?.get('name')).to.equal(provider);
         });
+
+        context(`when ${envVariable} is set to an empty string`, () => {
+          before(() => {
+            process.env[envVariable] = '';
+          });
+          after(() => {
+            delete process.env[envVariable];
+          });
+          it('returns null', () => {
+            expect(getFAASEnv()).to.be.null;
+          });
+        });
       });
     }
+
+    context('when AWS_EXECUTION_ENV starts with "AWS_Lambda_"', () => {
+      before(() => {
+        process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_correctStartString';
+      });
+      after(() => {
+        delete process.env.AWS_EXECUTION_ENV;
+      });
+      it('indicates the runtime is aws lambda', () => {
+        expect(getFAASEnv()?.get('name')).to.equal('aws.lambda');
+      });
+    });
 
     context('when AWS_EXECUTION_ENV does not start with "AWS_Lambda_"', () => {
       before(() => {
