@@ -27,14 +27,13 @@ import {
   ns,
   PoolClosedError as MongoPoolClosedError,
   setDifference,
-  Topology,
   TopologyDescription,
   TopologyOptions,
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../mongodb';
 import { ReplSetFixture } from '../tools/common';
 import { cleanup } from '../tools/mongodb-mock/index';
-import { getSymbolFrom } from '../tools/utils';
+import { getSymbolFrom, topologyWithPlaceholderClient } from '../tools/utils';
 
 describe('MongoErrors', () => {
   let errorClassesFromEntryPoint = Object.fromEntries(
@@ -303,7 +302,7 @@ describe('MongoErrors', () => {
 
     function makeAndConnectReplSet(cb) {
       let invoked = false;
-      const replSet = new Topology(
+      const replSet = topologyWithPlaceholderClient(
         [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
         { replicaSet: 'rs' } as TopologyOptions
       );

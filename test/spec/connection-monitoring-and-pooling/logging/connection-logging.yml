@@ -1,0 +1,220 @@
+description: "connection-logging"
+
+schemaVersion: "1.13"
+
+runOnRequirements:
+  - topologies:
+    - single # The number of log messages is different for each topology since there is a connection pool per host.
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+
+tests:
+  - description: "Create a client, run a command, and close the client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeLogMessages:
+                  connection: debug
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+      - name: close
+        object: *client
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checkout started"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection created"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection ready"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checked out"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checked in"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          #  The next three expected logs are for ending a session.
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checkout started"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checked out"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checked in"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection closed"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              reason: "Connection pool was closed"
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool closed"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  # This test exists to provide coverage of checkout failed and pool cleared events.
+  - description: "Connection checkout fails due to error establishing connection"
+    runOnRequirements:
+      - auth: true
+        minServerVersion: "4.0" # failCommand was added to mongod in 4.0
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  retryReads: false
+                  appname: &clientAppName clientAppName
+                  # use a high heartbeatFrequencyMS to avoid a successful monitor check marking the pool as
+                  # ready (and emitting another event) during the course of test execution.
+                  heartbeatFrequencyMS: 10000
+                observeLogMessages:
+                  connection: debug
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["saslContinue"]
+              closeConnection: true
+              appName: *clientAppName
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+        expectError:
+          isClientError: true
+
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool created"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool ready"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checkout started"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection created"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection pool cleared"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection closed"
+              driverConnectionId: { $$type: [int, long] }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              reason: "An error occurred while using the connection"
+              error: { $$exists: true }
+
+          - level: debug
+            component: connection
+            data:
+              message: "Connection checkout failed"
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+              reason: "An error occurred while trying to establish a new connection"
+              error: { $$exists: true }

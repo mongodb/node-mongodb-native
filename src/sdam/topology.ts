@@ -227,9 +227,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
-  constructor(seeds: string | string[] | HostAddress | HostAddress[], options: TopologyOptions) {
+  constructor(
+    client: MongoClient,
+    seeds: string | string[] | HostAddress | HostAddress[],
+    options: TopologyOptions
+  ) {
     super();
 
+    this.client = client;
     this.selectServerAsync = promisify(
       (
         selector: string | ReadPreference | ServerSelector,
@@ -787,7 +792,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
           MongoErrorLabel.InterruptInUseConnections
         );
 
-        server.s.pool.clear({ interruptInUseConnections });
+        server.pool.clear({ interruptInUseConnections });
       } else if (incomingServerDescription.error == null) {
         const newTopologyType = topology.s.description.type;
         const shouldMarkPoolReady =
@@ -795,7 +800,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
           (incomingServerDescription.type !== ServerType.Unknown &&
             newTopologyType === TopologyType.Single);
         if (shouldMarkPoolReady) {
-          server.s.pool.ready();
+          server.pool.ready();
         }
       }
     }

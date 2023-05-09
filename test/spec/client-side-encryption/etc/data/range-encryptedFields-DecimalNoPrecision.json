@@ -1,21 +1,23 @@
 {
-    "fields": [
-      {
-        "keyId": {
-          "$binary": {
-            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
-            "subType": "04"
-          }
+  "fields": [
+    {
+      "keyId": {
+        "$binary": {
+          "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+          "subType": "04"
+        }
+      },
+      "path": "encryptedDecimalNoPrecision",
+      "bsonType": "decimal",
+      "queries": {
+        "queryType": "rangePreview",
+        "contention": {
+          "$numberLong": "0"
         },
-        "path": "encryptedDecimalNoPrecision",
-        "bsonType": "decimal",
-        "queries": {
-          "queryType": "rangePreview",
-          "sparsity": {
-            "$numberInt": "1"
-          }
+        "sparsity": {
+          "$numberLong": "1"
         }
       }
-    ]
-  }
-  
+    }
+  ]
+}

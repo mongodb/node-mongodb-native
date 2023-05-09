@@ -1,5 +1,6 @@
 import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTestSuite, SkipDescription } from '../../tools/cmap_spec_runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 // These tests rely on a simple "pool.clear()" command, which is not sufficient
 // to properly clear the pool in LB mode, since it requires a serviceId to be passed in
@@ -28,15 +29,15 @@ const INTERRUPT_IN_USE_SKIPPED_TESTS: SkipDescription[] = [
   },
   {
     description:
-      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)',
+      'Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections = false)',
     skipIfCondition: 'always',
     skipReason:
       'NodeJS does not have a background thread responsible for managing connections, and so already checked in connections are not pruned when in-use connections are interrupted.'
   }
 ];
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration)', function () {
-  const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling');
+describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-format', function () {
+  const tests: CmapTest[] = loadSpecTests('connection-monitoring-and-pooling', 'cmap-format');
 
   runCmapTestSuite(tests, {
     testsToSkip: LB_SKIP_TESTS.concat(
@@ -50,5 +51,24 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration)', function 
       ],
       INTERRUPT_IN_USE_SKIPPED_TESTS
     )
+  });
+});
+
+describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
+  const tests = loadSpecTests('connection-monitoring-and-pooling', 'logging');
+
+  runUnifiedSuite(tests, test => {
+    if (
+      [
+        'waitQueueMultiple should be included in connection pool created message when specified',
+        'waitQueueSize should be included in connection pool created message when specified'
+      ].includes(test.description)
+    ) {
+      return 'not applicable: waitQueueSize not supported';
+    }
+    if (test.description === 'Connection checkout fails due to error establishing connection') {
+      return 'TODO(NODE-5230): unskip this once event ordering issue is resolved';
+    }
+    return false;
   });
 });
