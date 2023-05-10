@@ -71,6 +71,11 @@ describe('Handshake Prose Tests', function () {
         ['AWS_EXECUTION_ENV', 'AWS_Lambda_java8'],
         ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', 'big']
       ]
+    },
+    {
+      expectedProvider: undefined,
+      context: '8. Invalid - AWS_EXECUTION_ENV does not start with "AWS_Lambda_"',
+      env: [['AWS_EXECUTION_ENV', 'EC2']]
     }
   ];
 
