@@ -11,8 +11,11 @@
       "bsonType": "decimal",
       "queries": {
         "queryType": "rangePreview",
+        "contention": {
+          "$numberLong": "0"
+        },
         "sparsity": {
-          "$numberInt": "1"
+          "$numberLong": "1"
         },
         "min": {
           "$numberDecimal": "0.0"

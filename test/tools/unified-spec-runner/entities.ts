@@ -171,7 +171,7 @@ export class UnifiedMongoClient extends MongoClient {
         const transformedLog = {
           level: log.s,
           component: log.c,
-          data: { ...log, s: undefined, c: undefined }
+          data: { ...log }
         };
 
         this.buffer.push(transformedLog);
@@ -191,12 +191,12 @@ export class UnifiedMongoClient extends MongoClient {
       monitorCommands: true,
       [Symbol.for('@@mdb.skipPingOnConnect')]: true,
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
-      [Symbol.for('@@mdb.internalMongoLoggerConfig')]: componentSeverities,
+      [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       // @ts-expect-error TODO(NODE-4849): Remove this once we have support for mongodbLogPath
       mongodbLogPath: logCollector,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {})
-    });
+    } as any);
     this.logCollector = logCollector;
 
     this.ignoredEvents = [

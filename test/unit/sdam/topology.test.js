@@ -13,7 +13,7 @@ const { TopologyDescriptionChangedEvent } = require('../../mongodb');
 const { TopologyDescription } = require('../../mongodb');
 const { TopologyType } = require('../../mongodb');
 const { SrvPoller, SrvPollingEvent } = require('../../mongodb');
-const { getSymbolFrom } = require('../../tools/utils');
+const { getSymbolFrom, topologyWithPlaceholderClient } = require('../../tools/utils');
 const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../mongodb');
 
 describe('Topology (unit)', function () {
@@ -35,7 +35,7 @@ describe('Topology (unit)', function () {
     after(() => mock.cleanup());
 
     it('should correctly pass appname', function (done) {
-      const server = new Topology([`localhost:27017`], {
+      const server = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata({
           appName: 'My application name',
           driverInfo: {}
@@ -91,7 +91,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress());
+      const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -145,7 +145,10 @@ describe('Topology (unit)', function () {
         });
         context('when the topology originally only contained one server', function () {
           it('returns a MongoServerSelectionError', function (done) {
-            topology = new Topology([mockServer.hostAddress(), secondMockServer.hostAddress()]);
+            topology = topologyWithPlaceholderClient([
+              mockServer.hostAddress(),
+              secondMockServer.hostAddress()
+            ]);
 
             topology.connect(err => {
               expect(err).to.not.exist;
@@ -162,7 +165,10 @@ describe('Topology (unit)', function () {
         });
         context('when the topology originally contained more than one server', function () {
           it('returns a MongoServerSelectionError', function (done) {
-            topology = new Topology([mockServer.hostAddress(), secondMockServer.hostAddress()]);
+            topology = topologyWithPlaceholderClient([
+              mockServer.hostAddress(),
+              secondMockServer.hostAddress()
+            ]);
 
             topology.connect(err => {
               expect(err).to.not.exist;
@@ -192,7 +198,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      topology = new Topology(mockServer.hostAddress());
+      topology = topologyWithPlaceholderClient(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -228,7 +234,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = new Topology(mockServer.hostAddress());
+      const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -264,7 +270,7 @@ describe('Topology (unit)', function () {
         }
       });
 
-      topology = new Topology(mockServer.hostAddress());
+      topology = topologyWithPlaceholderClient(mockServer.hostAddress());
       topology.connect(err => {
         expect(err).to.not.exist;
 
@@ -329,7 +335,7 @@ describe('Topology (unit)', function () {
       let topology;
 
       beforeEach(() => {
-        topology = new Topology('', { srvHost: 'fakeHost' });
+        topology = topologyWithPlaceholderClient('', { srvHost: 'fakeHost' });
 
         expect(topology.s.detectSrvRecords).to.be.a('function');
         expect(topology.s.detectShardedTopology).to.be.a('function');
@@ -441,7 +447,7 @@ describe('Topology (unit)', function () {
     });
 
     it('should schedule monitoring if no suitable server is found', function (done) {
-      const topology = new Topology('someserver:27019');
+      const topology = topologyWithPlaceholderClient('someserver:27019');
       const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
       // satisfy the initial connect, then restore the original method
@@ -474,7 +480,7 @@ describe('Topology (unit)', function () {
     });
 
     it('should disallow selection when the topology is explicitly closed', function (done) {
-      const topology = new Topology('someserver:27019');
+      const topology = topologyWithPlaceholderClient('someserver:27019');
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
@@ -491,7 +497,7 @@ describe('Topology (unit)', function () {
 
     describe('waitQueue', function () {
       it('should process all wait queue members, including selection with errors', function (done) {
-        const topology = new Topology('someserver:27019');
+        const topology = topologyWithPlaceholderClient('someserver:27019');
         const selectServer = this.sinon
           .stub(Topology.prototype, 'selectServer')
           .callsFake(function (selector, options, callback) {

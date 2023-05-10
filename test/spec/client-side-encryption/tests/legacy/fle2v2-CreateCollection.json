@@ -22,9 +22,6 @@
           },
           "encryptedFieldsMap": {
             "default.encryptedCollection": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -65,7 +62,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -111,15 +108,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -153,21 +141,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -185,9 +158,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -243,12 +216,6 @@
                       "subType": "04",
                       "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
                     }
-                  },
-                  "queries": {
-                    "queryType": "equality",
-                    "contention": {
-                      "$numberLong": "0"
-                    }
                   }
                 }
               ]
@@ -280,7 +247,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -326,15 +293,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -368,21 +326,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -400,6 +343,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -408,12 +354,6 @@
                       "$binary": {
                         "subType": "04",
                         "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
-                      }
-                    },
-                    "queries": {
-                      "queryType": "equality",
-                      "contention": {
-                        "$numberLong": "0"
                       }
                     }
                   }
@@ -461,12 +401,6 @@
                       "subType": "04",
                       "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
                     }
-                  },
-                  "queries": {
-                    "queryType": "equality",
-                    "contention": {
-                      "$numberLong": "0"
-                    }
                   }
                 }
               ]
@@ -498,7 +432,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -535,14 +469,6 @@
           "object": "database",
           "arguments": {
             "collection": "encryptedCollection"
-          }
-        },
-        {
-          "name": "assertCollectionNotExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "enxcol_.encryptedCollection.ecc"
           }
         },
         {
@@ -584,15 +510,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -612,21 +529,6 @@
           "command_started_event": {
             "command": {
               "create": "enxcol_.encryptedCollection.esc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
               "clusteredIndex": {
                 "key": {
                   "_id": 1
@@ -667,12 +569,6 @@
                         "subType": "04",
                         "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
                       }
-                    },
-                    "queries": {
-                      "queryType": "equality",
-                      "contention": {
-                        "$numberLong": "0"
-                      }
                     }
                   }
                 ]
@@ -711,15 +607,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -732,235 +619,6 @@
               "drop": "encryptedCollection"
             },
             "command_name": "drop",
-            "database_name": "default"
-          }
-        }
-      ]
-    },
-    {
-      "description": "encryptedFieldsMap with cyclic entries does not loop",
-      "clientOptions": {
-        "autoEncryptOpts": {
-          "kmsProviders": {
-            "aws": {}
-          },
-          "encryptedFieldsMap": {
-            "default.encryptedCollection": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
-              "fields": [
-                {
-                  "path": "firstName",
-                  "bsonType": "string",
-                  "keyId": {
-                    "$binary": {
-                      "subType": "04",
-                      "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
-                    }
-                  }
-                }
-              ]
-            },
-            "default.encryptedCollection.esc": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
-              "fields": [
-                {
-                  "path": "firstName",
-                  "bsonType": "string",
-                  "keyId": {
-                    "$binary": {
-                      "subType": "04",
-                      "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
-                    }
-                  }
-                }
-              ]
-            }
-          }
-        }
-      },
-      "operations": [
-        {
-          "name": "dropCollection",
-          "object": "database",
-          "arguments": {
-            "collection": "encryptedCollection"
-          }
-        },
-        {
-          "name": "createCollection",
-          "object": "database",
-          "arguments": {
-            "collection": "encryptedCollection"
-          }
-        },
-        {
-          "name": "assertCollectionExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "enxcol_.encryptedCollection.esc"
-          }
-        },
-        {
-          "name": "assertCollectionExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "enxcol_.encryptedCollection.ecc"
-          }
-        },
-        {
-          "name": "assertCollectionExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "enxcol_.encryptedCollection.ecoc"
-          }
-        },
-        {
-          "name": "assertCollectionExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "encryptedCollection"
-          }
-        },
-        {
-          "name": "assertIndexExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
-            "collection": "encryptedCollection",
-            "index": "__safeContent___1"
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.esc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecoc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "encryptedCollection"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "create": "enxcol_.encryptedCollection.esc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "create": "enxcol_.encryptedCollection.ecoc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "create": "encryptedCollection",
-              "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
-                "fields": [
-                  {
-                    "path": "firstName",
-                    "bsonType": "string",
-                    "keyId": {
-                      "$binary": {
-                        "subType": "04",
-                        "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
-                      }
-                    }
-                  }
-                ]
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "createIndexes": "encryptedCollection",
-              "indexes": [
-                {
-                  "name": "__safeContent___1",
-                  "key": {
-                    "__safeContent__": 1
-                  }
-                }
-              ]
-            },
-            "command_name": "createIndexes",
             "database_name": "default"
           }
         }
@@ -975,9 +633,6 @@
           },
           "encryptedFieldsMap": {
             "default.encryptedCollection": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1060,9 +715,6 @@
           },
           "encryptedFieldsMap": {
             "default.encryptedCollection": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1103,7 +755,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -1149,15 +801,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -1191,21 +834,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -1223,9 +851,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1279,9 +907,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1303,9 +928,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1330,7 +952,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -1376,15 +998,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -1418,21 +1031,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -1450,9 +1048,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1511,9 +1109,6 @@
           },
           "encryptedFieldsMap": {
             "default.encryptedCollection": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1544,15 +1139,6 @@
           "command_started_event": {
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
             },
             "command_name": "drop",
             "database_name": "default"
@@ -1595,9 +1181,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1619,9 +1202,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1646,7 +1226,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -1684,9 +1264,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1715,14 +1292,6 @@
           "object": "testRunner",
           "arguments": {
             "database": "default",
-            "collection": "enxcol_.encryptedCollection.ecc"
-          }
-        },
-        {
-          "name": "assertCollectionNotExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
             "collection": "enxcol_.encryptedCollection.ecoc"
           }
         },
@@ -1740,15 +1309,6 @@
           "command_started_event": {
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
             },
             "command_name": "drop",
             "database_name": "default"
@@ -1790,21 +1350,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -1822,9 +1367,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1876,15 +1421,6 @@
           "command_started_event": {
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
             },
             "command_name": "drop",
             "database_name": "default"
@@ -1927,9 +1463,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1951,9 +1484,6 @@
           "arguments": {
             "collection": "encryptedCollection",
             "encryptedFields": {
-              "escCollection": "enxcol_.encryptedCollection.esc",
-              "eccCollection": "enxcol_.encryptedCollection.ecc",
-              "ecocCollection": "enxcol_.encryptedCollection.ecoc",
               "fields": [
                 {
                   "path": "firstName",
@@ -1978,7 +1508,7 @@
           }
         },
         {
-          "name": "assertCollectionExists",
+          "name": "assertCollectionNotExists",
           "object": "testRunner",
           "arguments": {
             "database": "default",
@@ -2030,14 +1560,6 @@
           "object": "testRunner",
           "arguments": {
             "database": "default",
-            "collection": "enxcol_.encryptedCollection.ecc"
-          }
-        },
-        {
-          "name": "assertCollectionNotExists",
-          "object": "testRunner",
-          "arguments": {
-            "database": "default",
             "collection": "enxcol_.encryptedCollection.ecoc"
           }
         },
@@ -2055,15 +1577,6 @@
           "command_started_event": {
             "command": {
               "drop": "enxcol_.encryptedCollection.esc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
             },
             "command_name": "drop",
             "database_name": "default"
@@ -2105,21 +1618,6 @@
         {
           "command_started_event": {
             "command": {
-              "create": "enxcol_.encryptedCollection.ecc",
-              "clusteredIndex": {
-                "key": {
-                  "_id": 1
-                },
-                "unique": true
-              }
-            },
-            "command_name": "create",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "create": "enxcol_.encryptedCollection.ecoc",
               "clusteredIndex": {
                 "key": {
@@ -2137,9 +1635,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": "enxcol_.encryptedCollection.esc",
-                "eccCollection": "enxcol_.encryptedCollection.ecc",
-                "ecocCollection": "enxcol_.encryptedCollection.ecoc",
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -2211,15 +1709,6 @@
         {
           "command_started_event": {
             "command": {
-              "drop": "enxcol_.encryptedCollection.ecc"
-            },
-            "command_name": "drop",
-            "database_name": "default"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "drop": "enxcol_.encryptedCollection.ecoc"
             },
             "command_name": "drop",
@@ -2233,6 +1722,53 @@
             },
             "command_name": "drop",
             "database_name": "default"
+          }
+        }
+      ]
+    },
+    {
+      "description": "encryptedFields are consulted for metadata collection names",
+      "clientOptions": {
+        "autoEncryptOpts": {
+          "kmsProviders": {
+            "aws": {}
+          },
+          "encryptedFieldsMap": {
+            "default.encryptedCollection": {
+              "escCollection": "invalid_esc_name",
+              "ecocCollection": "invalid_ecoc_name",
+              "fields": [
+                {
+                  "path": "firstName",
+                  "bsonType": "string",
+                  "keyId": {
+                    "$binary": {
+                      "subType": "04",
+                      "base64": "AAAAAAAAAAAAAAAAAAAAAA=="
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database",
+          "arguments": {
+            "collection": "encryptedCollection"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database",
+          "arguments": {
+            "collection": "encryptedCollection"
+          },
+          "result": {
+            "errorContains": "Encrypted State Collection name should follow"
           }
         }
       ]

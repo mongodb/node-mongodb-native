@@ -10,17 +10,17 @@ import {
   ServerDescription,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
-  ServerType,
-  Topology
+  ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
 
 class MockServer {
-  s: any;
+  pool: any;
   description: ServerDescription;
   constructor(options) {
-    this.s = { pool: { generation: 1 } };
+    this.pool = { generation: 1 };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
   }
@@ -46,7 +46,9 @@ describe('monitoring', function () {
     });
 
     // set `heartbeatFrequencyMS` to 250ms to force a quick monitoring check, and wait 500ms to validate below
-    const topology = new Topology(mockServer.hostAddress(), { heartbeatFrequencyMS: 250 } as any);
+    const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {
+      heartbeatFrequencyMS: 250
+    });
     topology.connect(err => {
       expect(err).to.not.exist;
 
@@ -88,7 +90,7 @@ describe('monitoring', function () {
       acceptConnections = true;
     }, 250);
 
-    const topology = new Topology(mockServer.hostAddress(), {});
+    const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
     topology.connect(err => {
       expect(err).to.not.exist;
       expect(topology).property('description').property('servers').to.have.length(1);

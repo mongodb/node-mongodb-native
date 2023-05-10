@@ -14,9 +14,6 @@
   "collection_name": "default",
   "data": [],
   "encrypted_fields": {
-    "escCollection": "enxcol_.default.esc",
-    "eccCollection": "enxcol_.default.ecc",
-    "ecocCollection": "enxcol_.default.ecoc",
     "fields": [
       {
         "keyId": {
@@ -25,7 +22,7 @@
             "subType": "04"
           }
         },
-        "path": "encryptedDouble",
+        "path": "encryptedDoubleNoPrecision",
         "bsonType": "double",
         "queries": {
           "queryType": "rangePreview",
@@ -94,7 +91,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -105,7 +102,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -115,7 +112,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$gt": {
                   "$numberDouble": "0.0"
                 }
@@ -125,7 +122,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -155,7 +152,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -166,7 +163,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -176,7 +173,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$gte": {
                   "$numberDouble": "0.0"
                 }
@@ -189,13 +186,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -225,7 +222,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -236,7 +233,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -246,7 +243,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$gt": {
                   "$numberDouble": "1.0"
                 }
@@ -279,7 +276,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -290,7 +287,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -300,7 +297,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$lt": {
                   "$numberDouble": "1.0"
                 }
@@ -310,7 +307,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -340,7 +337,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -351,7 +348,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -361,7 +358,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$lte": {
                   "$numberDouble": "1.0"
                 }
@@ -374,13 +371,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -410,7 +407,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -421,7 +418,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -431,7 +428,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$gt": {
                   "$numberDouble": "0.0"
                 },
@@ -444,7 +441,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -474,7 +471,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -485,7 +482,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -495,7 +492,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -503,7 +500,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -513,7 +510,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -521,7 +518,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -551,7 +548,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -562,7 +559,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -572,7 +569,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$in": [
                   {
                     "$numberDouble": "0.0"
@@ -584,7 +581,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -614,7 +611,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -625,7 +622,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -637,7 +634,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$gte": {
                       "$numberDouble": "0.0"
                     }
@@ -654,13 +651,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -690,7 +687,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -701,7 +698,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -713,7 +710,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$gt": {
                       "$numberDouble": "1.0"
                     }
@@ -748,7 +745,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -759,7 +756,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -771,7 +768,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$lt": {
                       "$numberDouble": "1.0"
                     }
@@ -783,7 +780,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -813,7 +810,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -824,7 +821,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -836,7 +833,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$lte": {
                       "$numberDouble": "1.0"
                     }
@@ -853,13 +850,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -889,7 +886,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -900,7 +897,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -912,7 +909,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$gt": {
                       "$numberDouble": "0.0"
                     },
@@ -927,7 +924,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -957,7 +954,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -968,7 +965,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -980,7 +977,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$numberDouble": "0.0"
                   }
                 }
@@ -990,7 +987,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -1002,7 +999,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$numberDouble": "1.0"
                   }
                 }
@@ -1012,7 +1009,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -1042,7 +1039,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -1053,7 +1050,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "1.0"
               }
             }
@@ -1065,7 +1062,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDouble": {
+                  "encryptedDoubleNoPrecision": {
                     "$in": [
                       {
                         "$numberDouble": "0.0"
@@ -1079,7 +1076,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberDouble": "0.0"
               }
             }
@@ -1109,7 +1106,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$numberInt": "0"
               }
             }
@@ -1141,7 +1138,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDouble": {
+              "encryptedDoubleNoPrecision": {
                 "$gte": {
                   "$numberInt": "0"
                 }

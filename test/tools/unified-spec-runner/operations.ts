@@ -184,7 +184,7 @@ operations.set('assertNumberConnectionsCheckedOut', async ({ entities, operation
   const client = entities.getEntity('client', operation.arguments!.client);
   const servers = Array.from(client.topology!.s.servers.values());
   const checkedOutConnections = servers.reduce((count, server) => {
-    const pool = server.s.pool;
+    const pool = server.pool;
     return count + pool.currentCheckedOutCount;
   }, 0);
 
@@ -202,13 +202,27 @@ operations.set('bulkWrite', async ({ entities, operation }) => {
 // type (stream/cursor) which will also throw an exception even when
 // telling getEntity() to ignore checking existence.
 operations.set('close', async ({ entities, operation }) => {
+  /* eslint-disable no-empty */
   try {
     const cursor = entities.getEntity('cursor', operation.object);
     await cursor.close();
-  } catch (e) {
+    return;
+  } catch {}
+
+  try {
     const changeStream = entities.getEntity('stream', operation.object);
     await changeStream.close();
-  }
+    return;
+  } catch {}
+
+  try {
+    const client = entities.getEntity('client', operation.object);
+    await client.close();
+    return;
+  } catch {}
+  /* eslint-enable no-empty */
+
+  throw new Error(`No closable entity with key ${operation.object}`);
 });
 
 operations.set('commitTransaction', async ({ entities, operation }) => {
