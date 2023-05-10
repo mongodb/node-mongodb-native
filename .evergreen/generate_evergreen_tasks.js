@@ -429,10 +429,8 @@ for (const {
   });
 
   for (const NODE_LTS_VERSION of testedNodeVersions) {
-    const nodeVersionNumber = NODE_LTS_VERSION;
-    const nodeLtsDisplayName =
-      nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
-    const name = `${osName}-Node${nodeVersionNumber}`;
+    const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
+    const name = `${osName}-Node${NODE_LTS_VERSION}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_VERSION: NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
@@ -463,7 +461,7 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${NODE_VERSIONS[NODE_VERSIONS.length -1]}`,
+  display_name: `MacOS 11 Node${LATEST_LTS}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
