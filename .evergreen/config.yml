@@ -3352,7 +3352,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-NODE_LTS_VERSION
+  - name: rhel80-large-Node20
     display_name: rhel8 Node20
     run_on: rhel80-large
     expansions:
@@ -3565,7 +3565,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-NODE_LTS_VERSION
+  - name: windows-64-vs2019-Node20
     display_name: Windows (VS2019) Node20
     run_on: windows-64-vs2019-large
     expansions:

@@ -432,7 +432,7 @@ for (const {
   for (const NODE_LTS_VERSION of testedNodeVersions) {
     const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
-    const name = `${osName}-${NODE_LTS_VERSION >= 20 ? `${NODE_LTS_VERSION}` : nodeLTSCodeName}`;
+    const name = `${osName}-${NODE_LTS_VERSION >= 20 ? `Node${NODE_LTS_VERSION}` : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
