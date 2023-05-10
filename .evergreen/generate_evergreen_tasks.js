@@ -429,15 +429,13 @@ for (const {
     return !isAWSTask && !isSkippedTaskOnWindows;
   });
 
-  for (const NODE_LTS_NAME of testedNodeVersions) {
-    const nodeVersionNumber = versions.find(
-      ({ codeName }) => codeName === NODE_LTS_NAME
-    ).versionNumber;
+  for (const NODE_LTS_VERSION of testedNodeVersions) {
+    const nodeVersionNumber = NODE_LTS_VERSION;
     const nodeLtsDisplayName =
       nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
-    const name = `${osName}-${NODE_LTS_NAME}`;
+    const name = `${osName}-Node${nodeVersionNumber}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_NAME };
+    const expansions = { NODE_LTS_VERSION: NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
@@ -453,7 +451,7 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_NAME: 'latest' },
+      expansions: { NODE_LTS_VERSION: 'latest' },
       tasks: tasks.map(({ name }) => name)
     };
     if (clientEncryption) {
@@ -466,11 +464,10 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${versions.find(version => version.codeName === LATEST_LTS).versionNumber
-    }`,
+  display_name: `MacOS 11 Node${versions[versions.length -1].versionNumber}`,
   run_on: 'macos-1100',
   expansions: {
-    NODE_LTS_NAME: LATEST_LTS,
+    NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
   tasks: ['test-rapid-server']
@@ -486,7 +483,7 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         { func: 'run unit tests' }
@@ -499,7 +496,7 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         { func: 'run lint checks' }
@@ -520,7 +517,7 @@ function* makeTypescriptTasks() {
           {
             func: 'install dependencies',
             vars: {
-              NODE_LTS_NAME: LOWEST_LTS
+              NODE_LTS_VERSION: LOWEST_LTS
             }
           },
           {
@@ -540,7 +537,7 @@ function* makeTypescriptTasks() {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         {
@@ -559,7 +556,7 @@ function* makeTypescriptTasks() {
       {
         func: 'install dependencies',
         vars: {
-          NODE_LTS_NAME: LOWEST_LTS
+          NODE_LTS_VERSION: LOWEST_LTS
         }
       },
       { func: 'run typescript next' }
@@ -598,7 +595,7 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: 'ubuntu1804-large',
   expansions: {
-    NODE_LTS_NAME: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS
   },
   tasks: AWS_AUTH_TASKS
 });
@@ -616,7 +613,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         {
@@ -665,7 +662,7 @@ BUILD_VARIANTS.push({
   display_name: 'Serverless Test',
   run_on: DEFAULT_OS,
   expansions: {
-    NODE_LTS_NAME: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS
   },
   tasks: ['serverless_task_group']
 });
@@ -706,7 +703,7 @@ BUILD_VARIANTS.push({
 for (const variant of BUILD_VARIANTS.filter(
   variant =>
     variant.expansions &&
-    ['gallium', 'hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+    [14, 16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
@@ -715,14 +712,14 @@ for (const variant of BUILD_VARIANTS.filter(
 
 // TODO(NODE-5021): Drop support for Kerberos 1.x on in 6.0.0
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-auth-kerberos'].includes(name));
 }
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
 }

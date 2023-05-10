@@ -17,7 +17,7 @@ const mongoshTestTasks = scopes.map(packageName => {
       {
         func: 'install dependencies',
         vars: {
-          NODE_LTS_NAME: 'gallium'
+          NODE_LTS_VERSION: 16
         }
       },
       {
@@ -37,7 +37,7 @@ const compileTask = {
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'gallium'
+        NODE_LTS_VERSION: 16
       }
     },
     { func: 'compile mongosh' }
@@ -51,7 +51,7 @@ const scopeVerificationTask = {
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: 'gallium'
+        NODE_LTS_VERSION: 16
       }
     },
     { func: 'run mongosh package scope test' }

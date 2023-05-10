@@ -436,7 +436,7 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
   install aws-credential-providers:
     - command: shell.exec
@@ -469,7 +469,7 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
   run socks5 tests:
@@ -503,7 +503,7 @@ functions:
 
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
 
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           export MONGODB_URI="${MONGODB_URI}"
 
@@ -533,7 +533,7 @@ functions:
           export KRB5_NEW_KEYTAB='${gssapi_auth_new_keytab_base64}'
           export KRB5_PRINCIPAL='${gssapi_auth_principal}'
           export MONGODB_URI='${gssapi_auth_mongodb_uri}'
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
   run ldap tests:
@@ -544,7 +544,7 @@ functions:
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGODB_URI='${plain_auth_mongodb_uri}'
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
   run data lake tests:
@@ -555,7 +555,7 @@ functions:
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGODB_URI='mongodb://mhuser:pencil@localhost'
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
   run tls tests:
@@ -565,7 +565,7 @@ functions:
         working_dir: src
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_NAME=${NODE_LTS_NAME}
+          export NODE_LTS_VERSION=${NODE_LTS_VERSION}
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
           export SSL_CA_FILE="${SSL_CA_FILE}"
           export SSL_KEY_FILE="${SSL_KEY_FILE}"
@@ -1045,7 +1045,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 18
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2485,7 +2485,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: run unit tests
   - name: run-lint-checks
     tags:
@@ -2493,7 +2493,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: run lint checks
   - name: check-types-typescript-next
     tags:
@@ -2501,7 +2501,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: check types
         vars:
           TS_VERSION: next
@@ -2511,7 +2511,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: compile driver
         vars:
           TS_VERSION: current
@@ -2521,7 +2521,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: check types
         vars:
           TS_VERSION: current
@@ -2531,7 +2531,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: check types
         vars:
           TS_VERSION: 4.1.6
@@ -2550,7 +2550,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2565,7 +2565,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2580,7 +2580,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2595,7 +2595,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2610,7 +2610,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2625,7 +2625,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: fermium
+          NODE_LTS_VERSION: 14
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -3010,7 +3010,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: browser-repl
@@ -3021,7 +3021,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: browser-runtime-electron
@@ -3032,7 +3032,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: cli-repl
@@ -3043,7 +3043,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: connectivity-tests
@@ -3054,7 +3054,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: mongosh
@@ -3065,7 +3065,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: node-runtime-worker-thread
@@ -3076,7 +3076,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh tests for package
         vars:
           mongosh_package: service-provider-server
@@ -3086,7 +3086,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: compile mongosh
   - name: verify-mongosh-scopes
     tags:
@@ -3094,7 +3094,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: gallium
+          NODE_LTS_VERSION: 16
       - func: run mongosh package scope test
 task_groups:
   - name: serverless_task_group
@@ -3208,11 +3208,11 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - run-spec-benchmark-tests
-  - name: rhel80-large-fermium
+  - name: rhel80-large-Node14
     display_name: rhel8 Node14
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_VERSION: 14
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -3251,18 +3251,16 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-gallium
+  - name: rhel80-large-Node16
     display_name: rhel8 Node16
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: gallium
+      NODE_LTS_VERSION: 16
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -3306,11 +3304,11 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-hydrogen
+  - name: rhel80-large-Node18
     display_name: rhel8 Node18
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: hydrogen
+      NODE_LTS_VERSION: 18
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -3354,11 +3352,11 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-iron
+  - name: rhel80-large-Node20
     display_name: rhel8 Node20
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: iron
+      NODE_LTS_VERSION: 20
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -3397,8 +3395,6 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -3408,7 +3404,7 @@ buildvariants:
     display_name: rhel8 Node Latest
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: latest
+      NODE_LTS_VERSION: latest
       CLIENT_ENCRYPTION: true
     tasks:
       - test-latest-server
@@ -3445,16 +3441,18 @@ buildvariants:
       - test-auth-oidc
       - test-socks5-csfle
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-fermium
+  - name: windows-64-vs2019-Node14
     display_name: Windows (VS2019) Node14
     run_on: windows-64-vs2019-large
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_VERSION: 14
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3484,18 +3482,16 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-gallium
+  - name: windows-64-vs2019-Node16
     display_name: Windows (VS2019) Node16
     run_on: windows-64-vs2019-large
     expansions:
-      NODE_LTS_NAME: gallium
+      NODE_LTS_VERSION: 16
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3530,11 +3526,11 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-hydrogen
+  - name: windows-64-vs2019-Node18
     display_name: Windows (VS2019) Node18
     run_on: windows-64-vs2019-large
     expansions:
-      NODE_LTS_NAME: hydrogen
+      NODE_LTS_VERSION: 18
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3569,11 +3565,11 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-iron
+  - name: windows-64-vs2019-Node20
     display_name: Windows (VS2019) Node20
     run_on: windows-64-vs2019-large
     expansions:
-      NODE_LTS_NAME: iron
+      NODE_LTS_VERSION: 20
     tasks:
       - test-latest-server
       - test-latest-replica_set
@@ -3603,8 +3599,6 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -3614,7 +3608,7 @@ buildvariants:
     display_name: MacOS 11 Node20
     run_on: macos-1100
     expansions:
-      NODE_LTS_NAME: iron
+      NODE_LTS_VERSION: 20
       CLIENT_ENCRYPTION: true
     tasks:
       - test-rapid-server
@@ -3650,7 +3644,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-large
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_VERSION: 14
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -3742,7 +3736,7 @@ buildvariants:
     display_name: Serverless Test
     run_on: rhel80-large
     expansions:
-      NODE_LTS_NAME: fermium
+      NODE_LTS_VERSION: 14
     tasks:
       - serverless_task_group
   - name: rhel8-test-gcp-kms

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
-NODE_LTS_NAME=${NODE_LTS_NAME:-fermium}
+NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
@@ -28,11 +28,12 @@ curl "${CURL_FLAGS[@]}" "https://nodejs.org/dist/index.tab" --output node_index.
 
 while IFS=$'\t' read -r -a row; do
   node_index_version="${row[0]}"
+  node_index_major_version=$(echo $node_index_version | sed -E 's/^v([0-9]+).*$/\1/')
   node_index_date="${row[1]}"
   node_index_lts="${row[9]}"
   [[ "$node_index_version" = "version" ]] && continue # skip tsv header
-  [[ "$NODE_LTS_NAME" = "latest" ]] && break # first line is latest
-  [[ "$NODE_LTS_NAME" = "$node_index_lts" ]] && break # case insensitive compare
+  [[ "$NODE_LTS_VERSION" = "latest" ]] && break # first line is latest
+  [[ "$NODE_LTS_VERSION" = "$node_index_major_version" ]] && break # case insensitive compare
 done < node_index.tab
 
 if [[ "$OS" = "Windows_NT" ]]; then

@@ -5,7 +5,7 @@ const versions = [
   { codeName: 'hydrogen', versionNumber: 18 },
   { codeName: 'iron', versionNumber: 20 }
 ];
-const NODE_VERSIONS = versions.map(({ codeName }) => codeName);
+const NODE_VERSIONS = versions.map(({ versionNumber }) => versionNumber);
 NODE_VERSIONS.sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
