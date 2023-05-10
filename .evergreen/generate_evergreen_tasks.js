@@ -432,7 +432,7 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-Node${NODE_LTS_VERSION}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION: NODE_LTS_VERSION };
+    const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
