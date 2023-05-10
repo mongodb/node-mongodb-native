@@ -4,7 +4,6 @@ const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
   MONGODB_VERSIONS,
-  versions,
   NODE_VERSIONS,
   LOWEST_LTS,
   LATEST_LTS,
@@ -464,7 +463,7 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: 'macos-1100',
-  display_name: `MacOS 11 Node${versions[versions.length -1].versionNumber}`,
+  display_name: `MacOS 11 Node${NODE_VERSIONS[NODE_VERSIONS.length -1]}`,
   run_on: 'macos-1100',
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
