@@ -1118,7 +1118,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       beforeEach(async function () {
         const { cryptSharedLibPath } = getEncryptExtraOptions();
         if (!cryptSharedLibPath) {
-          this.skip();
+          this.skip('Skipped because CRYPT_SHARED_LIB_PATH is missing');
         }
         // 1. Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
         clientEncrypted = this.configuration.newClient(
