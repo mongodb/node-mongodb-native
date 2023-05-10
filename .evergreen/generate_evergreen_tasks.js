@@ -4,6 +4,7 @@ const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
   MONGODB_VERSIONS,
+  versions,
   NODE_VERSIONS,
   LOWEST_LTS,
   LATEST_LTS,
@@ -429,8 +430,9 @@ for (const {
   });
 
   for (const NODE_LTS_VERSION of testedNodeVersions) {
+    const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
-    const name = `${osName}-Node${NODE_LTS_VERSION}`;
+    const name = `${osName}-${NODE_LTS_VERSION >= 20 ? `${NODE_LTS_VERSION}` : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
     const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);

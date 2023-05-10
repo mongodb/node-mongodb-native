@@ -1,10 +1,11 @@
 const MONGODB_VERSIONS = ['latest', 'rapid', '6.0', '5.0', '4.4', '4.2', '4.0', '3.6'];
-const NODE_VERSIONS = [
-  14,
-  16,
-  18,
-  20
+const versions = [
+  { codeName: 'fermium', versionNumber: 14 },
+  { codeName: 'gallium', versionNumber: 16 },
+  { codeName: 'hydrogen', versionNumber: 18 },
+  { codeName: 'iron', versionNumber: 20 }
 ];
+const NODE_VERSIONS = versions.map(({ versionNumber }) => versionNumber).sort();
 const LOWEST_LTS = NODE_VERSIONS[0];
 const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
 
@@ -16,6 +17,7 @@ const DEFAULT_OS = 'rhel80-large';
 
 module.exports = {
   MONGODB_VERSIONS,
+  versions,
   NODE_VERSIONS,
   LOWEST_LTS,
   LATEST_LTS,

@@ -3208,7 +3208,7 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - run-spec-benchmark-tests
-  - name: rhel80-large-Node14
+  - name: rhel80-large-fermium
     display_name: rhel8 Node14
     run_on: rhel80-large
     expansions:
@@ -3256,7 +3256,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-Node16
+  - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
     expansions:
@@ -3304,7 +3304,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-Node18
+  - name: rhel80-large-hydrogen
     display_name: rhel8 Node18
     run_on: rhel80-large
     expansions:
@@ -3352,7 +3352,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel80-large-Node20
+  - name: rhel80-large-NODE_LTS_VERSION
     display_name: rhel8 Node20
     run_on: rhel80-large
     expansions:
@@ -3448,7 +3448,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node14
+  - name: windows-64-vs2019-fermium
     display_name: Windows (VS2019) Node14
     run_on: windows-64-vs2019-large
     expansions:
@@ -3487,7 +3487,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node16
+  - name: windows-64-vs2019-gallium
     display_name: Windows (VS2019) Node16
     run_on: windows-64-vs2019-large
     expansions:
@@ -3526,7 +3526,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node18
+  - name: windows-64-vs2019-hydrogen
     display_name: Windows (VS2019) Node18
     run_on: windows-64-vs2019-large
     expansions:
@@ -3565,7 +3565,7 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node20
+  - name: windows-64-vs2019-NODE_LTS_VERSION
     display_name: Windows (VS2019) Node20
     run_on: windows-64-vs2019-large
     expansions:
