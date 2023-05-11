@@ -9,10 +9,14 @@ const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
-const { MongoServerError } = require('../../mongodb');
+const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
+
+const {
+  externalSchema
+} = require('../../spec/client-side-encryption/external/external-schema.json');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -1106,6 +1110,80 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
     it.skip('Via bypassAutoEncryption', () => {}).skipReason =
       'TODO(NODE-2422): Implement "Bypass spawning mongocryptd" tests';
+
+    describe('via loading shared library', function () {
+      let clientEncrypted;
+      let client;
+      beforeEach(function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (!cryptSharedLibPath) {
+          this.currentTest.skipReason =
+            'test requires that the shared library is present, but CRYPT_SHARED_LIB_PATH is unset.';
+          this.skip();
+        }
+      });
+
+      // Setup
+      beforeEach(async function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        // 1. Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
+        clientEncrypted = this.configuration.newClient(
+          {},
+          {
+            // 2. Configure the required options. use the `local` KMS provider as follows:
+            // ```javascript
+            // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
+            // ```
+            // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+            // configure with `client_encrypted` to use the schema `external/external-schema.json` for
+            // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
+            autoEncryption: {
+              keyVaultNamespace,
+              kmsProviders: { local: { key: LOCAL_KEY } },
+              // Configure the following `extraOptions`
+              // {
+              //    "mongocryptdURI": "mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000",
+              //    "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"],
+              //    "cryptSharedLibPath": "<path to shared library>",
+              //    "cryptSharedRequired": true
+              // }
+              extraOptions: {
+                mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
+                mongocryptdSpawnArgs: [
+                  '--pidfilepath=bypass-spawning-mongocryptd.pid',
+                  '--port=27021'
+                ],
+                cryptdSharedLibRequired: true,
+                cryptSharedLibPath
+              },
+              schemaMap: externalSchema
+            }
+          }
+        );
+        // 3. Use `client_encrypted` to insert the document `{"unencrypted": "test"}` into `db.coll`
+        // expect this to succeed
+        await clientEncrypted.connect();
+        const insertResult = await clientEncrypted
+          .db(dataDbName)
+          .collection(dataCollName)
+          .insertOne({ unencrypted: 'test' });
+        expect(insertResult).to.have.property('insertedId');
+      });
+
+      afterEach(async function () {
+        await clientEncrypted?.close();
+        await client?.close();
+      });
+
+      // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
+      // whatever was passed via `--port` with serverSelectionTimeoutMS=1000.) Run a handshake
+      // command and ensure it fails with a server selection timeout
+      it('should not spawn mongocryptd', metadata, async function () {
+        client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
+        const error = await client.connect().catch(e => e);
+        expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
+      });
+    });
   });
 
   describe('Deadlock tests', () => {
