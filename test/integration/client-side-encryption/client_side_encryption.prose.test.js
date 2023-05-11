@@ -1246,13 +1246,23 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     describe('via loading shared library', function () {
       let clientEncrypted;
       let client;
+      beforeEach(function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (!cryptSharedLibPath) {
+          this.currentTest.skipReason =
+            'test requires that the shared library is present, but CRYPT_SHARED_LIB_PATH is unset.';
+          this.skip();
+        }
+      });
+
       // Setup
       beforeEach(async function () {
-        // Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        // 1. Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
         clientEncrypted = this.configuration.newClient(
           {},
           {
-            // Configure the required options. use the `local` KMS provider as follows:
+            // 2. Configure the required options. use the `local` KMS provider as follows:
             // ```javascript
             // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
             // ```
@@ -1262,7 +1272,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             autoEncryption: {
               keyVaultNamespace,
               kmsProviders: { local: { key: LOCAL_KEY } },
-              schemaMap: { dataNamespace: externalSchema },
               // Configure the following `extraOptions`
               // {
               //    "mongocryptdURI": "mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000",
@@ -1271,18 +1280,19 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
               //    "cryptSharedRequired": true
               // }
               extraOptions: {
-                ...getEncryptExtraOptions(), // sets cryptSharedLibPath if it exists
                 mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
                 mongocryptdSpawnArgs: [
                   '--pidfilepath=bypass-spawning-mongocryptd.pid',
                   '--port=27021'
                 ],
-                cryptdSharedLibRequired: true
-              }
+                cryptdSharedLibRequired: true,
+                cryptSharedLibPath
+              },
+              schemaMap: externalSchema
             }
           }
         );
-        // Use `client_encrypted` to insert the document `{"unencrypted": "test"}` into `db.coll`
+        // 3. Use `client_encrypted` to insert the document `{"unencrypted": "test"}` into `db.coll`
         // expect this to succeed
         await clientEncrypted.connect();
         const insertResult = await clientEncrypted
@@ -1293,20 +1303,17 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       });
 
       afterEach(async function () {
-        if (clientEncrypted) await clientEncrypted.close();
-        if (client) await client.close();
+        await clientEncrypted?.close();
+        await client?.close();
       });
 
-      // Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
+      // 4. Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021 (or
       // whatever was passed via `--port` with serverSelectionTimeoutMS=1000.) Run a handshake
       // command and ensure it fails with a server selection timeout
       it('should not spawn mongocryptd', metadata, async function () {
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
-        const error = await client.connect().then(
-          () => null,
-          err => err
-        );
-        expect(error).to.be.instanceOf(MongoServerSelectionError);
+        const error = await client.connect().catch(e => e);
+        expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
       });
     });
   });

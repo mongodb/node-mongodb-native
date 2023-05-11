@@ -38,8 +38,7 @@ describe('client metadata module', () => {
   });
 
   describe('getFAASEnv()', function () {
-    const tests: Array<[string, string]> = [
-      ['AWS_EXECUTION_ENV', 'aws.lambda'],
+    const tests: Array<[envVariable: string, provider: string]> = [
       ['AWS_LAMBDA_RUNTIME_API', 'aws.lambda'],
       ['FUNCTIONS_WORKER_RUNTIME', 'azure.func'],
       ['K_SERVICE', 'gcp.func'],
@@ -47,9 +46,9 @@ describe('client metadata module', () => {
       ['VERCEL', 'vercel']
     ];
     for (const [envVariable, provider] of tests) {
-      context(`when ${envVariable} is in the environment`, () => {
+      context(`when ${envVariable} is set to a non-empty string`, () => {
         before(() => {
-          process.env[envVariable] = 'non empty string';
+          process.env[envVariable] = 'non_empty_string';
         });
         after(() => {
           delete process.env[envVariable];
@@ -57,8 +56,44 @@ describe('client metadata module', () => {
         it('determines the correct provider', () => {
           expect(getFAASEnv()?.get('name')).to.equal(provider);
         });
+
+        context(`when ${envVariable} is set to an empty string`, () => {
+          before(() => {
+            process.env[envVariable] = '';
+          });
+          after(() => {
+            delete process.env[envVariable];
+          });
+          it('returns null', () => {
+            expect(getFAASEnv()).to.be.null;
+          });
+        });
       });
     }
+
+    context('when AWS_EXECUTION_ENV starts with "AWS_Lambda_"', () => {
+      before(() => {
+        process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_correctStartString';
+      });
+      after(() => {
+        delete process.env.AWS_EXECUTION_ENV;
+      });
+      it('indicates the runtime is aws lambda', () => {
+        expect(getFAASEnv()?.get('name')).to.equal('aws.lambda');
+      });
+    });
+
+    context('when AWS_EXECUTION_ENV does not start with "AWS_Lambda_"', () => {
+      before(() => {
+        process.env.AWS_EXECUTION_ENV = 'AWS_LambdaIncorrectStartString';
+      });
+      after(() => {
+        delete process.env.AWS_EXECUTION_ENV;
+      });
+      it('returns null', () => {
+        expect(getFAASEnv()).to.be.null;
+      });
+    });
 
     context('when there is no FAAS provider data in the env', () => {
       it('returns null', () => {
@@ -70,9 +105,9 @@ describe('client metadata module', () => {
       context('unrelated environments', () => {
         before(() => {
           // aws
-          process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+          process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_non_empty_string';
           // azure
-          process.env.FUNCTIONS_WORKER_RUNTIME = 'non-empty-string';
+          process.env.FUNCTIONS_WORKER_RUNTIME = 'non_empty_string';
         });
         after(() => {
           delete process.env.AWS_EXECUTION_ENV;
@@ -86,10 +121,10 @@ describe('client metadata module', () => {
       context('vercel and aws which share env variables', () => {
         before(() => {
           // vercel
-          process.env.VERCEL = 'non-empty-string';
+          process.env.VERCEL = 'non_empty_string';
           // aws
-          process.env.AWS_EXECUTION_ENV = 'non-empty-string';
-          process.env.AWS_LAMBDA_RUNTIME_API = 'non-empty-string';
+          process.env.AWS_EXECUTION_ENV = 'non_empty_string';
+          process.env.AWS_LAMBDA_RUNTIME_API = 'non_empty_string';
         });
         after(() => {
           delete process.env.VERCEL;
@@ -384,7 +419,7 @@ describe('client metadata module', () => {
       aws: [
         {
           context: 'no additional metadata',
-          env: [['AWS_EXECUTION_ENV', 'non-empty string']],
+          env: [['AWS_EXECUTION_ENV', 'AWS_Lambda_non_empty_string']],
           outcome: {
             name: 'aws.lambda'
           }
@@ -392,7 +427,7 @@ describe('client metadata module', () => {
         {
           context: 'AWS_REGION provided',
           env: [
-            ['AWS_EXECUTION_ENV', 'non-empty string'],
+            ['AWS_EXECUTION_ENV', 'AWS_Lambda_non_empty_string'],
             ['AWS_REGION', 'non-null']
           ],
           outcome: {
@@ -403,7 +438,7 @@ describe('client metadata module', () => {
         {
           context: 'AWS_LAMBDA_FUNCTION_MEMORY_SIZE provided',
           env: [
-            ['AWS_EXECUTION_ENV', 'non-empty string'],
+            ['AWS_EXECUTION_ENV', 'AWS_Lambda_non_empty_string'],
             ['AWS_LAMBDA_FUNCTION_MEMORY_SIZE', '3']
           ],
           outcome: {
@@ -507,7 +542,7 @@ describe('client metadata module', () => {
 
     context('when a numeric FAAS env variable is not numerically parsable', () => {
       before(() => {
-        process.env.AWS_EXECUTION_ENV = 'non-empty-string';
+        process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_non_empty_string';
         process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE = '123not numeric';
       });
 
@@ -526,7 +561,7 @@ describe('client metadata module', () => {
     context('when faas region is too large', () => {
       beforeEach('1. Omit fields from `env` except `env.name`.', () => {
         sinon.stub(process, 'env').get(() => ({
-          AWS_EXECUTION_ENV: 'iLoveJavaScript',
+          AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
           AWS_REGION: 'a'.repeat(512)
         }));
       });
@@ -543,7 +578,7 @@ describe('client metadata module', () => {
       context('release too large', () => {
         beforeEach('2. Omit fields from `os` except `os.type`.', () => {
           sinon.stub(process, 'env').get(() => ({
-            AWS_EXECUTION_ENV: 'iLoveJavaScript',
+            AWS_EXECUTION_ENV: 'AWS_Lambda_iLoveJavaScript',
             AWS_REGION: 'abc'
           }));
           sinon.stub(os, 'release').returns('a'.repeat(512));

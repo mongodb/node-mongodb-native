@@ -1,6 +1,6 @@
 version: 1
 style: unit
-description: Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections: false)
+description: Pool clear SHOULD schedule the next background thread run immediately (interruptInUseConnections = false)
 poolOptions:
   # ensure it's not involved by default
   backgroundThreadIntervalMS: 10000

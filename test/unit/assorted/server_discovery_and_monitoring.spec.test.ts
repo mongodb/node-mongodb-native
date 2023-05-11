@@ -465,7 +465,7 @@ function assertTopologyDescriptionOutcomeExpectations(
       const expectedPool = expectedServer.pool;
       const actualServer = topology.s.servers.get(serverName);
       if (actualServer == null) expect.fail(`Must have server defined for ${serverName}`);
-      const actualPoolGeneration = actualServer.s.pool;
+      const actualPoolGeneration = actualServer.pool;
       expect(actualPoolGeneration).to.have.property('generation', expectedPool.generation);
       delete expectedServer.pool;
     }

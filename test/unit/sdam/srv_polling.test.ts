@@ -8,11 +8,11 @@ import {
   MongoDriverError,
   SrvPoller,
   SrvPollingEvent,
-  Topology,
   TopologyDescription,
   TopologyType
 } from '../../mongodb';
 import * as sdamEvents from '../../mongodb';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Mongos SRV Polling', function () {
   const SRV_HOST = 'darmok.tanagra.com';
@@ -202,7 +202,7 @@ describe('Mongos SRV Polling', function () {
     it('should not make an srv poller if there is no srv host', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+      const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvPoller
       });
 
@@ -212,7 +212,7 @@ describe('Mongos SRV Polling', function () {
     it('should make an srvPoller if there is an srvHost', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
 
-      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+      const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });
@@ -224,7 +224,7 @@ describe('Mongos SRV Polling', function () {
       const srvPoller = new FakeSrvPoller({ srvHost: SRV_HOST });
       sinon.stub(srvPoller, 'start');
 
-      const topology = new Topology(['localhost:27017', 'localhost:27018'], {
+      const topology = topologyWithPlaceholderClient(['localhost:27017', 'localhost:27018'], {
         srvHost: SRV_HOST,
         srvPoller
       });

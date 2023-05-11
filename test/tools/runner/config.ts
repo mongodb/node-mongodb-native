@@ -7,7 +7,6 @@ import {
   AuthMechanism,
   HostAddress,
   MongoClient,
-  Topology,
   TopologyType,
   WriteConcernSettings
 } from '../../mongodb';
@@ -238,19 +237,6 @@ export class TestConfiguration {
     }
 
     return new MongoClient(connectionString, serverOptions);
-  }
-
-  newTopology(host, port, options) {
-    if (typeof host === 'object') {
-      options = host;
-      host = null;
-      port = null;
-    }
-
-    options = Object.assign({}, options);
-    const hosts =
-      host == null ? [].concat(this.options.hostAddresses) : [new HostAddress(`${host}:${port}`)];
-    return new Topology(hosts, options);
   }
 
   /**

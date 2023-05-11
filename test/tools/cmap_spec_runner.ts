@@ -312,8 +312,8 @@ export class ThreadContext {
         ? { version: process.env.MONGODB_API_VERSION }
         : undefined
     });
-    this.#originalServerPool = this.#server.s.pool;
-    this.#server.s.pool = this.pool;
+    this.#originalServerPool = this.#server.pool;
+    this.#server.pool = this.pool;
     ALL_POOL_EVENTS.forEach(eventName => {
       this.pool.on(eventName, event => {
         if (this.#injectPoolStats) {
@@ -329,7 +329,7 @@ export class ThreadContext {
   }
 
   closePool() {
-    this.#server.s.pool = this.#originalServerPool;
+    this.#server.pool = this.#originalServerPool;
     return new Promise(resolve => {
       ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
       this.pool.close(resolve);

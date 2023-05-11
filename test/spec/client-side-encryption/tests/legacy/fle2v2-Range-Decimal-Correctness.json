@@ -12,9 +12,6 @@
   "collection_name": "default",
   "data": [],
   "encrypted_fields": {
-    "escCollection": "enxcol_.default.esc",
-    "eccCollection": "enxcol_.default.ecc",
-    "ecocCollection": "enxcol_.default.ecoc",
     "fields": [
       {
         "keyId": {
@@ -23,7 +20,7 @@
             "subType": "04"
           }
         },
-        "path": "encryptedDecimal",
+        "path": "encryptedDecimalNoPrecision",
         "bsonType": "decimal",
         "queries": {
           "queryType": "rangePreview",
@@ -92,7 +89,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -103,7 +100,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -113,7 +110,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$gt": {
                   "$numberDecimal": "0.0"
                 }
@@ -123,7 +120,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -153,7 +150,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -164,7 +161,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -174,7 +171,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$gte": {
                   "$numberDecimal": "0.0"
                 }
@@ -187,13 +184,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -223,7 +220,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -234,7 +231,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -244,7 +241,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$gt": {
                   "$numberDecimal": "1.0"
                 }
@@ -277,7 +274,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -288,7 +285,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -298,7 +295,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$lt": {
                   "$numberDecimal": "1.0"
                 }
@@ -308,7 +305,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -338,7 +335,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -349,7 +346,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -359,7 +356,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$lte": {
                   "$numberDecimal": "1.0"
                 }
@@ -372,13 +369,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -408,7 +405,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -419,7 +416,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -429,7 +426,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$gt": {
                   "$numberDecimal": "0.0"
                 },
@@ -442,7 +439,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -472,7 +469,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -483,7 +480,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -493,7 +490,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -501,7 +498,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -511,7 +508,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -519,7 +516,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -549,7 +546,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -560,7 +557,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -570,7 +567,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$in": [
                   {
                     "$numberDecimal": "0.0"
@@ -582,7 +579,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -612,7 +609,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -623,7 +620,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -635,7 +632,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$gte": {
                       "$numberDecimal": "0.0"
                     }
@@ -652,13 +649,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -688,7 +685,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -699,7 +696,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -711,7 +708,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$gt": {
                       "$numberDecimal": "1.0"
                     }
@@ -746,7 +743,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -757,7 +754,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -769,7 +766,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$lt": {
                       "$numberDecimal": "1.0"
                     }
@@ -781,7 +778,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -811,7 +808,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -822,7 +819,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -834,7 +831,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$lte": {
                       "$numberDecimal": "1.0"
                     }
@@ -851,13 +848,13 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             },
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -887,7 +884,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -898,7 +895,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -910,7 +907,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$gt": {
                       "$numberDecimal": "0.0"
                     },
@@ -925,7 +922,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -955,7 +952,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -966,7 +963,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -978,7 +975,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$numberDecimal": "0.0"
                   }
                 }
@@ -988,7 +985,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -1000,7 +997,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$numberDecimal": "1.0"
                   }
                 }
@@ -1010,7 +1007,7 @@
           "result": [
             {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -1040,7 +1037,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -1051,7 +1048,7 @@
           "arguments": {
             "document": {
               "_id": 1,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "1.0"
               }
             }
@@ -1063,7 +1060,7 @@
             "pipeline": [
               {
                 "$match": {
-                  "encryptedDecimal": {
+                  "encryptedDecimalNoPrecision": {
                     "$in": [
                       {
                         "$numberDecimal": "0.0"
@@ -1077,7 +1074,7 @@
           "result": [
             {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberDecimal": "0.0"
               }
             }
@@ -1107,7 +1104,7 @@
           "arguments": {
             "document": {
               "_id": 0,
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$numberInt": "0"
               }
             }
@@ -1139,7 +1136,7 @@
           "name": "find",
           "arguments": {
             "filter": {
-              "encryptedDecimal": {
+              "encryptedDecimalNoPrecision": {
                 "$gte": {
                   "$numberInt": "0"
                 }

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 cd ${DRIVERS_TOOLS}/.evergreen/csfle
 . ./activate-kmstlsvenv.sh
 # by default it always runs on port 5698

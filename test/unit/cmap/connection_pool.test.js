@@ -9,14 +9,31 @@ const { setImmediate } = require('timers');
 const { ns, isHello } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
+const { topologyWithPlaceholderClient } = require('../../tools/utils');
 
 describe('Connection Pool', function () {
-  let server;
+  let mockMongod;
+  const stubServer = {
+    topology: {
+      client: {
+        mongoLogger: {
+          debug: () => null
+        }
+      }
+    }
+  };
   after(() => mock.cleanup());
-  before(() => mock.createServer().then(s => (server = s)));
+  before(() =>
+    mock.createServer().then(s => {
+      mockMongod = s;
+      mockMongod.s = {
+        topology: topologyWithPlaceholderClient([], {})
+      };
+    })
+  );
 
   it('should destroy connections which have been closed', function (done) {
-    server.setMessageHandler(request => {
+    mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
         request.reply(mock.HELLO);
@@ -26,7 +43,10 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(server, { maxPoolSize: 1, hostAddress: server.hostAddress() });
+    const pool = new ConnectionPool(stubServer, {
+      maxPoolSize: 1,
+      hostAddress: mockMongod.hostAddress()
+    });
     pool.ready();
 
     const events = [];
@@ -60,7 +80,7 @@ describe('Connection Pool', function () {
   });
 
   it('should propagate socket timeouts to connections', function (done) {
-    server.setMessageHandler(request => {
+    mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
         request.reply(mock.HELLO);
@@ -69,10 +89,10 @@ describe('Connection Pool', function () {
       }
     });
 
-    const pool = new ConnectionPool(server, {
+    const pool = new ConnectionPool(stubServer, {
       maxPoolSize: 1,
       socketTimeoutMS: 200,
-      hostAddress: server.hostAddress()
+      hostAddress: mockMongod.hostAddress()
     });
 
     pool.ready();
@@ -92,17 +112,17 @@ describe('Connection Pool', function () {
   });
 
   it('should clear timed out wait queue members if no connections are available', function (done) {
-    server.setMessageHandler(request => {
+    mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
     });
 
-    const pool = new ConnectionPool(server, {
+    const pool = new ConnectionPool(stubServer, {
       maxPoolSize: 1,
       waitQueueTimeoutMS: 200,
-      hostAddress: server.hostAddress()
+      hostAddress: mockMongod.hostAddress()
     });
 
     pool.ready();
@@ -144,10 +164,10 @@ describe('Connection Pool', function () {
     });
 
     it('should respect the minPoolSizeCheckFrequencyMS option', function () {
-      const pool = new ConnectionPool(server, {
+      const pool = new ConnectionPool(stubServer, {
         minPoolSize: 2,
         minPoolSizeCheckFrequencyMS: 42,
-        hostAddress: server.hostAddress()
+        hostAddress: mockMongod.hostAddress()
       });
       const ensureSpy = sinon.spy(pool, 'ensureMinPoolSize');
 
@@ -180,9 +200,9 @@ describe('Connection Pool', function () {
     });
 
     it('should default minPoolSizeCheckFrequencyMS to 100ms', function () {
-      const pool = new ConnectionPool(server, {
+      const pool = new ConnectionPool(stubServer, {
         minPoolSize: 2,
-        hostAddress: server.hostAddress()
+        hostAddress: mockMongod.hostAddress()
       });
       const ensureSpy = sinon.spy(pool, 'ensureMinPoolSize');
 
@@ -217,14 +237,14 @@ describe('Connection Pool', function () {
 
   describe('withConnection', function () {
     it('should manage a connection for a successful operation', function (done) {
-      server.setMessageHandler(request => {
+      mockMongod.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
 
-      const pool = new ConnectionPool(server, { hostAddress: server.hostAddress() });
+      const pool = new ConnectionPool(stubServer, { hostAddress: mockMongod.hostAddress() });
       pool.ready();
 
       const callback = (err, result) => {
@@ -249,16 +269,16 @@ describe('Connection Pool', function () {
     });
 
     it('should allow user interaction with an error', function (done) {
-      server.setMessageHandler(request => {
+      mockMongod.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
           request.connection.destroy();
         }
       });
 
-      const pool = new ConnectionPool(server, {
+      const pool = new ConnectionPool(stubServer, {
         waitQueueTimeoutMS: 200,
-        hostAddress: server.hostAddress()
+        hostAddress: mockMongod.hostAddress()
       });
 
       pool.ready();
@@ -281,14 +301,14 @@ describe('Connection Pool', function () {
     });
 
     it('should return an error to the original callback', function (done) {
-      server.setMessageHandler(request => {
+      mockMongod.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
           request.reply(mock.HELLO);
         }
       });
 
-      const pool = new ConnectionPool(server, { hostAddress: server.hostAddress() });
+      const pool = new ConnectionPool(stubServer, { hostAddress: mockMongod.hostAddress() });
       pool.ready();
 
       const callback = (err, result) => {

@@ -176,7 +176,8 @@ export function getFAASEnv(): Map<string, string | Int32> | null {
     VERCEL_REGION = ''
   } = process.env;
 
-  const isAWSFaaS = AWS_EXECUTION_ENV.length > 0 || AWS_LAMBDA_RUNTIME_API.length > 0;
+  const isAWSFaaS =
+    AWS_EXECUTION_ENV.startsWith('AWS_Lambda_') || AWS_LAMBDA_RUNTIME_API.length > 0;
   const isAzureFaaS = FUNCTIONS_WORKER_RUNTIME.length > 0;
   const isGCPFaaS = K_SERVICE.length > 0 || FUNCTION_NAME.length > 0;
   const isVercelFaaS = VERCEL.length > 0;
