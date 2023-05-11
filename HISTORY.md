@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.0](https://github.com/mongodb/node-mongodb-native/compare/v5.4.0...v5.5.0) (2023-05-11)
+
+
+### Features
+
+* **NODE-4720:** Add log messages to CMAP spec ([#3645](https://github.com/mongodb/node-mongodb-native/issues/3645)) ([b27f385](https://github.com/mongodb/node-mongodb-native/commit/b27f385fe6a2bc53b3902465a570d832f52df4e6))
+* **NODE-5004:** dont create or drop ecc collections ([#3660](https://github.com/mongodb/node-mongodb-native/issues/3660)) ([2264fbb](https://github.com/mongodb/node-mongodb-native/commit/2264fbb5a9c99ced4cb3c3d71ff2a59e4505f898))
+
+
+### Bug Fixes
+
+* **NODE-5260:** AWS Lambda metadata detection logic is too permissive ([#3663](https://github.com/mongodb/node-mongodb-native/issues/3663)) ([d74d3f9](https://github.com/mongodb/node-mongodb-native/commit/d74d3f9a1b7180542a7fda980e7b15f6f1460be0))
+
 ## [5.4.0](https://github.com/mongodb/node-mongodb-native/compare/v5.3.0...v5.4.0) (2023-05-04)
 
 
