@@ -250,6 +250,71 @@
           ]
         }
       ]
+    },
+    {
+      "description": "createCollection with bucketing options",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "7.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "dropCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "name": "createCollection",
+          "object": "database0",
+          "arguments": {
+            "collection": "test",
+            "timeseries": {
+              "timeField": "time",
+              "bucketMaxSpanSeconds": 3600,
+              "bucketRoundingSeconds": 3600
+            }
+          }
+        },
+        {
+          "name": "assertCollectionExists",
+          "object": "testRunner",
+          "arguments": {
+            "databaseName": "ts-tests",
+            "collectionName": "test"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test"
+                },
+                "databaseName": "ts-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "timeseries": {
+                    "timeField": "time",
+                    "bucketMaxSpanSeconds": 3600,
+                    "bucketRoundingSeconds": 3600
+                  }
+                },
+                "databaseName": "ts-tests"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
