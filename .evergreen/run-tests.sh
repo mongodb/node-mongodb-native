@@ -53,7 +53,7 @@ else
 fi
 
 # TODO(NODE-5180): remove --force option
-npm install --force 'mongodb-client-encryption@alpha'
+npm install --force 'mongodb-client-encryption'
 npm install --force @mongodb-js/zstd
 npm install --force snappy
 
