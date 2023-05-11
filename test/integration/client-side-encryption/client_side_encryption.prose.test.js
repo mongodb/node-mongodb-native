@@ -1114,12 +1114,18 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     describe('via loading shared library', function () {
       let clientEncrypted;
       let client;
+      beforeEach(function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (!cryptSharedLibPath) {
+          this.currentTest.skipReason =
+            'test requires that the shared library is present, but CRYPT_SHARED_LIB_PATH is unset.';
+          this.skip();
+        }
+      });
+
       // Setup
       beforeEach(async function () {
         const { cryptSharedLibPath } = getEncryptExtraOptions();
-        if (!cryptSharedLibPath) {
-          this.skip('Skipped because CRYPT_SHARED_LIB_PATH is missing');
-        }
         // 1. Create a MongoClient configured with auto encryption (referred to as `client_encrypted`)
         clientEncrypted = this.configuration.newClient(
           {},
@@ -1174,10 +1180,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       // command and ensure it fails with a server selection timeout
       it('should not spawn mongocryptd', metadata, async function () {
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
-        const error = await client.connect().then(
-          () => null,
-          err => err
-        );
+        const error = await client.connect().catch(e => e);
         expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
       });
     });

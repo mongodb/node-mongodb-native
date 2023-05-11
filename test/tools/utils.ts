@@ -93,8 +93,13 @@ export class EventCollector {
   }
 }
 
-export function getEncryptExtraOptions() {
-  if (process.env.CRYPT_SHARED_LIB_PATH) {
+export function getEncryptExtraOptions(): {
+  cryptSharedLibPath?: string;
+} {
+  if (
+    typeof process.env.CRYPT_SHARED_LIB_PATH === 'string' &&
+    process.env.CRYPT_SHARED_LIB_PATH.length > 0
+  ) {
     return { cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH };
   }
   return {};
