@@ -1,5 +1,7 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
+import * as http from 'http';
+import * as url from 'url';
 import { URL } from 'url';
 
 import { type Document, ObjectId, resolveBSONOptions } from './bson';
@@ -14,6 +16,7 @@ import {
   type AnyError,
   MongoCompatibilityError,
   MongoInvalidArgumentError,
+  MongoNetworkTimeoutError,
   MongoNotConnectedError,
   MongoParseError,
   MongoRuntimeError
@@ -1265,4 +1268,69 @@ export function matchesParentDomain(address: string, srvHost: string): boolean {
   const srvHostDomain = `.${normalizedSrvHost.replace(allCharacterBeforeFirstDot, '')}`;
 
   return addressDomain.endsWith(srvHostDomain);
+}
+
+interface RequestOptions {
+  json?: boolean;
+  method?: string;
+  timeout?: number;
+  headers?: http.OutgoingHttpHeaders;
+}
+
+export async function request(uri: string): Promise<Record<string, any>>;
+export async function request(
+  uri: string,
+  options?: { json?: true } & RequestOptions
+): Promise<Record<string, any>>;
+export async function request(
+  uri: string,
+  options?: { json: false } & RequestOptions
+): Promise<string>;
+export async function request(
+  uri: string,
+  options: RequestOptions = {}
+): Promise<string | Record<string, any>> {
+  return new Promise<string | Record<string, any>>((resolve, reject) => {
+    const requestOptions = {
+      method: 'GET',
+      timeout: 10000,
+      json: true,
+      ...url.parse(uri),
+      ...options
+    };
+
+    const req = http.request(requestOptions, res => {
+      res.setEncoding('utf8');
+
+      let data = '';
+      res.on('data', d => {
+        data += d;
+      });
+
+      res.once('end', () => {
+        if (options.json === false) {
+          resolve(data);
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(data);
+          resolve(parsed);
+        } catch {
+          // TODO(NODE-3483)
+          reject(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
+        }
+      });
+    });
+
+    req.once('timeout', () =>
+      req.destroy(
+        new MongoNetworkTimeoutError(
+          `Network request to ${uri} timed out after ${options.timeout} ms`
+        )
+      )
+    );
+    req.once('error', error => reject(error));
+    req.end();
+  });
 }
