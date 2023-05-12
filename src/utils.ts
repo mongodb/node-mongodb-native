@@ -321,8 +321,8 @@ export class MongoDBNamespace {
     return this.collection ? `${this.db}.${this.collection}` : this.db;
   }
 
-  withCollection(collection: string): MongoDBNamespace {
-    return new MongoDBNamespace(this.db, collection);
+  withCollection(collection: string): MongoDBCollectionNamespace {
+    return new MongoDBCollectionNamespace(this.db, collection);
   }
 
   static fromString(namespace?: string): MongoDBNamespace {
@@ -334,6 +334,17 @@ export class MongoDBNamespace {
     const [db, ...collectionParts] = namespace.split('.');
     const collection = collectionParts.join('.');
     return new MongoDBNamespace(db, collection === '' ? undefined : collection);
+  }
+}
+
+/**
+ * @public
+ *
+ * A class representing a collection's namespace.
+ */
+export class MongoDBCollectionNamespace extends MongoDBNamespace {
+  constructor(db: string, override collection: string) {
+    super(db, collection);
   }
 }
 

@@ -165,6 +165,11 @@ export class Db {
     };
   }
 
+  /** @internal */
+  get client(): MongoClient {
+    return this.s.client;
+  }
+
   get databaseName(): string {
     return this.s.namespace.db;
   }

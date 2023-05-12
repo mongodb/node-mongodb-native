@@ -8,7 +8,7 @@ import { FindCursor } from './cursor/find_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
-import type { PkFactory } from './mongo_client';
+import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
@@ -70,6 +70,16 @@ import { IsCappedOperation } from './operations/is_capped';
 import type { Hint, OperationOptions } from './operations/operation';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
+import {
+  CreateSearchIndexesOperation,
+  SearchIndexDescription
+} from './operations/search_indexes/create';
+import { DropSearchIndexOperation } from './operations/search_indexes/drop';
+import {
+  ListSearchIndexesCursor,
+  ListSearchIndexesOptions
+} from './operations/search_indexes/list';
+import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
 import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
 import {
   ReplaceOneOperation,
@@ -84,7 +94,7 @@ import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
-  MongoDBNamespace,
+  MongoDBCollectionNamespace,
   normalizeHintField,
   resolveOptions
 } from './utils';
@@ -115,7 +125,7 @@ export interface CollectionPrivate {
   pkFactory: PkFactory;
   db: Db;
   options: any;
-  namespace: MongoDBNamespace;
+  namespace: MongoDBCollectionNamespace;
   readPreference?: ReadPreference;
   bsonOptions: BSONSerializeOptions;
   collectionHint?: Hint;
@@ -164,13 +174,18 @@ export class Collection<TSchema extends Document = Document> {
     this.s = {
       db,
       options,
-      namespace: new MongoDBNamespace(db.databaseName, name),
+      namespace: new MongoDBCollectionNamespace(db.databaseName, name),
       pkFactory: db.options?.pkFactory ?? DEFAULT_PK_FACTORY,
       readPreference: ReadPreference.fromOptions(options),
       bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options)
     };
+  }
+
+  /** @internal */
+  get client(): MongoClient {
+    return this.s.db.client;
   }
 
   /**
@@ -184,15 +199,19 @@ export class Collection<TSchema extends Document = Document> {
    * The name of this collection
    */
   get collectionName(): string {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.s.namespace.collection!;
+    return this.s.namespace.collection;
   }
 
   /**
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
    */
   get namespace(): string {
-    return this.s.namespace.toString();
+    return this.mongoDBNamespace.toString();
+  }
+
+  /** @internal */
+  get mongoDBNamespace(): MongoDBCollectionNamespace {
+    return this.s.namespace;
   }
 
   /**
@@ -976,11 +995,51 @@ export class Collection<TSchema extends Document = Document> {
   async count(filter: Filter<TSchema> = {}, options: CountOptions = {}): Promise<number> {
     return executeOperation(
       this.s.db.s.client,
-      new CountOperation(
-        MongoDBNamespace.fromString(this.namespace),
-        filter,
-        resolveOptions(this, options)
-      )
+      new CountOperation(this.mongoDBNamespace, filter, resolveOptions(this, options))
+    );
+  }
+
+  listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(indexName: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    indexName?: string | ListSearchIndexesOptions,
+    options?: ListSearchIndexesOptions
+  ): ListSearchIndexesCursor {
+    // todo: options handling
+
+    return ListSearchIndexesCursor.create(this, indexName as any, options);
+  }
+
+  async createSearchIndex(
+    description: SearchIndexDescription,
+    options: Document = {}
+  ): Promise<string> {
+    const indexes = await this.createSearchIndexes([description], options);
+    return indexes[0];
+  }
+
+  async createSearchIndexes(
+    descriptions: ReadonlyArray<SearchIndexDescription>,
+    options: Document = {}
+  ): Promise<string[]> {
+    return executeOperation(
+      this.s.db.s.client,
+      new CreateSearchIndexesOperation(this, descriptions, options)
+    );
+  }
+
+  async dropSearchIndex(name: string, options: Document = {}): Promise<void> {
+    return executeOperation(this.s.db.s.client, new DropSearchIndexOperation(this, name, options));
+  }
+
+  async updateSearchIndex(
+    name: string,
+    definition: Document,
+    options: Document = {}
+  ): Promise<void> {
+    return executeOperation(
+      this.s.db.s.client,
+      new UpdateSearchIndexOperation(this, name, definition, options)
     );
   }
 }
