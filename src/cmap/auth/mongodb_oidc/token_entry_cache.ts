@@ -1,31 +1,21 @@
 import type { IdPServerInfo, IdPServerResponse } from '../mongodb_oidc';
-import { Cache } from './cache';
+import { AbstractCache, ExpiringCacheEntry } from './cache';
 
-/* 5 minutes in milliseconds */
-const EXPIRATION_BUFFER_MS = 300000;
 /* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
+
 /** @internal */
-export class TokenEntry {
+export class TokenEntry extends ExpiringCacheEntry {
   tokenResult: IdPServerResponse;
   serverInfo: IdPServerInfo;
-  expiration: number;
 
   /**
    * Instantiate the entry.
    */
   constructor(tokenResult: IdPServerResponse, serverInfo: IdPServerInfo, expiration: number) {
+    super(expiration);
     this.tokenResult = tokenResult;
     this.serverInfo = serverInfo;
-    this.expiration = expiration;
-  }
-
-  /**
-   * The entry is still valid if the expiration is more than
-   * 5 minutes from the expiration time.
-   */
-  isValid() {
-    return this.expiration - Date.now() > EXPIRATION_BUFFER_MS;
   }
 }
 
@@ -33,7 +23,7 @@ export class TokenEntry {
  * Cache of OIDC token entries.
  * @internal
  */
-export class TokenEntryCache extends Cache<TokenEntry> {
+export class TokenEntryCache extends AbstractCache<TokenEntry> {
   /**
    * Set an entry in the token cache.
    */
@@ -76,6 +66,13 @@ export class TokenEntryCache extends Cache<TokenEntry> {
         this.entries.delete(key);
       }
     }
+  }
+
+  /**
+   * Create a cache key from the address and username.
+   */
+  cacheKey(address: string, username: string, callbackHash: string): string {
+    return this.hashedCacheKey(address, username, callbackHash);
   }
 }
 

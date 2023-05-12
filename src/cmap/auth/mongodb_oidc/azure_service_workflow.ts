@@ -1,5 +1,6 @@
 import { MongoAWSError } from '../../../error';
 import { request } from '../../../utils';
+import { AzureTokenCache } from './azure_token_cache';
 import { ServiceWorkflow } from './service_workflow';
 
 /** Error for when the token audience is missing in the environment. */
@@ -14,8 +15,9 @@ const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/jso
 
 /**
  * The Azure access token format.
+ * @internal
  */
-interface AzureAccessToken {
+export interface AzureAccessToken {
   access_token: string;
   expires_in: number;
 }
@@ -26,8 +28,14 @@ interface AzureAccessToken {
  * @internal
  */
 export class AzureServiceWorkflow extends ServiceWorkflow {
+  cache: AzureTokenCache;
+
+  /**
+   * Instantiate the Azure service workflow.
+   */
   constructor() {
     super();
+    this.cache = new AzureTokenCache();
   }
 
   /**
@@ -39,10 +47,19 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
       throw new MongoAWSError(TOKEN_AUDIENCE_MISSING_ERROR);
     }
     // TODO: Look for the token in the cache. They expire after 5 minutes.
-    const data = await getAzureTokenData(tokenAudience);
+    let token;
+    const entry = this.cache.getEntry(tokenAudience);
+    if (entry?.isValid()) {
+      token = entry.token;
+    } else {
+      this.cache.deleteEntry(tokenAudience);
+      const azureToken = await getAzureTokenData(tokenAudience);
+      const azureEntry = this.cache.addEntry(tokenAudience, azureToken);
+      token = azureEntry.token;
+    }
 
     // TODO: Validate access_token and expires_in are present.
-    return data.access_token;
+    return token;
   }
 }
 
