@@ -774,14 +774,17 @@ export interface MongoOptions
    *
    * If set TLS enabled, equivalent to setting the ssl option.
    *
+   * Spec complicant options: ssl, tls, tlsCAFile, tlsCertificateKeyFile, tlsCertificateKeyFilePassworda, tlsAllowInvalidCertificates,
+   * tlsAllowInvalidHostnames, tlsInsecure. All others will be deprecated and subsequently removed in future versions.
+   *
    * ### Additional options:
    *
    * |    nodejs option     | MongoDB equivalent                                       | type                                   |
    * |:---------------------|--------------------------------------------------------- |:---------------------------------------|
-   * | `ca`                 | `sslCA`, `tlsCAFile`                                     | `string \| Buffer \| Buffer[]`         |
-   * | `crl`                | `sslCRL`                                                 | `string \| Buffer \| Buffer[]`         |
-   * | `cert`               | `sslCert`, `tlsCertificateFile`, `tlsCertificateKeyFile` | `string \| Buffer \| Buffer[]`         |
-   * | `key`                | `sslKey`, `tlsCertificateKeyFile`                        | `string \| Buffer \| KeyObject[]`      |
+   * | `ca`                 | `sslCA`, `tlsCAFile`                                     | `string`                               |
+   * | `crl`                | `sslCRL`                                                 | `string`                               |
+   * | `cert`               | `sslCert`, `tlsCertificateFile`, `tlsCertificateKeyFile` | `string`                               |
+   * | `key`                | `sslKey`, `tlsCertificateKeyFile`                        | `string`                               |
    * | `passphrase`         | `sslPass`, `tlsCertificateKeyFilePassword`               | `string`                               |
    * | `rejectUnauthorized` | `sslValidate`                                            | `boolean`                              |
    *
