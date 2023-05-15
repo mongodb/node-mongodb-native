@@ -1176,7 +1176,20 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
         expect(insertError)
           .to.be.instanceOf(Error)
-          .to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+          .to.have.property('name', 'MongoServerSelectionError');
+
+        expect(insertError).to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+
+        expect(insertError).to.be.instanceOf(
+          MongoServerSelectionError,
+          `
+
+TODO(NODE-5283): The error thrown in this test fails an instanceof check with MongoServerSelectionError.
+  This should change after NODE-5283.  If this assertion is failing, then the test
+  should be updated to reflect that the error thrown is now a server selection error.
+
+`
+        );
       });
     });
 
