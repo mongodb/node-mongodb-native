@@ -1180,7 +1180,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
         expect(insertError).to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
 
-        expect(insertError).to.be.instanceOf(
+        expect(insertError).not.to.be.instanceOf(
           MongoServerSelectionError,
           `
 
