@@ -790,7 +790,7 @@ export interface MongoOptions
    * | see note below        | `tlsInsecure`                                 | N/A                | `boolean`          |
    *
    * If `tlsInsecure` is set to `true`, then it will set the node native options `checkServerIdentity`
-   * to a no-op and `rejectUnauthorized` to `false.
+   * to a no-op and `rejectUnauthorized` to `false`.
    *
    * If `tlsInsecure` is set to `false`, then it will set the node native options `checkServerIdentity`
    * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
