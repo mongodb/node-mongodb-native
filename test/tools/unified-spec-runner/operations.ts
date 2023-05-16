@@ -753,6 +753,30 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
   return clientEncryption.getKeyByAltName(keyAltName);
 });
 
+operations.set('listSearchIndexes', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { indexName } = operation.arguments!;
+  return collection.listSearchIndexes(indexName).toArray();
+});
+
+operations.set('dropSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { indexName } = operation.arguments!;
+  return collection.dropSearchIndex(indexName);
+});
+
+operations.set('updateSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { indexName, definition } = operation.arguments!;
+  return collection.updateSearchIndex(indexName, definition);
+});
+
+operations.set('createSearchIndexes', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { indexDefinitions } = operation.arguments!;
+  return collection.createSearchIndexes(indexDefinitions);
+});
+
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,

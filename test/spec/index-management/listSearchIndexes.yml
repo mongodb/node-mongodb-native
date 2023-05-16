@@ -1,0 +1,64 @@
+description: "listSearchIndexes"
+schemaVersion: "1.10"
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: *database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: *collection0
+
+runOnRequirements:
+  - minServerVersion: "4.0.0"
+    topologies: [ replicaset, load-balanced, sharded ]
+    serverless: forbid
+
+initialData:
+  # create the conection initially
+  - collectionName: *collection0
+    databaseName: *database0
+    documents: []
+
+tests:
+  - description: "when no name is provided, it does not populate the filter"
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        arguments: []
+        expectError: {}
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $listSearchIndexes: {}
+
+  - description: "when a name is provided, it is present in the filter"
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        arguments: 
+          indexName: &indexName "test index"
+        saveResultAsEntity: &changeStream0 changeStream0
+        expectError: {}
+    expectEvents:
+      - client: *client0
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $$matchAsRoot: 
+                      $listSearchIndexes: 
+                        { name: *indexName }

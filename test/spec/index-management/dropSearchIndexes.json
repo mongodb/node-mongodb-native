@@ -1,0 +1,78 @@
+{
+  "description": "dropSearchIndexes",
+  "schemaVersion": "1.10",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0.0",
+      "topologies": [
+        "replicaset",
+        "load-balanced",
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection0",
+      "databaseName": "database0",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "sends the correct command",
+      "operations": [
+        {
+          "name": "dropSearchIndex",
+          "object": "collection0",
+          "arguments": {
+            "indexName": "test index"
+          },
+          "expectError": {}
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "dropSearchIndex": "collection0",
+                  "name": "test index"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

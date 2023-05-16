@@ -13,7 +13,8 @@ export class ListSearchIndexesCursor extends AggregationCursor<{ name: string }>
   ): ListSearchIndexesCursor {
     const client = collection.client;
     const ns = collection.mongoDBNamespace;
-    const pipeline = name == null ? [{ $listIndexes: {} }] : [{ $listSearchIndexes: { name } }];
+    const pipeline =
+      name == null ? [{ $listSearchIndexes: {} }] : [{ $listSearchIndexes: { name } }];
     return new ListSearchIndexesCursor(client, ns, pipeline, options);
   }
 }
