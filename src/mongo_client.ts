@@ -774,18 +774,20 @@ export interface MongoOptions
    *
    * If `tls` is provided as an option, it is equivalent to setting the `ssl` option.
    *
+   * NodeJS native TLS options are passed through to the socket and retain their original types.
+   *
    * ### Additional options:
    *
-   * | nodejs option        | MongoDB driver spec compliant                 | Legacy option name | type      |
-   * |:---------------------|:----------------------------------------------|:-------------------|:----------|
-   * | `ca`                 | `tlsCAFile`                                   | `sslCA`            | `string`  |
-   * | `crl`                | N/A                                           | `sslCRL`           | `string`  |
-   * | `cert`               | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`  |
-   * | `key`                | `tlsCertificateKeyFile`                       | `sslKey`           | `string`  |
-   * | `passphrase`         | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`  |
-   * | `rejectUnauthorized` | `tlsAllowInvalidCertificates`                 | `sslValidate`      | `boolean` |
-   * | N/A                  | `tlsAllowInvalidHostnames`                    | N/A                | `boolean` |
-   * | N/A                  | `tlsInsecure`                                 | N/A                | `boolean` |
+   * | nodejs native option | driver spec compliant option name             | legacy option name | driver option type |
+   * |:---------------------|:----------------------------------------------|:-------------------|:-------------------|
+   * | `ca`                 | `tlsCAFile`                                   | `sslCA`            | `string`           |
+   * | `crl`                | N/A                                           | `sslCRL`           | `string`           |
+   * | `cert`               | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`           |
+   * | `key`                | `tlsCertificateKeyFile`                       | `sslKey`           | `string`           |
+   * | `passphrase`         | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`           |
+   * | `rejectUnauthorized` | `tlsAllowInvalidCertificates`                 | `sslValidate`      | `boolean`          |
+   * | N/A                  | `tlsAllowInvalidHostnames`                    | N/A                | `boolean`          |
+   * | N/A                  | `tlsInsecure`                                 | N/A                | `boolean`          |
    *
    */
   tls: boolean;
