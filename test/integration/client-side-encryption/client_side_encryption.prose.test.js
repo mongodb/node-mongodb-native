@@ -1103,13 +1103,178 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     });
   });
 
-  // TODO(NODE-2422): Implement bypass prose tests
-  describe('Bypass spawning mongocryptd', () => {
-    it.skip('Via mongocryptdBypassSpawn', () => {}).skipReason =
-      'TODO(NODE-2422): Implement "Bypass spawning mongocryptd" tests';
+  describe('Bypass spawning mongocryptd', function () {
+    describe('via mongocryptdBypassSpawn', function () {
+      let clientEncrypted;
+      // Create a MongoClient configured with auto encryption
+      // Configure the required options. use the `local` KMS provider as follows:
+      // ```javascript
+      // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
+      // ```
+      // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+      // configure with `client_encrypted` to use the schema `external/external-schema.json` for
+      // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
+      beforeEach(async function () {
+        clientEncrypted = this.configuration.newClient(
+          {},
+          {
+            // Configure the required options. use the `local` KMS provider as follows:
+            // ```javascript
+            // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
+            // ```
+            // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+            // configure with `client_encrypted` to use the schema `external/external-schema.json` for
+            // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
+            autoEncryption: {
+              keyVaultNamespace,
+              kmsProviders: { local: { key: LOCAL_KEY } },
+              schemaMap: { dataNamespace: externalSchema },
+              // Configure the following `extraOptions`
+              // {
+              //    "mongocryptdBypassSpawn": true
+              //    "mongocryptdURI": "mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000",
+              //    "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
+              // }
+              extraOptions: {
+                mongocryptdBypassSpawn: true,
+                mongocryptdURI: 'mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000',
+                mongocryptdSpawnArgs: [
+                  '--pidfilepath=bypass-spawning-mongocryptd.pid',
+                  '--port=27021'
+                ]
+              }
+            }
+          }
+        );
+      });
 
-    it.skip('Via bypassAutoEncryption', () => {}).skipReason =
-      'TODO(NODE-2422): Implement "Bypass spawning mongocryptd" tests';
+      beforeEach('precondition: the shared library must NOT be loaded', function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (cryptSharedLibPath) {
+          this.currentTest.skipReason =
+            'test requires that the shared library NOT is present, but CRYPT_SHARED_LIB_PATH is set.';
+          this.skip();
+        }
+        // the presence of the shared library can only be reliably determine after
+        // libmongocrypt has been initialized, and can be detected with the
+        // cryptSharedLibVersionInfo getter on the autoEncrypter.
+        expect(!!clientEncrypted.autoEncrypter.cryptSharedLibVersionInfo).to.be.false;
+      });
+
+      afterEach(async function () {
+        await clientEncrypted?.close();
+      });
+
+      it('does not spawn mongocryptd', metadata, async function () {
+        // Use client_encrypted to insert the document {"encrypted": "test"} into db.coll.
+        // Expect a server selection error propagated from the internal MongoClient failing to connect to mongocryptd on port 27021.
+        const insertError = await clientEncrypted
+          .db(dataDbName)
+          .collection(dataCollName)
+          .insertOne({ encrypted: 'test' })
+          .catch(e => e);
+
+        expect(insertError)
+          .to.be.instanceOf(Error)
+          .to.have.property('name', 'MongoServerSelectionError');
+
+        expect(insertError).to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+
+        expect(insertError).not.to.be.instanceOf(
+          MongoServerSelectionError,
+          `
+
+TODO(NODE-5283): The error thrown in this test fails an instanceof check with MongoServerSelectionError.
+  This should change after NODE-5283.  If this assertion is failing, then the test
+  should be updated to reflect that the error thrown is now a server selection error.
+
+`
+        );
+      });
+    });
+
+    describe('via bypassAutoEncryption', function () {
+      let clientEncrypted;
+      let client;
+      // Create a MongoClient configured with auto encryption
+      // Configure the required options. use the `local` KMS provider as follows:
+      // ```javascript
+      // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
+      // ```
+      // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+      // configure with bypassAutoEncryption=true.
+      // `db.coll` by setting a schema map like `{"db.coll": <contents of external-schema.json }`
+      beforeEach(async function () {
+        clientEncrypted = this.configuration.newClient(
+          {},
+          {
+            // Configure the required options. use the `local` KMS provider as follows:
+            // ```javascript
+            // { "local" : {"key": <base64 decoding of LOCAL_MASTERKEY>} }
+            // ```
+            // configure with the `keyVaultNamespace` set to `keyvault.datakeys`
+            // Configure with bypassAutoEncryption=true.
+            autoEncryption: {
+              keyVaultNamespace,
+              bypassAutoEncryption: true,
+              kmsProviders: { local: { key: LOCAL_KEY } },
+              extraOptions: {
+                // Configure the following extraOptions
+                // ```javascript
+                // {
+                //    "mongocryptdSpawnArgs": [ "--pidfilepath=bypass-spawning-mongocryptd.pid", "--port=27021"]
+                // }
+                //```
+                mongocryptdSpawnArgs: [
+                  '--pidfilepath=bypass-spawning-mongocryptd.pid',
+                  '--port=27021'
+                ]
+              }
+            }
+          }
+        );
+
+        // Use client_encrypted to insert the document {"unencrypted": "test"} into db.coll.
+        await clientEncrypted.connect();
+        const insertResult = await clientEncrypted
+          .db(dataDbName)
+          .collection(dataCollName)
+          .insertOne({ unencrypted: 'test' });
+
+        // Expect this to succeed.
+        expect(insertResult).to.have.property('insertedId');
+      });
+
+      beforeEach('precondition: the shared library must NOT be loaded', function () {
+        const { cryptSharedLibPath } = getEncryptExtraOptions();
+        if (cryptSharedLibPath) {
+          this.currentTest.skipReason =
+            'test requires that the shared library NOT is present, but CRYPT_SHARED_LIB_PATH is set.';
+          this.skip();
+        }
+        // the presence of the shared library can only be reliably determine after
+        // libmongocrypt has been initialized, and can be detected with the
+        // cryptSharedLibVersionInfo getter on the autoEncrypter.
+        expect(!!clientEncrypted.autoEncrypter.cryptSharedLibVersionInfo).to.be.false;
+      });
+
+      afterEach(async function () {
+        await clientEncrypted?.close();
+        await client?.close();
+      });
+
+      // Validate that mongocryptd was not spawned. Create a MongoClient to localhost:27021
+      // (or whatever was passed via --port) with serverSelectionTimeoutMS=1000. Run a handshake
+      // command and ensure it fails with a server selection timeout.
+      it('does not spawn mongocryptd', metadata, async function () {
+        client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
+        const error = await client.connect().catch(e => e);
+
+        expect(error)
+          .to.be.instanceOf(MongoServerSelectionError)
+          .to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+      });
+    });
 
     describe('via loading shared library', function () {
       let clientEncrypted;
