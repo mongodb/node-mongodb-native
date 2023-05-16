@@ -1,4 +1,4 @@
-import { MongoAWSError, MongoMissingCredentialsError } from '../../../error';
+import { MongoAzureError } from '../../../error';
 import { request } from '../../../utils';
 import { AzureTokenCache } from './azure_token_cache';
 import { ServiceWorkflow } from './service_workflow';
@@ -51,7 +51,7 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
   async getToken(): Promise<string> {
     const tokenAudience = process.env.TOKEN_AUDIENCE;
     if (!tokenAudience) {
-      throw new MongoAWSError(TOKEN_AUDIENCE_MISSING_ERROR);
+      throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
     }
     let token;
     const entry = this.cache.getEntry(tokenAudience);
@@ -66,7 +66,7 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
 
     if (isEndpointResultInvalid(token)) {
       this.cache.deleteEntry(tokenAudience);
-      throw new MongoMissingCredentialsError(ENDPOINT_RESULT_ERROR);
+      throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
     }
     return token;
   }
