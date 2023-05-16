@@ -29,7 +29,7 @@ export class AzureTokenCache extends AbstractCache<AzureTokenEntry> {
   }
 
   /**
-   * Create a cache key from the address and username.
+   * Create a cache key.
    */
   cacheKey(tokenAudience: string): string {
     return tokenAudience;

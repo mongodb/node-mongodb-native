@@ -755,6 +755,14 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
+  name: 'ubuntu20-test-azure-oidc',
+  display_name: 'Azure OIDC',
+  run_on: 'ubuntu2004-small',
+  batchtime: 20160,
+  tasks: ['testazureoidc_task_group']
+});
+
+BUILD_VARIANTS.push({
   name: 'rhel8-no-auth-tests',
   display_name: 'No Auth Tests',
   run_on: DEFAULT_OS,

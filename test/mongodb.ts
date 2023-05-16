@@ -107,6 +107,8 @@ export * from '../src/cmap/auth/mongocr';
 export * from '../src/cmap/auth/mongodb_aws';
 export * from '../src/cmap/auth/mongodb_oidc';
 export * from '../src/cmap/auth/mongodb_oidc/aws_service_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/azure_service_workflow';
+export * from '../src/cmap/auth/mongodb_oidc/azure_token_cache';
 export * from '../src/cmap/auth/mongodb_oidc/callback_lock_cache';
 export * from '../src/cmap/auth/mongodb_oidc/callback_workflow';
 export * from '../src/cmap/auth/mongodb_oidc/service_workflow';

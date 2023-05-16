@@ -1,4 +1,4 @@
-import { MongoAWSError } from '../../../error';
+import { MongoAWSError, MongoMissingCredentialsError } from '../../../error';
 import { request } from '../../../utils';
 import { AzureTokenCache } from './azure_token_cache';
 import { ServiceWorkflow } from './service_workflow';
@@ -12,6 +12,13 @@ const AZURE_BASE_URL =
 
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
+
+/** Properties allowed on results of the endpoint. */
+const RESULT_PROPERTIES = ['access_token', 'expires_in'];
+
+/** Invalid endpoint result error. */
+const ENDPOINT_RESULT_ERROR =
+  'Azure endpoint did not return a value with only access_token and expires_in properties';
 
 /**
  * The Azure access token format.
@@ -46,7 +53,6 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
     if (!tokenAudience) {
       throw new MongoAWSError(TOKEN_AUDIENCE_MISSING_ERROR);
     }
-    // TODO: Look for the token in the cache. They expire after 5 minutes.
     let token;
     const entry = this.cache.getEntry(tokenAudience);
     if (entry?.isValid()) {
@@ -58,7 +64,10 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
       token = azureEntry.token;
     }
 
-    // TODO: Validate access_token and expires_in are present.
+    if (isEndpointResultInvalid(token)) {
+      this.cache.deleteEntry(tokenAudience);
+      throw new MongoMissingCredentialsError(ENDPOINT_RESULT_ERROR);
+    }
     return token;
   }
 }
@@ -73,4 +82,15 @@ async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToke
     headers: AZURE_HEADERS
   });
   return data as AzureAccessToken;
+}
+
+/**
+ * Determines if a result returned from the endpoint is invalid.
+ * This means the result is nullish, doesn't contain the access_token required field,
+ * the expires_in required field, and does not contain extra fields.
+ */
+function isEndpointResultInvalid(token: unknown): boolean {
+  if (token == null || typeof token !== 'object') return true;
+  if (!('access_token' in token) || !('expires_in' in token)) return true;
+  return !Object.getOwnPropertyNames(token).every(prop => RESULT_PROPERTIES.includes(prop));
 }
