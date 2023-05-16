@@ -699,6 +699,21 @@ const coverageTask = {
 };
 
 SINGLETON_TASKS.push(coverageTask);
+SINGLETON_TASKS.push({
+  name: 'test-search-index-helpers',
+  tags: [],
+  commands: [
+    { func: 'install dependencies' },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: 'latest',
+        TOPOLOGY: 'replica_set'
+      }
+    },
+    { func: 'run search index management tests' }
+  ]
+})
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
@@ -750,6 +765,13 @@ BUILD_VARIANTS.push({
   run_on: DEFAULT_OS,
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example', 'test-deployed-lambda']
 });
+
+BUILD_VARIANTS.push({
+  name: 'rhel8-test-seach-index-management-helpers',
+  display_name: 'Search Index Management Helpers Tests',
+  run_on: DEFAULT_OS,
+  tasks: ['test-search-index-helpers']
+})
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(

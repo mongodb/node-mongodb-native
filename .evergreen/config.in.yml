@@ -40,10 +40,12 @@ functions:
         args:
         - .evergreen/prepare-shell.sh
 
-    # Load the expansion file to make an evergreen variable with the current unique version
-    - command: expansions.update
+  "run search index management tests":
+    - command: subprocess.exec
       params:
-        file: src/expansion.yml
+        binary: bash
+        args:
+          - src/.evergreen/run-search-index-management-tests.sh
 
   "bootstrap mongo-orchestration":
     - command: subprocess.exec
