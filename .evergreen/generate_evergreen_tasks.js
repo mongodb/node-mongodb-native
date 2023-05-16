@@ -450,7 +450,7 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_VERSION: 'latest' },
+      expansions: { NODE_LTS_VERSION: LATEST_LTS },
       tasks: tasks.map(({ name }) => name)
     };
     if (clientEncryption) {
