@@ -702,7 +702,7 @@ BUILD_VARIANTS.push({
 for (const variant of BUILD_VARIANTS.filter(
   variant =>
     variant.expansions &&
-    [14, 16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
+    [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)

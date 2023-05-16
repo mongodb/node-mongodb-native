@@ -3251,6 +3251,8 @@ buildvariants:
       - test-socks5
       - test-socks5-csfle
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
@@ -3482,6 +3484,8 @@ buildvariants:
       - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
+      - test-zstd-compression
+      - test-snappy-compression
       - test-tls-support-latest
       - test-tls-support-6.0
       - test-tls-support-5.0
