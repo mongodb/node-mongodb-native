@@ -778,17 +778,23 @@ export interface MongoOptions
    *
    * ### Additional options:
    *
-   * | nodejs native option | driver spec compliant option name             | legacy option name | driver option type |
-   * |:---------------------|:----------------------------------------------|:-------------------|:-------------------|
-   * | `ca`                 | `tlsCAFile`                                   | `sslCA`            | `string`           |
-   * | `crl`                | N/A                                           | `sslCRL`           | `string`           |
-   * | `cert`               | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`           |
-   * | `key`                | `tlsCertificateKeyFile`                       | `sslKey`           | `string`           |
-   * | `passphrase`         | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`           |
-   * | `rejectUnauthorized` | `tlsAllowInvalidCertificates`                 | `sslValidate`      | `boolean`          |
-   * | N/A                  | `tlsAllowInvalidHostnames`                    | N/A                | `boolean`          |
-   * | N/A                  | `tlsInsecure`                                 | N/A                | `boolean`          |
+   * | nodejs native option  | driver spec compliant option name             | legacy option name | driver option type |
+   * |:----------------------|:----------------------------------------------|:-------------------|:-------------------|
+   * | `ca`                  | `tlsCAFile`                                   | `sslCA`            | `string`           |
+   * | `crl`                 | N/A                                           | `sslCRL`           | `string`           |
+   * | `cert`                | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`           |
+   * | `key`                 | `tlsCertificateKeyFile`                       | `sslKey`           | `string`           |
+   * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`           |
+   * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `sslValidate`      | `boolean`          |
+   * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | N/A                | `boolean`          |
+   * | see note below        | `tlsInsecure`                                 | N/A                | `boolean`          |
    *
+   * If `tlsInsecure` is set to `true`, then it will set the node native options `checkServerIdentity`
+   * to a no-op and `rejectUnauthorized` to `false.
+   *
+   * If `tlsInsecure` is set to `false`, then it will set the node native options `checkServerIdentity`
+   * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
+   * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
    */
   tls: boolean;
 
