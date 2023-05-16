@@ -703,7 +703,12 @@ SINGLETON_TASKS.push({
   name: 'test-search-index-helpers',
   tags: [],
   commands: [
-    { func: 'install dependencies' },
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_NAME: LATEST_LTS
+      }
+    },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {

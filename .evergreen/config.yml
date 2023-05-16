@@ -22,12 +22,17 @@ functions:
           project: ${project}
         args:
           - .evergreen/prepare-shell.sh
-ev  run search index management tests:
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+  run search index management tests:
     - command: subprocess.exec
       params:
         binary: bash
+        working_dir: src
+        add_expansions_to_env: true
         args:
-          - src/.evergreen/run-search-index-management-tests.sh
+          - .evergreen/run-search-index-management-tests.sh
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -2596,6 +2601,8 @@ tasks:
     tags: []
     commands:
       - func: install dependencies
+        vars:
+          NODE_LTS_NAME: hydrogen
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
