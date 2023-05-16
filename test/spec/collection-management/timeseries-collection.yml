@@ -127,3 +127,38 @@ tests:
                 filter: {}
                 sort: { time: 1 }
               databaseName: *database0Name
+
+  - description: "createCollection with bucketing options"
+    runOnRequirements:
+      - minServerVersion: "7.0"
+    operations:
+      - name: dropCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+      - name: createCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          timeseries: &timeseries1
+            timeField: "time"
+            bucketMaxSpanSeconds: 3600
+            bucketRoundingSeconds: 3600
+      - name: assertCollectionExists
+        object: testRunner
+        arguments:
+          databaseName: *database0Name
+          collectionName: *collection0Name
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *collection0Name
+              databaseName: *database0Name
+          - commandStartedEvent:
+              command:
+                create: *collection0Name
+                timeseries: *timeseries1
+              databaseName: *database0Name
+

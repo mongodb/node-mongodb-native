@@ -46,6 +46,8 @@ export interface TimeSeriesCollectionOptions extends Document {
   timeField: string;
   metaField?: string;
   granularity?: 'seconds' | 'minutes' | 'hours' | string;
+  bucketMaxSpanSeconds?: number;
+  bucketRoundingSeconds?: number;
 }
 
 /** @public
