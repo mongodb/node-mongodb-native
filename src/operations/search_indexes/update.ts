@@ -8,9 +8,9 @@ import { AbstractOperation } from '../operation';
 
 export class UpdateSearchIndexOperation extends AbstractOperation<void> {
   constructor(
-    private collection: Collection<any>,
-    private name: string,
-    private definition: Document
+    private readonly collection: Collection<any>,
+    private readonly name: string,
+    private readonly definition: Document
   ) {
     super();
   }

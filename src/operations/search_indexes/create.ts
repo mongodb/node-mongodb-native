@@ -18,8 +18,8 @@ export interface SearchIndexDescription {
 /** @internal */
 export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
   constructor(
-    private collection: Collection<any>,
-    private descriptions: ReadonlyArray<SearchIndexDescription>
+    private readonly collection: Collection<any>,
+    private readonly descriptions: ReadonlyArray<SearchIndexDescription>
   ) {
     super();
   }
