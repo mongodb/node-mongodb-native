@@ -337,7 +337,7 @@ export class MongoDBNamespace {
 /**
  * @public
  *
- * A class representing a collection's namespace.  This class enforces that
+ * A class representing a collection's namespace.  This class enforces (through Typescript) that
  * the `collection` portion of the namespace is defined and should only be
  * used in scenarios where this can be guaranteed.
  */

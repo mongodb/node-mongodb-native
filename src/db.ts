@@ -196,7 +196,7 @@ export class Db {
    */
   get readPreference(): ReadPreference {
     if (this.s.readPreference == null) {
-      return this.s.client.readPreference;
+      return this.client.readPreference;
     }
 
     return this.s.readPreference;
@@ -227,7 +227,7 @@ export class Db {
     options?: CreateCollectionOptions
   ): Promise<Collection<TSchema>> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286
     );
   }
@@ -259,7 +259,7 @@ export class Db {
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(this.s.client, new RunCommandOperation(this, command, options));
+    return executeOperation(this.client, new RunCommandOperation(this, command, options));
   }
 
   /**
@@ -273,7 +273,7 @@ export class Db {
     options?: AggregateOptions
   ): AggregationCursor<T> {
     return new AggregationCursor(
-      this.s.client,
+      this.client,
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)
@@ -307,10 +307,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async stats(options?: DbStatsOptions): Promise<Document> {
-    return executeOperation(
-      this.s.client,
-      new DbStatsOperation(this, resolveOptions(this, options))
-    );
+    return executeOperation(this.client, new DbStatsOperation(this, resolveOptions(this, options)));
   }
 
   /**
@@ -357,7 +354,7 @@ export class Db {
   ): Promise<Collection<TSchema>> {
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
-      this.s.client,
+      this.client,
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
         toCollection,
@@ -374,7 +371,7 @@ export class Db {
    */
   async dropCollection(name: string, options?: DropCollectionOptions): Promise<boolean> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new DropCollectionOperation(this, name, resolveOptions(this, options))
     );
   }
@@ -386,7 +383,7 @@ export class Db {
    */
   async dropDatabase(options?: DropDatabaseOptions): Promise<boolean> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new DropDatabaseOperation(this, resolveOptions(this, options))
     );
   }
@@ -398,7 +395,7 @@ export class Db {
    */
   async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new CollectionsOperation(this, resolveOptions(this, options))
     );
   }
@@ -416,7 +413,7 @@ export class Db {
     options?: CreateIndexesOptions
   ): Promise<string> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options))
     );
   }
@@ -443,7 +440,7 @@ export class Db {
         : undefined;
     const password = typeof passwordOrOptions === 'string' ? passwordOrOptions : undefined;
     return executeOperation(
-      this.s.client,
+      this.client,
       new AddUserOperation(this, username, password, resolveOptions(this, options))
     );
   }
@@ -456,7 +453,7 @@ export class Db {
    */
   async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new RemoveUserOperation(this, username, resolveOptions(this, options))
     );
   }
@@ -472,7 +469,7 @@ export class Db {
     options?: SetProfilingLevelOptions
   ): Promise<ProfilingLevel> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new SetProfilingLevelOperation(this, level, resolveOptions(this, options))
     );
   }
@@ -484,7 +481,7 @@ export class Db {
    */
   async profilingLevel(options?: ProfilingLevelOptions): Promise<string> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new ProfilingLevelOperation(this, resolveOptions(this, options))
     );
   }
@@ -497,7 +494,7 @@ export class Db {
    */
   async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
     return executeOperation(
-      this.s.client,
+      this.client,
       new IndexInformationOperation(this, name, resolveOptions(this, options))
     );
   }
