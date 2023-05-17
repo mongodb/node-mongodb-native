@@ -26,7 +26,8 @@ tests:
       - name: listSearchIndexes
         object: *collection0
         arguments: []
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true
@@ -44,7 +45,8 @@ tests:
         arguments: 
           indexName: &indexName "test index"
         saveResultAsEntity: &changeStream0 changeStream0
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true
@@ -66,7 +68,8 @@ tests:
           options: 
             batchSize: 10
         saveResultAsEntity: &changeStream0 changeStream0
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true

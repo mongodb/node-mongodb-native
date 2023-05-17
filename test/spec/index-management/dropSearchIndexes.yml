@@ -27,7 +27,8 @@ tests:
         object: *collection0
         arguments:
           indexName: &indexName 'test index'
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true

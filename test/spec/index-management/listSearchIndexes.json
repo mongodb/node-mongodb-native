@@ -45,7 +45,9 @@
           "name": "listSearchIndexes",
           "object": "collection0",
           "arguments": [],
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -79,7 +81,9 @@
             "indexName": "test index"
           },
           "saveResultAsEntity": "changeStream0",
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -120,7 +124,9 @@
             }
           },
           "saveResultAsEntity": "changeStream0",
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [

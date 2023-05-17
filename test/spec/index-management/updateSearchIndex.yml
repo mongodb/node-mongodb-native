@@ -28,7 +28,8 @@ tests:
         arguments:
           indexName: &indexName 'test index'
           definition: &definition {}
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true

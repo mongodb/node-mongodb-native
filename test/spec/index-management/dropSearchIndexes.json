@@ -47,7 +47,9 @@
           "arguments": {
             "indexName": "test index"
           },
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [

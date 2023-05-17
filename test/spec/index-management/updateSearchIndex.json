@@ -48,7 +48,9 @@
             "indexName": "test index",
             "definition": {}
           },
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [

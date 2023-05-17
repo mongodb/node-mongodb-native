@@ -27,7 +27,8 @@ tests:
         object: *collection0
         arguments: 
           indexDefinitions: []
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true
@@ -43,7 +44,8 @@ tests:
         object: *collection0
         arguments:
           indexDefinitions: [ { definition: {} } ]
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true
@@ -59,7 +61,8 @@ tests:
         object: *collection0
         arguments: 
           indexDefinitions: [ { definition: {}, name: 'test index' } ]
-        expectError: {}
+        expectError:
+          isError: true
     expectEvents:
       - client: *client0
         ignoreExtraEvents: true

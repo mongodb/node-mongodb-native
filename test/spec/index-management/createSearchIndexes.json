@@ -47,7 +47,9 @@
           "arguments": {
             "indexDefinitions": []
           },
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -80,7 +82,9 @@
               }
             ]
           },
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
@@ -118,7 +122,9 @@
               }
             ]
           },
-          "expectError": {}
+          "expectError": {
+            "isError": true
+          }
         }
       ],
       "expectEvents": [
