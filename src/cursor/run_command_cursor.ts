@@ -1,4 +1,4 @@
-import type { BSONSerializeOptions, Document, Long } from '../bson';
+import { BSONSerializeOptions, Document, Long, resolveBSONOptions } from '../bson';
 import type { Db } from '../db';
 import { MongoAPIError, MongoUnexpectedServerResponseError } from '../error';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
@@ -58,8 +58,11 @@ export class RunCommandCursor extends AbstractCursor {
     return this;
   }
 
-  public clone(): never {
-    throw new MongoAPIError('RunCommandCursor cannot be cloned');
+  public clone(): RunCommandCursor {
+    return new RunCommandCursor(this.db, this.command, {
+      readPreference: this.readPreference,
+      ...resolveBSONOptions(this.cursorOptions)
+    });
   }
 
   public override withReadConcern(_: ReadConcernLike): never {
@@ -87,7 +90,7 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  private db: Db | undefined;
+  private db: Db;
 
   /** @internal */
   constructor(db: Db, command: Document, options: RunCommandCursorOptions = {}) {
