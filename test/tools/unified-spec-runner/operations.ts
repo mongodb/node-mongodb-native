@@ -35,7 +35,7 @@ interface OperationFunctionParams {
 
 type RunOperationFn = (
   p: OperationFunctionParams
-) => Promise<Document | boolean | number | null | void>;
+) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
@@ -755,8 +755,8 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName } = operation.arguments!;
-  return collection.listSearchIndexes(indexName).toArray();
+  const { indexName, options } = operation.arguments!;
+  return collection.listSearchIndexes(indexName, options).toArray();
 });
 
 operations.set('dropSearchIndex', async ({ entities, operation }) => {
@@ -769,6 +769,12 @@ operations.set('updateSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
   const { indexName, definition } = operation.arguments!;
   return collection.updateSearchIndex(indexName, definition);
+});
+
+operations.set('createSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { definition } = operation.arguments!;
+  return collection.createSearchIndex(definition);
 });
 
 operations.set('createSearchIndexes', async ({ entities, operation }) => {

@@ -1,5 +1,5 @@
 {
-  "description": "createSearchIndexes",
+  "description": "createSearchIndex convenience helper",
   "schemaVersion": "1.10",
   "createEntities": [
     {
@@ -39,46 +39,15 @@
   ],
   "tests": [
     {
-      "description": "empty index definition array",
-      "operations": [
-        {
-          "name": "createSearchIndexes",
-          "object": "collection0",
-          "arguments": {
-            "indexDefinitions": []
-          },
-          "expectError": {}
-        }
-      ],
-      "expectEvents": [
-        {
-          "client": "client0",
-          "ignoreExtraEvents": true,
-          "events": [
-            {
-              "commandStartedEvent": {
-                "command": {
-                  "createSearchIndexes": "collection0",
-                  "indexes": []
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
       "description": "no name provided for an index definition",
       "operations": [
         {
-          "name": "createSearchIndexes",
+          "name": "createSearchIndex",
           "object": "collection0",
           "arguments": {
-            "indexDefinitions": [
-              {
-                "definition": {}
-              }
-            ]
+            "definition": {
+              "definition": {}
+            }
           },
           "expectError": {}
         }
@@ -108,15 +77,13 @@
       "description": "name provided for an index definition",
       "operations": [
         {
-          "name": "createSearchIndexes",
+          "name": "createSearchIndex",
           "object": "collection0",
           "arguments": {
-            "indexDefinitions": [
-              {
-                "definition": {},
-                "name": "test index"
-              }
-            ]
+            "definition": {
+              "definition": {},
+              "name": "test index"
+            }
           },
           "expectError": {}
         }
