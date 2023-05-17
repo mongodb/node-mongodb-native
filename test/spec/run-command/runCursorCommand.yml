@@ -54,7 +54,7 @@ tests:
 
   - description: errors if the command response is not a cursor
     operations:
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           commandName: ping
@@ -132,7 +132,7 @@ tests:
     runOnRequirements:
       - topologies: [ load-balanced ]
     operations:
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           commandName: find
@@ -193,7 +193,7 @@ tests:
     runOnRequirements:
       - topologies: [ load-balanced ]
     operations:
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           commandName: find
@@ -328,7 +328,7 @@ tests:
           documents:
             - { _id: 1, x: 11 }
             - { _id: 2, x: 22 }
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           cursorType: tailable

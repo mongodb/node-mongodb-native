@@ -58,9 +58,9 @@ tests:
                 lsid: { $$exists: true }
               commandName: getMore
 
-  - description: createRunCursorCommand creates a cursor and stores it as an entity that can be iterated one document at a time
+  - description: createCommandCursor creates a cursor and stores it as an entity that can be iterated one document at a time
     operations:
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           commandName: find
@@ -83,9 +83,9 @@ tests:
         object: *myRunCommandCursor
         expectResult: { _id: 5, x: 55 }
 
-  - description: createRunCursorCommand's cursor can be closed and will perform a killCursors operation
+  - description: createCommandCursor's cursor can be closed and will perform a killCursors operation
     operations:
-      - name: createRunCursorCommand
+      - name: createCommandCursor
         object: *db
         arguments:
           commandName: find

@@ -108,7 +108,7 @@
       "description": "errors if the command response is not a cursor",
       "operations": [
         {
-          "name": "createRunCursorCommand",
+          "name": "createCommandCursor",
           "object": "db",
           "arguments": {
             "commandName": "ping",
@@ -302,7 +302,7 @@
       ],
       "operations": [
         {
-          "name": "createRunCursorCommand",
+          "name": "createCommandCursor",
           "object": "db",
           "arguments": {
             "commandName": "find",
@@ -437,7 +437,7 @@
       ],
       "operations": [
         {
-          "name": "createRunCursorCommand",
+          "name": "createCommandCursor",
           "object": "db",
           "arguments": {
             "commandName": "find",
@@ -742,7 +742,7 @@
           }
         },
         {
-          "name": "createRunCursorCommand",
+          "name": "createCommandCursor",
           "object": "db",
           "arguments": {
             "cursorType": "tailable",

@@ -687,29 +687,26 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   return cursor.toArray();
 });
 
-operations.set(
-  'createRunCursorCommand',
-  async ({ entities, operation }: OperationFunctionParams) => {
-    const collection = entities.getEntity('db', operation.object);
-    const { command, ...opts } = operation.arguments!;
-    const cursor = collection.runCursorCommand(command, {
-      readPreference: ReadPreference.fromOptions(opts),
-      session: opts.session
-    });
+operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
+  const collection = entities.getEntity('db', operation.object);
+  const { command, ...opts } = operation.arguments!;
+  const cursor = collection.runCursorCommand(command, {
+    readPreference: ReadPreference.fromOptions(opts),
+    session: opts.session
+  });
 
-    if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
-    if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
-    if (opts.comment !== undefined) cursor.setComment(opts.comment);
+  if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
+  if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
+  if (opts.comment !== undefined) cursor.setComment(opts.comment);
 
-    // The spec dictates that we create the cursor and force the find command
-    // to execute, but the first document must still be returned for the first iteration.
-    const result = await cursor.tryNext();
-    const kDocuments = getSymbolFrom(cursor, 'documents');
-    if (result) cursor[kDocuments].unshift(result);
+  // The spec dictates that we create the cursor and force the find command
+  // to execute, but the first document must still be returned for the first iteration.
+  const result = await cursor.tryNext();
+  const kDocuments = getSymbolFrom(cursor, 'documents');
+  if (result) cursor[kDocuments].unshift(result);
 
-    return cursor;
-  }
-);
+  return cursor;
+});
 
 operations.set('updateMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
