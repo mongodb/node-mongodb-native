@@ -206,11 +206,15 @@ export class Collection<TSchema extends Document = Document> {
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
    */
   get namespace(): string {
-    return this.mongoDBNamespace.toString();
+    return this.fullNamespace.toString();
   }
 
-  /** @internal */
-  get mongoDBNamespace(): MongoDBCollectionNamespace {
+  /**
+   *  @internal
+   *
+   * The `MongoDBNamespace` for the collection.
+   */
+  get fullNamespace(): MongoDBCollectionNamespace {
     return this.s.namespace;
   }
 
@@ -995,51 +999,50 @@ export class Collection<TSchema extends Document = Document> {
   async count(filter: Filter<TSchema> = {}, options: CountOptions = {}): Promise<number> {
     return executeOperation(
       this.s.db.s.client,
-      new CountOperation(this.mongoDBNamespace, filter, resolveOptions(this, options))
+      new CountOperation(this.fullNamespace, filter, resolveOptions(this, options))
     );
   }
 
   listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   listSearchIndexes(indexName: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   listSearchIndexes(
-    indexName?: string | ListSearchIndexesOptions,
+    indexNameOrOptions?: string | ListSearchIndexesOptions,
     options?: ListSearchIndexesOptions
   ): ListSearchIndexesCursor {
-    // todo: options handling
+    options =
+      typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+    const indexName =
+      indexNameOrOptions == null
+        ? null
+        : typeof indexNameOrOptions === 'object'
+        ? null
+        : indexNameOrOptions;
 
-    return ListSearchIndexesCursor.create(this, indexName as any, options);
+    return ListSearchIndexesCursor.create(this, indexName, options);
   }
 
-  async createSearchIndex(
-    description: SearchIndexDescription,
-    options: Document = {}
-  ): Promise<string> {
-    const indexes = await this.createSearchIndexes([description], options);
+  async createSearchIndex(description: SearchIndexDescription): Promise<string> {
+    const indexes = await this.createSearchIndexes([description]);
     return indexes[0];
   }
 
   async createSearchIndexes(
-    descriptions: ReadonlyArray<SearchIndexDescription>,
-    options: Document = {}
+    descriptions: ReadonlyArray<SearchIndexDescription>
   ): Promise<string[]> {
     return executeOperation(
       this.s.db.s.client,
-      new CreateSearchIndexesOperation(this, descriptions, options)
+      new CreateSearchIndexesOperation(this, descriptions)
     );
   }
 
-  async dropSearchIndex(name: string, options: Document = {}): Promise<void> {
-    return executeOperation(this.s.db.s.client, new DropSearchIndexOperation(this, name, options));
+  async dropSearchIndex(name: string): Promise<void> {
+    return executeOperation(this.s.db.s.client, new DropSearchIndexOperation(this, name));
   }
 
-  async updateSearchIndex(
-    name: string,
-    definition: Document,
-    options: Document = {}
-  ): Promise<void> {
+  async updateSearchIndex(name: string, definition: Document): Promise<void> {
     return executeOperation(
       this.s.db.s.client,
-      new UpdateSearchIndexOperation(this, name, definition, options)
+      new UpdateSearchIndexOperation(this, name, definition)
     );
   }
 }

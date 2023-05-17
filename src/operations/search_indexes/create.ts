@@ -6,22 +6,26 @@ import type { ClientSession } from '../../sessions';
 import type { Callback } from '../../utils';
 import { AbstractOperation } from '../operation';
 
+/** @public */
 export interface SearchIndexDescription {
+  /** The name of the index. */
   name?: string;
+
+  /** The index definition. */
   description: Document;
 }
 
+/** @internal */
 export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
   constructor(
     private collection: Collection<any>,
-    private descriptions: ReadonlyArray<SearchIndexDescription>,
-    override options: Document = {}
+    private descriptions: ReadonlyArray<SearchIndexDescription>
   ) {
-    super(options);
+    super();
   }
 
   execute(server: Server, session: ClientSession | undefined, callback: Callback<any>): void {
-    const namespace = this.collection.mongoDBNamespace;
+    const namespace = this.collection.fullNamespace;
     const command = {
       createSearchIndexes: namespace.collection,
       indexes: this.descriptions

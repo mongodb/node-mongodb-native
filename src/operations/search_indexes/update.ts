@@ -10,14 +10,13 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
   constructor(
     private collection: Collection<any>,
     private name: string,
-    private definition: Document,
-    override options: Document
+    private definition: Document
   ) {
-    super(options);
+    super();
   }
 
   execute(server: Server, session: ClientSession | undefined, callback: Callback<void>): void {
-    const namespace = this.collection.mongoDBNamespace;
+    const namespace = this.collection.fullNamespace;
     const command = {
       updateSearchIndex: namespace.collection,
       name: this.name,

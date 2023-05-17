@@ -418,6 +418,11 @@ export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
+export type { SearchIndexDescription } from './operations/search_indexes/create';
+export type {
+  ListSearchIndexesCursor,
+  ListSearchIndexesOptions
+} from './operations/search_indexes/list';
 export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type {
   CollStats,
@@ -489,6 +494,7 @@ export type {
   EventEmitterWithState,
   HostAddress,
   List,
+  MongoDBCollectionNamespace,
   MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';

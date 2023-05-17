@@ -304,16 +304,13 @@ export function ns(ns: string): MongoDBNamespace {
 
 /** @public */
 export class MongoDBNamespace {
-  db: string;
-  collection: string | undefined;
   /**
    * Create a namespace object
    *
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(db: string, collection?: string) {
-    this.db = db;
+  constructor(public db: string, public collection?: string) {
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -340,7 +337,9 @@ export class MongoDBNamespace {
 /**
  * @public
  *
- * A class representing a collection's namespace.
+ * A class representing a collection's namespace.  This class enforces that
+ * the `collection` portion of the namespace is defined and should only be
+ * used in scenarios where this can be guaranteed.
  */
 export class MongoDBCollectionNamespace extends MongoDBNamespace {
   constructor(db: string, override collection: string) {
