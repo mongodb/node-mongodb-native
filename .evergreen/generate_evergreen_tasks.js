@@ -35,7 +35,7 @@ const OPERATING_SYSTEMS = [
 
 // TODO: NODE-3060: enable skipped tests on windows
 const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer']);
-const SKIPPED_WINDOWS_NODE_VERSIONS = new Set(['erbium']);
+const SKIPPED_WINDOWS_NODE_VERSIONS = new Set([12]);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -384,22 +384,19 @@ for (const {
     return !isAWSTask && !isSkippedTaskOnWindows;
   });
 
-  for (const NODE_LTS_NAME of testedNodeVersions) {
-    const nodeVersionNumber = versions.find(
-      ({ codeName }) => codeName === NODE_LTS_NAME
-    ).versionNumber;
-    const nodeLtsDisplayName =
-      nodeVersionNumber === undefined ? `Node Latest` : `Node${nodeVersionNumber}`;
-    const name = `${osName}-${NODE_LTS_NAME}`;
+  for (const NODE_LTS_VERSION of testedNodeVersions) {
+    const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
+    const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
+    const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_NAME };
+    const expansions = { NODE_LTS_VERSION };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
       expansions.CLIENT_ENCRYPTION = true;
     }
 
-    if (os.match(/^windows/) && SKIPPED_WINDOWS_NODE_VERSIONS.has(NODE_LTS_NAME)) {
+    if (os.match(/^windows/) && SKIPPED_WINDOWS_NODE_VERSIONS.has(NODE_LTS_VERSION)) {
       continue;
     }
 
@@ -412,7 +409,7 @@ for (const {
       name: `${osName}-node-latest`,
       display_name: `${osDisplayName} Node Latest`,
       run_on,
-      expansions: { NODE_LTS_NAME: 'latest' },
+      expansions: { NODE_LTS_VERSION: 'latest' },
       tasks: tasks.map(({ name }) => name)
     };
     if (clientEncryption) {
@@ -426,11 +423,11 @@ for (const {
 BUILD_VARIANTS.push({
   name: 'macos-1100',
   display_name: `MacOS 11 Node${
-    versions.find(version => version.codeName === LATEST_LTS).versionNumber
+    versions.find(version => version.versionNumber === LATEST_LTS).versionNumber
   }`,
   run_on: 'macos-1100',
   expansions: {
-    NODE_LTS_NAME: LATEST_LTS,
+    NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
   },
   tasks: ['test-rapid-server']
@@ -446,7 +443,7 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         { func: 'run unit tests' }
@@ -459,7 +456,7 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         { func: 'run lint checks' }
@@ -480,7 +477,7 @@ function* makeTypescriptTasks() {
           {
             func: 'install dependencies',
             vars: {
-              NODE_LTS_NAME: LOWEST_LTS
+              NODE_LTS_VERSION: LOWEST_LTS
             }
           },
           {
@@ -500,7 +497,7 @@ function* makeTypescriptTasks() {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LATEST_LTS
+            NODE_LTS_VERSION: LATEST_LTS
           }
         },
         {
@@ -519,7 +516,7 @@ function* makeTypescriptTasks() {
       {
         func: 'install dependencies',
         vars: {
-          NODE_LTS_NAME: LATEST_LTS
+          NODE_LTS_VERSION: LATEST_LTS
         }
       },
       { func: 'run typescript next' }
@@ -558,7 +555,7 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: 'ubuntu1804-large',
   expansions: {
-    NODE_LTS_NAME: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS
   },
   tasks: AWS_AUTH_TASKS
 });
@@ -572,7 +569,7 @@ const oneOffFuncs = [
     name: 'run-bson-ext-integration',
     func: 'run bson-ext test',
     vars: {
-      NODE_LTS_NAME: LOWEST_LTS,
+      NODE_LTS_VERSION: LOWEST_LTS,
       TEST_NPM_SCRIPT: 'check:test'
     }
   },
@@ -580,7 +577,7 @@ const oneOffFuncs = [
     name: 'run-bson-ext-unit',
     func: 'run bson-ext test',
     vars: {
-      NODE_LTS_NAME: LOWEST_LTS,
+      NODE_LTS_VERSION: LOWEST_LTS,
       TEST_NPM_SCRIPT: 'check:unit'
     }
   }
@@ -593,7 +590,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_NAME: LOWEST_LTS
+        NODE_LTS_VERSION: LOWEST_LTS
       }
     },
     {
@@ -619,7 +616,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_NAME: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS
           }
         },
         {
@@ -668,7 +665,7 @@ BUILD_VARIANTS.push({
   display_name: 'Serverless Test',
   run_on: DEFAULT_OS,
   expansions: {
-    NODE_LTS_NAME: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS
   },
   tasks: ['serverless_task_group']
 });
@@ -694,7 +691,7 @@ BUILD_VARIANTS.push({
 for (const variant of BUILD_VARIANTS.filter(
   variant =>
     variant.expansions &&
-    ['gallium', 'hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+    [16, 18, 'latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
@@ -703,14 +700,14 @@ for (const variant of BUILD_VARIANTS.filter(
 
 // TODO(NODE-4894): fix kerberos tests on Node18
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['hydrogen', 'latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && [18, 'latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-auth-kerberos'].includes(name));
 }
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_NAME)
+  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
 }
