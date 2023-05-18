@@ -25,7 +25,7 @@ describe('CallbackLockCache', function () {
 
       it('raises an error', function () {
         try {
-          cache.getCallbacks(connection, credentials);
+          cache.getEntry(connection, credentials);
           expect.fail('Must raise error when no request callback exists.');
         } catch (error) {
           expect(error).to.be.instanceOf(MongoInvalidArgumentError);
@@ -71,7 +71,7 @@ describe('CallbackLockCache', function () {
           }
         });
         const cache = new CallbackLockCache();
-        const { requestCallback, refreshCallback, callbackHash } = cache.getCallbacks(
+        const { requestCallback, refreshCallback, callbackHash } = cache.getEntry(
           connection,
           credentials
         );
@@ -120,7 +120,7 @@ describe('CallbackLockCache', function () {
           }
         });
         const cache = new CallbackLockCache();
-        const { requestCallback, refreshCallback, callbackHash } = cache.getCallbacks(
+        const { requestCallback, refreshCallback, callbackHash } = cache.getEntry(
           connection,
           credentials
         );
