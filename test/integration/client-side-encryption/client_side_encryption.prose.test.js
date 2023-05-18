@@ -1181,7 +1181,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
-            error.cause.cause.errors.every(e => e.code === 'ECONNREFUSED')
+            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
 
         expect(insertError).not.to.be.instanceOf(
@@ -1282,7 +1282,7 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
           .that.satisfies(
             error =>
               /ECONNREFUSED/.test(error.message) ||
-              error.cause.cause.errors.every(e => e.code === 'ECONNREFUSED')
+              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
           );
       });
     });
