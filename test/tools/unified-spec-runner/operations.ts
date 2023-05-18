@@ -791,8 +791,6 @@ export async function executeOperationAndCheck(
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
 
   if (typeof operation.arguments?.session === 'string') {
-    // Cannot do this b/c operations pass through unsanitized options to command construction:
-    // operation.arguments.__sessionId = operation.arguments.session;
     operation.arguments.session = entities.getEntity('session', operation.arguments.session);
   }
 
