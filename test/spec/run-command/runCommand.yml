@@ -210,7 +210,7 @@ tests:
           commandName: insert
           command:
             insert: *collection
-            documents: [ { _id: 1 } ]
+            documents: [ { foo: 'bar' } ]
             ordered: true
         expectResult: { ok: 1 }
     expectEvents:
@@ -263,7 +263,7 @@ tests:
                 commandName: insert
                 command:
                   insert: *collection
-                  documents: [ { _id: 2 } ]
+                  documents: [ { foo: 'transaction' } ]
                   ordered: true
               expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } } }
     expectEvents:
@@ -272,7 +272,7 @@ tests:
           - commandStartedEvent:
               command:
                 insert: *collection
-                documents: [ { _id: 2 } ]
+                documents: [ { foo: 'transaction' } ]
                 ordered: true
                 lsid: { $$sessionLsid: *session }
                 txnNumber: 1

@@ -408,7 +408,7 @@
               "insert": "collection",
               "documents": [
                 {
-                  "_id": 1
+                  "foo": "bar"
                 }
               ],
               "ordered": true
@@ -514,7 +514,7 @@
                     "insert": "collection",
                     "documents": [
                       {
-                        "_id": 2
+                        "foo": "transaction"
                       }
                     ],
                     "ordered": true
@@ -542,7 +542,7 @@
                   "insert": "collection",
                   "documents": [
                     {
-                      "_id": 2
+                      "foo": "transaction"
                     }
                   ],
                   "ordered": true,
