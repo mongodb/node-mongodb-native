@@ -44,7 +44,7 @@
         {
           "name": "listSearchIndexes",
           "object": "collection0",
-          "arguments": [],
+          "arguments": {},
           "expectError": {
             "isError": true
           }
