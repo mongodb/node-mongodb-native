@@ -691,7 +691,7 @@ operations.set('createCommandCursor', async ({ entities, operation }: OperationF
   const collection = entities.getEntity('db', operation.object);
   const { command, ...opts } = operation.arguments!;
   const cursor = collection.runCursorCommand(command, {
-    readPreference: ReadPreference.fromOptions(opts),
+    readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
     session: opts.session
   });
 
