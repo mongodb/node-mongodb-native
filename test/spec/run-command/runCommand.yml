@@ -68,6 +68,9 @@ tests:
               commandName: ping
 
   - description: always gossips the $clusterTime on the sent command
+    runOnRequirements:
+      # Only replicasets and sharded clusters have a $clusterTime
+      - topologies: [ replicaset, sharded ]
     operations:
       # We have to run one command to obtain a clusterTime to gossip
       - name: runCommand
