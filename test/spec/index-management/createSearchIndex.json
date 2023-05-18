@@ -46,7 +46,11 @@
           "object": "collection0",
           "arguments": {
             "definition": {
-              "definition": {}
+              "definition": {
+                "mappings": {
+                  "dynamic": true
+                }
+              }
             }
           },
           "expectError": {
@@ -65,9 +69,14 @@
                   "createSearchIndexes": "collection0",
                   "indexes": [
                     {
-                      "definition": {}
+                      "definition": {
+                        "mappings": {
+                          "dynamic": true
+                        }
+                      }
                     }
-                  ]
+                  ],
+                  "$db": "database0"
                 }
               }
             }
@@ -83,7 +92,11 @@
           "object": "collection0",
           "arguments": {
             "definition": {
-              "definition": {},
+              "definition": {
+                "mappings": {
+                  "dynamic": true
+                }
+              },
               "name": "test index"
             }
           },
@@ -103,10 +116,15 @@
                   "createSearchIndexes": "collection0",
                   "indexes": [
                     {
-                      "definition": {},
+                      "definition": {
+                        "mappings": {
+                          "dynamic": true
+                        }
+                      },
                       "name": "test index"
                     }
-                  ]
+                  ],
+                  "$db": "database0"
                 }
               }
             }

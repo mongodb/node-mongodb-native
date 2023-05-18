@@ -55,9 +55,8 @@ tests:
               command:
                 aggregate: *collection0
                 pipeline:
-                  - $$matchAsRoot: 
-                      $listSearchIndexes: 
-                        { name: *indexName }
+                  - $listSearchIndexes: { name: *indexName }
+                $db: *database0
 
   - description: aggregation cursor options are supported
     operations:
@@ -79,6 +78,6 @@ tests:
                 aggregate: *collection0
                 cursor: { batchSize: 10 }
                 pipeline:
-                  - $$matchAsRoot: 
-                      $listSearchIndexes: 
-                        { name: *indexName }
+                  - $listSearchIndexes: { name: *indexName }
+                $db: *database0
+

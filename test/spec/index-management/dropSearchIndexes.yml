@@ -37,3 +37,5 @@ tests:
               command:
                 dropSearchIndex: *collection0
                 name: *indexName
+                $db: *database0
+

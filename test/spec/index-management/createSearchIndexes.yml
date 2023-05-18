@@ -37,13 +37,15 @@ tests:
               command:
                 createSearchIndexes: *collection0
                 indexes: []
+                $db: *database0
+
 
   - description: "no name provided for an index definition"
     operations:
       - name: createSearchIndexes
         object: *collection0
         arguments:
-          indexDefinitions: [ { definition: {} } ]
+          indexDefinitions: [ { definition: &definition { mappings: { dynamic: true } } } ]
         expectError:
           isError: true
     expectEvents:
@@ -53,14 +55,16 @@ tests:
           - commandStartedEvent:
               command:
                 createSearchIndexes: *collection0
-                indexes: [ { definition: {} } ]
+                indexes: [ { definition: *definition } ]
+                $db: *database0
+
 
   - description: "name provided for an index definition"
     operations:
       - name: createSearchIndexes
         object: *collection0
         arguments: 
-          indexDefinitions: [ { definition: {}, name: 'test index' } ]
+          indexDefinitions: [ { definition: &definition { mappings: { dynamic: true } } , name: 'test index' } ]
         expectError:
           isError: true
     expectEvents:
@@ -70,7 +74,9 @@ tests:
           - commandStartedEvent:
               command:
                 createSearchIndexes: *collection0
-                indexes: [ { definition: {}, name: 'test index' } ]
+                indexes: [ { definition: *definition, name: 'test index' } ]
+                $db: *database0
+
     
 
  

@@ -97,13 +97,12 @@
                   "aggregate": "collection0",
                   "pipeline": [
                     {
-                      "$$matchAsRoot": {
-                        "$listSearchIndexes": {
-                          "name": "test index"
-                        }
+                      "$listSearchIndexes": {
+                        "name": "test index"
                       }
                     }
-                  ]
+                  ],
+                  "$db": "database0"
                 }
               }
             }
@@ -143,13 +142,12 @@
                   },
                   "pipeline": [
                     {
-                      "$$matchAsRoot": {
-                        "$listSearchIndexes": {
-                          "name": "test index"
-                        }
+                      "$listSearchIndexes": {
+                        "name": "test index"
                       }
                     }
-                  ]
+                  ],
+                  "$db": "database0"
                 }
               }
             }

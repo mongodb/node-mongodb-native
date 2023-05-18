@@ -61,7 +61,8 @@
               "commandStartedEvent": {
                 "command": {
                   "dropSearchIndex": "collection0",
-                  "name": "test index"
+                  "name": "test index",
+                  "$db": "database0"
                 }
               }
             }

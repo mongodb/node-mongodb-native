@@ -63,7 +63,8 @@
                 "command": {
                   "updateSearchIndex": "collection0",
                   "name": "test index",
-                  "definition": {}
+                  "definition": {},
+                  "$db": "database0"
                 }
               }
             }
