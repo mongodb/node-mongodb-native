@@ -700,7 +700,7 @@ for (const variant of BUILD_VARIANTS.filter(
 
 // TODO(NODE-4894): fix kerberos tests on Node18
 for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && [18, 'latest'].includes(variant.expansions.NODE_LTS_VERSION)
+  variant => variant.expansions && [18, 20, 'latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-auth-kerberos'].includes(name));
 }
