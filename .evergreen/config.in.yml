@@ -1034,7 +1034,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: hydrogen
+          NODE_LTS_VERSION: 18
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
