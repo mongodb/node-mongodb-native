@@ -748,38 +748,38 @@ operations.set('removeKeyAltName', async ({ entities, operation }) => {
 
 operations.set('getKeyByAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { keyAltName } = operation.arguments!;
+  const { keyAltName } = operation.arguments ?? {};
 
   return clientEncryption.getKeyByAltName(keyAltName);
 });
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName, options } = operation.arguments!;
+  const { indexName, options } = operation.arguments ?? {};
   return collection.listSearchIndexes(indexName, options).toArray();
 });
 
 operations.set('dropSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName } = operation.arguments!;
+  const { indexName } = operation.arguments ?? {};
   return collection.dropSearchIndex(indexName);
 });
 
 operations.set('updateSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName, definition } = operation.arguments!;
+  const { indexName, definition } = operation.arguments ?? {};
   return collection.updateSearchIndex(indexName, definition);
 });
 
 operations.set('createSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { definition } = operation.arguments!;
+  const { definition } = operation.arguments ?? {};
   return collection.createSearchIndex(definition);
 });
 
 operations.set('createSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexDefinitions } = operation.arguments!;
+  const { indexDefinitions } = operation.arguments ?? {};
   return collection.createSearchIndexes(indexDefinitions);
 });
 
