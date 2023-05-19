@@ -108,7 +108,7 @@ export class RunCommandCursor extends AbstractCursor {
     });
     executeOperation(this.client, operation).then(
       response => {
-        if (!response.cursor) {
+        if (response.cursor == null) {
           callback(
             new MongoUnexpectedServerResponseError('Expected server to respond with cursor')
           );
