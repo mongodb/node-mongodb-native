@@ -6,7 +6,7 @@ createEntities:
   - client:
       id: &client client
       useMultipleMongoses: false
-      observeEvents: [commandStartedEvent]
+      observeEvents: [commandStartedEvent, connectionReadyEvent, connectionCheckedOutEvent, connectionCheckedInEvent]
   - session:
       id: &session session
       client: *client
@@ -137,6 +137,7 @@ tests:
         arguments:
           commandName: find
           batchSize: 2
+          session: *session
           command: { find: *collection, batchSize: 2 }
         saveResultAsEntity: &cursor cursor
       - name: assertNumberConnectionsCheckedOut
@@ -174,14 +175,22 @@ tests:
                 batchSize: 2
                 $db: *db
                 lsid: { $$sessionLsid: *session }
-              commandName: find
+              commandName: find # 2 documents
           - commandStartedEvent:
               command:
                 getMore: { $$type: [int, long] }
                 collection: *collection
                 $db: *db
                 lsid: { $$sessionLsid: *session }
-              commandName: getMore
+              commandName: getMore # 2 documents
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: getMore # 1 document
+              # Total documents: 5
       - client: *client
         eventType: cmap
         events:

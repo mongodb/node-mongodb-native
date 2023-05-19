@@ -7,7 +7,10 @@
         "id": "client",
         "useMultipleMongoses": false,
         "observeEvents": [
-          "commandStartedEvent"
+          "commandStartedEvent",
+          "connectionReadyEvent",
+          "connectionCheckedOutEvent",
+          "connectionCheckedInEvent"
         ]
       }
     },
@@ -307,6 +310,7 @@
           "arguments": {
             "commandName": "find",
             "batchSize": 2,
+            "session": "session",
             "command": {
               "find": "collection",
               "batchSize": 2
@@ -387,6 +391,24 @@
                   }
                 },
                 "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "collection",
+                  "$db": "db",
+                  "lsid": {
+                    "$$sessionLsid": "session"
+                  }
+                },
+                "commandName": "getMore"
               }
             },
             {
