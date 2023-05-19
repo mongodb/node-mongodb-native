@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
-NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
+NODE_LTS_VERSION=${NODE_LTS_VERSION:-12}
 NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
 if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
 
