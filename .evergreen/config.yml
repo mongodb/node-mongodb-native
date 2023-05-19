@@ -1170,6 +1170,7 @@ tasks:
             - src/.evergreen/run-azure-kms-tests.sh
   - name: oidc-auth-test-azure-latest
     commands:
+      - func: install dependencies
       - command: shell.exec
         params:
           shell: bash

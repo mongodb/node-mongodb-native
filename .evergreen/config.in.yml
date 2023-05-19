@@ -1246,18 +1246,18 @@ tasks:
 
   - name: "oidc-auth-test-azure-latest"
     commands:
-    - command: shell.exec
-      params:
-        shell: bash
-        script: |-
-          set -o errexit
-          ${PREPARE_SHELL}
-          cd src
-          export AZUREOIDC_DRIVERS_TAR_FILE=/tmp/node-mongodb-native.tgz
-          tar czf $AZUREOIDC_DRIVERS_TAR_FILE .
-          export AZUREOIDC_TEST_CMD="source ./env.sh && PROVIDER_NAME=azure ./.evergreen/run-oidc-tests.sh"
-          bash $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/run-driver-test.sh
-
+      - func: "install dependencies"
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            cd src
+            export AZUREOIDC_DRIVERS_TAR_FILE=/tmp/node-mongodb-native.tgz
+            tar czf $AZUREOIDC_DRIVERS_TAR_FILE .
+            export AZUREOIDC_TEST_CMD="source ./env.sh && PROVIDER_NAME=azure ./.evergreen/run-oidc-tests.sh"
+            bash $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/run-driver-test.sh
 
 task_groups:
   - name: serverless_task_group
