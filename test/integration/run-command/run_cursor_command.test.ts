@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { CommandStartedEvent, Db, MongoClient } from '../../mongodb';
 
-describe('class RunCommandCursor', () => {
+describe('runCursorCommand API', () => {
   let client: MongoClient;
   let db: Db;
   let commandsStarted: CommandStartedEvent[];

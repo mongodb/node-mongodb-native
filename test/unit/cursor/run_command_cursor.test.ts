@@ -35,7 +35,7 @@ describe('class RunCommandCursor', () => {
       expect(cursor).to.have.nested.property('getMoreOptions.maxAwaitTimeMS', 2);
     });
 
-    it('does not throw on incorrect maxTimeMS type', () => {
+    it('does not validate maxTimeMS type', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       // @ts-expect-error: testing for incorrect type
       cursor.setMaxTimeMS('abc');
@@ -50,7 +50,7 @@ describe('class RunCommandCursor', () => {
       expect(cursor).to.have.nested.property('getMoreOptions.batchSize', 2);
     });
 
-    it('does not throw on incorrect batchSize type', () => {
+    it('does not validate batchSize type', () => {
       const cursor = client.db().runCursorCommand({ a: 1 });
       // @ts-expect-error: testing for incorrect type
       cursor.setBatchSize('abc');

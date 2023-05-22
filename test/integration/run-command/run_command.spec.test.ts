@@ -3,9 +3,6 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 describe('RunCommand spec', () => {
   runUnifiedSuite(loadSpecTests('run-command'), test => {
-    if (test.description.includes('timeoutMS') || test.description.includes('timeoutMode')) {
-      return 'CSOT not implemented in Node.js yet';
-    }
     if (test.description === 'does not attach $readPreference to given command on standalone') {
       return 'TODO(NODE-5263): Do not send $readPreference to standalone servers';
     }

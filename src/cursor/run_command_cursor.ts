@@ -65,27 +65,31 @@ export class RunCommandCursor extends AbstractCursor {
     });
   }
 
+  /** Unsupported for RunCommandCursor: readConcern must be configured directly on command document */
   public override withReadConcern(_: ReadConcernLike): never {
     throw new MongoAPIError(
       'RunCommandCursor does not support readConcern it must be attached to the command being run'
     );
   }
 
+  /** Unsupported for RunCommandCursor: various cursor flags must be configured directly on command document */
   public override addCursorFlag(_: string, __: boolean): never {
     throw new MongoAPIError(
       'RunCommandCursor does not support cursor flags, they must be attached to the command being run'
     );
   }
 
+  /** Unsupported for RunCommandCursor: maxTimeMS must be configured directly on command document */
   public override maxTimeMS(_: number): never {
     throw new MongoAPIError(
-      'RunCommandCursor does not support maxTimeMS, it must be attached to the command being run'
+      'maxTimeMS must be configured on the command document directly, to configure getMore.maxTimeMS use cursor.setMaxTimeMS()'
     );
   }
 
+  /** Unsupported for RunCommandCursor: batchSize must be configured directly on command document */
   public override batchSize(_: number): never {
     throw new MongoAPIError(
-      'RunCommandCursor does not support batchSize, it must be attached to the command being run'
+      'batchSize must be configured on the command document directly, to configure getMore.batchSize use cursor.setBatchSize()'
     );
   }
 

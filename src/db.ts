@@ -526,7 +526,7 @@ export class Db {
   }
 
   /**
-   * A low level cursor API providing basic driver functionality.
+   * A low level cursor API providing basic driver functionality:
    * - ClientSession management
    * - ReadPreference for server selection
    * - Running getMores automatically when a local batch is exhausted

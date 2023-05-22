@@ -676,7 +676,7 @@ operations.set('runCursorCommand', async ({ entities, operation }: OperationFunc
   const db = entities.getEntity('db', operation.object);
   const { command, ...opts } = operation.arguments!;
   const cursor = db.runCursorCommand(command, {
-    readPreference: ReadPreference.fromOptions(opts),
+    readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
     session: opts.session
   });
 
@@ -790,7 +790,7 @@ export async function executeOperationAndCheck(
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
 
-  if (typeof operation.arguments?.session === 'string') {
+  if (operation.arguments?.session) {
     operation.arguments.session = entities.getEntity('session', operation.arguments.session);
   }
 
