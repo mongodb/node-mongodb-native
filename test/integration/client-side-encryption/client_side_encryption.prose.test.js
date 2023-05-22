@@ -1178,7 +1178,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .to.be.instanceOf(Error)
           .to.have.property('name', 'MongoServerSelectionError');
 
-        expect(insertError).to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+        // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
+        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
+          error =>
+            /ECONNREFUSED/.test(error.message) ||
+            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
+        );
 
         expect(insertError).not.to.be.instanceOf(
           MongoServerSelectionError,
@@ -1270,9 +1275,17 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
         const error = await client.connect().catch(e => e);
 
-        expect(error)
+        // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
+        expect(
+          error,
+          'Error MUST be a MongoServerSelectionError error that contains ECONNREFUSED information'
+        )
           .to.be.instanceOf(MongoServerSelectionError)
-          .to.match(/connect ECONNREFUSED 127.0.0.1:27021/);
+          .that.satisfies(
+            error =>
+              /ECONNREFUSED/.test(error.message) ||
+              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
+          );
       });
     });
 
