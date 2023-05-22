@@ -97,244 +97,247 @@ function deadlockTest(
   };
 }
 
-function deadlockTests(metadata) {
-  describe.only('Connection Pool Deadlock Prevention', function () {
-    installNodeDNSWorkaroundHooks();
-    beforeEach(async function () {
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-      const url: string = this.configuration.url();
+const metadata = {
+  requires: {
+    clientSideEncryption: true,
+    mongodb: '>=4.2.0',
+    topology: '!load-balanced'
+  }
+};
+describe.only('Connection Pool Deadlock Prevention', function () {
+  installNodeDNSWorkaroundHooks();
+  beforeEach(async function () {
+    const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+    const url: string = this.configuration.url();
 
-      this.clientTest = new CapturingMongoClient(url);
-      this.clientKeyVault = new CapturingMongoClient(url, {
-        monitorCommands: true,
-        maxPoolSize: 1
-      });
-
-      this.clientEncryption = undefined;
-      this.ciphertext = undefined;
-
-      await this.clientTest.connect();
-      await this.clientKeyVault.connect();
-      await dropCollection(this.clientTest.db('keyvault'), 'datakeys');
-      await dropCollection(this.clientTest.db('db'), 'coll');
-
-      await this.clientTest
-        .db('keyvault')
-        .collection('datakeys')
-        .insertOne(externalKey, {
-          writeConcern: { w: 'majority' }
-        });
-
-      await this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } });
-
-      this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
-        kmsProviders: { local: { key: LOCAL_KEY } },
-        keyVaultNamespace: 'keyvault.datakeys',
-        keyVaultClient: this.keyVaultClient,
-        extraOptions: getEncryptExtraOptions()
-      });
-      this.clientEncryption.encryptPromisified = util.promisify(
-        this.clientEncryption.encrypt.bind(this.clientEncryption)
-      );
-
-      this.ciphertext = await this.clientEncryption.encryptPromisified('string0', {
-        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-        keyAltName: 'local'
-      });
+    this.clientTest = new CapturingMongoClient(url);
+    this.clientKeyVault = new CapturingMongoClient(url, {
+      monitorCommands: true,
+      maxPoolSize: 1
     });
 
-    afterEach(function () {
-      return Promise.all([this.clientKeyVault.close(), this.clientTest.close()]).then(() => {
-        this.clientKeyVault = undefined;
-        this.clientTest = undefined;
-        this.clientEncryption = undefined;
+    this.clientEncryption = undefined;
+    this.ciphertext = undefined;
+
+    await this.clientTest.connect();
+    await this.clientKeyVault.connect();
+    await dropCollection(this.clientTest.db('keyvault'), 'datakeys');
+    await dropCollection(this.clientTest.db('db'), 'coll');
+
+    await this.clientTest
+      .db('keyvault')
+      .collection('datakeys')
+      .insertOne(externalKey, {
+        writeConcern: { w: 'majority' }
       });
+
+    await this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } });
+
+    this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
+      kmsProviders: { local: { key: LOCAL_KEY } },
+      keyVaultNamespace: 'keyvault.datakeys',
+      keyVaultClient: this.keyVaultClient,
+      extraOptions: getEncryptExtraOptions()
     });
-
-    const CASE1 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: false };
-    it(
-      `Case 1: ${JSON.stringify(CASE1)}`,
-      metadata,
-      deadlockTest(CASE1, clientEncrypted => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(4);
-
-        expect(events[0].command).to.have.property('listCollections');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('find');
-        expect(events[1].command.$db).to.equal('keyvault');
-
-        expect(events[2].command).to.have.property('insert');
-        expect(events[2].command.$db).to.equal('db');
-
-        expect(events[3].command).to.have.property('find');
-        expect(events[3].command.$db).to.equal('db');
-      })
+    this.clientEncryption.encryptPromisified = util.promisify(
+      this.clientEncryption.encrypt.bind(this.clientEncryption)
     );
 
-    const CASE2 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: true };
-    it(
-      `Case 2: ${JSON.stringify(CASE2)}`,
-      metadata,
-      deadlockTest(CASE2, (clientEncrypted, clientKeyVault) => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(3);
-
-        expect(events[0].command).to.have.property('listCollections');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('insert');
-        expect(events[1].command.$db).to.equal('db');
-
-        expect(events[2].command).to.have.property('find');
-        expect(events[2].command.$db).to.equal('db');
-
-        const keyVaultEvents = clientKeyVault[kEvents];
-        expect(keyVaultEvents).to.have.lengthOf(1);
-
-        expect(keyVaultEvents[0].command).to.have.property('find');
-        expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
-      })
-    );
-
-    const CASE3 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: false };
-    it(
-      `Case 3: ${JSON.stringify(CASE3)}`,
-      metadata,
-      deadlockTest(CASE3, clientEncrypted => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(2);
-
-        expect(events[0].command).to.have.property('find');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('find');
-        expect(events[1].command.$db).to.equal('keyvault');
-      })
-    );
-
-    const CASE4 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: true };
-    it(
-      `Case 4: ${JSON.stringify(CASE4)}`,
-      metadata,
-      deadlockTest(CASE4, (clientEncrypted, clientKeyVault) => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(1);
-
-        expect(events[0].command).to.have.property('find');
-        expect(events[0].command.$db).to.equal('db');
-
-        const keyVaultEvents = clientKeyVault[kEvents];
-        expect(keyVaultEvents).to.have.lengthOf(1);
-
-        expect(keyVaultEvents[0].command).to.have.property('find');
-        expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
-      })
-    );
-
-    const CASE5 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: false };
-    it(
-      `Case 5: ${JSON.stringify(CASE5)}`,
-      metadata,
-      deadlockTest(CASE5, clientEncrypted => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(5);
-
-        expect(events[0].command).to.have.property('listCollections');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('listCollections');
-        expect(events[1].command.$db).to.equal('keyvault');
-
-        expect(events[2].command).to.have.property('find');
-        expect(events[2].command.$db).to.equal('keyvault');
-
-        expect(events[3].command).to.have.property('insert');
-        expect(events[3].command.$db).to.equal('db');
-
-        expect(events[4].command).to.have.property('find');
-        expect(events[4].command.$db).to.equal('db');
-      })
-    );
-
-    const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
-    it(
-      `Case 6: ${JSON.stringify(CASE6)}`,
-
-      metadata,
-      deadlockTest(CASE6, (clientEncrypted, clientKeyVault) => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(3);
-
-        expect(events[0].command).to.have.property('listCollections');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('insert');
-        expect(events[1].command.$db).to.equal('db');
-
-        expect(events[2].command).to.have.property('find');
-        expect(events[2].command.$db).to.equal('db');
-
-        const keyVaultEvents = clientKeyVault[kEvents];
-        expect(keyVaultEvents).to.have.lengthOf(1);
-
-        expect(keyVaultEvents[0].command).to.have.property('find');
-        expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
-      })
-    );
-
-    const CASE7 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: false };
-    it(
-      `Case 7: ${JSON.stringify(CASE7)}`,
-      metadata,
-      deadlockTest(CASE7, clientEncrypted => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(2);
-
-        expect(events[0].command).to.have.property('find');
-        expect(events[0].command.$db).to.equal('db');
-
-        expect(events[1].command).to.have.property('find');
-        expect(events[1].command.$db).to.equal('keyvault');
-      })
-    );
-
-    const CASE8 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: true };
-    it(
-      `Case 8: ${JSON.stringify(CASE8)}`,
-      metadata,
-      deadlockTest(CASE8, (clientEncrypted, clientKeyVault) => {
-        expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
-
-        const events = clientEncrypted[kEvents];
-        expect(events).to.have.lengthOf(1);
-
-        expect(events[0].command).to.have.property('find');
-        expect(events[0].command.$db).to.equal('db');
-
-        const keyVaultEvents = clientKeyVault[kEvents];
-        expect(keyVaultEvents).to.have.lengthOf(1);
-
-        expect(keyVaultEvents[0].command).to.have.property('find');
-        expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
-      })
-    );
+    this.ciphertext = await this.clientEncryption.encryptPromisified('string0', {
+      algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+      keyAltName: 'local'
+    });
   });
-}
 
-module.exports = { deadlockTests };
+  afterEach(function () {
+    return Promise.all([this.clientKeyVault.close(), this.clientTest.close()]).then(() => {
+      this.clientKeyVault = undefined;
+      this.clientTest = undefined;
+      this.clientEncryption = undefined;
+    });
+  });
+
+  const CASE1 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: false };
+  it(
+    `Case 1: ${JSON.stringify(CASE1)}`,
+    metadata,
+    deadlockTest(CASE1, clientEncrypted => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(4);
+
+      expect(events[0].command).to.have.property('listCollections');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('find');
+      expect(events[1].command.$db).to.equal('keyvault');
+
+      expect(events[2].command).to.have.property('insert');
+      expect(events[2].command.$db).to.equal('db');
+
+      expect(events[3].command).to.have.property('find');
+      expect(events[3].command.$db).to.equal('db');
+    })
+  );
+
+  const CASE2 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: true };
+  it(
+    `Case 2: ${JSON.stringify(CASE2)}`,
+    metadata,
+    deadlockTest(CASE2, (clientEncrypted, clientKeyVault) => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(3);
+
+      expect(events[0].command).to.have.property('listCollections');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('insert');
+      expect(events[1].command.$db).to.equal('db');
+
+      expect(events[2].command).to.have.property('find');
+      expect(events[2].command.$db).to.equal('db');
+
+      const keyVaultEvents = clientKeyVault[kEvents];
+      expect(keyVaultEvents).to.have.lengthOf(1);
+
+      expect(keyVaultEvents[0].command).to.have.property('find');
+      expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
+    })
+  );
+
+  const CASE3 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: false };
+  it(
+    `Case 3: ${JSON.stringify(CASE3)}`,
+    metadata,
+    deadlockTest(CASE3, clientEncrypted => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(2);
+
+      expect(events[0].command).to.have.property('find');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('find');
+      expect(events[1].command.$db).to.equal('keyvault');
+    })
+  );
+
+  const CASE4 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: true };
+  it(
+    `Case 4: ${JSON.stringify(CASE4)}`,
+    metadata,
+    deadlockTest(CASE4, (clientEncrypted, clientKeyVault) => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(1);
+
+      expect(events[0].command).to.have.property('find');
+      expect(events[0].command.$db).to.equal('db');
+
+      const keyVaultEvents = clientKeyVault[kEvents];
+      expect(keyVaultEvents).to.have.lengthOf(1);
+
+      expect(keyVaultEvents[0].command).to.have.property('find');
+      expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
+    })
+  );
+
+  const CASE5 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: false };
+  it(
+    `Case 5: ${JSON.stringify(CASE5)}`,
+    metadata,
+    deadlockTest(CASE5, clientEncrypted => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(5);
+
+      expect(events[0].command).to.have.property('listCollections');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('listCollections');
+      expect(events[1].command.$db).to.equal('keyvault');
+
+      expect(events[2].command).to.have.property('find');
+      expect(events[2].command.$db).to.equal('keyvault');
+
+      expect(events[3].command).to.have.property('insert');
+      expect(events[3].command.$db).to.equal('db');
+
+      expect(events[4].command).to.have.property('find');
+      expect(events[4].command.$db).to.equal('db');
+    })
+  );
+
+  const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
+  it(
+    `Case 6: ${JSON.stringify(CASE6)}`,
+
+    metadata,
+    deadlockTest(CASE6, (clientEncrypted, clientKeyVault) => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(3);
+
+      expect(events[0].command).to.have.property('listCollections');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('insert');
+      expect(events[1].command.$db).to.equal('db');
+
+      expect(events[2].command).to.have.property('find');
+      expect(events[2].command.$db).to.equal('db');
+
+      const keyVaultEvents = clientKeyVault[kEvents];
+      expect(keyVaultEvents).to.have.lengthOf(1);
+
+      expect(keyVaultEvents[0].command).to.have.property('find');
+      expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
+    })
+  );
+
+  const CASE7 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: false };
+  it(
+    `Case 7: ${JSON.stringify(CASE7)}`,
+    metadata,
+    deadlockTest(CASE7, clientEncrypted => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(2);
+
+      expect(events[0].command).to.have.property('find');
+      expect(events[0].command.$db).to.equal('db');
+
+      expect(events[1].command).to.have.property('find');
+      expect(events[1].command.$db).to.equal('keyvault');
+    })
+  );
+
+  const CASE8 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: true };
+  it(
+    `Case 8: ${JSON.stringify(CASE8)}`,
+    metadata,
+    deadlockTest(CASE8, (clientEncrypted, clientKeyVault) => {
+      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+
+      const events = clientEncrypted[kEvents];
+      expect(events).to.have.lengthOf(1);
+
+      expect(events[0].command).to.have.property('find');
+      expect(events[0].command.$db).to.equal('db');
+
+      const keyVaultEvents = clientKeyVault[kEvents];
+      expect(keyVaultEvents).to.have.lengthOf(1);
+
+      expect(keyVaultEvents[0].command).to.have.property('find');
+      expect(keyVaultEvents[0].command.$db).to.equal('keyvault');
+    })
+  );
+});
