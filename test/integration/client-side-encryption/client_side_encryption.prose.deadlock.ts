@@ -1,13 +1,13 @@
-'use strict';
+import * as BSON from 'bson';
+import { expect } from 'chai';
+import { readFileSync } from 'fs';
+import * as path from 'path';
+import * as util from 'util';
 
-const BSON = require('bson');
-const { expect } = require('chai');
-const { dropCollection } = require('../shared');
-const util = require('util');
-const fs = require('fs');
-const path = require('path');
-const { getEncryptExtraOptions } = require('../../tools/utils');
-const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
+import { CommandStartedEvent, MongoClient, MongoClientOptions } from '../../mongodb';
+import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+import { getEncryptExtraOptions } from '../../tools/utils';
+import { dropCollection } from '../shared';
 
 /* REFERENCE: (note commit hash) */
 /* https://github.com/mongodb/specifications/blob/b3beada72ae1c992294ae6a8eea572003a274c35/source/client-side-encryption/tests/README.rst#deadlock-tests */
@@ -18,34 +18,35 @@ const LOCAL_KEY = Buffer.from(
 );
 
 const externalKey = BSON.EJSON.parse(
-  fs.readFileSync(
-    path.resolve(__dirname, '../../spec/client-side-encryption/external/external-key.json')
+  readFileSync(
+    path.resolve(__dirname, '../../spec/client-side-encryption/external/external-key.json'),
+    { encoding: 'utf-8' }
   )
 );
 const $jsonSchema = BSON.EJSON.parse(
-  fs.readFileSync(
-    path.resolve(__dirname, '../../spec/client-side-encryption/external/external-schema.json')
+  readFileSync(
+    path.resolve(__dirname, '../../spec/client-side-encryption/external/external-schema.json'),
+    { encoding: 'utf-8' }
   )
 );
 
 const kEvents = Symbol('events');
 const kClientsCreated = Symbol('clientsCreated');
-const CapturingMongoClient = class extends require('../../mongodb').MongoClient {
-  constructor(url, options) {
+class CapturingMongoClient extends MongoClient {
+  [kEvents]: Array<CommandStartedEvent> = [];
+  [kClientsCreated] = 0;
+  constructor(url, options: MongoClientOptions = {}) {
     options = { ...options, monitorCommands: true };
     if (process.env.MONGODB_API_VERSION) {
-      options.serverApi = process.env.MONGODB_API_VERSION;
+      options.serverApi = process.env.MONGODB_API_VERSION as MongoClientOptions['serverApi'];
     }
 
     super(url, options);
 
-    this[kEvents] = [];
     this.on('commandStarted', ev => this[kEvents].push(ev));
-
-    this[kClientsCreated] = 0;
     this.on('topologyOpening', () => this[kClientsCreated]++);
   }
-};
+}
 
 function deadlockTest(options, assertions) {
   return function () {
