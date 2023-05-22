@@ -95,62 +95,53 @@ function deadlockTests(_metadata) {
   describe('Connection Pool Deadlock Prevention', function () {
     installNodeDNSWorkaroundHooks();
     beforeEach(function () {
-      try {
-        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-        const url = this.configuration.url();
+      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
+      const url = this.configuration.url();
 
-        this.clientTest = new CapturingMongoClient(url);
-        this.clientKeyVault = new CapturingMongoClient(url, {
-          monitorCommands: true,
-          maxPoolSize: 1
-        });
+      this.clientTest = new CapturingMongoClient(url);
+      this.clientKeyVault = new CapturingMongoClient(url, {
+        monitorCommands: true,
+        maxPoolSize: 1
+      });
 
-        this.clientEncryption = undefined;
-        this.ciphertext = undefined;
+      this.clientEncryption = undefined;
+      this.ciphertext = undefined;
 
-        return this.clientTest
-          .connect()
-          .then(() => this.clientKeyVault.connect())
-          .then(() => dropCollection(this.clientTest.db('keyvault'), 'datakeys'))
-          .then(() => dropCollection(this.clientTest.db('db'), 'coll'))
-          .then(
-            () => this.clientTest.db('keyvault').collection('datakeys').insertOne(externalKey),
-            {
+      return this.clientTest
+        .connect()
+        .then(() => this.clientKeyVault.connect())
+        .then(() => dropCollection(this.clientTest.db('keyvault'), 'datakeys'))
+        .then(() => dropCollection(this.clientTest.db('db'), 'coll'))
+        .then(() =>
+          this.clientTest
+            .db('keyvault')
+            .collection('datakeys')
+            .insertOne(externalKey, {
               writeConcern: { w: 'majority' }
-            }
-          )
-          .then(() =>
-            this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } })
-          )
-          .then(() => {
-            this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
-              kmsProviders: { local: { key: LOCAL_KEY } },
-              keyVaultNamespace: 'keyvault.datakeys',
-              keyVaultClient: this.keyVaultClient,
-              extraOptions: getEncryptExtraOptions()
-            });
-            this.clientEncryption.encryptPromisified = util.promisify(
-              this.clientEncryption.encrypt.bind(this.clientEncryption)
-            );
-
-            return this.clientEncryption.encryptPromisified('string0', {
-              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-              keyAltName: 'local'
-            });
-          })
-          .then(ciphertext => {
-            this.ciphertext = ciphertext;
-          })
-          .catch(error => {
-            // TODO(NODE-3400): Investigate and unskip this flaky error
-            if (error.message === 'not all keys requested were satisfied') this.skip();
-            else return Promise.reject(error);
+            })
+        )
+        .then(() =>
+          this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } })
+        )
+        .then(() => {
+          this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
+            kmsProviders: { local: { key: LOCAL_KEY } },
+            keyVaultNamespace: 'keyvault.datakeys',
+            keyVaultClient: this.keyVaultClient,
+            extraOptions: getEncryptExtraOptions()
           });
-      } catch (error) {
-        // TODO(NODE-3400): Investigate and unskip this flaky error
-        if (error.message === 'not all keys requested were satisfied') this.skip();
-        else return Promise.reject(error);
-      }
+          this.clientEncryption.encryptPromisified = util.promisify(
+            this.clientEncryption.encrypt.bind(this.clientEncryption)
+          );
+
+          return this.clientEncryption.encryptPromisified('string0', {
+            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+            keyAltName: 'local'
+          });
+        })
+        .then(ciphertext => {
+          this.ciphertext = ciphertext;
+        });
     });
 
     afterEach(function () {
