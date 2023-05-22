@@ -728,6 +728,11 @@
     },
     {
       "description": "does not close the cursor when receiving an empty batch",
+      "runOnRequirements": [
+        {
+          "serverless": "forbid"
+        }
+      ],
       "operations": [
         {
           "name": "dropCollection",
