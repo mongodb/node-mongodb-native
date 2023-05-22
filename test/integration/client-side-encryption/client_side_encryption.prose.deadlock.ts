@@ -10,7 +10,7 @@ import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';
 
 /* REFERENCE: (note commit hash) */
-/* https://github.com/mongodb/specifications/blob/b3beada72ae1c992294ae6a8eea572003a274c35/source/client-side-encryption/tests/README.rst#deadlock-tests */
+/* https://github.com/mongodb/specifications/blob/b3beada 72ae1c992294ae6a8eea572003a274c35/source/client-side-encryption/tests/README.rst#deadlock-tests */
 
 const LOCAL_KEY = Buffer.from(
   'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk',
@@ -35,8 +35,8 @@ const kClientsCreated = Symbol('clientsCreated');
 class CapturingMongoClient extends MongoClient {
   [kEvents]: Array<CommandStartedEvent> = [];
   [kClientsCreated] = 0;
-  constructor(url, options: MongoClientOptions = {}) {
-    options = { ...options, monitorCommands: true };
+  constructor(url: string, options: MongoClientOptions = {}) {
+    options = { ...options, monitorCommands: true, [Symbol.for('@@mdb.skipPingOnConnect')]: true };
     if (process.env.MONGODB_API_VERSION) {
       options.serverApi = process.env.MONGODB_API_VERSION as MongoClientOptions['serverApi'];
     }
@@ -48,8 +48,15 @@ class CapturingMongoClient extends MongoClient {
   }
 }
 
-function deadlockTest(options, assertions) {
-  return function () {
+function deadlockTest(
+  {
+    maxPoolSize,
+    bypassAutoEncryption,
+    useKeyVaultClient
+  }: { maxPoolSize: number; useKeyVaultClient: boolean; bypassAutoEncryption: boolean },
+  assertions
+) {
+  return async function () {
     const url = this.configuration.url();
     const clientTest = this.clientTest;
     const ciphertext = this.ciphertext;
@@ -58,46 +65,44 @@ function deadlockTest(options, assertions) {
       autoEncryption: {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: { local: { key: LOCAL_KEY } },
-        bypassAutoEncryption: options.bypassAutoEncryption,
-        keyVaultClient: options.useKeyVaultClient ? this.clientKeyVault : undefined,
+        bypassAutoEncryption,
+        keyVaultClient: useKeyVaultClient ? this.clientKeyVault : undefined,
         extraOptions: getEncryptExtraOptions()
       },
-      maxPoolSize: options.maxPoolSize
+      maxPoolSize
     };
+
     const clientEncrypted = new CapturingMongoClient(url, clientEncryptedOpts);
 
-    return clientEncrypted
-      .connect()
-      .then(() => {
-        if (clientEncryptedOpts.autoEncryption.bypassAutoEncryption === true) {
-          return clientTest
-            .db('db')
-            .collection('coll')
-            .insertOne({ _id: 0, encrypted: ciphertext });
-        }
-        return clientEncrypted
+    await clientEncrypted.connect();
+
+    try {
+      if (bypassAutoEncryption) {
+        await clientTest.db('db').collection('coll').insertOne({ _id: 0, encrypted: ciphertext });
+      } else {
+        await clientEncrypted
           .db('db')
           .collection('coll')
           .insertOne({ _id: 0, encrypted: 'string0' });
-      })
-      .then(() => clientEncrypted.db('db').collection('coll').findOne({ _id: 0 }))
-      .then(res => {
-        expect(res).to.have.property('_id', 0);
-        expect(res).to.have.property('encrypted', 'string0');
-        assertions(clientEncrypted, this.clientKeyVault);
-        return clientEncrypted.close();
-      });
+      }
+
+      const res = await clientEncrypted.db('db').collection('coll').findOne({ _id: 0 });
+
+      expect(res).to.have.property('_id', 0);
+      expect(res).to.have.property('encrypted', 'string0');
+      assertions(clientEncrypted, this.clientKeyVault);
+    } finally {
+      await clientEncrypted.close();
+    }
   };
 }
 
-function deadlockTests(_metadata) {
-  const metadata = { ..._metadata, requires: { ..._metadata.requires, auth: 'disabled' } };
-  metadata.skipReason = 'TODO: NODE-3891 - fix tests broken when AUTH enabled';
-  describe('Connection Pool Deadlock Prevention', function () {
+function deadlockTests(metadata) {
+  describe.only('Connection Pool Deadlock Prevention', function () {
     installNodeDNSWorkaroundHooks();
-    beforeEach(function () {
+    beforeEach(async function () {
       const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-      const url = this.configuration.url();
+      const url: string = this.configuration.url();
 
       this.clientTest = new CapturingMongoClient(url);
       this.clientKeyVault = new CapturingMongoClient(url, {
@@ -108,41 +113,34 @@ function deadlockTests(_metadata) {
       this.clientEncryption = undefined;
       this.ciphertext = undefined;
 
-      return this.clientTest
-        .connect()
-        .then(() => this.clientKeyVault.connect())
-        .then(() => dropCollection(this.clientTest.db('keyvault'), 'datakeys'))
-        .then(() => dropCollection(this.clientTest.db('db'), 'coll'))
-        .then(() =>
-          this.clientTest
-            .db('keyvault')
-            .collection('datakeys')
-            .insertOne(externalKey, {
-              writeConcern: { w: 'majority' }
-            })
-        )
-        .then(() =>
-          this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } })
-        )
-        .then(() => {
-          this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
-            kmsProviders: { local: { key: LOCAL_KEY } },
-            keyVaultNamespace: 'keyvault.datakeys',
-            keyVaultClient: this.keyVaultClient,
-            extraOptions: getEncryptExtraOptions()
-          });
-          this.clientEncryption.encryptPromisified = util.promisify(
-            this.clientEncryption.encrypt.bind(this.clientEncryption)
-          );
+      await this.clientTest.connect();
+      await this.clientKeyVault.connect();
+      await dropCollection(this.clientTest.db('keyvault'), 'datakeys');
+      await dropCollection(this.clientTest.db('db'), 'coll');
 
-          return this.clientEncryption.encryptPromisified('string0', {
-            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
-            keyAltName: 'local'
-          });
-        })
-        .then(ciphertext => {
-          this.ciphertext = ciphertext;
+      await this.clientTest
+        .db('keyvault')
+        .collection('datakeys')
+        .insertOne(externalKey, {
+          writeConcern: { w: 'majority' }
         });
+
+      await this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } });
+
+      this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
+        kmsProviders: { local: { key: LOCAL_KEY } },
+        keyVaultNamespace: 'keyvault.datakeys',
+        keyVaultClient: this.keyVaultClient,
+        extraOptions: getEncryptExtraOptions()
+      });
+      this.clientEncryption.encryptPromisified = util.promisify(
+        this.clientEncryption.encrypt.bind(this.clientEncryption)
+      );
+
+      this.ciphertext = await this.clientEncryption.encryptPromisified('string0', {
+        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
+        keyAltName: 'local'
+      });
     });
 
     afterEach(function () {
@@ -155,7 +153,7 @@ function deadlockTests(_metadata) {
 
     const CASE1 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: false };
     it(
-      'Case 1',
+      `Case 1: ${JSON.stringify(CASE1)}`,
       metadata,
       deadlockTest(CASE1, clientEncrypted => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
@@ -179,7 +177,7 @@ function deadlockTests(_metadata) {
 
     const CASE2 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: true };
     it(
-      'Case 2',
+      `Case 2: ${JSON.stringify(CASE2)}`,
       metadata,
       deadlockTest(CASE2, (clientEncrypted, clientKeyVault) => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
@@ -206,7 +204,7 @@ function deadlockTests(_metadata) {
 
     const CASE3 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: false };
     it(
-      'Case 3',
+      `Case 3: ${JSON.stringify(CASE3)}`,
       metadata,
       deadlockTest(CASE3, clientEncrypted => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
@@ -224,7 +222,7 @@ function deadlockTests(_metadata) {
 
     const CASE4 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: true };
     it(
-      'Case 4',
+      `Case 4: ${JSON.stringify(CASE4)}`,
       metadata,
       deadlockTest(CASE4, (clientEncrypted, clientKeyVault) => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
@@ -245,7 +243,7 @@ function deadlockTests(_metadata) {
 
     const CASE5 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: false };
     it(
-      'Case 5',
+      `Case 5: ${JSON.stringify(CASE5)}`,
       metadata,
       deadlockTest(CASE5, clientEncrypted => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
@@ -272,7 +270,8 @@ function deadlockTests(_metadata) {
 
     const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
     it(
-      'Case 6',
+      `Case 6: ${JSON.stringify(CASE6)}`,
+
       metadata,
       deadlockTest(CASE6, (clientEncrypted, clientKeyVault) => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
@@ -299,7 +298,7 @@ function deadlockTests(_metadata) {
 
     const CASE7 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: false };
     it(
-      'Case 7',
+      `Case 7: ${JSON.stringify(CASE7)}`,
       metadata,
       deadlockTest(CASE7, clientEncrypted => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
@@ -317,7 +316,7 @@ function deadlockTests(_metadata) {
 
     const CASE8 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: true };
     it(
-      'Case 8',
+      `Case 8: ${JSON.stringify(CASE8)}`,
       metadata,
       deadlockTest(CASE8, (clientEncrypted, clientKeyVault) => {
         expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
