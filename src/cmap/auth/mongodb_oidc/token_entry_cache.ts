@@ -37,7 +37,7 @@ export class TokenEntryCache extends AbstractCache<TokenEntry> {
     const entry = new TokenEntry(
       tokenResult,
       serverInfo,
-      expirationTime(tokenResult.expiresInSeconds)
+      tokenResult.expiresInSeconds ?? DEFAULT_EXPIRATION_SECS
     );
     this.entries.set(this.cacheKey(address, username, callbackHash), entry);
     return entry;
@@ -74,11 +74,4 @@ export class TokenEntryCache extends AbstractCache<TokenEntry> {
   cacheKey(address: string, username: string, callbackHash: string): string {
     return this.hashedCacheKey(address, username, callbackHash);
   }
-}
-
-/**
- * Get an expiration time in milliseconds past epoch. Defaults to immediate.
- */
-function expirationTime(expiresInSeconds?: number): number {
-  return Date.now() + (expiresInSeconds ?? DEFAULT_EXPIRATION_SECS) * 1000;
 }

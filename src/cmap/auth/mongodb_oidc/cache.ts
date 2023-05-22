@@ -11,7 +11,7 @@ export abstract class ExpiringCacheEntry {
    * Create a new expiring token entry.
    */
   constructor(expiration: number) {
-    this.expiration = expiration;
+    this.expiration = this.expirationTime(expiration);
   }
   /**
    * The entry is still valid if the expiration is more than
@@ -19,6 +19,13 @@ export abstract class ExpiringCacheEntry {
    */
   isValid() {
     return this.expiration - Date.now() > EXPIRATION_BUFFER_MS;
+  }
+
+  /**
+   * Get an expiration time in milliseconds past epoch. Defaults to immediate.
+   */
+  private expirationTime(expiresInSeconds: number): number {
+    return Date.now() + expiresInSeconds * 1000;
   }
 }
 

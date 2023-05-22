@@ -19,7 +19,7 @@ describe('AzureTokenCache', function () {
       });
 
       it('adds the token result', function () {
-        expect(entry.tokenResult).to.deep.equal(tokenResultWithExpiration);
+        expect(entry.token).to.equal('test');
       });
 
       it('creates an expiration', function () {
@@ -64,7 +64,7 @@ describe('AzureTokenCache', function () {
 
     context('when there is a matching entry', function () {
       it('returns the entry', function () {
-        expect(cache.getEntry('audience1')).to.equal(tokenResultWithExpiration);
+        expect(cache.getEntry('audience1')?.token).to.equal('test');
       });
     });
 
