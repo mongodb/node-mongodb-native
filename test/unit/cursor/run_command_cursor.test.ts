@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { MongoAPIError, MongoClient, RunCommandCursor } from '../../mongodb';
 
-describe('class AbstractCursor', () => {
+describe('class RunCommandCursor', () => {
   let client: MongoClient;
   beforeEach(async function () {
     client = new MongoClient('mongodb://iLoveJavascript');
