@@ -19,6 +19,23 @@ describe('MONGODB-AWS', function () {
     await client?.close();
   });
 
+  it('should not authorize when not authenticated', async function () {
+    console.log(this.configuration.url());
+    const url = removeAuthFromConnectionString(this.configuration.url());
+    console.log(url);
+    client = this.configuration.newClient(url); // strip provided URI of credentials
+
+    const error = await client
+      .db('aws')
+      .collection('aws_test')
+      .estimatedDocumentCount()
+      .catch(error => error);
+    console.log(error);
+
+    //expect(error).to.be.instanceOf(MongoServerError);
+    //expect(error).to.have.property('code', 13);
+  });
+
   it('should authorize when successfully authenticated', async function () {
     client = this.configuration.newClient(process.env.MONGODB_URI); // use the URI built by the test environment
 
