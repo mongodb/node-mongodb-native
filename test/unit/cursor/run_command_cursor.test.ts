@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoAPIError, MongoClient, RunCommandCursor } from '../../mongodb';
+import { MongoAPIError, MongoClient } from '../../mongodb';
 
 describe('class RunCommandCursor', () => {
   let client: MongoClient;
@@ -58,15 +58,6 @@ describe('class RunCommandCursor', () => {
     });
   });
 
-  context('clone()', () => {
-    it('returns a new RunCursorCommand instance', () => {
-      const cursor = client.db().runCursorCommand({ a: 1 });
-      const clonedCursor = cursor.clone();
-      expect(clonedCursor).to.be.instanceOf(RunCommandCursor);
-      expect(clonedCursor).to.not.equal(cursor);
-    });
-  });
-
   context('Non applicable AbstractCursor methods', () => {
     it('withReadConcern throws', () => {
       expect(() =>
@@ -86,6 +77,10 @@ describe('class RunCommandCursor', () => {
 
     it('batchSize throws', () => {
       expect(() => client.db().runCursorCommand({ a: 1 }).batchSize(2)).to.throw(MongoAPIError);
+    });
+
+    it('clone throws', () => {
+      expect(() => client.db().runCursorCommand({ a: 1 }).clone()).to.throw(MongoAPIError);
     });
   });
 });

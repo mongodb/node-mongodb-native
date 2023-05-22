@@ -1,4 +1,4 @@
-import { BSONSerializeOptions, Document, Long, resolveBSONOptions } from '../bson';
+import type { BSONSerializeOptions, Document, Long } from '../bson';
 import type { Db } from '../db';
 import { MongoAPIError, MongoUnexpectedServerResponseError } from '../error';
 import { executeOperation, ExecutionResult } from '../operations/execute_operation';
@@ -58,11 +58,9 @@ export class RunCommandCursor extends AbstractCursor {
     return this;
   }
 
-  public clone(): RunCommandCursor {
-    return new RunCommandCursor(this.db, this.command, {
-      readPreference: this.readPreference,
-      ...resolveBSONOptions(this.cursorOptions)
-    });
+  /** Unsupported for RunCommandCursor */
+  public override clone(): never {
+    throw new MongoAPIError('Clone not supported, create a new cursor with db.runCursorCommand');
   }
 
   /** Unsupported for RunCommandCursor: readConcern must be configured directly on command document */
