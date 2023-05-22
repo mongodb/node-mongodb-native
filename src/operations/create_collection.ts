@@ -62,8 +62,6 @@ export interface ClusteredCollectionOptions extends Document {
 
 /** @public */
 export interface CreateCollectionOptions extends CommandOperationOptions {
-  /** Returns an error if the collection does not exist */
-  strict?: boolean;
   /** Create a capped collection */
   capped?: boolean;
   /** @deprecated Create an index on the _id field of the document. This option is deprecated in MongoDB 3.2+ and will be removed once no longer supported by the server. */

@@ -24,8 +24,11 @@ set -o xtrace
 npm install kerberos@">=2.0.0-beta.0"
 npm run check:kerberos
 
-npm install kerberos@"^1.1.7"
-npm run check:kerberos
+if [ "$NODE_LTS_VERSION" != "latest" ] && [ $NODE_LTS_VERSION -lt 20 ]; then
+  npm install kerberos@"^1.1.7"
+  npm run check:kerberos
+fi
+
 set +o xtrace
 
 # destroy ticket
