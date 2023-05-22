@@ -40,6 +40,7 @@ export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
+  MongoAzureError,
   MongoBatchReExecutionError,
   MongoChangeStreamError,
   MongoCompatibilityError,
