@@ -108,6 +108,16 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
+function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
+  return (
+    typeof e === 'object' &&
+    e != null &&
+    e instanceof Error &&
+    'errors' in e &&
+    Array.isArray(e.errors)
+  );
+}
+
 /**
  * @public
  * @category Error
@@ -132,7 +142,13 @@ export class MongoError extends Error {
 
   constructor(message: string | Error) {
     if (message instanceof Error) {
-      super(message.message);
+      if (isAggregateError(message)) {
+        const combinedMessage = 'Aggregate Error: ' + message.errors.map(e => e.message).join(', ');
+        super(combinedMessage);
+      } else {
+        super(message.message);
+      }
+
       this.cause = message;
     } else {
       super(message);
