@@ -11,7 +11,7 @@ import { Callback, ns } from '../utils';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
-export type RunCommandCursorOptions = {
+export type RunCursorCommandOptions = {
   readPreference?: ReadPreferenceLike;
   session?: ClientSession;
 } & BSONSerializeOptions;
@@ -95,7 +95,7 @@ export class RunCommandCursor extends AbstractCursor {
   private db: Db;
 
   /** @internal */
-  constructor(db: Db, command: Document, options: RunCommandCursorOptions = {}) {
+  constructor(db: Db, command: Document, options: RunCursorCommandOptions = {}) {
     super(db.s.client, ns(db.namespace), options);
     this.db = db;
     this.command = Object.freeze({ ...command });

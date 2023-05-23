@@ -277,7 +277,7 @@ export type {
   ChangeStreamAggregateRawResult,
   ChangeStreamCursorOptions
 } from './cursor/change_stream_cursor';
-export type { RunCommandCursorOptions } from './cursor/run_command_cursor';
+export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
 export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
