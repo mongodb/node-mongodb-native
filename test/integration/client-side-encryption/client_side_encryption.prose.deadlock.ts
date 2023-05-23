@@ -30,11 +30,9 @@ const $jsonSchema = BSON.EJSON.parse(
   )
 );
 
-const kEvents = Symbol('events');
-const kClientsCreated = Symbol('clientsCreated');
 class CapturingMongoClient extends MongoClient {
-  [kEvents]: Array<CommandStartedEvent> = [];
-  [kClientsCreated] = 0;
+  commandStartedEvents: Array<CommandStartedEvent> = [];
+  clientsCreated = 0;
   constructor(url: string, options: MongoClientOptions = {}) {
     options = { ...options, monitorCommands: true, [Symbol.for('@@mdb.skipPingOnConnect')]: true };
     if (process.env.MONGODB_API_VERSION) {
@@ -43,8 +41,8 @@ class CapturingMongoClient extends MongoClient {
 
     super(url, options);
 
-    this.on('commandStarted', ev => this[kEvents].push(ev));
-    this.on('topologyOpening', () => this[kClientsCreated]++);
+    this.on('commandStarted', ev => this.commandStartedEvents.push(ev));
+    this.on('topologyOpening', () => this.clientsCreated++);
   }
 }
 
@@ -162,9 +160,9 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 1: ${JSON.stringify(CASE1)}`,
     metadata,
     deadlockTest(CASE1, clientEncrypted => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(4);
 
       expect(events[0].command).to.have.property('listCollections');
@@ -186,9 +184,9 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 2: ${JSON.stringify(CASE2)}`,
     metadata,
     deadlockTest(CASE2, (clientEncrypted, clientKeyVault) => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(3);
 
       expect(events[0].command).to.have.property('listCollections');
@@ -200,7 +198,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
       expect(events[2].command).to.have.property('find');
       expect(events[2].command.$db).to.equal('db');
 
-      const keyVaultEvents = clientKeyVault[kEvents];
+      const keyVaultEvents = clientKeyVault.commandStartedEvents;
       expect(keyVaultEvents).to.have.lengthOf(1);
 
       expect(keyVaultEvents[0].command).to.have.property('find');
@@ -213,9 +211,9 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 3: ${JSON.stringify(CASE3)}`,
     metadata,
     deadlockTest(CASE3, clientEncrypted => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(2);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(2);
 
       expect(events[0].command).to.have.property('find');
@@ -231,15 +229,15 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 4: ${JSON.stringify(CASE4)}`,
     metadata,
     deadlockTest(CASE4, (clientEncrypted, clientKeyVault) => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(1);
 
       expect(events[0].command).to.have.property('find');
       expect(events[0].command.$db).to.equal('db');
 
-      const keyVaultEvents = clientKeyVault[kEvents];
+      const keyVaultEvents = clientKeyVault.commandStartedEvents;
       expect(keyVaultEvents).to.have.lengthOf(1);
 
       expect(keyVaultEvents[0].command).to.have.property('find');
@@ -252,9 +250,9 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 5: ${JSON.stringify(CASE5)}`,
     metadata,
     deadlockTest(CASE5, clientEncrypted => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(5);
 
       expect(events[0].command).to.have.property('listCollections');
@@ -277,12 +275,11 @@ describe.only('Connection Pool Deadlock Prevention', function () {
   const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
   it(
     `Case 6: ${JSON.stringify(CASE6)}`,
-
     metadata,
     deadlockTest(CASE6, (clientEncrypted, clientKeyVault) => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(3);
 
       expect(events[0].command).to.have.property('listCollections');
@@ -294,7 +291,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
       expect(events[2].command).to.have.property('find');
       expect(events[2].command.$db).to.equal('db');
 
-      const keyVaultEvents = clientKeyVault[kEvents];
+      const keyVaultEvents = clientKeyVault.commandStartedEvents;
       expect(keyVaultEvents).to.have.lengthOf(1);
 
       expect(keyVaultEvents[0].command).to.have.property('find');
@@ -307,9 +304,9 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 7: ${JSON.stringify(CASE7)}`,
     metadata,
     deadlockTest(CASE7, clientEncrypted => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(2);
 
       expect(events[0].command).to.have.property('find');
@@ -325,15 +322,15 @@ describe.only('Connection Pool Deadlock Prevention', function () {
     `Case 8: ${JSON.stringify(CASE8)}`,
     metadata,
     deadlockTest(CASE8, (clientEncrypted, clientKeyVault) => {
-      expect(clientEncrypted[kClientsCreated], 'Incorrect number of clients created').to.equal(1);
+      expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
 
-      const events = clientEncrypted[kEvents];
+      const events = clientEncrypted.commandStartedEvents;
       expect(events).to.have.lengthOf(1);
 
       expect(events[0].command).to.have.property('find');
       expect(events[0].command.$db).to.equal('db');
 
-      const keyVaultEvents = clientKeyVault[kEvents];
+      const keyVaultEvents = clientKeyVault.commandStartedEvents;
       expect(keyVaultEvents).to.have.lengthOf(1);
 
       expect(keyVaultEvents[0].command).to.have.property('find');
