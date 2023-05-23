@@ -102,7 +102,7 @@ const metadata = {
     topology: '!load-balanced'
   }
 };
-describe.only('Connection Pool Deadlock Prevention', function () {
+describe('Connection Pool Deadlock Prevention', function () {
   installNodeDNSWorkaroundHooks();
   beforeEach(async function () {
     const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
@@ -157,7 +157,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE1 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: false };
   it(
-    `Case 1: ${JSON.stringify(CASE1)}`,
+    'Case 1',
     metadata,
     deadlockTest(CASE1, clientEncrypted => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
@@ -181,7 +181,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE2 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: true };
   it(
-    `Case 2: ${JSON.stringify(CASE2)}`,
+    'Case 2',
     metadata,
     deadlockTest(CASE2, (clientEncrypted, clientKeyVault) => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
@@ -208,7 +208,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE3 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: false };
   it(
-    `Case 3: ${JSON.stringify(CASE3)}`,
+    'Case 3',
     metadata,
     deadlockTest(CASE3, clientEncrypted => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(2);
@@ -226,7 +226,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE4 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: true };
   it(
-    `Case 4: ${JSON.stringify(CASE4)}`,
+    'Case 4',
     metadata,
     deadlockTest(CASE4, (clientEncrypted, clientKeyVault) => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
@@ -247,7 +247,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE5 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: false };
   it(
-    `Case 5: ${JSON.stringify(CASE5)}`,
+    'Case 5',
     metadata,
     deadlockTest(CASE5, clientEncrypted => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
@@ -274,7 +274,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
   it(
-    `Case 6: ${JSON.stringify(CASE6)}`,
+    'Case 6',
     metadata,
     deadlockTest(CASE6, (clientEncrypted, clientKeyVault) => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
@@ -301,7 +301,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE7 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: false };
   it(
-    `Case 7: ${JSON.stringify(CASE7)}`,
+    'Case 7',
     metadata,
     deadlockTest(CASE7, clientEncrypted => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
@@ -319,7 +319,7 @@ describe.only('Connection Pool Deadlock Prevention', function () {
 
   const CASE8 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: true };
   it(
-    `Case 8: ${JSON.stringify(CASE8)}`,
+    'Case 8',
     metadata,
     deadlockTest(CASE8, (clientEncrypted, clientKeyVault) => {
       expect(clientEncrypted.clientsCreated, 'Incorrect number of clients created').to.equal(1);
