@@ -81,15 +81,15 @@ tests:
             data:
               failCommands: [find, getMore]
               blockConnection: true
-              blockTimeMS: 45
+              blockTimeMS: 60
       # Run a find with timeoutMS less than double our failPoint blockTimeMS and
       # batchSize less than the total document count will cause a find and a getMore to be sent.
-      # Both will block for 45ms so together they will go over the timeout.
+      # Both will block for 60ms so together they will go over the timeout.
       - name: runCursorCommand
         object: *db
         arguments:
           commandName: find
-          timeoutMS: 60
+          timeoutMS: 100
           command: { find: *collection, batchSize: 2 }
         expectError:
           isTimeoutError: true
@@ -109,8 +109,8 @@ tests:
                 maxTimeMS: { $$exists: true }
 
   # If timeoutMode=ITERATION, timeoutMS applies separately to the initial find and the getMore on the cursor. Neither
-  # command should have a maxTimeMS field. This is a failure test. The "find" inherits timeoutMS=10 and "getMore"
-  # commands are blocked for 15ms, causing iteration to fail with a timeout error.
+  # command should have a maxTimeMS field. This is a failure test. The "find" inherits timeoutMS=100 and "getMore"
+  # commands are blocked for 60ms, causing iteration to fail with a timeout error.
   - description: Non=tailable cursor iteration timeoutMS is refreshed for getMore if timeoutMode is iteration - failure
     runOnRequirements:
       - serverless: forbid
@@ -125,14 +125,14 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 60
       - name: runCursorCommand
         object: *db
         arguments:
           commandName: find
           command: { find: *collection, batchSize: 2 }
           timeoutMode: iteration
-          timeoutMS: 20
+          timeoutMS: 100
           batchSize: 2
         expectError:
           isTimeoutError: true
@@ -154,7 +154,7 @@ tests:
                 maxTimeMS: { $$exists: false }
 
   # The timeoutMS option should apply separately to the initial "find" and each getMore. This is a failure test. The
-  # find inherits timeoutMS=10 from the collection and the getMore command blocks for 15ms, causing iteration to fail
+  # find inherits timeoutMS=100 from the collection and the getMore command blocks for 60ms, causing iteration to fail
   # with a timeout error.
   - description: Tailable cursor iteration timeoutMS is refreshed for getMore - failure
     runOnRequirements:
@@ -170,7 +170,7 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 60
       - name: dropCollection
         object: *db
         arguments:
@@ -195,7 +195,7 @@ tests:
           commandName: find
           command: { find: *cappedCollection, batchSize: 1, tailable: true }
           timeoutMode: iteration
-          timeoutMS: 20
+          timeoutMS: 100
           batchSize: 1
           cursorType: tailable
         saveResultAsEntity: &tailableCursor tailableCursor
@@ -248,7 +248,7 @@ tests:
             data:
               failCommands: ["getMore"]
               blockConnection: true
-              blockTimeMS: 15
+              blockTimeMS: 60
       - name: dropCollection
         object: *db
         arguments:

@@ -149,7 +149,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 45
+                "blockTimeMS": 60
               }
             }
           }
@@ -159,7 +159,7 @@
           "object": "db",
           "arguments": {
             "commandName": "find",
-            "timeoutMS": 60,
+            "timeoutMS": 100,
             "command": {
               "find": "collection",
               "batchSize": 2
@@ -232,7 +232,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 60
               }
             }
           }
@@ -247,7 +247,7 @@
               "batchSize": 2
             },
             "timeoutMode": "iteration",
-            "timeoutMS": 20,
+            "timeoutMS": 100,
             "batchSize": 2
           },
           "expectError": {
@@ -316,7 +316,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 60
               }
             }
           }
@@ -366,7 +366,7 @@
               "tailable": true
             },
             "timeoutMode": "iteration",
-            "timeoutMS": 20,
+            "timeoutMS": 100,
             "batchSize": 1,
             "cursorType": "tailable"
           },
@@ -464,7 +464,7 @@
                   "getMore"
                 ],
                 "blockConnection": true,
-                "blockTimeMS": 15
+                "blockTimeMS": 60
               }
             }
           }
