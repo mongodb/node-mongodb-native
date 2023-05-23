@@ -542,7 +542,7 @@ function attemptTransactionCommit<T>(
   return session.commitTransaction().catch((err: MongoError) => {
     if (
       err instanceof MongoError &&
-      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
+      hasNotTimedOut(startTime, options?.maxTransactionTimeout || MAX_WITH_TRANSACTION_TIMEOUT) &&
       !isMaxTimeMSExpiredError(err)
     ) {
       if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
@@ -603,7 +603,7 @@ function attemptTransaction<TSchema>(
         if (
           err instanceof MongoError &&
           err.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-          hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
+          hasNotTimedOut(startTime, options?.maxTransactionTimeout || MAX_WITH_TRANSACTION_TIMEOUT)
         ) {
           return attemptTransaction(session, startTime, fn, options);
         }

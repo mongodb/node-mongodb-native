@@ -71,6 +71,8 @@ export interface TransactionOptions extends CommandOperationOptions {
   readPreference?: ReadPreferenceLike;
   /** Specifies the maximum amount of time to allow a commit action on a transaction to run in milliseconds */
   maxCommitTimeMS?: number;
+  /** Specifies the total number of transaction retries timeout in milliseconds */
+  maxTransactionTimeout?: number;
 }
 
 /**
