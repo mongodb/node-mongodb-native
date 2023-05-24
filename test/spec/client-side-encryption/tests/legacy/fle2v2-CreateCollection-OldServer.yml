@@ -1,0 +1,39 @@
+# Requires libmongocrypt 1.8.0.
+runOn:
+  - minServerVersion: "6.0.0"
+    maxServerVersion: "6.3.99"
+    # FLE 2 Encrypted collections are not supported on standalone.
+    topology: [ "replicaset", "sharded", "load-balanced" ]
+    
+database_name: &database_name "default"
+collection_name: &collection_name "default"
+
+tests:
+  - description: "driver returns an error if creating a QEv2 collection on unsupported server"
+    clientOptions:
+      autoEncryptOpts:
+        kmsProviders:
+          aws: {} # Credentials filled in from environment.
+        encryptedFieldsMap:
+          default.encryptedCollection: {
+                "fields": [
+                    {
+                        "path": "firstName",
+                        "bsonType": "string",
+                        "keyId": { "$binary": { "base64": "AAAAAAAAAAAAAAAAAAAAAA==", "subType": "04" }}
+                    }
+                ]
+            }
+
+    operations:
+      # Do an initial drop to remove collections that may exist from previous test runs.
+      - name: dropCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+      - name: createCollection
+        object: database
+        arguments:
+          collection: "encryptedCollection"
+        result:
+          errorContains: "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption."
