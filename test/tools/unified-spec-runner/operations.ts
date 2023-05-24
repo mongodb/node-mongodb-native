@@ -755,32 +755,32 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName, options } = operation.arguments ?? {};
-  return collection.listSearchIndexes(indexName, options).toArray();
+  const { name, options } = operation.arguments ?? {};
+  return collection.listSearchIndexes(name, options).toArray();
 });
 
 operations.set('dropSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName } = operation.arguments ?? {};
-  return collection.dropSearchIndex(indexName);
+  const { name } = operation.arguments ?? {};
+  return collection.dropSearchIndex(name);
 });
 
 operations.set('updateSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexName, definition } = operation.arguments ?? {};
-  return collection.updateSearchIndex(indexName, definition);
+  const { name, definition } = operation.arguments ?? {};
+  return collection.updateSearchIndex(name, definition);
 });
 
 operations.set('createSearchIndex', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { definition } = operation.arguments ?? {};
-  return collection.createSearchIndex(definition);
+  const { model } = operation.arguments ?? {};
+  return collection.createSearchIndex(model);
 });
 
 operations.set('createSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { indexDefinitions } = operation.arguments ?? {};
-  return collection.createSearchIndexes(indexDefinitions);
+  const { models } = operation.arguments ?? {};
+  return collection.createSearchIndexes(models);
 });
 
 export async function executeOperationAndCheck(

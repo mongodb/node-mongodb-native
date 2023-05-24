@@ -45,7 +45,7 @@
           "name": "createSearchIndexes",
           "object": "collection0",
           "arguments": {
-            "indexDefinitions": []
+            "models": []
           },
           "expectError": {
             "isError": true
@@ -55,7 +55,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {
@@ -77,7 +76,7 @@
           "name": "createSearchIndexes",
           "object": "collection0",
           "arguments": {
-            "indexDefinitions": [
+            "models": [
               {
                 "definition": {
                   "mappings": {
@@ -95,7 +94,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {
@@ -125,7 +123,7 @@
           "name": "createSearchIndexes",
           "object": "collection0",
           "arguments": {
-            "indexDefinitions": [
+            "models": [
               {
                 "definition": {
                   "mappings": {
@@ -144,7 +142,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {

@@ -1,5 +1,5 @@
 {
-  "description": "createSearchIndex convenience helper",
+  "description": "createSearchIndex",
   "schemaVersion": "1.10",
   "createEntities": [
     {
@@ -45,7 +45,7 @@
           "name": "createSearchIndex",
           "object": "collection0",
           "arguments": {
-            "definition": {
+            "model": {
               "definition": {
                 "mappings": {
                   "dynamic": true
@@ -61,7 +61,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {
@@ -91,7 +90,7 @@
           "name": "createSearchIndex",
           "object": "collection0",
           "arguments": {
-            "definition": {
+            "model": {
               "definition": {
                 "mappings": {
                   "dynamic": true
@@ -108,7 +107,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {

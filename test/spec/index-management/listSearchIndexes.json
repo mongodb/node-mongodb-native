@@ -52,7 +52,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {
@@ -77,7 +76,7 @@
           "name": "listSearchIndexes",
           "object": "collection0",
           "arguments": {
-            "indexName": "test index"
+            "name": "test index"
           },
           "expectError": {
             "isError": true
@@ -87,7 +86,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {
@@ -115,7 +113,7 @@
           "name": "listSearchIndexes",
           "object": "collection0",
           "arguments": {
-            "indexName": "test index",
+            "name": "test index",
             "options": {
               "batchSize": 10
             }
@@ -128,7 +126,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {

@@ -45,7 +45,7 @@
           "name": "updateSearchIndex",
           "object": "collection0",
           "arguments": {
-            "indexName": "test index",
+            "name": "test index",
             "definition": {}
           },
           "expectError": {
@@ -56,7 +56,6 @@
       "expectEvents": [
         {
           "client": "client0",
-          "ignoreExtraEvents": true,
           "events": [
             {
               "commandStartedEvent": {

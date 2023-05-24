@@ -1,4 +1,4 @@
-description: "dropSearchIndexes"
+description: "dropSearchIndex"
 schemaVersion: "1.10"
 createEntities:
   - client:
@@ -26,12 +26,13 @@ tests:
       - name: dropSearchIndex
         object: *collection0
         arguments:
-          indexName: &indexName 'test index'
+          name: &indexName 'test index'
         expectError:
+          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
+          # against an Atlas cluster and the expectError will be removed.
           isError: true
     expectEvents:
       - client: *client0
-        ignoreExtraEvents: true
         events:
           - commandStartedEvent:
               command:
