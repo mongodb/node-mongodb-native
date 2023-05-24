@@ -456,7 +456,6 @@ for (const {
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
-      //BUILD_VARIANTS.push({ ...buildVariantData, expansions: { ...buildVariantData.expansions, RUN_WITH_MONGOCRYPTD: true } })
     }
 
     BUILD_VARIANTS.push(buildVariantData);
