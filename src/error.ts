@@ -108,14 +108,8 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
-function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
-  return (
-    typeof e === 'object' &&
-    e != null &&
-    e instanceof Error &&
-    'errors' in e &&
-    Array.isArray(e.errors)
-  );
+function isAggregateError(e: unknown): e is { errors: Error[] } {
+  return typeof e === 'object' && e != null && 'errors' in e && Array.isArray(e.errors);
 }
 
 /**
@@ -141,19 +135,26 @@ export class MongoError extends Error {
   cause?: Error; // depending on the node version, this may or may not exist on the base
 
   constructor(message: string | Error) {
+    super(MongoError.buildErrorMessage(message));
     if (message instanceof Error) {
-      if (isAggregateError(message)) {
-        const combinedMessage = 'Aggregate Error: ' + message.errors.map(e => e.message).join(', ');
-        super(combinedMessage);
-      } else {
-        super(message.message);
-      }
-
       this.cause = message;
-    } else {
-      super(message);
     }
+
     this[kErrorLabels] = new Set();
+  }
+
+  /** @internal */
+  private static buildErrorMessage(e: Error | string): string {
+    if (typeof e === 'string') {
+      return e;
+    }
+    if (isAggregateError(e) && e.message.length === 0) {
+      return e.errors.length === 0
+        ? 'AggregateError: no suberrors have error messages.  please check the `cause` property for more error information.'
+        : 'Aggregate Error: ' + e.errors.map(({ message }) => message).join(', ');
+    }
+
+    return e.message;
   }
 
   override get name(): string {
