@@ -108,8 +108,8 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
-function isAggregateError(e: unknown): e is { errors: Error[] } {
-  return typeof e === 'object' && e != null && 'errors' in e && Array.isArray(e.errors);
+function isAggregateError(e: Error): e is Error & { errors: Error[] } {
+  return 'errors' in e && Array.isArray(e.errors);
 }
 
 /**
@@ -150,8 +150,8 @@ export class MongoError extends Error {
     }
     if (isAggregateError(e) && e.message.length === 0) {
       return e.errors.length === 0
-        ? 'AggregateError: no suberrors have error messages.  please check the `cause` property for more error information.'
-        : 'Aggregate Error: ' + e.errors.map(({ message }) => message).join(', ');
+        ? 'AggregateError has an empty errors array. Please check the `cause` property for more information.'
+        : e.errors.map(({ message }) => message).join(', ');
     }
 
     return e.message;
