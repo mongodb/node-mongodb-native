@@ -1,6 +1,6 @@
 {
   "description": "listSearchIndexes",
-  "schemaVersion": "1.10",
+  "schemaVersion": "1.4",
   "createEntities": [
     {
       "client": {

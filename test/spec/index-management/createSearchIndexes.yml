@@ -1,5 +1,5 @@
 description: "createSearchIndexes"
-schemaVersion: "1.10"
+schemaVersion: "1.4"
 createEntities:
   - client:
       id: &client0 client0
