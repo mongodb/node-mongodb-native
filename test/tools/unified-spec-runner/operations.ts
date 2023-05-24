@@ -755,8 +755,8 @@ operations.set('getKeyByAltName', async ({ entities, operation }) => {
 
 operations.set('listSearchIndexes', async ({ entities, operation }) => {
   const collection: Collection<any> = entities.getEntity('collection', operation.object);
-  const { name, options } = operation.arguments ?? {};
-  return collection.listSearchIndexes(name, options).toArray();
+  const { name, aggregationOptions } = operation.arguments ?? {};
+  return collection.listSearchIndexes(name, aggregationOptions).toArray();
 });
 
 operations.set('dropSearchIndex', async ({ entities, operation }) => {

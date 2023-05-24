@@ -64,7 +64,7 @@ tests:
         object: *collection0
         arguments: 
           name: &indexName "test index"
-          options: 
+          aggregationOptions: 
             batchSize: 10
         expectError:
           # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
