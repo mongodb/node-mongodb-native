@@ -21,9 +21,9 @@ import {
 } from '../../mongodb';
 import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
-import { EntitiesMap, UnifiedChangeStream } from './entities';
+import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
-import type { ExpectedEvent, ExpectedLogMessage, OperationDescription } from './schema';
+import type { ExpectedEvent, OperationDescription } from './schema';
 import { getMatchingEventCount, translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
@@ -349,40 +349,14 @@ operations.set('insertMany', async ({ entities, operation }) => {
   return collection.insertMany(documents, opts);
 });
 
-function getChangeStream({ entities, operation }): UnifiedChangeStream | null {
-  try {
-    const changeStream = entities.getEntity('stream', operation.object);
-    return changeStream;
-  } catch (e) {
-    return null;
-  }
-}
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  const changeStream = getChangeStream({ entities, operation });
-  if (changeStream == null) {
-    // iterateUntilDocumentOrError is used for changes streams and regular cursors.
-    // we have no other way to distinguish which scenario we are testing when we run an
-    // iterateUntilDocumentOrError operation, so we first try to get the changeStream and
-    // if that fails, we know we need to get a cursor
-    const cursor = entities.getEntity('cursor', operation.object);
-    return cursor.next();
-  }
-
-  return changeStream.next();
+  const iterable = entities.getChangeStreamOrCursor(operation.object);
+  return iterable.next();
 });
 
 operations.set('iterateOnce', async ({ entities, operation }) => {
-  const changeStream = getChangeStream({ entities, operation });
-  if (changeStream == null) {
-    // iterateOnce is used for changes streams and regular cursors.
-    // we have no other way to distinguish which scenario we are testing when we run an
-    // iterateOnce operation, so we first try to get the changeStream and
-    // if that fails, we know we need to get a cursor
-    const cursor = entities.getEntity('cursor', operation.object);
-    return cursor.tryNext();
-  }
-
-  return changeStream.tryNext();
+  const iterable = entities.getChangeStreamOrCursor(operation.object);
+  return iterable.tryNext();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {
@@ -701,9 +675,7 @@ operations.set('createCommandCursor', async ({ entities, operation }: OperationF
 
   // The spec dictates that we create the cursor and force the find command
   // to execute, but the first document must still be returned for the first iteration.
-  const result = await cursor.tryNext();
-  const kDocuments = getSymbolFrom(cursor, 'documents');
-  if (result) cursor[kDocuments].unshift(result);
+  await cursor.hasNext();
 
   return cursor;
 });
