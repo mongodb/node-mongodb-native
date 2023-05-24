@@ -419,6 +419,7 @@ for (const {
 } of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
   const os = osName.split('-')[0];
+  // NOTE: Filters out tasks that are not AWS tasks and that are not skipped on windows
   const tasks = BASE_TASKS.concat(TASKS).filter(task => {
     const isAWSTask = task.name.match(/^aws/);
     const isSkippedTaskOnWindows =
@@ -455,10 +456,62 @@ for (const {
     };
     if (clientEncryption) {
       buildVariantData.expansions.CLIENT_ENCRYPTION = true;
+      //BUILD_VARIANTS.push({ ...buildVariantData, expansions: { ...buildVariantData.expansions, RUN_WITH_MONGOCRYPTD: true } })
     }
 
     BUILD_VARIANTS.push(buildVariantData);
   }
+}
+
+// Running CSFLE tests with mongocryptd
+const MONGOCRYPTD_SERVER_VERSIONS = MONGODB_VERSIONS
+  .filter(version => {
+    const numericVersion = Number(version);
+    return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
+  });
+const MONGOCRYPTD_CSFLE_TASKS = [];
+for (const version of MONGOCRYPTD_SERVER_VERSIONS) {
+  for (const topology of TOPOLOGIES) {
+    const task = {
+      name: `test-${version}-${topology}-csfle-mongocryptd`,
+      tags: [version, topology],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: version,
+            TOPOLOGY: topology,
+            AUTH: 'auth'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        { func: 'run tests',
+          vars: {
+            TEST_NPM_SCRIPT: 'check:csfle'
+          }
+        }
+      ]
+    };
+    MONGOCRYPTD_CSFLE_TASKS.push(task);
+  }
+}
+for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
+  const name = `rhel8-node${nodeVersion}-test-csfle-mongocryptd`;
+  const displayName = `rhel 8 Node${nodeVersion} test mongocryptd`;
+  BUILD_VARIANTS.push({
+    name,
+    display_name: displayName,
+    run_on: DEFAULT_OS,
+    expansions: {
+      CLIENT_ENCRYPTION: true,
+      RUN_WITH_MONGOCRYPTD: true,
+      NODE_LTS_VERSION: LOWEST_LTS
+    },
+    tasks:
+      // TODO(NODE-4698): Add relevant task
+      MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
+  });
 }
 
 BUILD_VARIANTS.push({
@@ -698,6 +751,7 @@ BUILD_VARIANTS.push({
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example', 'test-deployed-lambda']
 });
 
+
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
   variant =>
@@ -730,6 +784,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
+  .concat(MONGOCRYPTD_CSFLE_TASKS)
   .concat(mongoshTasks);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
