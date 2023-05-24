@@ -53,10 +53,9 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
 
       if (encryptedFields) {
         const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
-        const eccCollection = encryptedFields.eccCollection || `enxcol_.${name}.ecc`;
         const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
 
-        for (const collectionName of [escCollection, eccCollection, ecocCollection]) {
+        for (const collectionName of [escCollection, ecocCollection]) {
           // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
           const dropOp = new DropCollectionOperation(db, collectionName);
           try {
