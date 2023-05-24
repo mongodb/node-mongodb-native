@@ -138,6 +138,7 @@ export * from '../src/cursor/change_stream_cursor';
 export * from '../src/cursor/find_cursor';
 export * from '../src/cursor/list_collections_cursor';
 export * from '../src/cursor/list_indexes_cursor';
+export * from '../src/cursor/run_command_cursor';
 export * from '../src/db';
 export * from '../src/deps';
 export * from '../src/encrypter';

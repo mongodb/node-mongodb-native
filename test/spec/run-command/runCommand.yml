@@ -67,6 +67,36 @@ tests:
                 $readPreference: { $$exists: false }
               commandName: ping
 
+  - description: always gossips the $clusterTime on the sent command
+    runOnRequirements:
+      # Only replicasets and sharded clusters have a $clusterTime
+      - topologies: [ replicaset, sharded ]
+    operations:
+      # We have to run one command to obtain a clusterTime to gossip
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectResult: { ok: 1 }
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: ping
+          # Only check the shape of the second ping which should have the $clusterTime received from the first operation
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $clusterTime: { $$exists: true }
+              commandName: ping
+
   - description: attaches the provided session lsid to given command
     operations:
       - name: runCommand
@@ -87,6 +117,9 @@ tests:
               commandName: ping
 
   - description: attaches the provided $readPreference to given command
+    runOnRequirements:
+      # Exclude single topology, which is most likely a standalone server
+      - topologies: [ replicaset, sharded-replicaset, load-balanced, sharded ]
     operations:
       - name: runCommand
         object: *db
@@ -102,6 +135,50 @@ tests:
               command:
                 ping: 1
                 $readPreference: *readPreference
+                $db: *db
+              commandName: ping
+
+  - description: does not attach $readPreference to given command on standalone
+    runOnRequirements:
+      # This test assumes that the single topology contains a standalone server;
+      # however, it is possible for a single topology to contain a direct
+      # connection to another server type.
+      # See: https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.rst#topology-type-single
+      - topologies: [ single ]
+    operations:
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+          readPreference: { mode: 'nearest' }
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $readPreference: { $$exists: false }
+                $db: *db
+              commandName: ping
+
+  - description: does not attach primary $readPreference to given command
+    operations:
+      - name: runCommand
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+          readPreference: { mode: 'primary' }
+        expectResult: { ok: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              command:
+                ping: 1
+                $readPreference: { $$exists: false }
                 $db: *db
               commandName: ping
 
@@ -133,7 +210,7 @@ tests:
           commandName: insert
           command:
             insert: *collection
-            documents: [ { _id: 1 } ]
+            documents: [ { foo: 'bar' } ]
             ordered: true
         expectResult: { ok: 1 }
     expectEvents:
@@ -186,7 +263,7 @@ tests:
                 commandName: insert
                 command:
                   insert: *collection
-                  documents: [ { _id: 2 } ]
+                  documents: [ { foo: 'transaction' } ]
                   ordered: true
               expectResult: { $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } } }
     expectEvents:
@@ -195,7 +272,7 @@ tests:
           - commandStartedEvent:
               command:
                 insert: *collection
-                documents: [ { _id: 2 } ]
+                documents: [ { foo: 'transaction' } ]
                 ordered: true
                 lsid: { $$sessionLsid: *session }
                 txnNumber: 1
