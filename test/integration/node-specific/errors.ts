@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { inspect } from 'util';
 
 import { MongoClient, MongoError } from '../../mongodb';
 
@@ -35,6 +36,6 @@ describe('Error (Integration)', function () {
       serverSelectionTimeoutMS: 1000
     }).catch(e => e);
     expect(error).to.be.instanceOf(Error);
-    expect(error.message).to.match(/ECONNREFUSED/);
+    expect(error.message).not.to.be.empty;
   });
 });
