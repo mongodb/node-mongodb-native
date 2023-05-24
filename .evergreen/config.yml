@@ -1214,6 +1214,45 @@ tasks:
           AUTH: auth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-7.0-server
+    tags:
+      - '7.0'
+      - server
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: server
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-7.0-replica_set
+    tags:
+      - '7.0'
+      - replica_set
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: replica_set
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-7.0-sharded_cluster
+    tags:
+      - '7.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-6.0-server
     tags:
       - '6.0'
@@ -2718,6 +2757,48 @@ tasks:
           AUTH: noauth
       - func: bootstrap kms servers
       - func: run tests
+  - name: test-7.0-server-noauth
+    tags:
+      - '7.0'
+      - server
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: server
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-7.0-replica_set-noauth
+    tags:
+      - '7.0'
+      - replica_set
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: replica_set
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
+  - name: test-7.0-sharded_cluster-noauth
+    tags:
+      - '7.0'
+      - sharded_cluster
+      - noauth
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: noauth
+      - func: bootstrap kms servers
+      - func: run tests
   - name: test-6.0-server-noauth
     tags:
       - '6.0'
@@ -3221,6 +3302,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3271,6 +3355,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3319,6 +3406,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3367,6 +3457,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3415,6 +3508,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3462,6 +3558,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3503,6 +3602,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3542,6 +3644,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3581,6 +3686,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3768,6 +3876,9 @@ buildvariants:
       - test-rapid-server-noauth
       - test-rapid-replica_set-noauth
       - test-rapid-sharded_cluster-noauth
+      - test-7.0-server-noauth
+      - test-7.0-replica_set-noauth
+      - test-7.0-sharded_cluster-noauth
       - test-6.0-server-noauth
       - test-6.0-replica_set-noauth
       - test-6.0-sharded_cluster-noauth
