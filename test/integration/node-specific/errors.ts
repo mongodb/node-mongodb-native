@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { inspect } from 'util';
 
 import { MongoClient, MongoError } from '../../mongodb';
 
