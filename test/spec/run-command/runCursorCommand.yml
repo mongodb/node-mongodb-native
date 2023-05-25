@@ -1,0 +1,391 @@
+description: runCursorCommand
+
+schemaVersion: '1.9'
+
+createEntities:
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents: [commandStartedEvent, connectionReadyEvent, connectionCheckedOutEvent, connectionCheckedInEvent]
+  - session:
+      id: &session session
+      client: *client
+  - database:
+      id: &db db
+      client: *client
+      databaseName: *db
+  - collection:
+      id: &collection collection
+      database: *db
+      collectionName: *collection
+
+initialData:
+  - collectionName: collection
+    databaseName: *db
+    documents: &documents
+      - { _id: 1, x: 11 }
+      - { _id: 2, x: 22 }
+      - { _id: 3, x: 33 }
+      - { _id: 4, x: 44 }
+      - { _id: 5, x: 55 }
+
+tests:
+  # This is what this API was invented to do.
+  - description: successfully executes checkMetadataConsistency cursor creating command
+    runOnRequirements:
+      - minServerVersion: '7.0'
+        topologies: [sharded]
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: checkMetadataConsistency
+          command: { checkMetadataConsistency: 1 }
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                checkMetadataConsistency: 1
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: checkMetadataConsistency
+
+  - description: errors if the command response is not a cursor
+    operations:
+      - name: createCommandCursor
+        object: *db
+        arguments:
+          commandName: ping
+          command: { ping: 1 }
+        expectError:
+          isClientError: true
+
+
+  # Driver Sessions
+  - description: creates an implicit session that is reused across getMores
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: find
+          command: { find: *collection, batchSize: 2 }
+        expectResult: *documents
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                batchSize: 2
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: getMore
+
+  - description: accepts an explicit session that is reused across getMores
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: find
+          session: *session
+          command: { find: *collection, batchSize: 2 }
+        expectResult: *documents
+      - name: assertSameLsidOnLastTwoCommands
+        object: testRunner
+        arguments:
+          client: *client
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                batchSize: 2
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: getMore
+
+  # Load Balancers
+  - description: returns pinned connections to the pool when the cursor is exhausted
+    runOnRequirements:
+      - topologies: [ load-balanced ]
+    operations:
+      - name: createCommandCursor
+        object: *db
+        arguments:
+          commandName: find
+          batchSize: 2
+          session: *session
+          command: { find: *collection, batchSize: 2 }
+        saveResultAsEntity: &cursor cursor
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client
+          connections: 1
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectResult: { _id: 1, x: 11 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectResult: { _id: 2, x: 22 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectResult: { _id: 3, x: 33 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectResult: { _id: 4, x: 44 }
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectResult: { _id: 5, x: 55 }
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client
+          connections: 0
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                batchSize: 2
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: find # 2 documents
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: getMore # 2 documents
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                lsid: { $$sessionLsid: *session }
+              commandName: getMore # 1 document
+              # Total documents: 5
+      - client: *client
+        eventType: cmap
+        events:
+          - connectionReadyEvent: {}
+          - connectionCheckedOutEvent: {}
+          - connectionCheckedInEvent: {}
+
+  - description: returns pinned connections to the pool when the cursor is closed
+    runOnRequirements:
+      - topologies: [ load-balanced ]
+    operations:
+      - name: createCommandCursor
+        object: *db
+        arguments:
+          commandName: find
+          command: { find: *collection, batchSize: 2 }
+        saveResultAsEntity: *cursor
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client
+          connections: 1
+      - name: close
+        object: *cursor
+      - name: assertNumberConnectionsCheckedOut
+        object: testRunner
+        arguments:
+          client: *client
+          connections: 0
+
+  # Iterating the Cursor / Executing GetMores
+  - description: supports configuring getMore batchSize
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: find
+          batchSize: 5
+          command: { find: *collection, batchSize: 1 }
+        expectResult: *documents
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                batchSize: 1
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                batchSize: 5
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: getMore
+
+  - description: supports configuring getMore maxTimeMS
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: find
+          maxTimeMS: 300
+          command: { find: *collection, maxTimeMS: 200, batchSize: 1 }
+        ignoreResultAndError: true
+    expectEvents:
+      - client: *client
+        eventType: command
+        # The getMore should receive an error here because we do not have the right kind of cursor
+        # So drivers should run a killCursors, but neither the error nor the killCursors command is relevant to this test
+        ignoreExtraEvents: true
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                maxTimeMS: 200
+                batchSize: 1
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                $db: *db
+                maxTimeMS: 300
+                lsid: { $$exists: true }
+              commandName: getMore
+
+  - description: supports configuring getMore comment
+    runOnRequirements:
+      - minServerVersion: '4.4'
+    operations:
+      - name: runCursorCommand
+        object: *db
+        arguments:
+          commandName: find
+          comment: { hello: 'getMore' }
+          command: { find: *collection, batchSize: 1, comment: { hello: 'find' } }
+        expectResult: *documents
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                find: *collection
+                batchSize: 1
+                comment: { hello: 'find' }
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *collection
+                comment: { hello: 'getMore' }
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: getMore
+
+  # Tailable cursor
+  - description: does not close the cursor when receiving an empty batch
+    runOnRequirements:
+      - serverless: forbid
+    operations:
+      - name: dropCollection
+        object: *db
+        arguments:
+          collection: &cappedCollection cappedCollection
+      - name: createCollection
+        object: *db
+        arguments:
+          collection: *cappedCollection
+          capped: true
+          size: 4096
+          max: 3
+        saveResultAsEntity: *cappedCollection
+      - name: insertMany
+        object: *cappedCollection
+        arguments:
+          documents:
+            - { _id: 1, x: 11 }
+            - { _id: 2, x: 22 }
+      - name: createCommandCursor
+        object: *db
+        arguments:
+          cursorType: tailable
+          commandName: find
+          batchSize: 2
+          command: { find: *cappedCollection, tailable: true }
+        saveResultAsEntity: &cursor cursor
+      - name: iterateOnce
+        object: *cursor
+      - name: iterateOnce
+        object: *cursor
+      - name: iterateOnce
+        object: *cursor
+      - name: close
+        object: *cursor
+    expectEvents:
+      - client: *client
+        eventType: command
+        events:
+          - commandStartedEvent:
+              command:
+                drop: *cappedCollection
+              commandName: drop
+          - commandStartedEvent:
+              command:
+                create: *cappedCollection
+              commandName: create
+          - commandStartedEvent:
+              command:
+                insert: *cappedCollection
+              commandName: insert
+          - commandStartedEvent:
+              command:
+                find: *cappedCollection
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: find
+          - commandStartedEvent:
+              command:
+                getMore: { $$type: [int, long] }
+                collection: *cappedCollection
+                $db: *db
+                lsid: { $$exists: true }
+              commandName: getMore
+          - commandStartedEvent:
+              command:
+                killCursors: *cappedCollection
+                cursors: { $$type: array }
+              commandName: killCursors
