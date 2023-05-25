@@ -52,10 +52,6 @@ else
   source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 fi
 
-if [ -n ${RUN_WITH_MONGOCRYPTD} ]; then
-  unset CRYPT_SHARED_LIB_PATH;
-fi
-
 npm install mongodb-client-encryption
 npm install @mongodb-js/zstd
 npm install snappy

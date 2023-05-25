@@ -468,6 +468,7 @@ const MONGOCRYPTD_SERVER_VERSIONS = MONGODB_VERSIONS
     const numericVersion = Number(version);
     return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
   });
+
 const MONGOCRYPTD_CSFLE_TASKS = [];
 for (const version of MONGOCRYPTD_SERVER_VERSIONS) {
   for (const topology of TOPOLOGIES) {
@@ -505,7 +506,8 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
     expansions: {
       CLIENT_ENCRYPTION: true,
       RUN_WITH_MONGOCRYPTD: true,
-      NODE_LTS_VERSION: LOWEST_LTS
+      NODE_LTS_VERSION: LOWEST_LTS,
+      TEST_NPM_SCRIPT: 'check:csfle'
     },
     tasks:
       // TODO(NODE-4698): Add relevant task

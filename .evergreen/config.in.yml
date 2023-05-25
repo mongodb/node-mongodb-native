@@ -227,6 +227,7 @@ functions:
             echo "CRYPT_SHARED_LIB_PATH not set; using mongocryptd"
           fi
 
+          TEST_NPM_SCRIPT="${TEST_NPM_SCRIPT|check:integration-coverage}" \
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \

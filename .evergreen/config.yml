@@ -196,6 +196,7 @@ functions:
             echo "CRYPT_SHARED_LIB_PATH not set; using mongocryptd"
           fi
 
+          TEST_NPM_SCRIPT="${TEST_NPM_SCRIPT|check:integration-coverage}" \
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
@@ -3987,6 +3988,7 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
+      TEST_NPM_SCRIPT: check:csfle
     tasks:
       - test-7.0-server-csfle-mongocryptd
       - test-7.0-replica_set-csfle-mongocryptd
@@ -4010,6 +4012,7 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
+      TEST_NPM_SCRIPT: check:csfle
     tasks:
       - test-7.0-server-csfle-mongocryptd
       - test-7.0-replica_set-csfle-mongocryptd
