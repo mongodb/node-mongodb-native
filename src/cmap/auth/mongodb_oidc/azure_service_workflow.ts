@@ -1,10 +1,8 @@
 import { MongoAzureError } from '../../../error';
 import { request } from '../../../utils';
+import type { MongoCredentials } from '../mongo_credentials';
 import { AzureTokenCache } from './azure_token_cache';
 import { ServiceWorkflow } from './service_workflow';
-
-/** Error for when the token audience is missing in the environment. */
-const TOKEN_AUDIENCE_MISSING_ERROR = 'TOKEN_AUDIENCE must be set in the environment.';
 
 /** Base URL for getting Azure tokens. */
 const AZURE_BASE_URL =
@@ -19,6 +17,10 @@ const RESULT_PROPERTIES = ['access_token', 'expires_in'];
 /** Invalid endpoint result error. */
 const ENDPOINT_RESULT_ERROR =
   'Azure endpoint did not return a value with only access_token and expires_in properties';
+
+/** Error for when the token audience is missing in the environment. */
+const TOKEN_AUDIENCE_MISSING_ERROR =
+  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
 
 /**
  * The Azure access token format.
@@ -48,8 +50,8 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
   /**
    * Get the token from the environment.
    */
-  async getToken(): Promise<string> {
-    const tokenAudience = process.env.TOKEN_AUDIENCE;
+  async getToken(credentials?: MongoCredentials): Promise<string> {
+    const tokenAudience = credentials?.mechanismProperties.TOKEN_AUDIENCE;
     if (!tokenAudience) {
       throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
     }

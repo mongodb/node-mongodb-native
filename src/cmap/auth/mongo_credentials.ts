@@ -2,6 +2,7 @@
 import type { Document } from '../../bson';
 import {
   MongoAPIError,
+  MongoAzureError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
@@ -43,6 +44,10 @@ export const DEFAULT_ALLOWED_HOSTS = [
   '::1'
 ];
 
+/** Error for when the token audience is missing in the environment. */
+const TOKEN_AUDIENCE_MISSING_ERROR =
+  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
+
 /** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
@@ -55,9 +60,11 @@ export interface AuthMechanismProperties extends Document {
   /** @experimental */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
   /** @experimental */
-  PROVIDER_NAME?: 'aws';
+  PROVIDER_NAME?: 'aws' | 'azure';
   /** @experimental */
   ALLOWED_HOSTS?: string[];
+  /** @experimental */
+  TOKEN_AUDIENCE?: string;
 }
 
 /** @public */
@@ -175,6 +182,13 @@ export class MongoCredentials {
         throw new MongoInvalidArgumentError(
           `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
         );
+      }
+
+      if (
+        this.mechanismProperties.PROVIDER_NAME === 'azure' &&
+        !this.mechanismProperties.TOKEN_AUDIENCE
+      ) {
+        throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
       }
 
       if (
