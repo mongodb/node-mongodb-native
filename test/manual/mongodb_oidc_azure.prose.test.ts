@@ -99,6 +99,72 @@ describe('OIDC Auth Spec Prose Tests', function () {
     });
 
     describe('3.5 Reauthentication Succeeds', function () {
+      const commandStartedEvents: CommandStartedEvent[] = [];
+      const commandSucceededEvents: CommandSucceededEvent[] = [];
+      const commandFailedEvents: CommandFailedEvent[] = [];
+
+      const commandStartedListener = event => {
+        if (event.commandName === 'find') {
+          commandStartedEvents.push(event);
+        }
+      };
+      const commandSucceededListener = event => {
+        if (event.commandName === 'find') {
+          commandSucceededEvents.push(event);
+        }
+      };
+      const commandFailedListener = event => {
+        if (event.commandName === 'find') {
+          commandFailedEvents.push(event);
+        }
+      };
+
+      const addListeners = () => {
+        client.on('commandStarted', commandStartedListener);
+        client.on('commandSucceeded', commandSucceededListener);
+        client.on('commandFailed', commandFailedListener);
+      };
+
+      // Sets up the fail point for the find to reauthenticate.
+      const setupFailPoint = async () => {
+        return await client
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: {
+              times: 1
+            },
+            data: {
+              failCommands: ['find'],
+              errorCode: 391
+            }
+          });
+      };
+
+      // Removes the fail point.
+      const removeFailPoint = async () => {
+        return await client.db().admin().command({
+          configureFailPoint: 'failCommand',
+          mode: 'off'
+        });
+      };
+
+      before(async function () {
+        azureCache?.clear();
+        client = new MongoClient(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
+        );
+        await client.db('test').collection('test').findOne();
+        addListeners();
+        setupFailPoint();
+      });
+
+      afterEach(async function () {
+        await removeFailPoint();
+        await client.close();
+      });
+
       // Clear the Azure OIDC cache.
       // Create a client with an event listener. The following assumes that the driver does not emit saslStart or saslContinue events. If the driver does emit those events, ignore/filter them for the purposes of this test.
       // Perform a find operation that succeeds.
@@ -127,6 +193,15 @@ describe('OIDC Auth Spec Prose Tests', function () {
       //Assert that the list of command succeeded events is [find].
       //Assert that a find operation failed once during the command execution.
       //Close the client.
+      it('successfully reauthenticates', async function () {
+        await client.db('test').collection('test').findOne();
+        expect(commandStartedEvents.map(event => event.commandName)).to.deep.equal([
+          'find',
+          'find'
+        ]);
+        expect(commandSucceededEvents.map(event => event.commandName)).to.deep.equal(['find']);
+        expect(commandFailedEvents.map(event => event.commandName)).to.deep.equal(['find']);
+      });
     });
   });
 });
