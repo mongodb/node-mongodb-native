@@ -30,6 +30,7 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
+const ALLOWED_PROVIDER_NAMES = ['aws', 'azure'];
 const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
 
 /** @internal */
@@ -178,10 +179,12 @@ export class MongoCredentials {
 
       if (
         this.mechanismProperties.PROVIDER_NAME &&
-        this.mechanismProperties.PROVIDER_NAME !== 'aws'
+        !ALLOWED_PROVIDER_NAMES.includes(this.mechanismProperties.PROVIDER_NAME)
       ) {
         throw new MongoInvalidArgumentError(
-          `Currently only a PROVIDER_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+          `Currently only a PROVIDER_NAME in ${ALLOWED_PROVIDER_NAMES.join(
+            ','
+          )} is supported for mechanism '${this.mechanism}'.`
         );
       }
 

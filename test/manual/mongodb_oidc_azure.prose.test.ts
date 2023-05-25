@@ -1,8 +1,11 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient } from '../mongodb';
+import { Collection, MongoClient, OIDC_WORKFLOWS } from '../mongodb';
 
 describe('OIDC Auth Spec Prose Tests', function () {
+  const callbackCache = OIDC_WORKFLOWS.get('callback').cache;
+  const azureCache = OIDC_WORKFLOWS.get('azure)').cache;
+
   describe('3. Azure Automatic Auth', function () {
     let client: MongoClient;
     let collection: Collection;
@@ -52,19 +55,47 @@ describe('OIDC Auth Spec Prose Tests', function () {
     });
 
     describe('3.3 Main Cache Not Used', function () {
+      before(function () {
+        callbackCache?.clear();
+        client = new MongoClient(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
+        );
+        collection = client.db('test').collection('test');
+      });
+
       // Clear the main OIDC cache.
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>.
       // Assert that a find operation succeeds.
       // Close the client.
       // Assert that the main OIDC cache is empty.
+      it('does not use the main callback cache', async function () {
+        const result = await collection.findOne();
+        expect(result).to.be.null;
+        expect(callbackCache.entries).to.be.empty;
+      });
     });
 
     describe('3.4 Azure Cache is Used', function () {
+      before(function () {
+        callbackCache?.clear();
+        azureCache?.clear();
+        client = new MongoClient(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
+        );
+        collection = client.db('test').collection('test');
+      });
+
       // Clear the Azure OIDC cache.
       // Create a client with a url of the form mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>.
       // Assert that a find operation succeeds.
       // Close the client.
       // Assert that the Azure OIDC cache has one entry.
+      it('uses the Azure OIDC cache', async function () {
+        const result = await collection.findOne();
+        expect(result).to.be.null;
+        expect(callbackCache.entries).to.be.empty;
+        expect(azureCache.entries.size).to.equal(1);
+      });
     });
 
     describe('3.5 Reauthentication Succeeds', function () {
