@@ -462,22 +462,22 @@ for (const {
 }
 
 // Running CSFLE tests with mongocryptd
-const MONGOCRYPTD_CSFLE_TASKS = generateVersionTopologyMatrix()
-  .filter(({ mongoVersion }) => { // Only run on server versions >= 4.2
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
+  .filter((mongoVersion) => { // Only run on server versions >= 4.2
     const numericVersion = Number(mongoVersion);
     return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
   })
-  .map(({ mongoVersion, topology }) => {
+  .map((mongoVersion) => {
     return {
-      name: `test-${mongoVersion}-${topology}-csfle-mongocryptd`,
-      tags: [mongoVersion, topology],
+      name: `test-${mongoVersion}-csfle-mongocryptd`,
+      tags: [mongoVersion, 'sharded_cluster'],
       commands: [
         { func: 'install dependencies' },
         {
           func: 'bootstrap mongo-orchestration',
           vars: {
             VERSION: mongoVersion,
-            TOPOLOGY: topology,
+            TOPOLOGY: 'sharded_cluster',
             AUTH: 'auth'
           }
         },

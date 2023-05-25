@@ -3090,37 +3090,7 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run lambda handler example tests with aws auth
-  - name: test-7.0-server-csfle-mongocryptd
-    tags:
-      - '7.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '7.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-7.0-replica_set-csfle-mongocryptd
-    tags:
-      - '7.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '7.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-7.0-sharded_cluster-csfle-mongocryptd
+  - name: test-7.0-csfle-mongocryptd
     tags:
       - '7.0'
       - sharded_cluster
@@ -3135,37 +3105,7 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: test-6.0-server-csfle-mongocryptd
-    tags:
-      - '6.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '6.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-6.0-replica_set-csfle-mongocryptd
-    tags:
-      - '6.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '6.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-6.0-sharded_cluster-csfle-mongocryptd
+  - name: test-6.0-csfle-mongocryptd
     tags:
       - '6.0'
       - sharded_cluster
@@ -3180,37 +3120,7 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: test-5.0-server-csfle-mongocryptd
-    tags:
-      - '5.0'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-5.0-replica_set-csfle-mongocryptd
-    tags:
-      - '5.0'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-5.0-sharded_cluster-csfle-mongocryptd
+  - name: test-5.0-csfle-mongocryptd
     tags:
       - '5.0'
       - sharded_cluster
@@ -3225,37 +3135,7 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.4-server-csfle-mongocryptd
-    tags:
-      - '4.4'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.4'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.4-replica_set-csfle-mongocryptd
-    tags:
-      - '4.4'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.4'
-          TOPOLOGY: replica_set
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.4-sharded_cluster-csfle-mongocryptd
+  - name: test-4.4-csfle-mongocryptd
     tags:
       - '4.4'
       - sharded_cluster
@@ -3270,37 +3150,7 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.2-server-csfle-mongocryptd
-    tags:
-      - '4.2'
-      - server
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: server
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.2-replica_set-csfle-mongocryptd
-    tags:
-      - '4.2'
-      - replica_set
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '4.2'
-          TOPOLOGY: replica_set
-          AUTH: auth
-      - func: bootstrap kms servers
-      - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
-  - name: test-4.2-sharded_cluster-csfle-mongocryptd
+  - name: test-4.2-csfle-mongocryptd
     tags:
       - '4.2'
       - sharded_cluster
@@ -3955,21 +3805,11 @@ buildvariants:
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
     tasks:
-      - test-7.0-server-csfle-mongocryptd
-      - test-7.0-replica_set-csfle-mongocryptd
-      - test-7.0-sharded_cluster-csfle-mongocryptd
-      - test-6.0-server-csfle-mongocryptd
-      - test-6.0-replica_set-csfle-mongocryptd
-      - test-6.0-sharded_cluster-csfle-mongocryptd
-      - test-5.0-server-csfle-mongocryptd
-      - test-5.0-replica_set-csfle-mongocryptd
-      - test-5.0-sharded_cluster-csfle-mongocryptd
-      - test-4.4-server-csfle-mongocryptd
-      - test-4.4-replica_set-csfle-mongocryptd
-      - test-4.4-sharded_cluster-csfle-mongocryptd
-      - test-4.2-server-csfle-mongocryptd
-      - test-4.2-replica_set-csfle-mongocryptd
-      - test-4.2-sharded_cluster-csfle-mongocryptd
+      - test-7.0-csfle-mongocryptd
+      - test-6.0-csfle-mongocryptd
+      - test-5.0-csfle-mongocryptd
+      - test-4.4-csfle-mongocryptd
+      - test-4.2-csfle-mongocryptd
   - name: rhel8-node20-test-csfle-mongocryptd
     display_name: rhel 8 Node20 test mongocryptd
     run_on: rhel80-large
@@ -3978,21 +3818,11 @@ buildvariants:
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
     tasks:
-      - test-7.0-server-csfle-mongocryptd
-      - test-7.0-replica_set-csfle-mongocryptd
-      - test-7.0-sharded_cluster-csfle-mongocryptd
-      - test-6.0-server-csfle-mongocryptd
-      - test-6.0-replica_set-csfle-mongocryptd
-      - test-6.0-sharded_cluster-csfle-mongocryptd
-      - test-5.0-server-csfle-mongocryptd
-      - test-5.0-replica_set-csfle-mongocryptd
-      - test-5.0-sharded_cluster-csfle-mongocryptd
-      - test-4.4-server-csfle-mongocryptd
-      - test-4.4-replica_set-csfle-mongocryptd
-      - test-4.4-sharded_cluster-csfle-mongocryptd
-      - test-4.2-server-csfle-mongocryptd
-      - test-4.2-replica_set-csfle-mongocryptd
-      - test-4.2-sharded_cluster-csfle-mongocryptd
+      - test-7.0-csfle-mongocryptd
+      - test-6.0-csfle-mongocryptd
+      - test-5.0-csfle-mongocryptd
+      - test-4.4-csfle-mongocryptd
+      - test-4.2-csfle-mongocryptd
   - name: macos-1100
     display_name: MacOS 11 Node20
     run_on: macos-1100
