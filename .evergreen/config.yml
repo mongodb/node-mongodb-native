@@ -3954,7 +3954,6 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
-      TEST_NPM_SCRIPT: check:csfle
     tasks:
       - test-7.0-server-csfle-mongocryptd
       - test-7.0-replica_set-csfle-mongocryptd
@@ -3978,7 +3977,6 @@ buildvariants:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
-      TEST_NPM_SCRIPT: check:csfle
     tasks:
       - test-7.0-server-csfle-mongocryptd
       - test-7.0-replica_set-csfle-mongocryptd
