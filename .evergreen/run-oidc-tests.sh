@@ -28,6 +28,6 @@ elif [ "$PROVIDER_NAME" = "azure" ]; then
   fi
   MONGODB_URI="${MONGODB_URI}/?authMechanism=MONGODB-OIDC"
   MONGODB_URI="${MONGODB_URI}&authMechanismProperties=PROVIDER_NAME:azure"
-  export MONGODB_URI="${MONGODB_URI},TOKEN_AUDIENCE:api://${AZUREOIDC_CLIENTID}"
+  export MONGODB_URI="${MONGODB_URI},TOKEN_AUDIENCE:api%3A%2F%2F${AZUREOIDC_CLIENTID}"
   npm run check:oidc-azure
 fi
