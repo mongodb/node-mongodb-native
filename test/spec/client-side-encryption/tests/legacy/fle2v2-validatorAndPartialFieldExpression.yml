@@ -17,7 +17,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
@@ -41,7 +41,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
@@ -62,7 +62,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
@@ -86,7 +86,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
@@ -112,7 +112,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
@@ -145,7 +145,7 @@ tests:
         kmsProviders:
           local: {'key': {'$binary': {'base64': 'Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk', 'subType': '00'}}}
         encryptedFieldsMap:
-          "default.encryptedCollection": {'escCollection': 'enxcol_.default.esc', 'eccCollection': 'enxcol_.default.ecc', 'ecocCollection': 'enxcol_.default.ecoc', 'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
+          "default.encryptedCollection": {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
     operations:
     # Drop to remove a collection that may exist from previous test runs.
     - name: dropCollection
