@@ -102,7 +102,6 @@ describe('OIDC Auth Spec Prose Tests', function () {
       const commandFailedEvents: CommandFailedEvent[] = [];
 
       const commandStartedListener = event => {
-        console.log(event);
         if (event.commandName === 'find') {
           commandStartedEvents.push(event);
         }
