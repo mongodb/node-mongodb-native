@@ -92,6 +92,8 @@ async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToke
  * the expires_in required field.
  */
 function isEndpointResultInvalid(token: unknown): boolean {
+  console.log('token in validation', token);
   if (token == null || typeof token !== 'object') return true;
+  console.log('test', 'access_token' in token, 'expires_in' in token);
   return !('access_token' in token) && !('expires_in' in token);
 }
