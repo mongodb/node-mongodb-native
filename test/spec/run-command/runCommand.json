@@ -124,6 +124,68 @@
       ]
     },
     {
+      "description": "always gossips the $clusterTime on the sent command",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ping"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$clusterTime": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "attaches the provided session lsid to given command",
       "operations": [
         {
@@ -163,6 +225,16 @@
     },
     {
       "description": "attaches the provided $readPreference to given command",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "replicaset",
+            "sharded-replicaset",
+            "load-balanced",
+            "sharded"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -191,6 +263,93 @@
                   "ping": 1,
                   "$readPreference": {
                     "mode": "nearest"
+                  },
+                  "$db": "db"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "does not attach $readPreference to given command on standalone",
+      "runOnRequirements": [
+        {
+          "topologies": [
+            "single"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            },
+            "readPreference": {
+              "mode": "nearest"
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$readPreference": {
+                    "$$exists": false
+                  },
+                  "$db": "db"
+                },
+                "commandName": "ping"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "does not attach primary $readPreference to given command",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            },
+            "readPreference": {
+              "mode": "primary"
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "ping": 1,
+                  "$readPreference": {
+                    "$$exists": false
                   },
                   "$db": "db"
                 },
@@ -249,7 +408,7 @@
               "insert": "collection",
               "documents": [
                 {
-                  "_id": 1
+                  "foo": "bar"
                 }
               ],
               "ordered": true
@@ -355,7 +514,7 @@
                     "insert": "collection",
                     "documents": [
                       {
-                        "_id": 2
+                        "foo": "transaction"
                       }
                     ],
                     "ordered": true
@@ -383,7 +542,7 @@
                   "insert": "collection",
                   "documents": [
                     {
-                      "_id": 2
+                      "foo": "transaction"
                     }
                   ],
                   "ordered": true,

@@ -1,0 +1,278 @@
+{
+  "description": "entity-commandCursor",
+  "schemaVersion": "1.3",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "db",
+        "client": "client",
+        "databaseName": "db"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "db",
+        "collectionName": "collection"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "collection",
+      "databaseName": "db",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        },
+        {
+          "_id": 4,
+          "x": 44
+        },
+        {
+          "_id": 5,
+          "x": 55
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "runCursorCommand creates and exhausts cursor by running getMores",
+      "operations": [
+        {
+          "name": "runCursorCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "find",
+            "batchSize": 2,
+            "command": {
+              "find": "collection",
+              "filter": {},
+              "batchSize": 2
+            }
+          },
+          "expectResult": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            },
+            {
+              "_id": 4,
+              "x": 44
+            },
+            {
+              "_id": 5,
+              "x": 55
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "collection",
+                  "filter": {},
+                  "batchSize": 2,
+                  "$db": "db",
+                  "lsid": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "collection",
+                  "$db": "db",
+                  "lsid": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "getMore"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "collection",
+                  "$db": "db",
+                  "lsid": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "getMore"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "createCommandCursor creates a cursor and stores it as an entity that can be iterated one document at a time",
+      "operations": [
+        {
+          "name": "createCommandCursor",
+          "object": "db",
+          "arguments": {
+            "commandName": "find",
+            "batchSize": 2,
+            "command": {
+              "find": "collection",
+              "filter": {},
+              "batchSize": 2
+            }
+          },
+          "saveResultAsEntity": "myRunCommandCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 2,
+            "x": 22
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 3,
+            "x": 33
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 4,
+            "x": 44
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 5,
+            "x": 55
+          }
+        }
+      ]
+    },
+    {
+      "description": "createCommandCursor's cursor can be closed and will perform a killCursors operation",
+      "operations": [
+        {
+          "name": "createCommandCursor",
+          "object": "db",
+          "arguments": {
+            "commandName": "find",
+            "batchSize": 2,
+            "command": {
+              "find": "collection",
+              "filter": {},
+              "batchSize": 2
+            }
+          },
+          "saveResultAsEntity": "myRunCommandCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "myRunCommandCursor",
+          "expectResult": {
+            "_id": 1,
+            "x": 11
+          }
+        },
+        {
+          "name": "close",
+          "object": "myRunCommandCursor"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "collection",
+                  "filter": {},
+                  "batchSize": 2,
+                  "$db": "db",
+                  "lsid": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "find"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "killCursors": "collection",
+                  "cursors": {
+                    "$$type": "array"
+                  }
+                },
+                "commandName": "killCursors"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

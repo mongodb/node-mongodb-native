@@ -417,6 +417,16 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     return new EntitiesMap(Array.from(this.entries()).filter(([, e]) => e instanceof ctor));
   }
 
+  getChangeStreamOrCursor(key: string): UnifiedChangeStream | AbstractCursor {
+    try {
+      const cs = this.getEntity('stream', key);
+      return cs;
+    } catch {
+      const cursor = this.getEntity('cursor', key);
+      return cursor;
+    }
+  }
+
   getEntity(type: 'client', key: string, assertExists?: boolean): UnifiedMongoClient;
   getEntity(type: 'db', key: string, assertExists?: boolean): Db;
   getEntity(type: 'collection', key: string, assertExists?: boolean): Collection;
