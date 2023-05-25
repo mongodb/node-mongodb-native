@@ -80,6 +80,7 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
  */
 async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToken> {
   const url = `${AZURE_BASE_URL}&resource=${tokenAudience}`;
+  console.log('url', url);
   const data = await request(url, {
     json: true,
     headers: AZURE_HEADERS

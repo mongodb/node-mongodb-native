@@ -1,6 +1,13 @@
 import { expect } from 'chai';
 
-import { Collection, MongoClient, OIDC_WORKFLOWS } from '../mongodb';
+import {
+  Collection,
+  CommandFailedEvent,
+  CommandStartedEvent,
+  CommandSucceededEvent,
+  MongoClient,
+  OIDC_WORKFLOWS
+} from '../mongodb';
 
 describe('OIDC Auth Spec Prose Tests', function () {
   const callbackCache = OIDC_WORKFLOWS.get('callback').cache;
@@ -16,9 +23,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
 
     describe('3.1 Connect', function () {
       before(function () {
-        client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
-        );
+        client = new MongoClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -33,14 +38,11 @@ describe('OIDC Auth Spec Prose Tests', function () {
 
     describe('3.2 Allowed Hosts Ignored', function () {
       before(function () {
-        client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>',
-          {
-            authMechanismProperties: {
-              ALLOWED_HOSTS: []
-            }
+        client = new MongoClient(process.env.MONGODB_URI, {
+          authMechanismProperties: {
+            ALLOWED_HOSTS: []
           }
-        );
+        });
         collection = client.db('test').collection('test');
       });
 
@@ -57,9 +59,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
     describe('3.3 Main Cache Not Used', function () {
       before(function () {
         callbackCache?.clear();
-        client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
-        );
+        client = new MongoClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -79,9 +79,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
       before(function () {
         callbackCache?.clear();
         azureCache?.clear();
-        client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
-        );
+        client = new MongoClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -152,9 +150,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
 
       before(async function () {
         azureCache?.clear();
-        client = new MongoClient(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:<foo>'
-        );
+        client = new MongoClient(process.env.MONGODB_URI);
         await client.db('test').collection('test').findOne();
         addListeners();
         setupFailPoint();
