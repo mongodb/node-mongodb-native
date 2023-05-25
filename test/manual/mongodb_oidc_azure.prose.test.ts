@@ -151,15 +151,14 @@ describe('OIDC Auth Spec Prose Tests', function () {
 
       before(async function () {
         azureCache?.clear();
-        client = new MongoClient(process.env.MONGODB_URI);
+        client = new MongoClient(process.env.MONGODB_URI, { monitorCommands: true });
         await client.db('test').collection('test').findOne();
         addListeners();
         await setupFailPoint();
       });
 
-      after(async function () {
+      afterEach(async function () {
         await removeFailPoint();
-        await client.close();
       });
 
       // Clear the Azure OIDC cache.
