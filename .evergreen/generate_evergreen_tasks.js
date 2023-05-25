@@ -419,7 +419,6 @@ for (const {
 } of OPERATING_SYSTEMS) {
   const testedNodeVersions = NODE_VERSIONS.filter(version => nodeVersions.includes(version));
   const os = osName.split('-')[0];
-  // NOTE: Filters out tasks that are not AWS tasks and that are not skipped on windows
   const tasks = BASE_TASKS.concat(TASKS).filter(task => {
     const isAWSTask = task.name.match(/^aws/);
     const isSkippedTaskOnWindows =
@@ -463,39 +462,36 @@ for (const {
 }
 
 // Running CSFLE tests with mongocryptd
-const MONGOCRYPTD_SERVER_VERSIONS = MONGODB_VERSIONS
-  .filter(version => {
-    const numericVersion = Number(version);
+const MONGOCRYPTD_CSFLE_TASKS = generateVersionTopologyMatrix()
+  .filter(({ mongoVersion }) => {
+    const numericVersion = Number(mongoVersion);
     return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
-  });
-
-const MONGOCRYPTD_CSFLE_TASKS = [];
-for (const version of MONGOCRYPTD_SERVER_VERSIONS) {
-  for (const topology of TOPOLOGIES) {
-    const task = {
-      name: `test-${version}-${topology}-csfle-mongocryptd`,
-      tags: [version, topology],
+  })
+  .map(({ mongoVersion, topology }) => {
+    return {
+      name: `test-${mongoVersion}-${topology}-csfle-mongocryptd`,
+      tags: [mongoVersion, topology],
       commands: [
         { func: 'install dependencies' },
         {
           func: 'bootstrap mongo-orchestration',
           vars: {
-            VERSION: version,
+            VERSION: mongoVersion,
             TOPOLOGY: topology,
             AUTH: 'auth'
           }
         },
         { func: 'bootstrap kms servers' },
-        { func: 'run tests',
+        {
+          func: 'run tests',
           vars: {
             TEST_NPM_SCRIPT: 'check:csfle'
           }
         }
       ]
-    };
-    MONGOCRYPTD_CSFLE_TASKS.push(task);
-  }
-}
+    }
+  });
+
 for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
   const name = `rhel8-node${nodeVersion}-test-csfle-mongocryptd`;
   const displayName = `rhel 8 Node${nodeVersion} test mongocryptd`;
