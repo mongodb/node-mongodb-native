@@ -53,18 +53,19 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
       throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
     }
     let token;
+    let response;
     const entry = this.cache.getEntry(tokenAudience);
     if (entry?.isValid()) {
       token = entry.token;
     } else {
       this.cache.deleteEntry(tokenAudience);
-      const response = await getAzureTokenData(tokenAudience);
+      response = await getAzureTokenData(tokenAudience);
       console.log('response', response);
       this.cache.addEntry(tokenAudience, response);
       token = response.access_token;
     }
     console.log('token', token);
-    if (isEndpointResultInvalid(token)) {
+    if (isEndpointResultInvalid(response)) {
       this.cache.deleteEntry(tokenAudience);
       throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
     }
@@ -88,9 +89,9 @@ async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToke
 /**
  * Determines if a result returned from the endpoint is invalid.
  * This means the result is nullish, doesn't contain the access_token required field,
- * the expires_in required field, and does not contain extra fields.
+ * the expires_in required field.
  */
 function isEndpointResultInvalid(token: unknown): boolean {
   if (token == null || typeof token !== 'object') return true;
-  return !('access_token' in token) || !('expires_in' in token);
+  return !('access_token' in token) && !('expires_in' in token);
 }
