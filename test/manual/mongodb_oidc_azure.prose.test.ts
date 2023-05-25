@@ -102,6 +102,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
       const commandFailedEvents: CommandFailedEvent[] = [];
 
       const commandStartedListener = event => {
+        console.log(event);
         if (event.commandName === 'find') {
           commandStartedEvents.push(event);
         }
@@ -153,10 +154,10 @@ describe('OIDC Auth Spec Prose Tests', function () {
         client = new MongoClient(process.env.MONGODB_URI);
         await client.db('test').collection('test').findOne();
         addListeners();
-        setupFailPoint();
+        await setupFailPoint();
       });
 
-      afterEach(async function () {
+      after(async function () {
         await removeFailPoint();
         await client.close();
       });
