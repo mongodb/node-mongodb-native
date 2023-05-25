@@ -1365,9 +1365,6 @@ task_groups:
   - name: testazureoidc_task_group
     setup_group:
     - func: fetch source
-    # - func: prepare resources
-    # - func: fix absolute paths
-    # - func: make files executable
     - command: shell.exec
       params:
         shell: bash
