@@ -21,9 +21,9 @@ import {
 } from '../../mongodb';
 import { getSymbolFrom, sleep } from '../../tools/utils';
 import { TestConfiguration } from '../runner/config';
-import { EntitiesMap, UnifiedChangeStream } from './entities';
+import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
-import type { ExpectedEvent, ExpectedLogMessage, OperationDescription } from './schema';
+import type { ExpectedEvent, OperationDescription } from './schema';
 import { getMatchingEventCount, translateOptions } from './unified-utils';
 
 interface OperationFunctionParams {
@@ -350,26 +350,13 @@ operations.set('insertMany', async ({ entities, operation }) => {
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
-  function getChangeStream(): UnifiedChangeStream | null {
-    try {
-      const changeStream = entities.getEntity('stream', operation.object);
-      return changeStream;
-    } catch (e) {
-      return null;
-    }
-  }
+  const iterable = entities.getChangeStreamOrCursor(operation.object);
+  return iterable.next();
+});
 
-  const changeStream = getChangeStream();
-  if (changeStream == null) {
-    // iterateUntilDocumentOrError is used for changes streams and regular cursors.
-    // we have no other way to distinguish which scenario we are testing when we run an
-    // iterateUntilDocumentOrError operation, so we first try to get the changeStream and
-    // if that fails, we know we need to get a cursor
-    const cursor = entities.getEntity('cursor', operation.object);
-    return await cursor.next();
-  }
-
-  return await changeStream.next();
+operations.set('iterateOnce', async ({ entities, operation }) => {
+  const iterable = entities.getChangeStreamOrCursor(operation.object);
+  return iterable.tryNext();
 });
 
 operations.set('listCollections', async ({ entities, operation }) => {
@@ -659,6 +646,40 @@ operations.set('runCommand', async ({ entities, operation }: OperationFunctionPa
   return db.command(command, options);
 });
 
+operations.set('runCursorCommand', async ({ entities, operation }: OperationFunctionParams) => {
+  const db = entities.getEntity('db', operation.object);
+  const { command, ...opts } = operation.arguments!;
+  const cursor = db.runCursorCommand(command, {
+    readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
+    session: opts.session
+  });
+
+  if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
+  if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
+  if (opts.comment !== undefined) cursor.setComment(opts.comment);
+
+  return cursor.toArray();
+});
+
+operations.set('createCommandCursor', async ({ entities, operation }: OperationFunctionParams) => {
+  const collection = entities.getEntity('db', operation.object);
+  const { command, ...opts } = operation.arguments!;
+  const cursor = collection.runCursorCommand(command, {
+    readPreference: ReadPreference.fromOptions({ readPreference: opts.readPreference }),
+    session: opts.session
+  });
+
+  if (!Number.isNaN(+opts.batchSize)) cursor.setBatchSize(+opts.batchSize);
+  if (!Number.isNaN(+opts.maxTimeMS)) cursor.setMaxTimeMS(+opts.maxTimeMS);
+  if (opts.comment !== undefined) cursor.setComment(opts.comment);
+
+  // The spec dictates that we create the cursor and force the find command
+  // to execute, but the first document must still be returned for the first iteration.
+  await cursor.hasNext();
+
+  return cursor;
+});
+
 operations.set('updateMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...options } = operation.arguments!;
@@ -742,8 +763,7 @@ export async function executeOperationAndCheck(
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
 
   if (operation.arguments?.session) {
-    const session = entities.getEntity('session', operation.arguments.session, false);
-    operation.arguments.session = session;
+    operation.arguments.session = entities.getEntity('session', operation.arguments.session);
   }
 
   let result;

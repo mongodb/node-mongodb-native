@@ -608,7 +608,7 @@ export abstract class AbstractCursor<
   abstract clone(): AbstractCursor<TSchema>;
 
   /** @internal */
-  abstract _initialize(
+  protected abstract _initialize(
     session: ClientSession | undefined,
     callback: Callback<ExecutionResult>
   ): void;
