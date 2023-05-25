@@ -3,8 +3,14 @@ import { expect } from 'chai';
 import { Collection, MongoClient, OIDC_WORKFLOWS } from '../mongodb';
 
 describe('OIDC Auth Spec Prose Tests', function () {
-  const callbackCache = OIDC_WORKFLOWS.get('callback').cache;
-  const azureCache = OIDC_WORKFLOWS.get('azure)').cache;
+  let callbackCache;
+  let azureCache;
+
+  before(function () {
+    console.log('OIDC_WORKFLOWS', OIDC_WORKFLOWS);
+    callbackCache = OIDC_WORKFLOWS.get('callback').cache;
+    azureCache = OIDC_WORKFLOWS.get('azure)').cache;
+  });
 
   describe('3. Azure Automatic Auth', function () {
     let client: MongoClient;
