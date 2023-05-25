@@ -463,7 +463,7 @@ for (const {
 
 // Running CSFLE tests with mongocryptd
 const MONGOCRYPTD_CSFLE_TASKS = generateVersionTopologyMatrix()
-  .filter(({ mongoVersion }) => {
+  .filter(({ mongoVersion }) => { // Only run on server versions >= 4.2
     const numericVersion = Number(mongoVersion);
     return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
   })
@@ -506,7 +506,6 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
       TEST_NPM_SCRIPT: 'check:csfle'
     },
     tasks:
-      // TODO(NODE-4698): Add relevant task
       MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
   });
 }
@@ -747,7 +746,6 @@ BUILD_VARIANTS.push({
   run_on: DEFAULT_OS,
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example', 'test-deployed-lambda']
 });
-
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
