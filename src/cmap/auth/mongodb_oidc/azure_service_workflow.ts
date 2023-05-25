@@ -11,9 +11,6 @@ const AZURE_BASE_URL =
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
 
-/** Properties allowed on results of the endpoint. */
-const RESULT_PROPERTIES = ['access_token', 'expires_in'];
-
 /** Invalid endpoint result error. */
 const ENDPOINT_RESULT_ERROR =
   'Azure endpoint did not return a value with only access_token and expires_in properties';
@@ -61,10 +58,10 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
       token = entry.token;
     } else {
       this.cache.deleteEntry(tokenAudience);
-      const azureToken = await getAzureTokenData(tokenAudience);
-      console.log('azureToken', azureToken);
-      const azureEntry = this.cache.addEntry(tokenAudience, azureToken);
-      token = azureEntry.token;
+      const response = await getAzureTokenData(tokenAudience);
+      console.log('response', response);
+      this.cache.addEntry(tokenAudience, response);
+      token = response.access_token;
     }
     console.log('token', token);
     if (isEndpointResultInvalid(token)) {
@@ -95,6 +92,5 @@ async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToke
  */
 function isEndpointResultInvalid(token: unknown): boolean {
   if (token == null || typeof token !== 'object') return true;
-  if (!('access_token' in token) || !('expires_in' in token)) return true;
-  return !Object.getOwnPropertyNames(token).every(prop => RESULT_PROPERTIES.includes(prop));
+  return !('access_token' in token) || !('expires_in' in token);
 }
