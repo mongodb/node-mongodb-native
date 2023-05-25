@@ -400,7 +400,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_NAME=${NODE_LTS_NAME} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
 
   "run atlas tests":
@@ -424,7 +424,7 @@ functions:
           rm -f ./prepare_atlas_connectivity.sh
 
           export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
 
@@ -454,7 +454,7 @@ functions:
           export PYTHON_BINARY=$([ "Windows_NT" = "$OS" ] && echo "/cygdrive/c/python/python38/python.exe" || echo "/opt/mongodbtoolchain/v3/bin/python3")
           export PROJECT_DIRECTORY="$(pwd)"
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
           export MONGODB_URI="${MONGODB_URI}"
           export SSL="${SSL}"
 
@@ -475,7 +475,7 @@ functions:
           export KRB5_KEYTAB='${gssapi_auth_keytab_base64}'
           export KRB5_PRINCIPAL='${gssapi_auth_principal}'
           export MONGODB_URI='${gssapi_auth_mongodb_uri}'
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-kerberos-tests.sh
 
@@ -487,7 +487,7 @@ functions:
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
           export MONGODB_URI='${plain_auth_mongodb_uri}'
-          export NODE_LTS_NAME='${NODE_LTS_NAME}'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
 
@@ -499,7 +499,7 @@ functions:
           script: |
             export PROJECT_DIRECTORY="$(pwd)"
             export MONGODB_URI='mongodb://mhuser:pencil@localhost'
-            export NODE_LTS_NAME='${NODE_LTS_NAME}'
+            export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
             bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
 
@@ -510,7 +510,7 @@ functions:
         working_dir: "src"
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
-          export NODE_LTS_NAME=${NODE_LTS_NAME}
+          export NODE_LTS_VERSION=${NODE_LTS_VERSION}
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
           export SSL_CA_FILE="${SSL_CA_FILE}"
           export SSL_KEY_FILE="${SSL_KEY_FILE}"
@@ -1034,7 +1034,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_VERSION: 18
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
