@@ -29,7 +29,7 @@ describe('Error (Integration)', function () {
     }
 
     context('when the message on the AggregateError is non-empty', () => {
-      it(`uses the AggregateError's message`, () => {
+      it(`uses the AggregateError's message`, { requires: { nodejs: '>=16' } }, () => {
         const error = new AggregateError([new Error('non-empty')]);
         error.message = 'custom error message';
         const mongoError = new MongoError(error);
