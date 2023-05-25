@@ -12,6 +12,7 @@ declare global {
       serverless?: 'forbid' | 'allow' | 'require';
       auth?: 'enabled' | 'disabled';
       idmsMockServer?: true;
+      nodejs?: string;
     };
 
     sessions?: {
