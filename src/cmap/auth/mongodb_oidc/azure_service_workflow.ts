@@ -62,10 +62,11 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
     } else {
       this.cache.deleteEntry(tokenAudience);
       const azureToken = await getAzureTokenData(tokenAudience);
+      console.log('azureToken', azureToken);
       const azureEntry = this.cache.addEntry(tokenAudience, azureToken);
       token = azureEntry.token;
     }
-
+    console.log('token', token);
     if (isEndpointResultInvalid(token)) {
       this.cache.deleteEntry(tokenAudience);
       throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
