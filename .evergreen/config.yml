@@ -3323,6 +3323,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
@@ -3544,6 +3547,9 @@ buildvariants:
       - test-rapid-server
       - test-rapid-replica_set
       - test-rapid-sharded_cluster
+      - test-7.0-server
+      - test-7.0-replica_set
+      - test-7.0-sharded_cluster
       - test-6.0-server
       - test-6.0-replica_set
       - test-6.0-sharded_cluster
