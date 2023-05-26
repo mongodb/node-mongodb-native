@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const semver = require('semver');
 const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
@@ -463,6 +464,52 @@ for (const {
   }
 }
 
+// Running CSFLE tests with mongocryptd
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
+  .filter(mongoVersion => ['latest', 'rapid'].includes(mongoVersion)
+    || semver.gte(`${mongoVersion}.0`, '4.2.0'))
+  .map((mongoVersion) => {
+    return {
+      name: `test-${mongoVersion}-csfle-mongocryptd`,
+      tags: [mongoVersion, 'sharded_cluster'],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: mongoVersion,
+            TOPOLOGY: 'sharded_cluster',
+            AUTH: 'auth'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        {
+          func: 'run tests',
+          vars: {
+            TEST_NPM_SCRIPT: 'check:csfle'
+          }
+        }
+      ]
+    }
+  });
+
+for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
+  const name = `rhel8-node${nodeVersion}-test-csfle-mongocryptd`;
+  const displayName = `rhel 8 Node${nodeVersion} test mongocryptd`;
+  BUILD_VARIANTS.push({
+    name,
+    display_name: displayName,
+    run_on: DEFAULT_OS,
+    expansions: {
+      CLIENT_ENCRYPTION: true,
+      RUN_WITH_MONGOCRYPTD: true,
+      NODE_LTS_VERSION: LOWEST_LTS
+    },
+    tasks:
+      MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
+  });
+}
+
 BUILD_VARIANTS.push({
   name: 'macos-1100',
   display_name: `MacOS 11 Node${LATEST_LTS}`,
@@ -732,6 +779,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
+  .concat(MONGOCRYPTD_CSFLE_TASKS)
   .concat(mongoshTasks);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
