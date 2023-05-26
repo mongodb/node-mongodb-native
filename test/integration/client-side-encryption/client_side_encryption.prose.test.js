@@ -4,7 +4,6 @@ const { expect } = require('chai');
 const fs = require('fs');
 const path = require('path');
 
-const { deadlockTests } = require('./client_side_encryption.prose.deadlock');
 const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
@@ -1362,10 +1361,6 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
         expect(error).to.be.instanceOf(MongoServerSelectionError, /'Server selection timed out'/i);
       });
     });
-  });
-
-  describe('Deadlock tests', () => {
-    deadlockTests(metadata);
   });
 
   // TODO(NODE-3151): Implement kms prose tests
