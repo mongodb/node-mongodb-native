@@ -398,6 +398,17 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh
+  reset aws instance profile:
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+          cd "${DRIVERS_TOOLS}/.evergreen/auth_aws"
+          if [ -f "./aws_e2e_setup.json" ]; then
+            . ./activate-authawsvenv.sh
+            python ./lib/aws_assign_instance_profile.py
+          fi
   cleanup:
     - command: shell.exec
       params:
@@ -600,7 +611,7 @@ functions:
               "iam_auth_assume_role_name" : "${iam_auth_assume_role_name}",
               "iam_auth_ec2_instance_account" : "${iam_auth_ec2_instance_account}",
               "iam_auth_ec2_instance_secret_access_key" : "${iam_auth_ec2_instance_secret_access_key}",
-              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}",
+              "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile_test}",
               "iam_auth_assume_web_role_name": "${iam_auth_assume_web_role_name}",
               "iam_web_identity_issuer": "${iam_web_identity_issuer}",
               "iam_web_identity_rsa_key": "${iam_web_identity_rsa_key}",
@@ -3396,6 +3407,7 @@ pre:
   - func: fix absolute paths
   - func: make files executable
 post:
+  - func: reset aws instance profile
   - func: upload test results
   - func: upload coverage report
   - func: cleanup
