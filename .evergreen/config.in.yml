@@ -455,7 +455,7 @@ functions:
           cd "${DRIVERS_TOOLS}/.evergreen/auth_aws"
           if [ -f "./aws_e2e_setup.json" ]; then
             . ./activate-authawsvenv.sh
-            python ./lib/aws_assign_instance_profile.py
+            python ./lib/aws_assign_instance_profile.py --instance_profile_arn=${iam_auth_ec2_instance_profile_default}
           fi
 
   "cleanup":
@@ -660,6 +660,7 @@ functions:
               "iam_auth_ec2_instance_account" : "${iam_auth_ec2_instance_account}",
               "iam_auth_ec2_instance_secret_access_key" : "${iam_auth_ec2_instance_secret_access_key}",
               "iam_auth_ec2_instance_profile" : "${iam_auth_ec2_instance_profile}",
+              "iam_auth_ec2_instance_profile_default" : "${iam_auth_ec2_instance_profile_default}",
               "iam_auth_assume_web_role_name": "${iam_auth_assume_web_role_name}",
               "iam_web_identity_issuer": "${iam_web_identity_issuer}",
               "iam_web_identity_rsa_key": "${iam_web_identity_rsa_key}",
