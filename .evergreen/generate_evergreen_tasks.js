@@ -465,7 +465,7 @@ for (const {
 // Running CSFLE tests with mongocryptd
 const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
   .filter(mongoVersion => ['latest', 'rapid'].includes(mongoVersion)
-    || semver.gte(semver.coerce(mongoVersion), semver.coerce('4.2')))
+    || semver.gte(`${mongoVersion}.0`, '4.2.0'))
   .map((mongoVersion) => {
     return {
       name: `test-${mongoVersion}-csfle-mongocryptd`,
