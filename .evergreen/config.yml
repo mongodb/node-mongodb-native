@@ -3090,6 +3090,36 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run lambda handler example tests with aws auth
+  - name: test-latest-csfle-mongocryptd
+    tags:
+      - latest
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-rapid-csfle-mongocryptd
+    tags:
+      - rapid
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
   - name: test-7.0-csfle-mongocryptd
     tags:
       - '7.0'
@@ -3805,6 +3835,8 @@ buildvariants:
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
     tasks:
+      - test-latest-csfle-mongocryptd
+      - test-rapid-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd
@@ -3818,6 +3850,8 @@ buildvariants:
       RUN_WITH_MONGOCRYPTD: true
       NODE_LTS_VERSION: 14
     tasks:
+      - test-latest-csfle-mongocryptd
+      - test-rapid-csfle-mongocryptd
       - test-7.0-csfle-mongocryptd
       - test-6.0-csfle-mongocryptd
       - test-5.0-csfle-mongocryptd

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const semver = require('semver');
 const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
@@ -463,10 +464,8 @@ for (const {
 
 // Running CSFLE tests with mongocryptd
 const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
-  .filter((mongoVersion) => { // Only run on server versions >= 4.2
-    const numericVersion = Number(mongoVersion);
-    return !Number.isNaN(numericVersion) && numericVersion >= 4.2;
-  })
+  .filter(mongoVersion => ['latest', 'rapid'].includes(mongoVersion)
+    || semver.gte(semver.coerce(mongoVersion), semver.coerce('4.2')))
   .map((mongoVersion) => {
     return {
       name: `test-${mongoVersion}-csfle-mongocryptd`,
