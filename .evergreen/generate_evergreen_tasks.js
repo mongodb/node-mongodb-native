@@ -11,19 +11,23 @@ const {
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
   TLS_VERSIONS,
-  DEFAULT_OS
+  DEFAULT_OS,
+  WINDOWS_OS,
+  MACOS_OS,
+  UBUNTU_OS,
+  DEBIAN_OS
 } = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
   {
-    name: 'rhel80-large',
+    name: DEFAULT_OS,
     display_name: 'rhel8',
     run_on: DEFAULT_OS
   },
   {
-    name: 'windows-64-vs2019',
-    display_name: 'Windows (VS2019)',
-    run_on: 'windows-64-vs2019-large',
+    name: WINDOWS_OS,
+    display_name: 'Windows',
+    run_on: WINDOWS_OS,
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
@@ -421,11 +425,11 @@ for (const {
 }
 
 BUILD_VARIANTS.push({
-  name: 'macos-1100',
+  name: MACOS_OS,
   display_name: `MacOS 11 Node${
     versions.find(version => version.versionNumber === LATEST_LTS).versionNumber
   }`,
-  run_on: 'macos-1100',
+  run_on: MACOS_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
@@ -545,7 +549,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
-  run_on: 'ubuntu1804-large',
+  run_on: UBUNTU_OS,
   tasks: mongoshTasks.map(({ name }) => name)
 });
 
@@ -553,7 +557,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: 'ubuntu1804-large',
+  run_on: UBUNTU_OS,
   expansions: {
     NODE_LTS_VERSION: LOWEST_LTS
   },
