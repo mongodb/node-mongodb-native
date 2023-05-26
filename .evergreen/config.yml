@@ -3657,9 +3657,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-gallium
-    display_name: Windows (VS2019) Node16
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-gallium
+    display_name: Windows Node16
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 16
     tasks:
@@ -3699,9 +3699,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-hydrogen
-    display_name: Windows (VS2019) Node18
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-hydrogen
+    display_name: Windows Node18
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 18
     tasks:
@@ -3741,9 +3741,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node20
-    display_name: Windows (VS2019) Node20
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-Node20
+    display_name: Windows Node20
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 20
     tasks:
