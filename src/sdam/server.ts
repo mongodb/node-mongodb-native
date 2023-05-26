@@ -343,13 +343,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return;
     }
 
-    this.s.operationCount += 1;
+    this.incrementOperationCount();
 
     this.pool.withConnection(
       conn,
       (err, conn, cb) => {
         if (err || !conn) {
-          this.s.operationCount -= 1;
+          this.decrementOperationCount();
           if (!err) {
             return cb(new MongoRuntimeError('Failed to create connection without error'));
           }
@@ -364,7 +364,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           cmd,
           finalOptions,
           makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-            this.s.operationCount -= 1;
+            this.decrementOperationCount();
             cb(error, response);
           })
         );
@@ -419,6 +419,20 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         }
       }
     }
+  }
+
+  /**
+   * Decrement the operation count, returning the new count.
+   */
+  private decrementOperationCount(): number {
+    return (this.s.operationCount -= 1);
+  }
+
+  /**
+   * Increment the operation count, returning the new count.
+   */
+  private incrementOperationCount(): number {
+    return (this.s.operationCount += 1);
   }
 }
 
