@@ -1,4 +1,5 @@
 // Resolves the default auth mechanism according to
+// Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
 import {
   MongoAPIError,
@@ -31,7 +32,7 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-const ALLOWED_PROVIDER_NAMES = ['aws', 'azure'];
+const ALLOWED_PROVIDER_NAMES: AuthMechanismProperties['PROVIDER_NAME'][] = ['aws', 'azure'];
 const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
 
 /** @internal */
