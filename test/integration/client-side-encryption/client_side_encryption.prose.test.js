@@ -2122,106 +2122,143 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
     };
     let client1, client2;
 
-    /**
-     * Run the following test case for each pair of KMS providers (referred to as ``srcProvider`` and ``dstProvider``).
-     * Include pairs where ``srcProvider`` equals ``dstProvider``.
-     */
-    function* generateTestCombinations() {
-      const providers = Object.keys(masterKeys);
-      for (const srcProvider of providers) {
-        for (const dstProvider of providers) {
-          yield { srcProvider, dstProvider };
+    describe('Case 1: Rewrap with separate ClientEncryption', function () {
+      /**
+       * Run the following test case for each pair of KMS providers (referred to as ``srcProvider`` and ``dstProvider``).
+       * Include pairs where ``srcProvider`` equals ``dstProvider``.
+       */
+      function* generateTestCombinations() {
+        const providers = Object.keys(masterKeys);
+        for (const srcProvider of providers) {
+          for (const dstProvider of providers) {
+            yield { srcProvider, dstProvider };
+          }
         }
       }
-    }
 
-    beforeEach(function () {
-      client1 = this.configuration.newClient();
-      client2 = this.configuration.newClient();
+      beforeEach(function () {
+        client1 = this.configuration.newClient();
+        client2 = this.configuration.newClient();
+      });
+
+      afterEach(async function () {
+        await client1.close();
+        await client2.close();
+      });
+
+      for (const { srcProvider, dstProvider } of generateTestCombinations()) {
+        it(
+          `should rewrap data key from ${srcProvider} to ${dstProvider}`,
+          metadata,
+          async function () {
+            // Step 1. Drop the collection ``keyvault.datakeys``
+            await client1
+              .db('keyvault')
+              .dropCollection('datakeys')
+              .catch(() => null);
+
+            // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
+            const clientEncryption1 =
+              new this.configuration.mongodbClientEncryption.ClientEncryption(client1, {
+                keyVaultNamespace: 'keyvault.datakeys',
+                kmsProviders: getKmsProviders(),
+                tlsOptions: {
+                  kmip: {
+                    tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                    tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  }
+                },
+                extraOptions: getEncryptExtraOptions(),
+                bson: BSON
+              });
+
+            // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
+            const keyId = await clientEncryption1.createDataKey(srcProvider, {
+              masterKey: masterKeys[srcProvider]
+            });
+
+            // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
+            const cipherText = await clientEncryption1.encrypt('test', {
+              keyId,
+              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+            });
+
+            // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
+            const clientEncryption2 =
+              new this.configuration.mongodbClientEncryption.ClientEncryption(client2, {
+                keyVaultNamespace: 'keyvault.datakeys',
+                kmsProviders: getKmsProviders(),
+                tlsOptions: {
+                  kmip: {
+                    tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                    tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                  }
+                },
+                extraOptions: getEncryptExtraOptions(),
+                bson: BSON
+              });
+
+            // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
+            const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
+              {},
+              {
+                provider: dstProvider,
+                masterKey: masterKeys[dstProvider]
+              }
+            );
+
+            expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
+            expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
+
+            // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
+            const decryptResult1 = await clientEncryption1.decrypt(cipherText);
+            expect(decryptResult1).to.equal('test');
+
+            // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
+            const decryptResult2 = await clientEncryption2.decrypt(cipherText);
+            expect(decryptResult2).to.equal('test');
+          }
+        );
+      }
     });
 
-    afterEach(async function () {
-      await client1.close();
-      await client2.close();
+    describe('Case 2: RewrapManyDataKeyOpts.provider is not optional', function () {
+      let client;
+      let clientEncryption;
+
+      // 1. Create a ``ClientEncryption`` object named ``clientEncryption`` with these options:
+      //    class ClientEncryptionOpts {
+      //       keyVaultClient: <new MongoClient>,
+      //       keyVaultNamespace: "keyvault.datakeys",
+      //       kmsProviders: <all KMS providers>,
+      before(function () {
+        client = this.configuration.newClient();
+        clientEncryption = new this.configuration.mongodbClientEncryption.ClientEncryption(client, {
+          keyVaultNamespace: 'keyvault.datakeys',
+          kmsProviders: getKmsProviders(),
+          extraOptions: getEncryptExtraOptions(),
+          bson: BSON
+        });
+      });
+
+      after(async function () {
+        await client?.close();
+      });
+
+      // 2. Call ``clientEncryption.rewrapManyDataKey`` with an empty ``filter`` and these options:
+      //    class RewrapManyDataKeyOpts {
+      //       masterKey: {}
+      //    }
+      // Assert that `clientEncryption.rewrapManyDataKey` raises a client error indicating that the
+      // required ``RewrapManyDataKeyOpts.provider`` field is missing.
+      context('when provider field is missing', function () {
+        it('raises an error', async function () {
+          const error = await clientEncryption
+            .rewrapManyDataKey({}, { masterKey: {} })
+            .catch(error => error);
+          expect(error.message).to.include('expected UTF-8 provider');
+        });
+      });
     });
-
-    for (const { srcProvider, dstProvider } of generateTestCombinations()) {
-      it(
-        `should rewrap data key from ${srcProvider} to ${dstProvider}`,
-        metadata,
-        async function () {
-          // Step 1. Drop the collection ``keyvault.datakeys``
-          await client1
-            .db('keyvault')
-            .dropCollection('datakeys')
-            .catch(() => null);
-
-          // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
-          const clientEncryption1 = new this.configuration.mongodbClientEncryption.ClientEncryption(
-            client1,
-            {
-              keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders(),
-              tlsOptions: {
-                kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-                }
-              },
-              extraOptions: getEncryptExtraOptions(),
-              bson: BSON
-            }
-          );
-
-          // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
-          const keyId = await clientEncryption1.createDataKey(srcProvider, {
-            masterKey: masterKeys[srcProvider]
-          });
-
-          // Step 4. Call ``clientEncryption1.encrypt`` with the value "test"
-          const cipherText = await clientEncryption1.encrypt('test', {
-            keyId,
-            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-          });
-
-          // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
-          const clientEncryption2 = new this.configuration.mongodbClientEncryption.ClientEncryption(
-            client2,
-            {
-              keyVaultNamespace: 'keyvault.datakeys',
-              kmsProviders: getKmsProviders(),
-              tlsOptions: {
-                kmip: {
-                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-                }
-              },
-              extraOptions: getEncryptExtraOptions(),
-              bson: BSON
-            }
-          );
-
-          // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
-          const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
-            {},
-            {
-              provider: dstProvider,
-              masterKey: masterKeys[dstProvider]
-            }
-          );
-
-          expect(rewrapManyDataKeyResult).to.have.property('bulkWriteResult');
-          expect(rewrapManyDataKeyResult.bulkWriteResult).to.have.property('modifiedCount', 1);
-
-          // 7. Call ``clientEncryption1.decrypt`` with the ``ciphertext``. Assert the return value is "test".
-          const decryptResult1 = await clientEncryption1.decrypt(cipherText);
-          expect(decryptResult1).to.equal('test');
-
-          // 8. Call ``clientEncryption2.decrypt`` with the ``ciphertext``. Assert the return value is "test".
-          const decryptResult2 = await clientEncryption2.decrypt(cipherText);
-          expect(decryptResult2).to.equal('test');
-        }
-      );
-    }
   });
 });

@@ -191,6 +191,7 @@ functions:
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             cat <<EOT > prepare_client_encryption.sh
             export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+            export RUN_WITH_MONGOCRYPTD=${RUN_WITH_MONGOCRYPTD}
             export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
@@ -218,10 +219,15 @@ functions:
           export VERSION=${VERSION}
           export DRIVERS_TOOLS=${DRIVERS_TOOLS}
 
-          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+          if [ -z "${RUN_WITH_MONGOCRYPTD}" ]; then
+            # Set up crypt shared lib if we don't want to use mongocryptd
+            source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+            echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
+          else
+            echo "CRYPT_SHARED_LIB_PATH not set; using mongocryptd"
+          fi
 
-          echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-
+          TEST_NPM_SCRIPT="${TEST_NPM_SCRIPT|check:integration-coverage}" \
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
