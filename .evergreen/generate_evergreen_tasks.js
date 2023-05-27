@@ -1,5 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
+const semver = require('semver');
 const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
@@ -11,19 +12,23 @@ const {
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
   TLS_VERSIONS,
-  DEFAULT_OS
+  DEFAULT_OS,
+  WINDOWS_OS,
+  MACOS_OS,
+  UBUNTU_OS,
+  DEBIAN_OS
 } = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
   {
-    name: 'rhel80-large',
+    name: DEFAULT_OS,
     display_name: 'rhel8',
     run_on: DEFAULT_OS
   },
   {
-    name: 'windows-64-vs2019',
-    display_name: 'Windows (VS2019)',
-    run_on: 'windows-64-vs2019-large',
+    name: WINDOWS_OS,
+    display_name: 'Windows',
+    run_on: WINDOWS_OS,
     clientEncryption: false // TODO(NODE-3401): Unskip when Windows no longer fails to launch mongocryptd occasionally
   }
 ].map(osConfig => ({
@@ -430,6 +435,8 @@ for (const {
   });
 
   for (const NODE_LTS_VERSION of testedNodeVersions) {
+    if (NODE_LTS_VERSION === 14 && os.match(/^windows/)) continue;
+
     const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
@@ -461,10 +468,56 @@ for (const {
   }
 }
 
+// Running CSFLE tests with mongocryptd
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
+  .filter(mongoVersion => ['latest', 'rapid'].includes(mongoVersion)
+    || semver.gte(`${mongoVersion}.0`, '4.2.0'))
+  .map((mongoVersion) => {
+    return {
+      name: `test-${mongoVersion}-csfle-mongocryptd`,
+      tags: [mongoVersion, 'sharded_cluster'],
+      commands: [
+        { func: 'install dependencies' },
+        {
+          func: 'bootstrap mongo-orchestration',
+          vars: {
+            VERSION: mongoVersion,
+            TOPOLOGY: 'sharded_cluster',
+            AUTH: 'auth'
+          }
+        },
+        { func: 'bootstrap kms servers' },
+        {
+          func: 'run tests',
+          vars: {
+            TEST_NPM_SCRIPT: 'check:csfle'
+          }
+        }
+      ]
+    }
+  });
+
+for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
+  const name = `rhel8-node${nodeVersion}-test-csfle-mongocryptd`;
+  const displayName = `rhel 8 Node${nodeVersion} test mongocryptd`;
+  BUILD_VARIANTS.push({
+    name,
+    display_name: displayName,
+    run_on: DEFAULT_OS,
+    expansions: {
+      CLIENT_ENCRYPTION: true,
+      RUN_WITH_MONGOCRYPTD: true,
+      NODE_LTS_VERSION: LOWEST_LTS
+    },
+    tasks:
+      MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
+  });
+}
+
 BUILD_VARIANTS.push({
-  name: 'macos-1100',
+  name: MACOS_OS,
   display_name: `MacOS 11 Node${LATEST_LTS}`,
-  run_on: 'macos-1100',
+  run_on: MACOS_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true
@@ -584,7 +637,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'mongosh_integration_tests',
   display_name: 'mongosh integration tests',
-  run_on: 'ubuntu1804-large',
+  run_on: UBUNTU_OS,
   tasks: mongoshTasks.map(({ name }) => name)
 });
 
@@ -592,7 +645,7 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: 'ubuntu1804-large',
+  run_on: UBUNTU_OS,
   expansions: {
     NODE_LTS_VERSION: LOWEST_LTS
   },
@@ -669,14 +722,14 @@ BUILD_VARIANTS.push({
 BUILD_VARIANTS.push({
   name: 'rhel8-test-gcp-kms',
   display_name: 'GCP KMS Test',
-  run_on: 'debian11-small',
+  run_on: DEBIAN_OS,
   tasks: ['test_gcpkms_task_group', 'test-gcpkms-fail-task']
 });
 
 BUILD_VARIANTS.push({
   name: 'debian11-test-azure-kms',
   display_name: 'Azure KMS Test',
-  run_on: 'debian11-small',
+  run_on: DEBIAN_OS,
   batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
@@ -730,6 +783,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
+  .concat(MONGOCRYPTD_CSFLE_TASKS)
   .concat(mongoshTasks);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);

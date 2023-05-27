@@ -25,4 +25,5 @@ npx mocha \
   test/integration/transactions/transactions.test.ts \
   test/integration/versioned-api/versioned_api.spec.test.js \
   test/integration/load-balancers/load_balancers.spec.test.js \
-  test/integration/client-side-encryption/client_side_encryption.spec.test.ts
+  test/integration/client-side-encryption/client_side_encryption.spec.test.ts \
+  test/integration/run-command/run_command.spec.test.ts

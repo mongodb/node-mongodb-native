@@ -160,6 +160,7 @@ functions:
           if [ -n "${CLIENT_ENCRYPTION}" ]; then
             cat <<EOT > prepare_client_encryption.sh
             export CLIENT_ENCRYPTION=${CLIENT_ENCRYPTION}
+            export RUN_WITH_MONGOCRYPTD=${RUN_WITH_MONGOCRYPTD}
             export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
@@ -187,10 +188,15 @@ functions:
           export VERSION=${VERSION}
           export DRIVERS_TOOLS=${DRIVERS_TOOLS}
 
-          source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+          if [ -z "${RUN_WITH_MONGOCRYPTD}" ]; then
+            # Set up crypt shared lib if we don't want to use mongocryptd
+            source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
+            echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
+          else
+            echo "CRYPT_SHARED_LIB_PATH not set; using mongocryptd"
+          fi
 
-          echo "CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
-
+          TEST_NPM_SCRIPT="${TEST_NPM_SCRIPT|check:integration-coverage}" \
           MONGODB_URI="${MONGODB_URI}" \
           AUTH=${AUTH} SSL=${SSL} TEST_CSFLE=true \
           MONGODB_API_VERSION="${MONGODB_API_VERSION}" \
@@ -3084,6 +3090,111 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run lambda handler example tests with aws auth
+  - name: test-latest-csfle-mongocryptd
+    tags:
+      - latest
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-rapid-csfle-mongocryptd
+    tags:
+      - rapid
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: rapid
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-7.0-csfle-mongocryptd
+    tags:
+      - '7.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-6.0-csfle-mongocryptd
+    tags:
+      - '6.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '6.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-5.0-csfle-mongocryptd
+    tags:
+      - '5.0'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '5.0'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-4.4-csfle-mongocryptd
+    tags:
+      - '4.4'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.4'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
+  - name: test-4.2-csfle-mongocryptd
+    tags:
+      - '4.2'
+      - sharded_cluster
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '4.2'
+          TOPOLOGY: sharded_cluster
+          AUTH: auth
+      - func: bootstrap kms servers
+      - func: run tests
+        vars:
+          TEST_NPM_SCRIPT: check:csfle
   - name: run-mongosh-browser-repl
     tags:
       - run-mongosh-integration-tests
@@ -3546,53 +3657,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-fermium
-    display_name: Windows (VS2019) Node14
-    run_on: windows-64-vs2019-large
-    expansions:
-      NODE_LTS_VERSION: 14
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-data-lake
-      - test-socks5
-      - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
-  - name: windows-64-vs2019-gallium
-    display_name: Windows (VS2019) Node16
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-gallium
+    display_name: Windows Node16
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 16
     tasks:
@@ -3632,9 +3699,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-hydrogen
-    display_name: Windows (VS2019) Node18
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-hydrogen
+    display_name: Windows Node18
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 18
     tasks:
@@ -3674,9 +3741,9 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: windows-64-vs2019-Node20
-    display_name: Windows (VS2019) Node20
-    run_on: windows-64-vs2019-large
+  - name: windows-vsCurrent-large-Node20
+    display_name: Windows Node20
+    run_on: windows-vsCurrent-large
     expansions:
       NODE_LTS_VERSION: 20
     tasks:
@@ -3716,6 +3783,36 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
+  - name: rhel8-node14-test-csfle-mongocryptd
+    display_name: rhel 8 Node14 test mongocryptd
+    run_on: rhel80-large
+    expansions:
+      CLIENT_ENCRYPTION: true
+      RUN_WITH_MONGOCRYPTD: true
+      NODE_LTS_VERSION: 14
+    tasks:
+      - test-latest-csfle-mongocryptd
+      - test-rapid-csfle-mongocryptd
+      - test-7.0-csfle-mongocryptd
+      - test-6.0-csfle-mongocryptd
+      - test-5.0-csfle-mongocryptd
+      - test-4.4-csfle-mongocryptd
+      - test-4.2-csfle-mongocryptd
+  - name: rhel8-node20-test-csfle-mongocryptd
+    display_name: rhel 8 Node20 test mongocryptd
+    run_on: rhel80-large
+    expansions:
+      CLIENT_ENCRYPTION: true
+      RUN_WITH_MONGOCRYPTD: true
+      NODE_LTS_VERSION: 14
+    tasks:
+      - test-latest-csfle-mongocryptd
+      - test-rapid-csfle-mongocryptd
+      - test-7.0-csfle-mongocryptd
+      - test-6.0-csfle-mongocryptd
+      - test-5.0-csfle-mongocryptd
+      - test-4.4-csfle-mongocryptd
+      - test-4.2-csfle-mongocryptd
   - name: macos-1100
     display_name: MacOS 11 Node20
     run_on: macos-1100
