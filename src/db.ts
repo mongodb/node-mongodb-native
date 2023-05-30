@@ -165,8 +165,6 @@ export class Db {
       // Namespace
       namespace: new MongoDBNamespace(databaseName)
     };
-
-    this.client = client;
   }
 
   get databaseName(): string {
