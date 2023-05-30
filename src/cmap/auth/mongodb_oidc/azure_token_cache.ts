@@ -1,5 +1,5 @@
 import type { AzureAccessToken } from './azure_service_workflow';
-import { AbstractCache, ExpiringCacheEntry } from './cache';
+import { Cache, ExpiringCacheEntry } from './cache';
 
 /** @internal */
 export class AzureTokenEntry extends ExpiringCacheEntry {
@@ -18,7 +18,7 @@ export class AzureTokenEntry extends ExpiringCacheEntry {
  * A cache of access tokens from Azure.
  * @internal
  */
-export class AzureTokenCache extends AbstractCache<AzureTokenEntry> {
+export class AzureTokenCache extends Cache<AzureTokenEntry> {
   /**
    * Add an entry to the cache.
    */

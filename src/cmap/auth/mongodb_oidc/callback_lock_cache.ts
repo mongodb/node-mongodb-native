@@ -8,7 +8,7 @@ import type {
   OIDCRefreshFunction,
   OIDCRequestFunction
 } from '../mongodb_oidc';
-import { AbstractCache } from './cache';
+import { Cache } from './cache';
 
 /** Error message for when request callback is missing. */
 const REQUEST_CALLBACK_REQUIRED_ERROR =
@@ -34,7 +34,7 @@ interface CallbacksEntry {
 /**
  * A cache of request and refresh callbacks per server/user.
  */
-export class CallbackLockCache extends AbstractCache<CallbacksEntry> {
+export class CallbackLockCache extends Cache<CallbacksEntry> {
   /**
    * Get the callbacks for the connection and credentials. If an entry does not
    * exist a new one will get set.

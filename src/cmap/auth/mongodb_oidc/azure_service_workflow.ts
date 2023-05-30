@@ -34,15 +34,7 @@ export interface AzureAccessToken {
  * @internal
  */
 export class AzureServiceWorkflow extends ServiceWorkflow {
-  cache: AzureTokenCache;
-
-  /**
-   * Instantiate the Azure service workflow.
-   */
-  constructor() {
-    super();
-    this.cache = new AzureTokenCache();
-  }
+  cache = new AzureTokenCache();
 
   /**
    * Get the token from the environment.
@@ -59,7 +51,7 @@ export class AzureServiceWorkflow extends ServiceWorkflow {
     } else {
       this.cache.deleteEntry(tokenAudience);
       const response = await getAzureTokenData(tokenAudience);
-      if (isEndpointResultInvalid(response)) {
+      if (!isEndpointResultValid(response)) {
         throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
       }
       this.cache.addEntry(tokenAudience, response);
@@ -82,11 +74,13 @@ async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToke
 }
 
 /**
- * Determines if a result returned from the endpoint is invalid.
- * This means the result is nullish, doesn't contain the access_token required field,
- * the expires_in required field.
+ * Determines if a result returned from the endpoint is valid.
+ * This means the result is not nullish, contains the access_token required field
+ * and the expires_in required field.
  */
-function isEndpointResultInvalid(token: unknown): boolean {
-  if (token == null || typeof token !== 'object') return true;
-  return !('access_token' in token) && !('expires_in' in token);
+function isEndpointResultValid(
+  token: unknown
+): token is { access_token: unknown; expires_in: unknown } {
+  if (token == null || typeof token !== 'object') return false;
+  return 'access_token' in token && 'expires_in' in token;
 }

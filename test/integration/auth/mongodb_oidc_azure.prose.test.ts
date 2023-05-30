@@ -7,7 +7,7 @@ import {
   CommandSucceededEvent,
   MongoClient,
   OIDC_WORKFLOWS
-} from '../mongodb';
+} from '../../mongodb';
 
 describe('OIDC Auth Spec Prose Tests', function () {
   const callbackCache = OIDC_WORKFLOWS.get('callback').cache;
@@ -17,13 +17,20 @@ describe('OIDC Auth Spec Prose Tests', function () {
     let client: MongoClient;
     let collection: Collection;
 
+    beforeEach(function () {
+      if (!this.configuration.isAzureOIDC(process.env.MONGODB_URI)) {
+        this.currentTest?.skipReason = 'Azure OIDC prose tests require an Azure OIDC environment.';
+        this.skip();
+      }
+    });
+
     afterEach(async function () {
       await client?.close();
     });
 
     describe('3.1 Connect', function () {
-      before(function () {
-        client = new MongoClient(process.env.MONGODB_URI);
+      beforeEach(function () {
+        client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -37,8 +44,8 @@ describe('OIDC Auth Spec Prose Tests', function () {
     });
 
     describe('3.2 Allowed Hosts Ignored', function () {
-      before(function () {
-        client = new MongoClient(process.env.MONGODB_URI, {
+      beforeEach(function () {
+        client = this.configuration.newClient(process.env.MONGODB_URI, {
           authMechanismProperties: {
             ALLOWED_HOSTS: []
           }
@@ -57,9 +64,9 @@ describe('OIDC Auth Spec Prose Tests', function () {
     });
 
     describe('3.3 Main Cache Not Used', function () {
-      before(function () {
+      beforeEach(function () {
         callbackCache?.clear();
-        client = new MongoClient(process.env.MONGODB_URI);
+        client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -76,10 +83,10 @@ describe('OIDC Auth Spec Prose Tests', function () {
     });
 
     describe('3.4 Azure Cache is Used', function () {
-      before(function () {
+      beforeEach(function () {
         callbackCache?.clear();
         azureCache?.clear();
-        client = new MongoClient(process.env.MONGODB_URI);
+        client = this.configuration.newClient(process.env.MONGODB_URI);
         collection = client.db('test').collection('test');
       });
 
@@ -148,9 +155,9 @@ describe('OIDC Auth Spec Prose Tests', function () {
         });
       };
 
-      before(async function () {
+      beforeEach(async function () {
         azureCache?.clear();
-        client = new MongoClient(process.env.MONGODB_URI, { monitorCommands: true });
+        client = this.configuration.newClient(process.env.MONGODB_URI, { monitorCommands: true });
         await client.db('test').collection('test').findOne();
         addListeners();
         await setupFailPoint();

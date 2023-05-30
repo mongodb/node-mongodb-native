@@ -1,5 +1,5 @@
 import type { IdPServerInfo, IdPServerResponse } from '../mongodb_oidc';
-import { AbstractCache, ExpiringCacheEntry } from './cache';
+import { Cache, ExpiringCacheEntry } from './cache';
 
 /* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
@@ -23,7 +23,7 @@ export class TokenEntry extends ExpiringCacheEntry {
  * Cache of OIDC token entries.
  * @internal
  */
-export class TokenEntryCache extends AbstractCache<TokenEntry> {
+export class TokenEntryCache extends Cache<TokenEntry> {
   /**
    * Set an entry in the token cache.
    */

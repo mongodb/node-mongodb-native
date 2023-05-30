@@ -30,19 +30,9 @@ export abstract class ExpiringCacheEntry {
 }
 
 /**
- * An OIDC token cache.
- */
-export interface Cache {
-  /**
-   * Implement the cache key for the token.
-   */
-  cacheKey(address: string, username: string, callbackHash: string): string;
-}
-
-/**
  * Base class for OIDC caches.
  */
-export abstract class AbstractCache<T> implements Cache {
+export abstract class Cache<T> {
   entries: Map<string, T>;
 
   /**
