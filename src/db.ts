@@ -70,7 +70,6 @@ const DB_OPTIONS_ALLOW_LIST = [
 
 /** @internal */
 export interface DbPrivate {
-  client: MongoClient;
   options?: DbOptions;
   readPreference?: ReadPreference;
   pkFactory: PkFactory;
@@ -136,7 +135,12 @@ export class Db {
    * @param databaseName - The name of the database this instance represents.
    * @param options - Optional settings for Db construction
    */
-  constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
+  constructor(
+    /** @internal */
+    readonly client: MongoClient,
+    databaseName: string,
+    options?: DbOptions
+  ) {
     options = options ?? {};
 
     // Filter the options
@@ -147,8 +151,6 @@ export class Db {
 
     // Internal state of the db object
     this.s = {
-      // Client
-      client,
       // Options
       options,
       // Unpack read preference
@@ -163,11 +165,8 @@ export class Db {
       // Namespace
       namespace: new MongoDBNamespace(databaseName)
     };
-  }
 
-  /** @internal */
-  get client(): MongoClient {
-    return this.s.client;
+    this.client = client;
   }
 
   get databaseName(): string {

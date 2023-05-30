@@ -21,7 +21,7 @@ export class ListCollectionsCursor<
   options?: ListCollectionsOptions;
 
   constructor(db: Db, filter: Document, options?: ListCollectionsOptions) {
-    super(db.s.client, db.s.namespace, options);
+    super(db.client, db.s.namespace, options);
     this.parent = db;
     this.filter = filter;
     this.options = options;
@@ -42,7 +42,7 @@ export class ListCollectionsCursor<
       session
     });
 
-    executeOperation(this.parent.s.client, operation, (err, response) => {
+    executeOperation(this.parent.client, operation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882

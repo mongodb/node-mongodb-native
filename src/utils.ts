@@ -288,10 +288,8 @@ export function getTopology(provider: TopologyProvider): Topology {
   // MongoClient or ClientSession or AbstractCursor
   if ('topology' in provider && provider.topology) {
     return provider.topology;
-  } else if ('s' in provider && 'client' in provider.s && provider.s.client.topology) {
-    return provider.s.client.topology;
-  } else if ('s' in provider && 'db' in provider.s && provider.s.db.s.client.topology) {
-    return provider.s.db.s.client.topology;
+  } else if ('client' in provider && provider.client.topology) {
+    return provider.client.topology;
   }
 
   throw new MongoNotConnectedError('MongoClient must be connected to perform this operation');

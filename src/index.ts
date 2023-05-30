@@ -277,6 +277,10 @@ export type {
   ChangeStreamAggregateRawResult,
   ChangeStreamCursorOptions
 } from './cursor/change_stream_cursor';
+export type {
+  ListSearchIndexesCursor,
+  ListSearchIndexesOptions
+} from './cursor/list_search_indexes_cursor';
 export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
 export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
@@ -419,10 +423,6 @@ export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { SearchIndexDescription } from './operations/search_indexes/create';
-export type {
-  ListSearchIndexesCursor,
-  ListSearchIndexesOptions
-} from './operations/search_indexes/list';
 export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
 export type {
   CollStats,

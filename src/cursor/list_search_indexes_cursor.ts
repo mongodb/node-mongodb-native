@@ -1,6 +1,6 @@
-import type { Collection } from '../../collection';
-import { AggregationCursor } from '../../cursor/aggregation_cursor';
-import type { AggregateOptions } from '../aggregate';
+import type { Collection } from '../collection';
+import type { AggregateOptions } from '../operations/aggregate';
+import { AggregationCursor } from './aggregation_cursor';
 
 /** @public */
 export type ListSearchIndexesOptions = AggregateOptions;
@@ -8,13 +8,13 @@ export type ListSearchIndexesOptions = AggregateOptions;
 /** @public */
 export class ListSearchIndexesCursor extends AggregationCursor<{ name: string }> {
   /** @internal */
-  static create(
+  constructor(
     { fullNamespace: ns, client }: Collection,
     name: string | null,
     options: ListSearchIndexesOptions = {}
-  ): ListSearchIndexesCursor {
+  ) {
     const pipeline =
       name == null ? [{ $listSearchIndexes: {} }] : [{ $listSearchIndexes: { name } }];
-    return new ListSearchIndexesCursor(client, ns, pipeline, options);
+    super(client, ns, pipeline, options);
   }
 }

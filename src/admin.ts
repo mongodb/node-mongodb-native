@@ -75,7 +75,7 @@ export class Admin {
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.s.db.client,
       new RunCommandOperation(this.s.db, command, { dbName: 'admin', ...options })
     );
   }
@@ -138,7 +138,7 @@ export class Admin {
         : undefined;
     const password = typeof passwordOrOptions === 'string' ? passwordOrOptions : undefined;
     return executeOperation(
-      this.s.db.s.client,
+      this.s.db.client,
       new AddUserOperation(this.s.db, username, password, { dbName: 'admin', ...options })
     );
   }
@@ -151,7 +151,7 @@ export class Admin {
    */
   async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
     return executeOperation(
-      this.s.db.s.client,
+      this.s.db.client,
       new RemoveUserOperation(this.s.db, username, { dbName: 'admin', ...options })
     );
   }
@@ -167,7 +167,7 @@ export class Admin {
     options: ValidateCollectionOptions = {}
   ): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.s.db.client,
       new ValidateCollectionOperation(this, collectionName, options)
     );
   }
@@ -178,7 +178,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async listDatabases(options?: ListDatabasesOptions): Promise<ListDatabasesResult> {
-    return executeOperation(this.s.db.s.client, new ListDatabasesOperation(this.s.db, options));
+    return executeOperation(this.s.db.client, new ListDatabasesOperation(this.s.db, options));
   }
 
   /**

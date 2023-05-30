@@ -11,7 +11,7 @@ export class ListIndexesCursor extends AbstractCursor {
   options?: ListIndexesOptions;
 
   constructor(collection: Collection, options?: ListIndexesOptions) {
-    super(collection.s.db.s.client, collection.s.namespace, options);
+    super(collection.client, collection.s.namespace, options);
     this.parent = collection;
     this.options = options;
   }
@@ -31,7 +31,7 @@ export class ListIndexesCursor extends AbstractCursor {
       session
     });
 
-    executeOperation(this.parent.s.db.s.client, operation, (err, response) => {
+    executeOperation(this.parent.client, operation, (err, response) => {
       if (err || response == null) return callback(err);
 
       // TODO: NODE-2882

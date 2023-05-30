@@ -6,6 +6,10 @@ import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './chang
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
+import {
+  ListSearchIndexesCursor,
+  ListSearchIndexesOptions
+} from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
@@ -75,10 +79,6 @@ import {
   SearchIndexDescription
 } from './operations/search_indexes/create';
 import { DropSearchIndexOperation } from './operations/search_indexes/drop';
-import {
-  ListSearchIndexesCursor,
-  ListSearchIndexesOptions
-} from './operations/search_indexes/list';
 import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
 import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
 import {
@@ -163,6 +163,9 @@ export class Collection<TSchema extends Document = Document> {
   /** @internal */
   s: CollectionPrivate;
 
+  /** @internal */
+  client: MongoClient;
+
   /**
    * Create a new Collection instance
    * @internal
@@ -181,11 +184,8 @@ export class Collection<TSchema extends Document = Document> {
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options)
     };
-  }
 
-  /** @internal */
-  get client(): MongoClient {
-    return this.s.db.client;
+    this.client = db.client;
   }
 
   /**
@@ -1008,13 +1008,22 @@ export class Collection<TSchema extends Document = Document> {
    *
    * Returns all search indexes for the current collection.
    *
-   * @param indexName - Optional.  If specified, only indexes with matching index names will be returned.
    * @param options - The options for the list indexes operation.
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
-  listSearchIndexes(indexName: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  /**
+   * @internal
+   *
+   * Returns all search indexes for the current collection.
+   *
+   * @param name - The name of the index to search for.  Only indexes with matching index names will be returned.
+   * @param options - The options for the list indexes operation.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  listSearchIndexes(name: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   listSearchIndexes(
     indexNameOrOptions?: string | ListSearchIndexesOptions,
     options?: ListSearchIndexesOptions
@@ -1028,7 +1037,7 @@ export class Collection<TSchema extends Document = Document> {
         ? null
         : indexNameOrOptions;
 
-    return ListSearchIndexesCursor.create(this, indexName, options);
+    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }
 
   /**
@@ -1058,7 +1067,10 @@ export class Collection<TSchema extends Document = Document> {
    * @returns
    */
   async createSearchIndexes(descriptions: SearchIndexDescription[]): Promise<string[]> {
-    return executeOperation(this.client, new CreateSearchIndexesOperation(this, descriptions));
+    return executeOperation(
+      this.client,
+      new CreateSearchIndexesOperation(this as TODO_NODE_3286, descriptions)
+    );
   }
 
   /**
@@ -1071,7 +1083,10 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   async dropSearchIndex(name: string): Promise<void> {
-    return executeOperation(this.client, new DropSearchIndexOperation(this, name));
+    return executeOperation(
+      this.client,
+      new DropSearchIndexOperation(this as TODO_NODE_3286, name)
+    );
   }
 
   /**
@@ -1085,6 +1100,9 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   async updateSearchIndex(name: string, definition: Document): Promise<void> {
-    return executeOperation(this.client, new UpdateSearchIndexOperation(this, name, definition));
+    return executeOperation(
+      this.client,
+      new UpdateSearchIndexOperation(this as TODO_NODE_3286, name, definition)
+    );
   }
 }
