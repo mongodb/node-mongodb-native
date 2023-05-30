@@ -1003,6 +1003,16 @@ export class Collection<TSchema extends Document = Document> {
     );
   }
 
+  /**
+   * @internal
+   *
+   * Returns all search indexes for the current collection.
+   *
+   * @param indexName - Optional.  If specified, only indexes with matching index names will be returned.
+   * @param options - The options for the list indexes operation.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
   listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   listSearchIndexes(indexName: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   listSearchIndexes(
@@ -1021,21 +1031,61 @@ export class Collection<TSchema extends Document = Document> {
     return ListSearchIndexesCursor.create(this, indexName, options);
   }
 
+  /**
+   * @internal
+   *
+   * Creates a single search index for the collection.
+   *
+   * @param description - The index description for the new search index.
+   * @returns A promise that resolves to the name of the new search index.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
   async createSearchIndex(description: SearchIndexDescription): Promise<string> {
     const indexes = await this.createSearchIndexes([description]);
     return indexes[0];
   }
 
+  /**
+   * @internal
+   *
+   * Creates multiple search indexes for the current collection.
+   *
+   * @param descriptions - An array of `SearchIndexDescription`s for the new search indexes.
+   * @returns A promise that resolves to an array of the newly created search index names.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   * @returns
+   */
   async createSearchIndexes(
     descriptions: ReadonlyArray<SearchIndexDescription>
   ): Promise<string[]> {
     return executeOperation(this.client, new CreateSearchIndexesOperation(this, descriptions));
   }
 
+  /**
+   * @internal
+   *
+   * Deletes a search index by index name.
+   *
+   * @param name - The name of the search index to be deleted.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
   async dropSearchIndex(name: string): Promise<void> {
     return executeOperation(this.client, new DropSearchIndexOperation(this, name));
   }
 
+  /**
+   * @internal
+   *
+   * Updates a search index by replacing the existing index definition with the provided definition.
+   *
+   * @param name - The name of the search index to update.
+   * @param definition - The new search index definition.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
   async updateSearchIndex(name: string, definition: Document): Promise<void> {
     return executeOperation(this.client, new UpdateSearchIndexOperation(this, name, definition));
   }
