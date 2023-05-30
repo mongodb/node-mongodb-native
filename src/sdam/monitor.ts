@@ -76,6 +76,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     Pick<MonitorOptions, 'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS'>
   >;
   connectOptions: ConnectionOptions;
+  isInFAASEnv: boolean;
   [kServer]: Server;
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
@@ -105,6 +106,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       heartbeatFrequencyMS: options.heartbeatFrequencyMS ?? 10000,
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
     });
+
+    // eslint-disable-next-line eqeqeq
+    this.isInFAASEnv = server.topology.clientMetadata?.env?.name != undefined;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -283,7 +287,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
-      if (isAwaitable && hello.topologyVersion) {
+      if (isAwaitable && hello.topologyVersion && !monitor.isInFAASEnv) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -354,7 +358,7 @@ function monitorServer(monitor: Monitor) {
       }
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
-      if (hello && hello.topologyVersion) {
+      if (hello && hello.topologyVersion && !monitor.isInFAASEnv) {
         setTimeout(() => {
           if (!isInCloseState(monitor)) {
             monitor[kMonitorId]?.wake();
