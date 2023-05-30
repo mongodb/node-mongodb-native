@@ -4042,7 +4042,7 @@ buildvariants:
       - test-azurekms-fail-task
   - name: ubuntu20-test-azure-oidc
     display_name: Azure OIDC
-    run_on: ubuntu1004-small
+    run_on: ubuntu2004-small
     batchtime: 20160
     tasks:
       - testazureoidc_task_group
