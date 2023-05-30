@@ -1171,17 +1171,17 @@ tasks:
   - name: oidc-auth-test-azure-latest
     commands:
       - func: install dependencies
-      - command: shell.exec
+      - command: subprocess.exec
         params:
-          shell: bash
-          script: |-
-            set -o errexit
-            ${PREPARE_SHELL}
-            cd src
-            export AZUREOIDC_DRIVERS_TAR_FILE=/tmp/node-mongodb-native.tgz
-            tar czf $AZUREOIDC_DRIVERS_TAR_FILE .
-            export AZUREOIDC_TEST_CMD="source ./env.sh && PROVIDER_NAME=azure ./.evergreen/run-oidc-tests.sh"
-            bash $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/run-driver-test.sh
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
+            PROVIDER_NAME: azure
+          args:
+            - .evergreen/run-oidc-tests-azure.sh
   - name: test-latest-server
     tags:
       - latest
