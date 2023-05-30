@@ -19,7 +19,7 @@ describe('OIDC Auth Spec Prose Tests', function () {
 
     beforeEach(function () {
       if (!this.configuration.isAzureOIDC(process.env.MONGODB_URI)) {
-        this.currentTest?.skipReason = 'Azure OIDC prose tests require an Azure OIDC environment.';
+        this.skipReason = 'Azure OIDC prose tests require an Azure OIDC environment.';
         this.skip();
       }
     });
