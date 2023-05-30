@@ -398,17 +398,6 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh
-  reset aws instance profile:
-    - command: shell.exec
-      params:
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          cd "${DRIVERS_TOOLS}/.evergreen/auth_aws"
-          if [ -f "./aws_e2e_setup.json" ]; then
-            . ./activate-authawsvenv.sh
-            python ./lib/aws_assign_instance_profile.py
-          fi
   cleanup:
     - command: shell.exec
       params:
@@ -837,7 +826,7 @@ functions:
           ECS_SRC_DIR=$AUTH_AWS_DIR/src
 
           # fix issue with `TestData` in SERVER-46340
-          # sed -i '1s+^+TestData = {};\n+' $AUTH_AWS_DIR/lib/ecs_hosted_test.js
+          sed -i '1s+^+TestData = {};\n+' $AUTH_AWS_DIR/lib/ecs_hosted_test.js
 
           # pack up project directory to ssh it to the container
           mkdir -p $ECS_SRC_DIR/.evergreen
@@ -848,7 +837,7 @@ functions:
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           . ./activate-authawsvenv.sh
           export MONGODB_BINARIES="${MONGODB_BINARIES}";
-          export PROJECT_DIRECTORY=$ECS_SRC_DIR;
+          export PROJECT_DIRECTORY=$PROJECT_DIRECTORY;
           python aws_tester.py ecs
   run-ocsp-test:
     - command: shell.exec
