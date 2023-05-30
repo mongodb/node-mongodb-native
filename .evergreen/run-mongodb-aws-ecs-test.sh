@@ -9,7 +9,7 @@ ls -la
 # untar packed archive
 cd $PROJECT_DIRECTORY
 ls -la
-tar -xzf src.tgz .
+# tar -xzf src.tgz .
 
 # load node.js
 set +x
