@@ -9,6 +9,8 @@ import { dependencies, peerDependencies, peerDependenciesMeta } from '../../pack
 const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', 'socks'];
 const EXPECTED_PEER_DEPENDENCIES = [
   '@aws-sdk/credential-providers',
+  '@mongodb-js/zstd',
+  'kerberos',
   'snappy',
   'mongodb-client-encryption'
 ];
