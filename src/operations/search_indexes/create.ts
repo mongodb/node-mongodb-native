@@ -18,13 +18,13 @@ export interface SearchIndexDescription {
 /** @internal */
 export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
   constructor(
-    private readonly collection: Collection<any>,
+    private readonly collection: Collection,
     private readonly descriptions: ReadonlyArray<SearchIndexDescription>
   ) {
     super();
   }
 
-  execute(server: Server, session: ClientSession | undefined, callback: Callback<any>): void {
+  execute(server: Server, session: ClientSession | undefined, callback: Callback<string[]>): void {
     const namespace = this.collection.fullNamespace;
     const command = {
       createSearchIndexes: namespace.collection,

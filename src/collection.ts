@@ -1042,8 +1042,8 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   async createSearchIndex(description: SearchIndexDescription): Promise<string> {
-    const indexes = await this.createSearchIndexes([description]);
-    return indexes[0];
+    const [index] = await this.createSearchIndexes([description]);
+    return index;
   }
 
   /**
@@ -1057,9 +1057,7 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    * @returns
    */
-  async createSearchIndexes(
-    descriptions: ReadonlyArray<SearchIndexDescription>
-  ): Promise<string[]> {
+  async createSearchIndexes(descriptions: SearchIndexDescription[]): Promise<string[]> {
     return executeOperation(this.client, new CreateSearchIndexesOperation(this, descriptions));
   }
 

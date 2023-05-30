@@ -6,9 +6,10 @@ import type { ClientSession } from '../../sessions';
 import type { Callback } from '../../utils';
 import { AbstractOperation } from '../operation';
 
+/** @internal */
 export class UpdateSearchIndexOperation extends AbstractOperation<void> {
   constructor(
-    private readonly collection: Collection<any>,
+    private readonly collection: Collection,
     private readonly name: string,
     private readonly definition: Document
   ) {

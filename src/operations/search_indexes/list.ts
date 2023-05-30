@@ -1,5 +1,3 @@
-import type { Document } from 'bson';
-
 import type { Collection } from '../../collection';
 import { AggregationCursor } from '../../cursor/aggregation_cursor';
 import type { AggregateOptions } from '../aggregate';
@@ -10,8 +8,8 @@ export type ListSearchIndexesOptions = AggregateOptions;
 /** @public */
 export class ListSearchIndexesCursor extends AggregationCursor<{ name: string }> {
   /** @internal */
-  static create<T extends Document>(
-    { fullNamespace: ns, client }: Collection<T>,
+  static create(
+    { fullNamespace: ns, client }: Collection,
     name: string | null,
     options: ListSearchIndexesOptions = {}
   ): ListSearchIndexesCursor {
