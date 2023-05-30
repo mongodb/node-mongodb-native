@@ -5,11 +5,9 @@ set -o errexit  # Exit the script with error if any of the commands fail
 export MONGODB_URI="$1"
 PROJECT_DIRECTORY="$(pwd)/src"
 
-ls -la
 # untar packed archive
 cd $PROJECT_DIRECTORY
-ls -la
-# tar -xzf src.tgz .
+tar -xzf src.tgz .
 
 # load node.js
 set +x
