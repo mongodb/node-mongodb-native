@@ -3,10 +3,10 @@ import { promisify } from 'util';
 
 import {
   CancellationToken,
-  ClientMetadata,
+  type ClientMetadata,
   connect,
-  Connection,
-  ConnectionOptions,
+  type Connection,
+  type ConnectionOptions,
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,

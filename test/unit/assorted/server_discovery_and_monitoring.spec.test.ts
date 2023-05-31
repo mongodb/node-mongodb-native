@@ -33,7 +33,7 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent,
-  TopologyVersion
+  type TopologyVersion
 } from '../../mongodb';
 import { ejson } from '../../tools/utils';
 

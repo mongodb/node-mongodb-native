@@ -1,5 +1,9 @@
 import { loadSpecTests } from '../../spec';
-import { CmapTest, runCmapTestSuite, SkipDescription } from '../../tools/cmap_spec_runner';
+import {
+  type CmapTest,
+  runCmapTestSuite,
+  type SkipDescription
+} from '../../tools/cmap_spec_runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 // These tests rely on a simple "pool.clear()" command, which is not sufficient

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import Sinon, * as sinon from 'sinon';
+import type Sinon from 'sinon';
+import * as sinon from 'sinon';
 
 import {
   Connection,

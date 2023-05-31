@@ -27,8 +27,8 @@ import {
   ns,
   PoolClosedError as MongoPoolClosedError,
   setDifference,
-  TopologyDescription,
-  TopologyOptions,
+  type TopologyDescription,
+  type TopologyOptions,
   WaitQueueTimeoutError as MongoWaitQueueTimeoutError
 } from '../mongodb';
 import { ReplSetFixture } from '../tools/common';

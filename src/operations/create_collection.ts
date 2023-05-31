@@ -10,7 +10,7 @@ import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 

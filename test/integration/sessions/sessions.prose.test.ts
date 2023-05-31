@@ -1,8 +1,13 @@
 import { expect } from 'chai';
-import { ChildProcess, spawn } from 'child_process';
+import { type ChildProcess, spawn } from 'child_process';
 import { once } from 'events';
 
-import { Collection, CommandStartedEvent, MongoClient, MongoDriverError } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  MongoClient,
+  MongoDriverError
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {

@@ -7,7 +7,7 @@ import {
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import { Msg, WriteProtocolMessageType } from './commands';
+import { Msg, type WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
 
 /**

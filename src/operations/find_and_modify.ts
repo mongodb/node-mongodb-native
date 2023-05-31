@@ -4,10 +4,10 @@ import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { formatSort, Sort, SortForCmd } from '../sort';
-import { Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import { formatSort, type Sort, type SortForCmd } from '../sort';
+import { type Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */

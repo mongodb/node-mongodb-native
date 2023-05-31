@@ -2,12 +2,12 @@ import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 import { promisify } from 'util';
 
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
+import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import {
-  AuthMechanismProperties,
+  type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
-  MongoCredentials
+  type MongoCredentials
 } from './cmap/auth/mongo_credentials';
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
@@ -16,20 +16,26 @@ import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import { Db, DbOptions } from './db';
+import { Db, type DbOptions } from './db';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import { MongoLogger, MongoLoggerOptions } from './mongo_logger';
+import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
-import { Topology, TopologyEvents } from './sdam/topology';
-import { ClientSession, ClientSessionOptions, ServerSessionPool } from './sessions';
-import { HostAddress, hostMatchesWildcards, MongoDBNamespace, ns, resolveOptions } from './utils';
+import { Topology, type TopologyEvents } from './sdam/topology';
+import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
+import {
+  type HostAddress,
+  hostMatchesWildcards,
+  type MongoDBNamespace,
+  ns,
+  resolveOptions
+} from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
 /** @public */

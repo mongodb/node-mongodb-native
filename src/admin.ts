@@ -1,18 +1,18 @@
 import type { Document } from './bson';
 import type { Db } from './db';
-import { AddUserOperation, AddUserOptions } from './operations/add_user';
+import { AddUserOperation, type AddUserOptions } from './operations/add_user';
 import type { CommandOperationOptions } from './operations/command';
 import { executeOperation } from './operations/execute_operation';
 import {
   ListDatabasesOperation,
-  ListDatabasesOptions,
-  ListDatabasesResult
+  type ListDatabasesOptions,
+  type ListDatabasesResult
 } from './operations/list_databases';
-import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
-import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
+import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
+import { RunCommandOperation, type RunCommandOptions } from './operations/run_command';
 import {
   ValidateCollectionOperation,
-  ValidateCollectionOptions
+  type ValidateCollectionOptions
 } from './operations/validate_collection';
 
 /** @internal */

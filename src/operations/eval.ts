@@ -1,4 +1,4 @@
-import { Code, Document } from '../bson';
+import { Code, type Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoServerError } from '../error';
@@ -6,7 +6,7 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {

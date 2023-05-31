@@ -17,7 +17,6 @@
     // Never emit error filled code
     "noEmitOnError": true,
     "outDir": "lib",
-    "importsNotUsedAsValues": "error",
     // We want the sourcemaps in a separate file
     "inlineSourceMap": false,
     "sourceMap": true,

@@ -1,7 +1,7 @@
-import { BSONSerializeOptions, Document, ObjectId, resolveBSONOptions } from '../bson';
+import { type BSONSerializeOptions, type Document, ObjectId, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
-  AnyError,
+  type AnyError,
   MongoBatchReExecutionError,
   MONGODB_ERROR_CODES,
   MongoInvalidArgumentError,
@@ -10,20 +10,20 @@ import {
 } from '../error';
 import type { Filter, OneOrMore, OptionalId, UpdateFilter, WithoutId } from '../mongo_types';
 import type { CollationOptions, CommandOperationOptions } from '../operations/command';
-import { DeleteOperation, DeleteStatement, makeDeleteStatement } from '../operations/delete';
+import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { AbstractOperation, Hint } from '../operations/operation';
-import { makeUpdateStatement, UpdateOperation, UpdateStatement } from '../operations/update';
+import { AbstractOperation, type Hint } from '../operations/operation';
+import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../operations/update';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import {
   applyRetryableWrites,
-  Callback,
+  type Callback,
   getTopology,
   hasAtomicOperators,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   resolveOptions
 } from '../utils';
 import { WriteConcern } from '../write_concern';

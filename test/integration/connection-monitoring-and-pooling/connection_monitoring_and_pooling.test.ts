@@ -1,5 +1,5 @@
 import { loadSpecTests } from '../../spec';
-import { CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
+import { type CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 describe('Connection Monitoring and Pooling (Node Driver)', function () {

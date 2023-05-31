@@ -2,8 +2,8 @@ import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */

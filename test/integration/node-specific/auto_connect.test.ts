@@ -3,10 +3,10 @@ import { once } from 'events';
 
 import {
   BSONType,
-  ChangeStream,
+  type ChangeStream,
   ClientSession,
-  Collection,
-  MongoClient,
+  type Collection,
+  type MongoClient,
   MongoNotConnectedError,
   ProfilingLevel,
   Topology,

@@ -2,14 +2,14 @@ import { expectType } from 'tsd';
 
 import {
   Batch,
-  BatchType,
+  type BatchType,
   BulkOperationBase,
-  BulkWriteOptions,
-  BulkWriteResult,
-  DeleteStatement,
-  Document,
+  type BulkWriteOptions,
+  type BulkWriteResult,
+  type DeleteStatement,
+  type Document,
   MongoClient,
-  UpdateStatement
+  type UpdateStatement
 } from '../../../mongodb';
 
 const client = new MongoClient('');

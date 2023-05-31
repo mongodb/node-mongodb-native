@@ -2,11 +2,11 @@ import { expect } from 'chai';
 
 import {
   ClientSession,
-  Collection,
-  MongoClient,
+  type Collection,
+  type MongoClient,
   MongoInvalidArgumentError,
   MongoNetworkError,
-  ServerSessionPool
+  type ServerSessionPool
 } from '../../mongodb';
 
 describe('Transactions', function () {

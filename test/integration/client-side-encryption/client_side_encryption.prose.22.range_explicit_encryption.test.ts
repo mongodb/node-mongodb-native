@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
-import { Decimal128, Document, Double, Long, MongoClient } from '../../../src';
+import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const getKmsProviders = () => {

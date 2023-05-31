@@ -2,8 +2,8 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, MongoDBNamespace } from '../utils';
-import { CommandOperation, OperationParent } from './command';
+import { type Callback, MongoDBNamespace } from '../utils';
+import { CommandOperation, type OperationParent } from './command';
 
 /** @public */
 export type RunCommandOptions = {

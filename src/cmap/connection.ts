@@ -23,15 +23,15 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
-import { CancellationToken, TypedEventEmitter } from '../mongo_types';
+import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
-import { applySession, ClientSession, updateSessionFromResponse } from '../sessions';
+import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   calculateDurationInMs,
-  Callback,
+  type Callback,
   HostAddress,
   maxWireVersion,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   now,
   uuidV4
 } from '../utils';
@@ -43,11 +43,11 @@ import {
   CommandStartedEvent,
   CommandSucceededEvent
 } from './command_monitoring_events';
-import { BinMsg, Msg, Query, Response, WriteProtocolMessageType } from './commands';
+import { type BinMsg, Msg, Query, type Response, type WriteProtocolMessageType } from './commands';
 import type { Stream } from './connect';
 import type { ClientMetadata } from './handshake/client_metadata';
-import { MessageStream, OperationDescription } from './message_stream';
-import { StreamDescription, StreamDescriptionOptions } from './stream_description';
+import { MessageStream, type OperationDescription } from './message_stream';
+import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */

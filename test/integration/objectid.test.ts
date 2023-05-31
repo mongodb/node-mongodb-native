@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, Db, MongoClient, ObjectId } from '../../src';
+import { type Collection, type Db, type MongoClient, ObjectId } from '../../src';
 import { sleep } from '../tools/utils';
 
 // TODO(NODE-4989): Improve these tests, likely can be made unit tests, or migrated to CRUD coverage (find oid range)

@@ -5,7 +5,7 @@ import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 import type { MongoClient } from '../../mongodb';
 import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
 import { ejson } from '../utils';
-import { EntitiesMap, UnifiedMongoClient } from './entities';
+import { EntitiesMap, type UnifiedMongoClient } from './entities';
 import { compareLogs, matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
 import * as uni from './schema';

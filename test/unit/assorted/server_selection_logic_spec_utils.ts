@@ -1,18 +1,18 @@
-import { Document, EJSON } from 'bson';
+import { type Document, EJSON } from 'bson';
 import { expect } from 'chai';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { basename, extname, join } from 'path';
 
 import {
   ReadPreference,
-  ReadPreferenceMode,
-  ReadPreferenceOptions,
+  type ReadPreferenceMode,
+  type ReadPreferenceOptions,
   readPreferenceServerSelector,
-  ServerDescription,
-  ServerType,
-  TagSet,
+  type ServerDescription,
+  type ServerType,
+  type TagSet,
   TopologyDescription,
-  TopologyType,
+  type TopologyType,
   writableServerSelector
 } from '../../mongodb';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';

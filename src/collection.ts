@@ -1,14 +1,14 @@
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import type { AnyBulkWriteOperation, BulkWriteOptions, BulkWriteResult } from './bulk/common';
 import { OrderedBulkOperation } from './bulk/ordered';
 import { UnorderedBulkOperation } from './bulk/unordered';
-import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
+import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
 import {
   ListSearchIndexesCursor,
-  ListSearchIndexesOptions
+  type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
@@ -25,72 +25,72 @@ import type {
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import type { IndexInformationOptions } from './operations/common_functions';
-import { CountOperation, CountOptions } from './operations/count';
-import { CountDocumentsOperation, CountDocumentsOptions } from './operations/count_documents';
+import { CountOperation, type CountOptions } from './operations/count';
+import { CountDocumentsOperation, type CountDocumentsOptions } from './operations/count_documents';
 import {
   DeleteManyOperation,
   DeleteOneOperation,
-  DeleteOptions,
-  DeleteResult
+  type DeleteOptions,
+  type DeleteResult
 } from './operations/delete';
-import { DistinctOperation, DistinctOptions } from './operations/distinct';
-import { DropCollectionOperation, DropCollectionOptions } from './operations/drop';
+import { DistinctOperation, type DistinctOptions } from './operations/distinct';
+import { DropCollectionOperation, type DropCollectionOptions } from './operations/drop';
 import {
   EstimatedDocumentCountOperation,
-  EstimatedDocumentCountOptions
+  type EstimatedDocumentCountOptions
 } from './operations/estimated_document_count';
 import { executeOperation } from './operations/execute_operation';
 import type { FindOptions } from './operations/find';
 import {
   FindOneAndDeleteOperation,
-  FindOneAndDeleteOptions,
+  type FindOneAndDeleteOptions,
   FindOneAndReplaceOperation,
-  FindOneAndReplaceOptions,
+  type FindOneAndReplaceOptions,
   FindOneAndUpdateOperation,
-  FindOneAndUpdateOptions
+  type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
 import {
   CreateIndexesOperation,
-  CreateIndexesOptions,
+  type CreateIndexesOptions,
   CreateIndexOperation,
   DropIndexesOperation,
-  DropIndexesOptions,
+  type DropIndexesOptions,
   DropIndexOperation,
-  IndexDescription,
+  type IndexDescription,
   IndexesOperation,
   IndexExistsOperation,
   IndexInformationOperation,
-  IndexSpecification,
-  ListIndexesOptions
+  type IndexSpecification,
+  type ListIndexesOptions
 } from './operations/indexes';
 import {
   InsertManyOperation,
-  InsertManyResult,
+  type InsertManyResult,
   InsertOneOperation,
-  InsertOneOptions,
-  InsertOneResult
+  type InsertOneOptions,
+  type InsertOneResult
 } from './operations/insert';
 import { IsCappedOperation } from './operations/is_capped';
 import type { Hint, OperationOptions } from './operations/operation';
 import { OptionsOperation } from './operations/options_operation';
-import { RenameOperation, RenameOptions } from './operations/rename';
+import { RenameOperation, type RenameOptions } from './operations/rename';
 import {
   CreateSearchIndexesOperation,
-  SearchIndexDescription
+  type SearchIndexDescription
 } from './operations/search_indexes/create';
 import { DropSearchIndexOperation } from './operations/search_indexes/drop';
 import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
-import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
+import { type CollStats, CollStatsOperation, type CollStatsOptions } from './operations/stats';
 import {
   ReplaceOneOperation,
-  ReplaceOptions,
+  type ReplaceOptions,
   UpdateManyOperation,
   UpdateOneOperation,
-  UpdateOptions,
-  UpdateResult
+  type UpdateOptions,
+  type UpdateResult
 } from './operations/update';
-import { ReadConcern, ReadConcernLike } from './read_concern';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
+import { ReadConcern, type ReadConcernLike } from './read_concern';
+import { ReadPreference, type ReadPreferenceLike } from './read_preference';
 import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
@@ -98,7 +98,7 @@ import {
   normalizeHintField,
   resolveOptions
 } from './utils';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
 /**
  * @public

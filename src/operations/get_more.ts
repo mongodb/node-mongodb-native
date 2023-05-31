@@ -2,8 +2,8 @@ import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
+import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /** @internal */
 export interface GetMoreOptions extends OperationOptions {

@@ -7,9 +7,9 @@ import {
   isHello,
   MongoClient,
   SrvPoller,
-  SrvPollerOptions,
+  type SrvPollerOptions,
   SrvPollingEvent,
-  TopologyOptions,
+  type TopologyOptions,
   TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

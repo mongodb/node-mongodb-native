@@ -3,18 +3,22 @@ import type { Collection } from '../collection';
 import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
 import { MongoRuntimeError } from '../error';
-import { Filter, TypedEventEmitter } from '../mongo_types';
+import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
-import { WriteConcern, WriteConcernOptions } from '../write_concern';
+import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { FindOptions } from './../operations/find';
 import {
   GridFSBucketReadStream,
-  GridFSBucketReadStreamOptions,
-  GridFSBucketReadStreamOptionsWithRevision,
-  GridFSFile
+  type GridFSBucketReadStreamOptions,
+  type GridFSBucketReadStreamOptionsWithRevision,
+  type GridFSFile
 } from './download';
-import { GridFSBucketWriteStream, GridFSBucketWriteStreamOptions, GridFSChunk } from './upload';
+import {
+  GridFSBucketWriteStream,
+  type GridFSBucketWriteStreamOptions,
+  type GridFSChunk
+} from './upload';
 
 const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
   bucketName: string;

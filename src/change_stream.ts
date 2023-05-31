@@ -4,22 +4,22 @@ import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
 import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
-import { ChangeStreamCursor, ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
+import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
 import {
-  AnyError,
+  type AnyError,
   isResumableError,
   MongoAPIError,
   MongoChangeStreamError,
   MongoRuntimeError
 } from './error';
 import { MongoClient } from './mongo_client';
-import { InferIdType, TypedEventEmitter } from './mongo_types';
+import { type InferIdType, TypedEventEmitter } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import type { ServerSessionId } from './sessions';
-import { filterOptions, getTopology, MongoDBNamespace } from './utils';
+import { filterOptions, getTopology, type MongoDBNamespace } from './utils';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');

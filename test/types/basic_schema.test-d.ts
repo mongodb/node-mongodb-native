@@ -1,7 +1,7 @@
 import { expectAssignable, expectNotAssignable, expectNotType, expectType } from 'tsd';
 
-import type { InferIdType } from '../mongodb';
-import { Collection, Db, Document, MongoClient, ObjectId } from '../mongodb';
+import type { Document, InferIdType } from '../mongodb';
+import { Collection, Db, MongoClient, ObjectId } from '../mongodb';
 
 const db = new Db(new MongoClient(''), '');
 

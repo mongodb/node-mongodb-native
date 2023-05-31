@@ -12,7 +12,7 @@ import {
   MongoCredentials,
   MongoDriverError,
   MongoInvalidArgumentError,
-  MongoOptions,
+  type MongoOptions,
   MongoParseError,
   MongoRuntimeError,
   OPTIONS,

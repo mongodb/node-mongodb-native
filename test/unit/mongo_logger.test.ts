@@ -20,10 +20,10 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY,
   DEFAULT_MAX_DOCUMENT_LENGTH,
-  Log,
-  MongoDBLogWritable,
+  type Log,
+  type MongoDBLogWritable,
   MongoLogger,
-  MongoLoggerOptions,
+  type MongoLoggerOptions,
   SeverityLevel,
   stringifyWithMaxLen
 } from '../mongodb';

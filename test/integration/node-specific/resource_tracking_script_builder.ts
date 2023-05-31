@@ -6,8 +6,8 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 import { parseSnapshot } from 'v8-heapsnapshot';
 
-import { MongoClient } from '../../mongodb';
-import { TestConfiguration } from '../../tools/runner/config';
+import { type MongoClient } from '../../mongodb';
+import { type TestConfiguration } from '../../tools/runner/config';
 
 export type ResourceTestFunction = (options: {
   MongoClient: typeof MongoClient;

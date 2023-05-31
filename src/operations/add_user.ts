@@ -5,8 +5,8 @@ import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, emitWarningOnce, getTopology } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { type Callback, emitWarningOnce, getTopology } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /**

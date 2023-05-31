@@ -2,10 +2,10 @@ import { EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 
-import { Collection, CommandStartedEvent, MongoClient } from '../../mongodb';
+import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
 import * as BSON from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
-import { ClientEncryption } from '../../tools/unified-spec-runner/schema';
+import { type ClientEncryption } from '../../tools/unified-spec-runner/schema';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {

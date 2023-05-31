@@ -4,10 +4,15 @@ import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { formatSort, Sort } from '../sort';
-import { Callback, decorateWithExplain, MongoDBNamespace, normalizeHintField } from '../utils';
-import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects, Hint } from './operation';
+import { formatSort, type Sort } from '../sort';
+import {
+  type Callback,
+  decorateWithExplain,
+  type MongoDBNamespace,
+  normalizeHintField
+} from '../utils';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
  * @public
