@@ -2602,7 +2602,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_NAME: hydrogen
+          NODE_LTS_NAME: 20
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
