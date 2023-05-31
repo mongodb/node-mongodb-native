@@ -96,7 +96,6 @@ functions:
   "bootstrap kms servers":
     - command: subprocess.exec
       params:
-        background: true
         working_dir: src
         binary: bash
         args:
@@ -105,7 +104,6 @@ functions:
           DRIVERS_TOOLS: ${DRIVERS_TOOLS}
     - command: subprocess.exec
       params:
-        background: true
         working_dir: src
         binary: bash
         args:
