@@ -697,9 +697,6 @@ functions:
         shell: bash
         script: |
           ${PREPARE_SHELL}
-          # Write an empty prepare_mongodb_aws so no auth environment variables
-          # are set.
-          echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
           set -ex
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           . ./activate-authawsvenv.sh
@@ -710,6 +707,11 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
+
+          # Write an empty prepare_mongodb_aws so no auth environment variables
+          # are set.
+          echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
+
           export IS_EC2=true
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials as environment variables:
