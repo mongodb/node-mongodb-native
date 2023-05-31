@@ -216,7 +216,10 @@
           "command_started_event": {
             "command": {
               "getMore": {
-                "$$type": "long"
+                "$$type": [
+                  "int",
+                  "long"
+                ]
               },
               "collection": "default",
               "batchSize": 2
