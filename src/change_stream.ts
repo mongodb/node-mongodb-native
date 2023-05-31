@@ -818,9 +818,9 @@ export class ChangeStream<
       this.type === CHANGE_DOMAIN_TYPES.CLUSTER
         ? (this.parent as MongoClient)
         : this.type === CHANGE_DOMAIN_TYPES.DATABASE
-        ? (this.parent as Db).s.client
+        ? (this.parent as Db).client
         : this.type === CHANGE_DOMAIN_TYPES.COLLECTION
-        ? (this.parent as Collection).s.db.s.client
+        ? (this.parent as Collection).client
         : null;
 
     if (client == null) {

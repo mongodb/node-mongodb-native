@@ -1,0 +1,82 @@
+description: "listSearchIndexes"
+schemaVersion: "1.4"
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: *database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: *collection0
+
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    topologies: [ replicaset, load-balanced, sharded ]
+    serverless: forbid
+
+tests:
+  - description: "when no name is provided, it does not populate the filter"
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        expectError:
+          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
+          # against an Atlas cluster and the expectError will be removed.
+          isError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $listSearchIndexes: {}
+
+  - description: "when a name is provided, it is present in the filter"
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        arguments: 
+          name: &indexName "test index"
+        expectError:
+          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
+          # against an Atlas cluster and the expectError will be removed.
+          isError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $listSearchIndexes: { name: *indexName }
+                $db: *database0
+
+  - description: aggregation cursor options are supported
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        arguments: 
+          name: &indexName "test index"
+          aggregationOptions: 
+            batchSize: 10
+        expectError:
+          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
+          # against an Atlas cluster and the expectError will be removed.
+          isError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                cursor: { batchSize: 10 }
+                pipeline:
+                  - $listSearchIndexes: { name: *indexName }
+                $db: *database0

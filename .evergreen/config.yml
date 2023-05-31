@@ -25,6 +25,14 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
+  run search index management tests:
+    - command: subprocess.exec
+      params:
+        binary: bash
+        working_dir: src
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-search-index-management-tests.sh
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -2596,6 +2604,17 @@ tasks:
         variant: '*'
         status: '*'
         patch_optional: true
+  - name: test-search-index-helpers
+    tags: []
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_NAME: 20
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+      - func: run search index management tests
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -4008,3 +4027,8 @@ buildvariants:
       - test-lambda-example
       - test-lambda-aws-auth-example
       - test-deployed-lambda
+  - name: rhel8-test-seach-index-management-helpers
+    display_name: Search Index Management Helpers Tests
+    run_on: rhel80-large
+    tasks:
+      - test-search-index-helpers

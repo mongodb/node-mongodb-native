@@ -1,0 +1,44 @@
+description: "updateSearchIndex"
+schemaVersion: "1.4"
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: *database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: *collection0
+
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    topologies: [ replicaset, load-balanced, sharded ]
+    serverless: forbid
+
+tests:
+  - description: "sends the correct command"
+    operations:
+      - name: updateSearchIndex
+        object: *collection0
+        arguments:
+          name: &indexName 'test index'
+          definition: &definition {}
+        expectError:          
+          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
+          # against an Atlas cluster and the expectError will be removed.
+          isError: true
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                updateSearchIndex: *collection0
+                name: *indexName
+                definition: *definition
+                $db: *database0
+
