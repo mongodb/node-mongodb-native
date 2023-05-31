@@ -19,7 +19,7 @@ import {
   shuffle
 } from '../mongodb';
 
-describe.only('driver utils', function () {
+describe('driver utils', function () {
   describe('.hostMatchesWildcards', function () {
     context('when using domains', function () {
       context('when using exact match', function () {

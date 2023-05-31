@@ -121,6 +121,9 @@ export class Db {
   /** @internal */
   s: DbPrivate;
 
+  /** @internal */
+  readonly client: MongoClient;
+
   public static SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
   public static SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
   public static SYSTEM_PROFILE_COLLECTION = CONSTANTS.SYSTEM_PROFILE_COLLECTION;
@@ -135,12 +138,7 @@ export class Db {
    * @param databaseName - The name of the database this instance represents.
    * @param options - Optional settings for Db construction
    */
-  constructor(
-    /** @internal */
-    readonly client: MongoClient,
-    databaseName: string,
-    options?: DbOptions
-  ) {
+  constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
     options = options ?? {};
 
     // Filter the options
@@ -165,6 +163,8 @@ export class Db {
       // Namespace
       namespace: new MongoDBNamespace(databaseName)
     };
+
+    this.client = client;
   }
 
   get databaseName(): string {
