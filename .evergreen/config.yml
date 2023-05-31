@@ -398,6 +398,17 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh
+  reset aws instance profile:
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+          cd "${DRIVERS_TOOLS}/.evergreen/auth_aws"
+          if [ -f "./aws_e2e_setup.json" ]; then
+            . ./activate-authawsvenv.sh
+            python ./lib/aws_assign_instance_profile.py
+          fi
   cleanup:
     - command: shell.exec
       params:
@@ -608,10 +619,6 @@ functions:
               "iam_web_identity_token_file": "${iam_web_identity_token_file}"
           }
           EOF
-
-          echo "PRINTING VALUES"
-          cat ${DRIVERS_TOOLS}/.evergreen/auth_aws/aws_e2e_setup.json | jq .iam_auth_ec2_instance_profile
-          cat ${DRIVERS_TOOLS}/.evergreen/auth_aws/aws_e2e_setup.json | jq .iam_auth_ec2_instance_profile_default
   setup aws env:
     - command: shell.exec
       type: test
@@ -707,11 +714,6 @@ functions:
         working_dir: src
         script: |
           ${PREPARE_SHELL}
-
-          # Write an empty prepare_mongodb_aws so no auth environment variables
-          # are set.
-          echo "" > "${PROJECT_DIRECTORY}/prepare_mongodb_aws.sh"
-
           export IS_EC2=true
           ${PROJECT_DIRECTORY}/.evergreen/run-mongodb-aws-test.sh
   run aws auth test with aws credentials as environment variables:
@@ -826,9 +828,6 @@ functions:
           ${PREPARE_SHELL}
           AUTH_AWS_DIR=${DRIVERS_TOOLS}/.evergreen/auth_aws
           ECS_SRC_DIR=$AUTH_AWS_DIR/src
-
-          # fix issue with `TestData` in SERVER-46340
-          # sed -i '1s+^+TestData = {};\n+' $AUTH_AWS_DIR/lib/ecs_hosted_test.js
 
           # pack up project directory to ssh it to the container
           mkdir -p $ECS_SRC_DIR/.evergreen
