@@ -3465,7 +3465,7 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: rhel80-large
+    run_on: rhel90-dbx-perf-large
     tasks:
       - run-spec-benchmark-tests
   - name: rhel80-large-fermium
