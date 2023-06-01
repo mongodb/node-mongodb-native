@@ -79,14 +79,12 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
 }
 
 function checkSupportedServer(hello: Document, options: ConnectionOptions) {
+  const maxWireVersion = Number(hello.maxWireVersion);
+  const minWireVersion = Number(hello.minWireVersion);
   const serverVersionHighEnough =
-    hello &&
-    typeof hello.maxWireVersion?.valueOf() === 'number' &&
-    hello.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
+    hello && !Number.isNaN(maxWireVersion) && hello.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
-    hello &&
-    typeof hello.minWireVersion?.valueOf() === 'number' &&
-    hello.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
+    hello && !Number.isNaN(minWireVersion) && hello.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
     if (serverVersionLowEnough) {
