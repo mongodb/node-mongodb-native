@@ -6,9 +6,13 @@ import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './chang
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { FindCursor } from './cursor/find_cursor';
 import { ListIndexesCursor } from './cursor/list_indexes_cursor';
+import {
+  ListSearchIndexesCursor,
+  ListSearchIndexesOptions
+} from './cursor/list_search_indexes_cursor';
 import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
-import type { PkFactory } from './mongo_client';
+import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
@@ -70,6 +74,12 @@ import { IsCappedOperation } from './operations/is_capped';
 import type { Hint, OperationOptions } from './operations/operation';
 import { OptionsOperation } from './operations/options_operation';
 import { RenameOperation, RenameOptions } from './operations/rename';
+import {
+  CreateSearchIndexesOperation,
+  SearchIndexDescription
+} from './operations/search_indexes/create';
+import { DropSearchIndexOperation } from './operations/search_indexes/drop';
+import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
 import { CollStats, CollStatsOperation, CollStatsOptions } from './operations/stats';
 import {
   ReplaceOneOperation,
@@ -84,7 +94,7 @@ import { ReadPreference, ReadPreferenceLike } from './read_preference';
 import {
   checkCollectionName,
   DEFAULT_PK_FACTORY,
-  MongoDBNamespace,
+  MongoDBCollectionNamespace,
   normalizeHintField,
   resolveOptions
 } from './utils';
@@ -115,7 +125,7 @@ export interface CollectionPrivate {
   pkFactory: PkFactory;
   db: Db;
   options: any;
-  namespace: MongoDBNamespace;
+  namespace: MongoDBCollectionNamespace;
   readPreference?: ReadPreference;
   bsonOptions: BSONSerializeOptions;
   collectionHint?: Hint;
@@ -153,6 +163,9 @@ export class Collection<TSchema extends Document = Document> {
   /** @internal */
   s: CollectionPrivate;
 
+  /** @internal */
+  client: MongoClient;
+
   /**
    * Create a new Collection instance
    * @internal
@@ -164,13 +177,15 @@ export class Collection<TSchema extends Document = Document> {
     this.s = {
       db,
       options,
-      namespace: new MongoDBNamespace(db.databaseName, name),
+      namespace: new MongoDBCollectionNamespace(db.databaseName, name),
       pkFactory: db.options?.pkFactory ?? DEFAULT_PK_FACTORY,
       readPreference: ReadPreference.fromOptions(options),
       bsonOptions: resolveBSONOptions(options, db),
       readConcern: ReadConcern.fromOptions(options),
       writeConcern: WriteConcern.fromOptions(options)
     };
+
+    this.client = db.client;
   }
 
   /**
@@ -184,15 +199,23 @@ export class Collection<TSchema extends Document = Document> {
    * The name of this collection
    */
   get collectionName(): string {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.s.namespace.collection!;
+    return this.s.namespace.collection;
   }
 
   /**
    * The namespace of this collection, in the format `${this.dbName}.${this.collectionName}`
    */
   get namespace(): string {
-    return this.s.namespace.toString();
+    return this.fullNamespace.toString();
+  }
+
+  /**
+   *  @internal
+   *
+   * The `MongoDBNamespace` for the collection.
+   */
+  get fullNamespace(): MongoDBCollectionNamespace {
+    return this.s.namespace;
   }
 
   /**
@@ -255,7 +278,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: InsertOneOptions
   ): Promise<InsertOneResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new InsertOneOperation(
         this as TODO_NODE_3286,
         doc,
@@ -277,7 +300,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new InsertManyOperation(
         this as TODO_NODE_3286,
         docs,
@@ -314,7 +337,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new BulkWriteOperation(
         this as TODO_NODE_3286,
         operations as TODO_NODE_3286,
@@ -336,7 +359,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new UpdateOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -359,7 +382,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: ReplaceOptions
   ): Promise<UpdateResult<TSchema> | Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new ReplaceOneOperation(
         this as TODO_NODE_3286,
         filter,
@@ -382,7 +405,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new UpdateManyOperation(
         this as TODO_NODE_3286,
         filter,
@@ -403,7 +426,7 @@ export class Collection<TSchema extends Document = Document> {
     options: DeleteOptions = {}
   ): Promise<DeleteResult> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
   }
@@ -419,7 +442,7 @@ export class Collection<TSchema extends Document = Document> {
     options: DeleteOptions = {}
   ): Promise<DeleteResult> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
   }
@@ -436,7 +459,7 @@ export class Collection<TSchema extends Document = Document> {
   async rename(newName: string, options?: RenameOptions): Promise<Collection> {
     // Intentionally, we do not inherit options from parent for this operation.
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
         readPreference: ReadPreference.PRIMARY
@@ -451,7 +474,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DropCollectionOperation(this.s.db, this.collectionName, options)
     );
   }
@@ -488,7 +511,7 @@ export class Collection<TSchema extends Document = Document> {
   find<T extends Document>(filter: Filter<TSchema>, options?: FindOptions): FindCursor<T>;
   find(filter: Filter<TSchema> = {}, options: FindOptions = {}): FindCursor<WithId<TSchema>> {
     return new FindCursor<WithId<TSchema>>(
-      this.s.db.s.client,
+      this.client,
       this.s.namespace,
       filter,
       resolveOptions(this as TODO_NODE_3286, options)
@@ -502,7 +525,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async options(options?: OperationOptions): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
   }
@@ -514,7 +537,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async isCapped(options?: OperationOptions): Promise<boolean> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
   }
@@ -552,7 +575,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: CreateIndexesOptions
   ): Promise<string> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new CreateIndexOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -598,7 +621,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: CreateIndexesOptions
   ): Promise<string[]> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new CreateIndexesOperation(
         this as TODO_NODE_3286,
         this.collectionName,
@@ -616,7 +639,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async dropIndex(indexName: string, options?: DropIndexesOptions): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DropIndexOperation(this as TODO_NODE_3286, indexName, {
         ...resolveOptions(this, options),
         readPreference: ReadPreference.primary
@@ -631,7 +654,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async dropIndexes(options?: DropIndexesOptions): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
   }
@@ -656,7 +679,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: IndexInformationOptions
   ): Promise<boolean> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options))
     );
   }
@@ -668,7 +691,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async indexInformation(options?: IndexInformationOptions): Promise<Document> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new IndexInformationOperation(this.s.db, this.collectionName, resolveOptions(this, options))
     );
   }
@@ -688,7 +711,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async estimatedDocumentCount(options?: EstimatedDocumentCountOptions): Promise<number> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new EstimatedDocumentCountOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
   }
@@ -723,7 +746,7 @@ export class Collection<TSchema extends Document = Document> {
     options: CountDocumentsOptions = {}
   ): Promise<number> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
   }
@@ -759,7 +782,7 @@ export class Collection<TSchema extends Document = Document> {
     options: DistinctOptions = {}
   ): Promise<any[]> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new DistinctOperation(
         this as TODO_NODE_3286,
         key as TODO_NODE_3286,
@@ -776,7 +799,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
   }
@@ -791,7 +814,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async stats(options?: CollStatsOptions): Promise<CollStats> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new CollStatsOperation(this as TODO_NODE_3286, options) as TODO_NODE_3286
     );
   }
@@ -807,7 +830,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: FindOneAndDeleteOptions
   ): Promise<ModifyResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new FindOneAndDeleteOperation(
         this as TODO_NODE_3286,
         filter,
@@ -829,7 +852,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: FindOneAndReplaceOptions
   ): Promise<ModifyResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new FindOneAndReplaceOperation(
         this as TODO_NODE_3286,
         filter,
@@ -852,7 +875,7 @@ export class Collection<TSchema extends Document = Document> {
     options?: FindOneAndUpdateOptions
   ): Promise<ModifyResult<TSchema>> {
     return executeOperation(
-      this.s.db.s.client,
+      this.client,
       new FindOneAndUpdateOperation(
         this as TODO_NODE_3286,
         filter,
@@ -879,7 +902,7 @@ export class Collection<TSchema extends Document = Document> {
     }
 
     return new AggregationCursor(
-      this.s.db.s.client,
+      this.client,
       this.s.namespace,
       pipeline,
       resolveOptions(this, options)
@@ -975,12 +998,111 @@ export class Collection<TSchema extends Document = Document> {
    */
   async count(filter: Filter<TSchema> = {}, options: CountOptions = {}): Promise<number> {
     return executeOperation(
-      this.s.db.s.client,
-      new CountOperation(
-        MongoDBNamespace.fromString(this.namespace),
-        filter,
-        resolveOptions(this, options)
-      )
+      this.client,
+      new CountOperation(this.fullNamespace, filter, resolveOptions(this, options))
+    );
+  }
+
+  /**
+   * @internal
+   *
+   * Returns all search indexes for the current collection.
+   *
+   * @param options - The options for the list indexes operation.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  /**
+   * @internal
+   *
+   * Returns all search indexes for the current collection.
+   *
+   * @param name - The name of the index to search for.  Only indexes with matching index names will be returned.
+   * @param options - The options for the list indexes operation.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  listSearchIndexes(name: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    indexNameOrOptions?: string | ListSearchIndexesOptions,
+    options?: ListSearchIndexesOptions
+  ): ListSearchIndexesCursor {
+    options =
+      typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+    const indexName =
+      indexNameOrOptions == null
+        ? null
+        : typeof indexNameOrOptions === 'object'
+        ? null
+        : indexNameOrOptions;
+
+    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
+  }
+
+  /**
+   * @internal
+   *
+   * Creates a single search index for the collection.
+   *
+   * @param description - The index description for the new search index.
+   * @returns A promise that resolves to the name of the new search index.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  async createSearchIndex(description: SearchIndexDescription): Promise<string> {
+    const [index] = await this.createSearchIndexes([description]);
+    return index;
+  }
+
+  /**
+   * @internal
+   *
+   * Creates multiple search indexes for the current collection.
+   *
+   * @param descriptions - An array of `SearchIndexDescription`s for the new search indexes.
+   * @returns A promise that resolves to an array of the newly created search index names.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   * @returns
+   */
+  async createSearchIndexes(descriptions: SearchIndexDescription[]): Promise<string[]> {
+    return executeOperation(
+      this.client,
+      new CreateSearchIndexesOperation(this as TODO_NODE_3286, descriptions)
+    );
+  }
+
+  /**
+   * @internal
+   *
+   * Deletes a search index by index name.
+   *
+   * @param name - The name of the search index to be deleted.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  async dropSearchIndex(name: string): Promise<void> {
+    return executeOperation(
+      this.client,
+      new DropSearchIndexOperation(this as TODO_NODE_3286, name)
+    );
+  }
+
+  /**
+   * @internal
+   *
+   * Updates a search index by replacing the existing index definition with the provided definition.
+   *
+   * @param name - The name of the search index to update.
+   * @param definition - The new search index definition.
+   *
+   * @remarks Only available when used against a 7.0+ Atlas cluster.
+   */
+  async updateSearchIndex(name: string, definition: Document): Promise<void> {
+    return executeOperation(
+      this.client,
+      new UpdateSearchIndexOperation(this as TODO_NODE_3286, name, definition)
     );
   }
 }

@@ -288,10 +288,8 @@ export function getTopology(provider: TopologyProvider): Topology {
   // MongoClient or ClientSession or AbstractCursor
   if ('topology' in provider && provider.topology) {
     return provider.topology;
-  } else if ('s' in provider && 'client' in provider.s && provider.s.client.topology) {
-    return provider.s.client.topology;
-  } else if ('s' in provider && 'db' in provider.s && provider.s.db.s.client.topology) {
-    return provider.s.db.s.client.topology;
+  } else if ('client' in provider && provider.client.topology) {
+    return provider.client.topology;
   }
 
   throw new MongoNotConnectedError('MongoClient must be connected to perform this operation');
@@ -304,16 +302,13 @@ export function ns(ns: string): MongoDBNamespace {
 
 /** @public */
 export class MongoDBNamespace {
-  db: string;
-  collection: string | undefined;
   /**
    * Create a namespace object
    *
    * @param db - database name
    * @param collection - collection name
    */
-  constructor(db: string, collection?: string) {
-    this.db = db;
+  constructor(public db: string, public collection?: string) {
     this.collection = collection === '' ? undefined : collection;
   }
 
@@ -321,8 +316,8 @@ export class MongoDBNamespace {
     return this.collection ? `${this.db}.${this.collection}` : this.db;
   }
 
-  withCollection(collection: string): MongoDBNamespace {
-    return new MongoDBNamespace(this.db, collection);
+  withCollection(collection: string): MongoDBCollectionNamespace {
+    return new MongoDBCollectionNamespace(this.db, collection);
   }
 
   static fromString(namespace?: string): MongoDBNamespace {
@@ -334,6 +329,19 @@ export class MongoDBNamespace {
     const [db, ...collectionParts] = namespace.split('.');
     const collection = collectionParts.join('.');
     return new MongoDBNamespace(db, collection === '' ? undefined : collection);
+  }
+}
+
+/**
+ * @public
+ *
+ * A class representing a collection's namespace.  This class enforces (through Typescript) that
+ * the `collection` portion of the namespace is defined and should only be
+ * used in scenarios where this can be guaranteed.
+ */
+export class MongoDBCollectionNamespace extends MongoDBNamespace {
+  constructor(db: string, override collection: string) {
+    super(db, collection);
   }
 }
 

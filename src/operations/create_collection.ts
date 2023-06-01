@@ -133,7 +133,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
       const encryptedFields: Document | undefined =
         options.encryptedFields ??
-        db.s.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+        db.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
       if (encryptedFields) {
         // Creating a QE collection required min server of 7.0.0

@@ -30,4 +30,7 @@ echo  "COMPRESSOR=${COMPRESSOR}"
 export PATH="$MONGODB_BINARIES:$PATH"
 echo  "MONGODB_BINARIES=${MONGODB_BINARIES}"
 
+export SKIP_LEGACY_SHELL="true"
+echo  "SKIP_LEGACY_SHELL=${SKIP_LEGACY_SHELL}"
+
 bash "${DRIVERS_TOOLS}/.evergreen/run-orchestration.sh"
