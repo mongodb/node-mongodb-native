@@ -7,7 +7,10 @@ if [[ "$OS" == "Windows_NT" ]]; then
   NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH")
 fi
 
-export PATH="$NODE_ARTIFACTS_PATH/npm_global/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
+export NODE_ARTIFACTS_PATH
+# npm uses this environment variable to determine where to install global packages
+export npm_global_prefix=$NODE_ARTIFACTS_PATH/npm_global
+export PATH="$npm_global_prefix/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
 hash -r
 
 export NODE_OPTIONS="--trace-deprecation --trace-warnings"
