@@ -256,9 +256,9 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     const options = isAwaitable
       ? {
-        socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
-        exhaustAllowed: true
-      }
+          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
+          exhaustAllowed: true
+        }
       : { socketTimeoutMS: connectTimeoutMS };
 
     if (isAwaitable && !monitor.isInFAASEnv && monitor[kRTTPinger] == null) {
@@ -289,7 +289,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, duration, hello)
       );
-      monitor.heartbeatProtocol = isAwaitable && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
+      monitor.heartbeatProtocol =
+        isAwaitable && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
@@ -364,7 +365,8 @@ function monitorServer(monitor: Monitor) {
         }
       }
 
-      monitor.heartbeatProtocol = hello && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
+      monitor.heartbeatProtocol =
+        hello && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
       // if the check indicates streaming is supported, immediately reschedule monitoring
       if (monitor.heartbeatProtocol === 'streaming') {
         setTimeout(() => {

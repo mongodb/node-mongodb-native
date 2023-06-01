@@ -6,11 +6,8 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoServerError,
-  MongoServerSelectionError,
-  Monitor
+  MongoServerSelectionError
 } from '../../mongodb';
-
-import { once } from 'events';
 
 describe('MongoDB Handshake', () => {
   let client;
@@ -19,7 +16,7 @@ describe('MongoDB Handshake', () => {
 
   context('when hello is too large', () => {
     before(() => {
-      sinon.stub(Connection.prototype, 'command').callsFake(function(ns, cmd, options, callback) {
+      sinon.stub(Connection.prototype, 'command').callsFake(function (ns, cmd, options, callback) {
         // @ts-expect-error: sinon will place wrappedMethod there
         const command = Connection.prototype.command.wrappedMethod.bind(this);
 
@@ -37,7 +34,7 @@ describe('MongoDB Handshake', () => {
 
     after(() => sinon.restore());
 
-    it('should fail with an error relating to size', async function() {
+    it('should fail with an error relating to size', async function () {
       client = this.configuration.newClient({ serverSelectionTimeoutMS: 2000 });
       const error = await client.connect().catch(error => error);
       if (this.configuration.isLoadBalanced) {
@@ -57,7 +54,7 @@ describe('MongoDB Handshake', () => {
 
     after(() => sinon.restore());
 
-    it('constructs a handshake with the specified compressors', async function() {
+    it('constructs a handshake with the specified compressors', async function () {
       client = this.configuration.newClient({ compressors: ['snappy'] });
       await client.connect();
       expect(spy.called).to.be.true;
@@ -66,20 +63,14 @@ describe('MongoDB Handshake', () => {
     });
   });
 });
-// TODO: Add version metadata
-context('when running against a server version >= 4.2', function() {
+context('when running against a server version >= 4.2', function () {
   const HEARTBEAT_FREQUENCY_MS = 1000;
   const MIN_HEARTBEAT_FREQUENCY_MS = 500;
   const metadata = { requires: { mongodb: '>= 4.2.0', topology: '!load-balanced' } };
   let cachedEnv: NodeJS.ProcessEnv;
   let client: MongoClient;
-  let eventCounts: {
-    heartBeatStarted: number;
-    heartBeatSucceeded: number;
-    heartBeatFailed: number;
-  };
 
-  beforeEach(function() {
+  beforeEach(async function () {
     cachedEnv = process.env;
     client = this.configuration.newClient(
       {},
@@ -88,46 +79,40 @@ context('when running against a server version >= 4.2', function() {
         minHeartbeatFrequencyMS: MIN_HEARTBEAT_FREQUENCY_MS
       }
     );
-
-    eventCounts = { heartBeatStarted: 0, heartBeatSucceeded: 0, heartBeatFailed: 0 };
-    client.on('serverHeartbeatStarted', e => {
-      eventCounts.heartBeatStarted++;
-    });
-    client.on('serverHeartbeatSucceeded', e => {
-      eventCounts.heartBeatSucceeded++;
-    });
-    client.on('serverHeartbeatFailed', e => {
-      eventCounts.heartBeatFailed++;
-    });
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await client.close().catch(() => null);
     process.env = cachedEnv;
   });
 
-  context('in a FaaS environment', function() {
-    beforeEach(function() {
+  context('in a FaaS environment', function () {
+    beforeEach(function () {
       process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_test';
       process.env.AWS_REGION = 'test_region';
     });
 
-    it('uses the polling protocol', metadata, async function() {
+    it('uses the polling protocol', metadata, async function () {
       await client.connect();
-      for (const [_, server] of client?.topology.s.servers.entries()) {
+      const servers = client?.topology.s?.servers;
+      expect(servers).to.exist;
+      for (const server of servers.values()) {
         const symbolMap = {};
-        (Object.getOwnPropertySymbols(server).forEach(s => {
+        Object.getOwnPropertySymbols(server).forEach(s => {
           symbolMap[s.toString()] = s;
-        }));
+        });
 
         expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        expect(server[symbolMap['Symbol(monitor)']]).to.have.property('heartbeatProtocol', 'polling');
+        expect(server[symbolMap['Symbol(monitor)']]).to.have.property(
+          'heartbeatProtocol',
+          'polling'
+        );
       }
     });
   });
 
-  context('in a non-FaaS environment', function() {
-    beforeEach(function() {
+  context('in a non-FaaS environment', function () {
+    beforeEach(function () {
       delete process.env.AWS_EXECUTION_ENV;
       delete process.env.AWS_REGION;
       delete process.env.AWS_LAMBDA_RUNTIME_API;
@@ -142,16 +127,21 @@ context('when running against a server version >= 4.2', function() {
       delete process.env.VERCEL_REGION;
     });
 
-    it('uses the streaming protocol', metadata, async function() {
+    it('uses the streaming protocol', metadata, async function () {
       await client.connect();
-      for (const [_, server] of client?.topology.s.servers.entries()) {
+      const servers = client?.topology.s?.servers;
+      expect(servers).to.exist;
+      for (const server of servers.values()) {
         const symbolMap = {};
-        (Object.getOwnPropertySymbols(server).forEach(s => {
+        Object.getOwnPropertySymbols(server).forEach(s => {
           symbolMap[s.toString()] = s;
-        }));
+        });
 
         expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        expect(server[symbolMap['Symbol(monitor)']]).to.have.property('heartbeatProtocol', 'streaming');
+        expect(server[symbolMap['Symbol(monitor)']]).to.have.property(
+          'heartbeatProtocol',
+          'streaming'
+        );
       }
     });
   });
