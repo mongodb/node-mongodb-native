@@ -13,7 +13,7 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 process.env.TZ = 'Etc/UTC';
 
 /**
- * FORMAT : M.M.P-dev+YYYYMMDD-sha
+ * FORMAT : M.M.P-dev+YYYYMMDD.sha.##########
  * EXAMPLE: 5.6.0-dev+20230601.sha.0853c6957c
  */
 class NightlyVersion {
