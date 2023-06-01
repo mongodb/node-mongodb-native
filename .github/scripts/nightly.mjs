@@ -17,6 +17,7 @@ process.env.TZ = 'Etc/UTC';
  * EXAMPLE: 5.6.0-dev+20230601.sha.0853c6957c
  */
 class NightlyVersion {
+  /** @param {string} version */
   constructor(version) {
     /** @type {string} */
     this.version = version;
@@ -27,28 +28,19 @@ class NightlyVersion {
     /** @type {string} */
     this.dateString = dateString;
   }
-  get date() {
-    const date = new Date();
-    date.setFullYear(Number(this.dateString.slice(0, 4)));
-    date.setMonth(Number(this.dateString.slice(4, 6)));
-    date.setDate(Number(this.dateString.slice(6, 8)));
-    return date;
-  }
   static async currentNightlyVersion() {
     try {
       const { stdout } = await exec('npm show --json mongodb@nightly', { encoding: 'utf8' });
       /** @type {{'dist-tags': {nightly?: string} }} */
       const showInfo = JSON.parse(stdout);
-      return new NightlyVersion(showInfo['dist-tags'].nightly) ?? null;
+      return new NightlyVersion(showInfo?.['dist-tags']?.nightly ?? '');
     } catch (error) {
       return null;
     }
   }
   static async currentCommit() {
-    const { stdout: currentCommit } = await exec('git rev-parse --short HEAD', {
-      encoding: 'utf8'
-    });
-    return currentCommit.trim();
+    const { stdout } = await exec('git rev-parse --short HEAD', { encoding: 'utf8' });
+    return stdout.trim();
   }
   static async generateNightlyVersion() {
     console.log('Generating new nightly version');
