@@ -450,9 +450,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     return maybeCallback(async () => {
       try {
-        if (this.connectionLock) return await this.connectionLock;
-
-        this.connectionLock = this._connect();
+        this.connectionLock = this.connectionLock ?? this._connect();
         await this.connectionLock;
         return this;
       } finally {
