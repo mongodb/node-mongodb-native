@@ -14,6 +14,10 @@ const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
 
 const DEFAULT_OS = 'rhel80-large';
+const WINDOWS_OS = 'windows-vsCurrent-large';
+const MACOS_OS = 'macos-1100';
+const UBUNTU_OS = 'ubuntu1804-large';
+const DEBIAN_OS = 'debian11-small';
 
 module.exports = {
   MONGODB_VERSIONS,
@@ -24,5 +28,9 @@ module.exports = {
   TOPOLOGIES,
   AWS_AUTH_VERSIONS,
   TLS_VERSIONS,
-  DEFAULT_OS
+  DEFAULT_OS,
+  WINDOWS_OS,
+  MACOS_OS,
+  UBUNTU_OS,
+  DEBIAN_OS
 };
