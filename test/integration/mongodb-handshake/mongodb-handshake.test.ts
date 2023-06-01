@@ -6,7 +6,8 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoServerError,
-  MongoServerSelectionError
+  MongoServerSelectionError,
+  Monitor
 } from '../../mongodb';
 
 describe('MongoDB Handshake', () => {
@@ -63,10 +64,10 @@ describe('MongoDB Handshake', () => {
     });
   });
 });
-context('when running against a server version >= 4.2', function () {
+context('when running against a server version >= 4.4', function () {
   const HEARTBEAT_FREQUENCY_MS = 1000;
   const MIN_HEARTBEAT_FREQUENCY_MS = 500;
-  const metadata = { requires: { mongodb: '>= 4.2.0', topology: '!load-balanced' } };
+  const metadata = { requires: { mongodb: '>= 4.4', topology: '!load-balanced' } };
   let cachedEnv: NodeJS.ProcessEnv;
   let client: MongoClient;
 
@@ -103,10 +104,8 @@ context('when running against a server version >= 4.2', function () {
         });
 
         expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        expect(server[symbolMap['Symbol(monitor)']]).to.have.property(
-          'heartbeatProtocol',
-          'polling'
-        );
+        const monitor: Monitor = server[symbolMap['Symbol(monitor)']];
+        expect(monitor.heartbeatProtocol).to.equal('polling');
       }
     });
   });
@@ -138,10 +137,8 @@ context('when running against a server version >= 4.2', function () {
         });
 
         expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        expect(server[symbolMap['Symbol(monitor)']]).to.have.property(
-          'heartbeatProtocol',
-          'streaming'
-        );
+        const monitor: Monitor = server[symbolMap['Symbol(monitor)']];
+        expect(monitor.heartbeatProtocol).to.equal('streaming');
       }
     });
   });
