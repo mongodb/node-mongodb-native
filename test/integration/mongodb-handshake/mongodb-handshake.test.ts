@@ -72,14 +72,7 @@ context('when running against a server version >= 4.4', function () {
   let client: MongoClient;
 
   beforeEach(async function () {
-    cachedEnv = process.env;
-    client = this.configuration.newClient(
-      {},
-      {
-        heartbeatFrequencyMS: HEARTBEAT_FREQUENCY_MS,
-        minHeartbeatFrequencyMS: MIN_HEARTBEAT_FREQUENCY_MS
-      }
-    );
+    cachedEnv = { ...process.env };
   });
 
   afterEach(async function () {
@@ -91,6 +84,13 @@ context('when running against a server version >= 4.4', function () {
     beforeEach(function () {
       process.env.AWS_EXECUTION_ENV = 'AWS_Lambda_test';
       process.env.AWS_REGION = 'test_region';
+      client = this.configuration.newClient(
+        {},
+        {
+          heartbeatFrequencyMS: HEARTBEAT_FREQUENCY_MS,
+          minHeartbeatFrequencyMS: MIN_HEARTBEAT_FREQUENCY_MS
+        }
+      );
     });
 
     it('uses the polling protocol', metadata, async function () {
@@ -124,6 +124,13 @@ context('when running against a server version >= 4.4', function () {
       delete process.env.FUNCTION_REGION;
       delete process.env.FUNCTION_TIMEOUT_SEC;
       delete process.env.VERCEL_REGION;
+      client = this.configuration.newClient(
+        {},
+        {
+          heartbeatFrequencyMS: HEARTBEAT_FREQUENCY_MS,
+          minHeartbeatFrequencyMS: MIN_HEARTBEAT_FREQUENCY_MS
+        }
+      );
     });
 
     it('uses the streaming protocol', metadata, async function () {

@@ -372,8 +372,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       }
     };
 
-    // eslint-disable-next-line eqeqeq
-    this.isInFAASEnv = getFAASEnv()?.get('name') != undefined;
+    this.isInFAASEnv = !!getFAASEnv()?.get('name');
   }
 
   /** @see MongoOptions */
