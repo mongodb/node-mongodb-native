@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
+import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
@@ -76,7 +77,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     Pick<MonitorOptions, 'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS'>
   >;
   connectOptions: ConnectionOptions;
+  /** @internal */
   isInFAASEnv: boolean;
+  /** @internal */
+  heartbeatProtocol?: 'polling' | 'streaming';
   [kServer]: Server;
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
@@ -107,8 +111,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
     });
 
+    const faasEnv = getFAASEnv();
     // eslint-disable-next-line eqeqeq
-    this.isInFAASEnv = server.topology.clientMetadata?.env?.name != undefined;
+    this.isInFAASEnv = faasEnv?.get('name') != undefined;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -251,12 +256,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     const options = isAwaitable
       ? {
-          socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
-          exhaustAllowed: true
-        }
+        socketTimeoutMS: connectTimeoutMS ? connectTimeoutMS + maxAwaitTimeMS : 0,
+        exhaustAllowed: true
+      }
       : { socketTimeoutMS: connectTimeoutMS };
 
-    if (isAwaitable && monitor[kRTTPinger] == null) {
+    if (isAwaitable && !monitor.isInFAASEnv && monitor[kRTTPinger] == null) {
       monitor[kRTTPinger] = new RTTPinger(
         monitor[kCancellationToken],
         Object.assign(
@@ -284,10 +289,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, duration, hello)
       );
+      monitor.heartbeatProtocol = isAwaitable && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
-      if (isAwaitable && hello.topologyVersion && !monitor.isInFAASEnv) {
+      if (monitor.heartbeatProtocol === 'streaming') {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address)
@@ -314,6 +320,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     if (conn) {
+      // TODO: Check if this is correct
       // Tell the connection that we are using the streaming protocol so that the
       // connection's message stream will only read the last hello on the buffer.
       conn.isMonitoringConnection = true;
@@ -357,8 +364,9 @@ function monitorServer(monitor: Monitor) {
         }
       }
 
+      monitor.heartbeatProtocol = hello && hello.topologyVersion && !monitor.isInFAASEnv ? 'streaming' : 'polling';
       // if the check indicates streaming is supported, immediately reschedule monitoring
-      if (hello && hello.topologyVersion && !monitor.isInFAASEnv) {
+      if (monitor.heartbeatProtocol === 'streaming') {
         setTimeout(() => {
           if (!isInCloseState(monitor)) {
             monitor[kMonitorId]?.wake();
