@@ -12,7 +12,7 @@ import {
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
-import { ClientMetadata, getFAASEnv } from './cmap/handshake/client_metadata';
+import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -334,8 +334,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * @internal
    */
   [kOptions]: MongoOptions;
-  /** @internal */
-  isInFAASEnv: boolean;
 
   constructor(url: string, options?: MongoClientOptions) {
     super();
@@ -371,8 +369,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return true;
       }
     };
-
-    this.isInFAASEnv = !!getFAASEnv()?.get('name');
   }
 
   /** @see MongoOptions */

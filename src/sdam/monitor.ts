@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, ConnectionOptions } from '../cmap/connection';
+import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
@@ -110,7 +111,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
     });
 
-    this.isInFAASEnv = server.topology.client.isInFAASEnv;
+    this.isInFAASEnv = !!getFAASEnv()?.get('name');
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
