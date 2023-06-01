@@ -13,15 +13,15 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 process.env.TZ = 'Etc/UTC';
 
 /**
- * FORMAT : M.M.P-dev+sha-YYYYMMDD
- * EXAMPLE: 5.6.0-dev+0853c6957c-20230601
+ * FORMAT : M.M.P-dev+YYYYMMDD-sha
+ * EXAMPLE: 5.6.0-dev+20230601-0853c6957c
  */
 class NightlyVersion {
   constructor(version) {
     /** @type {string} */
     this.version = version;
     const [, meta] = this.version.split('+');
-    const [commit, dateString] = meta.split('-');
+    const [dateString, commit] = meta.split('-');
     /** @type {string} */
     this.commit = commit;
     /** @type {string} */
@@ -62,7 +62,7 @@ class NightlyVersion {
     const pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
 
     console.log('package.json version is:', pkg.version);
-    pkg.version = `${pkg.version}-dev+${currentCommit}-${yyyymmdd}`;
+    pkg.version = `${pkg.version}-dev+${yyyymmdd}-${currentCommit}`;
     console.log('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
