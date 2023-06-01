@@ -1,0 +1,29 @@
+on:
+  schedule:
+    # https://crontab.guru/#0_12_*_*_1-5
+    # At 12:00 on every day-of-week from Monday through Friday.
+    - cron: '0 12 * * 1-5'
+
+name: release-nightly
+
+jobs:
+  release-nightly:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm
+      - run: npm clean-install
+      - run: npm run build:nightly
+        continue-on-error: true
+      - if: ${{ success() }}
+        run: npm publish --provenance --dist-tag=nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
