@@ -12,6 +12,7 @@ import {
   List,
   matchesParentDomain,
   maybeCallback,
+  MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoRuntimeError,
   ObjectId,
@@ -772,6 +773,21 @@ describe('driver utils', function () {
         expect(withCollectionNamespace).to.have.property('db', 'test');
         expect(withCollectionNamespace).to.have.property('collection', 'pets');
       });
+
+      it('returns a MongoDBCollectionNamespaceObject', () => {
+        expect(dbNamespace.withCollection('pets')).to.be.instanceOf(MongoDBCollectionNamespace);
+      });
+    });
+  });
+
+  describe('MongoDBCollectionNamespace', () => {
+    it('is a subclass of MongoDBNamespace', () => {
+      expect(new MongoDBCollectionNamespace('db', 'collection')).to.be.instanceOf(MongoDBNamespace);
+    });
+
+    it('does not enforce the collection property at runtime', () => {
+      // @ts-expect-error Intentionally calling constructor incorrectly.
+      expect(new MongoDBCollectionNamespace('db')).to.have.property('collection', undefined);
     });
   });
 

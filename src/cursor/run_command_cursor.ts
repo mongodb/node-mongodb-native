@@ -96,7 +96,7 @@ export class RunCommandCursor extends AbstractCursor {
 
   /** @internal */
   constructor(db: Db, command: Document, options: RunCursorCommandOptions = {}) {
-    super(db.s.client, ns(db.namespace), options);
+    super(db.client, ns(db.namespace), options);
     this.db = db;
     this.command = Object.freeze({ ...command });
   }

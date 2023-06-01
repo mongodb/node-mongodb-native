@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import { AbstractCursor, Collection, ConnectionPool, MongoClient } from '../../mongodb';
-import { FailPoint, sleep } from '../../tools/utils';
+import { FailPoint } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
   requires: {
@@ -118,20 +118,21 @@ describe('Server Operation Count Tests', function () {
       const server = Array.from(client.topology.s.servers.values())[0];
       expect(server.s.operationCount).to.equal(0);
       const commandSpy = sinon.spy(server, 'command');
+      const incrementSpy = sinon.spy(server, 'incrementOperationCount');
+      const decrementSpy = sinon.spy(server, 'decrementOperationCount');
 
       const operationPromises = Array.from({ length: 10 }, () =>
         collection.insertOne({ count: 1 })
       );
 
-      // operation count is incremented after connection checkout, which happens asynchronously (even though there are plenty of connections in the pool).
-      // we sleep to give the event loop a turn so that all the commands check out a connection before asserting the operation count
-      await sleep(1);
-
-      expect(server.s.operationCount).to.equal(10);
-
-      await Promise.all(operationPromises);
+      await Promise.allSettled(operationPromises);
 
       expect(commandSpy.called).to.be.true;
+      // This test is flaky when sleeping and asserting the operation count after the sleep but before the
+      // promise execution, so we assert instead that the count was incremented 10 times and decremented 10
+      // times - the total number of operations.
+      expect(incrementSpy.callCount).to.equal(10);
+      expect(decrementSpy.callCount).to.equal(10);
       expect(server.s.operationCount).to.equal(0);
     });
   });

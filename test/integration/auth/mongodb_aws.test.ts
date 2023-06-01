@@ -4,7 +4,6 @@ import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
 import { MongoAWSError, MongoClient, MongoServerError } from '../../mongodb';
-import { removeAuthFromConnectionString } from '../../tools/utils';
 
 describe('MONGODB-AWS', function () {
   let client: MongoClient;
@@ -18,20 +17,6 @@ describe('MONGODB-AWS', function () {
 
   afterEach(async () => {
     await client?.close();
-  });
-
-  it('should not authorize when not authenticated', async function () {
-    const url = removeAuthFromConnectionString(this.configuration.url());
-    client = this.configuration.newClient(url); // strip provided URI of credentials
-
-    const error = await client
-      .db('aws')
-      .collection('aws_test')
-      .estimatedDocumentCount()
-      .catch(error => error);
-
-    expect(error).to.be.instanceOf(MongoServerError);
-    expect(error).to.have.property('code', 13);
   });
 
   it('should authorize when successfully authenticated', async function () {

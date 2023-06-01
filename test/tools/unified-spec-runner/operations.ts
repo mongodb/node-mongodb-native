@@ -35,7 +35,7 @@ interface OperationFunctionParams {
 
 type RunOperationFn = (
   p: OperationFunctionParams
-) => Promise<Document | boolean | number | null | void>;
+) => Promise<Document | boolean | number | null | void | string>;
 export const operations = new Map<string, RunOperationFn>();
 
 operations.set('createEntities', async ({ entities, operation, testConfig }) => {
@@ -748,9 +748,39 @@ operations.set('removeKeyAltName', async ({ entities, operation }) => {
 
 operations.set('getKeyByAltName', async ({ entities, operation }) => {
   const clientEncryption = entities.getEntity('clientEncryption', operation.object);
-  const { keyAltName } = operation.arguments!;
+  const { keyAltName } = operation.arguments ?? {};
 
   return clientEncryption.getKeyByAltName(keyAltName);
+});
+
+operations.set('listSearchIndexes', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { name, aggregationOptions } = operation.arguments ?? {};
+  return collection.listSearchIndexes(name, aggregationOptions).toArray();
+});
+
+operations.set('dropSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { name } = operation.arguments ?? {};
+  return collection.dropSearchIndex(name);
+});
+
+operations.set('updateSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { name, definition } = operation.arguments ?? {};
+  return collection.updateSearchIndex(name, definition);
+});
+
+operations.set('createSearchIndex', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { model } = operation.arguments ?? {};
+  return collection.createSearchIndex(model);
+});
+
+operations.set('createSearchIndexes', async ({ entities, operation }) => {
+  const collection: Collection<any> = entities.getEntity('collection', operation.object);
+  const { models } = operation.arguments ?? {};
+  return collection.createSearchIndexes(models);
 });
 
 export async function executeOperationAndCheck(
