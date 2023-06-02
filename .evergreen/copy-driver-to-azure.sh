@@ -6,7 +6,7 @@ if [ -z ${AZUREKMS_RESOURCEGROUP+omitted} ]; then echo "AZUREKMS_RESOURCEGROUP i
 if [ -z ${AZUREKMS_VMNAME+omitted} ]; then echo "AZUREKMS_VMNAME is unset" && exit 1; fi
 if [ -z ${AZUREKMS_PRIVATEKEYPATH+omitted} ]; then echo "AZUREKMS_PRIVATEKEYPATH is unset" && exit 1; fi
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 echo "compressing node driver source ... begin"
 tar -czf node-driver-source.tgz src

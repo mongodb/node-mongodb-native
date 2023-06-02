@@ -8,7 +8,7 @@ if [ -z ${GCPKMS_INSTANCENAME+omitted} ]; then echo "GCPKMS_INSTANCENAME is unse
 
 set -o errexit
 
-source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 export GCPKMS_SRC=node-driver-source.tgz
 export GCPKMS_DST=$GCPKMS_INSTANCENAME:
