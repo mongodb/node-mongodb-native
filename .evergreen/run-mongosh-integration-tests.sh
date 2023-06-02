@@ -19,12 +19,12 @@ MONGOSH_RUN_ONLY_IN_PACKAGE=${MONGOSH_RUN_ONLY_IN_PACKAGE:-""}
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 npm cache clear --force || true
-npm install -g npm@8.x || true
+npm install --global npm@8.x || true
 
 npm pack | tee npm-pack.log
 
 npm cache clear --force || true
-npm install -g npm@8.x || true
+npm install --global npm@8.x || true
 
 TARBALL_FILENAME="$(tail -n1 npm-pack.log)"
 
