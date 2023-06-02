@@ -1077,7 +1077,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 18
+          NODE_LTS_VERSION: 20
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
