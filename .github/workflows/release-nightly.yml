@@ -24,6 +24,6 @@ jobs:
       - run: npm run build:nightly
         continue-on-error: true
       - if: ${{ success() }}
-        run: npm publish --provenance --tag=nightly
+        run: npm publish --dry-run --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
