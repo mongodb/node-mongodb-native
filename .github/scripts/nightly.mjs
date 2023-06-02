@@ -29,14 +29,11 @@ class NightlyVersion {
     this.dateString = dateString;
   }
   static async currentNightlyVersion() {
-    try {
-      const { stdout } = await exec('npm show --json mongodb@nightly', { encoding: 'utf8' });
-      /** @type {{'dist-tags': {nightly?: string} }} */
-      const showInfo = JSON.parse(stdout);
-      return new NightlyVersion(showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev+YYYYMMDD.sha.##########');
-    } catch (error) {
-      return null;
-    }
+    const { stdout } = await exec('npm show --json mongodb', { encoding: 'utf8' });
+    /** @type {{'dist-tags': {nightly?: string} }} */
+    const showInfo = JSON.parse(stdout);
+    const version = showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev+YYYYMMDD.sha.##########';
+    return new NightlyVersion(version);
   }
   static async currentCommit() {
     const { stdout } = await exec('git rev-parse --short HEAD', { encoding: 'utf8' });
@@ -66,7 +63,7 @@ console.log('current published nightly:', currentPublishedNightly?.version);
 const currentCommit = await NightlyVersion.currentCommit();
 console.log('current commit sha:', currentCommit);
 
-if (currentPublishedNightly?.commit === currentCommit) {
+if (currentPublishedNightly.commit === currentCommit) {
   console.log('Published nightly is up to date');
   process.exit(1);
 }
