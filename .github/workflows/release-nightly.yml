@@ -1,9 +1,9 @@
 on:
   schedule:
     # Timezone is UTC
-    # https://crontab.guru/#0_12_*_*_1-5
-    # At 12:00 on every day-of-week from Monday through Friday.
-    - cron: '0 12 * * 1-5'
+    # https://crontab.guru/#0_0_*_*_*
+    # At 00:00 every day.
+    - cron: '0 0 * * *'
 
 name: release-nightly
 
