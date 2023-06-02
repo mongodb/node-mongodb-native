@@ -28,10 +28,15 @@ export let Kerberos: typeof import('kerberos') | { kModuleError: MongoMissingDep
     )
   );
 
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  Kerberos = require('kerberos');
-} catch {} // eslint-disable-line
+export function getKerberos(): typeof Kerberos | { kModuleError: MongoMissingDependencyError } {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    Kerberos = require('kerberos');
+    return Kerberos;
+  } catch {
+    return Kerberos;
+  }
+}
 
 export interface KerberosClient {
   step(challenge: string): Promise<string>;
@@ -62,9 +67,14 @@ export let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError
     )
   );
 
-try {
-  ZStandard = require('@mongodb-js/zstd');
-} catch {} // eslint-disable-line
+export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissingDependencyError } {
+  try {
+    ZStandard = require('@mongodb-js/zstd');
+    return ZStandard;
+  } catch {
+    return ZStandard;
+  }
+}
 
 type CredentialProvider = {
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;

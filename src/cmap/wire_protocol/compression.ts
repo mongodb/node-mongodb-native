@@ -2,7 +2,7 @@ import { promisify } from 'util';
 import * as zlib from 'zlib';
 
 import { LEGACY_HELLO_COMMAND } from '../../constants';
-import { Snappy, ZStandard } from '../../deps';
+import { getZstdLibrary, Snappy, type ZStandard } from '../../deps';
 import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 
 /** @public */
@@ -37,6 +37,8 @@ const ZSTD_COMPRESSION_LEVEL = 3;
 const zlibInflate = promisify(zlib.inflate.bind(zlib));
 const zlibDeflate = promisify(zlib.deflate.bind(zlib));
 
+let zstd: typeof ZStandard;
+
 // Facilitate compressing a message using an agreed compressor
 export async function compress(
   options: { zlibCompressionLevel: number; agreedCompressor: CompressorName },
@@ -44,28 +46,30 @@ export async function compress(
 ): Promise<Buffer> {
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (options.agreedCompressor) {
-    case 'snappy':
+    case 'snappy': {
       if ('kModuleError' in Snappy) {
         throw Snappy['kModuleError'];
       }
       return Snappy.compress(dataToBeCompressed);
-
-    case 'zstd':
-      if ('kModuleError' in ZStandard) {
-        throw ZStandard['kModuleError'];
+    }
+    case 'zstd': {
+      loadZstd();
+      if ('kModuleError' in zstd) {
+        throw zstd['kModuleError'];
       }
-      return ZStandard.compress(dataToBeCompressed, ZSTD_COMPRESSION_LEVEL);
-
-    case 'zlib':
+      return zstd.compress(dataToBeCompressed, ZSTD_COMPRESSION_LEVEL);
+    }
+    case 'zlib': {
       if (options.zlibCompressionLevel) {
         zlibOptions.level = options.zlibCompressionLevel;
       }
       return zlibDeflate(dataToBeCompressed, zlibOptions);
-
-    default:
+    }
+    default: {
       throw new MongoInvalidArgumentError(
         `Unknown compressor ${options.agreedCompressor} failed to compress`
       );
+    }
   }
 }
 
@@ -83,22 +87,33 @@ export async function decompress(compressorID: number, compressedData: Buffer): 
   }
 
   switch (compressorID) {
-    case Compressor.snappy:
+    case Compressor.snappy: {
       if ('kModuleError' in Snappy) {
         throw Snappy['kModuleError'];
       }
       return Snappy.uncompress(compressedData, { asBuffer: true });
-
-    case Compressor.zstd:
-      if ('kModuleError' in ZStandard) {
-        throw ZStandard['kModuleError'];
+    }
+    case Compressor.zstd: {
+      loadZstd();
+      if ('kModuleError' in zstd) {
+        throw zstd['kModuleError'];
       }
-      return ZStandard.decompress(compressedData);
-
-    case Compressor.zlib:
+      return zstd.decompress(compressedData);
+    }
+    case Compressor.zlib: {
       return zlibInflate(compressedData);
-
-    default:
+    }
+    default: {
       return compressedData;
+    }
+  }
+}
+
+/**
+ * Load ZStandard if it is not already set.
+ */
+function loadZstd() {
+  if (!zstd) {
+    zstd = getZstdLibrary();
   }
 }
