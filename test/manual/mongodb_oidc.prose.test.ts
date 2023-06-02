@@ -5,17 +5,17 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
-  Collection,
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent,
-  IdPServerInfo,
+  type Collection,
+  type CommandFailedEvent,
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
+  type IdPServerInfo,
   MongoClient,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoServerError,
   OIDC_WORKFLOWS,
-  OIDCCallbackContext
+  type OIDCCallbackContext
 } from '../mongodb';
 import { sleep } from '../tools/utils';
 

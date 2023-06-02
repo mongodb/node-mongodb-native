@@ -2,7 +2,7 @@ import { BSONError } from 'bson';
 import { expect } from 'chai';
 
 import * as BSON from '../mongodb';
-import { BinMsg, MessageHeader } from '../mongodb';
+import { BinMsg, type MessageHeader } from '../mongodb';
 
 const msgHeader: MessageHeader = {
   length: 735,

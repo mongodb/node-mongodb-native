@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Db, DbOptions, MongoClient, ReadPreference } from '../mongodb';
+import { Db, type DbOptions, MongoClient, ReadPreference } from '../mongodb';
 
 describe('class Db', function () {
   describe('secondaryOk', function () {

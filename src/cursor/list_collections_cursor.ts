@@ -1,10 +1,10 @@
 import type { Document } from '../bson';
 import type { Db } from '../db';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import {
-  CollectionInfo,
+  type CollectionInfo,
   ListCollectionsOperation,
-  ListCollectionsOptions
+  type ListCollectionsOptions
 } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';

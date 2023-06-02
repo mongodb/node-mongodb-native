@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 
-import { BSONSerializeOptions, Document, resolveBSONOptions } from '../bson';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';

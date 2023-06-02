@@ -16,7 +16,7 @@ import {
   CONNECTION_READY
 } from '../constants';
 import {
-  AnyError,
+  type AnyError,
   MONGODB_ERROR_CODES,
   MongoError,
   MongoInvalidArgumentError,
@@ -27,9 +27,9 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { Callback, eachAsync, List, makeCounter } from '../utils';
+import { type Callback, eachAsync, List, makeCounter } from '../utils';
 import { AUTH_PROVIDERS, connect } from './connect';
-import { Connection, ConnectionEvents, ConnectionOptions } from './connection';
+import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,

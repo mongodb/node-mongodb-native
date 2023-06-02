@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { BSON, Collection, Db, MongoServerError } from '../../mongodb';
+import { BSON, Collection, type Db, MongoServerError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const metadata: MongoDBMetadataUI = {

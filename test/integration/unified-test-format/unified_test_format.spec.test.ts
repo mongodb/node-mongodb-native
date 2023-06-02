@@ -1,6 +1,6 @@
 import { loadSpecTests } from '../../spec/index';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
-import { TestFilter } from '../../tools/unified-spec-runner/schema';
+import { type TestFilter } from '../../tools/unified-spec-runner/schema';
 
 const filter: TestFilter = ({ description }) => {
   if (description === 'unpin after transient error within a transaction and commit') {

@@ -2,9 +2,9 @@ import { expect } from 'chai';
 import { on, once } from 'events';
 
 import {
-  Collection,
-  CommandStartedEvent,
-  Db,
+  type Collection,
+  type CommandStartedEvent,
+  type Db,
   LEGACY_HELLO_COMMAND,
   MongoClient
 } from '../../mongodb';

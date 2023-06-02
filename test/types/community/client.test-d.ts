@@ -1,14 +1,14 @@
 import { expectType } from 'tsd';
 
 import {
-  GridFSBucket,
+  type GridFSBucket,
   MongoClient,
-  MongoClientOptions,
+  type MongoClientOptions,
   MongoNetworkError,
   MongoParseError,
   ReadPreference,
-  ReadPreferenceMode,
-  W
+  type ReadPreferenceMode,
+  type W
 } from '../../mongodb';
 
 // TODO(NODE-3348): Improve the tests to expectType assertions

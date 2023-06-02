@@ -1,17 +1,17 @@
 import { promisify } from 'util';
 
-import { Binary, Document, Long, Timestamp } from './bson';
+import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
 import { isSharded } from './cmap/wire_protocol/shared';
 import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
-  AnyError,
+  type AnyError,
   MongoAPIError,
   MongoCompatibilityError,
   MONGODB_ERROR_CODES,
-  MongoDriverError,
+  type MongoDriverError,
   MongoError,
   MongoErrorLabel,
   MongoExpiredSessionError,
@@ -27,12 +27,17 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import { ReadConcernLevel } from './read_concern';
 import { ReadPreference } from './read_preference';
-import { _advanceClusterTime, ClusterTime, TopologyType } from './sdam/common';
-import { isTransactionCommand, Transaction, TransactionOptions, TxnState } from './transactions';
+import { _advanceClusterTime, type ClusterTime, TopologyType } from './sdam/common';
+import {
+  isTransactionCommand,
+  Transaction,
+  type TransactionOptions,
+  TxnState
+} from './transactions';
 import {
   ByteUtils,
   calculateDurationInMs,
-  Callback,
+  type Callback,
   commandSupportsReadConcern,
   isPromiseLike,
   List,

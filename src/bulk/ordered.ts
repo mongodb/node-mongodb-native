@@ -4,7 +4,7 @@ import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import type { DeleteStatement } from '../operations/delete';
 import type { UpdateStatement } from '../operations/update';
-import { Batch, BatchType, BulkOperationBase, BulkWriteOptions } from './common';
+import { Batch, BatchType, BulkOperationBase, type BulkWriteOptions } from './common';
 
 /** @public */
 export class OrderedBulkOperation extends BulkOperationBase {

@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 
 import { EntitiesMap } from '../../tools/unified-spec-runner/entities';
 import { compareLogs, resultCheck } from '../../tools/unified-spec-runner/match';
-import { ExpectedLogMessage } from '../../tools/unified-spec-runner/schema';
+import { type ExpectedLogMessage } from '../../tools/unified-spec-runner/schema';
 
 describe('Unified Spec Runner', function () {
   describe('Matching', function () {

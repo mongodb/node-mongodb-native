@@ -1,7 +1,7 @@
 import { Admin } from './admin';
-import { BSONSerializeOptions, Document, resolveBSONOptions } from './bson';
-import { ChangeStream, ChangeStreamDocument, ChangeStreamOptions } from './change_stream';
-import { Collection, CollectionOptions } from './collection';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
+import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
+import { Collection, type CollectionOptions } from './collection';
 import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
@@ -9,39 +9,42 @@ import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_com
 import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
-import { AddUserOperation, AddUserOptions } from './operations/add_user';
+import { AddUserOperation, type AddUserOptions } from './operations/add_user';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
 import type { IndexInformationOptions } from './operations/common_functions';
-import { CreateCollectionOperation, CreateCollectionOptions } from './operations/create_collection';
+import {
+  CreateCollectionOperation,
+  type CreateCollectionOptions
+} from './operations/create_collection';
 import {
   DropCollectionOperation,
-  DropCollectionOptions,
+  type DropCollectionOptions,
   DropDatabaseOperation,
-  DropDatabaseOptions
+  type DropDatabaseOptions
 } from './operations/drop';
 import { executeOperation } from './operations/execute_operation';
 import {
-  CreateIndexesOptions,
+  type CreateIndexesOptions,
   CreateIndexOperation,
   IndexInformationOperation,
-  IndexSpecification
+  type IndexSpecification
 } from './operations/indexes';
 import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
-import { ProfilingLevelOperation, ProfilingLevelOptions } from './operations/profiling_level';
-import { RemoveUserOperation, RemoveUserOptions } from './operations/remove_user';
-import { RenameOperation, RenameOptions } from './operations/rename';
-import { RunCommandOperation, RunCommandOptions } from './operations/run_command';
+import { ProfilingLevelOperation, type ProfilingLevelOptions } from './operations/profiling_level';
+import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
+import { RenameOperation, type RenameOptions } from './operations/rename';
+import { RunCommandOperation, type RunCommandOptions } from './operations/run_command';
 import {
-  ProfilingLevel,
+  type ProfilingLevel,
   SetProfilingLevelOperation,
-  SetProfilingLevelOptions
+  type SetProfilingLevelOptions
 } from './operations/set_profiling_level';
-import { DbStatsOperation, DbStatsOptions } from './operations/stats';
+import { DbStatsOperation, type DbStatsOptions } from './operations/stats';
 import { ReadConcern } from './read_concern';
-import { ReadPreference, ReadPreferenceLike } from './read_preference';
+import { ReadPreference, type ReadPreferenceLike } from './read_preference';
 import { DEFAULT_PK_FACTORY, filterOptions, MongoDBNamespace, resolveOptions } from './utils';
-import { WriteConcern, WriteConcernOptions } from './write_concern';
+import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
 // Allowed parameters
 const DB_OPTIONS_ALLOW_LIST = [

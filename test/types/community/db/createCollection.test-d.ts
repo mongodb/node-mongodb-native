@@ -1,6 +1,11 @@
 import { expectType } from 'tsd';
 
-import { Collection, CreateCollectionOptions, MongoClient, ObjectId } from '../../../mongodb';
+import {
+  type Collection,
+  type CreateCollectionOptions,
+  MongoClient,
+  type ObjectId
+} from '../../../mongodb';
 
 const client = new MongoClient('');
 const db = client.db('test');

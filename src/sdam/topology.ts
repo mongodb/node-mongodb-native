@@ -24,7 +24,7 @@ import {
 } from '../constants';
 import {
   MongoCompatibilityError,
-  MongoDriverError,
+  type MongoDriverError,
   MongoError,
   MongoErrorLabel,
   MongoRuntimeError,
@@ -33,12 +33,12 @@ import {
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
-  Callback,
-  EventEmitterWithState,
+  type Callback,
+  type EventEmitterWithState,
   HostAddress,
   List,
   makeStateMachine,
@@ -47,14 +47,14 @@ import {
 } from '../utils';
 import {
   _advanceClusterTime,
-  ClusterTime,
+  type ClusterTime,
   drainTimerQueue,
   ServerType,
   STATE_CLOSED,
   STATE_CLOSING,
   STATE_CONNECTED,
   STATE_CONNECTING,
-  TimerQueue,
+  type TimerQueue,
   TopologyType
 } from './common';
 import {
@@ -65,10 +65,10 @@ import {
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
 } from './events';
-import { Server, ServerEvents, ServerOptions } from './server';
+import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
-import { readPreferenceServerSelector, ServerSelector } from './server_selection';
-import { SrvPoller, SrvPollingEvent } from './srv_polling';
+import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
+import { SrvPoller, type SrvPollingEvent } from './srv_polling';
 import { TopologyDescription } from './topology_description';
 
 // Global state

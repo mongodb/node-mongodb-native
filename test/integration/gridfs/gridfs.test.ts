@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { once } from 'events';
 
 import {
-  CommandStartedEvent,
+  type CommandStartedEvent,
   type Db,
   GridFSBucket,
   type MongoClient,

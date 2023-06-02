@@ -3,7 +3,7 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AbstractOperation, OperationOptions } from './operation';
+import { AbstractOperation, type OperationOptions } from './operation';
 
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;

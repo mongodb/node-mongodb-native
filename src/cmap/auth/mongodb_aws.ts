@@ -13,7 +13,7 @@ import {
   MongoRuntimeError
 } from '../../error';
 import { ByteUtils, maxWireVersion, ns } from '../../utils';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 

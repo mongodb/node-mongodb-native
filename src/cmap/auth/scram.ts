@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 
-import { Binary, Document } from '../../bson';
+import { Binary, type Document } from '../../bson';
 import { saslprep } from '../../deps';
 import {
   MongoInvalidArgumentError,
@@ -10,7 +10,7 @@ import {
 } from '../../error';
 import { emitWarning, ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 

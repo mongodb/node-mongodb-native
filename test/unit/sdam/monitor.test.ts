@@ -8,8 +8,8 @@ import {
   Monitor,
   MonitorInterval,
   ServerDescription,
-  ServerHeartbeatFailedEvent,
-  ServerHeartbeatStartedEvent,
+  type ServerHeartbeatFailedEvent,
+  type ServerHeartbeatStartedEvent,
   ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

@@ -8,7 +8,7 @@ import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 

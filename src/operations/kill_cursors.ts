@@ -3,7 +3,7 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
-import { AbstractOperation, Aspect, defineAspects, OperationOptions } from './operation';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /**
  * https://www.mongodb.com/docs/manual/reference/command/killCursors/

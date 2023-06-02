@@ -3,7 +3,7 @@ import { Collection } from '../collection';
 import { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, checkCollectionName } from '../utils';
+import { type Callback, checkCollectionName } from '../utils';
 import type { CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { RunAdminCommandOperation } from './run_command';

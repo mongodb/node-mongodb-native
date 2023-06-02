@@ -1,10 +1,10 @@
 import * as dns from 'dns';
 
-import { Kerberos, KerberosClient } from '../../deps';
+import { Kerberos, type KerberosClient } from '../../deps';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
 import type { Connection } from '../connection';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 
 /** @public */
 export const GSSAPICanonicalizationValue = Object.freeze({
