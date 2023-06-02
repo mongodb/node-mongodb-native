@@ -82,9 +82,9 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
   const maxWireVersion = Number(hello.maxWireVersion);
   const minWireVersion = Number(hello.minWireVersion);
   const serverVersionHighEnough =
-    hello && !Number.isNaN(maxWireVersion) && hello.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
+    !Number.isNaN(maxWireVersion) && maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
-    hello && !Number.isNaN(minWireVersion) && hello.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
+    !Number.isNaN(minWireVersion) && minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
     if (serverVersionLowEnough) {
