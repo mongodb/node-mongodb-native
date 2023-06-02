@@ -43,8 +43,8 @@ class NightlyVersion {
     console.log('Generating new nightly version');
     const currentCommit = await NightlyVersion.currentCommit();
     const today = new Date();
-    const year = `${today.getFullYear()}`;
-    const month = `${today.getMonth()}`.padStart(2, '0');
+    const year = `${today.getUTCFullYear()}`;
+    const month = `${today.getUTCMonth() + 1}`.padStart(2, '0');
     const day = `${today.getUTCDate()}`.padStart(2, '0');
     const yyyymmdd = `${year}${month}${day}`;
 
