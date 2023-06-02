@@ -33,7 +33,7 @@ class NightlyVersion {
       const { stdout } = await exec('npm show --json mongodb@nightly', { encoding: 'utf8' });
       /** @type {{'dist-tags': {nightly?: string} }} */
       const showInfo = JSON.parse(stdout);
-      return new NightlyVersion(showInfo?.['dist-tags']?.nightly ?? '');
+      return new NightlyVersion(showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev+YYYYMMDD.sha.##########');
     } catch (error) {
       return null;
     }
