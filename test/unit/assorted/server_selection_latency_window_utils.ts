@@ -6,11 +6,11 @@ import { promisify } from 'util';
 
 import {
   ReadPreference,
-  Server,
-  ServerType,
+  type Server,
+  type ServerType,
   STATE_CONNECTED,
-  Topology,
-  TopologyType
+  type Topology,
+  type TopologyType
 } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 import { serverDescriptionFromDefinition } from './server_selection_spec_helper';

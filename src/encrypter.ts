@@ -3,8 +3,8 @@
 import { MONGO_CLIENT_EVENTS } from './constants';
 import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
-import { MongoClient, MongoClientOptions } from './mongo_client';
-import { Callback, getMongoDBClientEncryption } from './utils';
+import { MongoClient, type MongoClientOptions } from './mongo_client';
+import { type Callback, getMongoDBClientEncryption } from './utils';
 
 let AutoEncrypterClass: { new (...args: ConstructorParameters<AutoEncrypter>): AutoEncrypter };
 

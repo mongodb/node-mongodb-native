@@ -5,7 +5,7 @@ import { inspect } from 'util';
 
 import {
   Binary,
-  BSONTypeAlias,
+  type BSONTypeAlias,
   CommandFailedEvent,
   CommandStartedEvent,
   CommandSucceededEvent,
@@ -20,23 +20,23 @@ import {
   ConnectionPoolCreatedEvent,
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent,
-  Document,
+  type Document,
   Long,
   MongoError,
   MongoServerError,
   ObjectId,
-  OneOrMore,
+  type OneOrMore,
   ServerDescriptionChangedEvent
 } from '../../mongodb';
 import { ejson } from '../utils';
-import { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
+import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
 import {
-  ExpectedCmapEvent,
-  ExpectedCommandEvent,
-  ExpectedError,
-  ExpectedEventsForClient,
-  ExpectedLogMessage,
-  ExpectedSdamEvent
+  type ExpectedCmapEvent,
+  type ExpectedCommandEvent,
+  type ExpectedError,
+  type ExpectedEventsForClient,
+  type ExpectedLogMessage,
+  type ExpectedSdamEvent
 } from './schema';
 
 export interface ExistsOperator {

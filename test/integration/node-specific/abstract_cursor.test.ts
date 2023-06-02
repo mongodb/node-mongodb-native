@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { inspect } from 'util';
 
-import { Collection, MongoAPIError, MongoClient } from '../../mongodb';
+import { type Collection, MongoAPIError, type MongoClient } from '../../mongodb';
 
 const falseyValues = [0, 0n, NaN, '', false, undefined];
 

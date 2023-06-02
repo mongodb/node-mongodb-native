@@ -4,24 +4,17 @@ import type {
   AddToSetOperators,
   ArrayOperator,
   Collection,
+  Document,
   MatchKeysAndValues,
   PullAllOperator,
   PullOperator,
   PushOperator,
   SetFields,
   StrictUpdateFilter,
+  Timestamp,
   UpdateFilter
 } from '../../../mongodb';
-import {
-  Decimal128,
-  Document,
-  Double,
-  Int32,
-  Long,
-  MongoClient,
-  ObjectId,
-  Timestamp
-} from '../../../mongodb';
+import { Decimal128, Double, Int32, Long, MongoClient, ObjectId } from '../../../mongodb';
 
 // MatchKeysAndValues - for basic mapping keys to their values, restricts that key types must be the same but optional, and permit dot array notation
 expectAssignable<MatchKeysAndValues<{ a: number; b: string; c: { d: boolean } }>>({

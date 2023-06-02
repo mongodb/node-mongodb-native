@@ -1,9 +1,9 @@
 import type { Document } from '../bson';
-import { CommandOptions, Connection, DestroyOptions } from '../cmap/connection';
+import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
 import {
   ConnectionPool,
-  ConnectionPoolEvents,
-  ConnectionPoolOptions
+  type ConnectionPoolEvents,
+  type ConnectionPoolOptions
 } from '../cmap/connection_pool';
 import { PoolClearedError } from '../cmap/errors';
 import {
@@ -20,7 +20,7 @@ import {
 } from '../constants';
 import type { AutoEncrypter } from '../deps';
 import {
-  AnyError,
+  type AnyError,
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
@@ -31,7 +31,7 @@ import {
   MongoNetworkTimeoutError,
   MongoRuntimeError,
   MongoServerClosedError,
-  MongoServerError,
+  type MongoServerError,
   MongoUnexpectedServerResponseError,
   needsRetryableWriteLabel
 } from '../error';
@@ -41,15 +41,15 @@ import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
 import { isTransactionCommand } from '../transactions';
 import {
-  Callback,
-  EventEmitterWithState,
+  type Callback,
+  type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
-  MongoDBNamespace,
+  type MongoDBNamespace,
   supportsRetryableWrites
 } from '../utils';
 import {
-  ClusterTime,
+  type ClusterTime,
   STATE_CLOSED,
   STATE_CLOSING,
   STATE_CONNECTED,
@@ -61,7 +61,7 @@ import type {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent
 } from './events';
-import { Monitor, MonitorOptions } from './monitor';
+import { Monitor, type MonitorOptions } from './monitor';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import type { Topology } from './topology';
 

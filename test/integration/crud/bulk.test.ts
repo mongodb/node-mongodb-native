@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import * as crypto from 'crypto';
 
 import {
-  Collection,
+  type Collection,
   Long,
   MongoBatchReExecutionError,
-  MongoClient,
+  type MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
 } from '../../mongodb';

@@ -7,7 +7,7 @@ import {
   BSONType,
   Compressor,
   CURSOR_FLAGS,
-  CursorFlag,
+  type CursorFlag,
   ExplainVerbosity,
   GSSAPICanonicalizationValue,
   MongoErrorLabel,

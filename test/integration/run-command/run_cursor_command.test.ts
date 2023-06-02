@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Db, MongoClient } from '../../mongodb';
+import { type Db, type MongoClient } from '../../mongodb';
 
 describe('runCursorCommand API', () => {
   let client: MongoClient;

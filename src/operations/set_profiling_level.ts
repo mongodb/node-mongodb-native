@@ -4,7 +4,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { enumToString } from '../utils';
-import { CommandOperation, CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
 

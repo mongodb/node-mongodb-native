@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ClientSession, MongoClient, ReadConcern } from '../../mongodb';
+import { type ClientSession, MongoClient, ReadConcern } from '../../mongodb';
 
 // TODO(NODE-3345): Improve these tests to use expect assertions more
 

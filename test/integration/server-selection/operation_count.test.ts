@@ -1,8 +1,13 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { AbstractCursor, Collection, ConnectionPool, MongoClient } from '../../mongodb';
-import { FailPoint } from '../../tools/utils';
+import {
+  type AbstractCursor,
+  type Collection,
+  ConnectionPool,
+  type MongoClient
+} from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 const testMetadata: MongoDBMetadataUI = {
   requires: {

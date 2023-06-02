@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { TokenEntry, TokenEntryCache } from '../../../../mongodb';
+import { type TokenEntry, TokenEntryCache } from '../../../../mongodb';
 
 describe('TokenEntryCache', function () {
   const tokenResultWithExpiration = Object.freeze({

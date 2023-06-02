@@ -6,7 +6,7 @@ import {
   MongoRuntimeError,
   ObjectId,
   ServerDescription,
-  TopologyVersion
+  type TopologyVersion
 } from '../../mongodb';
 
 describe('ServerDescription', function () {

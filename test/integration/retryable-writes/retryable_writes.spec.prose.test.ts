@@ -5,8 +5,8 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import {
-  Collection,
-  MongoClient,
+  type Collection,
+  type MongoClient,
   MongoError,
   MongoServerError,
   MongoWriteConcernError,

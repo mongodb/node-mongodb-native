@@ -4,7 +4,7 @@ import { once } from 'events';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
-  MongoClient,
+  type MongoClient,
   SERVER_HEARTBEAT_FAILED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../mongodb';

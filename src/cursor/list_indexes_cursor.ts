@@ -1,6 +1,6 @@
 import type { Collection } from '../collection';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
-import { ListIndexesOperation, ListIndexesOptions } from '../operations/indexes';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { ListIndexesOperation, type ListIndexesOptions } from '../operations/indexes';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { AbstractCursor } from './abstract_cursor';

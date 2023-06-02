@@ -5,16 +5,23 @@ import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { inspect, promisify } from 'util';
 
-import { Document, HostAddress, MongoClient, OP_MSG, Topology, TopologyOptions } from '../mongodb';
+import {
+  type Document,
+  type HostAddress,
+  MongoClient,
+  OP_MSG,
+  Topology,
+  type TopologyOptions
+} from '../mongodb';
 import { runUnifiedSuite } from './unified-spec-runner/runner';
 import {
-  CollectionData,
-  EntityDescription,
-  ExpectedEventsForClient,
-  OperationDescription,
-  RunOnRequirement,
-  Test,
-  UnifiedSuite
+  type CollectionData,
+  type EntityDescription,
+  type ExpectedEventsForClient,
+  type OperationDescription,
+  type RunOnRequirement,
+  type Test,
+  type UnifiedSuite
 } from './unified-spec-runner/schema';
 
 export function ensureCalledWith(stub: any, args: any[]) {

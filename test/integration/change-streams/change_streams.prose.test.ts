@@ -3,11 +3,11 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
 import {
-  ChangeStream,
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent,
-  Document,
+  type ChangeStream,
+  type CommandFailedEvent,
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
+  type Document,
   isHello,
   LEGACY_HELLO_COMMAND,
   Long,

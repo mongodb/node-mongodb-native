@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 
-import { CommandStartedEvent, MongoClient, MongoClientOptions } from '../../mongodb';
+import { type CommandStartedEvent, MongoClient, type MongoClientOptions } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
 import { dropCollection } from '../shared';

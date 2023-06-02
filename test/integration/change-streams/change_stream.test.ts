@@ -9,23 +9,23 @@ import { promisify } from 'util';
 
 import {
   AbstractCursor,
-  ChangeStream,
-  ChangeStreamOptions,
-  Collection,
-  CommandStartedEvent,
-  Db,
+  type ChangeStream,
+  type ChangeStreamOptions,
+  type Collection,
+  type CommandStartedEvent,
+  type Db,
   isHello,
   Long,
   MongoAPIError,
   MongoChangeStreamError,
-  MongoClient,
+  type MongoClient,
   MongoServerError,
   ReadPreference,
-  ResumeToken
+  type ResumeToken
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import {
-  FailPoint,
+  type FailPoint,
   getSymbolFrom,
   sleep,
   TestBuilder,

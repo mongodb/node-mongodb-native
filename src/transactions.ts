@@ -1,7 +1,7 @@
 import type { Document } from './bson';
 import { MongoRuntimeError, MongoTransactionError } from './error';
 import type { CommandOperationOptions } from './operations/command';
-import { ReadConcern, ReadConcernLike } from './read_concern';
+import { ReadConcern, type ReadConcernLike } from './read_concern';
 import type { ReadPreferenceLike } from './read_preference';
 import { ReadPreference } from './read_preference';
 import type { Server } from './sdam/server';

@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import { inspect } from 'util';
 
 import {
-  Collection,
-  CommandStartedEvent,
-  FindCursor,
-  MongoClient,
+  type Collection,
+  type CommandStartedEvent,
+  type FindCursor,
+  type MongoClient,
   MongoCursorExhaustedError,
   MongoServerError
 } from '../../mongodb';

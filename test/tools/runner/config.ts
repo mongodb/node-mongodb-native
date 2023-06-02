@@ -4,11 +4,11 @@ import * as qs from 'querystring';
 import * as url from 'url';
 
 import {
-  AuthMechanism,
+  type AuthMechanism,
   HostAddress,
   MongoClient,
   TopologyType,
-  WriteConcernSettings
+  type WriteConcernSettings
 } from '../../mongodb';
 import { getEnvironmentalOptions } from '../utils';
 

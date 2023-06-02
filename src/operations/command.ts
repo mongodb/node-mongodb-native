@@ -1,21 +1,21 @@
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
-import { Explain, ExplainOptions } from '../explain';
+import { Explain, type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
 import type { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
 import {
-  Callback,
+  type Callback,
   commandSupportsReadConcern,
   decorateWithExplain,
   maxWireVersion,
   MongoDBNamespace
 } from '../utils';
-import { WriteConcern, WriteConcernOptions } from '../write_concern';
+import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
-import { AbstractOperation, Aspect, OperationOptions } from './operation';
+import { AbstractOperation, Aspect, type OperationOptions } from './operation';
 
 /** @public */
 export interface CollationOptions {

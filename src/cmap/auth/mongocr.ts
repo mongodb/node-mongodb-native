@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 
 import { MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 
 export class MongoCR extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {

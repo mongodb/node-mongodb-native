@@ -2,7 +2,12 @@
 import type { PeerCertificate } from 'tls';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { MongoClient, MongoClientOptions, ReadPreference, ReadPreferenceMode } from '../../../src';
+import {
+  MongoClient,
+  type MongoClientOptions,
+  type ReadPreference,
+  type ReadPreferenceMode
+} from '../../../src';
 import type { PropExists } from '../utility_types';
 
 type MongoDBImport = typeof import('../../../src');

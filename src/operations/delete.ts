@@ -5,8 +5,8 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
-import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects, Hint } from './operation';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
 export interface DeleteOptions extends CommandOperationOptions, WriteConcernOptions {

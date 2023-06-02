@@ -4,7 +4,7 @@ import type { Db } from '../db';
 import { MongoTopologyClosedError } from '../error';
 import type { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { Callback, getTopology } from '../utils';
+import { type Callback, getTopology } from '../utils';
 
 /** @public */
 export interface IndexInformationOptions {

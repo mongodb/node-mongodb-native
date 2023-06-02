@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { URL } from 'url';
 
-import { Document, ObjectId, resolveBSONOptions } from './bson';
+import { type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
 import { MAX_SUPPORTED_WIRE_VERSION } from './cmap/wire_protocol/constants';
 import type { Collection } from './collection';
@@ -11,7 +11,7 @@ import type { AbstractCursor } from './cursor/abstract_cursor';
 import type { FindCursor } from './cursor/find_cursor';
 import type { Db } from './db';
 import {
-  AnyError,
+  type AnyError,
   MongoCompatibilityError,
   MongoInvalidArgumentError,
   MongoNotConnectedError,

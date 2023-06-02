@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AggregateOperation, AggregateOptions } from './aggregate';
+import { AggregateOperation, type AggregateOptions } from './aggregate';
 
 /** @public */
 export interface CountDocumentsOptions extends AggregateOptions {

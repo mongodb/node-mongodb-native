@@ -1,9 +1,9 @@
 import { Readable, Transform } from 'stream';
 import { promisify } from 'util';
 
-import { BSONSerializeOptions, Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
-  AnyError,
+  type AnyError,
   MongoAPIError,
   MongoCursorExhaustedError,
   MongoCursorInUseError,
@@ -13,15 +13,15 @@ import {
   MongoTailableCursorError
 } from '../error';
 import type { MongoClient } from '../mongo_client';
-import { TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { type TODO_NODE_3286, TypedEventEmitter } from '../mongo_types';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { KillCursorsOperation } from '../operations/kill_cursors';
-import { ReadConcern, ReadConcernLike } from '../read_concern';
-import { ReadPreference, ReadPreferenceLike } from '../read_preference';
+import { ReadConcern, type ReadConcernLike } from '../read_concern';
+import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { Callback, List, MongoDBNamespace, ns } from '../utils';
+import { type Callback, List, type MongoDBNamespace, ns } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
