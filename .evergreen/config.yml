@@ -406,6 +406,17 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh
+  reset aws instance profile:
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+          cd "${DRIVERS_TOOLS}/.evergreen/auth_aws"
+          if [ -f "./aws_e2e_setup.json" ]; then
+            . ./activate-authawsvenv.sh
+            python ./lib/aws_assign_instance_profile.py
+          fi
   cleanup:
     - command: shell.exec
       params:
@@ -3415,6 +3426,7 @@ pre:
   - func: fix absolute paths
   - func: make files executable
 post:
+  - func: reset aws instance profile
   - func: upload test results
   - func: upload coverage report
   - func: cleanup
