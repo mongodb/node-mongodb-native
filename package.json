@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "5.5.0",
+  "version": "5.6.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "lib/index.js",
   "files": [
@@ -120,6 +120,7 @@
     "check:tsd": "tsd --version && tsd",
     "check:dependencies": "mocha test/action/dependency.test.ts",
     "check:dts": "node ./node_modules/typescript/bin/tsc --noEmit mongodb.d.ts && tsd",
+    "check:search-indexes": "nyc mocha --config test/mocha_mongodb.json test/manual/search-index-management.spec.test.ts",
     "check:test": "mocha --config test/mocha_mongodb.json test/integration",
     "check:unit": "mocha test/unit",
     "check:ts": "node ./node_modules/typescript/bin/tsc -v && node ./node_modules/typescript/bin/tsc --noEmit",

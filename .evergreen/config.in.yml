@@ -45,6 +45,15 @@ functions:
       params:
         file: src/expansion.yml
 
+  "run search index management tests":
+    - command: subprocess.exec
+      params:
+        binary: bash
+        working_dir: src
+        add_expansions_to_env: true
+        args:
+          - .evergreen/run-search-index-management-tests.sh
+
   "bootstrap mongo-orchestration":
     - command: subprocess.exec
       params:

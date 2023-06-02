@@ -36,7 +36,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
       const options = this.options;
       const name = this.name;
 
-      const encryptedFieldsMap = db.s.client.options.autoEncryption?.encryptedFieldsMap;
+      const encryptedFieldsMap = db.client.options.autoEncryption?.encryptedFieldsMap;
       let encryptedFields: Document | undefined =
         options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 

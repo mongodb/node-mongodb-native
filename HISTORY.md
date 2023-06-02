@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.6.0](https://github.com/mongodb/node-mongodb-native/compare/v5.5.0...v5.6.0) (2023-06-01)
+
+
+### Features
+
+* **NODE-5019:** add runCursorCommand API ([#3655](https://github.com/mongodb/node-mongodb-native/issues/3655)) ([4da926e](https://github.com/mongodb/node-mongodb-native/commit/4da926e0989b97cfbdf8384bd197dd6ed204fd12))
+* **NODE-5071:** support additional time series options ([#3667](https://github.com/mongodb/node-mongodb-native/issues/3667)) ([ccf555d](https://github.com/mongodb/node-mongodb-native/commit/ccf555d069f3bd0eb7e7b2cca0d5ecdc7d571332))
+* **NODE-5314:** add search index helpers ([#3672](https://github.com/mongodb/node-mongodb-native/issues/3672)) ([f647542](https://github.com/mongodb/node-mongodb-native/commit/f64754211fe9c142558e3fe9db3adf606d204fc9))
+
+
+### Bug Fixes
+
+* **NODE-5249:** remove strict flag from create collection options ([#3677](https://github.com/mongodb/node-mongodb-native/issues/3677)) ([be8faaf](https://github.com/mongodb/node-mongodb-native/commit/be8faaf63996c70e54e9cccb130fd05f64651e34))
+* **NODE-5296:** construct error messages for AggregateErrors in Node16+ ([#3682](https://github.com/mongodb/node-mongodb-native/issues/3682)) ([e03178e](https://github.com/mongodb/node-mongodb-native/commit/e03178ebc84e489e9058a72f576646a847470379))
+
 ## [5.5.0](https://github.com/mongodb/node-mongodb-native/compare/v5.4.0...v5.5.0) (2023-05-11)
 
 
