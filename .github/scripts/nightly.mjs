@@ -13,15 +13,15 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 process.env.TZ = 'Etc/UTC';
 
 /**
- * FORMAT : M.M.P-dev+YYYYMMDD.sha.##########
- * EXAMPLE: 5.6.0-dev+20230601.sha.0853c6957c
+ * FORMAT : M.M.P-dev.YYYYMMDD.sha.##########
+ * EXAMPLE: 5.6.0-dev.20230601.sha.0853c6957c
  */
 class NightlyVersion {
   /** @param {string} version */
   constructor(version) {
     /** @type {string} */
     this.version = version;
-    const [, meta] = this.version.split('+');
+    const [, meta] = this.version.split('dev.');
     const [dateString, commit] = meta.split('.sha.');
     /** @type {string} */
     this.commit = commit;
@@ -32,7 +32,7 @@ class NightlyVersion {
     const { stdout } = await exec('npm show --json mongodb', { encoding: 'utf8' });
     /** @type {{'dist-tags': {nightly?: string} }} */
     const showInfo = JSON.parse(stdout);
-    const version = showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev+YYYYMMDD.sha.##########';
+    const version = showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev.YYYYMMDD.sha.##########';
     return new NightlyVersion(version);
   }
   static async currentCommit() {
@@ -51,7 +51,7 @@ class NightlyVersion {
     const pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
 
     console.log('package.json version is:', pkg.version);
-    pkg.version = `${pkg.version}-dev+${yyyymmdd}.sha.${currentCommit}`;
+    pkg.version = `${pkg.version}-dev.${yyyymmdd}.sha.${currentCommit}`;
     console.log('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
