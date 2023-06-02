@@ -513,7 +513,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+          source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
           npm install @aws-sdk/credential-providers
 
   "run atlas tests":
@@ -1129,7 +1129,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 18 
+          NODE_LTS_VERSION: 18
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
