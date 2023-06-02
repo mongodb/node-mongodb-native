@@ -22,7 +22,7 @@ export abstract class ExpiringCacheEntry {
   }
 
   /**
-   * Get an expiration time in milliseconds past epoch. Defaults to immediate.
+   * Get an expiration time in milliseconds past epoch.
    */
   private expirationTime(expiresInSeconds: number): number {
     return Date.now() + expiresInSeconds * 1000;
