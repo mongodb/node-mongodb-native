@@ -283,6 +283,18 @@ try {
 }
 ```
 
+## Nightly releases
+
+If you need to test with a change from the latest `main` branch our `mongodb` npm package has nightly versions released under the `nightly` tag.
+
+```sh
+npm install mongodb@nightly
+```
+
+Nightly versions are published regardless of testing outcome.
+This means there could be sematic breakages or partially implemented features.
+The nightly build is not suitable for production use.
+
 ## Next Steps
 
 - [MongoDB Documentation](https://www.mongodb.com/docs/manual/)
