@@ -22,9 +22,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm install -g npm
       - run: npm clean-install
-      - run: npm run build:nightly
+      - id: build_nightly
+        run: npm run build:nightly
         continue-on-error: true
-      - if: ${{ success() }}
+      - if: ${{ steps.build_nightly.outcome == 'success' }}
         run: npm publish --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

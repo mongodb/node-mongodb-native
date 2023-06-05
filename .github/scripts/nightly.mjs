@@ -64,8 +64,9 @@ const currentCommit = await NightlyVersion.currentCommit();
 console.log('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
-  console.log('Published nightly is up to date');
+  console.log('Published nightly is up to date, nothing to do, exit 1');
   process.exit(1);
 }
 await NightlyVersion.generateNightlyVersion();
+console.log('Published nightly is behind main, updated package.json, exit 0');
 process.exit(0);
