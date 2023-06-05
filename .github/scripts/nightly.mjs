@@ -12,6 +12,15 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 process.env.TZ = 'Etc/UTC';
 
+function shouldPublish(publish) {
+  if (publish) {
+    console.log('publish=yes')
+  } else {
+    console.log('publish=no')
+  }
+  process.exit(0);
+}
+
 /**
  * FORMAT : M.M.P-dev.YYYYMMDD.sha.##########
  * EXAMPLE: 5.6.0-dev.20230601.sha.0853c6957c
@@ -40,7 +49,7 @@ class NightlyVersion {
     return stdout.trim();
   }
   static async generateNightlyVersion() {
-    console.log('Generating new nightly version');
+    console.error('Generating new nightly version');
     const currentCommit = await NightlyVersion.currentCommit();
     const today = new Date();
     const year = `${today.getUTCFullYear()}`;
@@ -50,23 +59,24 @@ class NightlyVersion {
 
     const pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
 
-    console.log('package.json version is:', pkg.version);
+    console.error('package.json version is:', pkg.version);
     pkg.version = `${pkg.version}-dev.${yyyymmdd}.sha.${currentCommit}`;
-    console.log('package.json version updated to:', pkg.version);
+    console.error('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
   }
 }
 
 const currentPublishedNightly = await NightlyVersion.currentNightlyVersion();
-console.log('current published nightly:', currentPublishedNightly?.version);
+console.error('current published nightly:', currentPublishedNightly?.version);
 const currentCommit = await NightlyVersion.currentCommit();
-console.log('current commit sha:', currentCommit);
+console.error('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
-  console.log('Published nightly is up to date, nothing to do, exit 1');
-  process.exit(1);
+  console.error('Published nightly is up to date, nothing to do, exit 1');
+  shouldPublish(false);
+} else {
+  await NightlyVersion.generateNightlyVersion();
+  console.error('Published nightly is behind main, updated package.json, exit 0');
+  shouldPublish(true);
 }
-await NightlyVersion.generateNightlyVersion();
-console.log('Published nightly is behind main, updated package.json, exit 0');
-process.exit(0);

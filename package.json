@@ -110,7 +110,6 @@
     "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs",
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
-    "build:nightly": "node ./.github/scripts/nightly.mjs",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run test:all",
     "check:integration-coverage": "nyc npm run check:test",

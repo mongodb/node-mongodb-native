@@ -3,7 +3,8 @@ on:
     # Timezone is UTC
     # https://crontab.guru/#0_0_*_*_*
     # At 00:00 every day.
-    - cron: '0 0 * * *'
+    # Every 15 minutes for testing
+    - cron: '*/15 * * * *'
 
 name: release-nightly
 
@@ -23,9 +24,8 @@ jobs:
       - run: npm install -g npm
       - run: npm clean-install
       - id: build_nightly
-        run: npm run build:nightly
-        continue-on-error: true
-      - if: ${{ steps.build_nightly.outcome == 'success' }}
-        run: npm publish --provenance --tag=nightly
+        run: node ./.github/scripts/nightly.mjs >> "$GITHUB_OUTPUT"
+      - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
+        run: npm publish --dry-run --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
