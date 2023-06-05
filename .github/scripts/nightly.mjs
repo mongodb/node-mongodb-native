@@ -47,7 +47,8 @@ class NightlyVersion {
     /** @type {{'dist-tags': {nightly?: string} }} */
     const showInfo = JSON.parse(stdout);
     const version = showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev.YYYYMMDD.sha.##########';
-    return new NightlyVersion(version);
+    // TODO: return new NightlyVersion(version);
+    return new NightlyVersion('mongodb-5.6.0-dev.20230603.sha.008fd6f')
   }
   static async currentCommit() {
     const { stdout } = await exec('git rev-parse --short HEAD', { encoding: 'utf8' });
