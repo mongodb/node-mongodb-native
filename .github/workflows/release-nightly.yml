@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: main
+          ref: NODE-5340
       - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
