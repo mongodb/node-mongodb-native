@@ -1,10 +1,12 @@
 on:
-  schedule:
-    # Timezone is UTC
-    # https://crontab.guru/#0_0_*_*_*
-    # At 00:00 every day.
-    # Every 15 minutes for testing
-    - cron: '*/15 * * * *'
+  # schedule:
+  #   # Timezone is UTC
+  #   # https://crontab.guru/#0_0_*_*_*
+  #   # At 00:00 every day.
+  #   # Every 15 minutes for testing
+  #   - cron: '*/15 * * * *'
+  pull_request:
+    branches: [ main ]
 
 name: release-nightly
 
@@ -24,7 +26,7 @@ jobs:
       - run: npm install -g npm
       - run: npm clean-install
       - id: build_nightly
-        run: node ./.github/scripts/nightly.mjs >> "$GITHUB_OUTPUT"
+        run: node ./.github/scripts/nightly.mjs
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
         run: npm publish --dry-run --provenance --tag=nightly
         env:

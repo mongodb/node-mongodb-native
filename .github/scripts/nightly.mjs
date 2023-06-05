@@ -12,12 +12,17 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 process.env.TZ = 'Etc/UTC';
 
-function shouldPublish(publish) {
-  if (publish) {
-    console.log('publish=yes')
-  } else {
-    console.log('publish=no')
+async function shouldPublish(publish) {
+  const githubOutput = process.env.GITHUB_OUTPUT ?? '';
+  if (githubOutput.length === 0) {
+    console.log('output file does not exist');
+    process.exit(1);
   }
+
+  const outputFile = await fs.open(githubOutput, 'a');
+  const output = publish ? 'publish=yes' : 'publish=no'
+  await outputFile.appendFile(output, { encoding: 'utf8' });
+  await outputFile.close();
   process.exit(0);
 }
 
@@ -49,7 +54,7 @@ class NightlyVersion {
     return stdout.trim();
   }
   static async generateNightlyVersion() {
-    console.error('Generating new nightly version');
+    console.log('Generating new nightly version');
     const currentCommit = await NightlyVersion.currentCommit();
     const today = new Date();
     const year = `${today.getUTCFullYear()}`;
@@ -59,24 +64,24 @@ class NightlyVersion {
 
     const pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
 
-    console.error('package.json version is:', pkg.version);
+    console.log('package.json version is:', pkg.version);
     pkg.version = `${pkg.version}-dev.${yyyymmdd}.sha.${currentCommit}`;
-    console.error('package.json version updated to:', pkg.version);
+    console.log('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
   }
 }
 
 const currentPublishedNightly = await NightlyVersion.currentNightlyVersion();
-console.error('current published nightly:', currentPublishedNightly?.version);
+console.log('current published nightly:', currentPublishedNightly?.version);
 const currentCommit = await NightlyVersion.currentCommit();
-console.error('current commit sha:', currentCommit);
+console.log('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
-  console.error('Published nightly is up to date, nothing to do, exit 1');
+  console.log('Published nightly is up to date, nothing to do, exit 1');
   shouldPublish(false);
 } else {
   await NightlyVersion.generateNightlyVersion();
-  console.error('Published nightly is behind main, updated package.json, exit 0');
+  console.log('Published nightly is behind main, updated package.json, exit 0');
   shouldPublish(true);
 }
