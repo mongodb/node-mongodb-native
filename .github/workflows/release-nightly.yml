@@ -5,8 +5,7 @@ on:
   #   # At 00:00 every day.
   #   # Every 15 minutes for testing
   #   - cron: '*/15 * * * *'
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch: {}
 
 name: release-nightly
 
