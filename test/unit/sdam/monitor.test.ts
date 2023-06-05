@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
@@ -10,6 +11,7 @@ import {
   ServerDescription,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent,
   ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
@@ -103,7 +105,7 @@ describe('monitoring', function () {
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
   describe('Monitor', function () {
-    let monitor;
+    let monitor: Monitor | null;
 
     beforeEach(() => {
       monitor = null;
@@ -115,7 +117,7 @@ describe('monitoring', function () {
       }
     });
 
-    it('should connect and issue an initial server check', function (done) {
+    it('should connect and issue an initial server check', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -126,12 +128,18 @@ describe('monitoring', function () {
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => {
-        expect(monitor.connection.isMonitoringConnection).to.be.true;
-        done();
-      });
+      const promises: Promise<(ServerHeartbeatFailedEvent | ServerHeartbeatSucceededEvent)[]>[] = [
+        once(monitor, 'serverHeartbeatFailed'),
+        once(monitor, 'serverHeartbeatSucceeded')
+      ];
       monitor.connect();
+
+      const events = await Promise.race(promises);
+      expect(events).to.have.lengthOf(1);
+
+      const event = events[0];
+      expect(event).to.not.haveOwnProperty('failure');
+      expect(monitor.connection?.isMonitoringConnection).to.be.true;
     });
 
     it('should ignore attempts to connect when not already closed', function (done) {

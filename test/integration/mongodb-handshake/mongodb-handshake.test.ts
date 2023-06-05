@@ -6,8 +6,7 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoClient,
   MongoServerError,
-  MongoServerSelectionError,
-  Monitor
+  MongoServerSelectionError
 } from '../../mongodb';
 
 describe('MongoDB Handshake', () => {
@@ -98,7 +97,9 @@ context('when running against a server version >= 4.4', function () {
       const servers = client?.topology.s?.servers;
       expect(servers).to.exist;
       for (const server of servers.values()) {
-        const monitorSymbol = Object.getOwnPropertySymbols(server).find(s => s.toString() === 'Symbol(monitor)');
+        const monitorSymbol = Object.getOwnPropertySymbols(server).find(
+          s => s.toString() === 'Symbol(monitor)'
+        );
         expect(monitorSymbol).to.exist;
         expect(server[monitorSymbol]).to.exist;
         expect(server[monitorSymbol].heartbeatProtocol).to.equal('polling');
@@ -134,7 +135,9 @@ context('when running against a server version >= 4.4', function () {
       const servers = client?.topology.s?.servers;
       expect(servers).to.exist;
       for (const server of servers.values()) {
-        const monitorSymbol = Object.getOwnPropertySymbols(server).find(s => s.toString() === 'Symbol(monitor)');
+        const monitorSymbol = Object.getOwnPropertySymbols(server).find(
+          s => s.toString() === 'Symbol(monitor)'
+        );
         expect(monitorSymbol).to.exist;
         expect(server[monitorSymbol]).to.exist;
         expect(server[monitorSymbol].heartbeatProtocol).to.equal('streaming');
