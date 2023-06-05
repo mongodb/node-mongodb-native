@@ -76,7 +76,7 @@ context('when running against a server version >= 4.4', function () {
   });
 
   afterEach(async function () {
-    await client.close().catch(() => null);
+    await client?.close().catch(() => null);
     process.env = cachedEnv;
   });
 
@@ -94,18 +94,14 @@ context('when running against a server version >= 4.4', function () {
     });
 
     it('uses the polling protocol', metadata, async function () {
-      await client.connect();
+      await client?.connect();
       const servers = client?.topology.s?.servers;
       expect(servers).to.exist;
       for (const server of servers.values()) {
-        const symbolMap = {};
-        Object.getOwnPropertySymbols(server).forEach(s => {
-          symbolMap[s.toString()] = s;
-        });
-
-        expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        const monitor: Monitor = server[symbolMap['Symbol(monitor)']];
-        expect(monitor.heartbeatProtocol).to.equal('polling');
+        const monitorSymbol = Object.getOwnPropertySymbols(server).find(s => s.toString() === 'Symbol(monitor)');
+        expect(monitorSymbol).to.exist;
+        expect(server[monitorSymbol]).to.exist;
+        expect(server[monitorSymbol].heartbeatProtocol).to.equal('polling');
       }
     });
   });
@@ -134,18 +130,14 @@ context('when running against a server version >= 4.4', function () {
     });
 
     it('uses the streaming protocol', metadata, async function () {
-      await client.connect();
+      await client?.connect();
       const servers = client?.topology.s?.servers;
       expect(servers).to.exist;
       for (const server of servers.values()) {
-        const symbolMap = {};
-        Object.getOwnPropertySymbols(server).forEach(s => {
-          symbolMap[s.toString()] = s;
-        });
-
-        expect(server[symbolMap['Symbol(monitor)']]).to.exist;
-        const monitor: Monitor = server[symbolMap['Symbol(monitor)']];
-        expect(monitor.heartbeatProtocol).to.equal('streaming');
+        const monitorSymbol = Object.getOwnPropertySymbols(server).find(s => s.toString() === 'Symbol(monitor)');
+        expect(monitorSymbol).to.exist;
+        expect(server[monitorSymbol]).to.exist;
+        expect(server[monitorSymbol].heartbeatProtocol).to.equal('streaming');
       }
     });
   });
