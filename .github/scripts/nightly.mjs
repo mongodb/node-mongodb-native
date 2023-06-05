@@ -24,7 +24,6 @@ async function shouldPublish(publish) {
   console.log('outputting:', output);
   await outputFile.appendFile(output, { encoding: 'utf8' });
   await outputFile.close();
-  process.exit(0);
 }
 
 /**
@@ -70,6 +69,7 @@ class NightlyVersion {
     console.log('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
+    console.log('wrote package.json');
   }
 }
 
@@ -80,9 +80,11 @@ console.log('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
   console.log('Published nightly is up to date, nothing to do');
-  shouldPublish(false);
+  await shouldPublish(false);
 } else {
   await NightlyVersion.generateNightlyVersion();
   console.log('Published nightly is behind main, updated package.json');
-  shouldPublish(true);
+  await shouldPublish(true);
 }
+
+console.log('done.')
