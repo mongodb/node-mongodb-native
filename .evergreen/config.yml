@@ -67,45 +67,32 @@ functions:
           ${PREPARE_SHELL}
           DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
   bootstrap kms servers:
-    - command: shell.exec
+    - command: subprocess.exec
       params:
-        shell: bash
-        script: |
-          ${PREPARE_SHELL}
-          cd ${DRIVERS_TOOLS}/.evergreen/csfle
-          . ./activate-kmstlsvenv.sh
-    - command: shell.exec
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/activate-kms-venv.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
       params:
-        shell: bash
         background: true
-        script: |
-          cd ${DRIVERS_TOOLS}/.evergreen/csfle
-          if [ "Windows_NT" = "$OS" ]; then
-            kmstlsvenv/Scripts/python.exe -u kms_kmip_server.py \
-              --ca_file ../x509gen/ca.pem \
-              --cert_file ../x509gen/server.pem \
-              --port 5698
-          else
-            ./kmstlsvenv/bin/python3 -u kms_kmip_server.py \
-              --ca_file ../x509gen/ca.pem \
-              --cert_file ../x509gen/server.pem \
-              --port 5698
-          fi
-    - command: shell.exec
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/run-kmip-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
       params:
-        shell: bash
         background: true
-        script: |
-          cd ${DRIVERS_TOOLS}/.evergreen/csfle
-          if [ "Windows_NT" = "$OS" ]; then
-            kmstlsvenv/Scripts/python.exe -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000 &
-            kmstlsvenv/Scripts/python.exe -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001 &
-            kmstlsvenv/Scripts/python.exe -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert &
-          else
-            ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/expired.pem --port 8000 &
-            ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/wrong-host.pem --port 8001 &
-            ./kmstlsvenv/bin/python3 -u kms_http_server.py --ca_file ../x509gen/ca.pem --cert_file ../x509gen/server.pem --port 8002 --require_client_cert &
-          fi
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/run-kms-servers.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
     - command: subprocess.exec
       params:
         background: true
