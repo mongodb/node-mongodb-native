@@ -20,7 +20,8 @@ async function shouldPublish(publish) {
   }
 
   const outputFile = await fs.open(githubOutput, 'a');
-  const output = publish ? 'publish=yes' : 'publish=no'
+  const output = publish ? 'publish=yes' : 'publish=no';
+  console.log('outputting:', output);
   await outputFile.appendFile(output, { encoding: 'utf8' });
   await outputFile.close();
   process.exit(0);
@@ -78,10 +79,10 @@ const currentCommit = await NightlyVersion.currentCommit();
 console.log('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
-  console.log('Published nightly is up to date, nothing to do, exit 1');
+  console.log('Published nightly is up to date, nothing to do');
   shouldPublish(false);
 } else {
   await NightlyVersion.generateNightlyVersion();
-  console.log('Published nightly is behind main, updated package.json, exit 0');
+  console.log('Published nightly is behind main, updated package.json');
   shouldPublish(true);
 }
