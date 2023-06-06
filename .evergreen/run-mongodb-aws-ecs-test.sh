@@ -11,7 +11,7 @@ tar -xzf src.tgz .
 
 # load node.js
 set +x
-source "${PROJECT_DIRECTORY}/.evergreen/init-nvm.sh"
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 set -x
 
 # run the tests
