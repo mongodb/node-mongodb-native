@@ -1,10 +1,13 @@
 on:
-  # schedule:
-  #   # Timezone is UTC
-  #   # https://crontab.guru/#0_0_*_*_*
-  #   # At 00:00 every day.
-  #   # Every 15 minutes for testing
-  #   - cron: '*/15 * * * *'
+  schedule:
+    # Timezone is UTC
+    # https://crontab.guru/#0_0_*_*_*
+    # At 00:00 every day.
+    - cron: '0 0 * * *'
+
+  # Allows us to manually trigger a nightly
+  # A nightly can be release more than one nightly in a day if the commit from main
+  # has changed since
   workflow_dispatch: {}
 
 name: release-nightly
@@ -27,6 +30,6 @@ jobs:
       - id: build_nightly
         run: node ./.github/scripts/nightly.mjs
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
-        run: npm publish --dry-run --provenance --tag=nightly
+        run: npm publish --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
