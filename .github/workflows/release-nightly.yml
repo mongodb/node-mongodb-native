@@ -7,8 +7,8 @@ on:
   #   - cron: '0 0 * * *'
 
   # Allows us to manually trigger a nightly
-  # A nightly can be release more than one nightly in a day if the commit from main
-  # has changed since
+  # Since npm prevents duplicate releases we can run this at any time
+  # As long as the commit hash has changed on main a release will be published
   workflow_dispatch: {}
 
 name: release-nightly
