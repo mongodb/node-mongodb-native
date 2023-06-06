@@ -6,6 +6,7 @@ import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
+import { AzureServiceWorkflow } from './mongodb_oidc/azure_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
 
 /** Error when credentials are missing. */
@@ -60,7 +61,7 @@ export type OIDCRefreshFunction = (
   context: OIDCCallbackContext
 ) => Promise<IdPServerResponse>;
 
-type ProviderName = 'aws' | 'callback';
+type ProviderName = 'aws' | 'azure' | 'callback';
 
 export interface Workflow {
   /**
@@ -84,6 +85,7 @@ export interface Workflow {
 export const OIDC_WORKFLOWS: Map<ProviderName, Workflow> = new Map();
 OIDC_WORKFLOWS.set('callback', new CallbackWorkflow());
 OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
+OIDC_WORKFLOWS.set('azure', new AzureServiceWorkflow());
 
 /**
  * OIDC auth provider.

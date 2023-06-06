@@ -16,7 +16,7 @@ export abstract class ServiceWorkflow implements Workflow {
    * and then attempts to read the token from that path.
    */
   async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
-    const token = await this.getToken();
+    const token = await this.getToken(credentials);
     const command = commandDocument(token);
     return connection.commandAsync(ns(credentials.source), command, undefined);
   }
@@ -25,7 +25,7 @@ export abstract class ServiceWorkflow implements Workflow {
    * Get the document to add for speculative authentication.
    */
   async speculativeAuth(credentials: MongoCredentials): Promise<Document> {
-    const token = await this.getToken();
+    const token = await this.getToken(credentials);
     const document = commandDocument(token);
     document.db = credentials.source;
     return { speculativeAuthenticate: document };
@@ -34,7 +34,7 @@ export abstract class ServiceWorkflow implements Workflow {
   /**
    * Get the token from the environment or endpoint.
    */
-  abstract getToken(): Promise<string>;
+  abstract getToken(credentials: MongoCredentials): Promise<string>;
 }
 
 /**

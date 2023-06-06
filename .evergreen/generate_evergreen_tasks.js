@@ -16,6 +16,7 @@ const {
   WINDOWS_OS,
   MACOS_OS,
   UBUNTU_OS,
+  UBUNTU_20_OS,
   DEBIAN_OS
 } = require('./ci_matrix_constants');
 
@@ -752,6 +753,14 @@ BUILD_VARIANTS.push({
   run_on: DEBIAN_OS,
   batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
+});
+
+BUILD_VARIANTS.push({
+  name: 'ubuntu20-test-azure-oidc',
+  display_name: 'Azure OIDC',
+  run_on: UBUNTU_20_OS,
+  batchtime: 20160,
+  tasks: ['testazureoidc_task_group']
 });
 
 BUILD_VARIANTS.push({

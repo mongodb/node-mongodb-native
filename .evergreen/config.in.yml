@@ -1244,6 +1244,20 @@ tasks:
           args:
             - src/.evergreen/run-azure-kms-tests.sh
 
+  - name: "oidc-auth-test-azure-latest"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
+            PROVIDER_NAME: azure
+          args:
+          - .evergreen/run-oidc-tests-azure.sh
 
 task_groups:
   - name: serverless_task_group
@@ -1347,6 +1361,34 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
     tasks:
       - test-azurekms-task
+
+  - name: testazureoidc_task_group
+    setup_group:
+    - func: fetch source
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |-
+          set -o errexit
+          ${PREPARE_SHELL}
+          export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
+          export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
+          export AZUREOIDC_SECRET="${testazureoidc_secret}"
+          export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
+          export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
+          export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
+    teardown_group:
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |-
+          ${PREPARE_SHELL}
+          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+    - oidc-auth-test-azure-latest
 
 pre:
   - func: "fetch source"

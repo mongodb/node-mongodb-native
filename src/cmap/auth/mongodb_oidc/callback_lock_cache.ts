@@ -39,7 +39,7 @@ export class CallbackLockCache extends Cache<CallbacksEntry> {
    * Get the callbacks for the connection and credentials. If an entry does not
    * exist a new one will get set.
    */
-  getCallbacks(connection: Connection, credentials: MongoCredentials): CallbacksEntry {
+  getEntry(connection: Connection, credentials: MongoCredentials): CallbacksEntry {
     const requestCallback = credentials.mechanismProperties.REQUEST_TOKEN_CALLBACK;
     const refreshCallback = credentials.mechanismProperties.REFRESH_TOKEN_CALLBACK;
     if (!requestCallback) {
@@ -51,13 +51,13 @@ export class CallbackLockCache extends Cache<CallbacksEntry> {
     if (entry) {
       return entry;
     }
-    return this.setCallbacks(key, callbackHash, requestCallback, refreshCallback);
+    return this.addEntry(key, callbackHash, requestCallback, refreshCallback);
   }
 
   /**
    * Set locked callbacks on for connection and credentials.
    */
-  private setCallbacks(
+  private addEntry(
     key: string,
     callbackHash: string,
     requestCallback: OIDCRequestFunction,
@@ -70,6 +70,13 @@ export class CallbackLockCache extends Cache<CallbacksEntry> {
     };
     this.entries.set(key, entry);
     return entry;
+  }
+
+  /**
+   * Create a cache key from the address and username.
+   */
+  cacheKey(address: string, username: string, callbackHash: string): string {
+    return this.hashedCacheKey(address, username, callbackHash);
   }
 }
 

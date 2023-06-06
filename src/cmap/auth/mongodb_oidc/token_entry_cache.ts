@@ -1,31 +1,21 @@
 import type { IdPServerInfo, IdPServerResponse } from '../mongodb_oidc';
-import { Cache } from './cache';
+import { Cache, ExpiringCacheEntry } from './cache';
 
-/* 5 minutes in milliseconds */
-const EXPIRATION_BUFFER_MS = 300000;
 /* Default expiration is now for when no expiration provided */
 const DEFAULT_EXPIRATION_SECS = 0;
+
 /** @internal */
-export class TokenEntry {
+export class TokenEntry extends ExpiringCacheEntry {
   tokenResult: IdPServerResponse;
   serverInfo: IdPServerInfo;
-  expiration: number;
 
   /**
    * Instantiate the entry.
    */
   constructor(tokenResult: IdPServerResponse, serverInfo: IdPServerInfo, expiration: number) {
+    super(expiration);
     this.tokenResult = tokenResult;
     this.serverInfo = serverInfo;
-    this.expiration = expiration;
-  }
-
-  /**
-   * The entry is still valid if the expiration is more than
-   * 5 minutes from the expiration time.
-   */
-  isValid() {
-    return this.expiration - Date.now() > EXPIRATION_BUFFER_MS;
   }
 }
 
@@ -47,7 +37,7 @@ export class TokenEntryCache extends Cache<TokenEntry> {
     const entry = new TokenEntry(
       tokenResult,
       serverInfo,
-      expirationTime(tokenResult.expiresInSeconds)
+      tokenResult.expiresInSeconds ?? DEFAULT_EXPIRATION_SECS
     );
     this.entries.set(this.cacheKey(address, username, callbackHash), entry);
     return entry;
@@ -77,11 +67,11 @@ export class TokenEntryCache extends Cache<TokenEntry> {
       }
     }
   }
-}
 
-/**
- * Get an expiration time in milliseconds past epoch. Defaults to immediate.
- */
-function expirationTime(expiresInSeconds?: number): number {
-  return Date.now() + (expiresInSeconds ?? DEFAULT_EXPIRATION_SECS) * 1000;
+  /**
+   * Create a cache key from the address and username.
+   */
+  cacheKey(address: string, username: string, callbackHash: string): string {
+    return this.hashedCacheKey(address, username, callbackHash);
+  }
 }

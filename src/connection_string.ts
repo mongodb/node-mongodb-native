@@ -207,7 +207,7 @@ function getUIntFromOptions(name: string, value: unknown): number {
 function* entriesFromString(value: string): Generator<[string, string]> {
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
-    const [key, value] = keyValue.split(':');
+    const [key, value] = keyValue.split(/:(.*)/);
     if (value == null) {
       throw new MongoParseError('Cannot have undefined values in key value pairs');
     }

@@ -65,7 +65,7 @@ export class CallbackWorkflow implements Workflow {
     response?: Document
   ): Promise<Document> {
     // Get the callbacks with locks from the callback lock cache.
-    const { requestCallback, refreshCallback, callbackHash } = this.callbackCache.getCallbacks(
+    const { requestCallback, refreshCallback, callbackHash } = this.callbackCache.getEntry(
       connection,
       credentials
     );

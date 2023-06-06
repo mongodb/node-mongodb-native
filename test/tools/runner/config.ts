@@ -153,6 +153,10 @@ export class TestConfiguration {
     return this.options.replicaSet;
   }
 
+  isAzureOIDC(uri: string): boolean {
+    return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf('PROVIDER_NAME:azure') > -1;
+  }
+
   newClient(dbOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
