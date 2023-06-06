@@ -319,10 +319,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     if (conn) {
-      // TODO: Check if this is correct
       // Tell the connection that we are using the streaming protocol so that the
       // connection's message stream will only read the last hello on the buffer.
-      conn.isMonitoringConnection = true;
+      const { hello } = conn;
+      monitor.heartbeatProtocol = hello && hello.topologyVersion && !monitor.isInFAASEnv;
+      conn.isStreamingMonitoringConnection = monitor.heartbeatProtocol === 'streaming';
 
       if (isInCloseState(monitor)) {
         conn.destroy({ force: true });

@@ -51,7 +51,7 @@ export class MessageStream extends Duplex {
   /** @internal */
   [kBuffer]: BufferPool;
   /** @internal */
-  isMonitoringConnection = false;
+  isStreamingMonitoringConnection = false;
 
   constructor(options: MessageStreamOptions = {}) {
     super(options);
@@ -163,7 +163,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
   };
 
   const monitorHasAnotherHello = () => {
-    if (stream.isMonitoringConnection) {
+    if (stream.isStreamingMonitoringConnection) {
       // Can we read the next message size?
       const sizeOfMessage = buffer.getInt32();
       if (sizeOfMessage != null && sizeOfMessage <= buffer.length) {

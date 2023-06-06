@@ -271,12 +271,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   // Set the whether the message stream is for a monitoring connection.
-  set isMonitoringConnection(value: boolean) {
-    this[kMessageStream].isMonitoringConnection = value;
+  set isStreamingMonitoringConnection(value: boolean) {
+    this[kMessageStream].isStreamingMonitoringConnection = value;
   }
 
-  get isMonitoringConnection(): boolean {
-    return this[kMessageStream].isMonitoringConnection;
+  get isStreamingMonitoringConnection(): boolean {
+    return this[kMessageStream].isStreamingMonitoringConnection;
   }
 
   get serviceId(): ObjectId | undefined {
@@ -342,7 +342,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
 
-    if (!operationDescription && this.isMonitoringConnection) {
+    if (!operationDescription && this.isStreamingMonitoringConnection) {
       // This is how we recover when the initial hello's requestId is not
       // the responseTo when hello responses have been skipped:
 
