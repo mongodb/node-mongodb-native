@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 
 import {
-  Collection,
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent,
-  MongoClient,
+  type Collection,
+  type CommandFailedEvent,
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
+  type MongoClient,
   OIDC_WORKFLOWS
 } from '../../mongodb';
 
