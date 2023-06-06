@@ -47,8 +47,7 @@ class NightlyVersion {
     /** @type {{'dist-tags': {nightly?: string} }} */
     const showInfo = JSON.parse(stdout);
     const version = showInfo?.['dist-tags']?.nightly ?? '0.0.0-dev.YYYYMMDD.sha.##########';
-    // TODO: return new NightlyVersion(version);
-    return new NightlyVersion('5.6.0-dev.20230605.sha.bf36a92')
+    return new NightlyVersion(version);
   }
   static async currentCommit() {
     const { stdout } = await exec('git rev-parse --short HEAD', { encoding: 'utf8' });
@@ -79,7 +78,7 @@ console.log('current published nightly:', currentPublishedNightly?.version);
 const currentCommit = await NightlyVersion.currentCommit();
 console.log('current commit sha:', currentCommit);
 
-if (currentPublishedNightly.commit === currentCommit) {
+if (true) { // || currentPublishedNightly.commit === currentCommit
   console.log('Published nightly is up to date, nothing to do');
   await shouldPublish(false);
 } else {
