@@ -29,6 +29,8 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
   sort?: Sort;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /** Return the raw result document instead of the ModifyResult */
+  returnRawResult?: boolean;
 }
 
 /** @public */
@@ -47,6 +49,8 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /** Return the raw result document instead of the ModifyResult */
+  returnRawResult?: boolean;
 }
 
 /** @public */
@@ -67,6 +71,8 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /** Return the raw result document instead of the ModifyResult */
+  returnRawResult?: boolean;
 }
 
 /** @internal */
@@ -126,6 +132,11 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       new: false,
       upsert: false
     };
+
+    // Default to returning the raw result.
+    if (!('returnRawResult' in options)) {
+      options.returnRawResult = true;
+    }
 
     const sort = formatSort(options.sort);
     if (sort) {
@@ -205,7 +216,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     // Execute the command
     super.executeCommand(server, session, cmd, (err, result) => {
       if (err) return callback(err);
-      return callback(undefined, result);
+      return callback(undefined, options.returnRawResult ? result.value ?? null : result);
     });
   }
 }

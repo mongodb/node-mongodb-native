@@ -100,12 +100,7 @@ import {
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
-/**
- * @public
- * @deprecated This type will be completely removed and findOneAndUpdate,
- *             findOneAndDelete, and findOneAndReplace will then return the
- *             actual result document.
- */
+/** @public */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
   lastErrorObject?: Document;
@@ -828,7 +823,7 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndDelete(
     filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<ModifyResult<TSchema> | TSchema | null> {
     return executeOperation(
       this.client,
       new FindOneAndDeleteOperation(
@@ -850,7 +845,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     options?: FindOneAndReplaceOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<ModifyResult<TSchema> | TSchema | null> {
     return executeOperation(
       this.client,
       new FindOneAndReplaceOperation(
@@ -873,7 +868,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     options?: FindOneAndUpdateOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<ModifyResult<TSchema> | TSchema | null> {
     return executeOperation(
       this.client,
       new FindOneAndUpdateOperation(
