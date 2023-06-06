@@ -2,8 +2,8 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-12}
-NODE_ARTIFACTS_PATH="${PROJECT_DIRECTORY:-$(pwd)}/node-artifacts"
-if [[ "$OS" = "Windows_NT" ]]; then NODE_ARTIFACTS_PATH=$(cygpath --unix "$NODE_ARTIFACTS_PATH"); fi
+
+source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
 CURL_FLAGS=(
   --fail          # Exit code 1 if request fails
@@ -90,25 +90,19 @@ else
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
 fi
 
-export PATH="$NODE_ARTIFACTS_PATH/npm_global/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
-hash -r
-
-# Set npm -g prefix to our local artifacts directory
-cat <<EOT > .npmrc
-prefix=$NODE_ARTIFACTS_PATH/npm_global
-EOT
+if [[ -z "${npm_global_prefix}" ]]; then
+  echo "npm_prefix_config not set"
+  exit 1
+fi
 
 # Cannot upgrade npm version for node 12
 if [[ $operating_system != "win" ]] && [[ $NODE_LTS_VERSION != 12 ]]; then
   # Update npm to latest when we can
   npm install --global npm@latest
   hash -r
-elif [[ $NODE_LTS_VERSION == 12 ]]; then
-  # Node.js 12 can run up to npm v8
-  npm install --global npm@8
-  hash -r
 fi
 
+echo "npm location: $(which npm)"
 echo "npm version: $(npm -v)"
 
 npm install "${NPM_OPTIONS}"
