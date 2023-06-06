@@ -51,7 +51,7 @@
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@microsoft/api-extractor": "^7.34.8",
+    "@microsoft/api-extractor": "^7.35.1",
     "@microsoft/tsdoc-config": "^0.16.2",
     "@mongodb-js/zstd": "^1.1.0",
     "@types/chai": "^4.3.5",
@@ -90,8 +90,8 @@
     "source-map-support": "^0.5.21",
     "standard-version": "^9.5.0",
     "ts-node": "^10.9.1",
-    "tsd": "^0.27.0",
-    "typescript": "^4.9.5",
+    "tsd": "^0.28.1",
+    "typescript": "^5.0.4",
     "typescript-cached-transpile": "^0.0.6",
     "v8-heapsnapshot": "^1.2.0",
     "yargs": "^17.7.2"
@@ -110,6 +110,7 @@
     "build:dts": "npm run build:ts && api-extractor run && node etc/clean_definition_files.cjs",
     "build:docs": "./etc/docs/build.ts",
     "build:typedoc": "typedoc",
+    "build:nightly": "node ./.github/scripts/nightly.mjs",
     "check:bench": "node test/benchmarks/driverBench",
     "check:coverage": "nyc npm run test:all",
     "check:integration-coverage": "nyc npm run check:test",

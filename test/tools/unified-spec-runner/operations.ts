@@ -7,20 +7,20 @@ import {
   Collection,
   CommandStartedEvent,
   Db,
-  Document,
-  GridFSFile,
-  MongoClient,
-  ObjectId,
+  type Document,
+  type GridFSFile,
+  type MongoClient,
+  type ObjectId,
   ReadConcern,
   ReadPreference,
   SERVER_DESCRIPTION_CHANGED,
   ServerType,
-  TopologyDescription,
-  TopologyType,
+  type TopologyDescription,
+  type TopologyType,
   WriteConcern
 } from '../../mongodb';
 import { getSymbolFrom, sleep } from '../../tools/utils';
-import { TestConfiguration } from '../runner/config';
+import { type TestConfiguration } from '../runner/config';
 import { EntitiesMap } from './entities';
 import { expectErrorCheck, resultCheck } from './match';
 import type { ExpectedEvent, OperationDescription } from './schema';

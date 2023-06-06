@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 
 import {
-  CommandStartedEvent,
-  Db,
-  MongoClient,
+  type CommandStartedEvent,
+  type Db,
+  type MongoClient,
   ReadConcern,
   ReadPreference,
   WriteConcern

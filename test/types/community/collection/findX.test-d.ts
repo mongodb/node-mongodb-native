@@ -1,15 +1,7 @@
 import { expectAssignable, expectNotType, expectType } from 'tsd';
 
-import type { Filter } from '../../../../src';
-import {
-  Collection,
-  Db,
-  FindCursor,
-  FindOptions,
-  MongoClient,
-  ObjectId,
-  WithId
-} from '../../../../src';
+import type { Collection, Db, Filter, FindCursor, FindOptions, WithId } from '../../../../src';
+import { MongoClient, ObjectId } from '../../../../src';
 import type { PropExists } from '../../utility_types';
 
 // collection.findX tests

@@ -1,8 +1,8 @@
 import type { Document } from '../bson';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
-import { AggregateOperation, AggregateOptions } from '../operations/aggregate';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { AggregateOperation, type AggregateOptions } from '../operations/aggregate';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
 import type { Callback, MongoDBNamespace } from '../utils';

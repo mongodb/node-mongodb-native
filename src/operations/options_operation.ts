@@ -4,7 +4,7 @@ import { MongoAPIError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AbstractOperation, OperationOptions } from './operation';
+import { AbstractOperation, type OperationOptions } from './operation';
 
 /** @internal */
 export class OptionsOperation extends AbstractOperation<Document> {

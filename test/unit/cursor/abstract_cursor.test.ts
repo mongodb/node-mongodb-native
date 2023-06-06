@@ -2,13 +2,13 @@ import { expect } from 'chai';
 
 import {
   AbstractCursor,
-  AbstractCursorOptions,
-  Callback,
+  type AbstractCursorOptions,
+  type Callback,
   ClientSession,
-  ExecutionResult,
+  type ExecutionResult,
   MongoClient,
   ns,
-  Server
+  type Server
 } from '../../mongodb';
 
 /** Minimal do nothing cursor to focus on testing the base cursor behavior */

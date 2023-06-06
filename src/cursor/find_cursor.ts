@@ -3,13 +3,13 @@ import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
-import { CountOperation, CountOptions } from '../operations/count';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
-import { FindOperation, FindOptions } from '../operations/find';
+import { CountOperation, type CountOptions } from '../operations/count';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
+import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
-import { formatSort, Sort, SortDirection } from '../sort';
-import { Callback, emitWarningOnce, mergeOptions, MongoDBNamespace } from '../utils';
+import { formatSort, type Sort, type SortDirection } from '../sort';
+import { type Callback, emitWarningOnce, mergeOptions, type MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @internal */

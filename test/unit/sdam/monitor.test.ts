@@ -9,9 +9,9 @@ import {
   Monitor,
   MonitorInterval,
   ServerDescription,
-  ServerHeartbeatFailedEvent,
-  ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
+  type ServerHeartbeatFailedEvent,
+  type ServerHeartbeatStartedEvent,
+  type ServerHeartbeatSucceededEvent,
   ServerType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';

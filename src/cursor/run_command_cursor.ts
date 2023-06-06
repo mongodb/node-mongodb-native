@@ -1,13 +1,13 @@
 import type { BSONSerializeOptions, Document, Long } from '../bson';
 import type { Db } from '../db';
 import { MongoAPIError, MongoUnexpectedServerResponseError } from '../error';
-import { executeOperation, ExecutionResult } from '../operations/execute_operation';
+import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import { GetMoreOperation } from '../operations/get_more';
 import { RunCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { Callback, ns } from '../utils';
+import { type Callback, ns } from '../utils';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */

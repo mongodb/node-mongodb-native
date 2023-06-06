@@ -5,7 +5,13 @@ import { MongoInvalidArgumentError } from '../error';
 import type { DeleteStatement } from '../operations/delete';
 import type { UpdateStatement } from '../operations/update';
 import type { Callback } from '../utils';
-import { Batch, BatchType, BulkOperationBase, BulkWriteOptions, BulkWriteResult } from './common';
+import {
+  Batch,
+  BatchType,
+  BulkOperationBase,
+  type BulkWriteOptions,
+  type BulkWriteResult
+} from './common';
 
 /** @public */
 export class UnorderedBulkOperation extends BulkOperationBase {

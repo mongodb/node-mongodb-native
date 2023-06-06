@@ -2,7 +2,7 @@ import type { Document } from '../../bson';
 import { MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 
 export class X509 extends AuthProvider {

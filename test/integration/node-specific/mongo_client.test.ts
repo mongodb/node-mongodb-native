@@ -3,9 +3,9 @@ import { once } from 'events';
 import * as sinon from 'sinon';
 
 import {
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent,
+  type CommandFailedEvent,
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
   Connection,
   Db,
   getTopology,

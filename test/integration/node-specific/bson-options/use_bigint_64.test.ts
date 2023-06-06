@@ -1,6 +1,13 @@
 import { expect } from 'chai';
 
-import { BSON, Collection, Db, MongoAPIError, MongoClient, WithId } from '../../../mongodb';
+import {
+  BSON,
+  type Collection,
+  type Db,
+  MongoAPIError,
+  type MongoClient,
+  type WithId
+} from '../../../mongodb';
 
 describe('useBigInt64 option', function () {
   let client: MongoClient;

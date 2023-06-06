@@ -2,6 +2,7 @@ import { expectAssignable, expectNotAssignable, expectNotType, expectType } from
 
 import type {
   AcceptedFields,
+  Document,
   FilterOperations,
   IntegerType,
   IsAny,
@@ -12,7 +13,7 @@ import type {
   OneOrMore,
   OnlyFieldsOfType
 } from '../mongodb';
-import { Decimal128, Document, Double, Int32, Long } from '../mongodb';
+import { Decimal128, Double, Int32, Long } from '../mongodb';
 
 expectType<IsAny<any, true, false>>(true);
 expectNotType<IsAny<number, true, false>>(true);

@@ -1,16 +1,18 @@
 import type {
   Document,
+  type FindCursor,
+  type MongoClient,
   MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
   ReadPreferenceMode,
+  type ServerApiVersion,
   SeverityLevel,
   TagSet,
   W
 } from '../../mongodb';
-import { FindCursor, MongoClient, ServerApiVersion } from '../../mongodb';
-import { TestConfiguration } from '../runner/config';
-import { UnifiedThread } from './entities';
+import { type TestConfiguration } from '../runner/config';
+import { type UnifiedThread } from './entities';
 
 export const SupportedVersion = '^1.0';
 

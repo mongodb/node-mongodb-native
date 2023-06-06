@@ -8,18 +8,18 @@ import { promisify } from 'util';
 
 import {
   BinMsg,
-  ClientMetadata,
+  type ClientMetadata,
   connect,
   Connection,
   hasSessionSupport,
-  HostAddress,
+  type HostAddress,
   isHello,
-  MessageStream,
+  type MessageStream,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
   ns,
-  OperationDescription
+  type OperationDescription
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';

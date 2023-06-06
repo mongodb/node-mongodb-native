@@ -1,14 +1,20 @@
-import { Duplex, DuplexOptions } from 'stream';
+import { Duplex, type DuplexOptions } from 'stream';
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoDecompressionError, MongoParseError } from '../error';
 import type { ClientSession } from '../sessions';
-import { BufferPool, Callback } from '../utils';
-import { BinMsg, MessageHeader, Msg, Response, WriteProtocolMessageType } from './commands';
+import { BufferPool, type Callback } from '../utils';
+import {
+  BinMsg,
+  type MessageHeader,
+  Msg,
+  Response,
+  type WriteProtocolMessageType
+} from './commands';
 import {
   compress,
   Compressor,
-  CompressorName,
+  type CompressorName,
   decompress,
   uncompressibleCommands
 } from './wire_protocol/compression';

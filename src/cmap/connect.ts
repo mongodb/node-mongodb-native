@@ -5,7 +5,6 @@ import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
 import * as tls from 'tls';
 
 import type { Document } from '../bson';
-import { Int32 } from '../bson';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import {
   MongoCompatibilityError,
@@ -17,8 +16,8 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { Callback, HostAddress, ns } from '../utils';
-import { AuthContext, AuthProvider } from './auth/auth_provider';
+import { type Callback, HostAddress, ns } from '../utils';
+import { AuthContext, type AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
 import { MongoDBAWS } from './auth/mongodb_aws';
@@ -27,7 +26,12 @@ import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
 import { ScramSHA1, ScramSHA256 } from './auth/scram';
 import { X509 } from './auth/x509';
-import { CommandOptions, Connection, ConnectionOptions, CryptoConnection } from './connection';
+import {
+  type CommandOptions,
+  Connection,
+  type ConnectionOptions,
+  CryptoConnection
+} from './connection';
 import type { ClientMetadata } from './handshake/client_metadata';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
@@ -75,14 +79,12 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
 }
 
 function checkSupportedServer(hello: Document, options: ConnectionOptions) {
+  const maxWireVersion = Number(hello.maxWireVersion);
+  const minWireVersion = Number(hello.minWireVersion);
   const serverVersionHighEnough =
-    hello &&
-    (typeof hello.maxWireVersion === 'number' || hello.maxWireVersion instanceof Int32) &&
-    hello.maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
+    !Number.isNaN(maxWireVersion) && maxWireVersion >= MIN_SUPPORTED_WIRE_VERSION;
   const serverVersionLowEnough =
-    hello &&
-    (typeof hello.minWireVersion === 'number' || hello.minWireVersion instanceof Int32) &&
-    hello.minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
+    !Number.isNaN(minWireVersion) && minWireVersion <= MAX_SUPPORTED_WIRE_VERSION;
 
   if (serverVersionHighEnough) {
     if (serverVersionLowEnough) {

@@ -2,9 +2,9 @@ import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects, Hint } from './operation';
+import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
 export const DB_AGGREGATE_COLLECTION = 1 as const;

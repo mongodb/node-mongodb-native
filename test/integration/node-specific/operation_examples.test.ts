@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import { format as f } from 'util';
 
-import { Code, enumToString, MongoClient, ProfilingLevel, ReturnDocument } from '../../mongodb';
+import {
+  Code,
+  enumToString,
+  type MongoClient,
+  ProfilingLevel,
+  ReturnDocument
+} from '../../mongodb';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { sleep as delay } from '../../tools/utils';
 import { setupDatabase } from '../shared';

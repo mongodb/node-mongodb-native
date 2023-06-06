@@ -5,17 +5,17 @@ import { promisify } from 'util';
 
 import {
   CMAP_EVENTS,
-  Connection,
+  type Connection,
   ConnectionPool,
-  ConnectionPoolOptions,
-  HostAddress,
+  type ConnectionPoolOptions,
+  type HostAddress,
   makeClientMetadata,
-  MongoClient,
-  Server,
+  type MongoClient,
+  type Server,
   shuffle
 } from '../mongodb';
 import { isAnyRequirementSatisfied } from './unified-spec-runner/unified-utils';
-import { FailPoint, sleep } from './utils';
+import { type FailPoint, sleep } from './utils';
 
 type CmapOperation =
   | { name: 'start' | 'waitForThread'; target: string }

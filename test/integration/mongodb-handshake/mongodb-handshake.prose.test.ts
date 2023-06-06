@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { getFAASEnv, MongoClient } from '../../mongodb';
+import { getFAASEnv, type MongoClient } from '../../mongodb';
 
 describe('Handshake Prose Tests', function () {
   let client: MongoClient;

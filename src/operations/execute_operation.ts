@@ -20,11 +20,11 @@ import type { Server } from '../sdam/server';
 import {
   sameServerSelector,
   secondaryWritableServerSelector,
-  ServerSelector
+  type ServerSelector
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { Callback, maybeCallback, supportsRetryableWrites } from '../utils';
+import { type Callback, maybeCallback, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;

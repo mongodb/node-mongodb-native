@@ -3,7 +3,7 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, MongoClient, MongoServerError } from '../../mongodb';
+import { MongoAWSError, type MongoClient, MongoServerError } from '../../mongodb';
 
 describe('MONGODB-AWS', function () {
   let client: MongoClient;

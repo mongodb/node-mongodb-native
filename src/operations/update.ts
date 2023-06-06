@@ -4,9 +4,9 @@ import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } 
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, hasAtomicOperators, MongoDBNamespace } from '../utils';
-import { CollationOptions, CommandOperation, CommandOperationOptions } from './command';
-import { Aspect, defineAspects, Hint } from './operation';
+import { type Callback, hasAtomicOperators, type MongoDBNamespace } from '../utils';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
 export interface UpdateOptions extends CommandOperationOptions {

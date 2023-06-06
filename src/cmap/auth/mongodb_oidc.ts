@@ -3,7 +3,7 @@ import type { Document } from 'bson';
 import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
-import { AuthContext, AuthProvider } from './auth_provider';
+import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
 import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
 import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';

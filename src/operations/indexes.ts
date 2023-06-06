@@ -6,14 +6,14 @@ import type { OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { Callback, isObject, maxWireVersion, MongoDBNamespace } from '../utils';
+import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
-  CollationOptions,
+  type CollationOptions,
   CommandOperation,
-  CommandOperationOptions,
-  OperationParent
+  type CommandOperationOptions,
+  type OperationParent
 } from './command';
-import { indexInformation, IndexInformationOptions } from './common_functions';
+import { indexInformation, type IndexInformationOptions } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([

@@ -5,16 +5,16 @@ import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
 import {
-  AutoEncryptionOptions,
-  CollectionOptions,
-  DbOptions,
-  Document,
+  type AutoEncryptionOptions,
+  type CollectionOptions,
+  type DbOptions,
+  type Document,
   getMongoDBClientEncryption,
-  MongoClient,
+  type MongoClient,
   MongoMissingDependencyError
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
-import { CmapEvent, CommandEvent, EntitiesMap } from './entities';
+import { type CmapEvent, type CommandEvent, type EntitiesMap } from './entities';
 import { matchesEvents } from './match';
 import type {
   ClientEncryption,

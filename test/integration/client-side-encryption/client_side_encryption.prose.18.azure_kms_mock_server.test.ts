@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Document } from '../../mongodb';
+import { type Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
 class KMSRequestOptions {

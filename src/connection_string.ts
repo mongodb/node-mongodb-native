@@ -7,7 +7,7 @@ import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
 import { makeClientMetadata } from './cmap/handshake/client_metadata';
-import { Compressor, CompressorName } from './cmap/wire_protocol/compression';
+import { Compressor, type CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import {
   MongoAPIError,
@@ -17,15 +17,19 @@ import {
 } from './error';
 import {
   MongoClient,
-  MongoClientOptions,
-  MongoOptions,
-  PkFactory,
-  ServerApi,
+  type MongoClientOptions,
+  type MongoOptions,
+  type PkFactory,
+  type ServerApi,
   ServerApiVersion
 } from './mongo_client';
-import { MongoLogger, MongoLoggerEnvOptions, MongoLoggerMongoClientOptions } from './mongo_logger';
-import { ReadConcern, ReadConcernLevel } from './read_concern';
-import { ReadPreference, ReadPreferenceMode } from './read_preference';
+import {
+  MongoLogger,
+  type MongoLoggerEnvOptions,
+  type MongoLoggerMongoClientOptions
+} from './mongo_logger';
+import { ReadConcern, type ReadConcernLevel } from './read_concern';
+import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
 import {
   DEFAULT_PK_FACTORY,
@@ -37,7 +41,7 @@ import {
   parseInteger,
   setDifference
 } from './utils';
-import { W, WriteConcern } from './write_concern';
+import { type W, WriteConcern } from './write_concern';
 
 const VALID_TXT_RECORDS = ['authSource', 'replicaSet', 'loadBalanced'];
 

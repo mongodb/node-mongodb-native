@@ -4,7 +4,7 @@ import { once } from 'events';
 import * as sinon from 'sinon';
 
 import {
-  Connection,
+  type Connection,
   MongoError,
   MongoErrorLabel,
   MongoNetworkError,

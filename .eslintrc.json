@@ -88,6 +88,14 @@
     ],
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/require-await": "off",
+    "@typescript-eslint/consistent-type-imports": [
+      "error",
+      {
+        "prefer": "type-imports",
+        "disallowTypeAnnotations": false,
+        "fixStyle": "inline-type-imports"
+      }
+    ],
     "no-restricted-imports": [
       "error",
       {

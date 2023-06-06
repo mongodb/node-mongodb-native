@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import {
   connect,
   Connection,
-  ConnectionOptions,
+  type ConnectionOptions,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
   MongoClient,

@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import { on } from 'events';
 
-import { Collection, CommandStartedEvent, HostAddress, MongoClient } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  HostAddress,
+  type MongoClient
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 const failPoint = {

@@ -1,14 +1,14 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { Document, Long } from '../bson';
+import { type Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
-import { Connection, ConnectionOptions } from '../cmap/connection';
+import { Connection, type ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback } from '../utils';
-import { calculateDurationInMs, EventEmitterWithState, makeStateMachine, now, ns } from '../utils';
+import type { Callback, EventEmitterWithState } from '../utils';
+import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   ServerHeartbeatFailedEvent,

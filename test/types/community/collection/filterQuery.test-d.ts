@@ -12,7 +12,13 @@ import {
 } from 'bson';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
-import { Collection, Filter, MongoClient, UpdateFilter, WithId } from '../../../../src';
+import {
+  type Collection,
+  type Filter,
+  MongoClient,
+  type UpdateFilter,
+  type WithId
+} from '../../../../src';
 
 /**
  * test the Filter type using collection.find<T>() method
