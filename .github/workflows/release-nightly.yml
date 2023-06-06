@@ -1,9 +1,10 @@
 on:
-  schedule:
-    # Timezone is UTC
-    # https://crontab.guru/#0_0_*_*_*
-    # At 00:00 every day.
-    - cron: '0 0 * * *'
+  # TODO: We can reenable cron when needed
+  # schedule:
+  #   # Timezone is UTC
+  #   # https://crontab.guru/#0_0_*_*_*
+  #   # At 00:00 every day.
+  #   - cron: '0 0 * * *'
 
   # Allows us to manually trigger a nightly
   # A nightly can be release more than one nightly in a day if the commit from main
@@ -19,8 +20,6 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: NODE-5340
       - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
@@ -28,7 +27,7 @@ jobs:
       - run: npm install -g npm
       - run: npm clean-install
       - id: build_nightly
-        run: node ./.github/scripts/nightly.mjs
+        run: npm run build:nightly
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
         run: npm publish --provenance --tag=nightly
         env:
