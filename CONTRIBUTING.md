@@ -150,7 +150,7 @@ Reviewers should use the following questions to evaluate the implementation for 
 [code-of-conduct]: CODE_OF_CONDUCT.md
 [github-perfect-pr]: https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/
 [mdb-core-values]: https://www.mongodb.com/company/
-[mtools-install]: http://blog.rueckstiess.com/mtools/install.html
+[mtools-install]: https://rueckstiess.github.io/mtools/
 [nvm-windows]: https://github.com/coreybutler/nvm-windows#installation--upgrades
 [nvm-unix]: https://github.com/nvm-sh/nvm#install--update-script
 [workspace-file]: https://gist.githubusercontent.com/nbbeeken/d831a3801b4c463648c077b27da5057b/raw/8e986843e5e28019f7c0cebe5c6fa72407bf8afb/node-mongodb-native.code-workspace
