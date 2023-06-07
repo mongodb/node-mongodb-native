@@ -1,9 +1,7 @@
-'use strict';
-const { setupDatabase } = require('../shared');
-const { MongoServerError } = require('../../mongodb');
-const chai = require('chai');
+import { expect } from 'chai';
 
-const expect = chai.expect;
+import { MongoServerError } from '../../mongodb';
+import { setupDatabase } from '../shared';
 
 describe('Explain', function () {
   let client;
@@ -27,8 +25,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithDeleteOne');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithDeleteOne');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -51,8 +49,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithDeleteMany');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithDeleteMany');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -75,8 +73,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithUpdateOne');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithUpdateOne');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -104,8 +102,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithUpdateMany');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithUpdateMany');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -133,8 +131,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithRemoveOne');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithRemoveOne');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -157,8 +155,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithRemoveMany');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithRemoveMany');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -181,8 +179,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithDistinct');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithDistinct');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -205,8 +203,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorBooleanExplainWithFindOneAndModify');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorBooleanExplainWithFindOneAndModify');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -229,8 +227,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldUseAllPlansExecutionAsTrueExplainVerbosity');
-      var collection = db.collection('test');
+      const db = client.db('shouldUseAllPlansExecutionAsTrueExplainVerbosity');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -255,8 +253,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldUseQueryPlannerAsFalseExplainVerbosity');
-      var collection = db.collection('test');
+      const db = client.db('shouldUseQueryPlannerAsFalseExplainVerbosity');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -281,8 +279,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorQueryPlannerStringExplain');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorQueryPlannerStringExplain');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -307,8 +305,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorExecutionStatsStringExplain');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorExecutionStatsStringExplain');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -334,8 +332,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorAllPlansStringExplain');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorAllPlansStringExplain');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -360,8 +358,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorStringExplainWithDistinct');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorStringExplainWithDistinct');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
@@ -385,8 +383,8 @@ describe('Explain', function () {
       }
     },
     test: function (done) {
-      var db = client.db('shouldHonorStringExplainWithFindOneAndModify');
-      var collection = db.collection('test');
+      const db = client.db('shouldHonorStringExplainWithFindOneAndModify');
+      const collection = db.collection('test');
 
       collection.insertOne({ a: 1 }, (err, res) => {
         expect(err).to.not.exist;
