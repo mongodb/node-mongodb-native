@@ -1080,7 +1080,7 @@ tasks:
           NODE_LTS_VERSION: 20
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: rapid
+          VERSION: v6.0-perf
           TOPOLOGY: server
           AUTH: noauth
       - func: run spec driver benchmarks
