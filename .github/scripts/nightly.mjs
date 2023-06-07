@@ -62,14 +62,14 @@ class NightlyVersion {
     const day = `${today.getUTCDate()}`.padStart(2, '0');
     const yyyymmdd = `${year}${month}${day}`;
 
-    const pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
-
+    let pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
     console.log('package.json version is:', pkg.version);
-    pkg.version = `${pkg.version}-dev.${yyyymmdd}.sha.${currentCommit}`;
-    console.log('package.json version updated to:', pkg.version);
 
-    await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
-    console.log('wrote package.json');
+    const version = `${pkg.version}-dev.${yyyymmdd}.sha.${currentCommit}`;
+    await exec(`npm version ${version} --git-tag-version=false`);
+
+    pkg = JSON.parse(await fs.readFile(pkgFilePath, { encoding: 'utf8' }));
+    console.log('package.json version updated to:', pkg.version);
   }
 }
 

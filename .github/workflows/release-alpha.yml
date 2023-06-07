@@ -41,7 +41,6 @@ jobs:
       - run: npm install -g npm
       - run: npm clean-install
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
-      # TODO: remove hardcoded dry-run
-      - run: npm publish --dry-run=true --provenance --tag=alpha
+      - run: npm publish --dry-run=${{ ! inputs.wetRun }} --provenance --tag=alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
