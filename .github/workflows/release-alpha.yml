@@ -1,0 +1,28 @@
+on:
+  # Allows us to manually trigger an alpha
+  # workflow_dispatch can be given an alternative 'ref' to release from a feature branch
+  workflow_dispatch:
+    inputs:
+      alphaVersion:
+        description: 'The semver version string. MUST end in -alpha.#'
+        required: true
+        type: string
+      wetRun:
+        description: 'If true, will publish to npm'
+        required: true
+        type: boolean
+
+name: release-alpha
+
+jobs:
+  release-nightly:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          [[ "${{ inputs.alphaVersion }}" =~ '-alpha(\.(0|[1-9][0-9]+))?$' ]] || { echo "Invalid alphaVersion string" ; exit 1; }
+          [[ "${{ inputs.wetRun }}" == "true" || "${{ inputs.wetRun }}" == "false" ]] || { echo "boolean wetRun must be provided" ; exit 1; }
+        shell: bash
+      - run: |
+          echo "${{ inputs.alphaVersion }}"
+          echo "${{ inputs.wetRun }}"
+        shell: bash
