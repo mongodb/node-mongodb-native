@@ -17,12 +17,22 @@ name: release-alpha
 jobs:
   release-nightly:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - run: |
           [[ "${{ inputs.alphaVersion }}" =~ '-alpha(\.(0|[1-9][0-9]+))?$' ]] || { echo "Invalid alphaVersion string" ; exit 1; }
           [[ "${{ inputs.wetRun }}" == "true" || "${{ inputs.wetRun }}" == "false" ]] || { echo "boolean wetRun must be provided" ; exit 1; }
         shell: bash
-      - run: |
-          echo "${{ inputs.alphaVersion }}"
-          echo "${{ inputs.wetRun }}"
-        shell: bash
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm
+      - run: npm clean-install
+      - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
+      # TODO: remove hardcoded dry-run
+      - run: npm publish --dry-run=true --provenance --tag=alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
