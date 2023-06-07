@@ -4,25 +4,34 @@ on:
   workflow_dispatch:
     inputs:
       alphaVersion:
-        description: 'The semver version string. MUST end in -alpha.#'
+        description: 'Enter alpha version'
         required: true
         type: string
       wetRun:
-        description: 'If true, will publish to npm'
+        description: 'run publish?'
         required: true
         type: boolean
 
 name: release-alpha
 
 jobs:
-  release-nightly:
+  release-alpha:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
     steps:
       - run: |
-          [[ "${{ inputs.alphaVersion }}" =~ '-alpha(\.(0|[1-9][0-9]+))?$' ]] || { echo "Invalid alphaVersion string" ; exit 1; }
-          [[ "${{ inputs.wetRun }}" == "true" || "${{ inputs.wetRun }}" == "false" ]] || { echo "boolean wetRun must be provided" ; exit 1; }
+          ALPHA_SEMVER_REGEXP="-alpha(\.(0|[1-9][0-9]+))?$"
+
+          if ! [[ "${{ inputs.alphaVersion }}" =~ $ALPHA_SEMVER_REGEXP ]]; then
+            echo "Invalid alphaVersion string"
+            exit 1
+          fi
+
+          if ! [[ "${{ inputs.wetRun }}" =~ ^true|false$ ]]; then
+            echo "Invalid boolean"
+            exit 1
+          fi
         shell: bash
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
