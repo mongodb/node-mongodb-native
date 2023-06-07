@@ -317,19 +317,19 @@ operations.set('findOne', async ({ entities, operation }) => {
 operations.set('findOneAndReplace', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, replacement, ...opts } = operation.arguments!;
-  return (await collection.findOneAndReplace(filter, replacement, translateOptions(opts))).value;
+  return await collection.findOneAndReplace(filter, replacement, translateOptions(opts));
 });
 
 operations.set('findOneAndUpdate', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, update, ...opts } = operation.arguments!;
-  return (await collection.findOneAndUpdate(filter, update, translateOptions(opts))).value;
+  return await collection.findOneAndUpdate(filter, update, translateOptions(opts));
 });
 
 operations.set('findOneAndDelete', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { filter, ...opts } = operation.arguments!;
-  return (await collection.findOneAndDelete(filter, opts)).value;
+  return await collection.findOneAndDelete(filter, opts);
 });
 
 operations.set('failPoint', async ({ entities, operation }) => {

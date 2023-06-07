@@ -19,9 +19,9 @@ import type {
   OptionalUnlessRequiredId,
   TODO_NODE_3286,
   UpdateFilter,
-  WithId,
   WithoutId
 } from './mongo_types';
+import { WithId } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
 import type { IndexInformationOptions } from './operations/common_functions';
@@ -822,8 +822,16 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOneAndDelete(
     filter: Filter<TSchema>,
+    options?: FindOneAndDeleteOptions & { returnRawResult: false }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndDelete(
+    filter: Filter<TSchema>,
+    options?: FindOneAndDeleteOptions & { returnRawResult: true | undefined }
+  ): Promise<WithId<TSchema> | null>;
+  async findOneAndDelete(
+    filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions
-  ): Promise<ModifyResult<TSchema> | TSchema | null> {
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndDeleteOperation(
@@ -844,8 +852,27 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions & { returnRawResult: false }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions & { returnRawResult: true }
+  ): Promise<WithId<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions
+  ): Promise<WithId<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>
+  ): Promise<WithId<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
     options?: FindOneAndReplaceOptions
-  ): Promise<ModifyResult<TSchema> | TSchema | null> {
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndReplaceOperation(
@@ -867,8 +894,18 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
-    options?: FindOneAndUpdateOptions
-  ): Promise<ModifyResult<TSchema> | TSchema | null> {
+    options?: FindOneAndReplaceOptions & { returnRawResult: false }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options?: FindOneAndReplaceOptions & { returnRawResult: true | undefined }
+  ): Promise<WithId<TSchema>>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options?: FindOneAndReplaceOptions
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndUpdateOperation(

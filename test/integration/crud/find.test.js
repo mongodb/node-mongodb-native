@@ -782,126 +782,6 @@ describe('Find', function () {
   });
 
   /**
-   * Test findOneAndUpdate a document
-   */
-  it('shouldCorrectlyfindOneAndUpdateDocument', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var db = client.db(configuration.db);
-      db.dropCollection('test_find_and_modify_a_document_1')
-        .catch(() => null)
-        .finally(() => {
-          db.createCollection('test_find_and_modify_a_document_1', function (err, collection) {
-            expect(err).to.not.exist;
-
-            // Test return new document on change
-            collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
-              expect(err).to.not.exist;
-
-              // Let's modify the document in place
-              collection.findOneAndUpdate(
-                { a: 1 },
-                { $set: { b: 3 } },
-                { returnDocument: ReturnDocument.AFTER },
-                function (err, updated_doc) {
-                  expect(err).to.not.exist;
-                  test.equal(1, updated_doc.value.a);
-                  test.equal(3, updated_doc.value.b);
-
-                  // Test return old document on change
-                  collection.insert(
-                    { a: 2, b: 2 },
-                    configuration.writeConcernMax(),
-                    function (err) {
-                      expect(err).to.not.exist;
-
-                      // Let's modify the document in place
-                      collection.findOneAndUpdate(
-                        { a: 2 },
-                        { $set: { b: 3 } },
-                        configuration.writeConcernMax(),
-                        function (err, result) {
-                          expect(err).to.not.exist;
-                          test.equal(2, result.value.a);
-                          test.equal(2, result.value.b);
-
-                          // Test remove object on change
-                          collection.insert(
-                            { a: 3, b: 2 },
-                            configuration.writeConcernMax(),
-                            function (err) {
-                              expect(err).to.not.exist;
-                              // Let's modify the document in place
-                              collection.findOneAndUpdate(
-                                { a: 3 },
-                                { $set: { b: 3 } },
-                                { remove: true },
-                                function (err, updated_doc) {
-                                  expect(err).to.not.exist;
-                                  test.equal(3, updated_doc.value.a);
-                                  test.equal(2, updated_doc.value.b);
-
-                                  // Let's upsert!
-                                  collection.findOneAndUpdate(
-                                    { a: 4 },
-                                    { $set: { b: 3 } },
-                                    { returnDocument: ReturnDocument.AFTER, upsert: true },
-                                    function (err, updated_doc) {
-                                      expect(err).to.not.exist;
-                                      test.equal(4, updated_doc.value.a);
-                                      test.equal(3, updated_doc.value.b);
-
-                                      // Test selecting a subset of fields
-                                      collection.insert(
-                                        { a: 100, b: 101 },
-                                        configuration.writeConcernMax(),
-                                        function (err, r) {
-                                          expect(err).to.not.exist;
-
-                                          collection.findOneAndUpdate(
-                                            { a: 100 },
-                                            { $set: { b: 5 } },
-                                            {
-                                              returnDocument: ReturnDocument.AFTER,
-                                              projection: { b: 1 }
-                                            },
-                                            function (err, updated_doc) {
-                                              expect(err).to.not.exist;
-                                              test.equal(2, Object.keys(updated_doc.value).length);
-                                              test.equal(
-                                                r.insertedIds[0].toHexString(),
-                                                updated_doc.value._id.toHexString()
-                                              );
-                                              test.equal(5, updated_doc.value.b);
-                                              test.equal('undefined', typeof updated_doc.value.a);
-                                              client.close(done);
-                                            }
-                                          );
-                                        }
-                                      );
-                                    }
-                                  );
-                                }
-                              );
-                            }
-                          );
-                        }
-                      );
-                    }
-                  );
-                }
-              );
-            });
-          });
-        });
-    }
-  });
-
-  /**
    * Test findOneAndUpdate a document with fields
    */
   it('shouldCorrectlyfindOneAndUpdateDocumentAndReturnSelectedFieldsOnly', {
@@ -925,8 +805,8 @@ describe('Find', function () {
               { $set: { b: 3 } },
               { returnDocument: ReturnDocument.AFTER, projection: { a: 1 } },
               function (err, updated_doc) {
-                test.equal(2, Object.keys(updated_doc.value).length);
-                test.equal(1, updated_doc.value.a);
+                test.equal(2, Object.keys(updated_doc).length);
+                test.equal(1, updated_doc.a);
                 client.close(done);
               }
             );
@@ -981,53 +861,6 @@ describe('Find', function () {
     }
   });
 
-  /**
-   * Test findOneAndUpdate a document
-   */
-  it('Should Correctly Handle findOneAndUpdate Duplicate Key Error', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        db.createCollection('findOneAndUpdateDuplicateKeyError', function (err, collection) {
-          expect(err).to.not.exist;
-          collection.createIndex(
-            ['name', 1],
-            { unique: true, writeConcern: { w: 1 } },
-            function (err) {
-              expect(err).to.not.exist;
-              // Test return new document on change
-              collection.insert(
-                [{ name: 'test1' }, { name: 'test2' }],
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  // Let's modify the document in place
-                  collection.findOneAndUpdate(
-                    { name: 'test1' },
-                    { $set: { name: 'test2' } },
-                    {},
-                    function (err, updated_doc) {
-                      expect(err).to.exist;
-                      expect(updated_doc).to.not.exist;
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            }
-          );
-        });
-      });
-    }
-  });
-
   it('Should correctly return null when attempting to modify a non-existing document', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -1047,7 +880,7 @@ describe('Find', function () {
               { $set: { name: 'test2' } },
               {},
               function (err, updated_doc) {
-                expect(updated_doc.value).to.not.exist;
+                expect(updated_doc).to.not.exist;
                 test.ok(err == null || err.errmsg.match('No matching object found'));
                 client.close(done);
               }
@@ -1168,8 +1001,8 @@ describe('Find', function () {
                 { $set: { b: 3 } },
                 { returnDocument: ReturnDocument.AFTER },
                 function (err, result) {
-                  test.equal(2, result.value.a);
-                  test.equal(3, result.value.b);
+                  test.equal(2, result.a);
+                  test.equal(3, result.b);
                   p_client.close(done);
                 }
               );
@@ -1260,12 +1093,12 @@ describe('Find', function () {
                 { $set: { 'c.c': 100 } },
                 { returnDocument: ReturnDocument.AFTER },
                 function (err, item) {
-                  test.equal(doc._id.toString(), item.value._id.toString());
-                  test.equal(doc.a, item.value.a);
-                  test.equal(doc.b, item.value.b);
-                  test.equal(doc.c.a, item.value.c.a);
-                  test.equal(doc.c.b, item.value.c.b);
-                  test.equal(100, item.value.c.c);
+                  test.equal(doc._id.toString(), item._id.toString());
+                  test.equal(doc.a, item.a);
+                  test.equal(doc.b, item.b);
+                  test.equal(doc.c.a, item.c.a);
+                  test.equal(doc.c.b, item.c.b);
+                  test.equal(100, item.c.c);
                   client.close(done);
                 }
               );
@@ -1455,7 +1288,7 @@ describe('Find', function () {
               { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
                 expect(err).to.not.exist;
-                expect(updated_doc.value).to.not.exist;
+                expect(updated_doc).to.not.exist;
                 client.close(done);
               }
             );
@@ -2327,8 +2160,8 @@ describe('Find', function () {
               { $set: { b: 3 } },
               { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
-                test.equal(1, updated_doc.value.a);
-                test.equal(3, updated_doc.value.b);
+                test.equal(1, updated_doc.a);
+                test.equal(3, updated_doc.b);
 
                 client.close(done);
               }

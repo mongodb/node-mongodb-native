@@ -87,8 +87,8 @@ try {
   const res = await db
     .collection<Account>('Account')
     .findOneAndUpdate({ name: from }, { $inc: { balance: -amount } }, opts);
-  const A = res.value!;
-  if (A.balance < 0) {
+  const A = res;
+  if (A?.balance && A.balance < 0) {
     // If A would have negative balance, fail and abort the transaction
     // `session.abortTransaction()` will undo the above `findOneAndUpdate()`
     throw new Error('Insufficient funds: ' + (A.balance + amount));
@@ -97,7 +97,7 @@ try {
   const resB = await db
     .collection<Account>('Account')
     .findOneAndUpdate({ name: to }, { $inc: { balance: amount } }, opts);
-  const B = resB.value!;
+  const B = resB;
 
   await session.commitTransaction();
   session.endSession();
