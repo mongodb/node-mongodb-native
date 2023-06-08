@@ -36,6 +36,7 @@ while IFS=$'\t' read -r -a row; do
   node_index_lts="${row[9]}"
   [[ "$node_index_version" = "version" ]] && continue # skip tsv header
   [[ "$NODE_LTS_VERSION" = "latest" ]] && break # first line is latest
+  [[ "$NODE_LTS_VERSION" = "$node_index_version" ]] && break # match full version if specified
   [[ "$NODE_LTS_VERSION" = "$node_index_major_version" ]] && break # case insensitive compare
 done < node_index.tab
 
