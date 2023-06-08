@@ -139,7 +139,7 @@ describe('monitoring', function () {
 
       const event = events[0];
       expect(event).to.not.haveOwnProperty('failure');
-      expect(monitor.connection?.isMonitoringConnection).to.be.true;
+      expect(monitor.connection?.isStreamingMonitoringConnection).to.be.true;
     });
 
     it('should ignore attempts to connect when not already closed', function (done) {

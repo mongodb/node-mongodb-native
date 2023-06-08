@@ -5,7 +5,7 @@ import * as sinon from 'sinon';
 import {
   Connection,
   LEGACY_HELLO_COMMAND,
-  MongoClient,
+  type MongoClient,
   MongoServerError,
   MongoServerSelectionError
 } from '../../mongodb';

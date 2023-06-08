@@ -231,7 +231,7 @@ describe('new Connection()', function () {
           const buffer = Buffer.concat([firstHello, secondHello, thirdHello]);
 
           connection = sinon.spy(new Connection(inputStream, connectionOptionsDefaults));
-          connection.isMonitoringConnection = true;
+          connection.isStreamingMonitoringConnection = true;
           const queueSymbol = getSymbolFrom(connection, 'queue');
           queue = connection[queueSymbol];
 
@@ -265,7 +265,7 @@ describe('new Connection()', function () {
 
           // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
           connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-          connection.isMonitoringConnection = true;
+          connection.isStreamingMonitoringConnection = true;
           const queueSymbol = getSymbolFrom(connection, 'queue');
           queue = connection[queueSymbol];
 
@@ -375,7 +375,7 @@ describe('new Connection()', function () {
 
           // @ts-expect-error: driverSocket does not fully satisfy the stream type, but that's okay
           connection = sinon.spy(new Connection(driverSocket, connectionOptionsDefaults));
-          connection.isMonitoringConnection = true;
+          connection.isStreamingMonitoringConnection = true;
           const queueSymbol = getSymbolFrom(connection, 'queue');
           queue = connection[queueSymbol];
 

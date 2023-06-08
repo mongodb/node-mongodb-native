@@ -25,7 +25,7 @@ describe('MessageStream', function () {
     it('only reads the last message in the buffer', async function () {
       const inputStream = bufferToStream(Buffer.concat([firstHello, secondHello, thirdHello]));
       const messageStream = new MessageStream();
-      messageStream.isMonitoringConnection = true;
+      messageStream.isStreamingMonitoringConnection = true;
 
       inputStream.pipe(messageStream);
       const messages = await once(messageStream, 'message');
@@ -41,7 +41,7 @@ describe('MessageStream', function () {
         Buffer.concat([firstHello, secondHello, thirdHello, partial])
       );
       const messageStream = new MessageStream();
-      messageStream.isMonitoringConnection = true;
+      messageStream.isStreamingMonitoringConnection = true;
 
       inputStream.pipe(messageStream);
       const messages = await once(messageStream, 'message');
