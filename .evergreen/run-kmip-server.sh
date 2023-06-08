@@ -2,15 +2,11 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 cd ${DRIVERS_TOOLS}/.evergreen/csfle
-if [ "Windows_NT" = "$OS" ]; then
-  PYTHON="kmstlsvenv/Scripts/python.exe"
-else
-  PYTHON="./kmstlsvenv/bin/python3"
-fi
+. ./prepare-kmsvenv.sh
 
-echo "$PYTHON"
+echo "$PYTHON_EXEC"
 
-$PYTHON -u kms_kmip_server.py \
+$PYTHON_EXEC -u kms_kmip_server.py \
   --ca_file ../x509gen/ca.pem \
   --cert_file ../x509gen/server.pem \
   --port 5698
