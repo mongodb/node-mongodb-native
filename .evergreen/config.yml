@@ -1069,7 +1069,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: run serverless tests
-  - name: run-spec-benchmark-tests
+  - name: run-spec-benchmark-tests-node-18-server-6.0
     tags:
       - run-spec-benchmark-tests
       - performance
@@ -1077,10 +1077,10 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 18
+          NODE_LTS_VERSION: v18.16.0
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: rapid
+          VERSION: v6.0-perf
           TOPOLOGY: server
           AUTH: noauth
       - func: run spec driver benchmarks
@@ -3465,9 +3465,9 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: rhel80-large
+    run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests
+      - run-spec-benchmark-tests-node-18-server-6.0
   - name: rhel80-large-fermium
     display_name: rhel8 Node14
     run_on: rhel80-large
