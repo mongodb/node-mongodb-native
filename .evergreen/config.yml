@@ -3246,17 +3246,6 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: run-mongosh-browser-repl
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: browser-repl
   - name: run-mongosh-browser-runtime-electron
     tags:
       - run-mongosh-integration-tests
@@ -3919,7 +3908,6 @@ buildvariants:
     display_name: mongosh integration tests
     run_on: ubuntu1804-large
     tasks:
-      - run-mongosh-browser-repl
       - run-mongosh-browser-runtime-electron
       - run-mongosh-cli-repl
       - run-mongosh-connectivity-tests

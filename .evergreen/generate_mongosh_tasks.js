@@ -1,5 +1,4 @@
 const scopes = [
-  'browser-repl',
   'browser-runtime-electron',
   'cli-repl',
   'connectivity-tests',
