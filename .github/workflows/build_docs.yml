@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
     - uses: ./.github/actions/setup.yml
     - run: sudo apt-get install hugo
     - name: Build Docs
