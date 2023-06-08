@@ -1,0 +1,22 @@
+on:
+  # push:
+  #   branches: [ main, 4.x ]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+name: release-please
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: node
+          package-name: mongodb
+          pull-request-title-pattern: "chore${scope}: release${component} ${version} [skip-ci]"
+    # Publication steps would be dependent on the output of the above step:
+    # steps.release.outputs.release_created
