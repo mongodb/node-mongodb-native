@@ -9,12 +9,7 @@ on:
   # Allows us to manually trigger a nightly
   # Since npm prevents duplicate releases we can run this at any time
   # As long as the commit hash has changed on main a release will be published
-  workflow_dispatch:
-    inputs:
-      wetRun:
-        description: 'run publish?'
-        required: true
-        type: boolean
+  workflow_dispatch: {}
 
 name: release-nightly
 
@@ -24,16 +19,10 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm
-      - run: npm clean-install
+      - uses: ./.github/actions/setup.yml
       - id: build_nightly
         run: npm run build:nightly
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
-        run: npm publish --dry-run=${{ ! inputs.wetRun }} --provenance --tag=nightly
+        run: npm publish --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

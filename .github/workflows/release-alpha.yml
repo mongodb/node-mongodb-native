@@ -7,10 +7,6 @@ on:
         description: 'Enter alpha version'
         required: true
         type: string
-      wetRun:
-        description: 'run publish?'
-        required: true
-        type: boolean
 
 name: release-alpha
 
@@ -20,27 +16,17 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - run: |
+      - shell: bash
+        run: |
           ALPHA_SEMVER_REGEXP="-alpha(\.(0|[1-9][0-9]+))?$"
 
           if ! [[ "${{ inputs.alphaVersion }}" =~ $ALPHA_SEMVER_REGEXP ]]; then
             echo "Invalid alphaVersion string"
             exit 1
           fi
-
-          if ! [[ "${{ inputs.wetRun }}" =~ ^true|false$ ]]; then
-            echo "Invalid boolean"
-            exit 1
-          fi
-        shell: bash
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm
-      - run: npm clean-install
+      - uses: ./.github/actions/setup.yml
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
-      - run: npm publish --dry-run=${{ ! inputs.wetRun }} --provenance --tag=alpha
+      # TODO: Remove dry-run before merging
+      - run: npm publish --dry-run --provenance --tag=alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
