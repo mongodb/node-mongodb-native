@@ -5,6 +5,9 @@ NODE_LTS_VERSION=${NODE_LTS_VERSION:-12}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
+if [[ -z "${npm_global_prefix}" ]]; then echo "npm_global_prefix is unset" && exit 1; fi
+if [[ -z "${NODE_ARTIFACTS_PATH}" ]]; then echo "NODE_ARTIFACTS_PATH is unset" && exit 1; fi
+
 CURL_FLAGS=(
   --fail          # Exit code 1 if request fails
   --compressed    # Request a compressed response should keep fetching fast
@@ -88,11 +91,6 @@ if [[ "$file_extension" = "zip" ]]; then
 else
   tar -xf "$node_archive_path" -C "${NODE_ARTIFACTS_PATH}"
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
-fi
-
-if [[ -z "${npm_global_prefix}" ]]; then
-  echo "npm_prefix_config not set"
-  exit 1
 fi
 
 # Cannot upgrade npm version for node 12
