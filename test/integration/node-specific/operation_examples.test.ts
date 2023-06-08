@@ -940,8 +940,8 @@ describe('Operations', function () {
             );
           })
           .then(function (doc) {
-            expect(doc.a).to.equal(1);
-            expect(doc.b1).to.equal(1);
+            expect(doc.value.a).to.equal(1);
+            expect(doc.value.b1).to.equal(1);
 
             // Simple findAndModify command returning the new document and
             // removing it at the same time
@@ -965,8 +965,8 @@ describe('Operations', function () {
             );
           })
           .then(function (doc) {
-            expect(doc.d).to.equal(1);
-            expect(doc.f).to.equal(1);
+            expect(doc.value.d).to.equal(1);
+            expect(doc.value.f).to.equal(1);
             return client.close();
           });
       });
@@ -1014,8 +1014,8 @@ describe('Operations', function () {
             return collection.findOneAndDelete({ b: 1 }, [['b', 1]]);
           })
           .then(function (doc) {
-            expect(doc.b).to.equal(1);
-            expect(doc.d).to.equal(1);
+            expect(doc.value.b).to.equal(1);
+            expect(doc.value.d).to.equal(1);
 
             // Verify that the document is gone
             return collection.findOne({ b: 1 });
@@ -4259,7 +4259,8 @@ describe('Operations', function () {
             return col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
           })
           .then(function (r) {
-            expect(r.b).to.equal(1);
+            expect(r.lastErrorObject.n).to.equal(1);
+            expect(r.value.b).to.equal(1);
 
             return client.close();
           });
@@ -4310,8 +4311,9 @@ describe('Operations', function () {
               }
             )
             .then(function (r) {
-              expect(r.b).to.equal(1);
-              expect(r.c).to.equal(1);
+              expect(r.lastErrorObject.n).to.equal(1);
+              expect(r.value.b).to.equal(1);
+              expect(r.value.c).to.equal(1);
 
               return client.close();
             });
@@ -4365,8 +4367,9 @@ describe('Operations', function () {
             );
           })
           .then(function (r) {
-            expect(r.b).to.equal(1);
-            expect(r.d).to.equal(1);
+            expect(r.lastErrorObject.n).to.equal(1);
+            expect(r.value.b).to.equal(1);
+            expect(r.value.d).to.equal(1);
 
             return client.close();
           });

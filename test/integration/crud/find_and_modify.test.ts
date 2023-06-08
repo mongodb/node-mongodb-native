@@ -28,7 +28,7 @@ describe('Collection (#findOneAnd...)', function () {
 
       it('returns the raw result', async function () {
         const result = await collection.findOneAndDelete({ a: 1 });
-        expect(result.b).to.equal(1);
+        expect(result.value.b).to.equal(1);
       });
     });
 
@@ -43,7 +43,7 @@ describe('Collection (#findOneAnd...)', function () {
           monitorCommands: true
         });
         client.on('commandStarted', function (event) {
-          if (event.commandName === 'findAndModify') started.push(event);
+          if (event.commandName === 'findAndModify') started.push(event.command);
         });
         collection = client.db('test').collection('findAndModifyTest');
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -179,7 +179,7 @@ describe('Collection (#findOneAnd...)', function () {
 
       it('returns the raw result', async function () {
         const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
-        expect(result.b).to.equal(1);
+        expect(result.value.b).to.equal(1);
       });
     });
 
@@ -194,7 +194,7 @@ describe('Collection (#findOneAnd...)', function () {
           monitorCommands: true
         });
         client.on('commandStarted', function (event) {
-          if (event.commandName === 'findAndModify') started.push(event);
+          if (event.commandName === 'findAndModify') started.push(event.command);
         });
         collection = client.db('test').collection('findAndModifyTest');
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -240,7 +240,7 @@ describe('Collection (#findOneAnd...)', function () {
 
         it('returns the raw result', async function () {
           const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
-          expect(result.b).to.equal(1);
+          expect(result.value.b).to.equal(1);
         });
       }
     });
@@ -365,7 +365,7 @@ describe('Collection (#findOneAnd...)', function () {
 
       it('returns the raw result', async function () {
         const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
-        expect(result.b).to.equal(1);
+        expect(result.value.b).to.equal(1);
       });
     });
 
@@ -380,7 +380,7 @@ describe('Collection (#findOneAnd...)', function () {
           monitorCommands: true
         });
         client.on('commandStarted', function (event) {
-          if (event.commandName === 'findAndModify') started.push(event);
+          if (event.commandName === 'findAndModify') started.push(event.command);
         });
         collection = client.db('test').collection('findAndModifyTest');
         await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
@@ -484,7 +484,7 @@ describe('Collection (#findOneAnd...)', function () {
 
           it('passes through the writeConcern', async function () {
             await collection.findOneAndReplace({}, { b: 1 });
-            expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+            expect(started[0].command.writeConcern).to.deep.equal({ w: 1 });
           });
         });
 
@@ -514,7 +514,7 @@ describe('Collection (#findOneAnd...)', function () {
 
           it('passes through the writeConcern', async function () {
             await collection.findOneAndReplace({}, { b: 1 });
-            expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+            expect(started[0].command.writeConcern).to.deep.equal({ w: 1 });
           });
         });
       }

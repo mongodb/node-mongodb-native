@@ -634,7 +634,7 @@ describe('CRUD API', function () {
         await collection.drop();
       });
 
-      context('when returnRawResult is false', function () {
+      context('when includeResultMetadata is true', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -642,14 +642,14 @@ describe('CRUD API', function () {
         it('returns the modify result', async function () {
           const result = await collection.findOneAndDelete(
             { a: 1 },
-            { projection: { b: 1 }, sort: { a: 1 }, returnRawResult: false }
+            { projection: { b: 1 }, sort: { a: 1 } }
           );
           expect(result?.lastErrorObject.n).to.equal(1);
           expect(result?.value.b).to.equal(1);
         });
       });
 
-      context('when returnRawResult is true', function () {
+      context('when includeResultMetadata is false', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -657,7 +657,7 @@ describe('CRUD API', function () {
         it('returns the deleted document', async function () {
           const result = await collection.findOneAndDelete(
             { a: 1 },
-            { projection: { b: 1 }, sort: { a: 1 } }
+            { projection: { b: 1 }, sort: { a: 1 }, includeResultMetadata: false }
           );
           expect(result?.b).to.equal(1);
         });
@@ -681,7 +681,7 @@ describe('CRUD API', function () {
         await collection.drop();
       });
 
-      context('when returnRawResult is false', function () {
+      context('when includeResultMetadata is true', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -694,8 +694,7 @@ describe('CRUD API', function () {
               projection: { b: 1, c: 1 },
               sort: { a: 1 },
               returnDocument: ReturnDocument.AFTER,
-              upsert: true,
-              returnRawResult: false
+              upsert: true
             }
           );
           expect(result?.lastErrorObject.n).to.equal(1);
@@ -704,7 +703,7 @@ describe('CRUD API', function () {
         });
       });
 
-      context('when returnRawResult is true', function () {
+      context('when includeResultMetadata is false', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -717,7 +716,8 @@ describe('CRUD API', function () {
               projection: { b: 1, c: 1 },
               sort: { a: 1 },
               returnDocument: ReturnDocument.AFTER,
-              upsert: true
+              upsert: true,
+              includeResultMetadata: false
             }
           );
           expect(result?.b).to.equal(1);
@@ -743,7 +743,7 @@ describe('CRUD API', function () {
         await collection.drop();
       });
 
-      context('when returnRawResult is false', function () {
+      context('when includeResultMetadata is true', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -756,8 +756,7 @@ describe('CRUD API', function () {
               projection: { b: 1, d: 1 },
               sort: { a: 1 },
               returnDocument: ReturnDocument.AFTER,
-              upsert: true,
-              returnRawResult: false
+              upsert: true
             }
           );
           expect(result?.lastErrorObject.n).to.equal(1);
@@ -766,7 +765,7 @@ describe('CRUD API', function () {
         });
       });
 
-      context('when returnRawResult is true', function () {
+      context('when includeResultMetadata is false', function () {
         beforeEach(async function () {
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
@@ -779,7 +778,8 @@ describe('CRUD API', function () {
               projection: { b: 1, d: 1 },
               sort: { a: 1 },
               returnDocument: ReturnDocument.AFTER,
-              upsert: true
+              upsert: true,
+              includeResultMetadata: false
             }
           );
           expect(result?.b).to.equal(1);

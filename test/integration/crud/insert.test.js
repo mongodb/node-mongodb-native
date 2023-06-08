@@ -886,7 +886,7 @@ describe('crud - insert', function () {
                       serializeFunctions: true
                     },
                     function (err, result) {
-                      test.ok(result.f._bsontype === 'Code');
+                      test.ok(result.value.f._bsontype === 'Code');
                       client.close(done);
                     }
                   );

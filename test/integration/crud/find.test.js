@@ -805,8 +805,8 @@ describe('Find', function () {
               { $set: { b: 3 } },
               { returnDocument: ReturnDocument.AFTER, projection: { a: 1 } },
               function (err, updated_doc) {
-                test.equal(2, Object.keys(updated_doc).length);
-                test.equal(1, updated_doc.a);
+                expect(Object.keys(updated_doc.value).length).to.equal(2);
+                expect(updated_doc.value.a).to.equal(1);
                 client.close(done);
               }
             );
@@ -880,7 +880,7 @@ describe('Find', function () {
               { $set: { name: 'test2' } },
               {},
               function (err, updated_doc) {
-                expect(updated_doc).to.not.exist;
+                expect(updated_doc.value).to.not.exist;
                 test.ok(err == null || err.errmsg.match('No matching object found'));
                 client.close(done);
               }
@@ -1001,8 +1001,8 @@ describe('Find', function () {
                 { $set: { b: 3 } },
                 { returnDocument: ReturnDocument.AFTER },
                 function (err, result) {
-                  test.equal(2, result.a);
-                  test.equal(3, result.b);
+                  expect(result.value.a).to.equal(2);
+                  expect(result.value.b).to.equal(3);
                   p_client.close(done);
                 }
               );
@@ -1093,12 +1093,12 @@ describe('Find', function () {
                 { $set: { 'c.c': 100 } },
                 { returnDocument: ReturnDocument.AFTER },
                 function (err, item) {
-                  test.equal(doc._id.toString(), item._id.toString());
-                  test.equal(doc.a, item.a);
-                  test.equal(doc.b, item.b);
-                  test.equal(doc.c.a, item.c.a);
-                  test.equal(doc.c.b, item.c.b);
-                  test.equal(100, item.c.c);
+                  expect(item.value._id.toString()).to.equal(doc._id.toString());
+                  expect(item.value.a).to.equal(doc.a);
+                  expect(item.value.b).to.equal(doc.b);
+                  expect(item.value.c.a).to.equal(doc.c.a);
+                  expect(item.value.c.b).to.equal(doc.c.b);
+                  expect(item.value.c.c).to.equal(100);
                   client.close(done);
                 }
               );
@@ -1288,7 +1288,7 @@ describe('Find', function () {
               { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
                 expect(err).to.not.exist;
-                expect(updated_doc).to.not.exist;
+                expect(updated_doc.value).to.not.exist;
                 client.close(done);
               }
             );
@@ -2160,8 +2160,8 @@ describe('Find', function () {
               { $set: { b: 3 } },
               { returnDocument: ReturnDocument.AFTER },
               function (err, updated_doc) {
-                test.equal(1, updated_doc.a);
-                test.equal(3, updated_doc.b);
+                expect(updated_doc.value.a).to.equal(1);
+                expect(updated_doc.value.b).to.equal(3);
 
                 client.close(done);
               }
