@@ -145,7 +145,8 @@ expectAssignable<SchemaWithIdNumberInterface | null>(
   ).value
 );
 expectAssignable<SchemaWithIdNumberType | null>(
-  (await typeNumberTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 }, { returnRawResult: false })).value
+  (await typeNumberTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 }, { returnRawResult: false }))
+    .value
 );
 expectAssignable<SchemaWithIdNumberInterface | null>(
   (
