@@ -82,9 +82,11 @@ const db = client.db();
 session.startTransaction();
 try {
   const opts = { session, returnOriginal: false };
-  const res = await db
-    .collection<Account>('Account')
-    .findOneAndUpdate({ name: from }, { $inc: { balance: -amount } }, opts);
+  const res = (
+    await db
+      .collection<Account>('Account')
+      .findOneAndUpdate({ name: from }, { $inc: { balance: -amount } }, opts)
+  ).value;
   const A = res;
   if (A?.balance && A.balance < 0) {
     // If A would have negative balance, fail and abort the transaction

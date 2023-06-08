@@ -822,17 +822,17 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOneAndDelete(
     filter: Filter<TSchema>,
-    options: FindOneAndDeleteOptions & { returnRawResult: false }
+    options: FindOneAndDeleteOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndDelete(
     filter: Filter<TSchema>,
-    options: FindOneAndDeleteOptions & { returnRawResult: true }
+    options: FindOneAndDeleteOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndDelete(
     filter: Filter<TSchema>,
     options: FindOneAndDeleteOptions
-  ): Promise<WithId<TSchema> | null>;
-  async findOneAndDelete(filter: Filter<TSchema>): Promise<WithId<TSchema> | null>;
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
   async findOneAndDelete(
     filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions
@@ -857,22 +857,22 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
-    options: FindOneAndReplaceOptions & { returnRawResult: false }
+    options: FindOneAndReplaceOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
-    options: FindOneAndReplaceOptions & { returnRawResult: true }
+    options: FindOneAndReplaceOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
     options: FindOneAndReplaceOptions
-  ): Promise<WithId<TSchema> | null>;
+  ): Promise<ModifyResult<TSchema>>;
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>
-  ): Promise<WithId<TSchema> | null>;
+  ): Promise<ModifyResult<TSchema>>;
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
@@ -899,22 +899,22 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
-    options: FindOneAndUpdateOptions & { returnRawResult: false }
+    options: FindOneAndUpdateOptions & { includeResultMetadata: true }
   ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
-    options: FindOneAndUpdateOptions & { returnRawResult: true }
+    options: FindOneAndUpdateOptions & { includeResultMetadata: false }
   ): Promise<WithId<TSchema> | null>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
     options: FindOneAndUpdateOptions
-  ): Promise<WithId<TSchema> | null>;
+  ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>
-  ): Promise<WithId<TSchema> | null>;
+  ): Promise<ModifyResult<TSchema>>;
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
