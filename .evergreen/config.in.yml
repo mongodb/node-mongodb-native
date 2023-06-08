@@ -96,9 +96,26 @@ functions:
   "bootstrap kms servers":
     - command: subprocess.exec
       params:
-        background: true
-        working_dir: src
         binary: bash
+        working_dir: src
+        args:
+          - .evergreen/activate-kms-venv.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/run-kmip-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
         args:
           - .evergreen/run-kms-servers.sh
         env:
