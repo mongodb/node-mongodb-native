@@ -3,11 +3,10 @@ import type { Collection } from '../collection';
 import { MongoAPIError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { AbstractCallbackOperation, type OperationOptions } from './operation';
+import { AbstractOperation, type OperationOptions } from './operation';
 
 /** @internal */
-export class OptionsOperation extends AbstractCallbackOperation<Document> {
+export class OptionsOperation extends AbstractOperation<Document> {
   override options: OperationOptions;
   collection: Collection;
 
@@ -17,29 +16,17 @@ export class OptionsOperation extends AbstractCallbackOperation<Document> {
     this.collection = collection;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const coll = this.collection;
-
-    coll.s.db
+    const [collection] = await coll.s.db
       .listCollections(
         { name: coll.collectionName },
         { ...this.options, nameOnly: false, readPreference: this.readPreference, session }
       )
-      .toArray()
-      .then(
-        collections => {
-          if (collections.length === 0) {
-            // TODO(NODE-3485)
-            return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
-          }
-
-          callback(undefined, collections[0].options);
-        },
-        error => callback(error)
-      );
+      .toArray();
+    if (collection == null || collection.options == null) {
+      throw new MongoAPIError(`collection ${coll.namespace} not found`);
+    }
+    return collection.options;
   }
 }

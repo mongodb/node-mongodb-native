@@ -1,3 +1,5 @@
+import { type Callback } from 'mongodb-legacy';
+
 import type { Document } from '../bson';
 import {
   MIN_SUPPORTED_QE_SERVER_VERSION,
@@ -9,8 +11,7 @@ import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
@@ -108,7 +109,7 @@ const INVALID_QE_VERSION =
   'Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.';
 
 /** @internal */
-export class CreateCollectionOperation extends CommandCallbackOperation<Collection> {
+export class CreateCollectionOperation extends CommandOperation<Collection> {
   override options: CreateCollectionOptions;
   db: Db;
   name: string;
@@ -121,96 +122,85 @@ export class CreateCollectionOperation extends CommandCallbackOperation<Collecti
     this.name = name;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Collection>
-  ): void {
-    (async () => {
-      const db = this.db;
-      const name = this.name;
-      const options = this.options;
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
+    const db = this.db;
+    const name = this.name;
+    const options = this.options;
 
-      const encryptedFields: Document | undefined =
-        options.encryptedFields ??
-        db.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+    const encryptedFields: Document | undefined =
+      options.encryptedFields ??
+      db.client.options.autoEncryption?.encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
-      if (encryptedFields) {
-        // Creating a QE collection required min server of 7.0.0
-        // TODO(NODE-5353): Get wire version information from connection.
-        if (
-          !server.loadBalanced &&
-          server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
-        ) {
-          throw new MongoCompatibilityError(
-            `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
-          );
-        }
-        // Create auxilliary collections for queryable encryption support.
-        const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
-        const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
+    if (encryptedFields) {
+      // Creating a QE collection required min server of 7.0.0
+      // TODO(NODE-5353): Get wire version information from connection.
+      if (
+        !server.loadBalanced &&
+        server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
+      ) {
+        throw new MongoCompatibilityError(
+          `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
+        );
+      }
+      // Create auxilliary collections for queryable encryption support.
+      const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
+      const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
 
-        for (const collectionName of [escCollection, ecocCollection]) {
-          const createOp = new CreateCollectionOperation(db, collectionName, {
-            clusteredIndex: {
-              key: { _id: 1 },
-              unique: true
-            }
-          });
-          await createOp.executeWithoutEncryptedFieldsCheck(server, session);
-        }
-
-        if (!options.encryptedFields) {
-          this.options = { ...this.options, encryptedFields };
-        }
+      for (const collectionName of [escCollection, ecocCollection]) {
+        const createOp = new CreateCollectionOperation(db, collectionName, {
+          clusteredIndex: {
+            key: { _id: 1 },
+            unique: true
+          }
+        });
+        await createOp.executeWithoutEncryptedFieldsCheck(server, session);
       }
 
-      const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
-
-      if (encryptedFields) {
-        // Create the required index for queryable encryption support.
-        const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
-        await createIndexOp.execute(server, session);
+      if (!options.encryptedFields) {
+        this.options = { ...this.options, encryptedFields };
       }
+    }
 
-      return coll;
-    })().then(
-      coll => callback(undefined, coll),
-      err => callback(err)
-    );
+    const coll = await this.executeWithoutEncryptedFieldsCheck(server, session);
+
+    if (encryptedFields) {
+      // Create the required index for queryable encryption support.
+      const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
+      await createIndexOp.execute(server, session);
+    }
+
+    return coll;
   }
 
-  private executeWithoutEncryptedFieldsCheck(
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Collection>
+  ): void {
+    throw new Error('Method not implemented.');
+  }
+
+  private async executeWithoutEncryptedFieldsCheck(
     server: Server,
     session: ClientSession | undefined
   ): Promise<Collection> {
-    return new Promise<Collection>((resolve, reject) => {
-      const db = this.db;
-      const name = this.name;
-      const options = this.options;
+    const db = this.db;
+    const name = this.name;
+    const options = this.options;
 
-      const done: Callback = err => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve(new Collection(db, name, options));
-      };
-
-      const cmd: Document = { create: name };
-      for (const n in options) {
-        if (
-          (options as any)[n] != null &&
-          typeof (options as any)[n] !== 'function' &&
-          !ILLEGAL_COMMAND_FIELDS.has(n)
-        ) {
-          cmd[n] = (options as any)[n];
-        }
+    const cmd: Document = { create: name };
+    for (const n in options) {
+      if (
+        (options as any)[n] != null &&
+        typeof (options as any)[n] !== 'function' &&
+        !ILLEGAL_COMMAND_FIELDS.has(n)
+      ) {
+        cmd[n] = (options as any)[n];
       }
-
-      // otherwise just execute the command
-      super.executeCommandCallback(server, session, cmd, done);
-    });
+    }
+    // otherwise just execute the command
+    await super.executeCommand(server, session, cmd);
+    return new Collection(db, name, options);
   }
 }
 

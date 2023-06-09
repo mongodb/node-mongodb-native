@@ -4,7 +4,11 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import {
+  CommandCallbackOperation,
+  CommandOperation,
+  type CommandOperationOptions
+} from './command';
 import { Aspect, defineAspects } from './operation';
 
 /**
@@ -58,7 +62,7 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DbStatsOperation extends CommandCallbackOperation<Document> {
+export class DbStatsOperation extends CommandOperation<Document> {
   override options: DbStatsOptions;
 
   constructor(db: Db, options: DbStatsOptions) {
@@ -66,17 +70,21 @@ export class DbStatsOperation extends CommandCallbackOperation<Document> {
     this.options = options;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {
       command.scale = this.options.scale;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

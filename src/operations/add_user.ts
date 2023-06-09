@@ -6,7 +6,7 @@ import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, emitWarningOnce, getTopology } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /**
@@ -35,7 +35,7 @@ export interface AddUserOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AddUserOperation extends CommandCallbackOperation<Document> {
+export class AddUserOperation extends CommandOperation<Document> {
   override options: AddUserOptions;
   db: Db;
   username: string;
@@ -50,11 +50,7 @@ export class AddUserOperation extends CommandCallbackOperation<Document> {
     this.options = options ?? {};
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const db = this.db;
     const username = this.username;
     const password = this.password;
@@ -64,7 +60,7 @@ export class AddUserOperation extends CommandCallbackOperation<Document> {
     // v5 removed the digestPassword option from AddUserOptions but we still want to throw
     // an error when digestPassword is provided.
     if ('digestPassword' in options && options.digestPassword != null) {
-      return callback(
+      return Promise.reject(
         new MongoInvalidArgumentError(
           'Option "digestPassword" not supported via addUser, use db.command(...) instead'
         )
@@ -89,7 +85,7 @@ export class AddUserOperation extends CommandCallbackOperation<Document> {
     try {
       topology = getTopology(db);
     } catch (error) {
-      return callback(error);
+      return Promise.reject(error);
     }
 
     const digestPassword = topology.lastHello().maxWireVersion >= 7;
@@ -117,7 +113,11 @@ export class AddUserOperation extends CommandCallbackOperation<Document> {
       command.pwd = userPassword;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
+  }
+
+  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
+    throw new Error('Method not implemented');
   }
 }
 
