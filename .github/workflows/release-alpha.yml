@@ -25,7 +25,14 @@ jobs:
             exit 1
           fi
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup.yml
+      # TODO: replace with setup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
+      - run: npm clean-install
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
       # TODO: Remove dry-run before merging
       - run: npm publish --dry-run --provenance --tag=alpha

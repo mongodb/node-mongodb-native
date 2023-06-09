@@ -1,5 +1,5 @@
 name: Setup
-description: "Installs node, driver dependencies, and builds source"
+description: 'Installs node, driver dependencies, and builds source'
 
 steps:
   - uses: actions/setup-node@v3
