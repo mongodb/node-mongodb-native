@@ -74,6 +74,7 @@ describe('CRUD API explain option', function () {
   afterEach(async function () {
     await collection.drop();
     await client.close();
+    commandsStarted = [];
   });
 
   for (const explainValue of explain) {
