@@ -29,17 +29,5 @@ jobs:
       - run: npm clean-install
       - id: update_changes
         run: npm run build:changelog
-
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "publish"
-        shell: bash
-
-  release_highlights:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "release_highlights"
-        shell: bash
-    # Publication steps would be dependent on the output of the above step:
-    # steps.release.outputs.release_created
+      - run: git add HISTORY.md
+      - run: "git commit -m 'chore: update HISTORY.md'"
