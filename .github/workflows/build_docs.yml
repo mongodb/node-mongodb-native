@@ -2,7 +2,7 @@ name: Build and commit docs
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   build:
-
     # prevent subsequent commits from triggering the job multiple times
     concurrency:
       group: ci-${{ github.ref }}
@@ -19,20 +18,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Setup NodeJS
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: 'npm'
-    - name: Install Dependencies
-      run: |
-        npm ci
-        sudo apt-get install hugo
-    - name: Build Docs
-      run: npm run build:docs -- --yes
-    - name: Open Pull Request
-      uses: peter-evans/create-pull-request@v4
-      with:
-        title: 'docs: generate docs from latest main'
-        delete-branch: true
+      - uses: actions/checkout@v3
+      # TODO: replace with setup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
+      - run: npm clean-install
+      - run: sudo apt-get install hugo
+      - name: Build Docs
+        run: npm run build:docs -- --yes
+      - name: Open Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: 'docs: generate docs from latest main'
+          delete-branch: true
