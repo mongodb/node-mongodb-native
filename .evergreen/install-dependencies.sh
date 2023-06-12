@@ -5,6 +5,9 @@ NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
+if [[ -z "${npm_global_prefix}" ]]; then echo "npm_global_prefix is unset" && exit 1; fi
+if [[ -z "${NODE_ARTIFACTS_PATH}" ]]; then echo "NODE_ARTIFACTS_PATH is unset" && exit 1; fi
+
 CURL_FLAGS=(
   --fail          # Exit code 1 if request fails
   --compressed    # Request a compressed response should keep fetching fast
@@ -33,6 +36,7 @@ while IFS=$'\t' read -r -a row; do
   node_index_lts="${row[9]}"
   [[ "$node_index_version" = "version" ]] && continue # skip tsv header
   [[ "$NODE_LTS_VERSION" = "latest" ]] && break # first line is latest
+  [[ "$NODE_LTS_VERSION" = "$node_index_version" ]] && break # match full version if specified
   [[ "$NODE_LTS_VERSION" = "$node_index_major_version" ]] && break # case insensitive compare
 done < node_index.tab
 
@@ -89,9 +93,6 @@ else
   tar -xf "$node_archive_path" -C "${NODE_ARTIFACTS_PATH}"
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
 fi
-
-export PATH="$NODE_ARTIFACTS_PATH/npm_global/bin:$NODE_ARTIFACTS_PATH/nodejs/bin:$PATH"
-hash -r
 
 if [[ $operating_system != "win" ]]; then
   # Update npm to latest when we can
