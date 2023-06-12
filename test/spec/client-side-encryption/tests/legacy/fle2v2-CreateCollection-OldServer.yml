@@ -37,3 +37,25 @@ tests:
           collection: "encryptedCollection"
         result:
           errorContains: "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption."
+      # Assert no collections were created.
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: &esc_collection_name "enxcol_.encryptedCollection.esc"
+      # ecc collection is no longer created for QEv2
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: &ecc_collection_name "enxcol_.encryptedCollection.ecc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: &ecoc_collection_name "enxcol_.encryptedCollection.ecoc"
+      - name: assertCollectionNotExists
+        object: testRunner
+        arguments:
+          database: *database_name
+          collection: encryptedCollection

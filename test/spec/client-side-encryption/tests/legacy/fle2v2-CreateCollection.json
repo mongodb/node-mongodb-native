@@ -2,7 +2,6 @@
   "runOn": [
     {
       "minServerVersion": "7.0.0",
-      "serverless": "forbid",
       "topology": [
         "replicaset",
         "sharded",
@@ -158,9 +157,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -343,9 +339,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -851,9 +844,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1048,9 +1038,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1367,9 +1354,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1635,9 +1619,6 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
-                "escCollection": null,
-                "ecocCollection": null,
-                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
