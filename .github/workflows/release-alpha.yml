@@ -34,7 +34,6 @@ jobs:
       - run: npm install -g npm@latest
       - run: npm clean-install
       - run: npm version "${{ inputs.alphaVersion }}" --git-tag-version=false
-      # TODO: Remove dry-run before merging
-      - run: npm publish --dry-run --provenance --tag=alpha
+      - run: npm publish --provenance --tag=alpha
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
