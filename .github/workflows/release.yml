@@ -17,9 +17,29 @@ jobs:
         with:
           release-type: node
           package-name: mongodb
-          pull-request-title-pattern: "chore${scope}: release${component} ${version} [skip-ci]"
+          plugins: mongodb
+          pull-request-title-pattern: 'chore${scope}: release${component} ${version} [skip-ci]'
           changelog-path: HISTORY.md
           default-branch: main # This setting is so that running the workflow against this WIP branch will still use main for search for releases
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm
+      - run: npm clean-install
+      - id: update_changes
+        run: npm run build:changelog
 
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "publish"
+        shell: bash
+
+  release_highlights:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "release_highlights"
+        shell: bash
     # Publication steps would be dependent on the output of the above step:
     # steps.release.outputs.release_created
