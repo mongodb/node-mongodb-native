@@ -17,7 +17,6 @@ jobs:
         with:
           release-type: node
           package-name: mongodb
-          plugins: mongodb
           pull-request-title-pattern: 'chore${scope}: release${component} ${version} [skip-ci]'
           changelog-path: HISTORY.md
           default-branch: main # This setting is so that running the workflow against this WIP branch will still use main for search for releases
