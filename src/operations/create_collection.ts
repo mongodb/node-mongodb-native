@@ -137,8 +137,10 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
       if (encryptedFields) {
         // Creating a QE collection required min server of 7.0.0
-        if (server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION) {
-          console.log('SERVER DESCRIPTION', server.description);
+        if (
+          !server.loadBalanced &&
+          server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
+        ) {
           throw new MongoCompatibilityError(
             `${INVALID_QE_VERSION} The minimum server version required is ${MIN_SUPPORTED_QE_SERVER_VERSION}`
           );
