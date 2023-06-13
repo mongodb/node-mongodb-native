@@ -14,12 +14,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      # TODO: replace with setup
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm@latest
-      - run: npm clean-install
+      - uses: ./.github/actions/setup.yml
       - run: npm run check:dependencies
