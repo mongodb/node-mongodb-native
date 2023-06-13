@@ -1,13 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type Db,
-  type MongoClient,
-  MongoServerError
-} from '../../mongodb';
+import { type Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
