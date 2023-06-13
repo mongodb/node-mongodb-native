@@ -1,6 +1,6 @@
 on:
-  # push:
-  #   branches: [ main, 4.x ]
+  push:
+    branches: [ main ]
   workflow_dispatch: {}
 
 permissions:
@@ -13,11 +13,22 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - id: release
+        uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
           package-name: mongodb
-          plugins: mongodb
           pull-request-title-pattern: 'chore${scope}: release${component} ${version} [skip-ci]'
           changelog-path: HISTORY.md
-          default-branch: main # This setting is so that running the workflow against this WIP branch will still use main for search for releases
+          default-branch: main
+
+      # If release-please created a release, publish to npm
+      - if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v3
+      - if: ${{ steps.release.outputs.release_created }}
+        name: setup
+        uses: ./.github/actions/setup.yml
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
