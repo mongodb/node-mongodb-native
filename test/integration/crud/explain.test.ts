@@ -1,12 +1,6 @@
 import { expect } from 'chai';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type Db,
-  type MongoClient,
-  MongoServerError
-} from '../../mongodb';
+import { type Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
 
 describe('Explain', function () {
   let client: MongoClient;
