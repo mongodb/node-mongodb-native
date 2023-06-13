@@ -21,13 +21,3 @@ jobs:
           pull-request-title-pattern: 'chore${scope}: release${component} ${version} [skip-ci]'
           changelog-path: HISTORY.md
           default-branch: main # This setting is so that running the workflow against this WIP branch will still use main for search for releases
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm
-      - run: npm clean-install
-      - id: update_changes
-        run: npm run build:changelog
-      - run: git add HISTORY.md
-      - run: "git commit -m 'chore: update HISTORY.md'"

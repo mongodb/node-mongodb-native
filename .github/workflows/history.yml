@@ -1,0 +1,55 @@
+name: history
+
+on:
+  workflow_dispatch:
+    inputs:
+      releasePr:
+        description: 'Enter release PR number'
+        required: true
+        type: number
+
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm install -g npm@latest
+      - run: npm clean-install
+
+      # See: https://github.com/googleapis/release-please/issues/1274
+
+      # Get the PRs that are in this release
+      # Outputs a list of comma seperated PR numbers, parsed from HISTORY.md
+      - id: pr_list
+        run: node .github/scripts/pr_list.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # From the list of PRs, gather the highlight sections of the PR body
+      # output JSON with "highlights" key (to preserve newlines)
+      - id: highlights
+        run: node .github/scripts/highlights.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_LIST: ${{ steps.pr_list.outputs.pr_list }}
+
+      # Update the HISTORY.md file to have the hightlights
+      # The combined output is available
+      - id: update_history
+        run: node .github/scripts/history.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HIGHLIGHTS: ${{ steps.highlights.outputs.highlights }}
+
+      # Update the release PR body to be the same as the HISTORY.md file
+      - run: gh pr edit ${{ inputs.releasePr }} --body "${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # TODO push changes to HISTORY.md file
