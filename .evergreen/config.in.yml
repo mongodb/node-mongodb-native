@@ -293,7 +293,7 @@ functions:
           source ./prepare_client_encryption.sh
           rm -f ./prepare_client_encryption.sh
 
-          export VERSION=latest
+          export VERSION=${VERSION}
           export DRIVERS_TOOLS=${DRIVERS_TOOLS}
 
           source ${PROJECT_DIRECTORY}/.evergreen/prepare-crypt-shared-lib.sh
