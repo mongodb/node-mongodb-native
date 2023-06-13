@@ -20,7 +20,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup.yml
+      - uses: ./.github/actions/setup
       - id: build_nightly
         run: npm run build:nightly
       - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
