@@ -2,7 +2,6 @@
 runOn:
     # Require server version 6.0.0 to get behavior added in SERVER-64911.
     - minServerVersion: "7.0.0"
-      serverless: "forbid"
       # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
       # FLE 2 Encrypted collections are not supported on standalone.
       topology: [ "replicaset", "sharded", "load-balanced" ]
