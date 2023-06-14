@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -18,7 +18,9 @@ jobs:
         with:
           release-type: node
           package-name: mongodb
-          pull-request-title-pattern: 'chore${scope}: release${component} ${version} [skip-ci]'
+          # Example: chore(main): release 5.7.0 [skip-ci]
+          # ${scope} - parenthesis included, base branch name
+          pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
           changelog-path: HISTORY.md
           default-branch: main
 

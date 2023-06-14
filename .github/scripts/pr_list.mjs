@@ -17,17 +17,10 @@ const historyFilePath = path.join(__dirname, '..', '..', 'HISTORY.md');
  */
 function parsePRList(history) {
   const prRegexp = /node-mongodb-native\/issues\/(?<prNum>\d+)\)/giu;
-  const lines = history.split('\n');
-  const prs = [];
-
-  for (const line of lines) {
-    const match = prRegexp.exec(line);
-    if (match?.groups?.prNum != null) {
-      prs.push(match.groups.prNum);
-    }
-  }
-
-  return prs;
+  return history
+    .split('\n')
+    .map(line => prRegexp.exec(line)?.groups?.prNum ?? '')
+    .filter(prNum => prNum !== '');
 }
 
 const historyContents = await fs.readFile(historyFilePath, { encoding: 'utf8' });

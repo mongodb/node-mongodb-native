@@ -33,14 +33,11 @@ export async function output(key, value) {
  */
 export async function getCurrentHistorySection(historyContents) {
   /** Markdown version header */
-  const VERSION_HEADER = /^#.+\(\d{4}-\d{2}-\d{2}\)$/gm;
+  const VERSION_HEADER = /^#.+\(\d{4}-\d{2}-\d{2}\)$/g;
 
   const historyLines = historyContents.split('\n');
 
-  const headerLineIndex = historyLines.findIndex(line => {
-    const headerMatches = VERSION_HEADER.exec(line);
-    return headerMatches != null;
-  });
+  const headerLineIndex = historyLines.findIndex(line => VERSION_HEADER.test(line));
 
   const headerLine = historyLines[headerLineIndex];
 
