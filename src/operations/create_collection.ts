@@ -137,6 +137,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
       if (encryptedFields) {
         // Creating a QE collection required min server of 7.0.0
+        // TODO(NODE-5353): Get wire version information from connection.
         if (
           !server.loadBalanced &&
           server.description.maxWireVersion < MIN_SUPPORTED_QE_WIRE_VERSION
