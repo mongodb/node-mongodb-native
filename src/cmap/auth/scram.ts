@@ -6,6 +6,7 @@ import { saslprep } from '../../deps';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
+  MongoMissingDependencyError,
   MongoRuntimeError
 } from '../../error';
 import { emitWarning, ns } from '../../utils';
@@ -140,7 +141,9 @@ async function continueScramConversation(
 
   let processedPassword;
   if (cryptoMethod === 'sha256') {
-    processedPassword = 'kModuleError' in saslprep ? password : saslprep(password);
+    processedPassword = MongoMissingDependencyError.isMongoMissingDependencyError(saslprep)
+      ? password
+      : saslprep(password);
   } else {
     processedPassword = passwordDigest(username, password);
   }

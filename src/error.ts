@@ -699,6 +699,16 @@ export class MongoMissingDependencyError extends MongoAPIError {
   override get name(): string {
     return 'MongoMissingDependencyError';
   }
+
+  /** @internal */
+  static isMongoMissingDependencyError(error: unknown): error is MongoMissingDependencyError {
+    return (
+      error != null &&
+      typeof error === 'object' &&
+      'name' in error &&
+      error.name === 'MongoMissingDependencyError'
+    );
+  }
 }
 /**
  * An error signifying a general system issue

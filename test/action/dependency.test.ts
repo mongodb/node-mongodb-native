@@ -84,4 +84,52 @@ describe('package.json', function () {
       });
     }
   });
+
+  const EXPECTED_IMPORTS = [
+    'bson',
+    'saslprep',
+    'sparse-bitfield',
+    'memory-pager',
+    'mongodb-connection-string-url',
+    'whatwg-url',
+    'webidl-conversions',
+    'tr46',
+    'socks',
+    'ip',
+    'smart-buffer'
+  ];
+
+  describe('mongodb imports', () => {
+    let imports: string[];
+    beforeEach(async function () {
+      for (const key of Object.keys(require.cache)) delete require.cache[key];
+      require('../../src');
+      imports = Array.from(
+        new Set(
+          Object.entries(require.cache)
+            .filter(([modKey]) => modKey.includes('/node_modules/'))
+            .map(([modKey]) => {
+              const leadingPkgName = modKey.split('/node_modules/')[1];
+              const [orgName, pkgName] = leadingPkgName.split('/');
+              if (orgName.startsWith('@')) {
+                return `${orgName}/${pkgName}`;
+              }
+              return orgName;
+            })
+        )
+      );
+    });
+
+    context('when importing mongodb', () => {
+      it('only contains the expected imports', function () {
+        expect(imports).to.deep.equal(EXPECTED_IMPORTS);
+      });
+
+      it('does not import optional dependencies', () => {
+        for (const peerDependency of EXPECTED_PEER_DEPENDENCIES) {
+          expect(imports).to.not.include(peerDependency);
+        }
+      });
+    });
+  });
 });

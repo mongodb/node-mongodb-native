@@ -8,6 +8,7 @@ import {
   MongoAWSError,
   MongoCompatibilityError,
   MongoMissingCredentialsError,
+  MongoMissingDependencyError,
   MongoRuntimeError
 } from '../../error';
 import { ByteUtils, maxWireVersion, ns, request } from '../../utils';
@@ -47,8 +48,8 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    if ('kModuleError' in aws4) {
-      throw aws4['kModuleError'];
+    if (MongoMissingDependencyError.isMongoMissingDependencyError(aws4)) {
+      throw aws4;
     }
     const { sign } = aws4;
 
@@ -182,11 +183,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
   }
 
-  const credentialProvider = getAwsCredentialProvider();
+  const credentialProvider = await getAwsCredentialProvider();
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if ('kModuleError' in credentialProvider) {
+  if (MongoMissingDependencyError.isMongoMissingDependencyError(credentialProvider)) {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {

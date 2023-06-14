@@ -1,42 +1,9 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import type { Document } from './bson';
 import type { AWSCredentials } from './cmap/auth/mongodb_aws';
 import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
 import type { Callback } from './utils';
-
-function makeErrorModule(error: any) {
-  const props = error ? { kModuleError: error } : {};
-  return new Proxy(props, {
-    get: (_: any, key: any) => {
-      if (key === 'kModuleError') {
-        return error;
-      }
-      throw error;
-    },
-    set: () => {
-      throw error;
-    }
-  });
-}
-
-export let Kerberos: typeof import('kerberos') | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
-    )
-  );
-
-export function getKerberos(): typeof Kerberos | { kModuleError: MongoMissingDependencyError } {
-  try {
-    // Ensure you always wrap an optional require in the try block NODE-3199
-    Kerberos = require('kerberos');
-    return Kerberos;
-  } catch {
-    return Kerberos;
-  }
-}
 
 export interface KerberosClient {
   step(challenge: string): Promise<string>;
@@ -47,7 +14,22 @@ export interface KerberosClient {
   unwrap(challenge: string, callback: Callback<string>): void;
 }
 
-type ZStandardLib = {
+export async function getKerberos(): Promise<
+  typeof import('kerberos') | MongoMissingDependencyError
+> {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    return require('kerberos');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
+      'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
+    );
+    missingDepError.cause = error;
+    return missingDepError;
+  }
+}
+
+export type ZSTD = {
   /**
    * Compress using zstd.
    * @param buf - Buffer to be compressed.
@@ -60,44 +42,39 @@ type ZStandardLib = {
   decompress(buf: Buffer): Promise<Buffer>;
 };
 
-export let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression'
-    )
-  );
-
-export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissingDependencyError } {
+export async function getZstd(): Promise<ZSTD | MongoMissingDependencyError> {
   try {
-    ZStandard = require('@mongodb-js/zstd');
-    return ZStandard;
-  } catch {
-    return ZStandard;
+    return require('@mongodb-js/zstd');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
+      'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression'
+    );
+    missingDepError.cause = error;
+    return missingDepError;
   }
 }
 
-type CredentialProvider = {
+type AWSCredentialProvider = {
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
 };
 
-export function getAwsCredentialProvider():
-  | CredentialProvider
-  | { kModuleError: MongoMissingDependencyError } {
+export async function getAwsCredentialProvider(): Promise<
+  AWSCredentialProvider | MongoMissingDependencyError
+> {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    const credentialProvider = require('@aws-sdk/credential-providers');
-    return credentialProvider;
-  } catch {
-    return makeErrorModule(
-      new MongoMissingDependencyError(
-        'Optional module `@aws-sdk/credential-providers` not found.' +
-          ' Please install it to enable getting aws credentials via the official sdk.'
-      )
+    return require('@aws-sdk/credential-providers');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
+      'Optional module `@aws-sdk/credential-providers` not found.' +
+        ' Please install it to enable getting aws credentials via the official sdk.'
     );
+    missingDepError.cause = error;
+    return missingDepError;
   }
 }
 
-type SnappyLib = {
+export type Snappy = {
   /**
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
@@ -111,29 +88,34 @@ type SnappyLib = {
   uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
 };
 
-export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `snappy` not found. Please install it to enable snappy compression'
-  )
-);
+export async function getSnappy(): Promise<Snappy | MongoMissingDependencyError> {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    return require('snappy');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
+      'Optional module `snappy` not found. Please install it to enable snappy compression'
+    );
+    missingDepError.cause = error;
+    return missingDepError;
+  }
+}
 
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  Snappy = require('snappy');
-} catch {} // eslint-disable-line
+export const saslprep = getSaslPrep();
 
-export let saslprep: typeof import('saslprep') | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
+function getSaslPrep(): typeof import('saslprep') | MongoMissingDependencyError {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    return require('saslprep');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
       'Optional module `saslprep` not found.' +
         ' Please install it to enable Stringprep Profile for User Names and Passwords'
-    )
-  );
-
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  saslprep = require('saslprep');
-} catch {} // eslint-disable-line
+    );
+    missingDepError.cause = error;
+    return missingDepError;
+  }
+}
 
 interface AWS4 {
   /**
@@ -176,16 +158,20 @@ interface AWS4 {
   };
 }
 
-export let aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `aws4` not found. Please install it to enable AWS authentication'
-  )
-);
+export const aws4 = getAWS4();
 
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  aws4 = require('aws4');
-} catch {} // eslint-disable-line
+function getAWS4(): AWS4 | MongoMissingDependencyError {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    return require('aws4');
+  } catch (error) {
+    const missingDepError = new MongoMissingDependencyError(
+      'Optional module `aws4` not found. Please install it to enable AWS authentication'
+    );
+    missingDepError.cause = error;
+    return missingDepError;
+  }
+}
 
 /** @public */
 export const AutoEncryptionLoggerLevel = Object.freeze({

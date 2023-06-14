@@ -1,7 +1,11 @@
 import * as dns from 'dns';
 
-import { getKerberos, type Kerberos, type KerberosClient } from '../../deps';
-import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
+import { getKerberos, type KerberosClient } from '../../deps';
+import {
+  MongoInvalidArgumentError,
+  MongoMissingCredentialsError,
+  MongoMissingDependencyError
+} from '../../error';
 import { ns } from '../../utils';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -36,7 +40,17 @@ async function externalCommand(
   }>;
 }
 
-let krb: typeof Kerberos;
+let kerberos: typeof import('kerberos') | null = null;
+async function loadKerberos() {
+  if (kerberos == null) {
+    const moduleOrError = await getKerberos();
+    if (MongoMissingDependencyError.isMongoMissingDependencyError(moduleOrError)) {
+      throw moduleOrError;
+    }
+    kerberos = moduleOrError;
+  }
+  return kerberos;
+}
 
 export class GSSAPI extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {
@@ -79,11 +93,9 @@ async function makeKerberosClient(authContext: AuthContext): Promise<KerberosCli
     );
   }
 
-  loadKrb();
-  if ('kModuleError' in krb) {
-    throw krb['kModuleError'];
-  }
-  const { initializeClient } = krb;
+  kerberos ??= await loadKerberos();
+
+  const { initializeClient } = kerberos;
 
   const { username, password } = credentials;
   const mechanismProperties = credentials.mechanismProperties as MechanismProperties;
@@ -191,14 +203,5 @@ export async function resolveCname(host: string): Promise<string> {
     return results.length > 0 ? results[0] : host;
   } catch {
     return host;
-  }
-}
-
-/**
- * Load the Kerberos library.
- */
-function loadKrb() {
-  if (!krb) {
-    krb = getKerberos();
   }
 }
