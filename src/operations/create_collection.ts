@@ -121,7 +121,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     this.name = name;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Collection>
@@ -170,9 +170,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       if (encryptedFields) {
         // Create the required index for queryable encryption support.
         const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
-        await new Promise<void>((resolve, reject) => {
-          createIndexOp.execute(server, session, err => (err ? reject(err) : resolve()));
-        });
+        await createIndexOp.execute(server, session);
       }
 
       return coll;

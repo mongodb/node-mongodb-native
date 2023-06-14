@@ -3,7 +3,12 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
-import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
+import {
+  AbstractCallbackOperation,
+  Aspect,
+  defineAspects,
+  type OperationOptions
+} from './operation';
 
 /** @internal */
 export interface GetMoreOptions extends OperationOptions {
@@ -35,7 +40,7 @@ export interface GetMoreCommand {
 }
 
 /** @internal */
-export class GetMoreOperation extends AbstractOperation {
+export class GetMoreOperation extends AbstractCallbackOperation {
   cursorId: Long;
   override options: GetMoreOptions;
 
@@ -52,7 +57,7 @@ export class GetMoreOperation extends AbstractOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

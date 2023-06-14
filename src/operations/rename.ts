@@ -38,14 +38,14 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Collection>
   ): void {
     const coll = this.collection;
 
-    super.execute(server, session, (err, doc) => {
+    super.executeCallback(server, session, (err, doc) => {
       if (err) return callback(err);
       // We have an error
       if (doc?.errmsg) {

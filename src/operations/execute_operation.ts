@@ -25,13 +25,13 @@ import {
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
 import { type Callback, maybeCallback, supportsRetryableWrites } from '../utils';
-import { AbstractOperation, Aspect } from './operation';
+import { AbstractCallbackOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
 const MMAPv1_RETRY_WRITES_ERROR_MESSAGE =
   'This MongoDB deployment does not support retryable writes. Please add retryWrites=false to your connection string.';
 
-type ResultTypeFromOperation<TOperation> = TOperation extends AbstractOperation<infer K>
+type ResultTypeFromOperation<TOperation> = TOperation extends AbstractCallbackOperation<infer K>
   ? K
   : never;
 
@@ -61,29 +61,29 @@ export interface ExecutionResult {
  * @param callback - The command result callback
  */
 export function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T): Promise<TResult>;
 export function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, callback: Callback<TResult>): void;
 export function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
 export function executeOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
   return maybeCallback(() => executeOperationAsync(client, operation), callback);
 }
 
 async function executeOperationAsync<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T): Promise<TResult> {
-  if (!(operation instanceof AbstractOperation)) {
+  if (!(operation instanceof AbstractCallbackOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
   }
@@ -152,13 +152,13 @@ async function executeOperationAsync<
 
   if (session == null) {
     // No session also means it is not retryable, early exit
-    return operation.executeAsync(server, undefined);
+    return operation.execute(server, undefined);
   }
 
   if (!operation.hasAspect(Aspect.RETRYABLE)) {
     // non-retryable operation, early exit
     try {
-      return await operation.executeAsync(server, session);
+      return await operation.execute(server, session);
     } finally {
       if (session?.owner != null && session.owner === owner) {
         await session.endSession().catch(() => null);
@@ -184,7 +184,7 @@ async function executeOperationAsync<
   }
 
   try {
-    return await operation.executeAsync(server, session);
+    return await operation.execute(server, session);
   } catch (operationError) {
     if (willRetry && operationError instanceof MongoError) {
       return await retryOperation(operation, operationError, {
@@ -209,7 +209,7 @@ type RetryOptions = {
 };
 
 async function retryOperation<
-  T extends AbstractOperation<TResult>,
+  T extends AbstractCallbackOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(
   operation: T,
@@ -257,7 +257,7 @@ async function retryOperation<
   }
 
   try {
-    return await operation.executeAsync(server, session);
+    return await operation.execute(server, session);
   } catch (retryError) {
     if (
       retryError instanceof MongoError &&
