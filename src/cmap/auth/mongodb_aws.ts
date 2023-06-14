@@ -3,12 +3,16 @@ import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4, getAwsCredentialProvider } from '../../deps';
+import {
+  aws4,
+  type AWSCredentialProvider,
+  getAwsCredentialProvider,
+  type ImportResult
+} from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
   MongoMissingCredentialsError,
-  MongoMissingDependencyError,
   MongoRuntimeError
 } from '../../error';
 import { ByteUtils, maxWireVersion, ns, request } from '../../utils';
@@ -48,10 +52,10 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    if (MongoMissingDependencyError.isMongoMissingDependencyError(aws4)) {
-      throw aws4;
+    if (aws4.status === 'rejected') {
+      throw aws4.reason;
     }
-    const { sign } = aws4;
+    const { sign } = aws4.value;
 
     if (maxWireVersion(connection) < 9) {
       throw new MongoCompatibilityError(
@@ -166,6 +170,8 @@ export interface AWSCredentials {
   expiration?: Date;
 }
 
+let awsCredentialProvider: ImportResult<AWSCredentialProvider>;
+
 async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
@@ -183,11 +189,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
   }
 
-  const credentialProvider = await getAwsCredentialProvider();
+  awsCredentialProvider ??= await getAwsCredentialProvider();
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if (MongoMissingDependencyError.isMongoMissingDependencyError(credentialProvider)) {
+  if (awsCredentialProvider.status === 'rejected') {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
@@ -228,7 +234,7 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
      * - Shared credentials and config ini files
      * - The EC2/ECS Instance Metadata Service
      */
-    const { fromNodeProviderChain } = credentialProvider;
+    const { fromNodeProviderChain } = awsCredentialProvider.value;
     const provider = fromNodeProviderChain();
     try {
       const creds = await provider();

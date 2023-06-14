@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 import { MONGO_CLIENT_EVENTS } from './constants';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
-import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
+import { type AutoEncrypter, type AutoEncryptionOptions, getMongoDBClientEncryption } from './deps';
+import { MongoInvalidArgumentError } from './error';
 import { MongoClient, type MongoClientOptions } from './mongo_client';
-import { type Callback, getMongoDBClientEncryption } from './utils';
+import { type Callback } from './utils';
 
 let AutoEncrypterClass: { new (...args: ConstructorParameters<AutoEncrypter>): AutoEncrypter };
 
@@ -119,13 +119,12 @@ export class Encrypter {
   }
 
   static checkForMongoCrypt(): void {
-    const mongodbClientEncryption = getMongoDBClientEncryption();
-    if (mongodbClientEncryption == null) {
-      throw new MongoMissingDependencyError(
-        'Auto-encryption requested, but the module is not installed. ' +
-          'Please add `mongodb-client-encryption` as a dependency of your project'
-      );
+    if (AutoEncrypterClass == null) {
+      const moduleOrError = getMongoDBClientEncryption();
+      if (moduleOrError.status === 'rejected') {
+        throw moduleOrError.reason;
+      }
+      AutoEncrypterClass = moduleOrError.value.extension(require('../lib/index')).AutoEncrypter;
     }
-    AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
   }
 }

@@ -3,11 +3,7 @@ import * as zlib from 'zlib';
 
 import { LEGACY_HELLO_COMMAND } from '../../constants';
 import { getSnappy, getZstd, type Snappy, type ZSTD } from '../../deps';
-import {
-  MongoDecompressionError,
-  MongoInvalidArgumentError,
-  MongoMissingDependencyError
-} from '../../error';
+import { MongoDecompressionError, MongoInvalidArgumentError } from '../../error';
 
 /** @public */
 export const Compressor = Object.freeze({
@@ -45,10 +41,10 @@ let zstd: ZSTD | null = null;
 async function loadZstd() {
   if (zstd == null) {
     const moduleOrError = await getZstd();
-    if (MongoMissingDependencyError.isMongoMissingDependencyError(moduleOrError)) {
-      throw moduleOrError;
+    if (moduleOrError.status === 'rejected') {
+      throw moduleOrError.reason;
     }
-    zstd = moduleOrError;
+    zstd = moduleOrError.value;
   }
   return zstd;
 }
@@ -57,10 +53,10 @@ let snappy: Snappy | null = null;
 async function loadSnappy() {
   if (snappy == null) {
     const moduleOrError = await getSnappy();
-    if (MongoMissingDependencyError.isMongoMissingDependencyError(moduleOrError)) {
-      throw moduleOrError;
+    if (moduleOrError.status === 'rejected') {
+      throw moduleOrError.reason;
     }
-    snappy = moduleOrError;
+    snappy = moduleOrError.value;
   }
   return snappy;
 }

@@ -1,11 +1,7 @@
 import * as dns from 'dns';
 
 import { getKerberos, type KerberosClient } from '../../deps';
-import {
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError,
-  MongoMissingDependencyError
-} from '../../error';
+import { MongoInvalidArgumentError, MongoMissingCredentialsError } from '../../error';
 import { ns } from '../../utils';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
@@ -44,10 +40,10 @@ let kerberos: typeof import('kerberos') | null = null;
 async function loadKerberos() {
   if (kerberos == null) {
     const moduleOrError = await getKerberos();
-    if (MongoMissingDependencyError.isMongoMissingDependencyError(moduleOrError)) {
-      throw moduleOrError;
+    if (moduleOrError.status === 'rejected') {
+      throw moduleOrError.reason;
     }
-    kerberos = moduleOrError;
+    kerberos = moduleOrError.value;
   }
   return kerberos;
 }
