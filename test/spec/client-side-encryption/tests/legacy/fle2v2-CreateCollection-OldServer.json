@@ -55,6 +55,38 @@
           "result": {
             "errorContains": "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption."
           }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "default",
+            "collection": "enxcol_.encryptedCollection.esc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "default",
+            "collection": "enxcol_.encryptedCollection.ecc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "default",
+            "collection": "enxcol_.encryptedCollection.ecoc"
+          }
+        },
+        {
+          "name": "assertCollectionNotExists",
+          "object": "testRunner",
+          "arguments": {
+            "database": "default",
+            "collection": "encryptedCollection"
+          }
         }
       ]
     }
