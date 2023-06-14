@@ -1,9 +1,15 @@
 on:
-  schedule:
-    # Timezone is UTC
-    # https://crontab.guru/#0_0_*_*_*
-    # At 00:00 every day.
-    - cron: '0 0 * * *'
+  # TODO: We can reenable cron when needed
+  # schedule:
+  #   # Timezone is UTC
+  #   # https://crontab.guru/#0_0_*_*_*
+  #   # At 00:00 every day.
+  #   - cron: '0 0 * * *'
+
+  # Allows us to manually trigger a nightly
+  # Since npm prevents duplicate releases we can run this at any time
+  # As long as the commit hash has changed on main a release will be published
+  workflow_dispatch: {}
 
 name: release-nightly
 
@@ -14,17 +20,17 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: main
+      # TODO: replace with setup
       - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*'
+          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm
+      - run: npm install -g npm@latest
       - run: npm clean-install
-      - run: npm run build:nightly
-        continue-on-error: true
-      - if: ${{ success() }}
+      - id: build_nightly
+        run: npm run build:nightly
+      - if: ${{ steps.build_nightly.outputs.publish == 'yes' }}
         run: npm publish --provenance --tag=nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

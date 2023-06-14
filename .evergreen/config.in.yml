@@ -96,9 +96,26 @@ functions:
   "bootstrap kms servers":
     - command: subprocess.exec
       params:
-        background: true
-        working_dir: src
         binary: bash
+        working_dir: src
+        args:
+          - .evergreen/activate-kms-venv.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/run-kmip-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
         args:
           - .evergreen/run-kms-servers.sh
         env:
@@ -1134,7 +1151,7 @@ tasks:
       - func: bootstrap kms servers
       - func: "run serverless tests"
 
-  - name: run-spec-benchmark-tests
+  - name: run-spec-benchmark-tests-node-18-server-6.0
     tags:
       - run-spec-benchmark-tests
       - performance
@@ -1142,10 +1159,10 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 18
+          NODE_LTS_VERSION: v18.16.0
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: rapid
+          VERSION: v6.0-perf
           TOPOLOGY: server
           AUTH: noauth
       - func: run spec driver benchmarks
@@ -1244,6 +1261,20 @@ tasks:
           args:
             - src/.evergreen/run-azure-kms-tests.sh
 
+  - name: "oidc-auth-test-azure-latest"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
+            PROVIDER_NAME: azure
+          args:
+          - .evergreen/run-oidc-tests-azure.sh
 
 task_groups:
   - name: serverless_task_group
@@ -1348,6 +1379,34 @@ task_groups:
     tasks:
       - test-azurekms-task
 
+  - name: testazureoidc_task_group
+    setup_group:
+    - func: fetch source
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |-
+          set -o errexit
+          ${PREPARE_SHELL}
+          export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
+          export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
+          export AZUREOIDC_SECRET="${testazureoidc_secret}"
+          export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
+          export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
+          export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
+    teardown_group:
+    - command: shell.exec
+      params:
+        shell: bash
+        script: |-
+          ${PREPARE_SHELL}
+          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+    - oidc-auth-test-azure-latest
+
 pre:
   - func: "fetch source"
   - func: "windows fix"
@@ -1365,6 +1424,6 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: rhel80-large
+    run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests
+      - run-spec-benchmark-tests-node-18-server-6.0

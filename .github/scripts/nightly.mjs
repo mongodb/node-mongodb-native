@@ -12,6 +12,20 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 process.env.TZ = 'Etc/UTC';
 
+async function shouldPublish(publish) {
+  const githubOutput = process.env.GITHUB_OUTPUT ?? '';
+  if (githubOutput.length === 0) {
+    console.log('output file does not exist');
+    process.exit(1);
+  }
+
+  const outputFile = await fs.open(githubOutput, 'a');
+  const output = publish ? 'publish=yes' : 'publish=no';
+  console.log('outputting:', output, 'to', githubOutput);
+  await outputFile.appendFile(output, { encoding: 'utf8' });
+  await outputFile.close();
+}
+
 /**
  * FORMAT : M.M.P-dev.YYYYMMDD.sha.##########
  * EXAMPLE: 5.6.0-dev.20230601.sha.0853c6957c
@@ -55,6 +69,7 @@ class NightlyVersion {
     console.log('package.json version updated to:', pkg.version);
 
     await fs.writeFile(pkgFilePath, JSON.stringify(pkg, undefined, 2), { encoding: 'utf8' });
+    console.log('wrote package.json');
   }
 }
 
@@ -64,8 +79,12 @@ const currentCommit = await NightlyVersion.currentCommit();
 console.log('current commit sha:', currentCommit);
 
 if (currentPublishedNightly.commit === currentCommit) {
-  console.log('Published nightly is up to date');
-  process.exit(1);
+  console.log('Published nightly is up to date, nothing to do');
+  await shouldPublish(false);
+} else {
+  await NightlyVersion.generateNightlyVersion();
+  console.log('Published nightly is behind main, updated package.json');
+  await shouldPublish(true);
 }
-await NightlyVersion.generateNightlyVersion();
-process.exit(0);
+
+console.log('done.');

@@ -276,6 +276,22 @@ describe('Connection String', function () {
         });
       });
     });
+
+    context('when TOKEN_AUDIENCE is in the properties', function () {
+      context('when it is a uri', function () {
+        const options = parseOptions(
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:api%3A%2F%2Ftest'
+        );
+
+        it('parses the uri', function () {
+          expect(options.credentials.mechanismProperties).to.deep.equal({
+            PROVIDER_NAME: 'azure',
+            TOKEN_AUDIENCE: 'api://test',
+            ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
+          });
+        });
+      });
+    });
   });
 
   it('should parse `authMechanismProperties`', function () {

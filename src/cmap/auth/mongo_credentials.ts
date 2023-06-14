@@ -1,7 +1,9 @@
 // Resolves the default auth mechanism according to
+// Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
 import {
   MongoAPIError,
+  MongoAzureError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError
 } from '../../error';
@@ -30,6 +32,7 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
+const ALLOWED_PROVIDER_NAMES: AuthMechanismProperties['PROVIDER_NAME'][] = ['aws', 'azure'];
 const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
 
 /** @internal */
@@ -41,6 +44,10 @@ export const DEFAULT_ALLOWED_HOSTS = [
   '127.0.0.1',
   '::1'
 ];
+
+/** Error for when the token audience is missing in the environment. */
+const TOKEN_AUDIENCE_MISSING_ERROR =
+  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
 
 /** @public */
 export interface AuthMechanismProperties extends Document {
@@ -54,9 +61,11 @@ export interface AuthMechanismProperties extends Document {
   /** @experimental */
   REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
   /** @experimental */
-  PROVIDER_NAME?: 'aws';
+  PROVIDER_NAME?: 'aws' | 'azure';
   /** @experimental */
   ALLOWED_HOSTS?: string[];
+  /** @experimental */
+  TOKEN_AUDIENCE?: string;
 }
 
 /** @public */
@@ -177,11 +186,20 @@ export class MongoCredentials {
       }
 
       if (
+        this.mechanismProperties.PROVIDER_NAME === 'azure' &&
+        !this.mechanismProperties.TOKEN_AUDIENCE
+      ) {
+        throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
+      }
+
+      if (
         this.mechanismProperties.PROVIDER_NAME &&
-        this.mechanismProperties.PROVIDER_NAME !== 'aws'
+        !ALLOWED_PROVIDER_NAMES.includes(this.mechanismProperties.PROVIDER_NAME)
       ) {
         throw new MongoInvalidArgumentError(
-          `Currently only a PROVIDER_NAME of 'aws' is supported for mechanism '${this.mechanism}'.`
+          `Currently only a PROVIDER_NAME in ${ALLOWED_PROVIDER_NAMES.join(
+            ','
+          )} is supported for mechanism '${this.mechanism}'.`
         );
       }
 

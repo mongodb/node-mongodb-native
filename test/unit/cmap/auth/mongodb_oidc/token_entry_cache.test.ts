@@ -48,7 +48,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('sets an immediate expiration', function () {
-        expect(entry.expiration).to.be.at.most(Date.now());
+        expect(entry?.expiration).to.be.at.most(Date.now());
       });
     });
 
@@ -67,7 +67,7 @@ describe('TokenEntryCache', function () {
       });
 
       it('sets an immediate expiration', function () {
-        expect(entry.expiration).to.be.at.most(Date.now());
+        expect(entry?.expiration).to.be.at.most(Date.now());
       });
     });
   });

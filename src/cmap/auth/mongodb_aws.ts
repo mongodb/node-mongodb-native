@@ -1,6 +1,4 @@
 import * as crypto from 'crypto';
-import * as http from 'http';
-import * as url from 'url';
 import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
@@ -12,7 +10,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, maxWireVersion, ns } from '../../utils';
+import { ByteUtils, maxWireVersion, ns, request } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -252,62 +250,4 @@ function deriveRegion(host: string) {
   }
 
   return parts[1];
-}
-
-interface RequestOptions {
-  json?: boolean;
-  method?: string;
-  timeout?: number;
-  headers?: http.OutgoingHttpHeaders;
-}
-
-async function request(uri: string): Promise<Record<string, any>>;
-async function request(
-  uri: string,
-  options?: { json?: true } & RequestOptions
-): Promise<Record<string, any>>;
-async function request(uri: string, options?: { json: false } & RequestOptions): Promise<string>;
-async function request(
-  uri: string,
-  options: RequestOptions = {}
-): Promise<string | Record<string, any>> {
-  return new Promise<string | Record<string, any>>((resolve, reject) => {
-    const requestOptions = {
-      method: 'GET',
-      timeout: 10000,
-      json: true,
-      ...url.parse(uri),
-      ...options
-    };
-
-    const req = http.request(requestOptions, res => {
-      res.setEncoding('utf8');
-
-      let data = '';
-      res.on('data', d => {
-        data += d;
-      });
-
-      res.once('end', () => {
-        if (options.json === false) {
-          resolve(data);
-          return;
-        }
-
-        try {
-          const parsed = JSON.parse(data);
-          resolve(parsed);
-        } catch {
-          // TODO(NODE-3483)
-          reject(new MongoRuntimeError(`Invalid JSON response: "${data}"`));
-        }
-      });
-    });
-
-    req.once('timeout', () =>
-      req.destroy(new MongoAWSError(`AWS request to ${uri} timed out after ${options.timeout} ms`))
-    );
-    req.once('error', error => reject(error));
-    req.end();
-  });
 }

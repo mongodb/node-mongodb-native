@@ -69,9 +69,26 @@ functions:
   bootstrap kms servers:
     - command: subprocess.exec
       params:
-        background: true
-        working_dir: src
         binary: bash
+        working_dir: src
+        args:
+          - .evergreen/activate-kms-venv.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
+        args:
+          - .evergreen/run-kmip-server.sh
+        env:
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+    - command: subprocess.exec
+      params:
+        background: true
+        binary: bash
+        working_dir: src
         args:
           - .evergreen/run-kms-servers.sh
         env:
@@ -1069,7 +1086,7 @@ tasks:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: run serverless tests
-  - name: run-spec-benchmark-tests
+  - name: run-spec-benchmark-tests-node-18-server-6.0
     tags:
       - run-spec-benchmark-tests
       - performance
@@ -1077,10 +1094,10 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 18
+          NODE_LTS_VERSION: v18.16.0
       - func: bootstrap mongo-orchestration
         vars:
-          VERSION: rapid
+          VERSION: v6.0-perf
           TOPOLOGY: server
           AUTH: noauth
       - func: run spec driver benchmarks
@@ -1168,6 +1185,20 @@ tasks:
             EXPECTED_AZUREKMS_OUTCOME: failure
           args:
             - src/.evergreen/run-azure-kms-tests.sh
+  - name: oidc-auth-test-azure-latest
+    commands:
+      - func: install dependencies
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
+            PROVIDER_NAME: azure
+          args:
+            - .evergreen/run-oidc-tests-azure.sh
   - name: test-latest-server
     tags:
       - latest
@@ -3232,17 +3263,6 @@ tasks:
       - func: run tests
         vars:
           TEST_NPM_SCRIPT: check:csfle
-  - name: run-mongosh-browser-repl
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: browser-repl
   - name: run-mongosh-browser-runtime-electron
     tags:
       - run-mongosh-integration-tests
@@ -3420,6 +3440,33 @@ task_groups:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
     tasks:
       - test-azurekms-task
+  - name: testazureoidc_task_group
+    setup_group:
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
+            export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
+            export AZUREOIDC_SECRET="${testazureoidc_secret}"
+            export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
+            export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
+            export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
+    teardown_group:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-azure-latest
 pre:
   - func: fetch source
   - func: windows fix
@@ -3435,9 +3482,9 @@ ignore:
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
-    run_on: rhel80-large
+    run_on: rhel90-dbx-perf-large
     tasks:
-      - run-spec-benchmark-tests
+      - run-spec-benchmark-tests-node-18-server-6.0
   - name: rhel80-large-fermium
     display_name: rhel8 Node14
     run_on: rhel80-large
@@ -3878,7 +3925,6 @@ buildvariants:
     display_name: mongosh integration tests
     run_on: ubuntu1804-large
     tasks:
-      - run-mongosh-browser-repl
       - run-mongosh-browser-runtime-electron
       - run-mongosh-cli-repl
       - run-mongosh-connectivity-tests
@@ -3999,6 +4045,12 @@ buildvariants:
     tasks:
       - test_azurekms_task_group
       - test-azurekms-fail-task
+  - name: ubuntu20-test-azure-oidc
+    display_name: Azure OIDC
+    run_on: ubuntu2004-small
+    batchtime: 20160
+    tasks:
+      - testazureoidc_task_group
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large
