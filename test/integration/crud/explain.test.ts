@@ -238,8 +238,8 @@ describe('Explain', function () {
     });
   });
 
-  context('when explain is set to "invalidExplain", result returns MongoServerError', () => {
-    it('should throw a catchable error with invalid explain string', async function () {
+  context('when explain is set to an unexpected value', () => {
+    it('result throws a catchable error with invalid explain string', async function () {
       const error = await collection
         .find({ a: 1 })
         .explain('invalidExplain')
