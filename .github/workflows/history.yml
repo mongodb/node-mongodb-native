@@ -14,13 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm@latest
-      - run: npm clean-install
+      - name: actions/setup
+        uses: ./.github/actions/setup
 
       # See: https://github.com/googleapis/release-please/issues/1274
 
