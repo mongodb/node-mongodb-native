@@ -2,11 +2,7 @@
 import * as url from 'node:url';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import * as process from 'node:process';
 import { getCurrentHistorySection, output } from './util.mjs';
-
-const { GITHUB_OUTPUT = '' } = process.env;
-if (GITHUB_OUTPUT.length === 0) throw new Error('Expected GITHUB_OUTPUT file path');
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 const historyFilePath = path.join(__dirname, '..', '..', 'HISTORY.md');
