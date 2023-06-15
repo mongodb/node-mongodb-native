@@ -77,21 +77,24 @@ describe('Explain', function () {
   });
 
   context('when explain is set to false', () => {
-    it('only queryPlanner property is used in explain result', async function () {
+    it('deleteOne only returns queryPlanner property in explain result', async function () {
       const explanation = await collection.deleteOne({ a: 1 }, { explain: false });
       expect(explanation).property('queryPlanner').to.exist;
+      expect(explanation).to.not.have.property('executionStats');
     });
 
     it('find returns "queryPlanner" explain result specified on cursor', async function () {
       const explanation = await collection.find({ a: 1 }).explain(false);
       expect(explanation).property('queryPlanner').to.exist;
+      expect(explanation).to.not.have.property('executionStats');
     });
   });
 
   context('when explain is set to "queryPlanner"', () => {
-    it('only queryPlanner property is used in explain result', async function () {
+    it('deleteOne returns only queryPlanner property in explain result', async function () {
       const explanation = await collection.deleteOne({ a: 1 }, { explain: 'queryPlanner' });
       expect(explanation).property('queryPlanner').to.exist;
+      expect(explanation).to.not.have.property('executionStats');
     });
 
     it('findOneAndReplace returns queryPlanner explain result', async function () {
