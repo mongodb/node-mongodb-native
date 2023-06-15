@@ -1,7 +1,4 @@
 // @ts-check
-import * as url from 'node:url';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 import * as process from 'node:process';
 import { Octokit } from '@octokit/core';
 import { output } from './util.mjs';
@@ -9,7 +6,6 @@ import { output } from './util.mjs';
 const {
   GITHUB_TOKEN = '',
   PR_LIST = '',
-  GITHUB_OUTPUT = '',
   owner = 'mongodb',
   repo = 'node-mongodb-native'
 } = process.env;

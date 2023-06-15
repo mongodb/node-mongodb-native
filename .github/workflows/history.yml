@@ -44,7 +44,10 @@ jobs:
 
       # Update the release PR body to be the same as the HISTORY.md file
       - run: |
-          gh pr edit ${{ inputs.releasePr }} --body "${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}"
+          gh pr edit ${{ inputs.releasePr }} --body-file - << EOF
+            ${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}
+          EOF
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
