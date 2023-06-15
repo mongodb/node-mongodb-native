@@ -44,7 +44,7 @@ jobs:
 
       # Update the release PR body to be the same as the HISTORY.md file
       - run: |
-          gh pr edit ${{ inputs.releasePr }} --body ":seedling: A new release!\n---\n${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}\n---\n"
+          gh pr edit ${{ inputs.releasePr }} --body "${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}"
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
