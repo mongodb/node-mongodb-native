@@ -143,6 +143,7 @@ export * from '../src/cursor/list_indexes_cursor';
 export * from '../src/cursor/run_command_cursor';
 export * from '../src/db';
 export * from '../src/deps';
+export * as deps from '../src/deps';
 export * from '../src/encrypter';
 export * from '../src/error';
 export * from '../src/explain';
