@@ -37,34 +37,23 @@ export async function getCurrentHistorySection(historyContents) {
 
   const historyLines = historyContents.split('\n');
 
+  // Search for the line with the first version header, this will be the one we're releasing
   const headerLineIndex = historyLines.findIndex(line => VERSION_HEADER.test(line));
-
-  const headerLine = historyLines[headerLineIndex];
-
   if (headerLineIndex < 0) throw new Error('Must contain version header');
-  const headerIndex = sum(historyLines.map(({ length }) => length + 1).slice(0, headerLineIndex));
 
-  console.log(
-    'Found markdown header for',
-    headerIndex,
-    JSON.stringify(historyContents.slice(headerIndex, headerIndex + 20))
-  );
+  console.log('Found markdown header current release', headerLineIndex, ':', historyLines[headerLineIndex]);
 
-  const offset = headerIndex + headerLine.length;
-  const currentHistoryEnd =
-    Number(VERSION_HEADER.exec(historyContents.slice(offset))?.index) + offset;
-  if (Number.isNaN(currentHistoryEnd))
-    throw new Error(`Expected to find next header after ${offset}`);
+  // Search lines starting after the first header, and add back the offset we sliced at
+  const nextHeaderLineIndex = historyLines
+    .slice(headerLineIndex + 1)
+    .findIndex(line => VERSION_HEADER.test(line)) + headerLineIndex + 1;
+  if (nextHeaderLineIndex < 0) throw new Error('Must contain version header');
 
-  console.log(
-    'Found markdown header previous release',
-    currentHistoryEnd,
-    JSON.stringify(historyContents.slice(currentHistoryEnd, currentHistoryEnd + 20))
-  );
+  console.log('Found markdown header previous release', nextHeaderLineIndex, ':', historyLines[nextHeaderLineIndex]);
 
   return [
-    historyContents.slice(0, headerIndex),
-    historyContents.slice(headerIndex, currentHistoryEnd),
-    historyContents.slice(currentHistoryEnd)
+    historyLines.slice(0, headerLineIndex).join('\n'),
+    historyLines.slice(headerLineIndex, nextHeaderLineIndex).join('\n'),
+    historyLines.slice(nextHeaderLineIndex).join('\n')
   ];
 }
