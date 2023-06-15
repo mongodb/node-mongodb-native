@@ -6,7 +6,7 @@ import * as process from 'node:process';
 import * as semver from 'semver';
 import { getCurrentHistorySection, output } from './util.mjs';
 
-const { HIGHLIGHTS = '', GITHUB_OUTPUT = '' } = process.env;
+const { HIGHLIGHTS = '' } = process.env;
 if (HIGHLIGHTS === '') throw new Error('HIGHLIGHTS cannot be empty');
 
 const { highlights } = JSON.parse(HIGHLIGHTS);
@@ -17,7 +17,7 @@ const packageFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 const historyContents = await fs.readFile(historyFilePath, { encoding: 'utf8' });
 
-const [beforeSection, currentHistorySection, afterSection] = await getCurrentHistorySection(
+const [, currentHistorySection] = await getCurrentHistorySection(
   historyContents
 );
 
@@ -46,10 +46,6 @@ ${history}
 
 We invite you to try the \`mongodb\` library immediately, and report any issues to the [NODE project](https://jira.mongodb.org/projects/NODE).
 `;
-
-const totalHistory = `${beforeSection}${releaseNotes}\n${afterSection}`;
-
-await fs.writeFile(historyFilePath, totalHistory, { encoding: 'utf8' });
 
 output(
   'release_notes',

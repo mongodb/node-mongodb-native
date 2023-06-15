@@ -50,5 +50,3 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-      # TODO push changes to HISTORY.md file
