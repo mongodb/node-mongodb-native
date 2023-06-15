@@ -5,6 +5,7 @@ import * as path from 'node:path';
 import * as process from 'node:process';
 import * as child_process from 'node:child_process';
 import * as util from 'node:util';
+import { output } from './util.mjs';
 const exec = util.promisify(child_process.exec);
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
@@ -12,18 +13,10 @@ const pkgFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 process.env.TZ = 'Etc/UTC';
 
+/** @param {boolean} publish */
 async function shouldPublish(publish) {
-  const githubOutput = process.env.GITHUB_OUTPUT ?? '';
-  if (githubOutput.length === 0) {
-    console.log('output file does not exist');
-    process.exit(1);
-  }
-
-  const outputFile = await fs.open(githubOutput, 'a');
-  const output = publish ? 'publish=yes' : 'publish=no';
-  console.log('outputting:', output, 'to', githubOutput);
-  await outputFile.appendFile(output, { encoding: 'utf8' });
-  await outputFile.close();
+  const answer = publish ? 'yes' : 'no';
+  output('publish', answer);
 }
 
 /**

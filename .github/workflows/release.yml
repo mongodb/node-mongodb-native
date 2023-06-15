@@ -1,6 +1,6 @@
 on:
-  # push:
-  #   branches: [ main, 4.x ]
+  push:
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
@@ -13,10 +13,25 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - id: release
+        uses: google-github-actions/release-please-action@v3
         with:
           release-type: node
           package-name: mongodb
-          pull-request-title-pattern: "chore${scope}: release${component} ${version} [skip-ci]"
-    # Publication steps would be dependent on the output of the above step:
-    # steps.release.outputs.release_created
+          # Example: chore(main): release 5.7.0 [skip-ci]
+          # ${scope} - parenthesis included, base branch name
+          pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
+          pull-request-header: ":seedling: A new release!"
+          changelog-path: HISTORY.md
+          default-branch: main
+
+      # If release-please created a release, publish to npm
+      - if: ${{ steps.release.outputs.release_created }}
+        uses: actions/checkout@v3
+      - if: ${{ steps.release.outputs.release_created }}
+        name: actions/setup
+        uses: ./.github/actions/setup
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
