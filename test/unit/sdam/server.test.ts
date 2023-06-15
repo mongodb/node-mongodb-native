@@ -64,6 +64,25 @@ describe('Server', () => {
         {} as any
       );
     });
+
+    context('when a server is created', function () {
+      let serverSpy;
+      let server;
+      beforeEach(function () {
+        server = new Server(
+          topologyWithPlaceholderClient([], {}),
+          new ServerDescription('a:1'),
+          {} as any
+        );
+        serverSpy = sinon.spy(server, 'command');
+      });
+
+      it('calls the command function through commandAsync', function () {
+        server.commandAsync();
+        expect(serverSpy).to.have.been.calledOnce;
+      });
+    });
+
     for (const loadBalanced of [true, false]) {
       const mode = loadBalanced ? 'loadBalanced' : 'non-loadBalanced';
       const contextSuffix = loadBalanced ? ' with connection provided' : '';
