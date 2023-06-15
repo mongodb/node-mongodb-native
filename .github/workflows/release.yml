@@ -32,6 +32,4 @@ jobs:
         name: actions/setup
         uses: ./.github/actions/setup
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --dry-run --provenance
