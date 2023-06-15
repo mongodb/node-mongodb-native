@@ -256,6 +256,22 @@ describe('new Connection()', function () {
         });
       });
 
+      context('when a connection is established', function () {
+        const inputStream = new InputStream();
+        let commandSpy;
+        let connection;
+
+        beforeEach(function () {
+          connection = new Connection(inputStream, connectionOptionsDefaults);
+          commandSpy = sinon.spy(connection, 'command');
+        });
+
+        it('calls the command function through commandAsync', function () {
+          connection.commandAsync();
+          expect(commandSpy).to.have.been.calledOnce;
+        });
+      });
+
       context('when requestId/responseTo do not match', function () {
         let callbackSpy;
         const document = { ok: 1 };
