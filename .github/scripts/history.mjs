@@ -51,4 +51,7 @@ const totalHistory = `${beforeSection}${releaseNotes}\n${afterSection}`;
 
 await fs.writeFile(historyFilePath, totalHistory, { encoding: 'utf8' });
 
-output('release_notes', JSON.stringify({ releaseNotes }));
+output(
+  'release_notes',
+  JSON.stringify({ releaseNotes: `:seedling: A new release!\n---\n${releaseNotes}\n---\n` })
+);
