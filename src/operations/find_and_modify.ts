@@ -133,10 +133,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       upsert: false
     };
 
-    // Default to returning the raw result.
-    if (!('includeResultMetadata' in options)) {
-      options.includeResultMetadata = true;
-    }
+    options.includeResultMetadata ??= true;
 
     const sort = formatSort(options.sort);
     if (sort) {

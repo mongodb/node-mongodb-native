@@ -288,6 +288,25 @@ const fooObjWithArray: FooWithArray = {
 const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
 
 declare const coll: Collection<{ a: number; b: string }>;
+expectType<WithId<{ a: number; b: string }> | null>((await coll.findOneAndDelete({ a: 3 })).value);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' })).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (
+    await coll.findOneAndUpdate(
+      { a: 3 },
+      {
+        $set: {
+          a: 5
+        }
+      }
+    )
+  ).value
+);
+
+// Including { includeResultMetadata: false } option will change the return type
+// to the modified document or null.
 expectType<WithId<{ a: number; b: string }> | null>(
   await coll.findOneAndDelete({ a: 3 }, { includeResultMetadata: false })
 );
@@ -299,12 +318,20 @@ expectType<WithId<{ a: number; b: string }> | null>(
   )
 );
 expectType<WithId<{ a: number; b: string }> | null>(
-  await coll.findOneAndUpdate({ a: 3 }, { $set: { a: 5 } }, { includeResultMetadata: false })
+  await coll.findOneAndUpdate(
+    { a: 3 },
+    {
+      $set: {
+        a: 5
+      }
+    },
+    { includeResultMetadata: false }
+  )
 );
 
 // projections do not change the return type - our typing doesn't support this
 expectType<WithId<{ a: number; b: string }> | null>(
-  await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 }, includeResultMetadata: false })
+  (await coll.findOneAndDelete({ a: 3 }, { projection: { _id: 0 } })).value
 );
 
 // NODE-3568: Uncomment when ModifyResult is removed in 5.0

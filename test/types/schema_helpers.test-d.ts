@@ -72,30 +72,22 @@ expectAssignable<SchemaWithIdInterface | null>(await interfaceTestCollection.fin
 expectAssignable<SchemaWithIdType>((await typeTestCollection.find().toArray())[0]);
 expectAssignable<SchemaWithIdInterface>((await interfaceTestCollection.find().toArray())[0]);
 expectAssignable<SchemaWithIdType | null>(
-  await typeTestCollection.findOneAndDelete({ a: 1 }, { includeResultMetadata: false })
+  (await typeTestCollection.findOneAndDelete({ a: 1 })).value
 );
 expectAssignable<SchemaWithIdInterface | null>(
-  await interfaceTestCollection.findOneAndDelete({ a: 1 }, { includeResultMetadata: false })
+  (await interfaceTestCollection.findOneAndDelete({ a: 1 })).value
 );
 expectAssignable<SchemaWithIdType | null>(
-  await typeTestCollection.findOneAndReplace({ a: 1 }, { a: 5 }, { includeResultMetadata: false })
+  (await typeTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
 );
 expectAssignable<SchemaWithIdInterface | null>(
-  await interfaceTestCollection.findOneAndReplace(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
+  (await interfaceTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
 );
 expectAssignable<SchemaWithIdType | null>(
-  await typeTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 }, { includeResultMetadata: false })
+  (await typeTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
 );
 expectAssignable<SchemaWithIdInterface | null>(
-  await interfaceTestCollection.findOneAndUpdate(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
+  (await interfaceTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
 );
 
 // OptionalId assignability when wrapping a schema with _id: number
@@ -123,7 +115,7 @@ expectAssignable<SchemaWithIdNumberInterface | null>(
   (await interfaceNumberTestCollection.findOneAndDelete({ a: 1 })).value
 );
 expectAssignable<SchemaWithIdNumberType | null>(
-  (await typeNumberTestCollection.findOneAndReplace({ a: 1 }, { a: 5 }, {})).value
+  (await typeNumberTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
 );
 expectAssignable<SchemaWithIdNumberInterface | null>(
   (await interfaceNumberTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })).value
@@ -133,41 +125,6 @@ expectAssignable<SchemaWithIdNumberType | null>(
 );
 expectAssignable<SchemaWithIdNumberInterface | null>(
   (await interfaceNumberTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })).value
-);
-
-expectAssignable<SchemaWithIdNumberType | null>(
-  await typeNumberTestCollection.findOneAndDelete({ a: 1 }, { includeResultMetadata: false })
-);
-expectAssignable<SchemaWithIdNumberInterface | null>(
-  await interfaceNumberTestCollection.findOneAndDelete({ a: 1 }, { includeResultMetadata: false })
-);
-expectAssignable<SchemaWithIdNumberType | null>(
-  await typeNumberTestCollection.findOneAndReplace(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
-);
-expectAssignable<SchemaWithIdNumberInterface | null>(
-  await interfaceNumberTestCollection.findOneAndReplace(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
-);
-expectAssignable<SchemaWithIdNumberType | null>(
-  await typeNumberTestCollection.findOneAndUpdate(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
-);
-expectAssignable<SchemaWithIdNumberInterface | null>(
-  await interfaceNumberTestCollection.findOneAndUpdate(
-    { a: 1 },
-    { a: 5 },
-    { includeResultMetadata: false }
-  )
 );
 
 /** ----------------------------------------------------------------------
