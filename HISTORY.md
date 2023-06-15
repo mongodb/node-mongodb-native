@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/nbbeeken/node-mongodb-native/compare/v1.0.0...v1.1.0) (2023-06-15)
+
+The MongoDB Node.js team is pleased to announce version 1.1.0 of the  package!
+
+
+### Features
+
+* thing b ([45f34b9](https://github.com/nbbeeken/node-mongodb-native/commit/45f34b948d288040e9574400721276e9bec383af))
+
+
+### Bug Fixes
+
+* thing a ([20c3d52](https://github.com/nbbeeken/node-mongodb-native/commit/20c3d524c65d339fe0f6426c6e2ff604ab73387c))
+## Documentation
+
+* [Reference](https://docs.mongodb.com/drivers/node/current/)
+* [API](https://mongodb.github.io/node-mongodb-native/1.1/)
+* [Changelog](https://github.com/mongodb/node-mongodb-native/blob/v1.1.0/HISTORY.md)
+
+We invite you to try the  library immediately, and report any issues to the [NODE project](https://jira.mongodb.org/projects/NODE).
+
 ## 1.0.0 (2023-06-15)
 
 
