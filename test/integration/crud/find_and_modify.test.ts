@@ -36,7 +36,7 @@ describe('Collection (#findOneAnd...)', function () {
       const started: CommandStartedEvent[] = [];
 
       beforeEach(async function () {
-        client = this.configuration.newClient({}, { maxPoolSize: 1 });
+        client = this.configuration.newClient({}, { maxPoolSize: 1, monitorCommands: true });
         client.on('commandStarted', function (event) {
           if (event.commandName === 'findAndModify') started.push(event);
         });
