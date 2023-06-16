@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import { promisify } from 'util';
 
 import { Binary, type Document } from '../../bson';
-import * as deps from '../../deps';
+import { saslprep } from '../../deps';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
@@ -36,7 +36,7 @@ class ScramSHA extends AuthProvider {
     }
     if (
       cryptoMethod === 'sha256' &&
-      (!('kModuleError' in deps.saslprep) || typeof deps.saslprep !== 'function')
+      ('kModuleError' in saslprep || typeof saslprep !== 'function')
     ) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
@@ -144,9 +144,7 @@ async function continueScramConversation(
   let processedPassword;
   if (cryptoMethod === 'sha256') {
     processedPassword =
-      'kModuleError' in deps.saslprep || typeof deps.saslprep !== 'function'
-        ? password
-        : deps.saslprep(password);
+      'kModuleError' in saslprep || typeof saslprep !== 'function' ? password : saslprep(password);
   } else {
     processedPassword = passwordDigest(username, password);
   }

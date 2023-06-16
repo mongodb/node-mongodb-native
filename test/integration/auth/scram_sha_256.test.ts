@@ -1,14 +1,18 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { deps, type MongoClient } from '../../mongodb';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as deps from '../../../src/deps';
+import { type MongoClient } from '../../mongodb';
 
 describe('SCRAM_SHA_256', function () {
   context('when saslprep is not a function', () => {
     let client: MongoClient;
     beforeEach(function () {
       if (!this.configuration.parameters.authenticationMechanisms.includes('SCRAM-SHA-256')) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.currentTest!.skipReason = 'Test requires that SCRAM-SHA-256 be enabled on the server.';
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.currentTest!.skip();
       }
     });
