@@ -23,6 +23,7 @@ function is42(input) {
 function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) {
   const expected = expectedObj[key];
   const actual = actualObj[key];
+  console.log('MATCH AND DIFF', key, expected, actual);
 
   if (expected === null) {
     if (key === 'readConcern') {
