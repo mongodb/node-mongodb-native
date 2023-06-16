@@ -21,8 +21,8 @@ function parsePRList(history) {
 
 const historyContents = await fs.readFile(historyFilePath, { encoding: 'utf8' });
 
-const [, currentHistorySection] = await getCurrentHistorySection(historyContents);
+const currentHistorySection = getCurrentHistorySection(historyContents);
 
 const prs = parsePRList(currentHistorySection);
 
-output('pr_list', prs.join(','));
+await output('pr_list', prs.join(','));

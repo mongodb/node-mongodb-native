@@ -17,9 +17,7 @@ const packageFilePath = path.join(__dirname, '..', '..', 'package.json');
 
 const historyContents = await fs.readFile(historyFilePath, { encoding: 'utf8' });
 
-const [, currentHistorySection] = await getCurrentHistorySection(
-  historyContents
-);
+const currentHistorySection = getCurrentHistorySection(historyContents);
 
 const version = semver.parse(
   JSON.parse(await fs.readFile(packageFilePath, { encoding: 'utf8' })).version
@@ -47,7 +45,12 @@ ${history}
 We invite you to try the \`mongodb\` library immediately, and report any issues to the [NODE project](https://jira.mongodb.org/projects/NODE).
 `;
 
-output(
-  'release_notes',
-  JSON.stringify({ releaseNotes: `:seedling: A new release!\n---\n${releaseNotes}\n---\n` })
+const releaseNotesPath = path.join(process.cwd(), 'release_notes.md');
+
+await fs.writeFile(
+  releaseNotesPath,
+  JSON.stringify(`:seedling: A new release!\n---\n${releaseNotes}\n---\n`),
+  { encoding:'utf8' }
 );
+
+await output('release_notes_path', releaseNotesPath)

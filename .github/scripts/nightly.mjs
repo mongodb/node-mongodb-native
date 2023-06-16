@@ -16,7 +16,7 @@ process.env.TZ = 'Etc/UTC';
 /** @param {boolean} publish */
 async function shouldPublish(publish) {
   const answer = publish ? 'yes' : 'no';
-  output('publish', answer);
+  await output('publish', answer);
 }
 
 /**

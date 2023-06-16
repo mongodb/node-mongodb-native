@@ -19,7 +19,7 @@ export async function output(key, value) {
 
   if (GITHUB_OUTPUT.length === 0) {
     // This is always defined in Github actions, and if it is not for some reason, tasks that follow will fail.
-    // For local testing its convenient to see what scripts would output without requiring the variable to be defined.
+    // For local testing it's convenient to see what scripts would output without requiring the variable to be defined.
     console.log('GITHUB_OUTPUT not defined, printing only');
     return;
   }
@@ -31,9 +31,9 @@ export async function output(key, value) {
 
 /**
  * @param {string} historyContents
- * @returns {Promise<[string, string, string]>}
+ * @returns {string}
  */
-export async function getCurrentHistorySection(historyContents) {
+export function getCurrentHistorySection(historyContents) {
   /** Markdown version header */
   const VERSION_HEADER = /^#.+\(\d{4}-\d{2}-\d{2}\)$/g;
 
@@ -41,7 +41,7 @@ export async function getCurrentHistorySection(historyContents) {
 
   // Search for the line with the first version header, this will be the one we're releasing
   const headerLineIndex = historyLines.findIndex(line => VERSION_HEADER.test(line));
-  if (headerLineIndex < 0) throw new Error('Must contain version header');
+  if (headerLineIndex < 0) throw new Error('Could not find any version header');
 
   console.log('Found markdown header current release', headerLineIndex, ':', historyLines[headerLineIndex]);
 
@@ -49,13 +49,9 @@ export async function getCurrentHistorySection(historyContents) {
   const nextHeaderLineIndex = historyLines
     .slice(headerLineIndex + 1)
     .findIndex(line => VERSION_HEADER.test(line)) + headerLineIndex + 1;
-  if (nextHeaderLineIndex < 0) throw new Error('Must contain version header');
+  if (nextHeaderLineIndex < 0) throw new Error(`Could not find previous version header, searched ${headerLineIndex + 1}`);
 
   console.log('Found markdown header previous release', nextHeaderLineIndex, ':', historyLines[nextHeaderLineIndex]);
 
-  return [
-    historyLines.slice(0, headerLineIndex).join('\n'),
-    historyLines.slice(headerLineIndex, nextHeaderLineIndex).join('\n'),
-    historyLines.slice(nextHeaderLineIndex).join('\n')
-  ];
+  return historyLines.slice(headerLineIndex, nextHeaderLineIndex).join('\n');
 }

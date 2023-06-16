@@ -73,4 +73,4 @@ async function pullRequestHighlights(prs) {
 console.log('List of PRs to collect highlights from:', prs);
 const highlights = await pullRequestHighlights(prs);
 
-output('highlights', JSON.stringify({ highlights }));
+await output('highlights', JSON.stringify({ highlights }));

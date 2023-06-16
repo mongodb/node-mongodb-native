@@ -34,19 +34,15 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           PR_LIST: ${{ steps.pr_list.outputs.pr_list }}
 
-      # Update the HISTORY.md file to have the hightlights
       # The combined output is available
-      - id: update_history
+      - id: release_notes
         run: node .github/scripts/history.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HIGHLIGHTS: ${{ steps.highlights.outputs.highlights }}
 
-      # Update the release PR body to be the same as the HISTORY.md file
-      - run: |
-          gh pr edit ${{ inputs.releasePr }} --body-file - << EOF
-            ${{ fromJson(steps.update_history.outputs.release_notes).releaseNotes }}
-          EOF
+      # Update the release PR body
+      - run: gh pr edit ${{ inputs.releasePr }} --body-file ${{ steps.release_notes.outputs.release_notes_path }}
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
