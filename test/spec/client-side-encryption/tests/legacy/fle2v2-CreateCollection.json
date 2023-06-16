@@ -157,6 +157,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -339,6 +342,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -844,6 +850,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1038,6 +1047,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1354,6 +1366,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
@@ -1619,6 +1634,9 @@
             "command": {
               "create": "encryptedCollection",
               "encryptedFields": {
+                "escCollection": null,
+                "ecocCollection": null,
+                "eccCollection": null,
                 "fields": [
                   {
                     "path": "firstName",
