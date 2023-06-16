@@ -62,19 +62,7 @@ export abstract class AbstractOperation<TResult = any> {
 
   [kSession]: ClientSession | undefined;
 
-  // executeAsync: (server: Server, session: ClientSession | undefined) => Promise<TResult>;
-
   constructor(options: OperationOptions = {}) {
-    // this.executeAsync = promisify(
-    //  (
-    //    server: Server,
-    //    session: ClientSession | undefined,
-    //    callback: (e: Error, r: TResult) => void
-    //  ) => {
-    //    this.execute(server, session, callback as any);
-    //  }
-    //);
-
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
@@ -118,7 +106,7 @@ export abstract class AbstractOperation<TResult = any> {
 }
 
 /** @internal */
-export abstract class AbstractCallbackOperation<TResult = any> extends AbstractOperation {
+export abstract class AbstractCallbackOperation<TResult> extends AbstractOperation<TResult> {
   constructor(options: OperationOptions = {}) {
     super(options);
   }
