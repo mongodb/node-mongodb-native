@@ -1,4 +1,4 @@
-name: history
+name: release_notes
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         type: number
 
 jobs:
-  history:
+  release_notes:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,7 +36,7 @@ jobs:
 
       # The combined output is available
       - id: release_notes
-        run: node .github/scripts/history.mjs
+        run: node .github/scripts/release_notes.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           HIGHLIGHTS: ${{ steps.highlights.outputs.highlights }}
