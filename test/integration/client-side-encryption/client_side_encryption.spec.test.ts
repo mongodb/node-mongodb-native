@@ -62,7 +62,7 @@ const SKIPPED_TESTS = new Set([
 
 const isServerless = !!process.env.SERVERLESS;
 
-describe.only('Client Side Encryption (Legacy)', function () {
+describe('Client Side Encryption (Legacy)', function () {
   const testContext = new TestRunnerContext({ requiresCSFLE: true });
   const testSuites = gatherTestSuites(
     path.join(__dirname, '../../spec/client-side-encryption/tests/legacy'),

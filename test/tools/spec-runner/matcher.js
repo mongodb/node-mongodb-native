@@ -23,7 +23,6 @@ function is42(input) {
 function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) {
   const expected = expectedObj[key];
   const actual = actualObj[key];
-  console.log('MATCH AND DIFF', key, expected, actual);
 
   if (expected === null) {
     if (key === 'readConcern') {
@@ -45,12 +44,13 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       };
     }
 
+    // An expected null value is not the same as the value not being present
+    // so an exact match is forced here.
     const match = expected === actual;
-    // const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
     return {
       match,
-      expected: SYMBOL_DOES_NOT_EXIST,
-      actual: match ? SYMBOL_DOES_NOT_EXIST : actual
+      expected: expected,
+      actual: actual === undefined ? SYMBOL_DOES_EXIST : actual
     };
   }
 
@@ -128,7 +128,6 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
 }
 
 function generateMatchAndDiff(expected, actual, metadata) {
-  console.log('MATCH', expected, actual);
   const typeOfExpected = typeof expected;
 
   if (typeOfExpected === 'object' && expected._bsontype === 'Int32' && typeof actual === 'number') {
