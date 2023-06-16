@@ -50,7 +50,7 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
     return {
       match,
       expected: expected,
-      actual: actual === undefined ? SYMBOL_DOES_EXIST : actual
+      actual: actual === undefined ? SYMBOL_DOES_NOT_EXIST : actual
     };
   }
 
