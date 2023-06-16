@@ -61,7 +61,7 @@ describe('Collection (#findOneAnd...)', function () {
     context('when passing in writeConcern', function () {
       let client;
       let collection;
-      const started: CommandStartedEvent[] = [];
+      let started: CommandStartedEvent[] = [];
 
       beforeEach(async function () {
         client = this.configuration.newClient({}, { maxPoolSize: 1 });
@@ -71,6 +71,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       afterEach(async function () {
+        started = [];
         await collection.drop();
         await client?.close();
       });
@@ -333,7 +334,7 @@ describe('Collection (#findOneAnd...)', function () {
     context('when passing in writeConcern', function () {
       let client;
       let collection;
-      const started: CommandStartedEvent[] = [];
+      let started: CommandStartedEvent[] = [];
 
       beforeEach(async function () {
         client = this.configuration.newClient({}, { maxPoolSize: 1, monitorCommands: true });
@@ -343,6 +344,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       afterEach(async function () {
+        started = [];
         await collection.drop();
         await client?.close();
       });
