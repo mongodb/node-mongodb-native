@@ -3,7 +3,7 @@ import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as deps from '../../../src/deps';
-import { type MongoClient } from '../../mongodb';
+import { type MongoClient } from '../../../src/mongo_client';
 
 describe('SCRAM_SHA_256', function () {
   beforeEach(function () {
