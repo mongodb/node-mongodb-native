@@ -692,8 +692,9 @@ export class MongoMissingCredentialsError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingDependencyError extends MongoAPIError {
-  constructor(message: string) {
+  constructor(message: string, { cause }: { cause?: Error } = {}) {
     super(message);
+    if (cause) this.cause = cause;
   }
 
   override get name(): string {
