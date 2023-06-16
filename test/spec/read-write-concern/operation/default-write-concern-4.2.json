@@ -65,8 +65,7 @@
                     "into": "other_collection_name"
                   }
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         }

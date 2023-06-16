@@ -27,8 +27,6 @@ tests:
           command:
             aggregate: *collection_name
             pipeline: *merge_pipeline
-            # "null" fields will be checked for non-existence
-            writeConcern: null
     outcome:
       collection:
         name: *other_collection_name

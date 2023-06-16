@@ -44,8 +44,7 @@
                   "q": {},
                   "limit": 1
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         }
@@ -78,8 +77,7 @@
                   "q": {},
                   "limit": 0
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         }
@@ -213,8 +211,7 @@
                 {
                   "_id": 1
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -233,8 +230,7 @@
                     }
                   }
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -246,8 +242,7 @@
                 {
                   "_id": 2
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -264,8 +259,7 @@
                     "x": 2
                   }
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -277,8 +271,7 @@
                 {
                   "_id": 3
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -298,8 +291,7 @@
                   },
                   "multi": true
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -314,8 +306,7 @@
                   },
                   "limit": 1
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         }
@@ -494,8 +485,7 @@
                     }
                   }
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -515,8 +505,7 @@
                   },
                   "multi": true
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         },
@@ -533,8 +522,7 @@
                     "x": 3
                   }
                 }
-              ],
-              "writeConcern": null
+              ]
             }
           }
         }
