@@ -45,7 +45,8 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       };
     }
 
-    const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
+    const match = expected === actual;
+    // const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
     return {
       match,
       expected: SYMBOL_DOES_NOT_EXIST,
