@@ -18,6 +18,8 @@ export async function output(key, value) {
   console.log('outputting:', output);
 
   if (GITHUB_OUTPUT.length === 0) {
+    // This is always defined in Github actions, and if it is not for some reason, tasks that follow will fail.
+    // For local testing its convenient to see what scripts would output without requiring the variable to be defined.
     console.log('GITHUB_OUTPUT not defined, printing only');
     return;
   }
