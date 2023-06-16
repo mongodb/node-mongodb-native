@@ -140,7 +140,7 @@ async function continueScramConversation(
 
   let processedPassword;
   if (cryptoMethod === 'sha256') {
-    processedPassword = saslprep.status === 'rejected' ? password : saslprep.value(password);
+    processedPassword = 'kModuleError' in saslprep ? password : saslprep(password);
   } else {
     processedPassword = passwordDigest(username, password);
   }

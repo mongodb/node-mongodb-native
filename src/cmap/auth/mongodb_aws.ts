@@ -3,12 +3,7 @@ import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import {
-  aws4,
-  type AWSCredentialProvider,
-  getAwsCredentialProvider,
-  type ImportResult
-} from '../../deps';
+import { aws4, getAwsCredentialProvider } from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
@@ -52,10 +47,10 @@ export class MongoDBAWS extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    if (aws4.status === 'rejected') {
-      throw aws4.reason;
+    if ('kModuleError' in aws4) {
+      throw aws4['kModuleError'];
     }
-    const { sign } = aws4.value;
+    const { sign } = aws4;
 
     if (maxWireVersion(connection) < 9) {
       throw new MongoCompatibilityError(
@@ -170,8 +165,6 @@ export interface AWSCredentials {
   expiration?: Date;
 }
 
-let awsCredentialProvider: ImportResult<AWSCredentialProvider>;
-
 async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
@@ -189,11 +182,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
   }
 
-  awsCredentialProvider ??= await getAwsCredentialProvider();
+  const credentialProvider = getAwsCredentialProvider();
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if (awsCredentialProvider.status === 'rejected') {
+  if ('kModuleError' in credentialProvider) {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
@@ -234,7 +227,7 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
      * - Shared credentials and config ini files
      * - The EC2/ECS Instance Metadata Service
      */
-    const { fromNodeProviderChain } = awsCredentialProvider.value;
+    const { fromNodeProviderChain } = credentialProvider;
     const provider = fromNodeProviderChain();
     try {
       const creds = await provider();
