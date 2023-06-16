@@ -49,7 +49,7 @@ const releaseNotesPath = path.join(process.cwd(), 'release_notes.md');
 
 await fs.writeFile(
   releaseNotesPath,
-  JSON.stringify(`:seedling: A new release!\n---\n${releaseNotes}\n---\n`),
+  `:seedling: A new release!\n---\n${releaseNotes}\n---\n`,
   { encoding:'utf8' }
 );
 
