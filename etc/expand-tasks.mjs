@@ -9,7 +9,7 @@ import { gte } from 'semver';
 import { Readable } from 'stream';
 import { inspect } from 'util';
 
-if (!gte(process.version, 16)) {
+if (!gte(process.version, '16.0.0')) {
   console.error('expand-tasks.mjs requires Node16+');
   process.exit(1);
 }
