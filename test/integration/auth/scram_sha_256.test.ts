@@ -58,7 +58,7 @@ describe('SCRAM_SHA_256', function () {
 
       await client.connect();
 
-      expect(spy.called).to.be.true;
+      expect(spy).to.have.been.called;
     });
   });
 });
