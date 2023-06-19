@@ -30,6 +30,30 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
+    context('when passing includeResultMetadata: false', function () {
+      let client;
+      let collection;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { maxPoolSize: 1 });
+        collection = client.db('test').collection('findAndModifyTest');
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      afterEach(async function () {
+        await collection.drop();
+        await client?.close();
+      });
+
+      it('returns the deleted document', async function () {
+        const result = await collection.findOneAndDelete(
+          { a: 1 },
+          { includeResultMetadata: false }
+        );
+        expect(result.b).to.equal(1);
+      });
+    });
+
     context('when passing an object id filter', function () {
       let client;
       let collection;
@@ -137,6 +161,31 @@ describe('Collection (#findOneAnd...)', function () {
       it('returns the raw result', async function () {
         const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
         expect(result.value.b).to.equal(1);
+      });
+    });
+
+    context('when passing includeResultMetadata: false', function () {
+      let client;
+      let collection;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { maxPoolSize: 1 });
+        collection = client.db('test').collection('findAndModifyTest');
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      afterEach(async function () {
+        await collection.drop();
+        await client?.close();
+      });
+
+      it('returns the modified document', async function () {
+        const result = await collection.findOneAndUpdate(
+          { a: 1 },
+          { $set: { a: 1 } },
+          { includeResultMetadata: false }
+        );
+        expect(result.b).to.equal(1);
       });
     });
 
@@ -277,6 +326,31 @@ describe('Collection (#findOneAnd...)', function () {
       it('returns the raw result', async function () {
         const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
         expect(result.value.b).to.equal(1);
+      });
+    });
+
+    context('when passing includeResultMetadata: false', function () {
+      let client;
+      let collection;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { maxPoolSize: 1 });
+        collection = client.db('test').collection('findAndModifyTest');
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      afterEach(async function () {
+        await collection.drop();
+        await client?.close();
+      });
+
+      it('returns the replaced document', async function () {
+        const result = await collection.findOneAndReplace(
+          { a: 1 },
+          { a: 1 },
+          { includeResultMetadata: false }
+        );
+        expect(result.b).to.equal(1);
       });
     });
 
