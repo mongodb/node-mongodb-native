@@ -43,13 +43,16 @@ tests:
             findAndModify: *collection_name
             query: {_id: 1}
             update: {$set: {x: 1}}
+            writeConcern: null
       - command_started_event:
           command:
             findAndModify: *collection_name
             query: {_id: 2}
             update: {x: 2}
+            writeConcern: null
       - command_started_event:
           command:
             findAndModify: *collection_name
             query: {_id: 2}
             remove: true
+            writeConcern: null

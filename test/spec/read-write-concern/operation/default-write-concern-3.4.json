@@ -69,7 +69,8 @@
                 {
                   "$out": "other_collection_name"
                 }
-              ]
+              ],
+              "writeConcern": null
             }
           }
         }
@@ -108,7 +109,8 @@
                   "q": {},
                   "limit": 1
                 }
-              ]
+              ],
+              "writeConcern": null
             }
           }
         }
@@ -161,7 +163,8 @@
           "command_started_event": {
             "command": {
               "dropIndexes": "default_write_concern_coll",
-              "index": "x_1"
+              "index": "x_1",
+              "writeConcern": null
             }
           }
         }
@@ -202,7 +205,8 @@
               },
               "out": {
                 "inline": 1
-              }
+              },
+              "writeConcern": null
             }
           }
         }

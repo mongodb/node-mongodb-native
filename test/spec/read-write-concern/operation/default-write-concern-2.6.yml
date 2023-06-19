@@ -27,6 +27,7 @@ tests:
             delete: *collection_name
             deletes:
               - {q: {}, limit: 1}
+            writeConcern: null
   - description: DeleteMany omits default write concern
     operations:
       - name: deleteMany
@@ -41,6 +42,7 @@ tests:
           command:
             delete: *collection_name
             deletes: [{q: {}, limit: 0}]
+            writeConcern: null
   - description: BulkWrite with all models omits default write concern
     operations:
       - name: bulkWrite
@@ -93,35 +95,42 @@ tests:
             insert: *collection_name
             documents:
               - {_id: 1}
+            writeConcern: null
       - command_started_event:
           command:
             update: *collection_name
             updates:
               - {q: {_id: 1}, u: {$set: {x: 1}}}
+            writeConcern: null
       - command_started_event:
           command:
             insert: *collection_name
             documents:
               - {_id: 2}
+            writeConcern: null
       - command_started_event:
           command:
             update: *collection_name
             updates:
               - {q: {_id: 1}, u: {x: 2}}
+            writeConcern: null
       - command_started_event:
           command:
             insert: *collection_name
             documents:
               - {_id: 3}
+            writeConcern: null
       - command_started_event:
           command:
             update: *collection_name
             updates: 
               - {q: {_id: 1}, u: {$set: {x: 3}}, multi: true}
+            writeConcern: null
       - command_started_event:
           command:
             delete: *collection_name
             deletes: [{q: {_id: 3}, limit: 1}]
+            writeConcern: null
   - description: 'InsertOne and InsertMany omit default write concern'
     operations:
       - name: insertOne
@@ -191,13 +200,16 @@ tests:
             update: *collection_name
             updates:
               - {q: {_id: 1}, u: {$set: {x: 1}}}
+            writeConcern: null
       - command_started_event:
           command:
             update: *collection_name
             updates:
               - {q: {_id: 2}, u: {$set: {x: 2}}, multi: true}
+            writeConcern: null
       - command_started_event:
           command:
             update: *collection_name
             updates:
               - {q: {_id: 2}, u: {x: 3}}
+            writeConcern: null

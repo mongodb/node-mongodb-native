@@ -88,7 +88,8 @@
                 "$set": {
                   "x": 1
                 }
-              }
+              },
+              "writeConcern": null
             }
           }
         },
@@ -101,7 +102,8 @@
               },
               "update": {
                 "x": 2
-              }
+              },
+              "writeConcern": null
             }
           }
         },
@@ -112,7 +114,8 @@
               "query": {
                 "_id": 2
               },
-              "remove": true
+              "remove": true,
+              "writeConcern": null
             }
           }
         }

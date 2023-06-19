@@ -32,6 +32,7 @@ tests:
           command:
             aggregate: *collection_name
             pipeline: *out_pipeline
+            writeConcern: null
   - description: RunCommand with a write command omits default write concern (runCommand should never inherit write concern)
     operations:
       - object: database
@@ -49,6 +50,7 @@ tests:
             delete: *collection_name
             deletes:
               - {q: {}, limit: 1}
+            writeConcern: null
   - description: CreateIndex and dropIndex omits default write concern 
     operations:
       - object: collection
@@ -73,6 +75,7 @@ tests:
           command:
             dropIndexes: *collection_name
             index: x_1
+            writeConcern: null
   - description: MapReduce omits default write concern
     operations:
       - name: mapReduce
@@ -89,3 +92,4 @@ tests:
             map: { $code: 'function inc() { return emit(0, this.x + 1) }' }
             reduce: { $code: 'function sum(key, values) { return values.reduce((acc, x) => acc + x); }' }
             out: { inline: 1 }
+            writeConcern: null
