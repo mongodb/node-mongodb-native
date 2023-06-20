@@ -42,10 +42,10 @@ let Snappy: SnappyLib | null = null;
 async function loadSnappy() {
   if (Snappy == null) {
     const snappyImport = await getSnappy();
-    if (snappyImport.status === 'rejected') {
-      throw snappyImport.reason;
+    if ('kModuleError' in snappyImport) {
+      throw snappyImport.kModuleError;
     }
-    Snappy = snappyImport.value;
+    Snappy = snappyImport;
   }
   return Snappy;
 }

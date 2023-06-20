@@ -72,9 +72,8 @@ describe('package.json', function () {
             'getSnappy returns rejected import',
             async function ({ expect, mongodb }) {
               const snappyImport = await mongodb.getSnappy();
-              expect(snappyImport).to.have.property('status', 'rejected');
               expect(snappyImport).to.have.nested.property(
-                'reason.name',
+                'kModuleError.name',
                 'MongoMissingDependencyError'
               );
             }
@@ -102,8 +101,8 @@ describe('package.json', function () {
             'getSnappy returns fulfilled import',
             async function ({ expect, mongodb }) {
               const snappyImport = await mongodb.getSnappy();
-              expect(snappyImport).to.have.property('status', 'fulfilled');
-              expect(snappyImport).to.have.property('value');
+              expect(snappyImport).to.have.property('compress').that.is.a('function');
+              expect(snappyImport).to.have.property('decompress').that.is.a('function');
             }
           );
         }

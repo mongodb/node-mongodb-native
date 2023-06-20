@@ -6,11 +6,6 @@ import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
 import type { Callback } from './utils';
 
-/** @internal */
-export type ImportResult<Module> =
-  | { status: 'fulfilled'; value: Module }
-  | { status: 'rejected'; reason: MongoMissingDependencyError };
-
 function makeErrorModule(error: any) {
   const props = error ? { kModuleError: error } : {};
   return new Proxy(props, {
@@ -117,16 +112,19 @@ export type SnappyLib = {
   uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
 };
 
-export async function getSnappy(): Promise<ImportResult<SnappyLib>> {
+export async function getSnappy(): Promise<
+  SnappyLib | { kModuleError: MongoMissingDependencyError }
+> {
   try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
     const value = require('snappy');
-    return { status: 'fulfilled', value };
+    return value;
   } catch (cause) {
-    const reason = new MongoMissingDependencyError(
+    const kModuleError = new MongoMissingDependencyError(
       'Optional module `snappy` not found. Please install it to enable snappy compression',
       { cause }
     );
-    return { status: 'rejected', reason };
+    return { kModuleError };
   }
 }
 
