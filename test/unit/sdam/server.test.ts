@@ -77,8 +77,8 @@ describe('Server', () => {
         serverSpy = sinon.spy(server, 'command');
       });
 
-      it('calls the command function through commandAsync', function () {
-        server.commandAsync();
+      it('calls the command function through commandAsync', async function () {
+        await server.commandAsync();
         expect(serverSpy).to.have.been.calledOnce;
       });
     });

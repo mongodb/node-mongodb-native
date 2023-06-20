@@ -106,16 +106,15 @@ export abstract class AbstractOperation<TResult = any> {
 }
 
 /** @internal */
-export abstract class AbstractCallbackOperation<TResult> extends AbstractOperation<TResult> {
+export abstract class AbstractCallbackOperation<TResult = any> extends AbstractOperation {
   constructor(options: OperationOptions = {}) {
     super(options);
   }
 
   execute(server: Server, session: ClientSession | undefined): Promise<TResult> {
-    const x = promisify((callback: (e: Error, r: TResult) => void) => {
+    return promisify((callback: (e: Error, r: TResult) => void) => {
       this.executeCallback(server, session, callback as any);
-    });
-    return x();
+    })();
   }
 
   protected abstract executeCallback(
