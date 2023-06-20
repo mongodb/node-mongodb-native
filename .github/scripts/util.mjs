@@ -2,16 +2,6 @@
 import * as process from 'node:process';
 import * as fs from 'node:fs/promises';
 
-/**
- * @param {number[]} array
- */
-function sum(array) {
-  return array.reduce((acc, n) => {
-    acc += n;
-    return acc;
-  }, 0);
-}
-
 export async function output(key, value) {
   const { GITHUB_OUTPUT = '' } = process.env;
   const output = `${key}=${value}\n`;
