@@ -515,10 +515,12 @@ export async function itInNodeProcess(
       import * as mongodb from './test/mongodb';
       const run = ${fn};
       run({ expect, mongodb }).then(
-        () => process.exit(0),
+        () => {
+          process.exitCode = 0;
+        },
         error => {
           console.error(error)
-          process.exit(1)
+          process.exitCode = 1;
         }
       );\n`;
 
@@ -544,11 +546,14 @@ export async function itInNodeProcess(
 
       let stderr = '';
       scriptInstance.stderr?.addListener('data', (data: string) => {
-        stderr += data
-          .split('\n')
-          .filter(line => !line.startsWith('Debugger') && !line.startsWith('For help'))
-          .join('\n');
+        stderr += data;
       });
+
+      // do not fail the test if the debugger is running
+      stderr = stderr
+        .split('\n')
+        .filter(line => !line.startsWith('Debugger') && !line.startsWith('For help'))
+        .join('\n');
 
       const [exitCode] = await once(scriptInstance, 'close');
 
