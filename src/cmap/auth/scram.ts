@@ -30,7 +30,10 @@ class ScramSHA extends AuthProvider {
     if (!credentials) {
       return callback(new MongoMissingCredentialsError('AuthContext must provide credentials.'));
     }
-    if (cryptoMethod === 'sha256' && saslprep == null) {
+    if (
+      cryptoMethod === 'sha256' &&
+      ('kModuleError' in saslprep || typeof saslprep !== 'function')
+    ) {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
@@ -152,7 +155,8 @@ function continueScramConversation(
 
   let processedPassword;
   if (cryptoMethod === 'sha256') {
-    processedPassword = 'kModuleError' in saslprep ? password : saslprep(password);
+    processedPassword =
+      'kModuleError' in saslprep || typeof saslprep !== 'function' ? password : saslprep(password);
   } else {
     try {
       processedPassword = passwordDigest(username, password);
