@@ -20,7 +20,7 @@ describe('Explain', function () {
     await client.close();
   });
 
-  context('when explain is set to true', () => {
+  context('highest verbosity explain', () => {
     it('deleteOne returns queryPlanner explain result', async function () {
       const explanation = await collection.deleteOne({ a: 1 }, { explain: true });
       expect(explanation).property('queryPlanner').to.exist;
@@ -76,7 +76,7 @@ describe('Explain', function () {
     });
   });
 
-  context('when explain is set to false', () => {
+  context('lowest verbosity explain', () => {
     it('deleteOne only returns queryPlanner property in explain result', async function () {
       const explanation = await collection.deleteOne({ a: 1 }, { explain: false });
       expect(explanation).property('queryPlanner').to.exist;
