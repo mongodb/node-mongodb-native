@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as deps from '../../../src/deps';
 import { type MongoClient } from '../../../src/mongo_client';
 
