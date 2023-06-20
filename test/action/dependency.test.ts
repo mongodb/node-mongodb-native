@@ -102,7 +102,7 @@ describe('package.json', function () {
             async function ({ expect, mongodb }) {
               const snappyImport = await mongodb.getSnappy();
               expect(snappyImport).to.have.property('compress').that.is.a('function');
-              expect(snappyImport).to.have.property('decompress').that.is.a('function');
+              expect(snappyImport).to.have.property('uncompress').that.is.a('function');
             }
           );
         }
