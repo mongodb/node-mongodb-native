@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.7.4](https://github.com/mongodb/node-mongodb-native/compare/v3.7.3...v3.7.4) (2023-06-21)
+
+
+### Bug Fixes
+
+* **NODE-3711:** retry txn end on retryable write ([#3047](https://github.com/mongodb/node-mongodb-native/issues/3047)) ([1595140](https://github.com/mongodb/node-mongodb-native/commit/15951403bd595842c872f0b0ba9f3b782b1c43ec))
+* **NODE-5355:** prevent error when saslprep is not a function ([#3733](https://github.com/mongodb/node-mongodb-native/issues/3733)) ([152425a](https://github.com/mongodb/node-mongodb-native/commit/152425a366f744490206e596e7b2ada37796577c))
+
 ### [3.7.3](https://github.com/mongodb/node-mongodb-native/compare/v3.7.2...v3.7.3) (2021-10-20)
 
 
