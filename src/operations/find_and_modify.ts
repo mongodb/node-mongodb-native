@@ -29,7 +29,7 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
   sort?: Sort;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-  /** Return the raw result document instead of the ModifyResult */
+  /** Return the ModifyResult instead of the modified document. Defaults to true. */
   includeResultMetadata?: boolean;
 }
 
@@ -49,7 +49,7 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-  /** Return the raw result document instead of the ModifyResult */
+  /** Return the ModifyResult instead of the modified document. Defaults to true. */
   includeResultMetadata?: boolean;
 }
 
@@ -71,7 +71,7 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
-  /** Return the raw result document instead of the ModifyResult */
+  /** Return the ModifyResult instead of the modified document. Defaults to true. */
   includeResultMetadata?: boolean;
 }
 
