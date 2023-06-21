@@ -45,12 +45,24 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      it('returns the deleted document', async function () {
-        const result = await collection.findOneAndDelete(
-          { a: 1 },
-          { includeResultMetadata: false }
-        );
-        expect(result.b).to.equal(1);
+      context('when there is a match', function () {
+        it('returns the deleted document', async function () {
+          const result = await collection.findOneAndDelete(
+            { a: 1 },
+            { includeResultMetadata: false }
+          );
+          expect(result.b).to.equal(1);
+        });
+      });
+
+      context('when there is no match', function () {
+        it('returns null', async function () {
+          const result = await collection.findOneAndDelete(
+            { a: 2 },
+            { includeResultMetadata: false }
+          );
+          expect(result).to.equal(null);
+        });
       });
     });
 
@@ -179,13 +191,26 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      it('returns the modified document', async function () {
-        const result = await collection.findOneAndUpdate(
-          { a: 1 },
-          { $set: { a: 1 } },
-          { includeResultMetadata: false }
-        );
-        expect(result.b).to.equal(1);
+      context('when there is a match', function () {
+        it('returns the modified document', async function () {
+          const result = await collection.findOneAndUpdate(
+            { a: 1 },
+            { $set: { a: 1 } },
+            { includeResultMetadata: false }
+          );
+          expect(result.b).to.equal(1);
+        });
+      });
+
+      context('when there is no match', function () {
+        it('returns null', async function () {
+          const result = await collection.findOneAndUpdate(
+            { a: 2 },
+            { $set: { a: 1 } },
+            { includeResultMetadata: false }
+          );
+          expect(result).to.equal(null);
+        });
       });
     });
 
@@ -344,13 +369,26 @@ describe('Collection (#findOneAnd...)', function () {
         await client?.close();
       });
 
-      it('returns the replaced document', async function () {
-        const result = await collection.findOneAndReplace(
-          { a: 1 },
-          { a: 1 },
-          { includeResultMetadata: false }
-        );
-        expect(result.b).to.equal(1);
+      context('when there is a match', function () {
+        it('returns the replaced document', async function () {
+          const result = await collection.findOneAndReplace(
+            { a: 1 },
+            { a: 1 },
+            { includeResultMetadata: false }
+          );
+          expect(result.b).to.equal(1);
+        });
+      });
+
+      context('when there is no match', function () {
+        it('returns null', async function () {
+          const result = await collection.findOneAndReplace(
+            { a: 2 },
+            { a: 1 },
+            { includeResultMetadata: false }
+          );
+          expect(result).to.equal(null);
+        });
       });
     });
 
