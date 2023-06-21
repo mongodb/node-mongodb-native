@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.7.0](https://github.com/mongodb/node-mongodb-native/compare/v5.6.0...v5.7.0) (2023-06-21)
+
+
+### Features
+
+* **NODE-4929:** Add OIDC Azure workflow ([#3670](https://github.com/mongodb/node-mongodb-native/issues/3670)) ([b3482f3](https://github.com/mongodb/node-mongodb-native/commit/b3482f32551ea5fcfefa861eca52961a99c82fe3))
+* **NODE-5008:** add zstd and kerberos to peer deps ([#3691](https://github.com/mongodb/node-mongodb-native/issues/3691)) ([9561f32](https://github.com/mongodb/node-mongodb-native/commit/9561f32a9dda6969be7f727c9bd1bd96980f5e95))
+* **NODE-5241:** add option to return modified document ([#3710](https://github.com/mongodb/node-mongodb-native/issues/3710)) ([d9c2600](https://github.com/mongodb/node-mongodb-native/commit/d9c2600daf3bb6c8106e0f3a27cb2f12b770c8eb))
+
+
+### Bug Fixes
+
+* **NODE-5289:** prevent scram auth from throwing TypeError if saslprep is not a function ([#3727](https://github.com/mongodb/node-mongodb-native/issues/3727)) ([e006347](https://github.com/mongodb/node-mongodb-native/commit/e0063477961bbd9c5ca34953e9afe554a1235581))
+
 ## [5.6.0](https://github.com/mongodb/node-mongodb-native/compare/v5.5.0...v5.6.0) (2023-06-01)
 
 
