@@ -69,7 +69,7 @@ async function pullRequestHighlights(prs) {
   }
   if (!highlights.length) return '';
 
-  highlights.unshift['## Release Notes\n\n'];
+  highlights.unshift('## Release Notes\n\n');
   return highlights.join('');
 }
 
