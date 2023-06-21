@@ -100,12 +100,7 @@ import {
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
-/**
- * @public
- * @deprecated This type will be completely removed and findOneAndUpdate,
- *             findOneAndDelete, and findOneAndReplace will then return the
- *             actual result document.
- */
+/** @public */
 export interface ModifyResult<TSchema = Document> {
   value: WithId<TSchema> | null;
   lastErrorObject?: Document;
@@ -827,8 +822,21 @@ export class Collection<TSchema extends Document = Document> {
    */
   async findOneAndDelete(
     filter: Filter<TSchema>,
+    options: FindOneAndDeleteOptions & { includeResultMetadata: true }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndDelete(
+    filter: Filter<TSchema>,
+    options: FindOneAndDeleteOptions & { includeResultMetadata: false }
+  ): Promise<WithId<TSchema> | null>;
+  async findOneAndDelete(
+    filter: Filter<TSchema>,
+    options: FindOneAndDeleteOptions
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndDelete(filter: Filter<TSchema>): Promise<ModifyResult<TSchema>>;
+  async findOneAndDelete(
+    filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndDeleteOperation(
@@ -849,8 +857,27 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndReplace(
     filter: Filter<TSchema>,
     replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions & { includeResultMetadata: true }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions & { includeResultMetadata: false }
+  ): Promise<WithId<TSchema> | null>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
+    options: FindOneAndReplaceOptions
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndReplace(
+    filter: Filter<TSchema>,
+    replacement: WithoutId<TSchema>,
     options?: FindOneAndReplaceOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndReplaceOperation(
@@ -872,8 +899,27 @@ export class Collection<TSchema extends Document = Document> {
   async findOneAndUpdate(
     filter: Filter<TSchema>,
     update: UpdateFilter<TSchema>,
+    options: FindOneAndUpdateOptions & { includeResultMetadata: true }
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options: FindOneAndUpdateOptions & { includeResultMetadata: false }
+  ): Promise<WithId<TSchema> | null>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
+    options: FindOneAndUpdateOptions
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>
+  ): Promise<ModifyResult<TSchema>>;
+  async findOneAndUpdate(
+    filter: Filter<TSchema>,
+    update: UpdateFilter<TSchema>,
     options?: FindOneAndUpdateOptions
-  ): Promise<ModifyResult<TSchema>> {
+  ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
     return executeOperation(
       this.client,
       new FindOneAndUpdateOperation(

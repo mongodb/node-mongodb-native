@@ -618,112 +618,160 @@ describe('CRUD API', function () {
     }
   });
 
-  it('should correctly execute findAndModify methods using crud api', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  describe('#findOneAndDelete', function () {
+    let collection;
 
-    test: function (done) {
-      client.connect(function (err, client) {
-        const db = client.db();
+    beforeEach(async function () {
+      await client.connect();
+      collection = client.db().collection('findAndModifyTest');
+    });
 
-        //
-        // findOneAndRemove method
-        // -------------------------------------------------
-        const findOneAndRemove = function () {
-          db.collection('t5_1').insertMany(
-            [{ a: 1, b: 1 }],
-            { writeConcern: { w: 1 } },
-            function (err, r) {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(1);
+    afterEach(async function () {
+      await collection.drop();
+    });
 
-              db.collection('t5_1').findOneAndDelete(
-                { a: 1 },
-                { projection: { b: 1 }, sort: { a: 1 } },
-                function (err, r) {
-                  expect(err).to.not.exist;
-                  test.equal(1, r.lastErrorObject.n);
-                  test.equal(1, r.value.b);
-
-                  findOneAndReplace();
-                }
-              );
-            }
-          );
-        };
-
-        //
-        // findOneAndRemove method
-        // -------------------------------------------------
-        const findOneAndReplace = function () {
-          db.collection('t5_2').insertMany(
-            [{ a: 1, b: 1 }],
-            { writeConcern: { w: 1 } },
-            function (err, r) {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(1);
-
-              db.collection('t5_2').findOneAndReplace(
-                { a: 1 },
-                { c: 1, b: 1 },
-                {
-                  projection: { b: 1, c: 1 },
-                  sort: { a: 1 },
-                  returnDocument: ReturnDocument.AFTER,
-                  upsert: true
-                },
-                function (err, r) {
-                  expect(err).to.not.exist;
-                  test.equal(1, r.lastErrorObject.n);
-                  test.equal(1, r.value.b);
-                  test.equal(1, r.value.c);
-
-                  findOneAndUpdate();
-                }
-              );
-            }
-          );
-        };
-
-        //
-        // findOneAndRemove method
-        // -------------------------------------------------
-        const findOneAndUpdate = function () {
-          db.collection('t5_3').insertMany(
-            [{ a: 1, b: 1 }],
-            { writeConcern: { w: 1 } },
-            function (err, r) {
-              expect(err).to.not.exist;
-              expect(r).property('insertedCount').to.equal(1);
-
-              db.collection('t5_3').findOneAndUpdate(
-                { a: 1 },
-                { $set: { d: 1 } },
-                {
-                  projection: { b: 1, d: 1 },
-                  sort: { a: 1 },
-                  returnDocument: ReturnDocument.AFTER,
-                  upsert: true
-                },
-                function (err, r) {
-                  expect(err).to.not.exist;
-                  test.equal(1, r.lastErrorObject.n);
-                  test.equal(1, r.value.b);
-                  test.equal(1, r.value.d);
-
-                  client.close(done);
-                }
-              );
-            }
-          );
-        };
-
-        findOneAndRemove();
+    context('when includeResultMetadata is true', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
       });
-    }
+
+      it('returns the modify result', async function () {
+        const result = await collection.findOneAndDelete(
+          { a: 1 },
+          { projection: { b: 1 }, sort: { a: 1 } }
+        );
+        expect(result?.lastErrorObject.n).to.equal(1);
+        expect(result?.value.b).to.equal(1);
+      });
+    });
+
+    context('when includeResultMetadata is false', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      it('returns the deleted document', async function () {
+        const result = await collection.findOneAndDelete(
+          { a: 1 },
+          { projection: { b: 1 }, sort: { a: 1 }, includeResultMetadata: false }
+        );
+        expect(result?.b).to.equal(1);
+      });
+    });
+  });
+
+  describe('#findOneAndReplace', function () {
+    let collection;
+
+    beforeEach(async function () {
+      await client.connect();
+      collection = client.db().collection('findAndModifyTest');
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+    });
+
+    context('when includeResultMetadata is true', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      it('returns the modify result', async function () {
+        const result = await collection.findOneAndReplace(
+          { a: 1 },
+          { c: 1, b: 1 },
+          {
+            projection: { b: 1, c: 1 },
+            sort: { a: 1 },
+            returnDocument: ReturnDocument.AFTER,
+            upsert: true
+          }
+        );
+        expect(result?.lastErrorObject.n).to.equal(1);
+        expect(result?.value.b).to.equal(1);
+        expect(result?.value.c).to.equal(1);
+      });
+    });
+
+    context('when includeResultMetadata is false', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      it('returns the replaced document', async function () {
+        const result = await collection.findOneAndReplace(
+          { a: 1 },
+          { c: 1, b: 1 },
+          {
+            projection: { b: 1, c: 1 },
+            sort: { a: 1 },
+            returnDocument: ReturnDocument.AFTER,
+            upsert: true,
+            includeResultMetadata: false
+          }
+        );
+        expect(result?.b).to.equal(1);
+        expect(result?.c).to.equal(1);
+      });
+    });
+  });
+
+  describe('#findOneAndUpdate', function () {
+    let collection;
+
+    beforeEach(async function () {
+      await client.connect();
+      collection = client.db().collection('findAndModifyTest');
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+    });
+
+    context('when includeResultMetadata is true', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      it('returns the modify result', async function () {
+        const result = await collection.findOneAndUpdate(
+          { a: 1 },
+          { $set: { d: 1 } },
+          {
+            projection: { b: 1, d: 1 },
+            sort: { a: 1 },
+            returnDocument: ReturnDocument.AFTER,
+            upsert: true
+          }
+        );
+        expect(result?.lastErrorObject.n).to.equal(1);
+        expect(result?.value.b).to.equal(1);
+        expect(result?.value.d).to.equal(1);
+      });
+    });
+
+    context('when includeResultMetadata is false', function () {
+      beforeEach(async function () {
+        await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
+      });
+
+      it('returns the replaced document', async function () {
+        const result = await collection.findOneAndUpdate(
+          { a: 1 },
+          { $set: { d: 1 } },
+          {
+            projection: { b: 1, d: 1 },
+            sort: { a: 1 },
+            returnDocument: ReturnDocument.AFTER,
+            upsert: true,
+            includeResultMetadata: false
+          }
+        );
+        expect(result?.b).to.equal(1);
+        expect(result?.d).to.equal(1);
+      });
+    });
   });
 
   it('should correctly execute removeMany with no selector', {
