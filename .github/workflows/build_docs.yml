@@ -27,5 +27,5 @@ jobs:
       - name: Open Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: 'docs: generate docs from latest main'
+          title: 'docs: generate docs from latest main [skip-ci]'
           delete-branch: true
