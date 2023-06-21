@@ -16,11 +16,11 @@ If you haven't already, it would greatly help the team review this work in a tim
 You can do that here: https://jira.mongodb.org/projects/NODE
 -->
 
-#### Release Highlight
+### Release Highlight
 
 <!-- RELEASE_HIGHLIGHT_START -->
 
-## Fill in title or leave empty for no highlight
+### Fill in title or leave empty for no highlight
 
 <!-- RELEASE_HIGHLIGHT_END -->
 

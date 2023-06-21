@@ -52,7 +52,7 @@ async function getPullRequestContent(pull_number) {
     return '';
   }
 
-  const start = body.indexOf('## ', body.indexOf(startIndicator));
+  const start = body.indexOf('### ', body.indexOf(startIndicator));
   const end = body.indexOf(endIndicator);
   const highlightSection = body.slice(start, end).trim();
 
@@ -67,6 +67,9 @@ async function pullRequestHighlights(prs) {
     const content = await getPullRequestContent(pr);
     highlights.push(content);
   }
+  if (!highlights.length) return '';
+
+  highlights.unshift('## Release Notes\n\n');
   return highlights.join('');
 }
 
