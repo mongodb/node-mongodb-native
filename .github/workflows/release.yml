@@ -21,7 +21,7 @@ jobs:
           # Example: chore(main): release 5.7.0 [skip-ci]
           # ${scope} - parenthesis included, base branch name
           pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
-          pull-request-header: 'Please run history action before releasing to generate release highlights'
+          pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
           changelog-path: HISTORY.md
           default-branch: main
 
