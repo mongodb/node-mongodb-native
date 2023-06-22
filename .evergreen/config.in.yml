@@ -1421,7 +1421,7 @@ task_groups:
           working_dir: src
           binary: bash
           args:
-            - ${DRIVERS_TOOLS}/aws_lambda/teardown-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/setup-atlas-cluster.sh
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
@@ -1434,7 +1434,7 @@ task_groups:
           working_dir: src
           binary: bash
           args:
-            - ${DRIVERS_TOOLS}/aws_lambda/teardown-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/teardown-atlas-cluster.sh
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
