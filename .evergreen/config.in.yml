@@ -1431,7 +1431,7 @@ task_groups:
             LAMBDA_STACK_NAME: dbx-node-lambda
       - command: expansions.update
         params:
-          file: atlas-expansion.yml
+          file: src/atlas-expansion.yml
     teardown_group:
       - command: subprocess.exec
         params:
