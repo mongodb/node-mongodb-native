@@ -70,7 +70,7 @@ async function pullRequestHighlights(prs) {
   if (!highlights.length) return '';
 
   highlights.unshift('## Release Notes\n\n');
-  return highlights.join('');
+  return highlights.join('\n\n');
 }
 
 console.log('List of PRs to collect highlights from:', prs);
