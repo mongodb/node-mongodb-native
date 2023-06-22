@@ -12,7 +12,7 @@ const historyFilePath = path.join(__dirname, '..', '..', 'HISTORY.md');
  * @returns {string[]}
  */
 function parsePRList(history) {
-  const prRegexp = /node-mongodb-native\/issues\/(?<prNum>\d+)\)/giu;
+  const prRegexp = /node-mongodb-native\/issues\/(?<prNum>\d+)\)/iu;
   return history
     .split('\n')
     .map(line => prRegexp.exec(line)?.groups?.prNum ?? '')
