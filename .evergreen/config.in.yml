@@ -182,31 +182,6 @@ functions:
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
 
-  "run deployed aws lambda tests":
-    - command: ec2.assume_role
-      params:
-        role_arn: ${LAMBDA_AWS_ROLE_ARN}
-        duration_seconds: 3600
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/run-deployed-lambda-aws-tests.sh
-        env:
-          TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
-          DRIVERS_ATLAS_PRIVATE_API_KEY: ${DRIVERS_ATLAS_PRIVATE_API_KEY}
-          DRIVERS_ATLAS_LAMBDA_USER: ${DRIVERS_ATLAS_LAMBDA_USER}
-          DRIVERS_ATLAS_LAMBDA_PASSWORD: ${DRIVERS_ATLAS_LAMBDA_PASSWORD}
-          DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
-          LAMBDA_STACK_NAME: dbx-node-lambda
-          AWS_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
-
   "run tests":
     - command: shell.exec
       type: test
@@ -1280,6 +1255,33 @@ tasks:
           args:
           - .evergreen/run-oidc-tests-azure.sh
 
+  - name: "test-aws-lambda-deployed"
+    commands:
+      - func: "install dependencies"
+      - command: ec2.assume_role
+        params:
+          role_arn: ${LAMBDA_AWS_ROLE_ARN}
+          duration_seconds: 3600
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/aws_lambda/run-deployed-lambda-aws-tests.sh
+          env:
+            TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
+            DRIVERS_ATLAS_PRIVATE_API_KEY: ${DRIVERS_ATLAS_PRIVATE_API_KEY}
+            DRIVERS_ATLAS_LAMBDA_USER: ${DRIVERS_ATLAS_LAMBDA_USER}
+            DRIVERS_ATLAS_LAMBDA_PASSWORD: ${DRIVERS_ATLAS_LAMBDA_PASSWORD}
+            DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
+            LAMBDA_STACK_NAME: dbx-node-lambda
+            AWS_REGION: us-east-1
+            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+            AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -1410,6 +1412,39 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
     - oidc-auth-test-azure-latest
+
+  - name: test_aws_lambda_task_group
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/aws_lambda/teardown-atlas-cluster.sh
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
+            DRIVERS_ATLAS_PRIVATE_API_KEY: ${DRIVERS_ATLAS_PRIVATE_API_KEY}
+            DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
+            LAMBDA_STACK_NAME: dbx-node-lambda
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          args:
+            - ${DRIVERS_TOOLS}/aws_lambda/teardown-atlas-cluster.sh
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
+            DRIVERS_ATLAS_PRIVATE_API_KEY: ${DRIVERS_ATLAS_PRIVATE_API_KEY}
+            DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
+            LAMBDA_STACK_NAME: dbx-node-lambda
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-aws-lambda-deployed
 
 pre:
   - func: "fetch source"
