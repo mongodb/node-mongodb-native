@@ -1267,7 +1267,7 @@ tasks:
           working_dir: src
           binary: bash
           args:
-            - ${DRIVERS_TOOLS}/aws_lambda/run-deployed-lambda-aws-tests.sh
+            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/run-deployed-lambda-aws-tests.sh
           env:
             TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
