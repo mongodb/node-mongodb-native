@@ -1050,8 +1050,6 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
-   * @internal
-   *
    * Returns all search indexes for the current collection.
    *
    * @param options - The options for the list indexes operation.
@@ -1060,8 +1058,6 @@ export class Collection<TSchema extends Document = Document> {
    */
   listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
   /**
-   * @internal
-   *
    * Returns all search indexes for the current collection.
    *
    * @param name - The name of the index to search for.  Only indexes with matching index names will be returned.
@@ -1087,8 +1083,6 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
-   * @internal
-   *
    * Creates a single search index for the collection.
    *
    * @param description - The index description for the new search index.
@@ -1102,8 +1096,6 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
-   * @internal
-   *
    * Creates multiple search indexes for the current collection.
    *
    * @param descriptions - An array of `SearchIndexDescription`s for the new search indexes.
@@ -1120,8 +1112,6 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
-   * @internal
-   *
    * Deletes a search index by index name.
    *
    * @param name - The name of the search index to be deleted.
@@ -1136,8 +1126,6 @@ export class Collection<TSchema extends Document = Document> {
   }
 
   /**
-   * @internal
-   *
    * Updates a search index by replacing the existing index definition with the provided definition.
    *
    * @param name - The name of the search index to update.
