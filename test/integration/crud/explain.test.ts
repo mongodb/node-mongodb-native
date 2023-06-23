@@ -1,29 +1,36 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type Collection, type Db, type MongoClient, MongoServerError } from '../../mongodb';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type Db,
+  type MongoClient,
+  MongoServerError
+} from '../../mongodb';
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe.only('Explain', function () {
+describe('Explain', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
+  let commandStartedPromise: Promise<CommandStartedEvent[]>;
   const ops = [
-    async (explain: boolean | string) => collection.deleteOne({ a: 1 }, { explain }),
-    async (explain: boolean | string) => collection.deleteMany({ a: 1 }, { explain }),
+    async (explain: boolean | string) => await collection.deleteOne({ a: 1 }, { explain }),
+    async (explain: boolean | string) => await collection.deleteMany({ a: 1 }, { explain }),
     async (explain: boolean | string) =>
-      collection.updateOne({ a: 1 }, { $inc: { a: 2 } }, { explain }),
+      await collection.updateOne({ a: 1 }, { $inc: { a: 2 } }, { explain }),
     async (explain: boolean | string) =>
-      collection.updateMany({ a: 1 }, { $inc: { a: 2 } }, { explain }),
-    async (explain: boolean | string) => collection.distinct('a', {}, { explain }),
-    async (explain: boolean | string) => collection.findOneAndDelete({ a: 1 }, { explain }),
-    async (explain: boolean | string) => collection.findOne({ a: 1 }, { explain }),
-    async (explain: boolean | string) => collection.find({ a: 1 }, { explain }),
+      await collection.updateMany({ a: 1 }, { $inc: { a: 2 } }, { explain }),
+    async (explain: boolean | string) => await collection.distinct('a', {}, { explain }),
+    async (explain: boolean | string) => await collection.findOneAndDelete({ a: 1 }, { explain }),
+    async (explain: boolean | string) => await collection.findOne({ a: 1 }, { explain }),
+    (explain: boolean | string) => collection.find({ a: 1 }).explain(explain),
     async (explain: boolean | string) =>
-      collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain }),
+      await collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain }),
     async (explain: boolean | string) =>
-      collection
+      await collection
         .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain })
         .toArray()
   ];
@@ -37,23 +44,16 @@ describe.only('Explain', function () {
     'findOneAndDelete',
     'findOne',
     'find',
+    'findOneAndReplace',
     'aggregate'
   ];
-
-  const testTable: {
-    op: (explain: boolean | string) => Promise<any>;
-    explainValue: string | boolean;
-  }[] = explain.flatMap(explainValue => {
-    return ops.flatMap(op => {
-      return { op, explainValue };
-    });
-  });
 
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
     db = client.db('queryPlannerExplainResult');
     collection = db.collection('test');
     await collection.insertOne({ a: 1 });
+    commandStartedPromise = once(client, 'commandStarted');
   });
 
   afterEach(async function () {
@@ -61,40 +61,41 @@ describe.only('Explain', function () {
     await client.close();
   });
 
-  testTable.forEach(function (test) {
-    context(`When explain is ${test.explainValue}`, function () {
-      it(`${
-        opNames[ops.indexOf(test.op)]
-      } returns ${explainValueToExpectation(test.op, test.explainValue)}`, async function () {
-        const commandStartedPromise = once(client, 'commandStartedEvent');
-        const response = await test.op(test.explainValue);
-        const commandStartedEvent = await commandStartedPromise;
-        expect(commandStartedEvent[0].explain).to.have.property(`${test.op.name}`);
-        switch (test.explainValue) {
-          case true:
-          case 'allPlansExecution':
-            expect(commandStartedEvent[0].verbosity).to.be.equal('allPlansExecution');
-            expect(response).to.have.property('queryPlanner');
-            expect(response).nested.property('executionStats.allPlansExecution').to.exist;
-            break;
-          case false:
-          case 'queryPlanner':
-            expect(commandStartedEvent[0].verbosity).to.be.equal('queryPlanner');
-            expect(response).to.have.property('queryPlanner');
-            break;
-          case 'executionStats':
-            expect(commandStartedEvent[0].verbosity).to.be.equal('executionStats');
-            expect(response).to.have.property('queryPlanner');
-            expect(response).to.have.property('executionStats');
-            expect(response).nested.property('allPlansExecution').to.not.exist;
-            break;
-          default:
-            expect(response).to.be.instanceOf(MongoServerError);
-            break;
-        }
-      });
+  for (const explainValue of explain) {
+    context(`When explain is ${explainValue}`, function () {
+      for (const op of ops) {
+        it(`${opNames[ops.indexOf(op)]} returns ${explainValueToExpectation(
+          explainValue
+        )}`, async function () {
+          const response = await op(explainValue).catch(error => error);
+          const commandStartedEvent = await commandStartedPromise;
+          switch (explainValue) {
+            case true:
+            case 'allPlansExecution':
+              expect(commandStartedEvent[0].command.verbosity).to.be.equal('allPlansExecution');
+              expect(response).to.have.property('queryPlanner');
+              expect(response).nested.property('executionStats.allPlansExecution').to.exist;
+              break;
+            case false:
+            case 'queryPlanner':
+              expect(commandStartedEvent[0].command.verbosity).to.be.equal('queryPlanner');
+              expect(response).to.have.property('queryPlanner');
+              expect(response).to.not.have.property('executionStats');
+              break;
+            case 'executionStats':
+              expect(commandStartedEvent[0].command.verbosity).to.be.equal('executionStats');
+              expect(response).to.have.property('queryPlanner');
+              expect(response).to.have.property('executionStats');
+              expect(response).to.not.have.nested.property('allPlansExecution');
+              break;
+            default:
+              expect(response).to.be.instanceOf(MongoServerError);
+              break;
+          }
+        });
+      }
     });
-  });
+  }
   /*
   context('highest verbosity explain', () => {
     it('deleteOne returns queryPlanner explain result', async function () {
@@ -329,10 +330,17 @@ describe.only('Explain', function () {
   */
 });
 
-async function explainValueToExpectation(
-  op: (explain: boolean | string) => Promise<any>,
-  explainValue: boolean | string
-) {
-  const opResult = await op(explainValue);
-  return opResult;
+function explainValueToExpectation(explainValue: boolean | string) {
+  switch (explainValue) {
+    case true:
+    case 'allPlansExecution':
+      return 'allPlansExecution property';
+    case false:
+    case 'queryPlanner':
+      return 'queryPlanner property';
+    case 'executionStats':
+      return 'executionStats property';
+    default:
+      return 'error';
+  }
 }
