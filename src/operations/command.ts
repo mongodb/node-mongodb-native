@@ -86,7 +86,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       this.ns = new MongoDBNamespace(dbNameOverride, '$cmd');
     } else {
       this.ns = parent
-        ? parent.s.namespace.withCollection('$cmd')
+        ? parent.s?.namespace.withCollection('$cmd')
         : new MongoDBNamespace('admin', '$cmd');
     }
 
