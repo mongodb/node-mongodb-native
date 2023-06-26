@@ -2,10 +2,10 @@ import type { Collection } from '../collection';
 import type { AggregateOptions } from '../operations/aggregate';
 import { AggregationCursor } from './aggregation_cursor';
 
-/** @internal */
+/** @public */
 export type ListSearchIndexesOptions = AggregateOptions;
 
-/** @internal */
+/** @public */
 export class ListSearchIndexesCursor extends AggregationCursor<{ name: string }> {
   /** @internal */
   constructor(
