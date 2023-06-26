@@ -17,35 +17,50 @@ describe('Explain', function () {
   let collection: Collection;
   let commandStartedPromise: Promise<CommandStartedEvent[]>;
   const ops = [
-    async (explain: boolean | string) => await collection.deleteOne({ a: 1 }, { explain }),
-    async (explain: boolean | string) => await collection.deleteMany({ a: 1 }, { explain }),
-    async (explain: boolean | string) =>
-      await collection.updateOne({ a: 1 }, { $inc: { a: 2 } }, { explain }),
-    async (explain: boolean | string) =>
-      await collection.updateMany({ a: 1 }, { $inc: { a: 2 } }, { explain }),
-    async (explain: boolean | string) => await collection.distinct('a', {}, { explain }),
-    async (explain: boolean | string) => await collection.findOneAndDelete({ a: 1 }, { explain }),
-    async (explain: boolean | string) => await collection.findOne({ a: 1 }, { explain }),
-    (explain: boolean | string) => collection.find({ a: 1 }).explain(explain),
-    async (explain: boolean | string) =>
-      await collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain }),
-    async (explain: boolean | string) =>
-      await collection
-        .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain })
-        .toArray()
-  ];
-
-  const opNames = [
-    'deleteOne',
-    'deleteMany',
-    'updateOne',
-    'updateMany',
-    'distinct',
-    'findOneAndDelete',
-    'findOne',
-    'find',
-    'findOneAndReplace',
-    'aggregate'
+    {
+      name: 'deleteOne',
+      op: async (explain: boolean | string) => await collection.deleteOne({ a: 1 }, { explain })
+    },
+    {
+      name: 'deleteMany',
+      op: async (explain: boolean | string) => await collection.deleteMany({ a: 1 }, { explain })
+    },
+    {
+      name: 'updateOne',
+      op: async (explain: boolean | string) =>
+        await collection.updateOne({ a: 1 }, { $inc: { a: 2 } }, { explain })
+    },
+    {
+      name: 'updateMany',
+      op: async (explain: boolean | string) =>
+        await collection.updateMany({ a: 1 }, { $inc: { a: 2 } }, { explain })
+    },
+    {
+      name: 'distinct',
+      op: async (explain: boolean | string) => await collection.distinct('a', {}, { explain })
+    },
+    {
+      name: 'findOneAndDelete',
+      op: async (explain: boolean | string) =>
+        await collection.findOneAndDelete({ a: 1 }, { explain })
+    },
+    {
+      name: 'findOne',
+      op: async (explain: boolean | string) => await collection.findOne({ a: 1 }, { explain })
+    },
+    { name: 'find', op: (explain: boolean | string) => collection.find({ a: 1 }).explain(explain) },
+    {
+      name: 'findOneAndReplace',
+      op: async (explain: boolean | string) =>
+        await collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain })
+    },
+    {
+      name: 'aggregate',
+      op: async (explain: boolean | string) =>
+        await collection
+          .aggregate([{ $project: { a: 1 } }, { $group: { _id: '$a' } }], { explain })
+          .toArray()
+    }
   ];
 
   beforeEach(async function () {
@@ -64,9 +79,9 @@ describe('Explain', function () {
   for (const explainValue of explain) {
     context(`When explain is ${explainValue}`, function () {
       for (const op of ops) {
-        const name = opNames[ops.indexOf(op)];
+        const name = op.name;
         it(`${name} returns ${explainValueToExpectation(explainValue)}`, async function () {
-          const response = await op(explainValue).catch(error => error);
+          const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
           switch (explainValue) {
             case true:
@@ -104,6 +119,7 @@ describe('Explain', function () {
               }
               break;
             default:
+              // for invalid values of explain
               expect(response).to.be.instanceOf(MongoServerError);
               break;
           }
