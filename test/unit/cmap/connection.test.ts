@@ -197,7 +197,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it.only('calls the command function through commandAsync', async function () {
+  it('calls the command function through commandAsync', async function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
