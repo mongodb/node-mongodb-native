@@ -198,25 +198,25 @@ describe('new Connection()', function () {
   });
 
   it.only('calls the command function through commandAsync', async function () {
-    const inputStream = new InputStream();
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
         request.reply(mock.HELLO);
       }
+      request.reply({ ok: 1 });
     });
 
     const options = {
       ...connectionOptionsDefaults,
-      connectionType: Connection,
       hostAddress: server.hostAddress()
     };
 
-    const connection: Connection = new Connection(inputStream, options);
+    const connectAsync = promisify(connect);
+    const connection: Connection = await connectAsync(options);
     const commandSpy = sinon.spy(connection, 'command');
 
-    await connection.commandAsync(ns('dummy'), { ping: 1 }, {});
-    expect(commandSpy).to.have.been.calledOnce;
+    connection.commandAsync(ns('dummy'), { ping: 1 }, {});
+    await expect(commandSpy).to.have.been.calledOnce;
   });
 
   it('throws a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
@@ -286,23 +286,6 @@ describe('new Connection()', function () {
           const messages = await once(connection, 'message');
           expect(messages[0].responseTo).to.equal(0);
           expect(callbackSpy).to.be.calledOnceWith(undefined, last);
-        });
-      });
-
-      context('when a connection is established', function () {
-        const inputStream = new FakeSocket();
-        let commandSpy;
-        let connection: Connection;
-        const document = { ping: 1 };
-
-        beforeEach(function () {
-          connection = new Connection(inputStream, connectionOptionsDefaults);
-          commandSpy = sinon.spy(connection, 'command');
-        });
-
-        it('calls the command function through commandAsync', async function () {
-          await connection.commandAsync(ns('dummy'), document, {});
-          expect(commandSpy).to.have.been.calledOnce;
         });
       });
 
