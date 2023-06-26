@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import { EventEmitter, once } from 'events';
+import { Server } from 'http';
 import { Socket } from 'net';
 import * as sinon from 'sinon';
-import { Readable } from 'stream';
+import { Duplex, Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -72,7 +73,7 @@ class FakeSocket extends EventEmitter {
   }
 }
 
-class InputStream extends Readable {
+class InputStream extends Duplex {
   writableEnded: boolean;
   timeout = 0;
 
@@ -85,6 +86,16 @@ class InputStream extends Readable {
     if (typeof cb === 'function') {
       process.nextTick(cb);
     }
+  }
+
+  write(
+    chunk: any,
+    encoding?: BufferEncoding | undefined,
+    cb?: ((error: Error | null | undefined) => void) | undefined
+  ): boolean;
+  write(chunk: any, cb?: ((error: Error | null | undefined) => void) | undefined): boolean;
+  write(chunk: unknown, encoding?: unknown, cb?: unknown): boolean {
+    this.push;
   }
 
   setTimeout(timeout) {
@@ -186,6 +197,28 @@ describe('new Connection()', function () {
     });
   });
 
+  it.only('calls the command function through commandAsync', async function () {
+    const inputStream = new InputStream();
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (isHello(doc)) {
+        request.reply(mock.HELLO);
+      }
+    });
+
+    const options = {
+      ...connectionOptionsDefaults,
+      connectionType: Connection,
+      hostAddress: server.hostAddress()
+    };
+
+    const connection: Connection = new Connection(inputStream, options);
+    const commandSpy = sinon.spy(connection, 'command');
+
+    await connection.commandAsync(ns('dummy'), { ping: 1 }, {});
+    expect(commandSpy).to.have.been.calledOnce;
+  });
+
   it('throws a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event
@@ -257,17 +290,18 @@ describe('new Connection()', function () {
       });
 
       context('when a connection is established', function () {
-        const inputStream = new InputStream();
+        const inputStream = new FakeSocket();
         let commandSpy;
-        let connection;
+        let connection: Connection;
+        const document = { ping: 1 };
 
         beforeEach(function () {
           connection = new Connection(inputStream, connectionOptionsDefaults);
           commandSpy = sinon.spy(connection, 'command');
         });
 
-        it('calls the command function through commandAsync', function () {
-          connection.commandAsync();
+        it('calls the command function through commandAsync', async function () {
+          await connection.commandAsync(ns('dummy'), document, {});
           expect(commandSpy).to.have.been.calledOnce;
         });
       });
