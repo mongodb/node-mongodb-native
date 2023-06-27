@@ -9,6 +9,7 @@ import {
   MongoErrorLabel,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  ns,
   ObjectId,
   Server,
   ServerDescription,
@@ -65,7 +66,7 @@ describe('Server', () => {
       );
     });
 
-    context('when a server is created', function () {
+    context.only('when a server is created', function () {
       let serverSpy;
       let server;
       beforeEach(function () {
@@ -78,7 +79,7 @@ describe('Server', () => {
       });
 
       it('calls the command function through commandAsync', async function () {
-        await server.commandAsync();
+        await server.commandAsync(ns('dummy'), { ping: 1 }, {});
         expect(serverSpy).to.have.been.calledOnce;
       });
     });
