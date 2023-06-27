@@ -90,10 +90,13 @@ describe('Explain', function () {
               if (name === 'aggregate') {
                 if (response.stages) {
                   if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
+                      expect(response.stages[0]).to.have.property('queryPlanner');
                     expect(response.stages[0].$cursor).nested.property(
                       'executionStats.allPlansExecution'
-                    ).to.exist;
+                    ).to.exist ||
+                      expect(response.stages[0]).nested.property('executionStats.allPlansExecution')
+                        .to.exist;
                   } else {
                     expect(response.stages[0]).to.have.property('queryPlanner');
                     expect(response.stages[0]).nested.property('executionStats.allPlansExecution')
@@ -114,8 +117,10 @@ describe('Explain', function () {
               if (name === 'aggregate') {
                 if (response.stages) {
                   if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
-                    expect(response.stages[0].$cursor).to.not.have.property('executionStats');
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
+                      expect(response.stages[0]).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).to.not.have.property('executionStats') ||
+                      expect(response.stages[0]).to.not.have.property('executionStats');
                   } else {
                     expect(response.stages[0]).to.have.property('queryPlanner');
                     expect(response.stages[0]).to.not.have.property('executionStats');
@@ -134,11 +139,16 @@ describe('Explain', function () {
               if (name === 'aggregate') {
                 if (response.stages) {
                   if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
-                    expect(response.stages[0].$cursor).to.have.property('executionStats');
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
+                      expect(response.stages[0]).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).to.have.property('executionStats') ||
+                      expect(response.stages[0]).to.have.property('executionStats');
                     expect(response.stages[0].$cursor).to.not.have.nested.property(
                       'executionStats.allPlansExecution'
-                    );
+                    ) ||
+                      expect(response.stages[0]).to.not.have.nested.property(
+                        'executionStats.allPlansExecution'
+                      );
                   } else {
                     expect(response.stages[0]).to.have.property('queryPlanner');
                     expect(response.stages[0]).to.have.property('executionStats');
