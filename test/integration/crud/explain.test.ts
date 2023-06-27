@@ -11,7 +11,7 @@ import {
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe.only('Explain', function () {
+describe('Explain', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
@@ -89,9 +89,16 @@ describe.only('Explain', function () {
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('allPlansExecution');
               if (name === 'aggregate') {
                 if (response.stages) {
-                  expect(response.stages[0]).to.have.property('queryPlanner');
-                  expect(response.stages[0]).nested.property('executionStats.allPlansExecution').to
-                    .exist;
+                  if (response.stages[0].$cursor) {
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).nested.property(
+                      'executionStats.allPlansExecution'
+                    ).to.exist;
+                  } else {
+                    expect(response.stages[0]).to.have.property('queryPlanner');
+                    expect(response.stages[0]).nested.property('executionStats.allPlansExecution')
+                      .to.exist;
+                  }
                 } else {
                   expect(response[0]).to.have.property('queryPlanner');
                   expect(response[0]).nested.property('executionStats.allPlansExecution').to.exist;
@@ -106,8 +113,13 @@ describe.only('Explain', function () {
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('queryPlanner');
               if (name === 'aggregate') {
                 if (response.stages) {
-                  expect(response.stages[0]).to.have.property('queryPlanner');
-                  expect(response.stages[0]).to.not.have.property('executionStats');
+                  if (response.stages[0].$cursor) {
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).to.not.have.property('executionStats');
+                  } else {
+                    expect(response.stages[0]).to.have.property('queryPlanner');
+                    expect(response.stages[0]).to.not.have.property('executionStats');
+                  }
                 } else {
                   expect(response[0]).to.have.property('queryPlanner');
                   expect(response[0]).to.not.have.property('executionStats');
@@ -121,11 +133,19 @@ describe.only('Explain', function () {
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('executionStats');
               if (name === 'aggregate') {
                 if (response.stages) {
-                  expect(response.stages[0]).to.have.property('queryPlanner');
-                  expect(response.stages[0]).to.have.property('executionStats');
-                  expect(response.stages[0]).to.not.have.nested.property(
-                    'executionStats.allPlansExecution'
-                  );
+                  if (response.stages[0].$cursor) {
+                    expect(response.stages[0].$cursor).to.have.property('queryPlanner');
+                    expect(response.stages[0].$cursor).to.have.property('executionStats');
+                    expect(response.stages[0].$cursor).to.not.have.nested.property(
+                      'executionStats.allPlansExecution'
+                    );
+                  } else {
+                    expect(response.stages[0]).to.have.property('queryPlanner');
+                    expect(response.stages[0]).to.have.property('executionStats');
+                    expect(response.stages[0]).to.not.have.nested.property(
+                      'executionStats.allPlansExecution'
+                    );
+                  }
                 } else {
                   expect(response[0]).to.have.property('queryPlanner');
                   expect(response[0]).to.have.property('executionStats');
