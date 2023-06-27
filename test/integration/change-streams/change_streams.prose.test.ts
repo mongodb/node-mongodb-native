@@ -938,4 +938,47 @@ describe('Change Stream prose tests', function () {
       }
     });
   });
+
+  describe('19. Validate that large ChangeStream events are split when using $changeStreamSplitLargeEvent', function () {
+    let client;
+    let db;
+    let collection;
+
+    beforeEach(async function () {
+      const configuration = this.configuration;
+      client = configuration.newClient();
+      db = client.db('test');
+      // Create a new collection _C_ with changeStreamPreAndPostImages enabled.
+      await db.createCollection('changeStreamSplitTests', {
+        changeStreamPreAndPostImages: { enabled: true }
+      });
+      collection = db.collection('changeStreamSplitTests');
+    });
+
+    afterEach(async function () {
+      await collection.drop();
+      await client.close();
+    });
+
+    it('splits the event into multiple fragments', {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=7.0.0' } },
+      test: async function () {
+        // Insert into _C_ a document at least 10mb in size, e.g. { "value": "q"*10*1024*1024 }
+        await collection.insertOne({ value: 'q'.repeat(10 * 1024 * 1024) });
+        // Create a change stream _S_ by calling watch on _C_ with pipeline
+        // [{ "$changeStreamSplitLargeEvent": {} }] and fullDocumentBeforeChange=required.
+        const changeStream = collection.watch([{ $changeStreamSplitLargeEvent: {} }], {
+          fullDocumentBeforeChange: 'required'
+        });
+        // Call updateOne on _C_ with an empty query and an update setting the field to a new
+        // large value, e.g. { "$set": { "value": "z"*10*1024*1024 } }.
+        await collection.updateOne({}, { $set: { value: 'z'.repeat(10 * 1024 * 1024) } });
+        // Collect two events from _S_.
+        const eventOne = await changeStream.next();
+        const eventTwo = await changeStream.next();
+        expect(eventOne.splitEvent).to.deep.equal({ fragment: 1, of: 2 });
+        expect(eventTwo.splitEvent).to.deep.equal({ fragment: 2, of: 2 });
+      }
+    });
+  });
 });
