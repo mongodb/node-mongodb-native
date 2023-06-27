@@ -1404,7 +1404,7 @@ task_groups:
     tasks:
     - oidc-auth-test-azure-latest
 
-  - name: test_aws_lambda_task_group
+  - name: test_atlas_task_group
     setup_group:
       - func: fetch source
       - command: subprocess.exec
@@ -1413,7 +1413,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/setup-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
@@ -1424,7 +1424,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/teardown-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:

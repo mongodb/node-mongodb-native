@@ -3457,7 +3457,7 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-azure-latest
-  - name: test_aws_lambda_task_group
+  - name: test_atlas_task_group
     setup_group:
       - func: fetch source
       - command: subprocess.exec
@@ -3466,7 +3466,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/setup-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
@@ -3477,7 +3477,7 @@ task_groups:
           binary: bash
           add_expansions_to_env: true
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/teardown-atlas-cluster.sh
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
@@ -4066,12 +4066,12 @@ buildvariants:
     batchtime: 20160
     tasks:
       - testazureoidc_task_group
-  - name: rhel8-test-aws-lambda
-    display_name: AWS Lambda Deployed Tests
+  - name: rhel8-test-atlas
+    display_name: Atlas Cluster Tests
     run_on: rhel80-large
     batchtime: 20160
     tasks:
-      - test_aws_lambda_task_group
+      - test_atlas_task_group
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large

@@ -754,11 +754,11 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'rhel8-test-aws-lambda',
-  display_name: 'AWS Lambda Deployed Tests',
+  name: 'rhel8-test-atlas',
+  display_name: 'Atlas Cluster Tests',
   run_on: DEFAULT_OS,
   batchtime: 20160,
-  tasks: ['test_aws_lambda_task_group']
+  tasks: ['test_atlas_task_group']
 });
 
 BUILD_VARIANTS.push({
