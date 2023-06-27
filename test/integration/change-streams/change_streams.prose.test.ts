@@ -976,6 +976,8 @@ describe('Change Stream prose tests', function () {
         // Collect two events from _S_.
         const eventOne = await changeStream.next();
         const eventTwo = await changeStream.next();
+        // Assert that the events collected have splitEvent fields { "fragment": 1, "of": 2 }
+        // and { "fragment": 2, "of": 2 }, in that order.
         expect(eventOne.splitEvent).to.deep.equal({ fragment: 1, of: 2 });
         expect(eventTwo.splitEvent).to.deep.equal({ fragment: 2, of: 2 });
       }
