@@ -11,7 +11,7 @@ import {
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe('Explain', function () {
+describe.only('CRUD API explain option', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
@@ -77,97 +77,74 @@ describe('Explain', function () {
   });
 
   for (const explainValue of explain) {
-    context(`When explain is ${explainValue}`, function () {
-      for (const op of ops) {
-        const name = op.name;
-        it(`${name} returns ${explainValueToExpectation(explainValue)}`, async function () {
+    for (const op of ops) {
+      const name = op.name;
+      context(`When explain is ${explainValue}, operation ${name}`, function () {
+        it(`returns ${explainValueToExpectation(explainValue)}`, async function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
+          let responsePropertyToCheck;
           switch (explainValue) {
             case true:
             case 'allPlansExecution':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('allPlansExecution');
               if (name === 'aggregate') {
-                if (response.stages) {
-                  if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
-                      expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0].$cursor).nested.property(
-                      'executionStats.allPlansExecution'
-                    ).to.exist ||
-                      expect(response.stages[0]).nested.property('executionStats.allPlansExecution')
-                        .to.exist;
+                if (response[0].stages) {
+                  if (response[0].stages[0].$cursor) {
+                    responsePropertyToCheck = response[0].stages[0].$cursor;
                   } else {
-                    expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0]).nested.property('executionStats.allPlansExecution')
-                      .to.exist;
+                    responsePropertyToCheck = response[0].stages[0];
                   }
                 } else {
-                  expect(response[0]).to.have.property('queryPlanner');
-                  expect(response[0]).nested.property('executionStats.allPlansExecution').to.exist;
+                  responsePropertyToCheck = response[0];
                 }
               } else {
-                expect(response).to.have.property('queryPlanner');
-                expect(response).nested.property('executionStats.allPlansExecution').to.exist;
+                responsePropertyToCheck = response;
               }
+              expect(responsePropertyToCheck).to.have.property('queryPlanner');
+              expect(responsePropertyToCheck).nested.property(
+                'executionStats.allPlansExecution'
+              ).to.exist;
               break;
             case false:
             case 'queryPlanner':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('queryPlanner');
               if (name === 'aggregate') {
-                if (response.stages) {
-                  if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
-                      expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0].$cursor).to.not.have.property('executionStats') ||
-                      expect(response.stages[0]).to.not.have.property('executionStats');
+                if (response[0].stages) {
+                  if (response[0].stages[0].$cursor) {
+                    responsePropertyToCheck = response[0].stages[0].$cursor;
                   } else {
-                    expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0]).to.not.have.property('executionStats');
+                    responsePropertyToCheck = response[0].stages[0];
                   }
                 } else {
-                  expect(response[0]).to.have.property('queryPlanner');
-                  expect(response[0]).to.not.have.property('executionStats');
+                  responsePropertyToCheck = response[0];
                 }
               } else {
-                expect(response).to.have.property('queryPlanner');
-                expect(response).to.not.have.property('executionStats');
+                responsePropertyToCheck = response;
               }
+              expect(responsePropertyToCheck).to.have.property('queryPlanner');
+              expect(responsePropertyToCheck).to.not.have.property('executionStats');
               break;
             case 'executionStats':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('executionStats');
               if (name === 'aggregate') {
-                if (response.stages) {
-                  if (response.stages[0].$cursor) {
-                    expect(response.stages[0].$cursor).to.have.property('queryPlanner') ||
-                      expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0].$cursor).to.have.property('executionStats') ||
-                      expect(response.stages[0]).to.have.property('executionStats');
-                    expect(response.stages[0].$cursor).to.not.have.nested.property(
-                      'executionStats.allPlansExecution'
-                    ) ||
-                      expect(response.stages[0]).to.not.have.nested.property(
-                        'executionStats.allPlansExecution'
-                      );
+                if (response[0].stages) {
+                  if (response[0].stages[0].$cursor) {
+                    responsePropertyToCheck = response[0].stages[0].$cursor;
                   } else {
-                    expect(response.stages[0]).to.have.property('queryPlanner');
-                    expect(response.stages[0]).to.have.property('executionStats');
-                    expect(response.stages[0]).to.not.have.nested.property(
-                      'executionStats.allPlansExecution'
-                    );
+                    responsePropertyToCheck = response[0].stages[0];
                   }
                 } else {
-                  expect(response[0]).to.have.property('queryPlanner');
-                  expect(response[0]).to.have.property('executionStats');
-                  expect(response[0]).to.not.have.nested.property(
-                    'executionStats.allPlansExecution'
-                  );
+                  responsePropertyToCheck = response[0];
                 }
               } else {
-                expect(response).to.have.property('queryPlanner');
-                expect(response).to.have.property('executionStats');
-                expect(response).to.not.have.nested.property('executionStats.allPlansExecution');
+                responsePropertyToCheck = response;
               }
+              expect(responsePropertyToCheck).to.have.property('queryPlanner');
+              expect(responsePropertyToCheck).to.have.property('executionStats');
+              expect(responsePropertyToCheck).to.not.have.nested.property(
+                'executionStats.allPlansExecution'
+              );
               break;
             default:
               // for invalid values of explain
@@ -175,8 +152,8 @@ describe('Explain', function () {
               break;
           }
         });
-      }
-    });
+      });
+    }
   }
 });
 
