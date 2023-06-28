@@ -11,7 +11,7 @@ import {
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe('CRUD API explain option', function () {
+describe.only('CRUD API explain option', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
@@ -80,7 +80,7 @@ describe('CRUD API explain option', function () {
     for (const op of ops) {
       const name = op.name;
       context(`When explain is ${explainValue}, operation ${name}`, function () {
-        it(`returns ${explainValueToExpectation(explainValue)}`, async function () {
+        it(`sets command verbosity to ${explainValue} and includes ${explainValueToExpectation(explainValue)} in the return response`, async function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
           let explainDocument;
@@ -127,12 +127,12 @@ function explainValueToExpectation(explainValue: boolean | string) {
   switch (explainValue) {
     case true:
     case 'allPlansExecution':
-      return 'allPlansExecution property';
+      return 'queryPlanner, executionStats, and nested allPlansExecution properties';
     case false:
     case 'queryPlanner':
-      return 'queryPlanner property';
+      return 'only queryPlanner property';
     case 'executionStats':
-      return 'executionStats property';
+      return 'queryPlanner and executionStats property';
     default:
       return 'error';
   }
