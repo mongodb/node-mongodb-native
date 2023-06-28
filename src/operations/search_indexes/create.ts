@@ -6,13 +6,15 @@ import type { ClientSession } from '../../sessions';
 import type { Callback } from '../../utils';
 import { AbstractOperation } from '../operation';
 
-/** @internal */
+/**
+ * @public
+ */
 export interface SearchIndexDescription {
   /** The name of the index. */
   name?: string;
 
   /** The index definition. */
-  description: Document;
+  definition: Document;
 }
 
 /** @internal */

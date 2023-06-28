@@ -19,19 +19,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      # TODO: replace with setup
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 'lts/*'
-          cache: 'npm'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm install -g npm@latest
-      - run: npm clean-install
+      - name: actions/setup
+        uses: ./.github/actions/setup
       - run: sudo apt-get install hugo
       - name: Build Docs
         run: npm run build:docs -- --yes
       - name: Open Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
-          title: 'docs: generate docs from latest main'
+          title: 'docs: generate docs from latest main [skip-ci]'
           delete-branch: true

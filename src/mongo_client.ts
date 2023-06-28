@@ -108,7 +108,10 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   tls?: boolean;
   /** A boolean to enable or disables TLS/SSL for the connection. (The ssl option is equivalent to the tls option.) */
   ssl?: boolean;
-  /** Specifies the location of a local TLS Certificate */
+  /**
+   * Specifies the location of a local TLS Certificate
+   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
+   */
   tlsCertificateFile?: string;
   /** Specifies the location of a local .pem file that contains either the client's TLS/SSL certificate and key or only the client's TLS/SSL key when tlsCertificateFile is used to provide the certificate. */
   tlsCertificateKeyFile?: string;
@@ -208,17 +211,35 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * @see https://www.mongodb.com/docs/manual/reference/write-concern/
    */
   writeConcern?: WriteConcern | WriteConcernSettings;
-  /** Validate mongod server certificate against Certificate Authority */
+  /**
+   * Validate mongod server certificate against Certificate Authority
+   * @deprecated Will be removed in the next major version. Please use tlsAllowInvalidCertificates instead.
+   */
   sslValidate?: boolean;
-  /** SSL Certificate file path. */
+  /**
+   * SSL Certificate file path.
+   * @deprecated Will be removed in the next major version. Please use tlsCAFile instead.
+   */
   sslCA?: string;
-  /** SSL Certificate file path. */
+  /**
+   * SSL Certificate file path.
+   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
+   */
   sslCert?: string;
-  /** SSL Key file file path. */
+  /**
+   * SSL Key file file path.
+   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
+   */
   sslKey?: string;
-  /** SSL Certificate pass phrase. */
+  /**
+   * SSL Certificate pass phrase.
+   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFilePassword instead.
+   */
   sslPass?: string;
-  /** SSL Certificate revocation list file path. */
+  /**
+   * SSL Certificate revocation list file path.
+   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
+   */
   sslCRL?: string;
   /** TCP Connection no delay */
   noDelay?: boolean;

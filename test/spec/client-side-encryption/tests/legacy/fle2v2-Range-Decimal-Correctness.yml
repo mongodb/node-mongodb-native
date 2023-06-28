@@ -4,7 +4,6 @@
 # Requires libmongocrypt 1.8.0.
 runOn:
   - minServerVersion: "7.0.0"
-    serverless: "forbid"
     # Skip QEv2 (also referred to as FLE2v2) tests on Serverless. Unskip once Serverless enables the QEv2 protocol.
     # FLE 2 Encrypted collections are not supported on standalone.
     # Tests for Decimal (without precision) must only run against a replica set. Decimal (without precision) queries are expected to take a long time and may exceed the default mongos timeout.
