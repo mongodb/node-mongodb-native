@@ -84,7 +84,7 @@ describe('CRUD API explain option', function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
           let explainDocument;
-          if (name !== 'aggregate') {
+          if (name === 'aggregate' && explainValue !== 'invalid') {
             // value changes depending on server version
             explainDocument = response[0].stages[0].$cursor ?? response[0].stages[0] ?? response[0];
           } else {
