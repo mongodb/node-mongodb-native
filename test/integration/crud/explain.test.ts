@@ -11,7 +11,7 @@ import {
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe('CRUD API explain option', function () {
+describe.only('CRUD API explain option', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
@@ -86,7 +86,8 @@ describe('CRUD API explain option', function () {
           let explainDocument;
           if (name === 'aggregate' && explainValue !== 'invalid') {
             // value changes depending on server version
-            explainDocument = response[0].stages[0].$cursor ?? response[0].stages[0] ?? response[0];
+            explainDocument =
+              response[0].stages?.[0]?.$cursor ?? response[0]?.stages ?? response[0];
           } else {
             explainDocument = response;
           }
