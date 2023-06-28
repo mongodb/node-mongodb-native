@@ -211,12 +211,16 @@ describe('new Connection()', function () {
       hostAddress: server.hostAddress()
     };
 
+    const serverSpy = sinon.spy(server, 'command');
     const connectAsync = promisify(connect);
     const connection: Connection = await connectAsync(options);
     const commandSpy = sinon.spy(connection, 'command');
 
-    connection.commandAsync(ns('dummy'), { ping: 1 }, {});
-    await expect(commandSpy).to.have.been.calledOnce;
+    await connection.commandAsync(ns('dummy'), { ping: 1 }, {});
+    expect(commandSpy).to.have.been.calledOnce;
+
+    await server.commandAsync(ns('dummy'), { ping: 1 }, {});
+    expect(serverSpy).to.have.been.calledOnce;
   });
 
   it('throws a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
