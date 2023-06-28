@@ -66,19 +66,9 @@ describe('Server', () => {
       );
     });
 
-    context.only('when a server is created', function () {
-      let serverSpy;
-      let server;
-      beforeEach(function () {
-        server = new Server(
-          topologyWithPlaceholderClient([], {}),
-          new ServerDescription('a:1'),
-          {} as any
-        );
-        serverSpy = sinon.spy(server, 'command');
-      });
-
+    context('when a server is created', function () {
       it('calls the command function through commandAsync', async function () {
+        const serverSpy = sinon.spy(server, 'command');
         await server.commandAsync(ns('dummy'), { ping: 1 }, {});
         expect(serverSpy).to.have.been.calledOnce;
       });

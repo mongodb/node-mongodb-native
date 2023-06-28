@@ -3,7 +3,7 @@ import { EventEmitter, once } from 'events';
 import { Server } from 'http';
 import { Socket } from 'net';
 import * as sinon from 'sinon';
-import { Duplex, Readable } from 'stream';
+import { Readable } from 'stream';
 import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -73,7 +73,7 @@ class FakeSocket extends EventEmitter {
   }
 }
 
-class InputStream extends Duplex {
+class InputStream extends Readable {
   writableEnded: boolean;
   timeout = 0;
 
