@@ -11,7 +11,7 @@ import {
 
 const explain = [true, false, 'queryPlanner', 'allPlansExecution', 'executionStats', 'invalid'];
 
-describe('CRUD API explain option', function () {
+describe.only('CRUD API explain option', function () {
   let client: MongoClient;
   let db: Db;
   let collection: Collection;
