@@ -83,66 +83,31 @@ describe('CRUD API explain option', function () {
         it(`returns ${explainValueToExpectation(explainValue)}`, async function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
-          let responsePropertyToCheck;
+          let explainDocument;
+          if (name !== 'aggregate') {
+            // value changes depending on server version
+            explainDocument = response[0].stages[0].$cursor ?? response[0].stages[0] ?? response[0];
+          } else {
+            explainDocument = response;
+          }
           switch (explainValue) {
             case true:
             case 'allPlansExecution':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('allPlansExecution');
-              if (name === 'aggregate') {
-                if (response[0].stages) {
-                  if (response[0].stages[0].$cursor) {
-                    responsePropertyToCheck = response[0].stages[0].$cursor;
-                  } else {
-                    responsePropertyToCheck = response[0].stages[0];
-                  }
-                } else {
-                  responsePropertyToCheck = response[0];
-                }
-              } else {
-                responsePropertyToCheck = response;
-              }
-              expect(responsePropertyToCheck).to.have.property('queryPlanner');
-              expect(responsePropertyToCheck).nested.property(
-                'executionStats.allPlansExecution'
-              ).to.exist;
+              expect(explainDocument).to.have.property('queryPlanner');
+              expect(explainDocument).nested.property('executionStats.allPlansExecution').to.exist;
               break;
             case false:
             case 'queryPlanner':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('queryPlanner');
-              if (name === 'aggregate') {
-                if (response[0].stages) {
-                  if (response[0].stages[0].$cursor) {
-                    responsePropertyToCheck = response[0].stages[0].$cursor;
-                  } else {
-                    responsePropertyToCheck = response[0].stages[0];
-                  }
-                } else {
-                  responsePropertyToCheck = response[0];
-                }
-              } else {
-                responsePropertyToCheck = response;
-              }
-              expect(responsePropertyToCheck).to.have.property('queryPlanner');
-              expect(responsePropertyToCheck).to.not.have.property('executionStats');
+              expect(explainDocument).to.have.property('queryPlanner');
+              expect(explainDocument).to.not.have.property('executionStats');
               break;
             case 'executionStats':
               expect(commandStartedEvent[0].command.verbosity).to.be.equal('executionStats');
-              if (name === 'aggregate') {
-                if (response[0].stages) {
-                  if (response[0].stages[0].$cursor) {
-                    responsePropertyToCheck = response[0].stages[0].$cursor;
-                  } else {
-                    responsePropertyToCheck = response[0].stages[0];
-                  }
-                } else {
-                  responsePropertyToCheck = response[0];
-                }
-              } else {
-                responsePropertyToCheck = response;
-              }
-              expect(responsePropertyToCheck).to.have.property('queryPlanner');
-              expect(responsePropertyToCheck).to.have.property('executionStats');
-              expect(responsePropertyToCheck).to.not.have.nested.property(
+              expect(explainDocument).to.have.property('queryPlanner');
+              expect(explainDocument).to.have.property('executionStats');
+              expect(explainDocument).to.not.have.nested.property(
                 'executionStats.allPlansExecution'
               );
               break;
