@@ -68,7 +68,7 @@ describe('Server', () => {
 
     context('when a server is created', function () {
       it('calls the command function through commandAsync', async function () {
-        const serverSpy = sinon.spy(server, 'command');
+        const serverSpy = sinon.stub(server, 'command').yieldsRight(undefined, { ok: 1 });
         await server.commandAsync(ns('dummy'), { ping: 1 }, {});
         expect(serverSpy).to.have.been.calledOnce;
       });
