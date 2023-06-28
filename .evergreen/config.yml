@@ -4069,7 +4069,6 @@ buildvariants:
   - name: rhel8-test-atlas
     display_name: Atlas Cluster Tests
     run_on: rhel80-large
-    batchtime: 20160
     tasks:
       - test_atlas_task_group
   - name: rhel8-no-auth-tests
