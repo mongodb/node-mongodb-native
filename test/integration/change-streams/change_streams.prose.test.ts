@@ -955,6 +955,7 @@ describe('Change Stream prose tests', function () {
     let client;
     let db;
     let collection;
+    let changeStream;
 
     beforeEach(async function () {
       const configuration = this.configuration;
@@ -968,6 +969,7 @@ describe('Change Stream prose tests', function () {
     });
 
     afterEach(async function () {
+      await changeStream.close();
       await collection.drop();
       await client.close();
     });
@@ -979,7 +981,7 @@ describe('Change Stream prose tests', function () {
         await collection.insertOne({ value: 'q'.repeat(10 * 1024 * 1024) });
         // Create a change stream _S_ by calling watch on _C_ with pipeline
         // [{ "$changeStreamSplitLargeEvent": {} }] and fullDocumentBeforeChange=required.
-        const changeStream = collection.watch([{ $changeStreamSplitLargeEvent: {} }], {
+        changeStream = collection.watch([{ $changeStreamSplitLargeEvent: {} }], {
           fullDocumentBeforeChange: 'required'
         });
         await initIteratorMode(changeStream);
@@ -989,7 +991,6 @@ describe('Change Stream prose tests', function () {
         // Collect two events from _S_.
         const eventOne = await changeStream.next();
         const eventTwo = await changeStream.next();
-        await changeStream.close();
         // Assert that the events collected have splitEvent fields { "fragment": 1, "of": 2 }
         // and { "fragment": 2, "of": 2 }, in that order.
         expect(eventOne.splitEvent).to.deep.equal({ fragment: 1, of: 2 });
