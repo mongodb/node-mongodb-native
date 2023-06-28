@@ -43,7 +43,7 @@ describe('FindOperation', function () {
       it('should build basic find command with filter', async () => {
         const findOperation = new FindOperation(undefined, namespace, filter);
         const stub = sinon.stub(server, 'command').yieldsRight();
-        await promisify(findOperation.execute.bind(findOperation))(server, undefined);
+        await promisify(findOperation.executeCallback.bind(findOperation))(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
           find: namespace.collection,
           filter
@@ -56,7 +56,7 @@ describe('FindOperation', function () {
         };
         const findOperation = new FindOperation(undefined, namespace, {}, options);
         const stub = sinon.stub(server, 'command').yieldsRight();
-        await promisify(findOperation.execute.bind(findOperation))(server, undefined);
+        await promisify(findOperation.executeCallback.bind(findOperation))(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
           sinon.match.has('oplogReplay', options.oplogReplay)

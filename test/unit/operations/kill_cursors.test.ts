@@ -65,10 +65,9 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
 
-      const error = await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(
-        differentServer,
-        undefined
-      ).catch(error => error);
+      const error = await promisify(
+        killCursorsOperation.executeCallback.bind(killCursorsOperation)
+      )(differentServer, undefined).catch(error => error);
 
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
@@ -81,10 +80,9 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
 
-      const error = await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(
-        server,
-        undefined
-      ).catch(error => error);
+      const error = await promisify(
+        killCursorsOperation.executeCallback.bind(killCursorsOperation)
+      )(server, undefined).catch(error => error);
 
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
@@ -97,7 +95,10 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
       const stub = sinon.stub(server, 'command').yieldsRight();
-      await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(server, undefined);
+      await promisify(killCursorsOperation.executeCallback.bind(killCursorsOperation))(
+        server,
+        undefined
+      );
       expect(stub).to.have.been.calledOnceWith(namespace, {
         killCursors: namespace.collection,
         cursors: [cursorId]
