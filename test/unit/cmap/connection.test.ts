@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { EventEmitter, once } from 'events';
-import { Server } from 'http';
 import { Socket } from 'net';
 import * as sinon from 'sinon';
 import { Readable } from 'stream';
@@ -86,16 +85,6 @@ class InputStream extends Readable {
     if (typeof cb === 'function') {
       process.nextTick(cb);
     }
-  }
-
-  write(
-    chunk: any,
-    encoding?: BufferEncoding | undefined,
-    cb?: ((error: Error | null | undefined) => void) | undefined
-  ): boolean;
-  write(chunk: any, cb?: ((error: Error | null | undefined) => void) | undefined): boolean;
-  write(chunk: unknown, encoding?: unknown, cb?: unknown): boolean {
-    this.push;
   }
 
   setTimeout(timeout) {
