@@ -194,6 +194,7 @@ export type {
   ChangeStreamReplaceDocument,
   ChangeStreamReshardCollectionDocument,
   ChangeStreamShardCollectionDocument,
+  ChangeStreamSplitEvent,
   ChangeStreamUpdateDocument,
   OperationTime,
   ResumeOptions,
