@@ -1,5 +1,5 @@
 import { Readable, Transform } from 'stream';
-import { promisify } from 'util';
+import { callbackify, promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
@@ -361,7 +361,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    const doc = await nextAsync<TSchema>(this, true);
+    const doc = await next<TSchema>(this, true);
 
     if (doc) {
       this[kDocuments].unshift(doc);
@@ -377,7 +377,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return nextAsync(this, true);
+    return next(this, true);
   }
 
   /**
@@ -388,7 +388,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return nextAsync(this, false);
+    return next(this, false);
   }
 
   /**
@@ -690,14 +690,6 @@ function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
   return doc;
 }
 
-const nextAsync = promisify(
-  next as <T>(
-    cursor: AbstractCursor<T>,
-    blocking: boolean,
-    callback: (e: Error, r: T | null) => void
-  ) => void
-);
-
 /**
  * @param cursor - the cursor on which to call `next`
  * @param blocking - a boolean indicating whether or not the cursor should `block` until data
@@ -705,63 +697,70 @@ const nextAsync = promisify(
  *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
  *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
  *     not indicate the end of the cursor.
- * @param callback - callback to return the result to the caller
- * @returns
+ * @returns the next document in the cursor, or `null`.  When `blocking` is `true`, a `null` document means
+ * the cursor has been exhausted.  Otherwise, it means that there is no document available in the cursor's buffer.
  */
-export function next<T>(
-  cursor: AbstractCursor<T>,
-  blocking: boolean,
-  callback: Callback<T | null>
-): void {
+async function next<T>(cursor: AbstractCursor<T>, blocking: boolean): Promise<T | null> {
   const cursorId = cursor[kId];
   if (cursor.closed) {
-    return callback(undefined, null);
+    return null;
   }
 
   if (cursor[kDocuments].length !== 0) {
-    callback(undefined, nextDocument<T>(cursor));
-    return;
+    return nextDocument<T>(cursor);
   }
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    cursor[kInit](err => {
-      if (err) return callback(err);
-      return next(cursor, blocking, callback);
-    });
-
-    return;
+    const init = promisify(cb => cursor[kInit](cb));
+    await init();
+    return next(cursor, blocking);
   }
 
   if (cursorIsDead(cursor)) {
-    return cleanupCursor(cursor, undefined, () => callback(undefined, null));
+    try {
+      await cleanupCursorAsync(cursor, undefined);
+      // eslint-disable-next-line no-empty
+    } catch {}
+    return null;
   }
 
   // otherwise need to call getMore
   const batchSize = cursor[kOptions].batchSize || 1000;
-  cursor._getMore(batchSize, (error, response) => {
-    if (response) {
-      const cursorId =
-        typeof response.cursor.id === 'number'
-          ? Long.fromNumber(response.cursor.id)
-          : typeof response.cursor.id === 'bigint'
-          ? Long.fromBigInt(response.cursor.id)
-          : response.cursor.id;
+  const getMore = promisify((batchSize: number, cb: Callback<Document | undefined>) =>
+    cursor._getMore(batchSize, cb)
+  );
 
-      cursor[kDocuments].pushMany(response.cursor.nextBatch);
-      cursor[kId] = cursorId;
-    }
-
+  let response: Document | undefined;
+  try {
+    response = await getMore(batchSize);
+  } catch (error) {
     if (error || cursorIsDead(cursor)) {
-      return cleanupCursor(cursor, { error }, () => callback(error, nextDocument<T>(cursor)));
+      try {
+        await cleanupCursorAsync(cursor, { error });
+        // eslint-disable-next-line no-empty
+      } catch {}
+      throw error;
     }
+  }
 
-    if (cursor[kDocuments].length === 0 && blocking === false) {
-      return callback(undefined, null);
-    }
+  if (response) {
+    const cursorId =
+      typeof response.cursor.id === 'number'
+        ? Long.fromNumber(response.cursor.id)
+        : typeof response.cursor.id === 'bigint'
+        ? Long.fromBigInt(response.cursor.id)
+        : response.cursor.id;
 
-    next(cursor, blocking, callback);
-  });
+    cursor[kDocuments].pushMany(response.cursor.nextBatch);
+    cursor[kId] = cursorId;
+  }
+
+  if (cursor[kDocuments].length === 0 && blocking === false) {
+    return null;
+  }
+
+  return next(cursor, blocking);
 }
 
 function cursorIsDead(cursor: AbstractCursor): boolean {
@@ -881,7 +880,7 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
-    next(this._cursor, true, (err, result) => {
+    callbackify(next)(this._cursor, true, (err, result) => {
       if (err) {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
         //       desired behavior is that a stream ends cleanly when a user explicitly closes
