@@ -14,7 +14,7 @@ const metadata: MongoDBMetadataUI = {
   }
 };
 
-describe('listDatabases()', function() {
+describe('listDatabases()', function () {
   describe('authorizedDatabases option', () => {
     const username = 'a';
     const password = 'b';
@@ -28,7 +28,7 @@ describe('listDatabases()', function() {
       roles: [{ role: 'read', db: mockAuthorizedDb }]
     };
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       adminClient = this.configuration.newClient();
 
       await adminClient
@@ -43,7 +43,7 @@ describe('listDatabases()', function() {
       });
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       await adminClient?.db('admin').removeUser(username);
       await adminClient?.db(mockAuthorizedDb).dropDatabase();
       await adminClient?.close();
@@ -53,7 +53,7 @@ describe('listDatabases()', function() {
     it(
       'should list all databases when admin client sets authorizedDatabases to true',
       metadata,
-      async function() {
+      async function () {
         const adminListDbs = await adminClient
           .db()
           .admin()
@@ -70,7 +70,7 @@ describe('listDatabases()', function() {
     it(
       'should list all databases when admin client sets authorizedDatabases to false',
       metadata,
-      async function() {
+      async function () {
         const adminListDbs = await adminClient
           .db()
           .admin()
@@ -87,7 +87,7 @@ describe('listDatabases()', function() {
     it(
       'should list authorized databases with authorizedDatabases set to true',
       metadata,
-      async function() {
+      async function () {
         const adminListDbs = await adminClient.db().admin().listDatabases();
         const authorizedListDbs = await authorizedClient
           .db()
@@ -108,7 +108,7 @@ describe('listDatabases()', function() {
     it(
       'should list authorized databases by default with authorizedDatabases unspecified',
       metadata,
-      async function() {
+      async function () {
         const adminListDbs = await adminClient.db().admin().listDatabases();
         const authorizedListDbs = await authorizedClient.db().admin().listDatabases();
         const adminDbs = adminListDbs.databases;
@@ -126,7 +126,7 @@ describe('listDatabases()', function() {
     it(
       'should not show authorized databases with authorizedDatabases set to false',
       metadata,
-      async function() {
+      async function () {
         let thrownError;
         try {
           await authorizedClient.db().admin().listDatabases({ authorizedDatabases: false });
@@ -141,12 +141,12 @@ describe('listDatabases()', function() {
     );
   });
 
-  describe('nameOnly option', function() {
+  describe('nameOnly option', function () {
     let client: MongoClient;
     const DBS = 10;
     const nameOnlyOptions = [true, false, undefined];
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       client = await this.configuration.newClient().connect();
       for (let i = 0; i < DBS; i++) {
         const db = client.db(`testDb_${i}`);
@@ -154,7 +154,7 @@ describe('listDatabases()', function() {
       }
     });
 
-    afterEach(async function() {
+    afterEach(async function () {
       if (client) {
         for (let i = 0; i < DBS; i++) {
           await client.db(`testDb_${i}`).dropDatabase();
@@ -165,8 +165,8 @@ describe('listDatabases()', function() {
     });
 
     for (const nameOnly of nameOnlyOptions) {
-      context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function() {
-        it(`returns ${optionToExpecation(nameOnly)}`, async function() {
+      context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
+        it(`returns ${optionToExpecation(nameOnly)}`, async function () {
           const response = await client.db().admin().listDatabases({ nameOnly });
 
           expect(response).to.have.property('databases');
