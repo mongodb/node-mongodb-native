@@ -361,7 +361,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    const doc = await next<TSchema>(this, true);
+    const doc = await next<TSchema>(this, true, false);
 
     if (doc) {
       this[kDocuments].unshift(doc);
@@ -680,16 +680,6 @@ export abstract class AbstractCursor<
   }
 }
 
-function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
-  const doc = cursor[kDocuments].shift();
-
-  if (doc && cursor[kTransform]) {
-    return cursor[kTransform](doc) as T;
-  }
-
-  return doc;
-}
-
 /**
  * @param cursor - the cursor on which to call `next`
  * @param blocking - a boolean indicating whether or not the cursor should `block` until data
@@ -697,31 +687,40 @@ function nextDocument<T>(cursor: AbstractCursor<T>): T | null {
  *     the cursor has been exhausted.  In certain scenarios (ChangeStreams, tailable await cursors and
  *     `tryNext`, for example) blocking is necessary because a getMore returning no documents does
  *     not indicate the end of the cursor.
+ * @param transform - if true, the cursor's transform function is applied to the result document (if the transform exists)
  * @returns the next document in the cursor, or `null`.  When `blocking` is `true`, a `null` document means
  * the cursor has been exhausted.  Otherwise, it means that there is no document available in the cursor's buffer.
  */
-async function next<T>(cursor: AbstractCursor<T>, blocking: boolean): Promise<T | null> {
+async function next<T>(
+  cursor: AbstractCursor<T>,
+  blocking: boolean,
+  transform = true
+): Promise<T | null> {
   const cursorId = cursor[kId];
   if (cursor.closed) {
     return null;
   }
 
   if (cursor[kDocuments].length !== 0) {
-    return nextDocument<T>(cursor);
+    const doc = cursor[kDocuments].shift();
+
+    if (doc != null && transform && cursor[kTransform]) {
+      return cursor[kTransform](doc);
+    }
+
+    return doc;
   }
 
   if (cursorId == null) {
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     const init = promisify(cb => cursor[kInit](cb));
     await init();
-    return next(cursor, blocking);
+    return next(cursor, blocking, transform);
   }
 
   if (cursorIsDead(cursor)) {
-    try {
-      await cleanupCursorAsync(cursor, undefined);
-      // eslint-disable-next-line no-empty
-    } catch {}
+    // if the cursor is dead, we clean it up
+    await cleanupCursorAsync(cursor);
     return null;
   }
 
@@ -735,11 +734,8 @@ async function next<T>(cursor: AbstractCursor<T>, blocking: boolean): Promise<T 
   try {
     response = await getMore(batchSize);
   } catch (error) {
-    if (error || cursorIsDead(cursor)) {
-      try {
-        await cleanupCursorAsync(cursor, { error });
-        // eslint-disable-next-line no-empty
-      } catch {}
+    if (error) {
+      await cleanupCursorAsync(cursor, { error });
       throw error;
     }
   }
@@ -756,11 +752,19 @@ async function next<T>(cursor: AbstractCursor<T>, blocking: boolean): Promise<T 
     cursor[kId] = cursorId;
   }
 
+  if (cursorIsDead(cursor)) {
+    // If we successfully received a response from a cursor BUT the cursor indicates that it is exhausted,
+    // we intentionally clean up the cursor to release its session back into the pool before the cursor
+    // is iterated.  This prevents a cursor that is exhausted on the server from holding
+    // onto a session indefinitely until the AbstractCursor is iterated.
+    await cleanupCursorAsync(cursor);
+  }
+
   if (cursor[kDocuments].length === 0 && blocking === false) {
     return null;
   }
 
-  return next(cursor, blocking);
+  return next(cursor, blocking, transform);
 }
 
 function cursorIsDead(cursor: AbstractCursor): boolean {
@@ -768,7 +772,20 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   return !!cursorId && cursorId.isZero();
 }
 
-const cleanupCursorAsync = promisify(cleanupCursor);
+const cleanupCursorAsyncInternal = promisify(cleanupCursor);
+
+async function cleanupCursorAsync<T>(
+  cursor: AbstractCursor<T>,
+  options: { needsToEmitClosed?: boolean; error?: AnyError } = {}
+): Promise<void> {
+  try {
+    await cleanupCursorAsyncInternal(cursor, options);
+  } catch {
+    // `cleanupCursor` never throws but we can't really test that.
+    // so this is a hack to ensure that any upstream consumers
+    // can safely guarantee on this wrapper never throwing.
+  }
+}
 
 function cleanupCursor(
   cursor: AbstractCursor,
