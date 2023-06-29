@@ -880,8 +880,21 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
-    callbackify(next)(this._cursor, true, (err, result) => {
-      if (err) {
+    next(this._cursor, true).then(
+      result => {
+        if (result == null) {
+          this.push(null);
+        } else if (this.destroyed) {
+          this._cursor.close().catch(() => null);
+        } else {
+          if (this.push(result)) {
+            return this._readNext();
+          }
+
+          this._readInProgress = false;
+        }
+      },
+      err => {
         // NOTE: This is questionable, but we have a test backing the behavior. It seems the
         //       desired behavior is that a stream ends cleanly when a user explicitly closes
         //       a client during iteration. Alternatively, we could do the "right" thing and
@@ -910,18 +923,6 @@ class ReadableCursorStream extends Readable {
         //       See NODE-4475.
         return this.destroy(err);
       }
-
-      if (result == null) {
-        this.push(null);
-      } else if (this.destroyed) {
-        this._cursor.close().catch(() => null);
-      } else {
-        if (this.push(result)) {
-          return this._readNext();
-        }
-
-        this._readInProgress = false;
-      }
-    });
+    );
   }
 }
