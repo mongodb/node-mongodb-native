@@ -96,7 +96,6 @@ describe('class AbstractCursor', function () {
           expect(doc.name).to.equal('JOHN DOE');
         });
 
-        // skipped because these tests fail after throwing uncaught exceptions
         it(`when the transform throws, ${method}() propagates the error to the user`, async () => {
           const cursor = collection.find().map(() => {
             throw new Error('error thrown in transform');
@@ -106,6 +105,7 @@ describe('class AbstractCursor', function () {
           expect(error)
             .to.be.instanceOf(Error)
             .to.match(/error thrown in transform/);
+          expect(cursor.closed).to.be.true;
         });
       }
 
@@ -130,6 +130,7 @@ describe('class AbstractCursor', function () {
         expect(error)
           .to.be.instanceOf(Error)
           .to.match(/error thrown in transform/);
+        expect(cursor._cursor).to.have.property('closed', true);
       });
     });
 

@@ -705,7 +705,12 @@ async function next<T>(
     const doc = cursor[kDocuments].shift();
 
     if (doc != null && transform && cursor[kTransform]) {
-      return cursor[kTransform](doc);
+      try {
+        return cursor[kTransform](doc);
+      } catch (error) {
+        await cleanupCursorAsync(cursor, { error, needsToEmitClosed: true });
+        throw error;
+      }
     }
 
     return doc;
