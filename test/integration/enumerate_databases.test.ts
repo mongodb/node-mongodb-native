@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { once } from 'events';
 
 import { type AddUserOptions, type MongoClient, MongoServerError } from '../mongodb';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
@@ -147,7 +148,7 @@ describe('listDatabases()', function () {
     const nameOnlyOptions = [true, false, undefined];
 
     beforeEach(async function () {
-      client = await this.configuration.newClient().connect();
+      client = await this.configuration.newClient({}, { monitorCommands: true }).connect();
       for (let i = 0; i < DBS; i++) {
         const db = client.db(`testDb_${i}`);
         await db.collection('test').insertOne({ a: 1 });
@@ -166,26 +167,22 @@ describe('listDatabases()', function () {
 
     for (const nameOnly of nameOnlyOptions) {
       context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
-        it(`returns ${optionToExpecation(nameOnly)}`, async function () {
-          const response = await client.db().admin().listDatabases({ nameOnly });
+        it(`sends command ${optionToExpecation(nameOnly)}`, async function () {
+          const promise = once(client, 'commandStarted');
+          await client.db().admin().listDatabases({ nameOnly });
 
-          expect(response).to.have.property('databases');
-          expect(response.databases).to.have.length.gte(DBS);
+          const commandStarted = (await promise)[0];
+          expect(commandStarted.command).to.haveOwnProperty('listDatabases', 1);
+
           switch (nameOnly) {
             case true:
-              for (const db of response.databases) {
-                expect(db).property('name').to.exist;
-                expect(db).to.not.have.property('sizeOnDisk');
-                expect(db).to.not.have.property('empty');
-              }
+              expect(commandStarted.command).to.have.property('nameOnly', true);
               break;
             case false:
+              expect(commandStarted.command).to.have.property('nameOnly', false);
+              break;
             case undefined:
-              for (const db of response.databases) {
-                expect(db.name).to.exist;
-                expect(db).property('sizeOnDisk').to.exist;
-                expect(db).property('empty').to.exist;
-              }
+              expect(commandStarted.command).to.not.have.property('nameOnly');
               break;
           }
         });
@@ -195,10 +192,11 @@ describe('listDatabases()', function () {
     function optionToExpecation(nameOnly?: boolean): string {
       switch (nameOnly) {
         case true:
-          return 'list of only database names';
+          return 'with nameOnly = true';
         case false:
+          return 'with nameOnly = false';
         case undefined:
-          return 'list of entire listDatabases responses';
+          return 'without nameOnly field';
       }
     }
   });
