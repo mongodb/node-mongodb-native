@@ -63,7 +63,7 @@ describe('GetMoreOperation', function () {
           maxTimeMS: 500
         };
 
-        await operation.execute.bind(operation)(server, undefined);
+        await operation.execute(server, undefined);
         expect(stub.calledOnce).to.be.true;
         const call = stub.getCall(0);
         expect(call.args[0]).to.equal(namespace);
@@ -108,7 +108,7 @@ describe('GetMoreOperation', function () {
       it('should build basic getMore command with cursorId and collection', async () => {
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
         const stub = sinon.stub(server, 'command').yieldsRight();
-        await getMoreOperation.execute.bind(getMoreOperation)(server, undefined);
+        await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
           getMore: cursorId,
           collection: namespace.collection
@@ -121,7 +121,7 @@ describe('GetMoreOperation', function () {
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
         const stub = sinon.stub(server, 'command').yieldsRight();
-        await getMoreOperation.execute.bind(getMoreOperation)(server, undefined);
+        await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
           sinon.match.has('batchSize', options.batchSize)
@@ -134,7 +134,7 @@ describe('GetMoreOperation', function () {
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
         const stub = sinon.stub(server, 'command').yieldsRight();
-        await getMoreOperation.execute.bind(getMoreOperation)(server, undefined);
+        await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
           sinon.match.has('maxTimeMS', options.maxAwaitTimeMS)
@@ -192,7 +192,7 @@ describe('GetMoreOperation', function () {
             };
             const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
             const stub = sinon.stub(server, 'command').yieldsRight();
-            await operation.execute.bind(operation)(server, undefined);
+            await operation.execute(server, undefined);
             expect(stub).to.have.been.calledOnceWith(namespace, getMore);
           });
         }
@@ -215,9 +215,7 @@ describe('GetMoreOperation', function () {
           server,
           options
         );
-        const error = await getMoreOperation.execute
-          .bind(getMoreOperation)(server, undefined)
-          .catch(error => error);
+        const error = await getMoreOperation.execute(server, undefined).catch(error => error);
         expect(error).to.be.instanceOf(MongoRuntimeError);
       });
 
@@ -228,9 +226,7 @@ describe('GetMoreOperation', function () {
           server,
           options
         );
-        const error = await getMoreOperation.execute
-          .bind(getMoreOperation)(server, undefined)
-          .catch(error => error);
+        const error = await getMoreOperation.execute(server, undefined).catch(error => error);
         expect(error).to.be.instanceOf(MongoRuntimeError);
       });
 
@@ -241,9 +237,7 @@ describe('GetMoreOperation', function () {
           server,
           options
         );
-        const error = await getMoreOperation.execute
-          .bind(getMoreOperation)(server, undefined)
-          .catch(error => error);
+        const error = await getMoreOperation.execute(server, undefined).catch(error => error);
         expect(error).to.be.instanceOf(MongoRuntimeError);
       });
     });
