@@ -31,7 +31,6 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
   constructor(db: Db, options?: ListDatabasesOptions) {
     super(db, options);
     this.options = options ?? {};
-    this.options.nameOnly = !!this.options.nameOnly;
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
@@ -40,7 +39,11 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     session: ClientSession | undefined,
     callback: Callback<ListDatabasesResult>
   ): void {
-    const cmd: Document = { listDatabases: 1, nameOnly: this.options.nameOnly };
+    const cmd: Document = { listDatabases: 1 };
+
+    if (typeof this.options.nameOnly === 'boolean') {
+      cmd.nameOnly = this.options.nameOnly;
+    }
 
     if (this.options.filter) {
       cmd.filter = this.options.filter;
