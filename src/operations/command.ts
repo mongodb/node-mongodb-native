@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import { Explain, type ExplainOptions } from '../explain';
@@ -111,8 +113,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     server: Server,
     session: ClientSession | undefined,
     cmd: Document,
-    callback: Callback
-  ): void {
+  ): Promise<any> {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -136,6 +137,71 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
 
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
       WriteConcern.apply(cmd, this.writeConcern);
+    }
+
+    if (
+      options.collation &&
+      typeof options.collation === 'object' &&
+      !this.hasAspect(Aspect.SKIP_COLLATION)
+    ) {
+      Object.assign(cmd, { collation: options.collation });
+    }
+
+    if (typeof options.maxTimeMS === 'number') {
+      cmd.maxTimeMS = options.maxTimeMS;
+    }
+
+    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
+      cmd = decorateWithExplain(cmd, this.explain);
+    }
+
+    return server.commandAsync(this.ns, cmd, options);
+  }
+}
+
+export abstract class CommandCallbackOperation<T = any> extends AbstractCallbackOperation<T> {
+  constructor(parent?: OperationParent, options?: CommandOperationOptions) {
+    super(parent, options);
+  }
+
+  async executeCommand(
+    server: Server,
+    session: ClientSession | undefined,
+    cmd: Document
+  ): Promise<any> {
+    return promisify((callback: (e: Error, r: T) => void) => {
+      this.executeCommandCallback(server, session, cmd, callback as any);
+    })();
+  }
+
+  protected abstract executeCommandCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    cmd: Document,
+    callback: Callback
+  ): void; {
+    this.server = server;
+
+    const options = {
+      ...this.options,
+      ...this.bsonOptions,
+      readPreference: this.readPreference,
+      session
+    };
+
+    const serverWireVersion = maxWireVersion(server);
+    const inTransaction = this.session && this.session.inTransaction();
+
+    if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
+      Object.assign(cmd, { readConcern: this.readConcern });
+    }
+
+    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
+      options.omitReadPreference = true;
+    }
+
+    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
+      Object.assign(cmd, { writeConcern: this.writeConcern });
     }
 
     if (
