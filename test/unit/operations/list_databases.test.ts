@@ -1,19 +1,29 @@
 import { expect } from 'chai';
 
-import { type Db, ListDatabasesOperation } from '../../mongodb';
+import { ListDatabasesOperation, MongoDBNamespace } from '../../mongodb';
+
+const mockDB = {
+  s: {
+    namespace: {
+      withCollection() {
+        return new MongoDBNamespace('test', 'test');
+      }
+    }
+  }
+};
 
 describe('ListDatabasesOperation', function () {
   describe('#constructor', function () {
     context('when nameOnly is provided', function () {
       context('when nameOnly is true', function () {
-        const operation = new ListDatabasesOperation({} as Db, { nameOnly: true });
+        const operation = new ListDatabasesOperation(mockDB, { nameOnly: true });
         it('sets nameOnly to true', function () {
           expect(operation.options).to.have.property('nameOnly', true);
         });
       });
 
       context('when nameOnly is false', function () {
-        const operation = new ListDatabasesOperation({} as Db, { nameOnly: false });
+        const operation = new ListDatabasesOperation(mockDB, { nameOnly: false });
 
         it('sets nameOnly to false', function () {
           expect(operation.options).to.have.property('nameOnly', false);
@@ -21,8 +31,8 @@ describe('ListDatabasesOperation', function () {
       });
     });
 
-    context('when no options are provided', function () {
-      const operation = new ListDatabasesOperation({} as Db, {});
+    context('when nameOnly is not specified', function () {
+      const operation = new ListDatabasesOperation(mockDB, {});
 
       it('nameOnly is undefined', function () {
         expect(operation.options).not.to.have.property('nameOnly');
