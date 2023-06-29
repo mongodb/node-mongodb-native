@@ -144,30 +144,28 @@ describe('listDatabases()', function () {
 
   describe('nameOnly option', function () {
     let client: MongoClient;
-    const DBS = 10;
     const nameOnlyOptions = [true, false, undefined];
+    const optionToExpectation = {
+      true: 'with nameOnly = true',
+      false: 'with nameOnly = false',
+      undefined: 'without nameOnly field'
+    };
 
     beforeEach(async function () {
       client = await this.configuration.newClient({}, { monitorCommands: true }).connect();
-      for (let i = 0; i < DBS; i++) {
-        const db = client.db(`testDb_${i}`);
-        await db.collection('test').insertOne({ a: 1 });
-      }
+      await client.db('test').createCollection('test');
     });
 
     afterEach(async function () {
       if (client) {
-        for (let i = 0; i < DBS; i++) {
-          await client.db(`testDb_${i}`).dropDatabase();
-        }
-
+        await client.db(`test`).dropDatabase();
         await client.close();
       }
     });
 
     for (const nameOnly of nameOnlyOptions) {
       context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
-        it(`sends command ${optionToExpecation(nameOnly)}`, async function () {
+        it(`sends command ${optionToExpectation[String(nameOnly)]}`, async function () {
           const promise = once(client, 'commandStarted');
           await client.db().admin().listDatabases({ nameOnly });
 
@@ -187,17 +185,6 @@ describe('listDatabases()', function () {
           }
         });
       });
-    }
-
-    function optionToExpecation(nameOnly?: boolean): string {
-      switch (nameOnly) {
-        case true:
-          return 'with nameOnly = true';
-        case false:
-          return 'with nameOnly = false';
-        case undefined:
-          return 'without nameOnly field';
-      }
     }
   });
   UnifiedTestSuiteBuilder.describe('comment option')
