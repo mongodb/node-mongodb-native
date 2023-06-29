@@ -88,7 +88,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     this.pipeline.push(stage);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<T>

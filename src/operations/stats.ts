@@ -37,7 +37,7 @@ export class CollStatsOperation extends CommandOperation<Document> {
     this.collectionName = collection.collectionName;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<CollStats>
@@ -66,7 +66,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
     this.options = options;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

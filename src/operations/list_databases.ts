@@ -34,7 +34,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<ListDatabasesResult>

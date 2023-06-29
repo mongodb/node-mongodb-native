@@ -60,7 +60,11 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
+  override executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback
+  ): void {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -97,12 +101,12 @@ export class DeleteOneOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<DeleteResult>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
@@ -121,12 +125,12 @@ export class DeleteManyOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<DeleteResult>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));

@@ -55,7 +55,7 @@ export class RunCommandOperation<T = Document> extends CommandOperation<T> {
     this.command = command;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<T>

@@ -102,7 +102,7 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

@@ -186,6 +186,28 @@ describe('new Connection()', function () {
     });
   });
 
+  it('calls the command function through commandAsync', async function () {
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (isHello(doc)) {
+        request.reply(mock.HELLO);
+      }
+      request.reply({ ok: 1 });
+    });
+
+    const options = {
+      ...connectionOptionsDefaults,
+      hostAddress: server.hostAddress()
+    };
+
+    const connectAsync = promisify(connect);
+    const connection: Connection = await connectAsync(options);
+    const commandSpy = sinon.spy(connection, 'command');
+
+    await connection.commandAsync(ns('dummy'), { ping: 1 }, {});
+    expect(commandSpy).to.have.been.calledOnce;
+  });
+
   it('throws a network error with kBeforeHandshake set to true on timeout before handshake', function (done) {
     server.setMessageHandler(() => {
       // respond to no requests to trigger timeout event

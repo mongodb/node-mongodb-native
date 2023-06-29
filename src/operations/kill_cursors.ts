@@ -3,7 +3,12 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
-import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
+import {
+  AbstractCallbackOperation,
+  Aspect,
+  defineAspects,
+  type OperationOptions
+} from './operation';
 
 /**
  * https://www.mongodb.com/docs/manual/reference/command/killCursors/
@@ -15,7 +20,7 @@ interface KillCursorsCommand {
   comment?: unknown;
 }
 
-export class KillCursorsOperation extends AbstractOperation {
+export class KillCursorsOperation extends AbstractCallbackOperation {
   cursorId: Long;
 
   constructor(cursorId: Long, ns: MongoDBNamespace, server: Server, options: OperationOptions) {
@@ -25,7 +30,11 @@ export class KillCursorsOperation extends AbstractOperation {
     this.server = server;
   }
 
-  execute(server: Server, session: ClientSession | undefined, callback: Callback<void>): void {
+  executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<void>
+  ): void {
     if (server !== this.server) {
       return callback(
         new MongoRuntimeError('Killcursor must run on the same server operation began on')
