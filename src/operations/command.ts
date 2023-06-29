@@ -109,10 +109,10 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     return true;
   }
 
-  executeCommand(
+  async executeCommand(
     server: Server,
     session: ClientSession | undefined,
-    cmd: Document,
+    cmd: Document
   ): Promise<any> {
     // TODO: consider making this a non-enumerable property
     this.server = server;
@@ -159,12 +159,12 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
   }
 }
 
-export abstract class CommandCallbackOperation<T = any> extends AbstractCallbackOperation<T> {
+export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(parent, options);
   }
 
-  async executeCommand(
+  override executeCommand(
     server: Server,
     session: ClientSession | undefined,
     cmd: Document
@@ -174,12 +174,12 @@ export abstract class CommandCallbackOperation<T = any> extends AbstractCallback
     })();
   }
 
-  protected abstract executeCommandCallback(
+  protected executeCommandCallback(
     server: Server,
     session: ClientSession | undefined,
     cmd: Document,
     callback: Callback
-  ): void; {
+  ): void {
     this.server = server;
 
     const options = {

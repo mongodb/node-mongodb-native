@@ -4,7 +4,7 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
 import { enumToString } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
@@ -22,7 +22,7 @@ export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
+export class SetProfilingLevelOperation extends CommandCallbackOperation<ProfilingLevel> {
   override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
@@ -64,7 +64,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     }
 
     // TODO(NODE-3483): Determine error to put here
-    super.executeCommand(server, session, { profile: this.profile }, (err, doc) => {
+    super.executeCommandCallback(server, session, { profile: this.profile }, (err, doc) => {
       if (err == null && doc.ok === 1) return callback(undefined, level);
       return err != null
         ? callback(err)

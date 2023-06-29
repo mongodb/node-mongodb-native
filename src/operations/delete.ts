@@ -5,7 +5,11 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  CommandCallbackOperation,
+  type CommandOperationOptions
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -41,7 +45,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<DeleteResult> {
+export class DeleteOperation extends CommandCallbackOperation<DeleteResult> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -92,7 +96,7 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

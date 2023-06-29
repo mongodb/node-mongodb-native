@@ -5,7 +5,11 @@ import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, hasAtomicOperators, type MongoDBNamespace } from '../utils';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  CommandCallbackOperation,
+  type CommandOperationOptions
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -60,7 +64,7 @@ export interface UpdateStatement {
 }
 
 /** @internal */
-export class UpdateOperation extends CommandOperation<Document> {
+export class UpdateOperation extends CommandCallbackOperation<Document> {
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
 
@@ -120,7 +124,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

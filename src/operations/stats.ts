@@ -4,7 +4,7 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /**
@@ -21,7 +21,7 @@ export interface CollStatsOptions extends CommandOperationOptions {
  * Get all the collection statistics.
  * @internal
  */
-export class CollStatsOperation extends CommandOperation<Document> {
+export class CollStatsOperation extends CommandCallbackOperation<Document> {
   override options: CollStatsOptions;
   collectionName: string;
 
@@ -47,7 +47,7 @@ export class CollStatsOperation extends CommandOperation<Document> {
       command.scale = this.options.scale;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 
@@ -58,7 +58,7 @@ export interface DbStatsOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DbStatsOperation extends CommandOperation<Document> {
+export class DbStatsOperation extends CommandCallbackOperation<Document> {
   override options: DbStatsOptions;
 
   constructor(db: Db, options: DbStatsOptions) {
@@ -76,7 +76,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
       command.scale = this.options.scale;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 
