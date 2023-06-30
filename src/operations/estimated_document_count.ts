@@ -27,7 +27,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     this.collectionName = collection.collectionName;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<number>

@@ -4,10 +4,10 @@ import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import type { Callback } from '../../utils';
-import { AbstractOperation } from '../operation';
+import { AbstractCallbackOperation } from '../operation';
 
 /** @internal */
-export class UpdateSearchIndexOperation extends AbstractOperation<void> {
+export class UpdateSearchIndexOperation extends AbstractCallbackOperation<void> {
   constructor(
     private readonly collection: Collection,
     private readonly name: string,
@@ -16,7 +16,11 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
     super();
   }
 
-  execute(server: Server, session: ClientSession | undefined, callback: Callback<void>): void {
+  executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<void>
+  ): void {
     const namespace = this.collection.fullNamespace;
     const command = {
       updateSearchIndex: namespace.collection,

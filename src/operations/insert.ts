@@ -10,7 +10,7 @@ import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {
@@ -24,7 +24,7 @@ export class InsertOperation extends CommandOperation<Document> {
     this.documents = documents;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>
@@ -72,12 +72,12 @@ export class InsertOneOperation extends InsertOperation {
     super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<InsertOneResult>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || res == null) return callback(err);
       if (res.code) return callback(new MongoServerError(res));
       if (res.writeErrors) {
@@ -104,7 +104,7 @@ export interface InsertManyResult<TSchema = Document> {
 }
 
 /** @internal */
-export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
+export class InsertManyOperation extends AbstractCallbackOperation<InsertManyResult> {
   override options: BulkWriteOptions;
   collection: Collection;
   docs: Document[];
@@ -121,7 +121,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     this.docs = docs;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<InsertManyResult>
@@ -135,7 +135,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
       options
     );
 
-    bulkWriteOperation.execute(server, session, (err, res) => {
+    bulkWriteOperation.executeCallback(server, session, (err, res) => {
       if (err || res == null) {
         if (err && err.message === 'Operation must be an object with an operation key') {
           err = new MongoInvalidArgumentError(

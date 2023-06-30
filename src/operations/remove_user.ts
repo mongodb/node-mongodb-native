@@ -19,7 +19,7 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     this.username = username;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<boolean>

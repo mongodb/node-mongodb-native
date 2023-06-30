@@ -4,19 +4,21 @@ import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import type { Callback } from '../../utils';
-import { AbstractOperation } from '../operation';
+import { AbstractCallbackOperation } from '../operation';
 
-/** @internal */
+/**
+ * @public
+ */
 export interface SearchIndexDescription {
   /** The name of the index. */
   name?: string;
 
   /** The index definition. */
-  description: Document;
+  definition: Document;
 }
 
 /** @internal */
-export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
+export class CreateSearchIndexesOperation extends AbstractCallbackOperation<string[]> {
   constructor(
     private readonly collection: Collection,
     private readonly descriptions: ReadonlyArray<SearchIndexDescription>
@@ -24,7 +26,11 @@ export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
     super();
   }
 
-  execute(server: Server, session: ClientSession | undefined, callback: Callback<string[]>): void {
+  executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<string[]>
+  ): void {
     const namespace = this.collection.fullNamespace;
     const command = {
       createSearchIndexes: namespace.collection,

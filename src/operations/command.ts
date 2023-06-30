@@ -15,7 +15,7 @@ import {
 } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
-import { AbstractOperation, Aspect, type OperationOptions } from './operation';
+import { AbstractCallbackOperation, Aspect, type OperationOptions } from './operation';
 
 /** @public */
 export interface CollationOptions {
@@ -68,7 +68,7 @@ export interface OperationParent {
 }
 
 /** @internal */
-export abstract class CommandOperation<T> extends AbstractOperation<T> {
+export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;

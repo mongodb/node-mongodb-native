@@ -14,7 +14,7 @@ import {
   type OperationParent
 } from './command';
 import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -176,7 +176,7 @@ function makeIndexSpec(
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractOperation<Document[]> {
+export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
   override options: IndexInformationOptions;
   collection: Collection;
 
@@ -186,7 +186,7 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document[]>
@@ -239,7 +239,7 @@ export class CreateIndexesOperation<
     });
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<T>
@@ -288,12 +288,12 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
   ) {
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<string>
   ): void {
-    super.execute(server, session, (err, indexNames) => {
+    super.executeCallback(server, session, (err, indexNames) => {
       if (err || !indexNames) return callback(err);
       return callback(undefined, indexNames[0]);
     });
@@ -317,7 +317,11 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.collectionName = collectionName;
   }
 
-  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
+  override executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback
+  ): void {
     const indexName = this.indexes[0].name;
     const cursor = this.db.collection(this.collectionName).listIndexes({ session });
     cursor.toArray().then(
@@ -327,12 +331,12 @@ export class EnsureIndexOperation extends CreateIndexOperation {
           callback(undefined, indexName);
           return;
         }
-        super.execute(server, session, callback);
+        super.executeCallback(server, session, callback);
       },
       error => {
         if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
           // ignore "NamespaceNotFound" errors
-          return super.execute(server, session, callback);
+          return super.executeCallback(server, session, callback);
         }
         return callback(error);
       }
@@ -357,7 +361,7 @@ export class DropIndexOperation extends CommandOperation<Document> {
     this.indexName = indexName;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>
@@ -373,8 +377,12 @@ export class DropIndexesOperation extends DropIndexOperation {
     super(collection, '*', options);
   }
 
-  override execute(server: Server, session: ClientSession | undefined, callback: Callback): void {
-    super.execute(server, session, err => {
+  override executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback
+  ): void {
+    super.executeCallback(server, session, err => {
       if (err) return callback(err, false);
       callback(undefined, true);
     });
@@ -407,7 +415,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>
@@ -429,7 +437,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
 }
 
 /** @internal */
-export class IndexExistsOperation extends AbstractOperation<boolean> {
+export class IndexExistsOperation extends AbstractCallbackOperation<boolean> {
   override options: IndexInformationOptions;
   collection: Collection;
   indexes: string | string[];
@@ -445,7 +453,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     this.indexes = indexes;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<boolean>
@@ -477,7 +485,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
 }
 
 /** @internal */
-export class IndexInformationOperation extends AbstractOperation<Document> {
+export class IndexInformationOperation extends AbstractCallbackOperation<Document> {
   override options: IndexInformationOptions;
   db: Db;
   name: string;
@@ -489,7 +497,7 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.name = name;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

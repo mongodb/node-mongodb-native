@@ -62,19 +62,7 @@ export abstract class AbstractOperation<TResult = any> {
 
   [kSession]: ClientSession | undefined;
 
-  executeAsync: (server: Server, session: ClientSession | undefined) => Promise<TResult>;
-
   constructor(options: OperationOptions = {}) {
-    this.executeAsync = promisify(
-      (
-        server: Server,
-        session: ClientSession | undefined,
-        callback: (e: Error, r: TResult) => void
-      ) => {
-        this.execute(server, session, callback as any);
-      }
-    );
-
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;
@@ -89,11 +77,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
   }
 
-  abstract execute(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<TResult>
-  ): void;
+  abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
     const ctor = this.constructor as OperationConstructor;
@@ -121,6 +105,24 @@ export abstract class AbstractOperation<TResult = any> {
   }
 }
 
+/** @internal */
+export abstract class AbstractCallbackOperation<TResult = any> extends AbstractOperation {
+  constructor(options: OperationOptions = {}) {
+    super(options);
+  }
+
+  execute(server: Server, session: ClientSession | undefined): Promise<TResult> {
+    return promisify((callback: (e: Error, r: TResult) => void) => {
+      this.executeCallback(server, session, callback as any);
+    })();
+  }
+
+  protected abstract executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<TResult>
+  ): void;
+}
 export function defineAspects(
   operation: OperationConstructor,
   aspects: symbol | symbol[] | Set<symbol>

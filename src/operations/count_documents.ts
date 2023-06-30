@@ -32,12 +32,12 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection.s.namespace, pipeline, options);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<number>
   ): void {
-    super.execute(server, session, (err, result) => {
+    super.executeCallback(server, session, (err, result) => {
       if (err || !result) {
         callback(err);
         return;

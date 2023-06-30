@@ -84,7 +84,7 @@ export class UpdateOperation extends CommandOperation<Document> {
     return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>
@@ -138,12 +138,12 @@ export class UpdateOneOperation extends UpdateOperation {
     }
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || !res) return callback(err);
       if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
@@ -175,12 +175,12 @@ export class UpdateManyOperation extends UpdateOperation {
     }
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || !res) return callback(err);
       if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));
@@ -231,12 +231,12 @@ export class ReplaceOneOperation extends UpdateOperation {
     }
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<UpdateResult | Document>
   ): void {
-    super.execute(server, session, (err, res) => {
+    super.executeCallback(server, session, (err, res) => {
       if (err || !res) return callback(err);
       if (this.explain != null) return callback(undefined, res);
       if (res.code) return callback(new MongoServerError(res));

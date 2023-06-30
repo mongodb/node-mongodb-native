@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import type { Document } from '../bson';
 import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
 import {
@@ -116,6 +118,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
+  commandAsync: (
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions
+  ) => Promise<Document | undefined>;
   [kMonitor]: Monitor | null;
 
   /** @event */
@@ -138,6 +145,15 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
+
+    this.commandAsync = promisify(
+      (
+        ns: MongoDBNamespace,
+        cmd: Document,
+        options: CommandOptions,
+        callback: Callback<Document>
+      ) => this.command(ns, cmd, options, callback as any)
+    );
 
     this.serverApi = options.serverApi;
 

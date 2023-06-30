@@ -13,7 +13,7 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { AbstractOperation, type Hint } from '../operations/operation';
+import { AbstractCallbackOperation, type Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../operations/update';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -881,14 +881,18 @@ export interface BulkWriteOptions extends CommandOperationOptions {
  * We would like this logic to simply live inside the BulkWriteOperation class
  * @internal
  */
-class BulkWriteShimOperation extends AbstractOperation {
+class BulkWriteShimOperation extends AbstractCallbackOperation {
   bulkOperation: BulkOperationBase;
   constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
     super(options);
     this.bulkOperation = bulkOperation;
   }
 
-  execute(server: Server, session: ClientSession | undefined, callback: Callback<any>): void {
+  executeCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    callback: Callback<any>
+  ): void {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation

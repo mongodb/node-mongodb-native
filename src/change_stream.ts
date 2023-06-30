@@ -163,6 +163,14 @@ export interface ChangeStreamDocumentKey<TSchema extends Document = Document> {
 }
 
 /** @public */
+export interface ChangeStreamSplitEvent {
+  /** Which fragment of the change this is. */
+  fragment: number;
+  /** The total number of fragments. */
+  of: number;
+}
+
+/** @public */
 export interface ChangeStreamDocumentCommon {
   /**
    * The id functions as an opaque token for use when resuming an interrupted
@@ -192,6 +200,13 @@ export interface ChangeStreamDocumentCommon {
    * Only present if the operation is part of a multi-document transaction.
    */
   lsid?: ServerSessionId;
+
+  /**
+   * When the change stream's backing aggregation pipeline contains the $changeStreamSplitLargeEvent
+   * stage, events larger than 16MB will be split into multiple events and contain the
+   * following information about which fragment the current event is.
+   */
+  splitEvent?: ChangeStreamSplitEvent;
 }
 
 /** @public */
