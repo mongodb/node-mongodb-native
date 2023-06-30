@@ -1,0 +1,15 @@
+name: Setup
+description: 'Installs node, driver dependencies, and builds source'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 'lts/*'
+        cache: 'npm'
+        registry-url: 'https://registry.npmjs.org'
+    - run: npm install -g npm@latest
+      shell: bash
+    - run: npm clean-install
+      shell: bash
