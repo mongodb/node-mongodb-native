@@ -1,7 +1,7 @@
 'use strict';
 const { expect } = require('chai');
 const { Binary } = require('../../mongodb');
-const { setTimeout } = require('timers');
+const { setTimeout, setImmediate } = require('timers');
 
 describe('Cursor Streams', function () {
   let client;
@@ -296,10 +296,10 @@ describe('Cursor Streams', function () {
         const stream = cursor.stream();
         stream.on('error', err => (error = err));
         cursor.on('close', function () {
-          setTimeout(() => {
+          setImmediate(() => {
             expect(error).to.exist;
             client.close(done);
-          }, 50);
+          });
         });
 
         stream.pipe(process.stdout);
