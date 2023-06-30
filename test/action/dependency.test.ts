@@ -71,7 +71,7 @@ describe('package.json', function () {
           itInNodeProcess(
             'getSnappy returns rejected import',
             async function ({ expect, mongodb }) {
-              const snappyImport = await mongodb.getSnappy();
+              const snappyImport = mongodb.getSnappy();
               expect(snappyImport).to.have.nested.property(
                 'kModuleError.name',
                 'MongoMissingDependencyError'
@@ -100,7 +100,7 @@ describe('package.json', function () {
           itInNodeProcess(
             'getSnappy returns fulfilled import',
             async function ({ expect, mongodb }) {
-              const snappyImport = await mongodb.getSnappy();
+              const snappyImport = mongodb.getSnappy();
               expect(snappyImport).to.have.property('compress').that.is.a('function');
               expect(snappyImport).to.have.property('uncompress').that.is.a('function');
             }
