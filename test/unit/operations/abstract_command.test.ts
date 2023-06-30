@@ -6,7 +6,7 @@ import {
   type ClientSession,
   CommandOperation,
   type CommandOperationOptions,
-type Document,
+  type Document,
   type OperationParent,
   Server,
   ServerDescription

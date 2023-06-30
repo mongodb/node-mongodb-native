@@ -157,6 +157,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
   }
 }
 
+/** @internal */
 export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(parent, options);
