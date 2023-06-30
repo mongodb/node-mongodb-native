@@ -182,6 +182,8 @@ describe('listDatabases()', function () {
             case undefined:
               expect(commandStarted.command).to.not.have.property('nameOnly');
               break;
+            default:
+              expect.fail(`Unrecognized nameOnly value: ${nameOnly}`);
           }
         });
       });
