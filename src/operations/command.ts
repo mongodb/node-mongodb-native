@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import { Explain, type ExplainOptions } from '../explain';
@@ -162,16 +160,6 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
 export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(parent, options);
-  }
-
-  override executeCommand(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document
-  ): Promise<any> {
-    return promisify((callback: (e: Error, r: T) => void) => {
-      this.executeCommandCallback(server, session, cmd, callback as any);
-    })();
   }
 
   protected executeCommandCallback(
