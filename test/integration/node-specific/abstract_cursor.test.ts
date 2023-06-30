@@ -117,7 +117,6 @@ describe('class AbstractCursor', function () {
         expect(doc.name).to.equal('JOHN DOE');
       });
 
-      // skipped because these tests fail after throwing uncaught exceptions
       it(`when the transform throws, Cursor.stream() propagates the error to the user`, async () => {
         const cursor = collection
           .find()

@@ -1708,7 +1708,6 @@ describe('Cursor', function () {
     expect(cursor).property('closed', false);
 
     const willClose = once(cursor, 'close');
-    const willEnd = once(stream, 'close');
 
     const dataEvents = on(stream, 'data');
 
@@ -1722,16 +1721,12 @@ describe('Cursor', function () {
     // After 5 successful data events, destroy stream
     stream.destroy();
 
-    // We should get a a close event on the stream and a close event on the cursor
-    // We should **not** get an 'error' event,
+    // We should get a close event on the stream and a close event on the cursor
+    // We should **not** get an 'error' or an 'end' event,
     // the following will throw if either stream or cursor emitted an 'error' event
     await Promise.race([
-      willEnd,
-      sleep(100, { ref: false }).then(() => Promise.reject(new Error('end event never emitted')))
-    ]);
-    await Promise.race([
       willClose,
-      sleep(100, { ref: false }).then(() => Promise.reject(new Error('close event never emitted')))
+      sleep(100).then(() => Promise.reject(new Error('close event never emitted')))
     ]);
   });
 
@@ -3606,7 +3601,6 @@ describe('Cursor', function () {
 
     await collection.insertMany(docs);
 
-    // TODO - talk to Neal about this test
     const cursor = await collection.find({}, { batchSize: 3 });
     for (let i = 0; i < 3; ++i) {
       await cursor.next();

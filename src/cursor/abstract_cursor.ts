@@ -1,5 +1,5 @@
 import { Readable, Transform } from 'stream';
-import { callbackify, promisify } from 'util';
+import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
 import {
@@ -708,7 +708,10 @@ async function next<T>(
       try {
         return cursor[kTransform](doc);
       } catch (error) {
-        await cleanupCursorAsync(cursor, { error, needsToEmitClosed: true });
+        await cleanupCursorAsync(cursor, { error, needsToEmitClosed: true }).catch(() => {
+          // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
+          // error instead.
+        });
         throw error;
       }
     }
@@ -725,7 +728,9 @@ async function next<T>(
 
   if (cursorIsDead(cursor)) {
     // if the cursor is dead, we clean it up
-    await cleanupCursorAsync(cursor);
+    // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
+    // and we should surface the error
+    await cleanupCursorAsync(cursor, {});
     return null;
   }
 
@@ -740,7 +745,10 @@ async function next<T>(
     response = await getMore(batchSize);
   } catch (error) {
     if (error) {
-      await cleanupCursorAsync(cursor, { error });
+      await cleanupCursorAsync(cursor, { error }).catch(() => {
+        // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
+        // error instead.
+      });
       throw error;
     }
   }
@@ -762,7 +770,10 @@ async function next<T>(
     // we intentionally clean up the cursor to release its session back into the pool before the cursor
     // is iterated.  This prevents a cursor that is exhausted on the server from holding
     // onto a session indefinitely until the AbstractCursor is iterated.
-    await cleanupCursorAsync(cursor);
+    //
+    // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
+    // and we should surface the error
+    await cleanupCursorAsync(cursor, {});
   }
 
   if (cursor[kDocuments].length === 0 && blocking === false) {
@@ -777,20 +788,7 @@ function cursorIsDead(cursor: AbstractCursor): boolean {
   return !!cursorId && cursorId.isZero();
 }
 
-const cleanupCursorAsyncInternal = promisify(cleanupCursor);
-
-async function cleanupCursorAsync<T>(
-  cursor: AbstractCursor<T>,
-  options: { needsToEmitClosed?: boolean; error?: AnyError } = {}
-): Promise<void> {
-  try {
-    await cleanupCursorAsyncInternal(cursor, options);
-  } catch {
-    // `cleanupCursor` never throws but we can't really test that.
-    // so this is a hack to ensure that any upstream consumers
-    // can safely guarantee on this wrapper never throwing.
-  }
-}
+const cleanupCursorAsync = promisify(cleanupCursor);
 
 function cleanupCursor(
   cursor: AbstractCursor,
@@ -802,6 +800,10 @@ function cleanupCursor(
   const server = cursor[kServer];
   const session = cursor[kSession];
   const error = options?.error;
+
+  // Cursors only emit closed events once the client-side cursor has been exhausted fully or there
+  // was an error.  Notably, when the server returns a cursor id of 0 and a non-empty batch, we
+  // cleanup the cursor but don't emit a `close` event.
   const needsToEmitClosed = options?.needsToEmitClosed ?? cursor[kDocuments].length === 0;
 
   if (error) {
