@@ -39,9 +39,9 @@ const zlibDeflate = promisify(zlib.deflate.bind(zlib));
 
 let zstd: typeof ZStandard;
 let Snappy: SnappyLib | null = null;
-async function loadSnappy() {
+function loadSnappy() {
   if (Snappy == null) {
-    const snappyImport = await getSnappy();
+    const snappyImport = getSnappy();
     if ('kModuleError' in snappyImport) {
       throw snappyImport.kModuleError;
     }
@@ -58,7 +58,7 @@ export async function compress(
   const zlibOptions = {} as zlib.ZlibOptions;
   switch (options.agreedCompressor) {
     case 'snappy': {
-      Snappy ??= await loadSnappy();
+      Snappy ??= loadSnappy();
       return Snappy.compress(dataToBeCompressed);
     }
     case 'zstd': {
@@ -97,7 +97,7 @@ export async function decompress(compressorID: number, compressedData: Buffer): 
 
   switch (compressorID) {
     case Compressor.snappy: {
-      Snappy ??= await loadSnappy();
+      Snappy ??= loadSnappy();
       return Snappy.uncompress(compressedData, { asBuffer: true });
     }
     case Compressor.zstd: {

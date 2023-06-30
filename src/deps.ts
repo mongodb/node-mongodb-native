@@ -112,9 +112,7 @@ export type SnappyLib = {
   uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
 };
 
-export async function getSnappy(): Promise<
-  SnappyLib | { kModuleError: MongoMissingDependencyError }
-> {
+export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyError } {
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
     const value = require('snappy');
