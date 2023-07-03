@@ -38,6 +38,7 @@ export interface WriteConcernSettings {
 
 export const WRITE_CONCERN_KEYS = ['w', 'wtimeout', 'j', 'journal', 'fsync'];
 
+/** The write concern options that decorate the server command. */
 interface CommandWriteConcernOptions {
   /** The write concern */
   w?: W;
@@ -45,8 +46,6 @@ interface CommandWriteConcernOptions {
   j?: boolean;
   /** The write concern timeout. */
   wtimeout?: number;
-  /** The file sync write concern. */
-  fsync?: boolean | 1;
 }
 
 /**
