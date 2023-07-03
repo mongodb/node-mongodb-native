@@ -1,4 +1,4 @@
-import { Document } from "bson";
+import { type Document } from 'bson';
 
 /** @public */
 export type W = number | 'majority';
