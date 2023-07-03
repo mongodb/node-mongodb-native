@@ -40,8 +40,9 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     callback: Callback<ListDatabasesResult>
   ): void {
     const cmd: Document = { listDatabases: 1 };
-    if (this.options.nameOnly) {
-      cmd.nameOnly = Number(cmd.nameOnly);
+
+    if (typeof this.options.nameOnly === 'boolean') {
+      cmd.nameOnly = this.options.nameOnly;
     }
 
     if (this.options.filter) {
