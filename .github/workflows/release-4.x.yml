@@ -7,7 +7,7 @@ permissions:
   contents: write
   pull-requests: write
 
-name: release
+name: release-4x
 
 jobs:
   release-please:
