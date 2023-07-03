@@ -38,7 +38,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
     this.query = query;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<any[]>

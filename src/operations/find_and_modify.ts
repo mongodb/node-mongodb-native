@@ -29,6 +29,11 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
   sort?: Sort;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Return the ModifyResult instead of the modified document. Defaults to true
+   * but will default to false in the next major version.
+   */
+  includeResultMetadata?: boolean;
 }
 
 /** @public */
@@ -47,6 +52,11 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Return the ModifyResult instead of the modified document. Defaults to true
+   * but will default to false in the next major version.
+   */
+  includeResultMetadata?: boolean;
 }
 
 /** @public */
@@ -67,6 +77,11 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   upsert?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
+  /**
+   * Return the ModifyResult instead of the modified document. Defaults to true
+   * but will default to false in the next major version.
+   */
+  includeResultMetadata?: boolean;
 }
 
 /** @internal */
@@ -127,6 +142,8 @@ class FindAndModifyOperation extends CommandOperation<Document> {
       upsert: false
     };
 
+    options.includeResultMetadata ??= true;
+
     const sort = formatSort(options.sort);
     if (sort) {
       this.cmdBase.sort = sort;
@@ -162,7 +179,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     this.query = query;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>
@@ -205,7 +222,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     // Execute the command
     super.executeCommand(server, session, cmd, (err, result) => {
       if (err) return callback(err);
-      return callback(undefined, result);
+      return callback(undefined, options.includeResultMetadata ? result : result.value ?? null);
     });
   }
 }

@@ -1,8 +1,11 @@
 import { expect } from 'chai';
+import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
+import { promisify } from 'util';
 
 import {
+  AbstractCursor,
   type ChangeStream,
   type CommandFailedEvent,
   type CommandStartedEvent,
@@ -16,6 +19,7 @@ import {
   Timestamp
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
+import { getSymbolFrom } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 /**
@@ -67,6 +71,14 @@ function triggerResumableError(
 
   triggerError();
 }
+
+const initIteratorMode = async (cs: ChangeStream) => {
+  const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+  const initEvent = once(cs.cursor, 'init');
+  await promisify(cs.cursor[init].bind(cs.cursor))();
+  await initEvent;
+  return;
+};
 
 /** Waits for a change stream to start */
 function waitForStarted(changeStream, callback) {
@@ -935,6 +947,54 @@ describe('Change Stream prose tests', function () {
               .then(() => coll.insertOne({ x: 3 }, { writeConcern: { w: 'majority', j: true } }))
           )
         );
+      }
+    });
+  });
+
+  describe('19. Validate that large ChangeStream events are split when using $changeStreamSplitLargeEvent', function () {
+    let client;
+    let db;
+    let collection;
+    let changeStream;
+
+    beforeEach(async function () {
+      const configuration = this.configuration;
+      client = configuration.newClient();
+      db = client.db('test');
+      // Create a new collection _C_ with changeStreamPreAndPostImages enabled.
+      await db.createCollection('changeStreamSplitTests', {
+        changeStreamPreAndPostImages: { enabled: true }
+      });
+      collection = db.collection('changeStreamSplitTests');
+    });
+
+    afterEach(async function () {
+      await changeStream.close();
+      await collection.drop();
+      await client.close();
+    });
+
+    it('splits the event into multiple fragments', {
+      metadata: { requires: { topology: '!single', mongodb: '>=7.0.0' } },
+      test: async function () {
+        // Insert into _C_ a document at least 10mb in size, e.g. { "value": "q"*10*1024*1024 }
+        await collection.insertOne({ value: 'q'.repeat(10 * 1024 * 1024) });
+        // Create a change stream _S_ by calling watch on _C_ with pipeline
+        // [{ "$changeStreamSplitLargeEvent": {} }] and fullDocumentBeforeChange=required.
+        changeStream = collection.watch([{ $changeStreamSplitLargeEvent: {} }], {
+          fullDocumentBeforeChange: 'required'
+        });
+        await initIteratorMode(changeStream);
+        // Call updateOne on _C_ with an empty query and an update setting the field to a new
+        // large value, e.g. { "$set": { "value": "z"*10*1024*1024 } }.
+        await collection.updateOne({}, { $set: { value: 'z'.repeat(10 * 1024 * 1024) } });
+        // Collect two events from _S_.
+        const eventOne = await changeStream.next();
+        const eventTwo = await changeStream.next();
+        // Assert that the events collected have splitEvent fields { "fragment": 1, "of": 2 }
+        // and { "fragment": 2, "of": 2 }, in that order.
+        expect(eventOne.splitEvent).to.deep.equal({ fragment: 1, of: 2 });
+        expect(eventTwo.splitEvent).to.deep.equal({ fragment: 2, of: 2 });
       }
     });
   });

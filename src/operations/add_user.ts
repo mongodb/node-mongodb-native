@@ -50,7 +50,7 @@ export class AddUserOperation extends CommandOperation<Document> {
     this.options = options ?? {};
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

@@ -32,7 +32,7 @@ export class CountOperation extends CommandOperation<number> {
     this.query = filter;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<number>

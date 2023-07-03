@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
 import {
   KillCursorsOperation,
@@ -65,10 +64,9 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
 
-      const error = await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(
-        differentServer,
-        undefined
-      ).catch(error => error);
+      const error = await killCursorsOperation
+        .execute(differentServer, undefined)
+        .catch(error => error);
 
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
@@ -81,10 +79,7 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
 
-      const error = await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(
-        server,
-        undefined
-      ).catch(error => error);
+      const error = await killCursorsOperation.execute(server, undefined).catch(error => error);
 
       expect(error).to.be.instanceOf(MongoRuntimeError);
     });
@@ -97,7 +92,7 @@ describe('class KillCursorsOperation', () => {
         options
       ) as any;
       const stub = sinon.stub(server, 'command').yieldsRight();
-      await promisify(killCursorsOperation.execute.bind(killCursorsOperation))(server, undefined);
+      await killCursorsOperation.execute(server, undefined);
       expect(stub).to.have.been.calledOnceWith(namespace, {
         killCursors: namespace.collection,
         cursors: [cursorId]

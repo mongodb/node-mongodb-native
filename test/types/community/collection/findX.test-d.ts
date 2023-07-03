@@ -288,6 +288,7 @@ const fooObjWithArray: FooWithArray = {
 const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
 
 declare const coll: Collection<{ a: number; b: string }>;
+// Passing no options will return the modify result.
 expectType<WithId<{ a: number; b: string }> | null>((await coll.findOneAndDelete({ a: 3 })).value);
 expectType<WithId<{ a: number; b: string }> | null>(
   (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' })).value
@@ -303,6 +304,69 @@ expectType<WithId<{ a: number; b: string }> | null>(
       }
     )
   ).value
+);
+
+// Passing empty options will return the modify result.
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndDelete({ a: 3 }, {})).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' }, {})).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (
+    await coll.findOneAndUpdate(
+      { a: 3 },
+      {
+        $set: {
+          a: 5
+        }
+      },
+      {}
+    )
+  ).value
+);
+
+// Including { includeResultMetadata: true } option will return the
+// modify result.
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndDelete({ a: 3 }, { includeResultMetadata: true })).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (
+    await coll.findOneAndReplace(
+      { a: 3 },
+      { a: 5, b: 'new string' },
+      { includeResultMetadata: true }
+    )
+  ).value
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  (await coll.findOneAndUpdate({ a: 3 }, { $set: { a: 5 } }, { includeResultMetadata: true })).value
+);
+
+// Including { includeResultMetadata: false } option will change the return type
+// to the modified document or null.
+expectType<WithId<{ a: number; b: string }> | null>(
+  await coll.findOneAndDelete({ a: 3 }, { includeResultMetadata: false })
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  await coll.findOneAndReplace(
+    { a: 3 },
+    { a: 5, b: 'new string' },
+    { includeResultMetadata: false }
+  )
+);
+expectType<WithId<{ a: number; b: string }> | null>(
+  await coll.findOneAndUpdate(
+    { a: 3 },
+    {
+      $set: {
+        a: 5
+      }
+    },
+    { includeResultMetadata: false }
+  )
 );
 
 // projections do not change the return type - our typing doesn't support this

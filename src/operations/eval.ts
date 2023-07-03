@@ -38,7 +38,7 @@ export class EvalOperation extends CommandOperation<Document> {
     });
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

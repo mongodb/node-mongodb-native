@@ -17,7 +17,7 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     this.options = options;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<string>

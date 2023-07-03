@@ -34,7 +34,7 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     this.collectionName = collectionName;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

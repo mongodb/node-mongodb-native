@@ -4,10 +4,10 @@ import { MongoAPIError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AbstractOperation, type OperationOptions } from './operation';
+import { AbstractCallbackOperation, type OperationOptions } from './operation';
 
 /** @internal */
-export class OptionsOperation extends AbstractOperation<Document> {
+export class OptionsOperation extends AbstractCallbackOperation<Document> {
   override options: OperationOptions;
   collection: Collection;
 
@@ -17,7 +17,7 @@ export class OptionsOperation extends AbstractOperation<Document> {
     this.collection = collection;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

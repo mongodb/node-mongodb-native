@@ -20,7 +20,7 @@ function is42(input) {
   return valIs42(input) || valIs42(input.$numberInt) || valIs42(input.$numberLong);
 }
 
-function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) {
+function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata, isRoot) {
   const expected = expectedObj[key];
   const actual = actualObj[key];
 
@@ -44,11 +44,16 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
       };
     }
 
-    const match = !Object.prototype.hasOwnProperty.call(actualObj, key);
+    // An expected null value is not the same as the value not being present
+    // so an exact match is forced here when not at the root level of the
+    // object.
+    const match = isRoot
+      ? !Object.prototype.hasOwnProperty.call(actualObj, key)
+      : expected === actual;
     return {
       match,
-      expected: SYMBOL_DOES_NOT_EXIST,
-      actual: match ? SYMBOL_DOES_NOT_EXIST : actual
+      expected: expected,
+      actual: actual === undefined ? SYMBOL_DOES_NOT_EXIST : actual
     };
   }
 
@@ -88,7 +93,7 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
     // Case lsid - assert that session matches session in session data
     const sessionData = metadata.sessionData;
     const lsid = sessionData[expected];
-    return generateMatchAndDiff(lsid, actual, metadata);
+    return generateMatchAndDiff(lsid, actual, metadata, false);
   } else if (key === 'getMore' && expectedIs42) {
     // cursorid - explicitly ignore 42 values
     return {
@@ -121,11 +126,11 @@ function generateMatchAndDiffSpecialCase(key, expectedObj, actualObj, metadata) 
     };
   } else {
     // default
-    return generateMatchAndDiff(expected, actual, metadata);
+    return generateMatchAndDiff(expected, actual, metadata, false);
   }
 }
 
-function generateMatchAndDiff(expected, actual, metadata) {
+function generateMatchAndDiff(expected, actual, metadata, isRoot) {
   const typeOfExpected = typeof expected;
 
   if (typeOfExpected === 'object' && expected._bsontype === 'Int32' && typeof actual === 'number') {
@@ -154,7 +159,7 @@ function generateMatchAndDiff(expected, actual, metadata) {
     }
 
     return expected
-      .map((val, idx) => generateMatchAndDiff(val, actual[idx], metadata))
+      .map((val, idx) => generateMatchAndDiff(val, actual[idx], metadata, false))
       .reduce(
         (ret, value) => {
           ret.match = ret.match && value.match;
@@ -168,7 +173,7 @@ function generateMatchAndDiff(expected, actual, metadata) {
 
   return Object.keys(expected).reduce(
     (ret, key) => {
-      const check = generateMatchAndDiffSpecialCase(key, expected, actual, metadata);
+      const check = generateMatchAndDiffSpecialCase(key, expected, actual, metadata, isRoot);
       ret.match = ret.match && check.match;
       ret.expected[key] = check.expected;
       ret.actual[key] = check.actual;
@@ -192,7 +197,7 @@ function matchMongoSpec(chai, utils) {
 
     const sessionData = utils.flag(this, 'testRunnerSessionData');
 
-    const result = generateMatchAndDiff(expected, actual, { sessionData });
+    const result = generateMatchAndDiff(expected, actual, { sessionData }, true);
 
     chai.Assertion.prototype.assert.call(
       this,

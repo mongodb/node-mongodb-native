@@ -151,30 +151,6 @@ functions:
           AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test_user1" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
-  run deployed aws lambda tests:
-    - command: ec2.assume_role
-      params:
-        role_arn: ${LAMBDA_AWS_ROLE_ARN}
-        duration_seconds: 3600
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        binary: bash
-        args:
-          - .evergreen/run-deployed-lambda-aws-tests.sh
-        env:
-          TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
-          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-          DRIVERS_ATLAS_PUBLIC_API_KEY: ${DRIVERS_ATLAS_PUBLIC_API_KEY}
-          DRIVERS_ATLAS_PRIVATE_API_KEY: ${DRIVERS_ATLAS_PRIVATE_API_KEY}
-          DRIVERS_ATLAS_LAMBDA_USER: ${DRIVERS_ATLAS_LAMBDA_USER}
-          DRIVERS_ATLAS_LAMBDA_PASSWORD: ${DRIVERS_ATLAS_LAMBDA_PASSWORD}
-          DRIVERS_ATLAS_GROUP_ID: ${DRIVERS_ATLAS_GROUP_ID}
-          LAMBDA_STACK_NAME: dbx-node-lambda
-          AWS_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-          AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-          AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
   run tests:
     - command: shell.exec
       type: test
@@ -1203,6 +1179,23 @@ tasks:
             PROVIDER_NAME: azure
           args:
             - .evergreen/run-oidc-tests-azure.sh
+  - name: test-aws-lambda-deployed
+    commands:
+      - func: install dependencies
+      - command: ec2.assume_role
+        params:
+          role_arn: ${LAMBDA_AWS_ROLE_ARN}
+          duration_seconds: 3600
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/aws_lambda/run-deployed-lambda-aws-tests.sh
+          env:
+            TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
+            AWS_REGION: us-east-1
   - name: test-latest-server
     tags:
       - latest
@@ -3140,13 +3133,6 @@ tasks:
           VERSION: rapid
           TOPOLOGY: server
       - func: run lambda handler example tests
-  - name: test-deployed-lambda
-    tags:
-      - latest
-      - lambda
-    commands:
-      - func: install dependencies
-      - func: run deployed aws lambda tests
   - name: test-lambda-aws-auth-example
     tags:
       - latest
@@ -3471,6 +3457,31 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-azure-latest
+  - name: test_atlas_task_group
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-aws-lambda-deployed
 pre:
   - func: fetch source
   - func: windows fix
@@ -4055,6 +4066,11 @@ buildvariants:
     batchtime: 20160
     tasks:
       - testazureoidc_task_group
+  - name: rhel8-test-atlas
+    display_name: Atlas Cluster Tests
+    run_on: rhel80-large
+    tasks:
+      - test_atlas_task_group
   - name: rhel8-no-auth-tests
     display_name: No Auth Tests
     run_on: rhel80-large
@@ -4094,7 +4110,6 @@ buildvariants:
     tasks:
       - test-lambda-example
       - test-lambda-aws-auth-example
-      - test-deployed-lambda
   - name: rhel8-test-seach-index-management-helpers
     display_name: Search Index Management Helpers Tests
     run_on: rhel80-large

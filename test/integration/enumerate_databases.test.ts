@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { once } from 'events';
 
 import { type AddUserOptions, type MongoClient, MongoServerError } from '../mongodb';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
@@ -141,6 +142,53 @@ describe('listDatabases()', function () {
     );
   });
 
+  describe('nameOnly option', function () {
+    let client: MongoClient;
+    const nameOnlyOptions = [true, false, undefined];
+    const optionToExpectation = {
+      true: 'with nameOnly = true',
+      false: 'with nameOnly = false',
+      undefined: 'without nameOnly field'
+    };
+
+    beforeEach(async function () {
+      client = await this.configuration.newClient({}, { monitorCommands: true }).connect();
+      await client.db('test').createCollection('test');
+    });
+
+    afterEach(async function () {
+      if (client) {
+        await client.db(`test`).dropDatabase();
+        await client.close();
+      }
+    });
+
+    for (const nameOnly of nameOnlyOptions) {
+      context(`when options.nameOnly is ${nameOnly ?? 'not defined'}`, function () {
+        it(`sends command ${optionToExpectation[String(nameOnly)]}`, async function () {
+          const promise = once(client, 'commandStarted');
+          await client.db().admin().listDatabases({ nameOnly });
+
+          const commandStarted = (await promise)[0];
+          expect(commandStarted.command).to.haveOwnProperty('listDatabases', 1);
+
+          switch (nameOnly) {
+            case true:
+              expect(commandStarted.command).to.have.property('nameOnly', true);
+              break;
+            case false:
+              expect(commandStarted.command).to.have.property('nameOnly', false);
+              break;
+            case undefined:
+              expect(commandStarted.command).to.not.have.property('nameOnly');
+              break;
+            default:
+              expect.fail(`Unrecognized nameOnly value: ${nameOnly}`);
+          }
+        });
+      });
+    }
+  });
   UnifiedTestSuiteBuilder.describe('comment option')
     .createEntities(UnifiedTestSuiteBuilder.defaultEntities)
     .initialData({
