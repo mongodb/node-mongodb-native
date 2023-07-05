@@ -111,7 +111,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     server: Server,
     session: ClientSession | undefined,
     cmd: Document
-  ): Promise<any> {
+  ): Promise<Document> {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -169,46 +169,9 @@ export abstract class CommandCallbackOperation<T = any> extends CommandOperation
     cmd: Document,
     callback: Callback
   ): void {
-    this.server = server;
-
-    const options = {
-      ...this.options,
-      ...this.bsonOptions,
-      readPreference: this.readPreference,
-      session
-    };
-
-    const serverWireVersion = maxWireVersion(server);
-    const inTransaction = this.session && this.session.inTransaction();
-
-    if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
-      Object.assign(cmd, { readConcern: this.readConcern });
-    }
-
-    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
-      options.omitReadPreference = true;
-    }
-
-    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-      Object.assign(cmd, { writeConcern: this.writeConcern });
-    }
-
-    if (
-      options.collation &&
-      typeof options.collation === 'object' &&
-      !this.hasAspect(Aspect.SKIP_COLLATION)
-    ) {
-      Object.assign(cmd, { collation: options.collation });
-    }
-
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
-    }
-
-    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      cmd = decorateWithExplain(cmd, this.explain);
-    }
-
-    server.command(this.ns, cmd, options, callback);
+    super.executeCommand(server, session, cmd).then(
+      res => callback(undefined, res),
+      err => callback(err, undefined)
+    );
   }
 }

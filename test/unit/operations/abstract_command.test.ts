@@ -31,7 +31,10 @@ class ConcreteCommand<T> extends CommandOperation<T> {
     session: ClientSession | undefined,
     callback: Callback<any>
   ) {
-    return [server, session, callback];
+    super.execute(server, session).then(
+      res => callback(undefined, res),
+      err => callback(err, undefined)
+    );
   }
 }
 
@@ -50,7 +53,7 @@ describe('class CommandOperation', () => {
       const operation = new ConcreteCommand<any>();
       const serverSpy = sinon.stub(server, 'commandAsync');
       const commandPromise = operation.executeCommand(server, undefined, { ping: 1 });
-      expect(commandPromise).to.be.instanceOf(Promise<any>);
+      expect(commandPromise).to.be.instanceOf(Promise);
       await commandPromise;
       expect(serverSpy).to.have.been.calledOnce;
     });
