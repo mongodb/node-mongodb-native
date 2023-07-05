@@ -773,7 +773,7 @@ function endTransaction(
 
           WriteConcern.apply(
             command,
-            Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+            Object.assign({ wtimeoutMS: 10000 }, command.writeConcern, {
               w: 'majority'
             })
           );
