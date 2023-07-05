@@ -704,14 +704,13 @@ function endTransaction(
   }
 
   if (txnState === TxnState.TRANSACTION_COMMITTED) {
-    writeConcern = Object.assign({ wtimeout: 10000 }, writeConcern, { w: 'majority' });
+    writeConcern = Object.assign({ wtimeoutMS: 10000 }, writeConcern, { w: 'majority' });
   }
 
   if (writeConcern) {
     WriteConcern.apply(command, writeConcern);
   }
 
-  console.log(command);
   if (commandName === 'commitTransaction' && session.transaction.options.maxTimeMS) {
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
