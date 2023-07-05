@@ -3585,9 +3585,6 @@ describe('Cursor', function () {
   });
 
   it('should return implicit session to pool when client-side cursor exhausts results after a getMore', async function () {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { maxPoolSize: 1 });
-
     const db = client.db(configuration.db);
     const collection = db.collection('cursor_session_tests2');
 
@@ -3613,7 +3610,6 @@ describe('Cursor', function () {
     );
 
     await cursor.close();
-    await client.close();
   });
 
   describe('#clone', function () {

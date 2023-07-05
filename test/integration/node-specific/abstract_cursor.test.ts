@@ -57,13 +57,14 @@ describe('class AbstractCursor', function () {
       await client.close();
     });
 
-    describe('tryNext()', function () {
+    context(`hasNext()`, function () {
       context('when there is a transform on the cursor', function () {
-        it('does not transform any documents', async function () {
+        it(`the transform is NOT called`, async () => {
           const cursor = collection.find().map(transformSpy);
 
-          await cursor.hasNext();
-          expect(transformSpy.called).to.be.false;
+          const hasNext = await cursor.hasNext();
+          expect(transformSpy).not.to.have.been.called;
+          expect(hasNext).to.be.true;
         });
       });
     });
@@ -71,85 +72,58 @@ describe('class AbstractCursor', function () {
     const operations: ReadonlyArray<readonly [string, (arg0: FindCursor) => Promise<unknown>]> = [
       [
         'tryNext',
-        (cursor: FindCursor) => {
-          return cursor.tryNext();
-        }
+        (cursor: FindCursor) => cursor.tryNext()
       ],
       ['next', (cursor: FindCursor) => cursor.next()],
       [
         'Symbol.asyncIterator().next',
         async (cursor: FindCursor) => {
           const iterator = cursor[Symbol.asyncIterator]();
-          const doc = await iterator.next();
-          return doc.value;
+          return iterator.next().then(({ value }) => value);
         }
-      ]
+      ],
+      ['Cursor.stream', (cursor: FindCursor) => {
+        const stream = cursor.stream();
+        return once(stream, 'data').then(([doc]) => doc)
+      }]
     ] as const;
 
-    context('when there is a transform on the cursor', function () {
-      for (const [method, func] of operations) {
-        it(`${method}() calls the cursor transform when iterated`, async () => {
-          const cursor = collection.find().map(transformSpy);
+    for (const [method, func] of operations) {
+      context(`${method}()`, function () {
+        context('when there is a transform on the cursor', function () {
+          it(`the transform is called`, async () => {
+            const cursor = collection.find().map(transformSpy);
 
-          const doc = await func(cursor);
-          expect(transformSpy).to.have.been.calledOnce;
-          expect(doc.name).to.equal('JOHN DOE');
-        });
-
-        it(`when the transform throws, ${method}() propagates the error to the user`, async () => {
-          const cursor = collection.find().map(() => {
-            throw new Error('error thrown in transform');
+            const doc = await func(cursor);
+            expect(transformSpy).to.have.been.calledOnce;
+            expect(doc.name).to.equal('JOHN DOE');
           });
+          context('when the transform throws', function () {
+            it(`the error is propagated to the user`, async () => {
+              const cursor = collection.find().map(() => {
+                throw new Error('error thrown in transform');
+              });
 
-          const error = await func(cursor).catch(e => e);
-          expect(error)
-            .to.be.instanceOf(Error)
-            .to.match(/error thrown in transform/);
-          expect(cursor.closed).to.be.true;
-        });
-      }
-
-      it('Cursor.stream() calls the cursor transform when iterated', async function () {
-        const cursor = collection.find().map(transformSpy).stream();
-
-        const [doc] = await once(cursor, 'data');
-        expect(transformSpy).to.have.been.calledOnce;
-        expect(doc.name).to.equal('JOHN DOE');
-      });
-
-      it(`when the transform throws, Cursor.stream() propagates the error to the user`, async () => {
-        const cursor = collection
-          .find()
-          .map(() => {
-            throw new Error('error thrown in transform');
+              const error = await func(cursor).catch(e => e);
+              expect(error)
+                .to.be.instanceOf(Error)
+                .to.match(/error thrown in transform/);
+              expect(cursor.closed).to.be.true;
+            });
           })
-          .stream();
-
-        const error = await once(cursor, 'data').catch(e => e);
-        expect(error)
-          .to.be.instanceOf(Error)
-          .to.match(/error thrown in transform/);
-        expect(cursor._cursor).to.have.property('closed', true);
-      });
-    });
-
-    context('when there is not a transform on the cursor', function () {
-      for (const [method, func] of operations) {
-        it(`${method}() returns the documents, unmodified`, async () => {
-          const cursor = collection.find();
-
-          const doc = await func(cursor);
-          expect(doc.name).to.equal('john doe');
         });
-      }
 
-      it('Cursor.stream() returns the documents, unmodified', async function () {
-        const cursor = collection.find().stream();
+        context('when there is not a transform on the cursor', function () {
+          it(`it returns the cursor's documents unmodified`, async () => {
+            const cursor = collection.find();
 
-        const [doc] = await once(cursor, 'data');
-        expect(doc.name).to.equal('john doe');
+            const doc = await func(cursor);
+            expect(doc.name).to.equal('john doe');
+          });
+        });
+
       });
-    });
+    }
   });
 
   describe('custom transforms with falsy values', function () {
