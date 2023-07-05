@@ -458,8 +458,8 @@ function getWriteOptions(stream: GridFSBucketWriteStream): WriteConcernOptions {
   if (stream.writeConcern) {
     obj.writeConcern = {
       w: stream.writeConcern.w,
-      wtimeout: stream.writeConcern.wtimeout,
-      j: stream.writeConcern.j
+      wtimeout: stream.writeConcern.wtimeoutMS,
+      j: stream.writeConcern.journal
     };
   }
   return obj;
