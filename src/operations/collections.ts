@@ -3,14 +3,14 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AbstractOperation, type OperationOptions } from './operation';
+import { AbstractCallbackOperation, type OperationOptions } from './operation';
 
 export interface CollectionsOptions extends OperationOptions {
   nameOnly?: boolean;
 }
 
 /** @internal */
-export class CollectionsOperation extends AbstractOperation<Collection[]> {
+export class CollectionsOperation extends AbstractCallbackOperation<Collection[]> {
   override options: CollectionsOptions;
   db: Db;
 
@@ -20,7 +20,7 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
     this.db = db;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Collection[]>

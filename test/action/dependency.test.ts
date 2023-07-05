@@ -5,6 +5,7 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
+import { itInNodeProcess } from '../tools/utils';
 
 const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', 'socks'];
 const EXPECTED_PEER_DEPENDENCIES = [
@@ -65,11 +66,24 @@ describe('package.json', function () {
 
           expect(result).to.include('import success!');
         });
+
+        if (depName === 'snappy') {
+          itInNodeProcess(
+            'getSnappy returns rejected import',
+            async function ({ expect, mongodb }) {
+              const snappyImport = mongodb.getSnappy();
+              expect(snappyImport).to.have.nested.property(
+                'kModuleError.name',
+                'MongoMissingDependencyError'
+              );
+            }
+          );
+        }
       });
 
       context(`when ${depName} is installed`, () => {
         beforeEach(async () => {
-          execSync(`npm install --no-save "${depName}"@${depMajor}`);
+          execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
         });
 
         it(`driver is importable`, () => {
@@ -81,7 +95,66 @@ describe('package.json', function () {
 
           expect(result).to.include('import success!');
         });
+
+        if (depName === 'snappy') {
+          itInNodeProcess(
+            'getSnappy returns fulfilled import',
+            async function ({ expect, mongodb }) {
+              const snappyImport = mongodb.getSnappy();
+              expect(snappyImport).to.have.property('compress').that.is.a('function');
+              expect(snappyImport).to.have.property('uncompress').that.is.a('function');
+            }
+          );
+        }
       });
     }
+  });
+
+  const EXPECTED_IMPORTS = [
+    'bson',
+    'saslprep',
+    'sparse-bitfield',
+    'memory-pager',
+    'mongodb-connection-string-url',
+    'whatwg-url',
+    'webidl-conversions',
+    'tr46',
+    'socks',
+    'ip',
+    'smart-buffer'
+  ];
+
+  describe('mongodb imports', () => {
+    let imports: string[];
+    beforeEach(async function () {
+      for (const key of Object.keys(require.cache)) delete require.cache[key];
+      require('../../src');
+      imports = Array.from(
+        new Set(
+          Object.entries(require.cache)
+            .filter(([modKey]) => modKey.includes('/node_modules/'))
+            .map(([modKey]) => {
+              const leadingPkgName = modKey.split('/node_modules/')[1];
+              const [orgName, pkgName] = leadingPkgName.split('/');
+              if (orgName.startsWith('@')) {
+                return `${orgName}/${pkgName}`;
+              }
+              return orgName;
+            })
+        )
+      );
+    });
+
+    context('when importing mongodb', () => {
+      it('only contains the expected imports', function () {
+        expect(imports).to.deep.equal(EXPECTED_IMPORTS);
+      });
+
+      it('does not import optional dependencies', () => {
+        for (const peerDependency of EXPECTED_PEER_DEPENDENCIES) {
+          expect(imports).to.not.include(peerDependency);
+        }
+      });
+    });
   });
 });

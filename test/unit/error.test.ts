@@ -16,6 +16,7 @@ import {
   MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
+  MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoParseError,
@@ -151,6 +152,22 @@ describe('MongoErrors', () => {
 
         const error = new MongoSystemError('something went wrong', topologyDescription);
         expect(error).to.haveOwnProperty('code', undefined);
+      });
+    });
+  });
+
+  describe('MongoMissingDependencyError#constructor', () => {
+    context('when options.cause is set', () => {
+      it('attaches the cause property to the instance', () => {
+        const error = new MongoMissingDependencyError('missing!', { cause: new Error('hello') });
+        expect(error).to.have.property('cause');
+      });
+    });
+
+    context('when options.cause is not set', () => {
+      it('attaches the cause property to the instance', () => {
+        const error = new MongoMissingDependencyError('missing!', { cause: undefined });
+        expect(error).to.not.have.property('cause');
       });
     });
   });

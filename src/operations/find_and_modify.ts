@@ -179,7 +179,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     this.query = query;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<Document>

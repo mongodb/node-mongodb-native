@@ -1,3 +1,8 @@
+import * as child_process from 'node:child_process';
+import { once } from 'node:events';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
 import { EJSON } from 'bson';
 import * as BSON from 'bson';
 import { expect } from 'chai';
@@ -498,4 +503,64 @@ export function topologyWithPlaceholderClient(
     seeds,
     options as TopologyOptions
   );
+}
+
+export async function itInNodeProcess(
+  title: string,
+  fn: (d: { expect: typeof import('chai').expect; mongodb: typeof import('../mongodb') }) => void
+) {
+  it(title, async () => {
+    const script = `
+      import { expect } from 'chai';
+      import * as mongodb from './test/mongodb';
+      const run = ${fn};
+      run({ expect, mongodb }).then(
+        () => {
+          process.exitCode = 0;
+        },
+        error => {
+          console.error(error)
+          process.exitCode = 1;
+        }
+      );\n`;
+
+    const scriptName = `./testing_${title.split(/\s/).join('_')}_script.cts`;
+    const cwd = path.resolve(__dirname, '..', '..');
+    const tsNode = path.resolve(__dirname, '..', '..', 'node_modules', '.bin', 'ts-node');
+    try {
+      await fs.writeFile(scriptName, script, { encoding: 'utf8' });
+      const scriptInstance = child_process.fork(scriptName, {
+        signal: AbortSignal.timeout(50_000),
+        cwd,
+        stdio: 'pipe',
+        execArgv: [tsNode]
+      });
+
+      scriptInstance.stdout?.setEncoding('utf8');
+      scriptInstance.stderr?.setEncoding('utf8');
+
+      let stdout = '';
+      scriptInstance.stdout?.addListener('data', data => {
+        stdout += data;
+      });
+
+      let stderr = '';
+      scriptInstance.stderr?.addListener('data', (data: string) => {
+        stderr += data;
+      });
+
+      // do not fail the test if the debugger is running
+      stderr = stderr
+        .split('\n')
+        .filter(line => !line.startsWith('Debugger') && !line.startsWith('For help'))
+        .join('\n');
+
+      const [exitCode] = await once(scriptInstance, 'close');
+
+      if (stderr.length) console.log(stderr);
+      expect({ exitCode, stdout, stderr }).to.deep.equal({ exitCode: 0, stdout: '', stderr: '' });
+    } finally {
+      await fs.unlink(scriptName);
+    }
+  });
 }

@@ -97,7 +97,8 @@ export function getAwsCredentialProvider():
   }
 }
 
-type SnappyLib = {
+/** @internal */
+export type SnappyLib = {
   /**
    * In order to support both we must check the return value of the function
    * @param buf - Buffer to be compressed
@@ -111,16 +112,19 @@ type SnappyLib = {
   uncompress(buf: Buffer, opt: { asBuffer: true }): Promise<Buffer>;
 };
 
-export let Snappy: SnappyLib | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `snappy` not found. Please install it to enable snappy compression'
-  )
-);
-
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  Snappy = require('snappy');
-} catch {} // eslint-disable-line
+export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyError } {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    const value = require('snappy');
+    return value;
+  } catch (cause) {
+    const kModuleError = new MongoMissingDependencyError(
+      'Optional module `snappy` not found. Please install it to enable snappy compression',
+      { cause }
+    );
+    return { kModuleError };
+  }
+}
 
 export let saslprep: typeof import('saslprep') | { kModuleError: MongoMissingDependencyError } =
   makeErrorModule(

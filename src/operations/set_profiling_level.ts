@@ -48,7 +48,7 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     this.level = level;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<ProfilingLevel>

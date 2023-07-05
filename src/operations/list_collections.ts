@@ -47,7 +47,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<string[]>

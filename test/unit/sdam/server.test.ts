@@ -9,6 +9,7 @@ import {
   MongoErrorLabel,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  ns,
   ObjectId,
   Server,
   ServerDescription,
@@ -64,6 +65,15 @@ describe('Server', () => {
         {} as any
       );
     });
+
+    context('when a server is created', function () {
+      it('calls the command function through commandAsync', async function () {
+        const serverSpy = sinon.stub(server, 'command').yieldsRight(undefined, { ok: 1 });
+        await server.commandAsync(ns('dummy'), { ping: 1 }, {});
+        expect(serverSpy).to.have.been.calledOnce;
+      });
+    });
+
     for (const loadBalanced of [true, false]) {
       const mode = loadBalanced ? 'loadBalanced' : 'non-loadBalanced';
       const contextSuffix = loadBalanced ? ' with connection provided' : '';

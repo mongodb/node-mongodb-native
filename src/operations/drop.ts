@@ -26,7 +26,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     this.name = name;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<boolean>
@@ -102,7 +102,7 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     super(db, options);
     this.options = options;
   }
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<boolean>

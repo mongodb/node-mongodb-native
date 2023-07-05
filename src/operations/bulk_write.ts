@@ -8,10 +8,10 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
-export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
+export class BulkWriteOperation extends AbstractCallbackOperation<BulkWriteResult> {
   override options: BulkWriteOptions;
   collection: Collection;
   operations: AnyBulkWriteOperation[];
@@ -27,7 +27,7 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     this.operations = operations;
   }
 
-  override execute(
+  override executeCallback(
     server: Server,
     session: ClientSession | undefined,
     callback: Callback<BulkWriteResult>

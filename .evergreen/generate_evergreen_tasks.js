@@ -302,16 +302,6 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   ]
 });
 
-// Add the deployed lambda function tests.
-AWS_LAMBDA_HANDLER_TASKS.push({
-  name: 'test-deployed-lambda',
-  tags: ['latest', 'lambda'],
-  commands: [
-    { func: 'install dependencies' },
-    { func: 'run deployed aws lambda tests' }
-  ]
-});
-
 // Add task for testing lambda example with aws auth.
 AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
@@ -764,6 +754,13 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
+  name: 'rhel8-test-atlas',
+  display_name: 'Atlas Cluster Tests',
+  run_on: DEFAULT_OS,
+  tasks: ['test_atlas_task_group']
+});
+
+BUILD_VARIANTS.push({
   name: 'rhel8-no-auth-tests',
   display_name: 'No Auth Tests',
   run_on: DEFAULT_OS,
@@ -777,7 +774,7 @@ BUILD_VARIANTS.push({
   name: 'rhel8-test-lambda',
   display_name: 'AWS Lambda handler tests',
   run_on: DEFAULT_OS,
-  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example', 'test-deployed-lambda']
+  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
 });
 
 BUILD_VARIANTS.push({
