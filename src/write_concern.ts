@@ -1,4 +1,4 @@
-import { type Document } from 'bson';
+import { type Document } from './bson';
 
 /** @public */
 export type W = number | 'majority';
@@ -105,7 +105,7 @@ export class WriteConcern {
   }
 
   /**
-   * Apply a write concern to a command document.
+   * Apply a write concern to a command document. Will modify and return the command.
    */
   static apply(command: Document, writeConcern: WriteConcern): Document {
     const wc: CommandWriteConcernOptions = {};
@@ -113,7 +113,8 @@ export class WriteConcern {
     if (writeConcern.w != null) wc.w = writeConcern.w;
     if (writeConcern.wtimeoutMS != null) wc.wtimeout = writeConcern.wtimeoutMS;
     if (writeConcern.journal != null) wc.j = writeConcern.j;
-    return Object.assign(command, { writeConcern: wc });
+    command.writeConcern = wc;
+    return command;
   }
 
   /** Construct a WriteConcern given an options object. */

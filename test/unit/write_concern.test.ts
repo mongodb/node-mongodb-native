@@ -5,11 +5,29 @@ import { WriteConcern } from '../mongodb';
 describe('WriteConcern', function () {
   describe('#constructor', function () {
     context('when w is provided', function () {
-      const writeConcern = new WriteConcern(1);
+      context('when w is a number', function () {
+        const writeConcern = new WriteConcern(1);
 
-      it('sets the w property', function () {
-        expect(writeConcern.w).to.equal(1);
+        it('sets the w property', function () {
+          expect(writeConcern.w).to.equal(1);
+        });
       });
+
+      context('when w is a string number', function () {
+        const writeConcern = new WriteConcern('10');
+
+        it('sets the w property to a number', function () {
+          expect(writeConcern.w).to.equal(10);
+        });
+      });
+
+      context('when w is a string', function () {
+        const writeConcern = new WriteConcern('majority');
+
+        it('sets the w property to the string', function () {
+          expect(writeConcern.w).to.equal('majority');
+        });
+      })
     });
 
     context('when wtimeoutMS is provided', function () {
