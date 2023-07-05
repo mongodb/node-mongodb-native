@@ -3585,7 +3585,7 @@ describe('Cursor', function () {
   });
 
   it('should return implicit session to pool when client-side cursor exhausts results after a getMore', async function () {
-    const db = client.db(configuration.db);
+    const db = client.db(this.configuration.db);
     const collection = db.collection('cursor_session_tests2');
 
     const docs = [

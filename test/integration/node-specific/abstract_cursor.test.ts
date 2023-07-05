@@ -70,10 +70,7 @@ describe('class AbstractCursor', function () {
     });
 
     const operations: ReadonlyArray<readonly [string, (arg0: FindCursor) => Promise<unknown>]> = [
-      [
-        'tryNext',
-        (cursor: FindCursor) => cursor.tryNext()
-      ],
+      ['tryNext', (cursor: FindCursor) => cursor.tryNext()],
       ['next', (cursor: FindCursor) => cursor.next()],
       [
         'Symbol.asyncIterator().next',
@@ -82,10 +79,13 @@ describe('class AbstractCursor', function () {
           return iterator.next().then(({ value }) => value);
         }
       ],
-      ['Cursor.stream', (cursor: FindCursor) => {
-        const stream = cursor.stream();
-        return once(stream, 'data').then(([doc]) => doc)
-      }]
+      [
+        'Cursor.stream',
+        (cursor: FindCursor) => {
+          const stream = cursor.stream();
+          return once(stream, 'data').then(([doc]) => doc);
+        }
+      ]
     ] as const;
 
     for (const [method, func] of operations) {
@@ -110,7 +110,7 @@ describe('class AbstractCursor', function () {
                 .to.match(/error thrown in transform/);
               expect(cursor.closed).to.be.true;
             });
-          })
+          });
         });
 
         context('when there is not a transform on the cursor', function () {
@@ -121,7 +121,6 @@ describe('class AbstractCursor', function () {
             expect(doc.name).to.equal('john doe');
           });
         });
-
       });
     }
   });
