@@ -296,7 +296,6 @@ describe('Cursor Streams', function () {
         const stream = cursor.stream();
         stream.on('error', err => (error = err));
         cursor.on('close', function () {
-          // NOTE: use `setImmediate` here because the stream implementation uses `nextTick` to emit the error
           setImmediate(() => {
             expect(error).to.exist;
             client.close(done);
