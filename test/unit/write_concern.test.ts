@@ -114,7 +114,7 @@ describe('WriteConcern', function () {
       const document = {};
       const writeConcern = new WriteConcern(2, 30, true, false);
 
-      it('overrites j to the write concern document', function () {
+      it('overwrites j to the write concern document', function () {
         expect(WriteConcern.apply(document, writeConcern)).to.deep.equal({
           writeConcern: { w: 2, wtimeout: 30, j: false }
         });

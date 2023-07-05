@@ -263,9 +263,8 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   });
 
   if (!hasChunksIndex) {
-    const writeConcernOptions = getWriteOptions(stream);
     await stream.chunks.createIndex(index, {
-      ...writeConcernOptions,
+      ...stream.writeConcern,
       background: true,
       unique: true
     });
@@ -292,7 +291,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       return false;
     }
 
-    stream.files.insertOne(filesDoc, getWriteOptions(stream)).then(
+    stream.files.insertOne(filesDoc, { writeConcern: stream.writeConcern }).then(
       () => {
         stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
         stream.emit(GridFSBucketWriteStream.CLOSE);
@@ -423,7 +422,7 @@ function doWrite(
         return false;
       }
 
-      stream.chunks.insertOne(doc, getWriteOptions(stream)).then(
+      stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
         () => {
           --stream.state.outstandingRequests;
           --outstandingRequests;
@@ -451,18 +450,6 @@ function doWrite(
   // to be compatible with node's `.pipe()` function.
   // False means the client should wait for the 'drain' event.
   return false;
-}
-
-function getWriteOptions(stream: GridFSBucketWriteStream): WriteConcernOptions {
-  const obj: WriteConcernOptions = {};
-  if (stream.writeConcern) {
-    obj.writeConcern = {
-      w: stream.writeConcern.w,
-      wtimeout: stream.writeConcern.wtimeoutMS,
-      j: stream.writeConcern.journal
-    };
-  }
-  return obj;
 }
 
 function waitForIndexes(
@@ -499,7 +486,7 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
     return false;
   }
 
-  stream.chunks.insertOne(doc, getWriteOptions(stream)).then(
+  stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
     () => {
       --stream.state.outstandingRequests;
       checkDone(stream);

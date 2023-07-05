@@ -771,9 +771,12 @@ function endTransaction(
           // per txns spec, must unpin session in this case
           session.unpin({ force: true });
 
-          command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
-            w: 'majority'
-          });
+          WriteConcern.apply(
+            command,
+            Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+              w: 'majority'
+            })
+          );
         }
 
         return executeOperation(
