@@ -45,6 +45,7 @@ import {
   now,
   uuidV4
 } from './utils';
+import { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -697,7 +698,7 @@ function endTransaction(
   // apply a writeConcern if specified
   let writeConcern;
   if (session.transaction.options.writeConcern) {
-    writeConcern = Object.assign({}, session.transaction.options.writeConcern);
+    writeConcern = WriteConcern.apply({}, session.transaction.options.writeConcern);
   } else if (session.clientOptions && session.clientOptions.writeConcern) {
     writeConcern = { w: session.clientOptions.writeConcern.w };
   }
