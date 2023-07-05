@@ -361,7 +361,7 @@ export abstract class AbstractCursor<
       return true;
     }
 
-    const doc = await next<TSchema>(this, true, false);
+    const doc = await next<TSchema>(this, { blocking: true, transform: false });
 
     if (doc) {
       this[kDocuments].unshift(doc);
@@ -377,7 +377,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return next(this, true);
+    return next(this, { blocking: true, transform: true });
   }
 
   /**
@@ -388,7 +388,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return next(this, false);
+    return next(this, { blocking: false, transform: true });
   }
 
   /**
@@ -693,8 +693,13 @@ export abstract class AbstractCursor<
  */
 async function next<T>(
   cursor: AbstractCursor<T>,
-  blocking: boolean,
-  transform = true
+  {
+    blocking,
+    transform
+  }: {
+    blocking: boolean;
+    transform: boolean;
+  }
 ): Promise<T | null> {
   const cursorId = cursor[kId];
   if (cursor.closed) {
@@ -723,7 +728,7 @@ async function next<T>(
     // All cursors must operate within a session, one must be made implicitly if not explicitly provided
     const init = promisify(cb => cursor[kInit](cb));
     await init();
-    return next(cursor, blocking, transform);
+    return next(cursor, { blocking, transform });
   }
 
   if (cursorIsDead(cursor)) {
@@ -780,7 +785,7 @@ async function next<T>(
     return null;
   }
 
-  return next(cursor, blocking, transform);
+  return next(cursor, { blocking, transform });
 }
 
 function cursorIsDead(cursor: AbstractCursor): boolean {
@@ -904,7 +909,7 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
-    next(this._cursor, true).then(
+    next(this._cursor, { blocking: true, transform: true }).then(
       result => {
         if (result == null) {
           this.push(null);
