@@ -83,7 +83,7 @@ export class WriteConcern {
    * @param w - request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags.
    * @param wtimeoutMS - specify a time limit to prevent write operations from blocking indefinitely
    * @param journal - request acknowledgment that the write operation has been written to the on-disk journal
-   * @param fsync - equivalent to the j option
+   * @param fsync - equivalent to the j option. Is deprecated and will be removed in the next major version.
    */
   constructor(w?: W, wtimeoutMS?: number, journal?: boolean, fsync?: boolean | 1) {
     if (w != null) {
