@@ -27,7 +27,7 @@ describe('WriteConcern', function () {
         it('sets the w property to the string', function () {
           expect(writeConcern.w).to.equal('majority');
         });
-      })
+      });
     });
 
     context('when wtimeoutMS is provided', function () {
