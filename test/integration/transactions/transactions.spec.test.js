@@ -93,7 +93,7 @@ const SKIP_TESTS = [
   'Client side error when transaction is in progress'
 ];
 
-describe('Transactions Spec Legacy Tests', function () {
+describe.only('Transactions Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();
   if (process.env.SERVERLESS) {
     // TODO(NODE-3550): these tests should pass on serverless but currently fail
