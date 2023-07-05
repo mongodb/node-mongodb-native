@@ -698,7 +698,7 @@ function endTransaction(
   // apply a writeConcern if specified
   let writeConcern;
   if (session.transaction.options.writeConcern) {
-    writeConcern = WriteConcern.apply({}, session.transaction.options.writeConcern);
+    writeConcern = Object.assign({}, session.transaction.options.writeConcern);
   } else if (session.clientOptions && session.clientOptions.writeConcern) {
     writeConcern = { w: session.clientOptions.writeConcern.w };
   }
@@ -708,9 +708,10 @@ function endTransaction(
   }
 
   if (writeConcern) {
-    Object.assign(command, { writeConcern });
+    WriteConcern.apply(command, writeConcern);
   }
 
+  console.log(command);
   if (commandName === 'commitTransaction' && session.transaction.options.maxTimeMS) {
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
