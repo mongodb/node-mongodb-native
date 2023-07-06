@@ -65,8 +65,10 @@ async function updateSiteTemplateForNewVersion(
 
   jsonVersions.sort((a, b) => customSemverCompare(a.version, b.version));
 
-  await writeFile(RELEASES_TOML_FILE, stringify(tomlData as any));
-  await writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4));
+  await Promise.all([
+    writeFile(RELEASES_TOML_FILE, stringify(tomlData as any)),
+    writeFile(RELEASES_JSON_FILE, JSON.stringify(jsonVersions, null, 4)),
+  ]);
 
   // generate the site from the template
   await exec(`hugo -s template -d ../temp -b "/node-mongodb-native"`);
@@ -107,12 +109,13 @@ async function main() {
 
   log('Generating new static site...');
 
-  const tomlVersions = parse(
-    await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })
-  ) as unknown as TomlVersionSchema;
-  const jsonVersions = JSON.parse(
-    await readFile(RELEASES_JSON_FILE, { encoding: 'utf8' })
-  ) as unknown as JsonVersionSchema[];
+  const [tomlFile, jsonFile] = await Promise.all([
+    readFile(RELEASES_TOML_FILE, { encoding: 'utf8' }),
+    readFile(RELEASES_JSON_FILE, { encoding: 'utf8' }),
+  ]);
+
+  const tomlVersions = parse(tomlFile) as unknown as TomlVersionSchema;
+  const jsonVersions = JSON.parse(jsonFile) as unknown as JsonVersionSchema[];
 
   const versionAlreadyExists = jsonVersions.some(({ version }) => version === tag);
 
