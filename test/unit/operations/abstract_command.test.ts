@@ -5,8 +5,8 @@ import {
   type Callback,
   type ClientSession,
   CommandCallbackOperation,
+  CommandOperation,
   type CommandOperationOptions,
-  type Document,
   type OperationParent,
   Server,
   ServerDescription
@@ -16,14 +16,6 @@ import { topologyWithPlaceholderClient } from '../../tools/utils';
 class ConcreteCommand<T> extends CommandCallbackOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(parent, options);
-  }
-
-  async executeCommand(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document
-  ): Promise<any> {
-    return super.executeCommand(server, session, cmd);
   }
 
   protected executeCallback(
@@ -48,14 +40,18 @@ describe('class CommandOperation', () => {
     );
   });
 
-  context('when a server is created', () => {
-    it('calls executeCommand, which calls server.commandAsync, when executeCommandCallback is invoked', async () => {
+  context('when an operation uses CommandCallbackOperation', () => {
+    it('calls executeCommand when executeCommandCallback is invoked', done => {
       const operation = new ConcreteCommand<any>();
-      const serverSpy = sinon.stub(server, 'commandAsync');
-      operation.executeCommandCallback(server, undefined, { ping: 1 }, (err, res) => {
-        err ? err : res;
+      const operationSpy = sinon.spy(CommandOperation.prototype, 'executeCommand');
+      operation.executeCommandCallback(server, undefined, { ping: 1 }, () => {
+        try {
+          expect(operationSpy).to.have.been.calledOnceWithExactly(server, undefined, { ping: 1 });
+          done();
+        } catch (error) {
+          done(error);
+        }
       });
-      expect(serverSpy).to.have.been.calledOnce;
     });
   });
 });
