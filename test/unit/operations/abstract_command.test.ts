@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 import {
   type Callback,
   type ClientSession,
-  CommandOperation,
+  CommandCallbackOperation,
   type CommandOperationOptions,
   type Document,
   type OperationParent,
@@ -13,7 +13,7 @@ import {
 } from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-class ConcreteCommand<T> extends CommandOperation<T> {
+class ConcreteCommand<T> extends CommandCallbackOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
     super(parent, options);
   }
@@ -49,12 +49,12 @@ describe('class CommandOperation', () => {
   });
 
   context('when a server is created', () => {
-    it('calls server.commandAsync when executeCommand is invoked', async () => {
+    it('calls executeCommand, which calls server.commandAsync, when executeCommandCallback is invoked', async () => {
       const operation = new ConcreteCommand<any>();
       const serverSpy = sinon.stub(server, 'commandAsync');
-      const commandPromise = operation.executeCommand(server, undefined, { ping: 1 });
-      expect(commandPromise).to.be.instanceOf(Promise);
-      await commandPromise;
+      operation.executeCommandCallback(server, undefined, { ping: 1 }, (err, res) => {
+        err ? err : res;
+      });
       expect(serverSpy).to.have.been.calledOnce;
     });
   });

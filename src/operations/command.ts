@@ -163,7 +163,7 @@ export abstract class CommandCallbackOperation<T = any> extends CommandOperation
     super(parent, options);
   }
 
-  protected executeCommandCallback(
+  executeCommandCallback(
     server: Server,
     session: ClientSession | undefined,
     cmd: Document,
