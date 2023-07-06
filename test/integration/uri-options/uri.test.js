@@ -66,7 +66,7 @@ describe('URI', function () {
       const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
       client.connect((err, client) => {
         var db = client.db(this.configuration.db);
-        expect(db.writeConcern.fsync).to.be.true;
+        expect(db.writeConcern.journal).to.be.true;
         client.close(done);
       });
     }
