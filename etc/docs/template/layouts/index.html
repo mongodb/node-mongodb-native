@@ -7,6 +7,9 @@
     <title>{{.Title}}</title>
 
     {{ partial "assets/css.html" . }}
+
+    <!-- javascripts -->
+    {{ partial "assets/javascripts.html" . }}
   </head>
 
   <body>
@@ -46,7 +49,6 @@
 
 
 <!-- javascripts -->
-{{ partial "assets/javascripts.html" . }}
 {{ partial "assets/analytics.html" . }}
 </body>
 </html>
