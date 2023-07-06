@@ -52,9 +52,8 @@ describe('class MongoClient', function () {
 
         expect(db).to.have.property('writeConcern');
         expect(db.writeConcern).to.have.property('w', 1);
-        expect(db.writeConcern).to.have.property('wtimeout', 1000);
-        expect(db.writeConcern).to.have.property('fsync', true);
-        expect(db.writeConcern).to.have.property('j', true);
+        expect(db.writeConcern).to.have.property('wtimeoutMS', 1000);
+        expect(db.writeConcern).to.have.property('journal', true);
 
         expect(db).to.have.property('s');
         expect(db.s).to.have.property('readPreference');

@@ -135,7 +135,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     }
 
     if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-      Object.assign(cmd, { writeConcern: this.writeConcern });
+      WriteConcern.apply(cmd, this.writeConcern);
     }
 
     if (
