@@ -2,7 +2,7 @@ import type { Document, Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /** @internal */

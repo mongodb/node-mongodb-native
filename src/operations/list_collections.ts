@@ -2,8 +2,8 @@ import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { maxWireVersion } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +17,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandCallbackOperation<string[]> {
+export class ListCollectionsOperation extends CommandOperation<string[]> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The

@@ -2,8 +2,8 @@ import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -25,7 +25,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {

@@ -5,17 +5,8 @@ import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort } from '../sort';
-import {
-  type Callback,
-  decorateWithExplain,
-  type MongoDBNamespace,
-  normalizeHintField
-} from '../utils';
-import {
-  type CollationOptions,
-  CommandCallbackOperation,
-  type CommandOperationOptions
-} from './command';
+import { decorateWithExplain, type MongoDBNamespace, normalizeHintField } from '../utils';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
@@ -75,7 +66,7 @@ export interface FindOptions<TSchema extends Document = Document>
 }
 
 /** @internal */
-export class FindOperation extends CommandCallbackOperation<Document> {
+export class FindOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The

@@ -2,13 +2,8 @@ import type { Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
-import {
-  AbstractCallbackOperation,
-  Aspect,
-  defineAspects,
-  type OperationOptions
-} from './operation';
+import type { MongoDBNamespace } from '../utils';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /**
  * https://www.mongodb.com/docs/manual/reference/command/killCursors/
@@ -20,7 +15,7 @@ interface KillCursorsCommand {
   comment?: unknown;
 }
 
-export class KillCursorsOperation extends AbstractCallbackOperation {
+export class KillCursorsOperation extends AbstractOperation {
   cursorId: Long;
 
   constructor(cursorId: Long, ns: MongoDBNamespace, server: Server, options: OperationOptions) {
@@ -30,13 +25,9 @@ export class KillCursorsOperation extends AbstractCallbackOperation {
     this.server = server;
   }
 
-  executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<void>
-  ): void {
+  execute(server: Server, session: ClientSession | undefined): Promise<void> {
     if (server !== this.server) {
-      return callback(
+      return Promise.reject(
         new MongoRuntimeError('Killcursor must run on the same server operation began on')
       );
     }
@@ -45,7 +36,7 @@ export class KillCursorsOperation extends AbstractCallbackOperation {
     if (killCursors == null) {
       // Cursors should have adopted the namespace returned by MongoDB
       // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
-      return callback(
+      return Promise.reject(
         new MongoRuntimeError('A collection name must be determined before killCursors')
       );
     }
@@ -55,7 +46,7 @@ export class KillCursorsOperation extends AbstractCallbackOperation {
       cursors: [this.cursorId]
     };
 
-    server.command(this.ns, killCursorsCommand, { session }, () => callback());
+    return server.commandAsync(this.ns, killCursorsCommand, { session });
   }
 }
 

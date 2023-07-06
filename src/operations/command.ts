@@ -111,7 +111,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     server: Server,
     session: ClientSession | undefined,
     cmd: Document
-  ): Promise<Document> {
+  ): Promise<T> {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
