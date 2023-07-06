@@ -119,8 +119,8 @@ describe('Collection (#findOneAnd...)', function () {
         });
 
         it('passes through the writeConcern', async function () {
-          await collection.findOneAndDelete({}, { writeConcern: { fsync: 1 } });
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          await collection.findOneAndDelete({}, { writeConcern: { j: 1 } });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
 
@@ -128,27 +128,27 @@ describe('Collection (#findOneAnd...)', function () {
         beforeEach(async function () {
           collection = client
             .db('test')
-            .collection('findAndModifyTest', { writeConcern: { fsync: 1 } });
+            .collection('findAndModifyTest', { writeConcern: { j: 1 } });
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
 
         it('passes through the writeConcern', async function () {
           await collection.findOneAndDelete({});
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
 
       context('when provided at the db level', function () {
         beforeEach(async function () {
           collection = client
-            .db('test', { writeConcern: { fsync: 1 } })
+            .db('test', { writeConcern: { j: 1 } })
             .collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
 
         it('passes through the writeConcern', async function () {
           await collection.findOneAndDelete({});
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
     });
@@ -297,8 +297,8 @@ describe('Collection (#findOneAnd...)', function () {
         });
 
         it('passes through the writeConcern', async function () {
-          await collection.findOneAndUpdate({}, { $set: { a: 1 } }, { writeConcern: { fsync: 1 } });
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          await collection.findOneAndUpdate({}, { $set: { a: 1 } }, { writeConcern: { j: 1 } });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
 
@@ -306,27 +306,27 @@ describe('Collection (#findOneAnd...)', function () {
         beforeEach(async function () {
           collection = client
             .db('test')
-            .collection('findAndModifyTest', { writeConcern: { fsync: 1 } });
+            .collection('findAndModifyTest', { writeConcern: { j: 1 } });
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
 
         it('passes through the writeConcern', async function () {
           await collection.findOneAndUpdate({}, { $set: { a: 1 } });
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
 
       context('when provided at the db level', function () {
         beforeEach(async function () {
           collection = client
-            .db('test', { writeConcern: { fsync: 1 } })
+            .db('test', { writeConcern: { j: 1 } })
             .collection('findAndModifyTest');
           await collection.insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } });
         });
 
         it('passes through the writeConcern', async function () {
           await collection.findOneAndUpdate({}, { $set: { a: 1 } });
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
     });
@@ -468,8 +468,8 @@ describe('Collection (#findOneAnd...)', function () {
         });
 
         it('passes through the writeConcern', async function () {
-          await collection.findOneAndReplace({}, { b: 1 }, { writeConcern: { fsync: 1 } });
-          expect(started[0].command.writeConcern).to.deep.equal({ fsync: 1 });
+          await collection.findOneAndReplace({}, { b: 1 }, { writeConcern: { j: 1 } });
+          expect(started[0].command.writeConcern).to.deep.equal({ j: 1 });
         });
       });
 
