@@ -47,17 +47,8 @@ export class ListCollectionsOperation extends CommandCallbackOperation<string[]>
     }
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<string[]>
-  ): void {
-    return super.executeCommandCallback(
-      server,
-      session,
-      this.generateCommand(maxWireVersion(server)),
-      callback
-    );
+  override execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
+    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */

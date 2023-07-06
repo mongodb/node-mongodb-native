@@ -34,11 +34,10 @@ export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabas
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  override executeCallback(
+  override execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<ListDatabasesResult>
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<ListDatabasesResult> {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
@@ -59,7 +58,7 @@ export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabas
       cmd.comment = this.options.comment;
     }
 
-    super.executeCommandCallback(server, session, cmd, callback);
+    return super.executeCommand(server, session, cmd);
   }
 }
 

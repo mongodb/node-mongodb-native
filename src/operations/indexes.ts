@@ -415,11 +415,7 @@ export class ListIndexesOperation extends CommandCallbackOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const serverWireVersion = maxWireVersion(server);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
@@ -432,7 +428,7 @@ export class ListIndexesOperation extends CommandCallbackOperation<Document> {
       command.comment = this.options.comment;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
   }
 }
 

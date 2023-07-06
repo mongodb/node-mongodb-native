@@ -3,12 +3,7 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
-import {
-  AbstractCallbackOperation,
-  Aspect,
-  defineAspects,
-  type OperationOptions
-} from './operation';
+import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /** @internal */
 export interface GetMoreOptions extends OperationOptions {
@@ -40,7 +35,7 @@ export interface GetMoreCommand {
 }
 
 /** @internal */
-export class GetMoreOperation extends AbstractCallbackOperation {
+export class GetMoreOperation extends AbstractOperation {
   cursorId: Long;
   override options: GetMoreOptions;
 
@@ -57,26 +52,24 @@ export class GetMoreOperation extends AbstractCallbackOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     if (server !== this.server) {
-      return callback(
+      return Promise.reject(
         new MongoRuntimeError('Getmore must run on the same server operation began on')
       );
     }
 
     if (this.cursorId == null || this.cursorId.isZero()) {
-      return callback(new MongoRuntimeError('Unable to iterate cursor with no id'));
+      return Promise.reject(new MongoRuntimeError('Unable to iterate cursor with no id'));
     }
 
     const collection = this.ns.collection;
     if (collection == null) {
       // Cursors should have adopted the namespace returned by MongoDB
       // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
-      return callback(new MongoRuntimeError('A collection name must be determined before getMore'));
+      return Promise.reject(
+        new MongoRuntimeError('A collection name must be determined before getMore')
+      );
     }
 
     const getMoreCmd: GetMoreCommand = {
@@ -104,7 +97,7 @@ export class GetMoreOperation extends AbstractCallbackOperation {
       ...this.options
     };
 
-    server.command(this.ns, getMoreCmd, commandOptions, callback);
+    return server.commandAsync(this.ns, getMoreCmd, commandOptions);
   }
 }
 

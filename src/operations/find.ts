@@ -106,11 +106,7 @@ export class FindOperation extends CommandCallbackOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     this.server = server;
 
     const options = this.options;
@@ -120,17 +116,12 @@ export class FindOperation extends CommandCallbackOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    server.command(
-      this.ns,
-      findCommand,
-      {
-        ...this.options,
-        ...this.bsonOptions,
-        documentsReturnedIn: 'firstBatch',
-        session
-      },
-      callback
-    );
+    return server.commandAsync(this.ns, findCommand, {
+      ...this.options,
+      ...this.bsonOptions,
+      documentsReturnedIn: 'firstBatch',
+      session
+    });
   }
 }
 
