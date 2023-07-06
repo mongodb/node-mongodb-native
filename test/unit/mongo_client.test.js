@@ -36,9 +36,7 @@ describe('MongoOptions', function () {
       tlsCertificateKeyFile: filename,
       tlsCertificateFile: filename,
       tlsCAFile: filename,
-      sslCRL: filename,
-      tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword',
-      sslValidate: false
+      tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword'
     });
     fs.unlinkSync(filename);
 
@@ -47,19 +45,20 @@ describe('MongoOptions', function () {
      *
      * ### Additional options:
      *
-     * |    nodejs option     | MongoDB equivalent                                 | type                                   |
-     * |:---------------------|----------------------------------------------------|:---------------------------------------|
-     * | `ca`                 | sslCA, tlsCAFile                                   | `string \| Buffer \| Buffer[]`         |
-     * | `crl`                | sslCRL                                             | `string \| Buffer \| Buffer[]`         |
-     * | `cert`               | sslCert, tlsCertificateFile                        | `string \| Buffer \| Buffer[]`         |
-     * | `key`                | sslKey, tlsCertificateKeyFile                      | `string \| Buffer \| KeyObject[]`      |
-     * | `passphrase`         | sslPass, tlsCertificateKeyFilePassword             | `string`                               |
-     * | `rejectUnauthorized` | sslValidate                                        | `boolean`                              |
+     * | nodejs native option  | driver spec compliant option name             | driver option type |
+     * |:----------------------|:----------------------------------------------|:-------------------|
+     * | `ca`                  | `tlsCAFile`                                   | `string`           |
+     * | `crl`                 | N/A                                           | `string`           |
+     * | `cert`                | `tlsCertificateKeyFile`                       | `string`           |
+     * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
+     * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
+     * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
+     * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | `boolean`          |
+     * | see note below        | `tlsInsecure`                                 | `boolean`          |
      *
      */
     expect(options).to.not.have.property('tlsCertificateKeyFile');
     expect(options).to.not.have.property('tlsCAFile');
-    expect(options).to.not.have.property('sslCRL');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
     expect(options).has.property('ca', '');
     expect(options).has.property('crl', '');
@@ -126,8 +125,6 @@ describe('MongoOptions', function () {
     serverApi: { version: '1' },
     socketTimeoutMS: 3,
     ssl: true,
-    sslPass: 'pass',
-    sslValidate: true,
     tls: true,
     tlsAllowInvalidCertificates: true,
     tlsAllowInvalidHostnames: true,
