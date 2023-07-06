@@ -3,6 +3,7 @@ import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { WriteConcern } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
@@ -102,7 +103,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
 
     if (this.hasWriteStage && this.writeConcern) {
-      Object.assign(command, { writeConcern: this.writeConcern });
+      WriteConcern.apply(command, this.writeConcern);
     }
 
     if (options.bypassDocumentValidation === true) {

@@ -45,6 +45,7 @@ import {
   now,
   uuidV4
 } from './utils';
+import { WriteConcern } from './write_concern';
 
 const minWireVersionForShardedTransactions = 8;
 
@@ -703,11 +704,11 @@ function endTransaction(
   }
 
   if (txnState === TxnState.TRANSACTION_COMMITTED) {
-    writeConcern = Object.assign({ wtimeout: 10000 }, writeConcern, { w: 'majority' });
+    writeConcern = Object.assign({ wtimeoutMS: 10000 }, writeConcern, { w: 'majority' });
   }
 
   if (writeConcern) {
-    Object.assign(command, { writeConcern });
+    WriteConcern.apply(command, writeConcern);
   }
 
   if (commandName === 'commitTransaction' && session.transaction.options.maxTimeMS) {
