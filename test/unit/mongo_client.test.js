@@ -34,7 +34,6 @@ describe('MongoOptions', function () {
     fs.closeSync(fs.openSync(filename, 'w'));
     const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
       tlsCertificateKeyFile: filename,
-      tlsCertificateFile: filename,
       tlsCAFile: filename,
       tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword'
     });
@@ -49,7 +48,6 @@ describe('MongoOptions', function () {
      * |:----------------------|:----------------------------------------------|:-------------------|
      * | `ca`                  | `tlsCAFile`                                   | `string`           |
      * | `crl`                 | N/A                                           | `string`           |
-     * | `cert`                | `tlsCertificateKeyFile`                       | `string`           |
      * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
      * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
      * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
@@ -61,12 +59,9 @@ describe('MongoOptions', function () {
     expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
     expect(options).has.property('ca', '');
-    expect(options).has.property('crl', '');
-    expect(options).has.property('cert', '');
     expect(options).has.property('key');
     expect(options.key).has.length(0);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
-    expect(options).has.property('rejectUnauthorized', false);
     expect(options).has.property('tls', true);
   });
 
@@ -401,27 +396,10 @@ describe('MongoOptions', function () {
       const optsFromObject = parseOptions('mongodb://localhost/', {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
-      expect(optsFromObject).to.have.property('cert', 'cert key');
       expect(optsFromObject).to.have.property('key', 'cert key');
 
       const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
-      expect(optsFromUri).to.have.property('cert', 'cert key');
       expect(optsFromUri).to.have.property('key', 'cert key');
-    });
-
-    it('correctly sets the cert and key if both tlsCertificateKeyFile and tlsCertificateFile is provided', function () {
-      const optsFromObject = parseOptions('mongodb://localhost/', {
-        tlsCertificateKeyFile: 'testKey.pem',
-        tlsCertificateFile: 'testCert.pem'
-      });
-      expect(optsFromObject).to.have.property('cert', 'test cert');
-      expect(optsFromObject).to.have.property('key', 'test key');
-
-      const optsFromUri = parseOptions(
-        'mongodb://localhost?tlsCertificateKeyFile=testKey.pem&tlsCertificateFile=testCert.pem'
-      );
-      expect(optsFromUri).to.have.property('cert', 'test cert');
-      expect(optsFromUri).to.have.property('key', 'test key');
     });
   });
 

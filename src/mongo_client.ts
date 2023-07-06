@@ -774,7 +774,6 @@ export interface MongoOptions
    * |:----------------------|:----------------------------------------------|:-------------------|
    * | `ca`                  | `tlsCAFile`                                   | `string`           |
    * | `crl`                 | N/A                                           | `string`           |
-   * | `cert`                | `tlsCertificateKeyFile`                       | `string`           |
    * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
    * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
    * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
