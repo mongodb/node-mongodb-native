@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.7.0](https://github.com/mongodb/node-mongodb-native/compare/v5.6.0...v5.7.0) (2023-07-06)
+
+
+### Features
+
+* **NODE-4929:** Add OIDC Azure workflow ([#3670](https://github.com/mongodb/node-mongodb-native/issues/3670)) ([b3482f3](https://github.com/mongodb/node-mongodb-native/commit/b3482f32551ea5fcfefa861eca52961a99c82fe3))
+* **NODE-5008:** add zstd and kerberos to peer deps ([#3691](https://github.com/mongodb/node-mongodb-native/issues/3691)) ([9561f32](https://github.com/mongodb/node-mongodb-native/commit/9561f32a9dda6969be7f727c9bd1bd96980f5e95))
+* **NODE-5241:** add option to return modified document ([#3710](https://github.com/mongodb/node-mongodb-native/issues/3710)) ([d9c2600](https://github.com/mongodb/node-mongodb-native/commit/d9c2600daf3bb6c8106e0f3a27cb2f12b770c8eb))
+* **NODE-5243:** add change stream split event ([#3745](https://github.com/mongodb/node-mongodb-native/issues/3745)) ([1c84f82](https://github.com/mongodb/node-mongodb-native/commit/1c84f82424acb23b510fdc10e64f304eafecfc1d))
+* **NODE-5274:** deprecate write concern options ([#3752](https://github.com/mongodb/node-mongodb-native/issues/3752)) ([1f880ea](https://github.com/mongodb/node-mongodb-native/commit/1f880eaea6e3bc2aa0bf48a70d020a4f9271286d))
+* **NODE-5287:** deprecate ssl options ([#3743](https://github.com/mongodb/node-mongodb-native/issues/3743)) ([f9b5677](https://github.com/mongodb/node-mongodb-native/commit/f9b5677657a05b22cc47c20f910e6ae264da8717))
+* **NODE-5319:** mark search index api public ([#3741](https://github.com/mongodb/node-mongodb-native/issues/3741)) ([c015e54](https://github.com/mongodb/node-mongodb-native/commit/c015e5446dbeccfa4d63a4a6f46d06add74deb8b))
+* **NODE-5407:** update bson to 5.4.0 ([#3754](https://github.com/mongodb/node-mongodb-native/issues/3754)) ([6a574cf](https://github.com/mongodb/node-mongodb-native/commit/6a574cf94e8cb923ff33f3a1d241a33d7fd90eb0))
+
+
+### Bug Fixes
+
+* **NODE-4977:** load snappy lazily ([#3726](https://github.com/mongodb/node-mongodb-native/issues/3726)) ([865e658](https://github.com/mongodb/node-mongodb-native/commit/865e658e7a341c8e9bd64e411bac2e9f5160820d))
+* **NODE-5102:** listDatabases nameOnly setting is sent as NaN ([#3742](https://github.com/mongodb/node-mongodb-native/issues/3742)) ([b97132e](https://github.com/mongodb/node-mongodb-native/commit/b97132ea0d39d52192ee9bcf06e85d7e8db0c4ca))
+* **NODE-5289:** prevent scram auth from throwing TypeError if saslprep is not a function ([#3727](https://github.com/mongodb/node-mongodb-native/issues/3727)) ([e006347](https://github.com/mongodb/node-mongodb-native/commit/e0063477961bbd9c5ca34953e9afe554a1235581))
+* **NODE-5374:** do not apply cursor transform in Cursor.hasNext ([#3746](https://github.com/mongodb/node-mongodb-native/issues/3746)) ([0668cd8](https://github.com/mongodb/node-mongodb-native/commit/0668cd8d566acb02c9d8cc38bcffe51e1a9cd585))
+
 ## [5.6.0](https://github.com/mongodb/node-mongodb-native/compare/v5.5.0...v5.6.0) (2023-06-01)
 
 
