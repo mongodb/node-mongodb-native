@@ -396,7 +396,10 @@ export interface AutoEncryptionOptions {
   };
 }
 
-/** @public */
+/**
+ * @public
+ * @deprecated This interface will be removed in the next major version.
+ */
 export interface AutoEncrypter {
   // eslint-disable-next-line @typescript-eslint/no-misused-new
   new (client: MongoClient, options: AutoEncryptionOptions): AutoEncrypter;
