@@ -48,7 +48,6 @@ function extension(mongodb) {
 module.exports = {
   extension,
   MongoCryptError,
-  foo: 'bar',
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptCreateDataKeyError,
   MongoCryptAzureKMSRequestError,

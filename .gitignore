@@ -98,3 +98,4 @@ test/lambda/env.json
 
 !encryption/lib
 !encryption/test
+!encryption/test/types
