@@ -9,7 +9,7 @@ import type { ClientSession } from '../sessions';
 import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
-  CommandOperation,
+  CommandCallbackOperation,
   type CommandOperationOptions,
   type OperationParent
 } from './command';
@@ -206,7 +206,7 @@ export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
 /** @internal */
 export class CreateIndexesOperation<
   T extends string | string[] = string[]
-> extends CommandOperation<T> {
+> extends CommandCallbackOperation<T> {
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
@@ -266,7 +266,7 @@ export class CreateIndexesOperation<
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommand(server, session, cmd, err => {
+    super.executeCommandCallback(server, session, cmd, err => {
       if (err) {
         callback(err);
         return;
@@ -348,7 +348,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropIndexOperation extends CommandOperation<Document> {
+export class DropIndexOperation extends CommandCallbackOperation<Document> {
   override options: DropIndexesOptions;
   collection: Collection;
   indexName: string;
@@ -367,7 +367,7 @@ export class DropIndexOperation extends CommandOperation<Document> {
     callback: Callback<Document>
   ): void {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    super.executeCommand(server, session, cmd, callback);
+    super.executeCommandCallback(server, session, cmd, callback);
   }
 }
 
@@ -396,7 +396,7 @@ export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'write
 }
 
 /** @internal */
-export class ListIndexesOperation extends CommandOperation<Document> {
+export class ListIndexesOperation extends CommandCallbackOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -432,7 +432,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
       command.comment = this.options.comment;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

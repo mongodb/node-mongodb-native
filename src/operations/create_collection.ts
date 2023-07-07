@@ -10,7 +10,7 @@ import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
@@ -108,7 +108,7 @@ const INVALID_QE_VERSION =
   'Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.';
 
 /** @internal */
-export class CreateCollectionOperation extends CommandOperation<Collection> {
+export class CreateCollectionOperation extends CommandCallbackOperation<Collection> {
   override options: CreateCollectionOptions;
   db: Db;
   name: string;
@@ -209,7 +209,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
       }
 
       // otherwise just execute the command
-      super.executeCommand(server, session, cmd, done);
+      super.executeCommandCallback(server, session, cmd, done);
     });
   }
 }

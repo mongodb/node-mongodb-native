@@ -3,7 +3,7 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +17,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<string[]> {
+export class ListCollectionsOperation extends CommandCallbackOperation<string[]> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -52,7 +52,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     session: ClientSession | undefined,
     callback: Callback<string[]>
   ): void {
-    return super.executeCommand(
+    return super.executeCommandCallback(
       server,
       session,
       this.generateCommand(maxWireVersion(server)),

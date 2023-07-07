@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, decorateWithCollation, decorateWithReadConcern } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -13,7 +13,7 @@ export type DistinctOptions = CommandOperationOptions;
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandOperation<any[]> {
+export class DistinctOperation extends CommandCallbackOperation<any[]> {
   override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
@@ -76,7 +76,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
       return callback(err);
     }
 
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommandCallback(server, session, cmd, (err, result) => {
       if (err) {
         callback(err);
         return;

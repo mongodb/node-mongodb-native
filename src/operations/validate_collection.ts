@@ -4,7 +4,7 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -13,7 +13,7 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends CommandOperation<Document> {
+export class ValidateCollectionOperation extends CommandCallbackOperation<Document> {
   override options: ValidateCollectionOptions;
   collectionName: string;
   command: Document;
@@ -41,7 +41,7 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
   ): void {
     const collectionName = this.collectionName;
 
-    super.executeCommand(server, session, this.command, (err, doc) => {
+    super.executeCommandCallback(server, session, this.command, (err, doc) => {
       if (err != null) return callback(err);
 
       // TODO(NODE-3483): Replace these with MongoUnexpectedServerResponseError

@@ -107,12 +107,11 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     return true;
   }
 
-  executeCommand(
+  async executeCommand(
     server: Server,
     session: ClientSession | undefined,
-    cmd: Document,
-    callback: Callback
-  ): void {
+    cmd: Document
+  ): Promise<Document> {
     // TODO: consider making this a non-enumerable property
     this.server = server;
 
@@ -154,6 +153,25 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
       cmd = decorateWithExplain(cmd, this.explain);
     }
 
-    server.command(this.ns, cmd, options, callback);
+    return server.commandAsync(this.ns, cmd, options);
+  }
+}
+
+/** @internal */
+export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
+  constructor(parent?: OperationParent, options?: CommandOperationOptions) {
+    super(parent, options);
+  }
+
+  executeCommandCallback(
+    server: Server,
+    session: ClientSession | undefined,
+    cmd: Document,
+    callback: Callback
+  ): void {
+    super.executeCommand(server, session, cmd).then(
+      res => callback(undefined, res),
+      err => callback(err, undefined)
+    );
   }
 }

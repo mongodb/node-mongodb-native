@@ -3,7 +3,7 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -25,7 +25,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabasesResult> {
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {
@@ -59,7 +59,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
       cmd.comment = this.options.comment;
     }
 
-    super.executeCommand(server, session, cmd, callback);
+    super.executeCommandCallback(server, session, cmd, callback);
   }
 }
 

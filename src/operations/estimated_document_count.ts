@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +17,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EstimatedDocumentCountOperation extends CommandOperation<number> {
+export class EstimatedDocumentCountOperation extends CommandCallbackOperation<number> {
   override options: EstimatedDocumentCountOptions;
   collectionName: string;
 
@@ -44,7 +44,7 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
       cmd.comment = this.options.comment;
     }
 
-    super.executeCommand(server, session, cmd, (err, response) => {
+    super.executeCommandCallback(server, session, cmd, (err, response) => {
       if (err) {
         callback(err);
         return;

@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -19,7 +19,7 @@ export interface CountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class CountOperation extends CommandOperation<number> {
+export class CountOperation extends CommandCallbackOperation<number> {
   override options: CountOptions;
   collectionName?: string;
   query: Document;
@@ -59,7 +59,7 @@ export class CountOperation extends CommandOperation<number> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommandCallback(server, session, cmd, (err, result) => {
       callback(err, result ? result.n : 0);
     });
   }
