@@ -1,10 +1,8 @@
-'use strict';
-
-const {
+import {
   MongoCryptAzureKMSRequestError,
   MongoCryptKMSRequestNetworkTimeoutError
-} = require('../errors');
-const utils = require('./utils');
+} from '../errors';
+import * as utils from './utils';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 

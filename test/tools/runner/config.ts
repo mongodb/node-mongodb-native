@@ -1,10 +1,12 @@
 import { expect } from 'chai';
+import { ClientEncryption } from 'mongodb-client-encryption';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
 import {
   type AuthMechanism,
+  getMongoDBClientEncryption,
   HostAddress,
   MongoClient,
   TopologyType,
@@ -348,11 +350,6 @@ export class TestConfiguration {
     }
 
     return { writeConcern: { w: 1 } };
-  }
-
-  // Accessors and methods Client-Side Encryption
-  get mongodbClientEncryption(): typeof import('mongodb-client-encryption') {
-    return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
   }
 
   kmsProviders(localKey): Record<string, any> {

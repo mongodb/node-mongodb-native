@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
 import { BSON, Collection, type Db, MongoServerError } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
@@ -20,7 +22,6 @@ describe('21. Automatic Data Encryption Keys', () => {
   let db: Db;
   let clientEncryption;
   let client;
-  let MongoCryptCreateEncryptedCollectionError;
 
   const runProseTestsFor = provider => {
     const masterKey = {
@@ -32,11 +33,6 @@ describe('21. Automatic Data Encryption Keys', () => {
     }[provider];
     beforeEach(async function () {
       client = this.configuration.newClient();
-      const {
-        ClientEncryption,
-        MongoCryptCreateEncryptedCollectionError: MongoCryptCreateEncryptedCollectionErrorCtor
-      } = this.configuration.mongodbClientEncryption;
-      MongoCryptCreateEncryptedCollectionError = MongoCryptCreateEncryptedCollectionErrorCtor;
 
       if (typeof process.env.CSFLE_KMS_PROVIDERS !== 'string') {
         if (this.currentTest) {

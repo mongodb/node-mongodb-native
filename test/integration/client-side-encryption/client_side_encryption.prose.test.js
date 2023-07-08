@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-modules */
 'use strict';
 const BSON = require('bson');
 const { expect } = require('chai');
@@ -16,6 +17,7 @@ const { coerce, gte } = require('semver');
 const {
   externalSchema
 } = require('../../spec/client-side-encryption/external/external-schema.json');
+const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
@@ -81,8 +83,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // First, perform the setup.
     beforeEach(function () {
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-
       // 1. Create a MongoClient without encryption enabled (referred to as ``client``). Enable command monitoring to listen for command_started events.
       this.client = this.configuration.newClient({}, { monitorCommands: true });
 
@@ -139,7 +139,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           //       }
           //   Configure ``client_encryption`` with the ``keyVaultClient`` of the previously created ``client``.
           .then(() => {
-            this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+            this.clientEncryption = new ClientEncryption(this.client, {
               kmsProviders: getKmsProviders(),
               keyVaultNamespace,
               extraOptions: getEncryptExtraOptions()
@@ -398,7 +398,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         `should work ${withExternalKeyVault ? 'with' : 'without'} external key vault`,
         metadata,
         function () {
-          const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
           return (
             Promise.resolve()
               .then(() => {
@@ -858,8 +857,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
       invalidKmsProviders.kmip.endpoint = 'doesnotexist.local:5698';
 
       return this.client.connect().then(() => {
-        const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
-        this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.client, {
+        this.clientEncryption = new ClientEncryption(this.client, {
           bson: BSON,
           keyVaultNamespace,
           kmsProviders: customKmsProviders,
@@ -872,7 +870,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           extraOptions: getEncryptExtraOptions()
         });
 
-        this.clientEncryptionInvalid = new mongodbClientEncryption.ClientEncryption(this.client, {
+        this.clientEncryptionInvalid = new ClientEncryption(this.client, {
           keyVaultNamespace,
           kmsProviders: invalidKmsProviders,
           tlsOptions: {
@@ -1184,16 +1182,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
 
-        expect(insertError).not.to.be.instanceOf(
-          MongoServerSelectionError,
-          `
-
-TODO(NODE-5283): The error thrown in this test fails an instanceof check with MongoServerSelectionError.
-  This should change after NODE-5283.  If this assertion is failing, then the test
-  should be updated to reflect that the error thrown is now a server selection error.
-
-`
-        );
+        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
       });
     });
 
@@ -1440,12 +1429,11 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
         tlsOptions: tlsCaOptions,
         extraOptions: getEncryptExtraOptions()
       };
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
 
       switch (this.currentTest.title) {
         case 'should fail with no TLS':
           clientNoTls = this.configuration.newClient({}, { autoEncryption: clientNoTlsOptions });
-          clientEncryptionNoTls = new mongodbClientEncryption.ClientEncryption(clientNoTls, {
+          clientEncryptionNoTls = new ClientEncryption(clientNoTls, {
             ...clientNoTlsOptions,
             bson: BSON
           });
@@ -1456,7 +1444,7 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
             {},
             { autoEncryption: clientWithTlsOptions }
           );
-          clientEncryptionWithTls = new mongodbClientEncryption.ClientEncryption(clientWithTls, {
+          clientEncryptionWithTls = new ClientEncryption(clientWithTls, {
             ...clientWithTlsOptions,
             bson: BSON
           });
@@ -1467,10 +1455,10 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
             {},
             { autoEncryption: clientWithTlsExpiredOptions }
           );
-          clientEncryptionWithTlsExpired = new mongodbClientEncryption.ClientEncryption(
-            clientWithTlsExpired,
-            { ...clientWithTlsExpiredOptions, bson: BSON }
-          );
+          clientEncryptionWithTlsExpired = new ClientEncryption(clientWithTlsExpired, {
+            ...clientWithTlsExpiredOptions,
+            bson: BSON
+          });
           await clientWithTlsExpired.connect();
           break;
         case 'should fail with an invalid hostname':
@@ -1478,10 +1466,10 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
             {},
             { autoEncryption: clientWithInvalidHostnameOptions }
           );
-          clientEncryptionWithInvalidHostname = new mongodbClientEncryption.ClientEncryption(
-            clientWithInvalidHostname,
-            { ...clientWithInvalidHostnameOptions, bson: BSON }
-          );
+          clientEncryptionWithInvalidHostname = new ClientEncryption(clientWithInvalidHostname, {
+            ...clientWithInvalidHostnameOptions,
+            bson: BSON
+          });
           await clientWithInvalidHostname.connect();
           break;
         default:
@@ -1716,7 +1704,6 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
     let encryptedClient;
 
     beforeEach(async function () {
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       // Load the file encryptedFields.json as encryptedFields.
       encryptedFields = EJSON.parse(
         await fs.promises.readFile(path.join(data, 'encryptedFields.json')),
@@ -1748,7 +1735,7 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
       //      keyVaultNamespace: "keyvault.datakeys";
       //      kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
       //   }
-      clientEncryption = new mongodbClientEncryption.ClientEncryption(keyVaultClient, {
+      clientEncryption = new ClientEncryption(keyVaultClient, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders(LOCAL_KEY),
         bson: BSON,
@@ -2023,7 +2010,7 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
         );
 
       // Create a ClientEncryption object (referred to as client_encryption) with client set as the keyVaultClient.
-      clientEncryption = new this.configuration.mongodbClientEncryption.ClientEncryption(client, {
+      clientEncryption = new ClientEncryption(client, {
         keyVaultNamespace: 'keyvault.datakeys',
         kmsProviders: getKmsProviders(),
         extraOptions: getEncryptExtraOptions()
@@ -2158,19 +2145,18 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
               .catch(() => null);
 
             // Step 2. Create a ``ClientEncryption`` object named ``clientEncryption1``
-            const clientEncryption1 =
-              new this.configuration.mongodbClientEncryption.ClientEncryption(client1, {
-                keyVaultNamespace: 'keyvault.datakeys',
-                kmsProviders: getKmsProviders(),
-                tlsOptions: {
-                  kmip: {
-                    tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                    tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-                  }
-                },
-                extraOptions: getEncryptExtraOptions(),
-                bson: BSON
-              });
+            const clientEncryption1 = new ClientEncryption(client1, {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: getKmsProviders(),
+              tlsOptions: {
+                kmip: {
+                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                }
+              },
+              extraOptions: getEncryptExtraOptions(),
+              bson: BSON
+            });
 
             // Step 3. Call ``clientEncryption1.createDataKey`` with ``srcProvider``
             const keyId = await clientEncryption1.createDataKey(srcProvider, {
@@ -2184,19 +2170,18 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
             });
 
             // Step 5. Create a ``ClientEncryption`` object named ``clientEncryption2``
-            const clientEncryption2 =
-              new this.configuration.mongodbClientEncryption.ClientEncryption(client2, {
-                keyVaultNamespace: 'keyvault.datakeys',
-                kmsProviders: getKmsProviders(),
-                tlsOptions: {
-                  kmip: {
-                    tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-                    tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-                  }
-                },
-                extraOptions: getEncryptExtraOptions(),
-                bson: BSON
-              });
+            const clientEncryption2 = new ClientEncryption(client2, {
+              keyVaultNamespace: 'keyvault.datakeys',
+              kmsProviders: getKmsProviders(),
+              tlsOptions: {
+                kmip: {
+                  tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+                  tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+                }
+              },
+              extraOptions: getEncryptExtraOptions(),
+              bson: BSON
+            });
 
             // Step 6. Call ``clientEncryption2.rewrapManyDataKey`` with an empty ``filter``
             const rewrapManyDataKeyResult = await clientEncryption2.rewrapManyDataKey(
@@ -2233,7 +2218,7 @@ TODO(NODE-5283): The error thrown in this test fails an instanceof check with Mo
       //       kmsProviders: <all KMS providers>,
       before(function () {
         client = this.configuration.newClient();
-        clientEncryption = new this.configuration.mongodbClientEncryption.ClientEncryption(client, {
+        clientEncryption = new ClientEncryption(client, {
           keyVaultNamespace: 'keyvault.datakeys',
           kmsProviders: getKmsProviders(),
           extraOptions: getEncryptExtraOptions(),

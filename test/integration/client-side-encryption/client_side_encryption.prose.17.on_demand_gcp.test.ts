@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import { Binary } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
@@ -24,8 +26,6 @@ describe('17. On-demand GCP Credentials', () => {
 
   beforeEach(async function () {
     keyVaultClient = this.configuration.newClient();
-
-    const { ClientEncryption } = this.configuration.mongodbClientEncryption;
 
     if (typeof env.GCPKMS_GCLOUD === 'string') {
       // If Google cloud env is present then EXPECTED_GCPKMS_OUTCOME MUST be set

@@ -1,12 +1,10 @@
-'use strict';
-
-const spawn = require('child_process').spawn;
+import { spawn } from 'child_process'
 
 /**
  * @ignore
  * An internal class that handles spawning a mongocryptd.
  */
-class MongocryptdManager {
+export class MongocryptdManager {
   /**
    * @ignore
    * Creates a new Mongocryptd Manager
@@ -62,5 +60,3 @@ class MongocryptdManager {
 }
 
 MongocryptdManager.DEFAULT_MONGOCRYPTD_URI = 'mongodb://localhost:27020';
-
-module.exports = { MongocryptdManager };

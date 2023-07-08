@@ -1,7 +1,6 @@
-'use strict';
-const crypto = require('crypto');
+import * as crypto from 'crypto';
 
-function makeAES256Hook(method, mode) {
+export function makeAES256Hook(method, mode) {
   return function (key, iv, input, output) {
     let result;
 
@@ -22,7 +21,7 @@ function makeAES256Hook(method, mode) {
   };
 }
 
-function randomHook(buffer, count) {
+export function randomHook(buffer, count) {
   try {
     crypto.randomFillSync(buffer, 0, count);
   } catch (e) {
@@ -31,7 +30,7 @@ function randomHook(buffer, count) {
   return count;
 }
 
-function sha256Hook(input, output) {
+export function sha256Hook(input, output) {
   let result;
   try {
     result = crypto.createHash('sha256').update(input).digest();
@@ -43,7 +42,7 @@ function sha256Hook(input, output) {
   return result.length;
 }
 
-function makeHmacHook(algorithm) {
+export function makeHmacHook(algorithm) {
   return (key, input, output) => {
     let result;
     try {
@@ -57,7 +56,7 @@ function makeHmacHook(algorithm) {
   };
 }
 
-function signRsaSha256Hook(key, input, output) {
+export function signRsaSha256Hook(key, input, output) {
   let result;
   try {
     const signer = crypto.createSign('sha256WithRSAEncryption');
@@ -74,14 +73,10 @@ function signRsaSha256Hook(key, input, output) {
   return result.length;
 }
 
-module.exports = {
-  aes256CbcEncryptHook: makeAES256Hook('createCipheriv', 'aes-256-cbc'),
-  aes256CbcDecryptHook: makeAES256Hook('createDecipheriv', 'aes-256-cbc'),
-  aes256CtrEncryptHook: makeAES256Hook('createCipheriv', 'aes-256-ctr'),
-  aes256CtrDecryptHook: makeAES256Hook('createDecipheriv', 'aes-256-ctr'),
-  randomHook,
-  hmacSha512Hook: makeHmacHook('sha512'),
-  hmacSha256Hook: makeHmacHook('sha256'),
-  sha256Hook,
-  signRsaSha256Hook
-};
+
+export const aes256CbcEncryptHook = makeAES256Hook('createCipheriv', 'aes-256-cbc');
+export const aes256CbcDecryptHook = makeAES256Hook('createDecipheriv', 'aes-256-cbc');
+export const aes256CtrEncryptHook = makeAES256Hook('createCipheriv', 'aes-256-ctr');
+export const aes256CtrDecryptHook = makeAES256Hook('createDecipheriv', 'aes-256-ctr');
+export const hmacSha512Hook = makeHmacHook('sha512');
+export const hmacSha256Hook = makeHmacHook('sha256');

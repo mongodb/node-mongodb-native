@@ -4,6 +4,7 @@ import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import {
   type AutoEncryptionOptions,
   type CollectionOptions,
@@ -17,7 +18,6 @@ import { shouldRunServerlessTest } from '../../tools/utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap } from './entities';
 import { matchesEvents } from './match';
 import type {
-  ClientEncryption,
   ClientEncryptionEntity,
   CollectionOrDatabaseOptions,
   ExpectedEventsForClient,
@@ -25,6 +25,7 @@ import type {
   RunOnRequirement,
   StringOrPlaceholder
 } from './schema';
+import { ClientEncryption } from './schema';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {
@@ -220,31 +221,6 @@ export function getMatchingEventCount(event, client, entities): number {
 }
 
 /**
- * attempts to import mongodb-client-encryption and extract the client encryption class for
- * use in the csfle unified tests
- *
- * @throws MongoMissingDependencyError when mongodb-client-encryption is not installed
- */
-export function getClientEncryptionClass(): ClientEncryption {
-  try {
-    const mongodbClientEncryption = getMongoDBClientEncryption();
-    if (mongodbClientEncryption == null) {
-      throw new MongoMissingDependencyError(
-        'Attempting to import mongodb-client-encryption but it is not installed.'
-      );
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { ClientEncryption } = mongodbClientEncryption.extension(require('../../mongodb'));
-    return ClientEncryption;
-  } catch {
-    throw new MongoMissingDependencyError(
-      'Attempting to import mongodb-client-encryption but it is not installed.'
-    );
-  }
-}
-
-/**
  * parses the process.env for three required environment variables
  *
  * - CSFLE_KMS_PROVIDERS
@@ -362,14 +338,7 @@ export function createClientEncryption(
   map: EntitiesMap,
   entity: ClientEncryptionEntity
 ): ClientEncryption {
-  let ClientEncryptionClass;
-  try {
-    ClientEncryptionClass = getClientEncryptionClass();
-  } catch {
-    throw new Error(
-      'unable to import client encryption.  has mongodb-client-encryption been installed?'
-    );
-  }
+  getMongoDBClientEncryption();
 
   const { clientEncryptionOpts } = entity;
   const {
@@ -404,6 +373,6 @@ export function createClientEncryption(
     };
   }
 
-  const clientEncryption = new ClientEncryptionClass(clientEntity, autoEncryptionOptions);
+  const clientEncryption = new ClientEncryption(clientEntity, autoEncryptionOptions);
   return clientEncryption;
 }

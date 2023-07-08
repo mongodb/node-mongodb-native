@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { MongoCryptError } from '../../../src/client-side-encryption/errors';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
 const getKmsProviders = () => {
@@ -143,7 +146,6 @@ describe('Range Explicit Encryption', function () {
             expect(value).to.deep.equal(factory(expected));
           }
         };
-        const ClientEncryption = this.configuration.mongodbClientEncryption.ClientEncryption;
         const keyDocument1 = EJSON.parse(
           await readFile(join(__dirname, '../../../', basePath, 'keys', `key1-document.json`), {
             encoding: 'utf8'
@@ -459,9 +461,7 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(
-            this.configuration.mongodbClientEncryption.MongoCryptError
-          );
+          expect(resultOrError).to.be.instanceOf(MongoCryptError);
         }
       );
 
@@ -488,9 +488,7 @@ describe('Range Explicit Encryption', function () {
           })
           .catch(e => e);
 
-        expect(resultOrError).to.be.instanceOf(
-          this.configuration.mongodbClientEncryption.MongoCryptError
-        );
+        expect(resultOrError).to.be.instanceOf(MongoCryptError);
       });
 
       it(

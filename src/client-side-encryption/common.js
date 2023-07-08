@@ -1,11 +1,9 @@
-'use strict';
-
 /**
  * @ignore
  * Helper function for logging. Enabled by setting the environment flag MONGODB_CRYPT_DEBUG.
  * @param {*} msg Anything you want to be logged.
  */
-function debug(msg) {
+export function debug(msg) {
   if (process.env.MONGODB_CRYPT_DEBUG) {
     // eslint-disable-next-line no-console
     console.error(msg);
@@ -18,7 +16,7 @@ function debug(msg) {
  * @param {string} ns A string in the format of a namespace (database.collection)
  * @returns {string} The database portion of the namespace
  */
-function databaseNamespace(ns) {
+export function databaseNamespace(ns) {
   return ns.split('.')[0];
 }
 /**
@@ -27,11 +25,11 @@ function databaseNamespace(ns) {
  * @param {string} ns A string in the format of a namespace (database.collection)
  * @returns {string} The collection portion of the namespace
  */
-function collectionNamespace(ns) {
+export function collectionNamespace(ns) {
   return ns.split('.').slice(1).join('.');
 }
 
-function maybeCallback(promiseFn, callback) {
+export function maybeCallback(promiseFn, callback) {
   const promise = promiseFn();
   if (callback == null) {
     return promise;
@@ -54,7 +52,7 @@ function maybeCallback(promiseFn, callback) {
  * @param {Function} fn A function that takes a callback
  * @returns {Promise|void} Returns nothing if a callback is supplied, else returns a Promise.
  */
-function promiseOrCallback(callback, fn) {
+export function promiseOrCallback(callback, fn) {
   if (typeof callback === 'function') {
     fn(function (err) {
       if (err != null) {
@@ -88,11 +86,3 @@ function promiseOrCallback(callback, fn) {
     });
   });
 }
-
-module.exports = {
-  debug,
-  databaseNamespace,
-  collectionNamespace,
-  promiseOrCallback,
-  maybeCallback
-};

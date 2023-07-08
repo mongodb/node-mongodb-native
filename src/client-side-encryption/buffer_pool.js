@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @internal
  * @ignore
@@ -17,7 +15,7 @@ const kLength = Symbol('length');
  * @internal
  * @ignore
  */
-class BufferPool {
+export class BufferPool {
   // [kBuffers]: Buffer[];
   // [kLength]: number;
 
@@ -119,5 +117,3 @@ class BufferPool {
     return result;
   }
 }
-
-module.exports = { BufferPool };

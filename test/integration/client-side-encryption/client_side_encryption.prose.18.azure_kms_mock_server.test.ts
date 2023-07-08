@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 import { type Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
@@ -28,12 +30,9 @@ context('Azure KMS Mock Server Tests', function () {
     url: URL;
     headers: Document;
   }) => Promise<{ accessToken: string }>;
-  let MongoCryptAzureKMSRequestError;
 
   beforeEach(async function () {
     fetchAzureKMSToken = this.configuration.mongodbClientEncryption['___azureKMSProseTestExports'];
-    MongoCryptAzureKMSRequestError =
-      this.configuration.mongodbClientEncryption.MongoCryptAzureKMSRequestError;
   });
 
   context('Case 1: Success', metadata, function () {

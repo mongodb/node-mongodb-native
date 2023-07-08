@@ -1,7 +1,5 @@
-'use strict';
-
-const { MongoCryptKMSRequestNetworkTimeoutError } = require('../errors');
-const http = require('http');
+import { MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
+import * as http from 'http';
 
 /**
  * @param {URL | string} url

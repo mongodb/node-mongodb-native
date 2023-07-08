@@ -394,14 +394,37 @@ export interface AutoEncryptionOptions {
   };
 }
 
-/** @public */
-export interface AutoEncrypter {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new (client: MongoClient, options: AutoEncryptionOptions): AutoEncrypter;
-  init(cb: Callback): void;
-  teardown(force: boolean, callback: Callback): void;
-  encrypt(ns: string, cmd: Document, options: any, callback: Callback<Document>): void;
-  decrypt(cmd: Document, options: any, callback: Callback<Document>): void;
-  /** @experimental */
-  readonly cryptSharedLibVersionInfo: { version: bigint; versionStr: string } | null;
+type MongoCrypt = { MongoCrypt: any };
+/** A utility function to get the instance of mongodb-client-encryption, if it exists. */
+export function getMongoDBClientEncryption(): MongoCrypt | null {
+  let mongodbClientEncryption = null;
+
+  // NOTE(NODE-4254): This is to get around the circular dependency between
+  // mongodb-client-encryption and the driver in the test scenarios.
+  if (
+    typeof process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE === 'string' &&
+    process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE.length > 0
+  ) {
+    try {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
+      mongodbClientEncryption = require(process.env.MONGODB_CLIENT_ENCRYPTION_OVERRIDE);
+    } catch {
+      // ignore
+    }
+  } else {
+    try {
+      // NOTE(NODE-3199): Ensure you always wrap an optional require literally in the try block
+      // Cannot be moved to helper utility function, bundlers search and replace the actual require call
+      // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
+      mongodbClientEncryption = require('mongodb-client-encryption');
+    } catch {
+      // ignore
+    }
+  }
+
+  return mongodbClientEncryption;
 }
+
+export type MongodbClientEncryption = ReturnType<typeof getMongoDBClientEncryption>;

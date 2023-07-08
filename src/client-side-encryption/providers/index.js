@@ -1,8 +1,6 @@
-'use strict';
-
-const { loadAWSCredentials } = require('./aws');
-const { loadAzureCredentials, fetchAzureKMSToken } = require('./azure');
-const { loadGCPCredentials } = require('./gcp');
+import { loadAWSCredentials } from './aws'
+import { loadAzureCredentials, fetchAzureKMSToken }from './azure';
+import { loadGCPCredentials } from './gcp';
 
 /**
  * Auto credential fetching should only occur when the provider is defined on the kmsProviders map

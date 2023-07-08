@@ -1,8 +1,6 @@
-'use strict';
-
 let awsCredentialProviders = null;
 /** @ignore */
-async function loadAWSCredentials(kmsProviders) {
+export async function loadAWSCredentials(kmsProviders) {
   if (awsCredentialProviders == null) {
     try {
       // Ensure you always wrap an optional require in the try block NODE-3199
@@ -22,5 +20,3 @@ async function loadAWSCredentials(kmsProviders) {
 
   return kmsProviders;
 }
-
-module.exports = { loadAWSCredentials };

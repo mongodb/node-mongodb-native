@@ -1,8 +1,6 @@
-'use strict';
-
 let gcpMetadata = null;
 /** @ignore */
-async function loadGCPCredentials(kmsProviders) {
+export async function loadGCPCredentials(kmsProviders) {
   if (gcpMetadata == null) {
     try {
       // Ensure you always wrap an optional require in the try block NODE-3199
@@ -20,5 +18,3 @@ async function loadGCPCredentials(kmsProviders) {
 
   return kmsProviders;
 }
-
-module.exports = { loadGCPCredentials };
