@@ -347,13 +347,6 @@ export function parseOptions(
     allProvidedOptions.set(key, values);
   }
 
-  if (
-    allProvidedOptions.has('tlsCertificateKeyFile') &&
-    !allProvidedOptions.has('tlsCertificateFile')
-  ) {
-    allProvidedOptions.set('tlsCertificateFile', allProvidedOptions.get('tlsCertificateKeyFile'));
-  }
-
   if (allProvidedOptions.has('tls') || allProvidedOptions.has('ssl')) {
     const tlsAndSslOpts = (allProvidedOptions.get('tls') || [])
       .concat(allProvidedOptions.get('ssl') || [])
