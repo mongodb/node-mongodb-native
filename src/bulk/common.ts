@@ -809,7 +809,7 @@ export interface BulkOperationPrivate {
 /** @public */
 export interface BulkWriteOptions extends CommandOperationOptions {
   /**
-   * Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+   * Allow driver to bypass schema validation.
    * @defaultValue `false` - documents will be validated by default
    **/
   bypassDocumentValidation?: boolean;
