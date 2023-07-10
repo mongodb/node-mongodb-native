@@ -208,9 +208,7 @@ export type AutoEncryptionLoggerLevel =
 export interface AutoEncryptionTlsOptions {
   /**
    * Specifies the location of a local .pem file that contains
-   * either the client's TLS/SSL certificate and key or only the
-   * client's TLS/SSL key when tlsCertificateFile is used to
-   * provide the certificate.
+   * either the client's TLS/SSL certificate and key.
    */
   tlsCertificateKeyFile?: string;
   /**
