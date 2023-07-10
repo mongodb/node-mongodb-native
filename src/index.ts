@@ -388,6 +388,7 @@ export type {
   CommandOperationOptions,
   OperationParent
 } from './operations/command';
+export type { CommandCallbackOperation } from './operations/command';
 export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';

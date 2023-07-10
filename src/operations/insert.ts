@@ -8,12 +8,12 @@ import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
 import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
-export class InsertOperation extends CommandOperation<Document> {
+export class InsertOperation extends CommandCallbackOperation<Document> {
   override options: BulkWriteOptions;
   documents: Document[];
 
@@ -47,7 +47,7 @@ export class InsertOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

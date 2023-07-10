@@ -16,20 +16,16 @@ describe('Error (Integration)', function () {
         message: 'message 1, message 2'
       }
     ]) {
-      it(
-        `constructs the message properly with an array of ${errors.length} errors`,
-        { requires: { nodejs: '>=16' } },
-        () => {
-          const error = new AggregateError(errors);
-          const mongoError = new MongoError(error);
+      it(`constructs the message properly with an array of ${errors.length} errors`, () => {
+        const error = new AggregateError(errors);
+        const mongoError = new MongoError(error);
 
-          expect(mongoError.message).to.equal(message);
-        }
-      );
+        expect(mongoError.message).to.equal(message);
+      });
     }
 
     context('when the message on the AggregateError is non-empty', () => {
-      it(`uses the AggregateError's message`, { requires: { nodejs: '>=16' } }, () => {
+      it(`uses the AggregateError's message`, () => {
         const error = new AggregateError([new Error('non-empty')]);
         error.message = 'custom error message';
         const mongoError = new MongoError(error);
@@ -37,7 +33,7 @@ describe('Error (Integration)', function () {
       });
     });
 
-    it('sets the AggregateError to the cause property', { requires: { nodejs: '>=16' } }, () => {
+    it('sets the AggregateError to the cause property', () => {
       const error = new AggregateError([new Error('error 1')]);
       const mongoError = new MongoError(error);
       expect(mongoError.cause).to.equal(error);

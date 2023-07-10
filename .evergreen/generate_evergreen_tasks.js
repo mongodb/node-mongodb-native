@@ -426,8 +426,6 @@ for (const {
   });
 
   for (const NODE_LTS_VERSION of testedNodeVersions) {
-    if (NODE_LTS_VERSION === 14 && os.match(/^windows/)) continue;
-
     const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;

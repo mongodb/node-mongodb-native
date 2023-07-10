@@ -118,11 +118,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
-  commandAsync: (
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions
-  ) => Promise<Document | undefined>;
+  commandAsync: (ns: MongoDBNamespace, cmd: Document, options: CommandOptions) => Promise<Document>;
   [kMonitor]: Monitor | null;
 
   /** @event */
@@ -151,7 +147,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         ns: MongoDBNamespace,
         cmd: Document,
         options: CommandOptions,
-        callback: Callback<Document>
+        // callback type defines Document result because result is never nullish when it succeeds, otherwise promise rejects
+        callback: (error: Error | undefined, result: Document) => void
       ) => this.command(ns, cmd, options, callback as any)
     );
 

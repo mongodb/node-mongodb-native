@@ -4,7 +4,7 @@ import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -14,7 +14,7 @@ export interface DropCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DropCollectionOperation extends CommandOperation<boolean> {
+export class DropCollectionOperation extends CommandCallbackOperation<boolean> {
   override options: DropCollectionOptions;
   db: Db;
   name: string;
@@ -83,7 +83,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     session: ClientSession | undefined
   ): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      super.executeCommand(server, session, { drop: this.name }, (err, result) => {
+      super.executeCommandCallback(server, session, { drop: this.name }, (err, result) => {
         if (err) return reject(err);
         resolve(!!result.ok);
       });
@@ -95,7 +95,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
 export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropDatabaseOperation extends CommandOperation<boolean> {
+export class DropDatabaseOperation extends CommandCallbackOperation<boolean> {
   override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {
@@ -107,7 +107,7 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     session: ClientSession | undefined,
     callback: Callback<boolean>
   ): void {
-    super.executeCommand(server, session, { dropDatabase: 1 }, (err, result) => {
+    super.executeCommandCallback(server, session, { dropDatabase: 1 }, (err, result) => {
       if (err) return callback(err);
       if (result.ok) return callback(undefined, true);
       callback(undefined, false);

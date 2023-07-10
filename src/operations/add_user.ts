@@ -6,7 +6,7 @@ import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, emitWarningOnce, getTopology } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /**
@@ -35,7 +35,7 @@ export interface AddUserOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AddUserOperation extends CommandOperation<Document> {
+export class AddUserOperation extends CommandCallbackOperation<Document> {
   override options: AddUserOptions;
   db: Db;
   username: string;
@@ -117,7 +117,7 @@ export class AddUserOperation extends CommandOperation<Document> {
       command.pwd = userPassword;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

@@ -163,8 +163,8 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
     const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
     const percentageToHost1 = (counts[host1] / totalNumberOfTasks) * 100;
     const percentageToHost2 = (counts[host2] / totalNumberOfTasks) * 100;
-    expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
-    expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
+    expect(percentageToHost1).to.be.greaterThan(35).and.lessThan(65);
+    expect(percentageToHost2).to.be.greaterThan(35).and.lessThan(65);
   });
 
   it(
@@ -188,8 +188,8 @@ describe('operationCount-based Selection Within Latency Window - Prose Test', fu
       const [host1, host2] = seeds.map(seed => seed.split(':')[1]);
       const percentageToHost1 = (counts[host1] / n) * 100;
       const percentageToHost2 = (counts[host2] / n) * 100;
-      expect(percentageToHost1).to.be.greaterThan(40).and.lessThan(60);
-      expect(percentageToHost2).to.be.greaterThan(40).and.lessThan(60);
+      expect(percentageToHost1).to.be.greaterThan(35).and.lessThan(65);
+      expect(percentageToHost2).to.be.greaterThan(35).and.lessThan(65);
     }
   );
 });

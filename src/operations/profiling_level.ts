@@ -3,13 +3,13 @@ import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export type ProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class ProfilingLevelOperation extends CommandOperation<string> {
+export class ProfilingLevelOperation extends CommandCallbackOperation<string> {
   override options: ProfilingLevelOptions;
 
   constructor(db: Db, options: ProfilingLevelOptions) {
@@ -22,7 +22,7 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     session: ClientSession | undefined,
     callback: Callback<string>
   ): void {
-    super.executeCommand(server, session, { profile: -1 }, (err, doc) => {
+    super.executeCommandCallback(server, session, { profile: -1 }, (err, doc) => {
       if (err == null && doc.ok === 1) {
         const was = doc.was;
         if (was === 0) return callback(undefined, 'off');
