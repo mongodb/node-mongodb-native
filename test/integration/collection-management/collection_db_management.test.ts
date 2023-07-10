@@ -45,7 +45,7 @@ describe('Collection Management and Db Management', function () {
     const collection2 = await db.createCollection('promiseCollectionCollections2');
     expect(collection2).to.be.instanceOf(Collection);
     const collectionArray = await db.collections();
-    expect(collectionArray).to.be.instanceOf(Array);
+    expect(collectionArray).to.be.an('array');
     expect(collectionArray).to.have.length(2);
   });
 });
