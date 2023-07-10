@@ -71,7 +71,7 @@ export interface FindOptions<TSchema extends Document = Document>
 }
 
 /** @internal */
-export class FindOperation extends CommandCallbackOperation<Document> {
+export class FindOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The

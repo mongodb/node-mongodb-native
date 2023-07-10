@@ -25,7 +25,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {
