@@ -347,13 +347,6 @@ export function parseOptions(
     allProvidedOptions.set(key, values);
   }
 
-  if (
-    allProvidedOptions.has('tlsCertificateKeyFile') &&
-    !allProvidedOptions.has('tlsCertificateFile')
-  ) {
-    allProvidedOptions.set('tlsCertificateFile', allProvidedOptions.get('tlsCertificateKeyFile'));
-  }
-
   if (allProvidedOptions.has('tls') || allProvidedOptions.has('ssl')) {
     const tlsAndSslOpts = (allProvidedOptions.get('tls') || [])
       .concat(allProvidedOptions.get('ssl') || [])
@@ -1096,50 +1089,6 @@ export const OPTIONS = {
     target: 'tls',
     type: 'boolean'
   },
-  sslCA: {
-    deprecated:
-      'sslCA is deprecated and will be removed in the next major version. Please use tlsCAFile instead.',
-    target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
-  },
-  sslCRL: {
-    deprecated:
-      'sslCRL is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFile instead.',
-    target: 'crl',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
-  },
-  sslCert: {
-    deprecated:
-      'sslCert is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFile instead.',
-    target: 'cert',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
-  },
-  sslKey: {
-    deprecated:
-      'sslKey is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFile instead.',
-    target: 'key',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
-  },
-  sslPass: {
-    deprecated:
-      'sslPass is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFilePassword instead.',
-    target: 'passphrase',
-    type: 'string'
-  },
-  sslValidate: {
-    deprecated:
-      'sslValidate is deprecated and will be removed in the next major version. Please use tlsAllowInvalidCertificates instead.',
-    target: 'rejectUnauthorized',
-    type: 'boolean'
-  },
   tls: {
     type: 'boolean'
   },
@@ -1159,14 +1108,6 @@ export const OPTIONS = {
   },
   tlsCAFile: {
     target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
-  },
-  tlsCertificateFile: {
-    deprecated:
-      'tlsCertificateFile is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFile instead.',
-    target: 'cert',
     transform({ values: [value] }) {
       return fs.readFileSync(String(value), { encoding: 'ascii' });
     }
