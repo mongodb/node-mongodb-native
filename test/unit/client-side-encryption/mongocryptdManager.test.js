@@ -1,6 +1,6 @@
 'use strict';
 
-const MongocryptdManager = require('../lib/mongocryptdManager').MongocryptdManager;
+const MongocryptdManager = require('../../../src/client-side-encryption/mongocryptdManager').MongocryptdManager;
 const { expect } = require('chai');
 
 describe('MongocryptdManager', function () {

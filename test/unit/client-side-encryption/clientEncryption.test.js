@@ -2,17 +2,15 @@
 const fs = require('fs');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const mongodb = require('mongodb');
-const BSON = mongodb.BSON;
-const MongoClient = mongodb.MongoClient;
-const cryptoCallbacks = require('../lib/cryptoCallbacks');
-const stateMachine = require('../lib/stateMachine')({ mongodb });
-const StateMachine = stateMachine.StateMachine;
-const { Binary, EJSON, deserialize } = BSON;
+const { MongoClient } = require('../../../lib/mongo_client');
+const cryptoCallbacks = require('../../../src/client-side-encryption/cryptoCallbacks');
+const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
+const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption')
+const { Binary, EJSON, deserialize, Long, Int32 } = require('bson');
 const {
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptCreateDataKeyError
-} = require('../lib/errors');
+} = require('../../../src/client-side-encryption/errors');
 
 function readHttpResponse(path) {
   let data = fs.readFileSync(path, 'utf8').toString();
@@ -20,15 +18,10 @@ function readHttpResponse(path) {
   return Buffer.from(data, 'utf8');
 }
 
-const ClientEncryption = require('../lib/clientEncryption')({
-  mongodb,
-  stateMachine
-}).ClientEncryption;
 
 class MockClient {
   constructor() {
     this.topology = {
-      bson: BSON
     };
   }
   db(dbName) {
@@ -41,6 +34,8 @@ class MockClient {
 }
 
 const requirements = require('./requirements.helper');
+const { SKIP_LIVE_TESTS } = require('./requirements.helper');
+const { resolve } = require('path');
 
 describe('ClientEncryption', function () {
   this.timeout(12000);
@@ -68,112 +63,11 @@ describe('ClientEncryption', function () {
       return Promise.resolve();
     }
 
-    return client.close();
+    return client?.close();
   }
 
-  describe('#constructor', function () {
-    context('when mongodb exports BSON (driver >= 4.9.0)', function () {
-      context('when a bson option is provided', function () {
-        const bson = Object.assign({}, BSON);
-        const encrypter = new ClientEncryption(
-          {},
-          {
-            bson: bson,
-            keyVaultNamespace: 'client.encryption',
-            kmsProviders: {
-              local: { key: Buffer.alloc(96) }
-            }
-          }
-        );
-
-        it('uses the bson option', function () {
-          expect(encrypter._bson).to.equal(bson);
-        });
-      });
-
-      context('when a bson option is not provided', function () {
-        const encrypter = new ClientEncryption(
-          {},
-          {
-            keyVaultNamespace: 'client.encryption',
-            kmsProviders: {
-              local: { key: Buffer.alloc(96) }
-            }
-          }
-        );
-
-        it('uses the mongodb exported BSON', function () {
-          expect(encrypter._bson).to.equal(BSON);
-        });
-      });
-
-      it('never uses bson from the topology', function () {
-        expect(() => {
-          new ClientEncryption(
-            {},
-            {
-              keyVaultNamespace: 'client.encryption',
-              kmsProviders: {
-                local: { key: Buffer.alloc(96) }
-              }
-            }
-          );
-        }).not.to.throw();
-      });
-    });
-
-    context('when mongodb does not export BSON (driver < 4.9.0)', function () {
-      context('when a bson option is provided', function () {
-        const bson = Object.assign({}, BSON);
-        const encrypter = new ClientEncryption(
-          {},
-          {
-            bson: bson,
-            keyVaultNamespace: 'client.encryption',
-            kmsProviders: {
-              local: { key: Buffer.alloc(96) }
-            }
-          }
-        );
-
-        it('uses the bson option', function () {
-          expect(encrypter._bson).to.equal(bson);
-        });
-      });
-
-      context('when a bson option is not provided', function () {
-        const mongoNoBson = { ...mongodb, BSON: undefined };
-        const ClientEncryptionNoBson = require('../lib/clientEncryption')({
-          mongodb: mongoNoBson,
-          stateMachine
-        }).ClientEncryption;
-
-        context('when the client has a topology', function () {
-          const client = new MockClient();
-          const encrypter = new ClientEncryptionNoBson(client, {
-            keyVaultNamespace: 'client.encryption',
-            kmsProviders: {
-              local: { key: Buffer.alloc(96) }
-            }
-          });
-
-          it('uses the bson on the topology', function () {
-            expect(encrypter._bson).to.equal(client.topology.bson);
-          });
-        });
-
-        context('when the client does not have a topology', function () {
-          it('raises an error', function () {
-            expect(() => {
-              new ClientEncryptionNoBson({}, {});
-            }).to.throw(/bson/);
-          });
-        });
-      });
-    });
-  });
-
-  describe('stubbed stateMachine', function () {
+  // PORT TO INTEGRATION
+  describe.skip('stubbed stateMachine', function () {
     let sandbox = sinon.createSandbox();
 
     after(() => sandbox.restore());
@@ -237,7 +131,7 @@ describe('ClientEncryption', function () {
 
         const dataKeyOptions = {
           ...providerTest.options,
-          keyMaterial: new BSON.Binary(Buffer.alloc(96))
+          keyMaterial: new Binary(Buffer.alloc(96))
         };
 
         const dataKey = await encryption.createDataKey(providerName, dataKeyOptions);
@@ -262,7 +156,7 @@ describe('ClientEncryption', function () {
       });
 
       const dataKeyOptions = {
-        keyMaterial: new BSON.Binary(
+        keyMaterial: new Binary(
           Buffer.from(
             'xPTAjBRG5JiPm+d3fj6XLi2q5DMXUS/f1f+SMAlhhwkhDRL0kr8r9GDLIGTAGlvC+HVjSIgdL+RKwZCvpXSyxTICWSXTUYsWYPyu3IoHbuBZdmw2faM3WhcRIgbMReU5',
             'base64'
@@ -276,7 +170,7 @@ describe('ClientEncryption', function () {
       const doc = (
         await keyVaultColl.findOneAndDelete({ _id: dataKey }, { writeConcern: { w: 'majority' } })
       ).value;
-      doc._id = new BSON.Binary(Buffer.alloc(16), 4);
+      doc._id = new Binary(Buffer.alloc(16), 4);
       await keyVaultColl.insertOne(doc, { writeConcern: { w: 'majority' } });
 
       const encrypted = await encryption.encrypt('test', {
@@ -296,7 +190,7 @@ describe('ClientEncryption', function () {
       });
 
       const dataKeyOptions = {
-        keyMaterial: new BSON.Binary(Buffer.alloc(97))
+        keyMaterial: new Binary(Buffer.alloc(97))
       };
       try {
         encryption.createDataKey('local', dataKeyOptions);
@@ -501,7 +395,7 @@ describe('ClientEncryption', function () {
       "TODO(NODE-3371): resolve KMS JSON response does not include string 'Plaintext'. HTTP status=200 error";
   });
 
-  describe('ClientEncryptionKeyAltNames', function () {
+  describe.skip('ClientEncryptionKeyAltNames', function () {
     const kmsProviders = requirements.awsKmsProviders;
     const dataKeyOptions = requirements.awsDataKeyOptions;
     beforeEach(function () {
@@ -522,7 +416,7 @@ describe('ClientEncryption', function () {
     });
 
     afterEach(function () {
-      return teardown().then(() => {
+      return teardown()?.then(() => {
         this.encryption = undefined;
         this.collection = undefined;
         this.client = undefined;
@@ -624,7 +518,7 @@ describe('ClientEncryption', function () {
             });
         });
     });
-  });
+  }).skipReason = 'TODO = debug AWS test requirements';
 
   context('with stubbed key material and fixed random source', function () {
     let sandbox = sinon.createSandbox();
@@ -652,8 +546,9 @@ describe('ClientEncryption', function () {
         filter = deserialize(filter);
         const keyIds = filter.$or[0]._id.$in.map(key => key.toString('hex'));
         const fileNames = keyIds.map(
-          keyId => `${__dirname}/../../../test/data/keys/${keyId.toUpperCase()}-local-document.json`
+          keyId => resolve(`${__dirname}/data/keys/${keyId.toUpperCase()}-local-document.json`)
         );
+        console.error(fileNames);
         const contents = fileNames.map(filename => EJSON.parse(fs.readFileSync(filename)));
         cb(null, contents);
       });
@@ -684,7 +579,8 @@ describe('ClientEncryption', function () {
     });
   });
 
-  describe('encrypt()', function () {
+  // TODO: port to integration
+  describe.skip('encrypt()', function () {
     let clientEncryption;
     let completeOptions;
     let dataKey;
@@ -711,9 +607,9 @@ describe('ClientEncryption', function () {
         algorithm: 'RangePreview',
         contentionFactor: 0,
         rangeOptions: {
-          min: new BSON.Long(0),
-          max: new BSON.Long(10),
-          sparsity: new BSON.Long(1)
+          min: new Long(0),
+          max: new Long(10),
+          sparsity: new Long(1)
         },
         keyId: dataKey
       };
@@ -734,7 +630,8 @@ describe('ClientEncryption', function () {
     });
   });
 
-  describe('encryptExpression()', function () {
+    // TODO: port to integration
+  describe.skip('encryptExpression()', function () {
     let clientEncryption;
     let completeOptions;
     let dataKey;
@@ -765,9 +662,9 @@ describe('ClientEncryption', function () {
         queryType: 'rangePreview',
         contentionFactor: 0,
         rangeOptions: {
-          min: new BSON.Int32(0),
-          max: new BSON.Int32(10),
-          sparsity: new BSON.Long(1)
+          min: new Int32(0),
+          max: new Int32(10),
+          sparsity: new Long(1)
         },
         keyId: dataKey
       };

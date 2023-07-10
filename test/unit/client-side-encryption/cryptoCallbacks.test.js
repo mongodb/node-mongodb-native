@@ -2,14 +2,10 @@
 
 const sinon = require('sinon');
 const { expect } = require('chai');
-const mongodb = require('mongodb');
-const MongoClient = mongodb.MongoClient;
-const stateMachine = require('../lib/stateMachine')({ mongodb });
-const cryptoCallbacks = require('../lib/cryptoCallbacks');
-const ClientEncryption = require('../lib/clientEncryption')({
-  mongodb,
-  stateMachine
-}).ClientEncryption;
+const { MongoClient } = require('../../../lib/mongo_client');
+const { cryptoCallbacks } = require('../../../src/client-side-encryption/cryptoCallbacks');
+const { ClientEncryption } = require('../../../src/client-side-encryption/ClientEncryption');
+
 
 const requirements = require('./requirements.helper');
 

@@ -380,7 +380,9 @@ export class AutoEncrypter {
    * shared library was loaded.
    */
   get cryptSharedLibVersionInfo() {
-    return this._mongocrypt.cryptSharedLibVersionInfo;
+    return AutoEncrypter.cryptSharedLibVersionInfoTestingOverride != null ?
+      AutoEncrypter.cryptSharedLibVersionInfoTestingOverride :
+      this._mongocrypt.cryptSharedLibVersionInfo;
   }
 
   static get libmongocryptVersion() {

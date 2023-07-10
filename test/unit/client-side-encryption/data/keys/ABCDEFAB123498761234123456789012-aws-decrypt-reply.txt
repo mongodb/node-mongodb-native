@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+x-amzn-RequestId: adcfdbde-7213-4fcf-a312-370e1d0ccaf0
+Cache-Control: no-cache, no-store, must-revalidate, private
+Expires: 0
+Pragma: no-cache
+Date: Sat, 02 Apr 2022 16:00:00 GMT
+Content-Type: application/x-amz-json-1.1
+Content-Length: 272
+Connection: close
+
+{"EncryptionAlgorithm":"SYMMETRIC_DEFAULT","KeyId":"arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0","Plaintext":"p928TIvgDVH2jZ2OSF81HI7cjSIGsk2ODhgW0AX75SDkiRJQR9ZHsNhoS/vb8JwwQIXtCGq6bCsrFnfMyRztiEenM79eVoLISz7nlp5KX+Dgwh5ePuGQWVpV+DFH2N4q"}

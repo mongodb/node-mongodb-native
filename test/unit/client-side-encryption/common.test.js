@@ -1,7 +1,7 @@
 'use strict';
 
 const { expect } = require('chai');
-const maybeCallback = require('../lib/common').maybeCallback;
+const maybeCallback = require('../../../src/client-side-encryption/common').maybeCallback;
 
 describe('maybeCallback()', () => {
   it('should accept two arguments', () => {

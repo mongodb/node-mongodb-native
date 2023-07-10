@@ -6,9 +6,10 @@ const tls = require('tls');
 const fs = require('fs');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const mongodb = require('mongodb');
-const BSON = mongodb.BSON;
-const StateMachine = require('../lib/stateMachine')({ mongodb }).StateMachine;
+const { serialize, Long, Int32 } = require('bson');
+const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
+const { Db } = require('../../../src/db');
+const { MongoClient } = require('../../../src/mongo_client');
 
 describe('StateMachine', function () {
   class MockRequest {
@@ -44,22 +45,22 @@ describe('StateMachine', function () {
     beforeEach(function () {
       this.sinon = sinon.createSandbox();
       runCommandStub = this.sinon.stub().resolves({});
-      dbStub = this.sinon.createStubInstance(mongodb.Db, {
+      dbStub = this.sinon.createStubInstance(Db, {
         command: runCommandStub
       });
-      clientStub = this.sinon.createStubInstance(mongodb.MongoClient, {
+      clientStub = this.sinon.createStubInstance(MongoClient, {
         db: dbStub
       });
     });
 
     const command = {
       encryptedFields: {},
-      a: new BSON.Long('0'),
-      b: new BSON.Int32(0)
+      a: new Long('0'),
+      b: new Int32(0)
     };
     const options = { promoteLongs: false, promoteValues: false };
-    const serializedCommand = BSON.serialize(command);
-    const stateMachine = new StateMachine({ bson: BSON });
+    const serializedCommand = serialize(command);
+    const stateMachine = new StateMachine();
     const callback = () => {};
 
     context('when executing the command', function () {
@@ -97,7 +98,7 @@ describe('StateMachine', function () {
       });
 
       it('should only resolve once bytesNeeded drops to zero', function (done) {
-        const stateMachine = new StateMachine({ bson: BSON });
+        const stateMachine = new StateMachine();
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
         stateMachine
@@ -139,7 +140,6 @@ describe('StateMachine', function () {
         ].forEach(function (option) {
           context(`when the option is ${option}`, function () {
             const stateMachine = new StateMachine({
-              bson: BSON,
               tlsOptions: { aws: { [option]: true } }
             });
             const request = new MockRequest(Buffer.from('foobar'), 500);
@@ -157,7 +157,6 @@ describe('StateMachine', function () {
       context('when the options are secure', function () {
         context('when providing tlsCertificateKeyFile', function () {
           const stateMachine = new StateMachine({
-            bson: BSON,
             tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
           });
           const request = new MockRequest(Buffer.from('foobar'), -1);
@@ -185,7 +184,6 @@ describe('StateMachine', function () {
 
         context('when providing tlsCAFile', function () {
           const stateMachine = new StateMachine({
-            bson: BSON,
             tlsOptions: { aws: { tlsCAFile: 'test.pem' } }
           });
           const request = new MockRequest(Buffer.from('foobar'), -1);
@@ -212,7 +210,6 @@ describe('StateMachine', function () {
 
         context('when providing tlsCertificateKeyFilePassword', function () {
           const stateMachine = new StateMachine({
-            bson: BSON,
             tlsOptions: { aws: { tlsCertificateKeyFilePassword: 'test' } }
           });
           const request = new MockRequest(Buffer.from('foobar'), -1);
@@ -285,7 +282,6 @@ describe('StateMachine', function () {
 
     it('should create HTTPS connections through a Socks5 proxy (no proxy auth)', async function () {
       const stateMachine = new StateMachine({
-        bson: BSON,
         proxyOptions: {
           proxyHost: 'localhost',
           proxyPort: socks5srv.address().port
@@ -307,7 +303,6 @@ describe('StateMachine', function () {
     it('should create HTTPS connections through a Socks5 proxy (username/password auth)', async function () {
       withUsernamePassword = true;
       const stateMachine = new StateMachine({
-        bson: BSON,
         proxyOptions: {
           proxyHost: 'localhost',
           proxyPort: socks5srv.address().port,

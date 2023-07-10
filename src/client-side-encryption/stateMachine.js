@@ -9,6 +9,7 @@ import { MongoNetworkTimeoutError } from '../error';
 import { debug, databaseNamespace, collectionNamespace } from './common';
 import { MongoCryptError } from './errors';
 import { BufferPool } from './buffer_pool';
+import { serialize, deserialize } from 'bson';
 
 // libmongocrypt states
 const MONGOCRYPT_CTX_ERROR = 0;
@@ -81,7 +82,6 @@ const INSECURE_TLS_OPTIONS = [
 class StateMachine {
   constructor(options) {
     this.options = options || {};
-    this.bson = options.bson;
 
     this.executeAsync = promisify((autoEncrypter, context, callback) =>
       this.execute(autoEncrypter, context, callback)
@@ -97,7 +97,6 @@ class StateMachine {
    * @returns {void}
    */
   execute(autoEncrypter, context, callback) {
-    const bson = this.bson;
     const keyVaultNamespace = autoEncrypter._keyVaultNamespace;
     const keyVaultClient = autoEncrypter._keyVaultClient;
     const metaDataClient = autoEncrypter._metaDataClient;
@@ -107,7 +106,7 @@ class StateMachine {
     debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
     switch (context.state) {
       case MONGOCRYPT_CTX_NEED_MONGO_COLLINFO: {
-        const filter = bson.deserialize(context.nextMongoOperation());
+        const filter = deserialize(context.nextMongoOperation());
         this.fetchCollectionInfo(metaDataClient, context.ns, filter, (err, collInfo) => {
           if (err) {
             return callback(err, null);
@@ -163,7 +162,7 @@ class StateMachine {
         this.fetchKeys(keyVaultClient, keyVaultNamespace, filter, (err, keys) => {
           if (err) return callback(err, null);
           keys.forEach(key => {
-            context.addMongoOperationResponse(bson.serialize(key));
+            context.addMongoOperationResponse(serialize(key));
           });
 
           context.finishMongoOperation();
@@ -178,7 +177,7 @@ class StateMachine {
           .askForKMSCredentials()
           .then(kmsProviders => {
             context.provideKMSProviders(
-              !Buffer.isBuffer(kmsProviders) ? bson.serialize(kmsProviders) : kmsProviders
+              !Buffer.isBuffer(kmsProviders) ? serialize(kmsProviders) : kmsProviders
             );
             this.execute(autoEncrypter, context, callback);
           })
@@ -220,7 +219,7 @@ class StateMachine {
           callback(new MongoCryptError(message));
           return;
         }
-        callback(null, bson.deserialize(finalizedContext, this.options));
+        callback(null, deserialize(finalizedContext, this.options));
         return;
       }
       case MONGOCRYPT_CTX_ERROR: {
@@ -397,7 +396,6 @@ class StateMachine {
    * @param {StateMachine~fetchCollectionInfoCallback} callback Invoked with the info of the requested collection, or with an error
    */
   fetchCollectionInfo(client, ns, filter, callback) {
-    const bson = this.bson;
     const dbName = databaseNamespace(ns);
 
     client
@@ -409,7 +407,7 @@ class StateMachine {
       .toArray()
       .then(
         collections => {
-          const info = collections.length > 0 ? bson.serialize(collections[0]) : null;
+          const info = collections.length > 0 ? serialize(collections[0]) : null;
           return callback(null, info);
         },
         err => {
@@ -429,17 +427,16 @@ class StateMachine {
    * @returns {void}
    */
   markCommand(client, ns, command, callback) {
-    const bson = this.bson;
     const options = { promoteLongs: false, promoteValues: false };
     const dbName = databaseNamespace(ns);
-    const rawCommand = bson.deserialize(command, options);
+    const rawCommand = deserialize(command, options);
 
     client
       .db(dbName)
       .command(rawCommand, options)
       .then(
         response => {
-          return callback(null, bson.serialize(response, this.options));
+          return callback(null, serialize(response, this.options));
         },
         err => {
           callback(err, null);
@@ -458,10 +455,9 @@ class StateMachine {
    * @returns {void}
    */
   fetchKeys(client, keyVaultNamespace, filter, callback) {
-    const bson = this.bson;
     const dbName = databaseNamespace(keyVaultNamespace);
     const collectionName = collectionNamespace(keyVaultNamespace);
-    filter = bson.deserialize(filter);
+    filter = deserialize(filter);
 
     client
       .db(dbName)

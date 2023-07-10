@@ -3,14 +3,14 @@
 const { expect } = require('chai');
 const http = require('http');
 const requirements = require('../requirements.helper');
-const { loadCredentials, isEmptyCredentials } = require('../../lib/providers');
-const { tokenCache, fetchAzureKMSToken } = require('../../lib/providers/azure');
+const { loadCredentials, isEmptyCredentials } = require('../../../../src/client-side-encryption/providers');
+const { tokenCache, fetchAzureKMSToken } = require('../../../../src/client-side-encryption/providers/azure');
 const sinon = require('sinon');
-const utils = require('../../lib/providers/utils');
+const utils = require('../../../../src/client-side-encryption/providers/utils');
 const {
   MongoCryptKMSRequestNetworkTimeoutError,
   MongoCryptAzureKMSRequestError
-} = require('../../lib/errors');
+} = require('../../../../src/client-side-encryption/errors');
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;

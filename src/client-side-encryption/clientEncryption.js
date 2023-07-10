@@ -754,7 +754,7 @@ export class ClientEncryption {
   }
 
   static get libmongocryptVersion() {
-    return MongoCrypt.MongoCrypt.libmongocryptVersion;
+    return MongoCrypt.libmongocryptVersion;
   }
 
   /**
