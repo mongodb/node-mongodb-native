@@ -60,6 +60,33 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
 
     return super.executeCommand(server, session, cmd);
   }
+
+  override executeCallback(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<ListDatabasesResult> {
+    const cmd: Document = { listDatabases: 1 };
+
+    if (typeof this.options.nameOnly === 'boolean') {
+      cmd.nameOnly = this.options.nameOnly;
+    }
+
+    if (this.options.filter) {
+      cmd.filter = this.options.filter;
+    }
+
+    if (typeof this.options.authorizedDatabases === 'boolean') {
+      cmd.authorizedDatabases = this.options.authorizedDatabases;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (maxWireVersion(server) >= 9 && this.options.comment !== undefined) {
+      cmd.comment = this.options.comment;
+    }
+
+    return super.executeCommand(server, session, cmd);
+  }
 }
 
 defineAspects(ListDatabasesOperation, [Aspect.READ_OPERATION, Aspect.RETRYABLE]);

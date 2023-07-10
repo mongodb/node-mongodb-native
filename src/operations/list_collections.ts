@@ -51,6 +51,10 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
   }
 
+  override executeCallback(server: Server, session: ClientSession | undefined): Promise<string[]> {
+    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
+  }
+
   /* This is here for the purpose of unit testing the final command that gets sent. */
   generateCommand(wireVersion: number): Document {
     const command: Document = {

@@ -114,6 +114,24 @@ export class FindOperation extends CommandOperation<Document> {
       session
     });
   }
+
+  executeCallback(server: Server, session: ClientSession | undefined): Promise<Document> {
+    this.server = server;
+
+    const options = this.options;
+
+    let findCommand = makeFindCommand(this.ns, this.filter, options);
+    if (this.explain) {
+      findCommand = decorateWithExplain(findCommand, this.explain);
+    }
+
+    return server.commandAsync(this.ns, findCommand, {
+      ...this.options,
+      ...this.bsonOptions,
+      documentsReturnedIn: 'firstBatch',
+      session
+    });
+  }
 }
 
 function makeFindCommand(ns: MongoDBNamespace, filter: Document, options: FindOptions): Document {

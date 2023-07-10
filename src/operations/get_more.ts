@@ -99,6 +99,54 @@ export class GetMoreOperation extends AbstractOperation {
 
     return server.commandAsync(this.ns, getMoreCmd, commandOptions);
   }
+
+  executeCallback(server: Server, session: ClientSession | undefined): Promise<Document> {
+    if (server !== this.server) {
+      return Promise.reject(
+        new MongoRuntimeError('Getmore must run on the same server operation began on')
+      );
+    }
+
+    if (this.cursorId == null || this.cursorId.isZero()) {
+      return Promise.reject(new MongoRuntimeError('Unable to iterate cursor with no id'));
+    }
+
+    const collection = this.ns.collection;
+    if (collection == null) {
+      // Cursors should have adopted the namespace returned by MongoDB
+      // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
+      return Promise.reject(
+        new MongoRuntimeError('A collection name must be determined before getMore')
+      );
+    }
+
+    const getMoreCmd: GetMoreCommand = {
+      getMore: this.cursorId,
+      collection
+    };
+
+    if (typeof this.options.batchSize === 'number') {
+      getMoreCmd.batchSize = Math.abs(this.options.batchSize);
+    }
+
+    if (typeof this.options.maxAwaitTimeMS === 'number') {
+      getMoreCmd.maxTimeMS = this.options.maxAwaitTimeMS;
+    }
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (this.options.comment !== undefined && maxWireVersion(server) >= 9) {
+      getMoreCmd.comment = this.options.comment;
+    }
+
+    const commandOptions = {
+      returnFieldSelector: null,
+      documentsReturnedIn: 'nextBatch',
+      ...this.options
+    };
+
+    return server.commandAsync(this.ns, getMoreCmd, commandOptions);
+  }
 }
 
 defineAspects(GetMoreOperation, [Aspect.READ_OPERATION, Aspect.MUST_SELECT_SAME_SERVER]);

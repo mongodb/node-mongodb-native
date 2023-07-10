@@ -123,6 +123,7 @@ export abstract class AbstractCallbackOperation<TResult = any> extends AbstractO
     callback: Callback<TResult>
   ): void;
 }
+
 export function defineAspects(
   operation: OperationConstructor,
   aspects: symbol | symbol[] | Set<symbol>

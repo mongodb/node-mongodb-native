@@ -431,6 +431,22 @@ export class ListIndexesOperation extends CommandOperation<Document> {
 
     return super.executeCommand(server, session, command);
   }
+
+  override executeCallback(server: Server, session: ClientSession | undefined): Promise<Document> {
+    const serverWireVersion = maxWireVersion(server);
+
+    const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
+
+    const command: Document = { listIndexes: this.collectionNamespace.collection, cursor };
+
+    // we check for undefined specifically here to allow falsy values
+    // eslint-disable-next-line no-restricted-syntax
+    if (serverWireVersion >= 9 && this.options.comment !== undefined) {
+      command.comment = this.options.comment;
+    }
+
+    return super.executeCommand(server, session, command);
+  }
 }
 
 /** @internal */

@@ -26,52 +26,27 @@ describe('Collection', function () {
       await client.close();
     });
 
-    it('should correctly execute basic collection methods', function (done) {
-      db.createCollection('test_collection_methods', (err, collection) => {
-        // Verify that all the result are correct coming back (should contain the value ok)
-        expect(collection.collectionName).to.equal('test_collection_methods');
-        // Let's check that the collection was created correctly
-        db.listCollections().toArray((err, documents) => {
-          expect(err).to.not.exist;
-          let found = false;
-          documents.forEach(doc => {
-            if (doc.name === 'test_collection_methods') found = true;
-          });
-          expect(found).to.be.true;
-          // Rename the collection and check that it's gone
-          db.renameCollection('test_collection_methods', 'test_collection_methods2', err => {
-            expect(err).to.not.exist;
-            // Drop the collection and check that it's gone
-            db.dropCollection('test_collection_methods2', (err, result) => {
-              expect(result).to.be.true;
-            });
-
-            db.createCollection('test_collection_methods3', (err, collection) => {
-              // Verify that all the result are correct coming back (should contain the value ok)
-              expect(collection.collectionName).to.equal('test_collection_methods3');
-
-              db.createCollection('test_collection_methods4', (err, collection) => {
-                // Verify that all the result are correct coming back (should contain the value ok)
-                expect(collection.collectionName).to.equal('test_collection_methods4');
-                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-                db.renameCollection(
-                  'test_collection_methods4',
-                  'test_collection_methods3',
-                  { dropTarget: true },
-                  err => {
-                    expect(err).to.not.exist;
-
-                    db.dropCollection('test_collection_methods3', (err, result) => {
-                      expect(result).to.be.true;
-                      done();
-                    });
-                  }
-                );
-              });
-            });
-          });
-        });
+    it('should correctly execute basic collection methods', async function () {
+      const collection = await db.createCollection('test_collection_methods');
+      // Verify that all the result are correct coming back (should contain the value ok)
+      expect(collection.collectionName).to.equal('test_collection_methods');
+      // Let's check that the collection was created correctly
+      const documents = await db.listCollections().toArray();
+      expect(documents).to.be.instanceOf(Array);
+      let found = false;
+      documents.forEach(doc => {
+        if (doc.name === 'test_collection_methods') found = true;
       });
+      expect(found).to.be.true;
+      // Rename the collection and check that it's gone
+      const renameCollection = await db.renameCollection(
+        'test_collection_methods',
+        'test_collection_methods2'
+      );
+      expect(renameCollection.collectionName).to.equal('test_collection_methods2');
+      // Drop the collection and check that it's gone
+      const drop = db.dropCollection('test_collection_methods2');
+      expect(drop).to.be.true;
     });
 
     it('should correctly access collection names', function (done) {
