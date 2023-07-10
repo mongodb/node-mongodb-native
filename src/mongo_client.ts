@@ -417,6 +417,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this[kOptions].monitorCommands = value;
   }
 
+  /**
+   * @deprecated This method will be removed in the next major version.
+   */
   get autoEncrypter(): AutoEncrypter | undefined {
     return this[kOptions].autoEncrypter;
   }
@@ -780,6 +783,9 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /**
+   * @deprecated This option will be removed in the next major version.
+   */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;
