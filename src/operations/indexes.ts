@@ -397,7 +397,7 @@ export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'write
 }
 
 /** @internal */
-export class ListIndexesOperation extends CommandOperation<Document> {
+export class ListIndexesOperation extends CommandCallbackOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The

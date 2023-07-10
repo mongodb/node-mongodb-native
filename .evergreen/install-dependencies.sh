@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit  # Exit the script with error if any of the commands fail
 
-NODE_LTS_VERSION=${NODE_LTS_VERSION:-14}
+NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 

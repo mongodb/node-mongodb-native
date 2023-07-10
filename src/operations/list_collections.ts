@@ -17,7 +17,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<string[]> {
+export class ListCollectionsOperation extends CommandCallbackOperation<string[]> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -46,6 +46,7 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
       this.batchSize = this.options.batchSize;
     }
   }
+
 
   override execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
     return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
