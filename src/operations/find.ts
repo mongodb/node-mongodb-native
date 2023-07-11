@@ -102,7 +102,7 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
-  async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     this.server = server;
 
     const options = this.options;

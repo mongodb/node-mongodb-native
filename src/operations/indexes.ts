@@ -416,7 +416,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const serverWireVersion = maxWireVersion(server);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};

@@ -34,7 +34,10 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  async execute(server: Server, session: ClientSession | undefined): Promise<ListDatabasesResult> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<ListDatabasesResult> {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
