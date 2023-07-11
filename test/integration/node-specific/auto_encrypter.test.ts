@@ -1,32 +1,14 @@
+import { EJSON } from 'bson';
 import { expect } from 'chai';
-import { existsSync } from 'fs';
-import * as path from 'path';
+import { spawnSync } from 'child_process';
+import { promisify } from 'util';
 
-import { AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
+import { type AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
 import { type MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const sharedLibrarySuffix =
   process.platform === 'win32' ? 'dll' : process.platform === 'darwin' ? 'dylib' : 'so';
-
-let sharedLibraryStub = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  `mongo_crypt_v1.${sharedLibrarySuffix}`
-);
-if (!existsSync(sharedLibraryStub)) {
-  sharedLibraryStub = path.resolve(
-    __dirname,
-    '..',
-    'deps',
-    'tmp',
-    'libmongocrypt-build',
-    ...(process.platform === 'win32' ? ['RelWithDebInfo'] : []),
-    `mongo_crypt_v1.${sharedLibrarySuffix}`
-  );
-}
 
 const cryptSharedPredicate = () => {
   if (typeof getEncryptExtraOptions().cryptSharedLibPath !== 'string') {
@@ -43,40 +25,26 @@ describe('crypt_shared library', function () {
     await client.connect();
   });
   afterEach(async () => {
-    if (autoEncrypter != null) {
-      await new Promise<void>(resolve => {
-        if (autoEncrypter) {
-          autoEncrypter.teardown(true, resolve);
-        } else {
-          resolve();
-        }
-      });
-      autoEncrypter = undefined;
-    }
+    await promisify(cb =>
+      autoEncrypter ? autoEncrypter.teardown(true, cb) : cb(undefined, undefined)
+    )();
     await client?.close();
   });
   it('should fail if no library can be found in the search path and cryptSharedLibRequired is set', async function () {
-    // NB: This test has to be run before the tests/without having previously
-    // loaded a CSFLE shared library below to get the right error path.
-    try {
-      new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        },
-        extraOptions: {
-          cryptSharedLibSearchPaths: ['/nonexistent'],
-          cryptSharedLibRequired: true
-        }
-      });
-      expect.fail('missed exception');
-    } catch (err) {
-      expect(err.message).to.include(
-        '`cryptSharedLibRequired` set but no crypt_shared library loaded'
-      );
-    }
+    const env = {
+      MONGODB_URI: this.configuration.url(),
+      EXTRA_OPTIONS: JSON.stringify({
+        cryptSharedLibSearchPaths: ['/nonexistent'],
+        cryptSharedLibRequired: true
+      })
+    };
+    const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
+    const { stderr } = spawnSync(process.execPath, [file], {
+      env,
+      encoding: 'utf-8'
+    });
+
+    expect(stderr).to.include('`cryptSharedLibRequired` set but no crypt_shared library loaded');
   });
 
   it(
@@ -90,27 +58,21 @@ describe('crypt_shared library', function () {
       const cryptSharedLibPath = `${
         getEncryptExtraOptions().cryptSharedLibPath
       }/${`mongo_crypt_v1.${sharedLibrarySuffix}`}`;
-      autoEncrypter = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        },
-        extraOptions: {
+      const env = {
+        MONGODB_URI: this.configuration.url(),
+        EXTRA_OPTIONS: JSON.stringify({
           cryptSharedLibPath
-        }
-      });
+        })
+      };
+      const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
+      const { stdout } = spawnSync(process.execPath, [file], { env, encoding: 'utf-8' });
 
-      expect(autoEncrypter).to.not.have.property('_mongocryptdManager');
-      expect(autoEncrypter).to.not.have.property('_mongocryptdClient');
-      expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo').that.is.not.null;
+      const response = EJSON.parse(stdout, { useBigInt64: true });
 
-      const cryptSharedLibVersion = autoEncrypter.cryptSharedLibVersionInfo;
+      expect(response).not.to.be.null;
 
-      expect(cryptSharedLibVersion).not.to.be.null;
-      expect(cryptSharedLibVersion).to.have.property('version').that.is.a('bigint');
-      expect(cryptSharedLibVersion).to.have.property('versionStr').that.is.a('string');
+      expect(response).to.have.property('version').that.is.a('bigint');
+      expect(response).to.have.property('versionStr').that.is.a('string');
     }
   );
 
@@ -122,28 +84,23 @@ describe('crypt_shared library', function () {
       }
     },
     async function () {
-      autoEncrypter = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        },
-        extraOptions: {
+      const env = {
+        MONGODB_URI: this.configuration.url(),
+        EXTRA_OPTIONS: JSON.stringify({
           // This test only runs when cryptSharedLibPath is undefined.
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           cryptSharedLibSearchPaths: [getEncryptExtraOptions().cryptSharedLibPath!]
-        }
-      });
+        })
+      };
+      const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
+      const { stdout } = spawnSync(process.execPath, [file], { env, encoding: 'utf-8' });
 
-      expect(autoEncrypter._mongocryptdManager).to.be.undefined;
-      expect(autoEncrypter._mongocryptdClient).to.be.undefined;
+      const response = EJSON.parse(stdout, { useBigInt64: true });
 
-      const cryptSharedLibVersion = autoEncrypter.cryptSharedLibVersionInfo;
-      expect(cryptSharedLibVersion).not.to.be.null;
+      expect(response).not.to.be.null;
 
-      expect(cryptSharedLibVersion).to.have.property('version').that.is.a('bigint');
-      expect(cryptSharedLibVersion).to.have.property('versionStr').that.is.a('string');
+      expect(response).to.have.property('version').that.is.a('bigint');
+      expect(response).to.have.property('versionStr').that.is.a('string');
     }
   );
 });

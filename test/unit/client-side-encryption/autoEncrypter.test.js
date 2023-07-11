@@ -8,33 +8,12 @@ const bson = require('bson');
 const { EJSON } = bson;
 const requirements = require('./requirements.helper');
 const { MongoError, MongoNetworkTimeoutError } = require('../../../src/error');
-const {StateMachine} = require('../../../src/client-side-encryption/stateMachine');
+const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
 
-const {AutoEncrypter} = require('../../../src/client-side-encryption/autoEncrypter');
-const {MongocryptdManager } = require('../../../src/client-side-encryption/mongocryptdManager');
+const { AutoEncrypter } = require('../../../src/client-side-encryption/autoEncrypter');
+const { MongocryptdManager } = require('../../../src/client-side-encryption/mongocryptdManager');
 
 const { expect } = require('chai');
-
-const sharedLibrarySuffix =
-  process.platform === 'win32' ? 'dll' : process.platform === 'darwin' ? 'dylib' : 'so';
-let sharedLibraryStub = path.resolve(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  `mongo_crypt_v1.${sharedLibrarySuffix}`
-);
-if (!fs.existsSync(sharedLibraryStub)) {
-  sharedLibraryStub = path.resolve(
-    __dirname,
-    '..',
-    'deps',
-    'tmp',
-    'libmongocrypt-build',
-    ...(process.platform === 'win32' ? ['RelWithDebInfo'] : []),
-    `mongo_crypt_v1.${sharedLibrarySuffix}`
-  );
-}
 
 function readExtendedJsonToBuffer(path) {
   const ejson = EJSON.parse(fs.readFileSync(path, 'utf8'));
@@ -115,7 +94,7 @@ describe('AutoEncrypter', function () {
       const autoEncrypterOptions = {
         mongocryptdBypassSpawn: true,
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -164,7 +143,7 @@ describe('AutoEncrypter', function () {
       bypassAutoEncryption: true,
       mongocryptdBypassSpawn: true,
       keyVaultNamespace: 'admin.datakeys',
-      logger: () => {},
+      logger: () => { },
       kmsProviders: {
         aws: { accessKeyId: 'example', secretAccessKey: 'example' },
         local: { key: Buffer.alloc(96) }
@@ -184,7 +163,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -207,7 +186,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -245,7 +224,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: {}
         },
@@ -286,7 +265,7 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
+          logger: () => { },
           kmsProviders: {
             aws: {}
           }
@@ -325,7 +304,7 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
+          logger: () => { },
           kmsProviders: {
             aws: {}
           }
@@ -343,7 +322,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -376,7 +355,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: {}
         },
@@ -384,47 +363,6 @@ describe('AutoEncrypter', function () {
           return { aws: { accessKeyId: 'example', secretAccessKey: 'example' } };
         }
       });
-
-      mc.encrypt('test.test', TEST_COMMAND, (err, encrypted) => {
-        if (err) return done(err);
-        const expected = EJSON.parse(
-          JSON.stringify({
-            find: 'test',
-            filter: {
-              ssn: {
-                $binary: {
-                  base64:
-                    'AWFhYWFhYWFhYWFhYWFhYWECRTOW9yZzNDn5dGwuqsrJQNLtgMEKaujhs9aRWRp+7Yo3JK8N8jC8P0Xjll6C1CwLsE/iP5wjOMhVv1KMMyOCSCrHorXRsb2IKPtzl2lKTqQ=',
-                  subType: '6'
-                }
-              }
-            }
-          })
-        );
-
-        expect(encrypted).to.containSubset(expected);
-        done();
-      });
-    });
-
-    it('should encrypt mock data when using the crypt_shared library', function (done) {
-      const client = new MockClient();
-      const mc = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: {}
-        },
-        async onKmsProviderRefresh() {
-          return { aws: { accessKeyId: 'example', secretAccessKey: 'example' } };
-        },
-        extraOptions: {
-          cryptSharedLibPath: sharedLibraryStub
-        }
-      });
-
-      expect(mc).to.not.have.property('_mongocryptdManager');
-      expect(mc).to.not.have.property('_mongocryptdClient');
 
       mc.encrypt('test.test', TEST_COMMAND, (err, encrypted) => {
         if (err) return done(err);
@@ -504,7 +442,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -538,7 +476,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -575,7 +513,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -612,7 +550,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -638,7 +576,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -681,7 +619,7 @@ describe('AutoEncrypter', function () {
     ['mongocryptdBypassSpawn', 'bypassAutoEncryption', 'bypassQueryAnalysis'].forEach(opt => {
       const encryptionOptions = {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -697,7 +635,7 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         this.mc = new AutoEncrypter(client, encryptionOptions);
 
-        const localMcdm = this.mc._mongocryptdManager || { spawn: () => {} };
+        const localMcdm = this.mc._mongocryptdManager || { spawn: () => { } };
         sandbox.spy(localMcdm, 'spawn');
 
         this.mc.init(err => {
@@ -724,7 +662,7 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       this.mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
+        logger: () => { },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }

@@ -274,7 +274,6 @@ class StateMachine {
 
       function onerror(err) {
         destroySockets();
-        console.error(err);
         const mcError = new MongoCryptError('KMS request failed');
         mcError.originalError = err;
         reject(mcError);
