@@ -26,7 +26,7 @@ describe('Collection', function () {
       await client.close();
     });
 
-    it('should correctly execute basic collection methods', async function () {
+    it.only('should correctly execute basic collection methods', async function () {
       const collection = await db.createCollection('test_collection_methods');
       // Verify that all the result are correct coming back (should contain the value ok)
       expect(collection.collectionName).to.equal('test_collection_methods');

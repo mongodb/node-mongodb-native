@@ -431,6 +431,10 @@ export class ListIndexesOperation extends CommandOperation<Document> {
 
     return super.executeCommand(server, session, command);
   }
+
+  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
+    throw new Error('Method not implemented');
+  }
 }
 
 /** @internal */
