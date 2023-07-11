@@ -71,13 +71,30 @@ maybeDescribe('examples(change-stream):', function () {
       });
       // End Changestream Example 1
 
-      // Start Changestream Example 1 Alternative
       const changeStreamIterator = collection.watch();
       const next = await changeStreamIterator.next();
-      // End Changestream Example 1 Alternative
 
       await changeStream.close();
       await changeStreamIterator.close();
+      await looper.stop();
+
+      expect(next).to.have.property('operationType').that.equals('insert');
+    }
+  });
+
+  it('Open A Change Stream and use iteration methods', {
+    metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
+    test: async function () {
+      const looper = new Looper(() => db.collection('inventory').insertOne({ a: 1 }));
+      looper.run();
+
+      // Start Changestream Example 1 Alternative
+      const collection = db.collection('inventory');
+      const changeStream = collection.watch();
+      const next = await changeStream.next();
+      // End Changestream Example 1 Alternative
+
+      await changeStream.close();
       await looper.stop();
 
       expect(next).to.have.property('operationType').that.equals('insert');
