@@ -10,7 +10,7 @@ const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
  * @class
  * @ignore
  */
-class AzureCredentialCache {
+export class AzureCredentialCache {
   constructor() {
     /**
      * @type { { accessToken: string, expiresOnTimestamp: number } | null}
@@ -69,7 +69,7 @@ let tokenCache = new AzureCredentialCache();
  * @returns { Promise<{ accessToken: string, expiresOnTimestamp: number } >}
  * @ignore
  */
-async function parseResponse(response) {
+export async function parseResponse(response) {
   const { status, body: rawBody } = response;
 
   /**
@@ -119,7 +119,7 @@ async function parseResponse(response) {
  *
  * @ignore
  */
-function prepareRequest(options) {
+export function prepareRequest(options) {
   const url =
     options.url == null
       ? new URL('http://169.254.169.254/metadata/identity/oauth2/token')
@@ -154,7 +154,7 @@ function prepareRequest(options) {
  *
  * @ignore
  */
-async function fetchAzureKMSToken(options = {}) {
+export async function fetchAzureKMSToken(options = {}) {
   const { headers, url } = prepareRequest(options);
   const response = await utils.get(url, { headers }).catch(error => {
     if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
@@ -168,9 +168,7 @@ async function fetchAzureKMSToken(options = {}) {
 /**
  * @ignore
  */
-async function loadAzureCredentials(kmsProviders) {
+export async function loadAzureCredentials(kmsProviders) {
   const azure = await tokenCache.getToken();
   return { ...kmsProviders, azure };
 }
-
-module.exports = { loadAzureCredentials, AzureCredentialCache, fetchAzureKMSToken, tokenCache };
