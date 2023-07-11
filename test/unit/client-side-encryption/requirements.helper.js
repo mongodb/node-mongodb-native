@@ -11,9 +11,7 @@ const awsKmsProviders = {
 };
 const awsDataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
 
-const SKIP_LIVE_TESTS = !!process.env.MONGODB_NODE_SKIP_LIVE_TESTS;
-const SKIP_AWS_TESTS =
-  SKIP_LIVE_TESTS || !AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY || !AWS_REGION || !AWS_CMK_ID;
+const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_CMK_ID].some(secret => !secret);
 
 function isAWSCredentialProviderInstalled() {
   try {
@@ -34,7 +32,6 @@ function isGCPCredentialProviderInstalled() {
 }
 
 module.exports = {
-  SKIP_LIVE_TESTS,
   SKIP_AWS_TESTS,
   KEYS: {
     AWS_ACCESS_KEY_ID,

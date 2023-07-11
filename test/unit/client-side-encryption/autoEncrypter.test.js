@@ -14,7 +14,6 @@ const {AutoEncrypter} = require('../../../src/client-side-encryption/autoEncrypt
 const {MongocryptdManager } = require('../../../src/client-side-encryption/mongocryptdManager');
 
 const { expect } = require('chai');
-const { MongoCrypt } = require('mongodb-client-encryption/lib');
 
 const sharedLibrarySuffix =
   process.platform === 'win32' ? 'dll' : process.platform === 'darwin' ? 'dylib' : 'so';
@@ -128,13 +127,6 @@ describe('AutoEncrypter', function () {
         expect(autoEncrypter)
           .to.have.property('_mongocryptdClient')
           .to.be.instanceOf(MongoClient);
-      });
-
-      it('sets the 3x legacy client options on the mongo client', function () {
-        expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
-        const options = autoEncrypter._mongocryptdClient.s.options;
-        expect(options).to.have.property('useUnifiedTopology', true);
-        expect(options).to.have.property('useNewUrlParser', true);
       });
 
       it('sets serverSelectionTimeoutMS to 10000ms', function () {
@@ -415,8 +407,7 @@ describe('AutoEncrypter', function () {
       });
     });
 
-    // TODO(NODE-4089): Enable test once https://github.com/mongodb/libmongocrypt/pull/263 is done
-    it.skip('should encrypt mock data when using the crypt_shared library', function (done) {
+    it('should encrypt mock data when using the crypt_shared library', function (done) {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
@@ -498,13 +489,6 @@ describe('AutoEncrypter', function () {
   });
 
   describe('autoSpawn', function () {
-    beforeEach(function () {
-      if (requirements.SKIP_LIVE_TESTS) {
-        this.currentTest.skipReason = `requirements.SKIP_LIVE_TESTS=${requirements.SKIP_LIVE_TESTS}`;
-        this.currentTest.skip();
-        return;
-      }
-    });
     afterEach(function (done) {
       if (this.mc) {
         this.mc.teardown(false, err => {
@@ -679,11 +663,6 @@ describe('AutoEncrypter', function () {
 
   describe('noAutoSpawn', function () {
     beforeEach('start MongocryptdManager', function (done) {
-      if (requirements.SKIP_LIVE_TESTS) {
-        this.currentTest.skipReason = `requirements.SKIP_LIVE_TESTS=${requirements.SKIP_LIVE_TESTS}`;
-        this.skip();
-      }
-
       this.mcdm = new MongocryptdManager({});
       this.mcdm.spawn(done);
     });
@@ -769,85 +748,6 @@ describe('AutoEncrypter', function () {
           done();
         });
       });
-    });
-  });
-
-  describe('crypt_shared library', function () {
-    it('should fail if no library can be found in the search path and cryptSharedLibRequired is set', function () {
-      // NB: This test has to be run before the tests/without having previously
-      // loaded a CSFLE shared library below to get the right error path.
-      const client = new MockClient();
-      try {
-        new AutoEncrypter(client, {
-          keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
-          kmsProviders: {
-            aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-            local: { key: Buffer.alloc(96) }
-          },
-          extraOptions: {
-            cryptSharedLibSearchPaths: ['/nonexistent'],
-            cryptSharedLibRequired: true
-          }
-        });
-        expect.fail('missed exception');
-      } catch (err) {
-        expect(err.message).to.include(
-          '`cryptSharedLibRequired` set but no crypt_shared library loaded'
-        );
-      }
-    });
-
-    // port to integration suite
-    it.skip('should load a shared library by specifying its path', function (done) {
-      const client = new MockClient();
-      this.mc = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        },
-        extraOptions: {
-          cryptSharedLibPath: sharedLibraryStub
-        }
-      });
-
-      expect(this.mc).to.not.have.property('_mongocryptdManager');
-      expect(this.mc).to.not.have.property('_mongocryptdClient');
-      expect(this.mc).to.have.deep.property('cryptSharedLibVersionInfo', {
-        // eslint-disable-next-line no-undef
-        version: BigInt(0x000600020001000),
-        versionStr: 'stubbed-crypt_shared'
-      });
-
-      this.mc.teardown(true, done);
-    });
-
-    // port to integration suite
-    it.skip('should load a shared library by specifying a search path', function (done) {
-      const client = new MockClient();
-
-      this.mc = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
-        kmsProviders: {
-          aws: { accessKeyId: 'example', secretAccessKey: 'example' },
-          local: { key: Buffer.alloc(96) }
-        },
-        extraOptions: {
-          cryptSharedLibSearchPaths: [path.dirname(sharedLibraryStub)]
-        }
-      });
-
-      expect(this.mc).to.not.have.property('_mongocryptdManager');
-      expect(this.mc).to.not.have.property('_mongocryptdClient');
-      expect(this.mc).to.have.deep.property('cryptSharedLibVersionInfo', {
-        version: 1,
-        versionStr: '1'
-      });
-
-      this.mc.teardown(true, done);
     });
   });
 

@@ -3,12 +3,10 @@ import { databaseNamespace } from './common';
 import { StateMachine } from './stateMachine';
 import { MongocryptdManager } from './mongocryptdManager';
 import {MongoClient} from '../mongo_client';
-console.error(MongoClient)
 import {MongoError} from '../error';
 import { loadCredentials } from './providers';
 import * as  cryptoCallbacks from './cryptoCallbacks';
-
-import * as BSON from 'bson';
+import { serialize, deserialize } from 'bson';
 
 /**
  * Configuration options for a automatic client encryption.
@@ -111,7 +109,6 @@ export class AutoEncrypter {
    */
   constructor(client, options) {
     this._client = client;
-    this._bson = options.bson || BSON || client.topology.bson;
     this._bypassEncryption = options.bypassAutoEncryption === true;
 
     this._keyVaultNamespace = options.keyVaultNamespace || 'admin.datakeys';
@@ -126,17 +123,17 @@ export class AutoEncrypter {
     if (options.schemaMap) {
       mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)
         ? options.schemaMap
-        : this._bson.serialize(options.schemaMap);
+        : serialize(options.schemaMap);
     }
 
     if (options.encryptedFieldsMap) {
       mongoCryptOptions.encryptedFieldsMap = Buffer.isBuffer(options.encryptedFieldsMap)
         ? options.encryptedFieldsMap
-        : this._bson.serialize(options.encryptedFieldsMap);
+        : serialize(options.encryptedFieldsMap);
     }
 
     mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? this._bson.serialize(this._kmsProviders)
+      ? serialize(this._kmsProviders)
       : this._kmsProviders;
 
     if (options.logger) {
@@ -178,8 +175,6 @@ export class AutoEncrypter {
     if (!this._bypassMongocryptdAndCryptShared && !this.cryptSharedLibVersionInfo) {
       this._mongocryptdManager = new MongocryptdManager(options.extraOptions);
       const clientOptions = {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
         serverSelectionTimeoutMS: 10000
       };
 
@@ -289,8 +284,7 @@ export class AutoEncrypter {
       return;
     }
 
-    const bson = this._bson;
-    const commandBuffer = Buffer.isBuffer(cmd) ? cmd : bson.serialize(cmd, options);
+    const commandBuffer = Buffer.isBuffer(cmd) ? cmd : serialize(cmd, options);
 
     let context;
     try {
@@ -306,7 +300,6 @@ export class AutoEncrypter {
     context.document = cmd;
 
     const stateMachine = new StateMachine({
-      bson,
       ...options,
       promoteValues: false,
       promoteLongs: false,
@@ -329,8 +322,7 @@ export class AutoEncrypter {
       options = {};
     }
 
-    const bson = this._bson;
-    const buffer = Buffer.isBuffer(response) ? response : bson.serialize(response, options);
+    const buffer = Buffer.isBuffer(response) ? response : serialize(response, options);
 
     let context;
     try {
@@ -344,7 +336,6 @@ export class AutoEncrypter {
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({
-      bson,
       ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
@@ -354,7 +345,7 @@ export class AutoEncrypter {
     stateMachine.execute(this, context, function (err, result) {
       // Only for testing/internal usage
       if (!err && result && decorateResult) {
-        err = decorateDecryptionResult(result, response, bson);
+        err = decorateDecryptionResult(result, response);
         if (err) return callback(err);
       }
       callback(err, result);
@@ -399,12 +390,12 @@ export class AutoEncrypter {
  * @internal
  * @ignore
  */
-function decorateDecryptionResult(decrypted, original, bson, isTopLevelDecorateCall = true) {
+function decorateDecryptionResult(decrypted, original, isTopLevelDecorateCall = true) {
   const decryptedKeys = Symbol.for('@@mdb.decryptedKeys');
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
     if (Buffer.isBuffer(original)) {
-      original = bson.deserialize(original);
+      original = deserialize(original);
     }
     if (Buffer.isBuffer(decrypted)) {
       return new Error('Expected result of decryption to be deserialized BSON object');
@@ -432,6 +423,6 @@ function decorateDecryptionResult(decrypted, original, bson, isTopLevelDecorateC
       continue;
     }
 
-    decorateDecryptionResult(decrypted[k], originalValue, bson, false);
+    decorateDecryptionResult(decrypted[k], originalValue, false);
   }
 }

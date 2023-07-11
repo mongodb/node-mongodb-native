@@ -1,4 +1,4 @@
-import { OneOrMore } from './src/mongo_types';
+import { type OneOrMore } from './src/mongo_types';
 import type { TestConfiguration } from './test/tools/runner/config';
 
 declare global {
@@ -13,6 +13,7 @@ declare global {
       auth?: 'enabled' | 'disabled';
       idmsMockServer?: true;
       nodejs?: string;
+      predicate?: (test?: Mocha.Test) => true | string;
     };
 
     sessions?: {

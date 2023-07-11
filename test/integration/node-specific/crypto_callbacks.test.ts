@@ -1,57 +1,47 @@
-'use strict';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-const sinon = require('sinon');
-const { expect } = require('chai');
-const { MongoClient } = require('../../../lib/mongo_client');
-const { cryptoCallbacks } = require('../../../src/client-side-encryption/cryptoCallbacks');
-const { ClientEncryption } = require('../../../src/client-side-encryption/ClientEncryption');
-
-
-const requirements = require('./requirements.helper');
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import * as cryptoCallbacks from '../../../src/client-side-encryption/cryptoCallbacks';
+import { type MongoClient } from '../../mongodb';
 
 // Data Key Stuff
-const kmsProviders = Object.assign({}, requirements.awsKmsProviders);
-const dataKeyOptions = Object.assign({}, requirements.awsDataKeyOptions);
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_REGION = process.env.AWS_REGION;
+const AWS_CMK_ID = process.env.AWS_CMK_ID;
+
+const kmsProviders = {
+  aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
+};
+const dataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
+
+const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_CMK_ID].some(
+  secret => !secret
+);
 
 describe('cryptoCallbacks', function () {
+  let client: MongoClient;
+  let sandbox;
   before(function () {
-    if (requirements.SKIP_AWS_TESTS) {
-      console.error('Skipping crypto callback tests');
-      return;
-    }
-    this.sinon = sinon.createSandbox();
+    sandbox = sinon.createSandbox();
   });
 
   beforeEach(function () {
-    if (requirements.SKIP_AWS_TESTS) {
-      this.currentTest.skipReason = `requirements.SKIP_AWS_TESTS=${requirements.SKIP_AWS_TESTS}`;
-      this.test.skip();
+    if (SKIP_AWS_TESTS) {
+      this.currentTest?.skip();
       return;
     }
-    this.sinon.restore();
-    this.client = new MongoClient('mongodb://localhost:27017/', {
-      useUnifiedTopology: true,
-      useNewUrlParser: true
-    });
 
-    return this.client.connect();
+    sandbox.restore();
+    client = this.configuration.newClient();
+
+    return client.connect();
   });
 
-  afterEach(function () {
-    if (requirements.SKIP_AWS_TESTS) {
-      return;
-    }
-    this.sinon.restore();
-    let p = Promise.resolve();
-    if (this.client) {
-      p = p.then(() => this.client.close()).then(() => (this.client = undefined));
-    }
-
-    return p;
-  });
-
-  after(function () {
-    this.sinon = undefined;
+  afterEach(async function () {
+    sandbox.restore();
+    await client?.close();
   });
 
   // TODO(NODE-3370): fix key formatting error "asn1_check_tlen:wrong tag"
@@ -88,10 +78,10 @@ describe('cryptoCallbacks', function () {
 
   it('should invoke crypto callbacks when doing encryption', function (done) {
     for (const name of hookNames) {
-      this.sinon.spy(cryptoCallbacks, name);
+      sandbox.spy(cryptoCallbacks, name);
     }
 
-    function assertCertainHooksCalled(expectedSet) {
+    function assertCertainHooksCalled(expectedSet?) {
       expectedSet = expectedSet || new Set([]);
       for (const name of hookNames) {
         const hook = cryptoCallbacks[name];
@@ -105,7 +95,7 @@ describe('cryptoCallbacks', function () {
       }
     }
 
-    const encryption = new ClientEncryption(this.client, {
+    const encryption = new ClientEncryption(client, {
       keyVaultNamespace: 'test.encryption',
       kmsProviders
     });
@@ -155,9 +145,9 @@ describe('cryptoCallbacks', function () {
     ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook'].forEach(hookName => {
       it(`should properly propagate an error when ${hookName} fails`, function (done) {
         const error = new Error('some random error text');
-        this.sinon.stub(cryptoCallbacks, hookName).returns(error);
+        sandbox.stub(cryptoCallbacks, hookName).returns(error);
 
-        const encryption = new ClientEncryption(this.client, {
+        const encryption = new ClientEncryption(client, {
           keyVaultNamespace: 'test.encryption',
           kmsProviders
         });
@@ -197,9 +187,9 @@ describe('cryptoCallbacks', function () {
     ['hmacSha256Hook', 'sha256Hook'].forEach(hookName => {
       it(`should error with a specific kms error when ${hookName} fails`, function () {
         const error = new Error('some random error text');
-        this.sinon.stub(cryptoCallbacks, hookName).returns(error);
+        sandbox.stub(cryptoCallbacks, hookName).returns(error);
 
-        const encryption = new ClientEncryption(this.client, {
+        const encryption = new ClientEncryption(client, {
           keyVaultNamespace: 'test.encryption',
           kmsProviders
         });
@@ -212,9 +202,9 @@ describe('cryptoCallbacks', function () {
 
     it('should error synchronously with error when randomHook fails', function (done) {
       const error = new Error('some random error text');
-      this.sinon.stub(cryptoCallbacks, 'randomHook').returns(error);
+      sandbox.stub(cryptoCallbacks, 'randomHook').returns(error);
 
-      const encryption = new ClientEncryption(this.client, {
+      const encryption = new ClientEncryption(client, {
         keyVaultNamespace: 'test.encryption',
         kmsProviders
       });

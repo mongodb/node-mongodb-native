@@ -2,7 +2,6 @@
 import { MongoCrypt } from 'mongodb-client-encryption';
 import { databaseNamespace, collectionNamespace, promiseOrCallback, maybeCallback } from './common';
 import { StateMachine } from './stateMachine';
-import * as BSON from 'bson';
 import {
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptCreateDataKeyError
@@ -10,6 +9,7 @@ import {
 import { loadCredentials } from './providers/index';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { promisify } from 'util';
+import { serialize, deserialize } from 'bson';
 
 /** @typedef {*} BSONValue - any serializable BSON value */
 /** @typedef {BSON.Long} Long A 64 bit integer, represented by the js-bson Long type.*/
@@ -103,7 +103,6 @@ export class ClientEncryption {
    */
   constructor(client, options) {
     this._client = client;
-    this._bson = BSON;
     this._proxyOptions = options.proxyOptions;
     this._tlsOptions = options.tlsOptions;
     this._kmsProviders = options.kmsProviders || {};
@@ -115,7 +114,7 @@ export class ClientEncryption {
     const mongoCryptOptions = { ...options, cryptoCallbacks };
 
     mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? this._bson.serialize(this._kmsProviders)
+      ? serialize(this._kmsProviders)
       : this._kmsProviders;
 
     this._onKmsProviderRefresh = options.onKmsProviderRefresh;
@@ -212,8 +211,6 @@ export class ClientEncryption {
       options = {};
     }
 
-    const bson = this._bson;
-
     const dataKey = Object.assign({ provider }, options.masterKey);
 
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
@@ -231,22 +228,21 @@ export class ClientEncryption {
           );
         }
 
-        return bson.serialize({ keyAltName });
+        return serialize({ keyAltName });
       });
     }
 
     let keyMaterial = undefined;
     if (options.keyMaterial) {
-      keyMaterial = bson.serialize({ keyMaterial: options.keyMaterial });
+      keyMaterial = serialize({ keyMaterial: options.keyMaterial });
     }
 
-    const dataKeyBson = bson.serialize(dataKey);
+    const dataKeyBson = serialize(dataKey);
     const context = this._mongoCrypt.makeDataKeyContext(dataKeyBson, {
       keyAltNames,
       keyMaterial
     });
     const stateMachine = new StateMachine({
-      bson,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
@@ -312,23 +308,20 @@ export class ClientEncryption {
    * }
    */
   async rewrapManyDataKey(filter, options) {
-    const bson = this._bson;
-
     let keyEncryptionKeyBson = undefined;
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
-      keyEncryptionKeyBson = bson.serialize(keyEncryptionKey);
+      keyEncryptionKeyBson = serialize(keyEncryptionKey);
     } else {
       // Always make sure `options` is an object below.
       options = {};
     }
-    const filterBson = bson.serialize(filter);
+    const filterBson = serialize(filter);
     const context = this._mongoCrypt.makeRewrapManyDataKeyContext(
       filterBson,
       keyEncryptionKeyBson
     );
     const stateMachine = new StateMachine({
-      bson,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
@@ -718,12 +711,10 @@ export class ClientEncryption {
    * }
    */
   decrypt(value, callback) {
-    const bson = this._bson;
-    const valueBuffer = bson.serialize({ v: value });
+    const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
     const stateMachine = new StateMachine({
-      bson,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
@@ -772,8 +763,7 @@ export class ClientEncryption {
    *
    */
   async _encrypt(value, expressionMode, options) {
-    const bson = this._bson;
-    const valueBuffer = bson.serialize({ v: value });
+    const valueBuffer = serialize({ v: value });
     const contextOptions = Object.assign({}, options, { expressionMode });
     if (options.keyId) {
       contextOptions.keyId = options.keyId.buffer;
@@ -790,15 +780,14 @@ export class ClientEncryption {
         );
       }
 
-      contextOptions.keyAltName = bson.serialize({ keyAltName });
+      contextOptions.keyAltName = serialize({ keyAltName });
     }
 
     if ('rangeOptions' in options) {
-      contextOptions.rangeOptions = bson.serialize(options.rangeOptions);
+      contextOptions.rangeOptions = serialize(options.rangeOptions);
     }
 
     const stateMachine = new StateMachine({
-      bson,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
@@ -807,4 +796,6 @@ export class ClientEncryption {
     const result = await stateMachine.executeAsync(this, context);
     return result.v;
   }
+
+
 }
