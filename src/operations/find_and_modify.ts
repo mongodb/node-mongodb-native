@@ -38,7 +38,7 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
 
 /** @public */
 export interface FindOneAndReplaceOptions extends CommandOperationOptions {
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
@@ -63,7 +63,7 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
 export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   /** Optional list of array filters referenced in filtered positional operators */
   arrayFilters?: Document[];
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;

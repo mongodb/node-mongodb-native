@@ -53,7 +53,7 @@ export class InsertOperation extends CommandCallbackOperation<Document> {
 
 /** @public */
 export interface InsertOneOptions extends CommandOperationOptions {
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** Force server to assign _id values instead of driver. */
   forceServerObjectId?: boolean;

@@ -21,7 +21,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   allowDiskUse?: boolean;
   /** The number of documents to return per batch. See [aggregation documentation](https://www.mongodb.com/docs/manual/reference/command/aggregate). */
   batchSize?: number;
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** Return the query as cursor, on 2.6 \> it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
   cursor?: Document;

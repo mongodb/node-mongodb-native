@@ -56,8 +56,7 @@ describe('Ignore Undefined', function () {
         const client = configuration.newClient(
           {},
           {
-            ignoreUndefined: true,
-            sslValidate: false
+            ignoreUndefined: true
           }
         );
 

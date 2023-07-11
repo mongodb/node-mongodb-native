@@ -25,7 +25,7 @@ const options: MongoClientOptions = {
   maxPoolSize: 1,
   family: 4,
   ssl: true,
-  sslValidate: false,
+  tlsAllowInvalidCertificates: false,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   checkServerIdentity(host, cert) {
     return undefined;
