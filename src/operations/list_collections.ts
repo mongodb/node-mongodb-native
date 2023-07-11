@@ -1,5 +1,6 @@
 import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion } from '../utils';
@@ -48,7 +49,11 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
   }
 
   override execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
-    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
+    return super.executeCommand(
+      server,
+      session,
+      this.generateCommand(maxWireVersion(server))
+    ) as TODO_NODE_3286;
   }
 
   executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {

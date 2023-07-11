@@ -54,22 +54,18 @@ export class GetMoreOperation extends AbstractOperation {
    */
   async execute(server: Server, _session: ClientSession | undefined): Promise<Document> {
     if (server !== this.server) {
-      return Promise.reject(
-        new MongoRuntimeError('Getmore must run on the same server operation began on')
-      );
+      throw new MongoRuntimeError('Getmore must run on the same server operation began on');
     }
 
     if (this.cursorId == null || this.cursorId.isZero()) {
-      return Promise.reject(new MongoRuntimeError('Unable to iterate cursor with no id'));
+      throw new MongoRuntimeError('Unable to iterate cursor with no id');
     }
 
     const collection = this.ns.collection;
     if (collection == null) {
       // Cursors should have adopted the namespace returned by MongoDB
       // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
-      return Promise.reject(
-        new MongoRuntimeError('A collection name must be determined before getMore')
-      );
+      throw new MongoRuntimeError('A collection name must be determined before getMore');
     }
 
     const getMoreCmd: GetMoreCommand = {

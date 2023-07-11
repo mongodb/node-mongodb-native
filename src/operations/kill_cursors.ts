@@ -1,5 +1,6 @@
 import type { Long } from '../bson';
 import { MongoRuntimeError } from '../error';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { MongoDBNamespace } from '../utils';
@@ -27,18 +28,14 @@ export class KillCursorsOperation extends AbstractOperation {
 
   async execute(server: Server, session: ClientSession | undefined): Promise<void> {
     if (server !== this.server) {
-      return Promise.reject(
-        new MongoRuntimeError('Killcursor must run on the same server operation began on')
-      );
+      throw new MongoRuntimeError('Killcursor must run on the same server operation began on');
     }
 
     const killCursors = this.ns.collection;
     if (killCursors == null) {
       // Cursors should have adopted the namespace returned by MongoDB
       // which should always defined a collection name (even a pseudo one, ex. db.aggregate())
-      return Promise.reject(
-        new MongoRuntimeError('A collection name must be determined before killCursors')
-      );
+      throw new MongoRuntimeError('A collection name must be determined before killCursors');
     }
 
     const killCursorsCommand: KillCursorsCommand = {
@@ -46,7 +43,7 @@ export class KillCursorsOperation extends AbstractOperation {
       cursors: [this.cursorId]
     };
 
-    return server.commandAsync(this.ns, killCursorsCommand, { session });
+    return server.commandAsync(this.ns, killCursorsCommand, { session }) as TODO_NODE_3286;
   }
 }
 

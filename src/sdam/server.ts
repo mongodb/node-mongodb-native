@@ -118,7 +118,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
-  commandAsync: (ns: MongoDBNamespace, cmd: Document, options: CommandOptions) => Promise<any>;
+  commandAsync: (ns: MongoDBNamespace, cmd: Document, options: CommandOptions) => Promise<Document>;
   [kMonitor]: Monitor | null;
 
   /** @event */
