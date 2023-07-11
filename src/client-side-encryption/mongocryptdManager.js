@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 
 /**
- * @ignore
+ * @internal
  * An internal class that handles spawning a mongocryptd.
  */
 export class MongocryptdManager {

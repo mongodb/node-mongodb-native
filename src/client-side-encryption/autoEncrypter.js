@@ -57,7 +57,7 @@ import { serialize, deserialize } from 'bson';
  */
 
 /**
- * @classdesc An internal class to be used by the driver for auto encryption
+ * @internal An internal class to be used by the driver for auto encryption
  * **NOTE**: Not meant to be instantiated directly, this is for internal use only.
  */
 export class AutoEncrypter {

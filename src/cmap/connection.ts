@@ -113,7 +113,7 @@ export interface ConnectionOptions
   id: number | '<monitor>';
   generation: number;
   hostAddress: HostAddress;
-  // Settings
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   serverApi?: ServerApi;
   monitorCommands: boolean;
