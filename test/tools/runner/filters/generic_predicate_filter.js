@@ -16,12 +16,10 @@
 
 class GenericPredicateFilter {
   filter(test) {
+    /** @type{ ((test?: Mocha.Test) => string | true) | undefined } */
     const predicate = test?.metadata?.requires?.predicate;
-    if (typeof predicate !== 'function') {
-      return false;
-    }
 
-    return predicate(test);
+    return predicate?.(test) ?? true;
   }
 }
 
