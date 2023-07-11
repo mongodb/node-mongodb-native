@@ -77,7 +77,7 @@ export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissin
 }
 
 type CredentialProvider = {
-  fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
+  fromNodeProviderChain(config: any): () => Promise<AWSCredentials>;
 };
 
 export function getAwsCredentialProvider():

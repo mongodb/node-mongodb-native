@@ -227,8 +227,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
      * - Shared credentials and config ini files
      * - The EC2/ECS Instance Metadata Service
      */
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { fromNodeProviderChain } = credentialProvider;
-    const provider = fromNodeProviderChain();
+    const provider = fromNodeProviderChain({
+      clientConfig: { region: process.env.AWS_REGION ?? 'us-east-1' }
+    });
     try {
       const creds = await provider();
       return makeMongoCredentialsFromAWSTemp({
