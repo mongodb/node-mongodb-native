@@ -416,7 +416,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const serverWireVersion = maxWireVersion(server);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
@@ -430,10 +430,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     }
 
     return super.executeCommand(server, session, command);
-  }
-
-  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
-    throw new Error('Method not implemented');
   }
 }
 

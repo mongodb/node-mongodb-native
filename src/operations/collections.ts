@@ -1,3 +1,4 @@
+import type { Document } from '../bson';
 import { Collection } from '../collection';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
@@ -19,10 +20,7 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
     this.db = db;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<Collection[]> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<Collection[]> {
     // Let's get the collection names
     const documents = await this.db
       .listCollections(
@@ -30,7 +28,7 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
         { ...this.options, nameOnly: true, readPreference: this.readPreference, session }
       )
       .toArray();
-    const collections = [];
+    const collections: Collection<Document>[] = [];
     for (const { name } of documents) {
       if (!name.includes('$')) {
         // Filter collections removing any illegal ones

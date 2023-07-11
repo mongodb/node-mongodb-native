@@ -2,7 +2,7 @@ import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion } from '../utils';
+import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -47,12 +47,8 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
     return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
-  }
-
-  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
-    throw new Error('Method not implemented');
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */

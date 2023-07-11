@@ -25,7 +25,7 @@ export class KillCursorsOperation extends AbstractOperation {
     this.server = server;
   }
 
-  execute(server: Server, session: ClientSession | undefined): Promise<void> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<void> {
     if (server !== this.server) {
       return Promise.reject(
         new MongoRuntimeError('Killcursor must run on the same server operation began on')

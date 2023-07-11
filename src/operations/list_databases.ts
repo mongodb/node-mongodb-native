@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
+import { maxWireVersion, MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -34,10 +34,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  override execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<ListDatabasesResult> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<ListDatabasesResult> {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
@@ -59,10 +56,6 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     }
 
     return super.executeCommand(server, session, cmd);
-  }
-
-  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
-    throw new Error('Method not implemented');
   }
 }
 

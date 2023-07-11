@@ -5,12 +5,7 @@ import { ReadConcern } from '../read_concern';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort } from '../sort';
-import {
-  type Callback,
-  decorateWithExplain,
-  type MongoDBNamespace,
-  normalizeHintField
-} from '../utils';
+import { decorateWithExplain, type MongoDBNamespace, normalizeHintField } from '../utils';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
@@ -102,7 +97,7 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     this.server = server;
 
     const options = this.options;
@@ -118,10 +113,6 @@ export class FindOperation extends CommandOperation<Document> {
       documentsReturnedIn: 'firstBatch',
       session
     });
-  }
-
-  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
-    throw new Error('Method not implemented');
   }
 }
 
