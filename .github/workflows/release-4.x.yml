@@ -12,6 +12,8 @@ name: release-4x
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v3

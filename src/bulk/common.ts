@@ -212,62 +212,6 @@ export class BulkWriteResult {
     return this.result.ok;
   }
 
-  /**
-   * The number of inserted documents
-   * @deprecated Use insertedCount instead.
-   */
-  get nInserted(): number {
-    return this.result.nInserted;
-  }
-
-  /**
-   * Number of upserted documents
-   * @deprecated User upsertedCount instead.
-   */
-  get nUpserted(): number {
-    return this.result.nUpserted;
-  }
-
-  /**
-   * Number of matched documents
-   * @deprecated Use matchedCount instead.
-   */
-  get nMatched(): number {
-    return this.result.nMatched;
-  }
-
-  /**
-   * Number of documents updated physically on disk
-   * @deprecated Use modifiedCount instead.
-   */
-  get nModified(): number {
-    return this.result.nModified;
-  }
-
-  /**
-   * Number of removed documents
-   * @deprecated Use deletedCount instead.
-   */
-  get nRemoved(): number {
-    return this.result.nRemoved;
-  }
-
-  /**
-   * Returns an array of all inserted ids
-   * @deprecated Use insertedIds instead.
-   */
-  getInsertedIds(): Document[] {
-    return this.result.insertedIds;
-  }
-
-  /**
-   * Returns an array of all upserted ids
-   * @deprecated Use upsertedIds instead.
-   */
-  getUpsertedIds(): Document[] {
-    return this.result.upserted;
-  }
-
   /** Returns the upserted id at the given index */
   getUpsertedIdAt(index: number): Document | undefined {
     return this.result.upserted[index];
@@ -864,11 +808,21 @@ export interface BulkOperationPrivate {
 
 /** @public */
 export interface BulkWriteOptions extends CommandOperationOptions {
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /**
+   * Allow driver to bypass schema validation.
+   * @defaultValue `false` - documents will be validated by default
+   **/
   bypassDocumentValidation?: boolean;
-  /** If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails. */
+  /**
+   * If true, when an insert fails, don't execute the remaining writes.
+   * If false, continue with remaining inserts when one fails.
+   * @defaultValue `true` - inserts are ordered by default
+   */
   ordered?: boolean;
-  /** Force server to assign _id values instead of driver. */
+  /**
+   * Force server to assign _id values instead of driver.
+   * @defaultValue `false` - the driver generates `_id` fields by default
+   **/
   forceServerObjectId?: boolean;
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;

@@ -6,7 +6,7 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {
@@ -14,7 +14,7 @@ export interface EvalOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EvalOperation extends CommandOperation<Document> {
+export class EvalOperation extends CommandCallbackOperation<Document> {
   override options: EvalOptions;
   code: Code;
   parameters?: Document | Document[];
@@ -65,7 +65,7 @@ export class EvalOperation extends CommandOperation<Document> {
     }
 
     // Execute the command
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommandCallback(server, session, cmd, (err, result) => {
       if (err) return callback(err);
       if (result && result.ok === 1) {
         return callback(undefined, result.retval);

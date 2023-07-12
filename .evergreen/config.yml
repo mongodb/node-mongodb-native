@@ -2584,7 +2584,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: run unit tests
   - name: run-lint-checks
     tags:
@@ -2592,7 +2592,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: run lint checks
   - name: check-types-typescript-next
     tags:
@@ -2600,7 +2600,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: check types
         vars:
           TS_VERSION: next
@@ -2610,7 +2610,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: compile driver
         vars:
           TS_VERSION: current
@@ -2620,7 +2620,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: check types
         vars:
           TS_VERSION: current
@@ -2630,7 +2630,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: check types
         vars:
           TS_VERSION: 4.1.6
@@ -2660,7 +2660,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2675,7 +2675,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2690,7 +2690,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2705,7 +2705,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2720,7 +2720,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2735,7 +2735,7 @@ tasks:
     commands:
       - func: install dependencies
         vars:
-          NODE_LTS_VERSION: 14
+          NODE_LTS_VERSION: 16
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -3500,59 +3500,6 @@ buildvariants:
     run_on: rhel90-dbx-perf-large
     tasks:
       - run-spec-benchmark-tests-node-18-server-6.0
-  - name: rhel80-large-fermium
-    display_name: rhel8 Node14
-    run_on: rhel80-large
-    expansions:
-      NODE_LTS_VERSION: 14
-      CLIENT_ENCRYPTION: true
-    tasks:
-      - test-latest-server
-      - test-latest-replica_set
-      - test-latest-sharded_cluster
-      - test-rapid-server
-      - test-rapid-replica_set
-      - test-rapid-sharded_cluster
-      - test-7.0-server
-      - test-7.0-replica_set
-      - test-7.0-sharded_cluster
-      - test-6.0-server
-      - test-6.0-replica_set
-      - test-6.0-sharded_cluster
-      - test-5.0-server
-      - test-5.0-replica_set
-      - test-5.0-sharded_cluster
-      - test-4.4-server
-      - test-4.4-replica_set
-      - test-4.4-sharded_cluster
-      - test-4.2-server
-      - test-4.2-replica_set
-      - test-4.2-sharded_cluster
-      - test-4.0-server
-      - test-4.0-replica_set
-      - test-4.0-sharded_cluster
-      - test-3.6-server
-      - test-3.6-replica_set
-      - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-auth-oidc
-      - test-socks5
-      - test-socks5-csfle
-      - test-socks5-tls
-      - test-zstd-compression
-      - test-snappy-compression
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
@@ -3883,13 +3830,13 @@ buildvariants:
       - test-tls-support-5.0
       - test-tls-support-4.4
       - test-tls-support-4.2
-  - name: rhel8-node14-test-csfle-mongocryptd
-    display_name: rhel 8 Node14 test mongocryptd
+  - name: rhel8-node16-test-csfle-mongocryptd
+    display_name: rhel 8 Node16 test mongocryptd
     run_on: rhel80-large
     expansions:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
-      NODE_LTS_VERSION: 14
+      NODE_LTS_VERSION: 16
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
@@ -3904,7 +3851,7 @@ buildvariants:
     expansions:
       CLIENT_ENCRYPTION: true
       RUN_WITH_MONGOCRYPTD: true
-      NODE_LTS_VERSION: 14
+      NODE_LTS_VERSION: 16
     tasks:
       - test-latest-csfle-mongocryptd
       - test-rapid-csfle-mongocryptd
@@ -3952,7 +3899,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu1804-large
     expansions:
-      NODE_LTS_VERSION: 14
+      NODE_LTS_VERSION: 16
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
@@ -4044,7 +3991,7 @@ buildvariants:
     display_name: Serverless Test
     run_on: rhel80-large
     expansions:
-      NODE_LTS_VERSION: 14
+      NODE_LTS_VERSION: 16
     tasks:
       - serverless_task_group
   - name: rhel8-test-gcp-kms

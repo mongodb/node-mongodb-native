@@ -108,12 +108,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   tls?: boolean;
   /** A boolean to enable or disables TLS/SSL for the connection. (The ssl option is equivalent to the tls option.) */
   ssl?: boolean;
-  /**
-   * Specifies the location of a local TLS Certificate
-   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
-   */
-  tlsCertificateFile?: string;
-  /** Specifies the location of a local .pem file that contains either the client's TLS/SSL certificate and key or only the client's TLS/SSL key when tlsCertificateFile is used to provide the certificate. */
+  /** Specifies the location of a local .pem file that contains either the client's TLS/SSL certificate and key. */
   tlsCertificateKeyFile?: string;
   /** Specifies the password to de-crypt the tlsCertificateKeyFile. */
   tlsCertificateKeyFilePassword?: string;
@@ -211,36 +206,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * @see https://www.mongodb.com/docs/manual/reference/write-concern/
    */
   writeConcern?: WriteConcern | WriteConcernSettings;
-  /**
-   * Validate mongod server certificate against Certificate Authority
-   * @deprecated Will be removed in the next major version. Please use tlsAllowInvalidCertificates instead.
-   */
-  sslValidate?: boolean;
-  /**
-   * SSL Certificate file path.
-   * @deprecated Will be removed in the next major version. Please use tlsCAFile instead.
-   */
-  sslCA?: string;
-  /**
-   * SSL Certificate file path.
-   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
-   */
-  sslCert?: string;
-  /**
-   * SSL Key file file path.
-   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
-   */
-  sslKey?: string;
-  /**
-   * SSL Certificate pass phrase.
-   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFilePassword instead.
-   */
-  sslPass?: string;
-  /**
-   * SSL Certificate revocation list file path.
-   * @deprecated Will be removed in the next major version. Please use tlsCertificateKeyFile instead.
-   */
-  sslCRL?: string;
   /** TCP Connection no delay */
   noDelay?: boolean;
   /** @deprecated TCP Connection keep alive enabled. Will not be able to turn off in the future. */
@@ -805,16 +770,15 @@ export interface MongoOptions
    *
    * ### Additional options:
    *
-   * | nodejs native option  | driver spec compliant option name             | legacy option name | driver option type |
-   * |:----------------------|:----------------------------------------------|:-------------------|:-------------------|
-   * | `ca`                  | `tlsCAFile`                                   | `sslCA`            | `string`           |
-   * | `crl`                 | N/A                                           | `sslCRL`           | `string`           |
-   * | `cert`                | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`           |
-   * | `key`                 | `tlsCertificateKeyFile`                       | `sslKey`           | `string`           |
-   * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`           |
-   * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `sslValidate`      | `boolean`          |
-   * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | N/A                | `boolean`          |
-   * | see note below        | `tlsInsecure`                                 | N/A                | `boolean`          |
+   * | nodejs native option  | driver spec compliant option name             | driver option type |
+   * |:----------------------|:----------------------------------------------|:-------------------|
+   * | `ca`                  | `tlsCAFile`                                   | `string`           |
+   * | `crl`                 | N/A                                           | `string`           |
+   * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
+   * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
+   * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
+   * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | `boolean`          |
+   * | see note below        | `tlsInsecure`                                 | `boolean`          |
    *
    * If `tlsInsecure` is set to `true`, then it will set the node native options `checkServerIdentity`
    * to a no-op and `rejectUnauthorized` to `false`.

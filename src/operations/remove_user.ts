@@ -2,14 +2,14 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback } from '../utils';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
 export type RemoveUserOptions = CommandOperationOptions;
 
 /** @internal */
-export class RemoveUserOperation extends CommandOperation<boolean> {
+export class RemoveUserOperation extends CommandCallbackOperation<boolean> {
   override options: RemoveUserOptions;
   username: string;
 
@@ -24,7 +24,7 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     session: ClientSession | undefined,
     callback: Callback<boolean>
   ): void {
-    super.executeCommand(server, session, { dropUser: this.username }, err => {
+    super.executeCommandCallback(server, session, { dropUser: this.username }, err => {
       callback(err, err ? false : true);
     });
   }

@@ -3,7 +3,7 @@ import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, MongoDBNamespace } from '../utils';
-import { CommandOperation, type OperationParent } from './command';
+import { CommandCallbackOperation, type OperationParent } from './command';
 
 /** @public */
 export type RunCommandOptions = {
@@ -45,7 +45,7 @@ export type RunCommandOptions = {
 } & BSONSerializeOptions;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends CommandOperation<T> {
+export class RunCommandOperation<T = Document> extends CommandCallbackOperation<T> {
   override options: RunCommandOptions;
   command: Document;
 
@@ -61,7 +61,7 @@ export class RunCommandOperation<T = Document> extends CommandOperation<T> {
     callback: Callback<T>
   ): void {
     const command = this.command;
-    this.executeCommand(server, session, command, callback);
+    this.executeCommandCallback(server, session, command, callback);
   }
 }
 

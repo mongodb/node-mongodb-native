@@ -7,7 +7,7 @@ import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
 import { type Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
-import { CommandOperation, type CommandOperationOptions } from './command';
+import { CommandCallbackOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -38,7 +38,7 @@ export interface FindOneAndDeleteOptions extends CommandOperationOptions {
 
 /** @public */
 export interface FindOneAndReplaceOptions extends CommandOperationOptions {
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
@@ -63,7 +63,7 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
 export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   /** Optional list of array filters referenced in filtered positional operators */
   arrayFilters?: Document[];
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** An optional hint for query optimization. See the {@link https://www.mongodb.com/docs/manual/reference/command/update/#update-command-hint|update command} reference for more information.*/
   hint?: Document;
@@ -122,7 +122,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 }
 
 /** @internal */
-class FindAndModifyOperation extends CommandOperation<Document> {
+class FindAndModifyOperation extends CommandCallbackOperation<Document> {
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;
@@ -220,7 +220,7 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     }
 
     // Execute the command
-    super.executeCommand(server, session, cmd, (err, result) => {
+    super.executeCommandCallback(server, session, cmd, (err, result) => {
       if (err) return callback(err);
       return callback(undefined, options.includeResultMetadata ? result : result.value ?? null);
     });

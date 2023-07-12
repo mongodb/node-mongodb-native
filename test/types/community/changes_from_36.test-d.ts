@@ -25,16 +25,6 @@ expectNotType<boolean>(options.readPreference);
 expectNotType<{}>(options.pkFactory);
 // .checkServerIdentity cannot be `true`
 expectNotType<true>(options.checkServerIdentity);
-// .sslCA cannot be string[]
-expectNotType<string[]>(options.sslCA);
-// .sslCRL cannot be string[]
-expectNotType<string[]>(options.sslCRL);
-// .sslCert cannot be a Buffer
-expectNotType<Buffer>(options.sslCert);
-// .sslKey cannot be a Buffer
-expectNotType<Buffer>(options.sslKey);
-// .sslPass cannot be a Buffer
-expectNotType<Buffer>(options.sslPass);
 
 // Legacy option kept
 expectType<PropExists<MongoClientOptions, 'w'>>(true);
@@ -60,7 +50,6 @@ expectType<ReadPreferenceMode | ReadPreference | undefined>(options.readPreferen
 expectType<boolean | undefined>(options.promoteValues);
 expectType<number | undefined>(options.family);
 expectType<boolean | undefined>(options.ssl);
-expectType<boolean | undefined>(options.sslValidate);
 expectAssignable<((host: string, cert: PeerCertificate) => Error | undefined) | undefined>(
   options.checkServerIdentity
 );

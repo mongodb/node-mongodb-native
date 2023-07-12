@@ -4,7 +4,11 @@ import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
-import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
+import {
+  type CollationOptions,
+  CommandCallbackOperation,
+  type CommandOperationOptions
+} from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
@@ -17,7 +21,7 @@ export interface AggregateOptions extends CommandOperationOptions {
   allowDiskUse?: boolean;
   /** The number of documents to return per batch. See [aggregation documentation](https://www.mongodb.com/docs/manual/reference/command/aggregate). */
   batchSize?: number;
-  /** Allow driver to bypass schema validation in MongoDB 3.2 or higher. */
+  /** Allow driver to bypass schema validation. */
   bypassDocumentValidation?: boolean;
   /** Return the query as cursor, on 2.6 \> it returns as a real cursor on pre 2.6 it returns as an emulated cursor. */
   cursor?: Document;
@@ -36,7 +40,7 @@ export interface AggregateOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AggregateOperation<T = Document> extends CommandOperation<T> {
+export class AggregateOperation<T = Document> extends CommandCallbackOperation<T> {
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
@@ -133,7 +137,7 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       command.cursor.batchSize = options.batchSize;
     }
 
-    super.executeCommand(server, session, command, callback);
+    super.executeCommandCallback(server, session, command, callback);
   }
 }
 

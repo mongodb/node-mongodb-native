@@ -1,0 +1,8 @@
+{
+  "nested": {
+    "$binary": {
+        "base64": "AmFhYWFhYWFhYWFhYWFhYWEDW89+etsVGIufAfsiEwR62ce6+lry79sJJBUyJ6hH89wBkhpRkzFLz26Nu6jXQRe8ESYAF5cAa5wg9rsq95IBHuaIaLEQLW2jLjGo1fp69jg=",
+        "subType": "06"
+    }
+  }
+}
