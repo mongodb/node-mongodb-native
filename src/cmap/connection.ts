@@ -122,10 +122,6 @@ export interface ConnectionOptions
   credentials?: MongoCredentials;
   connectTimeoutMS?: number;
   tls: boolean;
-  /** @deprecated - Will not be able to turn off in the future. */
-  keepAlive?: boolean;
-  /** @deprecated - Will not be configurable in the future. */
-  keepAliveInitialDelay?: number;
   noDelay?: boolean;
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;

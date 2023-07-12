@@ -331,15 +331,9 @@ const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
 
 function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stream>) {
   const useTLS = options.tls ?? false;
-  const keepAlive = options.keepAlive ?? true;
-  const socketTimeoutMS = options.socketTimeoutMS ?? Reflect.get(options, 'socketTimeout') ?? 0;
   const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
   const rejectUnauthorized = options.rejectUnauthorized ?? true;
-  const keepAliveInitialDelay =
-    ((options.keepAliveInitialDelay ?? 120000) > socketTimeoutMS
-      ? Math.round(socketTimeoutMS / 2)
-      : options.keepAliveInitialDelay) ?? 120000;
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
@@ -377,7 +371,7 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
     socket = net.createConnection(parseConnectOptions(options));
   }
 
-  socket.setKeepAlive(keepAlive, keepAliveInitialDelay);
+  socket.setKeepAlive(true, 300000);
   socket.setTimeout(connectTimeoutMS);
   socket.setNoDelay(noDelay);
 
