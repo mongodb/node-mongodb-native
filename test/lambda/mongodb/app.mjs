@@ -18,8 +18,6 @@ await mongoClient.connect();
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  */
 export const lambdaHandler = async () => {
-  console.log('SDK VERSION', version.version);
-  console.log('AWS_REGION', process.env.AWS_REGION);
   const db = mongoClient.db('lambdaTest');
   const collection = db.collection('test');
   const { insertedId } = await collection.insertOne({ n: 1 });
@@ -27,6 +25,6 @@ export const lambdaHandler = async () => {
 
   return {
     statusCode: 200,
-    body: ''
+    body: JSON.stringify({ sdkVersion: version.version, awsRegion: process.env.AWS_REGION })
   };
 };
