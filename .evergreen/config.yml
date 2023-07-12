@@ -3470,9 +3470,6 @@ task_groups:
             MONGODB_VERSION: '7.0'
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
-      - command: expansions.update
-        params:
-          file: src/atlas-expansion.yml
     teardown_group:
       - command: subprocess.exec
         params:
@@ -3481,6 +3478,13 @@ task_groups:
           add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+    setup_task:
+      - command: expansions.update
+        params:
+          file: src/expansion.yml
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
