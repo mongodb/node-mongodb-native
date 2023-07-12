@@ -64,7 +64,7 @@ describe('Index Management Prose Tests', function () {
 
     beforeEach(function () {
       if (lt(process.version, '18.0.0')) {
-        this.currentTest!.skipReason = 'Test requires Node18+';
+        this.currentTest.skipReason = 'Test requires Node18+';
         this.skip();
       }
     });
