@@ -8,10 +8,10 @@ commands:
 	unlink: unlinks the node bindings from the driver
 
 required environment variables:
-	NODE_BINDINGS - a path, relative or absolute, to the directory that contains the Node libmongocrypt bindings"
+	FLE_BINDINGS_PATH - a path, relative or absolute, to the directory that contains the Node libmongocrypt bindings"
 
 build_libmongocrypt() {
-	cd $NODE_BINDINGS
+	cd $FLE_BINDINGS_PATH
 	# clean out any stale builds
 	git clean -fdx
 	bash etc/build-static.sh
@@ -19,21 +19,21 @@ build_libmongocrypt() {
 }
 
 build_node_bindings() {
-	cd $NODE_BINDINGS
+	cd $FLE_BINDINGS_PATH
 	npm run rebuild
 	cd -
 }
 
 link_bindings() {
-	npm link $NODE_BINDINGS
+	npm link $FLE_BINDINGS_PATH
 }
 
 unlink_bindings() {
-	npm unlink $NODE_BINDINGS
+	npm unlink $FLE_BINDINGS_PATH
 }
 
-if [[ "$NODE_BINDINGS" == "" ]]; then
-	echo "NODE_BINDINGS path must be set."
+if [[ "$FLE_BINDINGS_PATH" == "" ]]; then
+	echo "FLE_BINDINGS_PATH path must be set."
 	exit 1
 fi
 
