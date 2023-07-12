@@ -1,9 +1,8 @@
 import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
-import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion } from '../utils';
+import { maxWireVersion } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -18,7 +17,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandOperation<string[]> {
+export class ListCollectionsOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -48,16 +47,8 @@ export class ListCollectionsOperation extends CommandOperation<string[]> {
     }
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
-    return super.executeCommand(
-      server,
-      session,
-      this.generateCommand(maxWireVersion(server))
-    ) as TODO_NODE_3286;
-  }
-
-  executeCallback(_server: Server, _session: ClientSession | undefined, _callback: Callback): void {
-    throw new Error('Method not implemented');
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */

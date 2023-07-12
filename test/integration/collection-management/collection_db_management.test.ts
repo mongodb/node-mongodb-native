@@ -1,17 +1,13 @@
 import { expect } from 'chai';
 
 import { Collection, type Db, type MongoClient } from '../../mongodb';
-import { setupDatabase } from '../shared';
 
 describe('Collection Management and Db Management', function () {
   let client: MongoClient;
   let db: Db;
-  before(function () {
-    return setupDatabase(this.configuration);
-  });
 
   beforeEach(function () {
-    client = this.configuration.newClient({}, { maxPoolSize: 5 });
+    client = this.configuration.newClient();
     db = client.db();
   });
 

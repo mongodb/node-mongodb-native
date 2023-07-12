@@ -1,6 +1,5 @@
 import type { Long } from '../bson';
 import { MongoRuntimeError } from '../error';
-import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { MongoDBNamespace } from '../utils';
@@ -42,8 +41,11 @@ export class KillCursorsOperation extends AbstractOperation {
       killCursors,
       cursors: [this.cursorId]
     };
-
-    return server.commandAsync(this.ns, killCursorsCommand, { session }) as TODO_NODE_3286;
+    try {
+      await server.commandAsync(this.ns, killCursorsCommand, { session });
+    } catch {
+      // The driver should never emit errors from killCursors, this is spec-ed behavior
+    }
   }
 }
 

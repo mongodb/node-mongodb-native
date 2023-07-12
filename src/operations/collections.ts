@@ -1,4 +1,3 @@
-import type { Document } from '../bson';
 import { Collection } from '../collection';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
@@ -28,7 +27,7 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
         { ...this.options, nameOnly: true, readPreference: this.readPreference, session }
       )
       .toArray();
-    const collections: Collection<Document>[] = [];
+    const collections: Collection[] = [];
     for (const { name } of documents) {
       if (!name.includes('$')) {
         // Filter collections removing any illegal ones

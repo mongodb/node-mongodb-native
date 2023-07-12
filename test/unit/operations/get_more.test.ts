@@ -87,10 +87,9 @@ describe('GetMoreOperation', function () {
         const session = sinon.createStubInstance(ClientSession);
         const opts = { ...options, session };
         const operation = new GetMoreOperation(namespace, cursorId, server1, opts);
-        await operation.execute(server2, session).catch(error => {
-          expect(error).to.be.instanceOf(MongoRuntimeError);
-          expect(error.message).to.equal('Getmore must run on the same server operation began on');
-        });
+        const error = await operation.execute(server2, session).catch(error => error);
+        expect(error).to.be.instanceOf(MongoRuntimeError);
+        expect(error.message).to.equal('Getmore must run on the same server operation began on');
       });
     });
 

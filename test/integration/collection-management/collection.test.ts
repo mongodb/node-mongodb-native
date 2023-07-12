@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type Collection, type Db, isHello, type MongoClient } from '../../mongodb';
+import { Collection, type Db, isHello, type MongoClient } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -26,38 +26,16 @@ describe('Collection', function () {
       await client.close();
     });
 
-    it('should correctly execute basic collection methods', async function () {
-      const collection = await db.createCollection('test_collection_methods');
-      // Verify that all the result are correct coming back (should contain the value ok)
-      expect(collection.collectionName).to.equal('test_collection_methods');
-      // Let's check that the collection was created correctly
-      const documents = await db.listCollections().toArray();
-      expect(documents).to.be.an('array');
-      expect(documents).to.have.length(1);
-      const nameArray = documents.map(doc => doc.name);
-      expect(nameArray).to.include('test_collection_methods');
-      // Rename the collection and check that it's gone
-      const renameCollection = await db.renameCollection(
-        'test_collection_methods',
-        'test_collection_methods2'
-      );
-      expect(renameCollection.collectionName).to.equal('test_collection_methods2');
-      // Drop the collection and check that it's gone
-      const drop = await db.dropCollection('test_collection_methods2');
-      expect(drop).to.be.true;
-    });
-
-    it('should correctly access collection names', async function () {
+    it('should access collection names from db.collections() after creating two collections', async function () {
       // Create two collections
-      const spiderman_collection = await db.createCollection('test.spiderman');
-      const mario_collection = await db.createCollection('test.mario');
-      // Insert test documents (creates collections)
-      await spiderman_collection.insertOne({ foo: 5 }, configuration.writeConcernMax());
-      await mario_collection.insertOne({ bar: 0 }, configuration.writeConcernMax());
+      await db.createCollection('test.spiderman');
+      await db.createCollection('test.mario');
       const collections = await db.collections();
       const nameArray = collections.map(col => col.collectionName);
       expect(nameArray).to.include('test.spiderman');
       expect(nameArray).to.include('test.mario');
+      expect(collections[0]).to.be.instanceOf(Collection);
+      expect(collections[1]).to.be.instanceOf(Collection);
     });
 
     it('should correctly retrieve listCollections', function (done) {
@@ -352,7 +330,7 @@ describe('Collection', function () {
       });
     });
 
-    it('should correctly handle namespace when using collections method', async function () {
+    it('should access collectionName and collection namespace from emptyDb.collections() after creating a collection', async function () {
       const emptyDb = client.db('listCollectionsDb2');
       await emptyDb.createCollection('test.test');
       const collections = await emptyDb.collections();
