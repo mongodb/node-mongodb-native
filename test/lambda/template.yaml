@@ -22,6 +22,7 @@ Resources:
       Environment:
         Variables:
           MONGODB_URI: !Ref MongoDbUri
+          AWS_REGION: 'eu-west-1'
       Architectures:
       - x86_64
       Events:
