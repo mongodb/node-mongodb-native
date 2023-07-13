@@ -3,7 +3,7 @@ import type { Db } from '../db';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { maxWireVersion, MongoDBNamespace } from '../utils';
+import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -60,6 +60,14 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     }
 
     return super.executeCommand(server, session, cmd) as TODO_NODE_3286;
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<ListDatabasesResult>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

@@ -15,12 +15,7 @@ import {
 } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
-import {
-  AbstractCallbackOperation,
-  AbstractOperation,
-  Aspect,
-  type OperationOptions
-} from './operation';
+import { AbstractCallbackOperation, Aspect, type OperationOptions } from './operation';
 
 /** @public */
 export interface CollationOptions {
@@ -73,7 +68,7 @@ export interface OperationParent {
 }
 
 /** @internal */
-export abstract class CommandOperation<T> extends AbstractOperation<T> {
+export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -162,43 +157,9 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
   }
 }
 /** @internal */
-export abstract class CommandCallbackOperation<T = any> extends AbstractCallbackOperation<T> {
-  override options: CommandOperationOptions;
-  readConcern?: ReadConcern;
-  writeConcern?: WriteConcern;
-  explain?: Explain;
-
+export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
-    super(options);
-    this.options = options ?? {};
-
-    // NOTE: this was explicitly added for the add/remove user operations, it's likely
-    //       something we'd want to reconsider. Perhaps those commands can use `Admin`
-    //       as a parent?
-    const dbNameOverride = options?.dbName || options?.authdb;
-    if (dbNameOverride) {
-      this.ns = new MongoDBNamespace(dbNameOverride, '$cmd');
-    } else {
-      this.ns = parent
-        ? parent.s.namespace.withCollection('$cmd')
-        : new MongoDBNamespace('admin', '$cmd');
-    }
-
-    this.readConcern = ReadConcern.fromOptions(options);
-    this.writeConcern = WriteConcern.fromOptions(options);
-
-    if (this.hasAspect(Aspect.EXPLAINABLE)) {
-      this.explain = Explain.fromOptions(options);
-    } else if (options?.explain != null) {
-      throw new MongoInvalidArgumentError(`Option "explain" is not supported on this command`);
-    }
-  }
-
-  override get canRetryWrite(): boolean {
-    if (this.hasAspect(Aspect.EXPLAINABLE)) {
-      return this.explain == null;
-    }
-    return true;
+    super(parent, options);
   }
 
   executeCommandCallback(
@@ -207,47 +168,9 @@ export abstract class CommandCallbackOperation<T = any> extends AbstractCallback
     cmd: Document,
     callback: Callback
   ): void {
-    // TODO: consider making this a non-enumerable property
-    this.server = server;
-
-    const options = {
-      ...this.options,
-      ...this.bsonOptions,
-      readPreference: this.readPreference,
-      session
-    };
-
-    const serverWireVersion = maxWireVersion(server);
-    const inTransaction = this.session && this.session.inTransaction();
-
-    if (this.readConcern && commandSupportsReadConcern(cmd) && !inTransaction) {
-      Object.assign(cmd, { readConcern: this.readConcern });
-    }
-
-    if (this.trySecondaryWrite && serverWireVersion < MIN_SECONDARY_WRITE_WIRE_VERSION) {
-      options.omitReadPreference = true;
-    }
-
-    if (this.writeConcern && this.hasAspect(Aspect.WRITE_OPERATION) && !inTransaction) {
-      WriteConcern.apply(cmd, this.writeConcern);
-    }
-
-    if (
-      options.collation &&
-      typeof options.collation === 'object' &&
-      !this.hasAspect(Aspect.SKIP_COLLATION)
-    ) {
-      Object.assign(cmd, { collation: options.collation });
-    }
-
-    if (typeof options.maxTimeMS === 'number') {
-      cmd.maxTimeMS = options.maxTimeMS;
-    }
-
-    if (this.hasAspect(Aspect.EXPLAINABLE) && this.explain) {
-      cmd = decorateWithExplain(cmd, this.explain);
-    }
-
-    return server.command(this.ns, cmd, options, callback);
+    super.executeCommand(server, session, cmd).then(
+      res => callback(undefined, res),
+      err => callback(err, undefined)
+    );
   }
 }
