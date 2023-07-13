@@ -26,7 +26,7 @@ describe('Collection', function () {
       await client.close();
     });
 
-    it('should access collection names from db.collections() after creating two collections', async function () {
+    it('should be able to access collections by name from db.collections() array after creating two collections', async function () {
       // Create two collections
       await db.createCollection('test.spiderman');
       await db.createCollection('test.mario');
@@ -330,7 +330,7 @@ describe('Collection', function () {
       });
     });
 
-    it('should access collectionName and collection namespace from emptyDb.collections() after creating a collection', async function () {
+    it('should create and access collection given the name and namespace as specified, including dots', async function () {
       const emptyDb = client.db('listCollectionsDb2');
       await emptyDb.createCollection('test.test');
       const collections = await emptyDb.collections();
