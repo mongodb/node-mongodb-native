@@ -66,50 +66,9 @@ popd # ../csfle-deps-tmp
 # copy mongodb-client-encryption into driver's node_modules
 npm link $BINDINGS_DIR
 
-node --eval "console.log(require('mongodb-client-encryption').MongoCrypt)"
-
 export MONGODB_URI=${MONGODB_URI}
 export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
 export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
 export TEST_CSFLE=true
 
-# set +o errexit # We want to run both test suites even if the first fails
 npm run check:csfle
-# DRIVER_CSFLE_TEST_RESULT=$?
-# set -o errexit
-
-# # Great! our drivers tests ran
-# # there are tests inside the bindings repo that we also want to check
-
-# pushd ../csfle-deps-tmp/libmongocrypt/bindings/node
-
-# # a mongocryptd was certainly started by the driver tests,
-# # let us let the bindings tests start their own
-# killall mongocryptd || true
-
-# # only prod deps were installed earlier, install devDependencies here (except for mongodb!)
-# npm install --ignore-scripts
-
-# # copy mongodb into CSFLE's node_modules
-# rm -rf node_modules/mongodb
-# cp -R "$ABS_PATH_TO_PATCH" node_modules/mongodb
-# pushd node_modules/mongodb
-# # lets be sure we have compiled TS since driver tests don't need to compile
-# npm run build:ts
-# popd # node_modules/mongodb
-
-# # this variable needs to be empty
-# export MONGODB_NODE_SKIP_LIVE_TESTS=""
-# # all of the below must be defined (as well as AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY)
-# export AWS_REGION="us-east-1"
-# export AWS_CMK_ID="arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
-
-# npm test -- --colors
-
-# popd # ../csfle-deps-tmp/libmongocrypt/bindings/node
-
-# # Exit the script in a way that will show evergreen a pass or fail
-# if [ $DRIVER_CSFLE_TEST_RESULT -ne 0 ]; then
-#   echo "Driver tests failed, look above for results"
-#   exit 1
-# fi
