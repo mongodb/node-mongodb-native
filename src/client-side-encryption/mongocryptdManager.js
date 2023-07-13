@@ -5,6 +5,8 @@ import { spawn } from 'child_process'
  * An internal class that handles spawning a mongocryptd.
  */
 export class MongocryptdManager {
+  static DEFAULT_MONGOCRYPTD_URI = 'mongodb://localhost:27020';
+
   /**
    * @ignore
    * Creates a new Mongocryptd Manager
@@ -58,5 +60,3 @@ export class MongocryptdManager {
     process.nextTick(callback);
   }
 }
-
-MongocryptdManager.DEFAULT_MONGOCRYPTD_URI = 'mongodb://localhost:27020';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { expect } from 'chai';
 
 import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
@@ -11,8 +12,7 @@ import {
   type DbOptions,
   type Document,
   getMongoDBClientEncryption,
-  type MongoClient,
-  MongoMissingDependencyError
+  type MongoClient
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap } from './entities';

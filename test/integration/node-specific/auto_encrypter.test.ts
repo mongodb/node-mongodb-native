@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';

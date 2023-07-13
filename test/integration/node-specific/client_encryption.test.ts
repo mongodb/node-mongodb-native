@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
@@ -219,6 +220,7 @@ describe('ClientEncryption integration tests', function () {
       const rewrapManyDataKeyResult = await newClientEncryption().rewrapManyDataKey({});
       expect(rewrapManyDataKeyResult.bulkWriteResult.result.nModified).to.equal(1);
       const decrypted = await newClientEncryption().decrypt(encrypted);
+      expect(decrypted).to.equal('hello');
     });
 
     it('should not perform updates if no keys match', async function () {

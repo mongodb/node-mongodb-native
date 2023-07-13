@@ -1,12 +1,10 @@
 import { expect } from 'chai';
-import { ClientEncryption } from 'mongodb-client-encryption';
 import ConnectionString from 'mongodb-connection-string-url';
 import * as qs from 'querystring';
 import * as url from 'url';
 
 import {
   type AuthMechanism,
-  getMongoDBClientEncryption,
   HostAddress,
   MongoClient,
   TopologyType,
