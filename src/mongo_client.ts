@@ -208,13 +208,6 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   writeConcern?: WriteConcern | WriteConcernSettings;
   /** TCP Connection no delay */
   noDelay?: boolean;
-  /** @deprecated TCP Connection keep alive enabled. Will not be able to turn off in the future. */
-  keepAlive?: boolean;
-  /**
-   * @deprecated The number of milliseconds to wait before initiating keepAlive on the TCP socket.
-   *             Will not be configurable in the future.
-   */
-  keepAliveInitialDelay?: number;
   /** Force server to assign `_id` values instead of driver */
   forceServerObjectId?: boolean;
   /** A primary key factory function for generation of custom `_id` keys */
@@ -707,8 +700,6 @@ export interface MongoOptions
         | 'forceServerObjectId'
         | 'minHeartbeatFrequencyMS'
         | 'heartbeatFrequencyMS'
-        | 'keepAlive'
-        | 'keepAliveInitialDelay'
         | 'localThresholdMS'
         | 'maxConnecting'
         | 'maxIdleTimeMS'
