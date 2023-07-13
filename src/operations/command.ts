@@ -156,6 +156,7 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     return server.commandAsync(this.ns, cmd, options);
   }
 }
+
 /** @internal */
 export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
   constructor(parent?: OperationParent, options?: CommandOperationOptions) {
