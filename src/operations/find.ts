@@ -72,13 +72,6 @@ export interface FindOptions<TSchema extends Document = Document>
 
 /** @internal */
 export class FindOperation extends CommandOperation<Document> {
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
-  }
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -125,6 +118,14 @@ export class FindOperation extends CommandOperation<Document> {
       documentsReturnedIn: 'firstBatch',
       session
     });
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 
