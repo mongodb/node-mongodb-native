@@ -2,14 +2,12 @@
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
+import { dirname } from 'path';
 import { promisify } from 'util';
 
 import { type AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
 import { type MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
-
-const sharedLibrarySuffix =
-  process.platform === 'win32' ? 'dll' : process.platform === 'darwin' ? 'dylib' : 'so';
 
 const cryptSharedPredicate = () => {
   if (typeof getEncryptExtraOptions().cryptSharedLibPath !== 'string') {
@@ -56,13 +54,10 @@ describe('crypt_shared library', function () {
       }
     },
     async function () {
-      const cryptSharedLibPath = `${
-        getEncryptExtraOptions().cryptSharedLibPath
-      }/${`mongo_crypt_v1.${sharedLibrarySuffix}`}`;
       const env = {
         MONGODB_URI: this.configuration.url(),
         EXTRA_OPTIONS: JSON.stringify({
-          cryptSharedLibPath
+          cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath!
         })
       };
       const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;
@@ -85,12 +80,12 @@ describe('crypt_shared library', function () {
       }
     },
     async function () {
+      const cryptDir = dirname(getEncryptExtraOptions().cryptSharedLibPath!);
       const env = {
         MONGODB_URI: this.configuration.url(),
         EXTRA_OPTIONS: JSON.stringify({
           // This test only runs when cryptSharedLibPath is undefined.
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          cryptSharedLibSearchPaths: [getEncryptExtraOptions().cryptSharedLibPath!]
+          cryptSharedLibSearchPaths: [cryptDir]
         })
       };
       const file = `${__dirname}/../../tools/fixtures/shared_library_test.js`;

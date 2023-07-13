@@ -451,15 +451,11 @@ describe('ClientEncryption integration tests', function () {
     const AWS_REGION = process.env.AWS_REGION;
     const AWS_CMK_ID = process.env.AWS_CMK_ID;
 
-    // TODO - why are we using aws providers specifically?
     const kmsProviders = {
       aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
     };
     const dataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
 
-    // const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_CMK_ID].some(
-    //   secret => !secret
-    // );
     beforeEach(function () {
       client = this.configuration.newClient();
       collection = client.db('client').collection('encryption');
