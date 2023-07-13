@@ -161,7 +161,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     return server.commandAsync(this.ns, cmd, options);
   }
 }
-
 /** @internal */
 export abstract class CommandCallbackOperation<T = any> extends AbstractCallbackOperation<T> {
   override options: CommandOperationOptions;
@@ -208,6 +207,7 @@ export abstract class CommandCallbackOperation<T = any> extends AbstractCallback
     cmd: Document,
     callback: Callback
   ): void {
+    // TODO: consider making this a non-enumerable property
     this.server = server;
 
     const options = {
@@ -248,6 +248,6 @@ export abstract class CommandCallbackOperation<T = any> extends AbstractCallback
       cmd = decorateWithExplain(cmd, this.explain);
     }
 
-    server.command(this.ns, cmd, options, callback);
+    return server.command(this.ns, cmd, options, callback);
   }
 }
