@@ -54,7 +54,7 @@ export abstract class ConnectionPoolMonitoringEvent {
  */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
-  options?: Pick<
+  options: Pick<
     ConnectionPoolOptions,
     'maxPoolSize' | 'minPoolSize' | 'maxConnecting' | 'maxIdleTimeMS' | 'waitQueueTimeoutMS'
   >;
