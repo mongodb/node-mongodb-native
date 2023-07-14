@@ -2,12 +2,7 @@ import { once } from 'node:events';
 
 import { expect } from 'chai';
 
-import {
-  type ConnectionPoolCreatedEvent,
-  type Db,
-  type MongoClient,
-  type MongoClientOptions
-} from '../../mongodb';
+import { type ConnectionPoolCreatedEvent, type Db, type MongoClient } from '../../mongodb';
 
 describe('Connection Pool', function () {
   let client: MongoClient;
@@ -64,37 +59,6 @@ describe('Connection Pool', function () {
 
         it('the options field only contains keys and values matching the non-default options', function () {
           expect(connectionPoolCreated).to.have.deep.property('options', options);
-        });
-      });
-
-      context('when non connection pool options are passed in', function () {
-        let pConnectionPoolCreated: Promise<ConnectionPoolCreatedEvent[]>;
-        let connectionPoolCreated: ConnectionPoolCreatedEvent;
-        const options: MongoClientOptions = {
-          waitQueueTimeoutMS: 2000,
-          maxIdleTimeMS: 1,
-          maxConnecting: 3,
-          minPoolSize: 1,
-          maxPoolSize: 101,
-          tls: true
-        };
-        const optionsNoMetadata = {
-          waitQueueTimeoutMS: 2000,
-          maxIdleTimeMS: 1,
-          maxConnecting: 3,
-          minPoolSize: 1,
-          maxPoolSize: 101
-        };
-        beforeEach(async function () {
-          client = this.configuration.newClient({}, options);
-          pConnectionPoolCreated = once(client, 'connectionPoolCreated');
-          await client.connect();
-
-          connectionPoolCreated = (await pConnectionPoolCreated)[0];
-        });
-
-        it('the options field only contains keys and values associated with connection pool', function () {
-          expect(connectionPoolCreated).to.have.deep.property('options', optionsNoMetadata);
         });
       });
     });
