@@ -3,7 +3,7 @@ import { once } from 'node:events';
 import { expect } from 'chai';
 
 import {
-  ConnectionPoolCreatedEvent,
+  type ConnectionPoolCreatedEvent,
   type Db,
   type MongoClient,
   type MongoClientOptions
@@ -22,14 +22,6 @@ describe('Connection Pool', function () {
   });
   describe('Events', function () {
     describe('ConnectionPoolCreatedEvent', function () {
-      it('is emitted on client connect', async function () {
-        client = this.configuration.newClient();
-        const pConnectionPoolCreated = once(client, 'connectionPoolCreated');
-        await client.connect();
-
-        expect((await pConnectionPoolCreated)[0]).to.be.instanceOf(ConnectionPoolCreatedEvent);
-      });
-
       context('when no connection pool options are passed in', function () {
         let pConnectionPoolCreated: Promise<ConnectionPoolCreatedEvent[]>;
         let connectionPoolCreated: ConnectionPoolCreatedEvent;

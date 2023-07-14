@@ -1,25 +1,17 @@
 import { expect } from 'chai';
-import { ConnectionPool, ConnectionPoolCreatedEvent } from '../../../mongodb';
 
+import { type ConnectionPool, ConnectionPoolCreatedEvent } from '../../mongodb';
 
-describe('Connection Pool Events', function() {
+describe('Connection Pool Events', function () {
   const connectionPoolMock = {
     address: 'localhost:9000',
-    time: new Date(),
+    time: new Date()
   };
 
-  const allowedFields = [
-    'waitQueueTimeoutMS',
-    'maxIdleTimeMS',
-    'maxConnecting',
-    'minPoolSize',
-    'maxPoolSize'
-
-  ];
-  describe('ConnectionPoolCreatedEvent', function() {
-    describe('constructor', function() {
-      context('when provided expected option fields', function() {
-        it(`Sets the allowed fields appropriately`, function() {
+  describe('ConnectionPoolCreatedEvent', function () {
+    describe('constructor', function () {
+      context('when provided expected option fields', function () {
+        it(`Sets the allowed fields appropriately`, function () {
           const options = {
             maxIdleTimeMS: 0,
             maxConnecting: 2,
@@ -27,13 +19,16 @@ describe('Connection Pool Events', function() {
             maxPoolSize: 100,
             waitQueueTimeoutMS: 1000
           };
-          const event = new ConnectionPoolCreatedEvent({ ...connectionPoolMock, options } as unknown as ConnectionPool);
+          const event = new ConnectionPoolCreatedEvent({
+            ...connectionPoolMock,
+            options
+          } as unknown as ConnectionPool);
 
           expect(event).to.have.deep.property('options', options);
         });
       });
-      context('when provided unallowed fields', function() {
-        it('only stores expected fields', function() {
+      context('when provided unallowed fields', function () {
+        it('only stores expected fields', function () {
           const options = {
             maxIdleTimeMS: 0,
             maxConnecting: 2,
@@ -47,14 +42,17 @@ describe('Connection Pool Events', function() {
             foo: 'foo',
             hello: 'world'
           };
-          const event = new ConnectionPoolCreatedEvent({ ...connectionPoolMock, options } as unknown as ConnectionPool);
+          const event = new ConnectionPoolCreatedEvent({
+            ...connectionPoolMock,
+            options
+          } as unknown as ConnectionPool);
 
           expect(event).to.have.deep.property('options', {
             maxIdleTimeMS: 0,
             maxConnecting: 2,
             minPoolSize: 0,
             maxPoolSize: 100,
-            waitQueueTimeoutMS: 1000,
+            waitQueueTimeoutMS: 1000
           });
         });
       });
