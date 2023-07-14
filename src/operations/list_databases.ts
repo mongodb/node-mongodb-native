@@ -1,9 +1,10 @@
 import type { Document } from '../bson';
 import type { Db } from '../db';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, MongoDBNamespace } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -25,7 +26,7 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabasesResult> {
+export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {
@@ -34,11 +35,10 @@ export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabas
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<ListDatabasesResult>
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<ListDatabasesResult> {
     const cmd: Document = { listDatabases: 1 };
 
     if (typeof this.options.nameOnly === 'boolean') {
@@ -59,7 +59,15 @@ export class ListDatabasesOperation extends CommandCallbackOperation<ListDatabas
       cmd.comment = this.options.comment;
     }
 
-    super.executeCommandCallback(server, session, cmd, callback);
+    return super.executeCommand(server, session, cmd) as TODO_NODE_3286;
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<ListDatabasesResult>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

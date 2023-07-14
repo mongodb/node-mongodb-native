@@ -3,7 +3,7 @@ import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +17,7 @@ export interface ListCollectionsOptions extends Omit<CommandOperationOptions, 'w
 }
 
 /** @internal */
-export class ListCollectionsOperation extends CommandCallbackOperation<string[]> {
+export class ListCollectionsOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -47,17 +47,16 @@ export class ListCollectionsOperation extends CommandCallbackOperation<string[]>
     }
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<string[]>
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
   ): void {
-    return super.executeCommandCallback(
-      server,
-      session,
-      this.generateCommand(maxWireVersion(server)),
-      callback
-    );
+    throw new Error('Method not implemented.');
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */

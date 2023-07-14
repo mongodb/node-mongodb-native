@@ -11,11 +11,7 @@ import {
   type MongoDBNamespace,
   normalizeHintField
 } from '../utils';
-import {
-  type CollationOptions,
-  CommandCallbackOperation,
-  type CommandOperationOptions
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /**
@@ -75,7 +71,7 @@ export interface FindOptions<TSchema extends Document = Document>
 }
 
 /** @internal */
-export class FindOperation extends CommandCallbackOperation<Document> {
+export class FindOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -106,11 +102,7 @@ export class FindOperation extends CommandCallbackOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     this.server = server;
 
     const options = this.options;
@@ -120,17 +112,20 @@ export class FindOperation extends CommandCallbackOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    server.command(
-      this.ns,
-      findCommand,
-      {
-        ...this.options,
-        ...this.bsonOptions,
-        documentsReturnedIn: 'firstBatch',
-        session
-      },
-      callback
-    );
+    return server.commandAsync(this.ns, findCommand, {
+      ...this.options,
+      ...this.bsonOptions,
+      documentsReturnedIn: 'firstBatch',
+      session
+    });
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

@@ -10,6 +10,7 @@ import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '
 import {
   type CollationOptions,
   CommandCallbackOperation,
+  CommandOperation,
   type CommandOperationOptions,
   type OperationParent
 } from './command';
@@ -396,7 +397,7 @@ export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'write
 }
 
 /** @internal */
-export class ListIndexesOperation extends CommandCallbackOperation<Document> {
+export class ListIndexesOperation extends CommandOperation<Document> {
   /**
    * @remarks WriteConcern can still be present on the options because
    * we inherit options from the client/db/collection.  The
@@ -415,11 +416,7 @@ export class ListIndexesOperation extends CommandCallbackOperation<Document> {
     this.collectionNamespace = collection.s.namespace;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const serverWireVersion = maxWireVersion(server);
 
     const cursor = this.options.batchSize ? { batchSize: this.options.batchSize } : {};
@@ -432,7 +429,15 @@ export class ListIndexesOperation extends CommandCallbackOperation<Document> {
       command.comment = this.options.comment;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { type Collection, type Db, isHello, type MongoClient } from '../../mongodb';
+import { Collection, type Db, isHello, type MongoClient } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -12,8 +12,8 @@ describe('Collection', function () {
   });
 
   describe('standard collection tests', function () {
-    let client;
-    let db;
+    let client: MongoClient;
+    let db: Db;
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
@@ -26,90 +26,16 @@ describe('Collection', function () {
       await client.close();
     });
 
-    it('should correctly execute basic collection methods', function (done) {
-      db.createCollection('test_collection_methods', (err, collection) => {
-        // Verify that all the result are correct coming back (should contain the value ok)
-        expect(collection.collectionName).to.equal('test_collection_methods');
-        // Let's check that the collection was created correctly
-        db.listCollections().toArray((err, documents) => {
-          expect(err).to.not.exist;
-          let found = false;
-          documents.forEach(doc => {
-            if (doc.name === 'test_collection_methods') found = true;
-          });
-          expect(found).to.be.true;
-          // Rename the collection and check that it's gone
-          db.renameCollection('test_collection_methods', 'test_collection_methods2', err => {
-            expect(err).to.not.exist;
-            // Drop the collection and check that it's gone
-            db.dropCollection('test_collection_methods2', (err, result) => {
-              expect(result).to.be.true;
-            });
-
-            db.createCollection('test_collection_methods3', (err, collection) => {
-              // Verify that all the result are correct coming back (should contain the value ok)
-              expect(collection.collectionName).to.equal('test_collection_methods3');
-
-              db.createCollection('test_collection_methods4', (err, collection) => {
-                // Verify that all the result are correct coming back (should contain the value ok)
-                expect(collection.collectionName).to.equal('test_collection_methods4');
-                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-                db.renameCollection(
-                  'test_collection_methods4',
-                  'test_collection_methods3',
-                  { dropTarget: true },
-                  err => {
-                    expect(err).to.not.exist;
-
-                    db.dropCollection('test_collection_methods3', (err, result) => {
-                      expect(result).to.be.true;
-                      done();
-                    });
-                  }
-                );
-              });
-            });
-          });
-        });
-      });
-    });
-
-    it('should correctly access collection names', function (done) {
+    it('should be able to access collections by name from db.collections() array after creating two collections', async function () {
       // Create two collections
-      db.createCollection('test.spiderman', () => {
-        db.createCollection('test.mario', () => {
-          // Insert test documents (creates collections)
-          const spiderman_collection = db.collection('test.spiderman');
-          spiderman_collection.insertOne({ foo: 5 }, configuration.writeConcernMax(), err => {
-            expect(err).to.not.exist;
-            const mario_collection = db.collection('test.mario');
-            mario_collection.insertOne({ bar: 0 }, configuration.writeConcernMax(), err => {
-              expect(err).to.not.exist;
-              // Assert collections
-              db.collections((err, collections) => {
-                expect(err).to.not.exist;
-
-                let found_spiderman = false;
-                let found_mario = false;
-                let found_does_not_exist = false;
-
-                collections.forEach(collection => {
-                  if (collection.collectionName === 'test.spiderman') {
-                    found_spiderman = true;
-                  }
-                  if (collection.collectionName === 'test.mario') found_mario = true;
-                  if (collection.collectionName === 'does_not_exist') found_does_not_exist = true;
-                });
-
-                expect(found_spiderman).to.be.true;
-                expect(found_mario).to.be.true;
-                expect(found_does_not_exist).to.be.false;
-                done();
-              });
-            });
-          });
-        });
-      });
+      await db.createCollection('test.spiderman');
+      await db.createCollection('test.mario');
+      const collections = await db.collections();
+      const nameArray = collections.map(col => col.collectionName);
+      expect(nameArray).to.include('test.spiderman');
+      expect(nameArray).to.include('test.mario');
+      expect(collections[0]).to.be.instanceOf(Collection);
+      expect(collections[1]).to.be.instanceOf(Collection);
     });
 
     it('should correctly retrieve listCollections', function (done) {
@@ -404,40 +330,19 @@ describe('Collection', function () {
       });
     });
 
-    it('should correctly handle namespace when using collections method', function (done) {
+    it('should create and access collection given the name and namespace as specified, including dots', async function () {
       const emptyDb = client.db('listCollectionsDb2');
-      emptyDb.createCollection('test1', err => {
-        expect(err).to.not.exist;
-
-        emptyDb.createCollection('test.test', err => {
-          expect(err).to.not.exist;
-
-          emptyDb.createCollection('test3', err => {
-            expect(err).to.not.exist;
-
-            emptyDb.collections((err, collections) => {
-              collections = collections.map(collection => {
-                return {
-                  collectionName: collection.collectionName,
-                  namespace: collection.namespace
-                };
-              });
-
-              let foundCollection = false;
-              collections.forEach(x => {
-                if (
-                  x.namespace === 'listCollectionsDb2.test.test' &&
-                  x.collectionName === 'test.test'
-                ) {
-                  foundCollection = true;
-                }
-              });
-
-              expect(foundCollection).to.be.true;
-              done();
-            });
-          });
-        });
+      await emptyDb.createCollection('test.test');
+      const collections = await emptyDb.collections();
+      const collection_rename = collections.map(collection => {
+        return {
+          collectionName: collection.collectionName,
+          namespace: collection.namespace
+        };
+      });
+      expect(collection_rename).to.deep.include({
+        collectionName: 'test.test',
+        namespace: 'listCollectionsDb2.test.test'
       });
     });
 

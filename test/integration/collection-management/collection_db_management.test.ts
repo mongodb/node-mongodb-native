@@ -1,83 +1,47 @@
-import { assert as test, setupDatabase } from '../shared';
+import { expect } from 'chai';
+
+import { Collection, type Db, type MongoClient } from '../../mongodb';
 
 describe('Collection Management and Db Management', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client: MongoClient;
+  let db: Db;
+
+  beforeEach(function () {
+    client = this.configuration.newClient();
+    db = client.db();
   });
 
-  it('Should correctly createCollection using Promise', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { maxPoolSize: 5 });
-
-    client
-      .db(configuration.db)
-      .createCollection('promiseCollection')
-      .then(function (col) {
-        test.ok(col != null);
-
-        client.close(done);
-      })
-      .catch(function (err) {
-        test.ok(err != null);
-      });
+  afterEach(async function () {
+    await client.close();
   });
 
-  it('Should correctly rename and drop collection using Promise', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { maxPoolSize: 5 });
-
-    const db = client.db(configuration.db);
-
-    db.createCollection('promiseCollection1').then(function (col) {
-      test.ok(col != null);
-      const db = client.db(configuration.db);
-
-      db.renameCollection('promiseCollection1', 'promiseCollection2').then(function (col) {
-        test.ok(col != null);
-
-        db.dropCollection('promiseCollection2').then(function (r) {
-          test.ok(r);
-
-          client.close(done);
-        });
-      });
-    });
+  it('returns a collection object after calling createCollection', async function () {
+    const collection = await db.createCollection('collection');
+    expect(collection).to.be.instanceOf(Collection);
   });
 
-  it('Should correctly drop database using Promise', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { maxPoolSize: 5 });
-
-    client
-      .db(configuration.db)
-      .dropDatabase()
-      .then(function (r) {
-        test.ok(r);
-
-        client.close(done);
-      })
-      .catch(function (e) {
-        test.ok(e != null);
-      });
+  it('creates a collection named collection1, renames collection1 to collection2, and returns true after calling dropCollection on collection2', async function () {
+    const createCollection = await db.createCollection('collection1');
+    expect(createCollection).to.be.instanceOf(Collection);
+    const renameCollection = await db.renameCollection('collection1', 'collection2');
+    expect(renameCollection).to.be.instanceOf(Collection);
+    expect(renameCollection).to.have.nested.property('s.namespace.collection').equal('collection2');
+    const dropCollection = await db.dropCollection('collection2');
+    expect(dropCollection).to.be.true;
   });
 
-  it('Should correctly createCollections and call collections with Promise', function (done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({}, { maxPoolSize: 5 });
-    const db = client.db(configuration.db);
+  it('returns true after calling dropDatabase', async function () {
+    const dropCollection = await db.dropDatabase();
+    expect(dropCollection).to.be.true;
+  });
 
-    db.createCollection('promiseCollectionCollections1').then(function (col) {
-      test.ok(col != null);
-
-      db.createCollection('promiseCollectionCollections2').then(function (col) {
-        test.ok(col != null);
-
-        db.collections().then(function (r) {
-          test.ok(Array.isArray(r));
-
-          client.close(done);
-        });
-      });
-    });
+  it('creates two collections, and returns an array of length 2 after calling db.collections()', async function () {
+    const collection1 = await db.createCollection('promiseCollectionCollections1');
+    expect(collection1).to.be.instanceOf(Collection);
+    const collection2 = await db.createCollection('promiseCollectionCollections2');
+    expect(collection2).to.be.instanceOf(Collection);
+    const collectionArray = await db.collections();
+    expect(collectionArray).to.be.an('array');
+    expect(collectionArray).to.have.length(2);
   });
 });
