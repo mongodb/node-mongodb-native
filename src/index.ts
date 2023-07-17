@@ -201,8 +201,8 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export { AutoEncrypter } from './client-side-encryption/autoEncrypter';
-export { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
+export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,

@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import ConnectionString from 'mongodb-connection-string-url';
 import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import {
   type AutoEncryptionOptions,
@@ -25,7 +25,6 @@ import type {
   RunOnRequirement,
   StringOrPlaceholder
 } from './schema';
-import { ClientEncryption } from './schema';
 
 const ENABLE_UNIFIED_TEST_LOGGING = false;
 export function log(message: unknown, ...optionalParameters: unknown[]): void {

@@ -602,7 +602,7 @@ export class CryptoConnection extends Connection {
       ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
       : null;
 
-    // TODO: add typescript support
+    // TODO(NODE-5422): add typescript support
     // @ts-expect-error no typescript support yet
     autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
       if (err || encrypted == null) {

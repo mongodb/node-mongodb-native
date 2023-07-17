@@ -1,4 +1,3 @@
-import { MongoCrypt } from 'mongodb-client-encryption'
 import { databaseNamespace } from './common';
 import { StateMachine } from './stateMachine';
 import { MongocryptdManager } from './mongocryptdManager';
@@ -159,7 +158,7 @@ export class AutoEncrypter {
     }
 
     Object.assign(mongoCryptOptions, { cryptoCallbacks });
-    this._mongocrypt = new MongoCrypt(mongoCryptOptions);
+    this._mongocrypt = new getMongoDBClientEncryption().MongoCrypt(mongoCryptOptions);
     this._contextCounter = 0;
 
     if (

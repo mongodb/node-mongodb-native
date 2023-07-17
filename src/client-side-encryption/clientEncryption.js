@@ -1,5 +1,4 @@
 
-import { MongoCrypt } from 'mongodb-client-encryption';
 import { databaseNamespace, collectionNamespace, promiseOrCallback, maybeCallback } from './common';
 import { StateMachine } from './stateMachine';
 import {
@@ -120,7 +119,7 @@ export class ClientEncryption {
     this._onKmsProviderRefresh = options.onKmsProviderRefresh;
     this._keyVaultNamespace = options.keyVaultNamespace;
     this._keyVaultClient = options.keyVaultClient || client;
-    this._mongoCrypt = new MongoCrypt(mongoCryptOptions);
+    this._mongoCrypt = new getMongoDBClientEncryption().MongoCrypt(mongoCryptOptions);
   }
 
   /**

@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import { dirname } from 'path';
 import { promisify } from 'util';
 
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { type AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
 import { type MongoClient } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
@@ -57,6 +57,7 @@ describe('crypt_shared library', function () {
       const env = {
         MONGODB_URI: this.configuration.url(),
         EXTRA_OPTIONS: JSON.stringify({
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           cryptSharedLibPath: getEncryptExtraOptions().cryptSharedLibPath!
         })
       };
@@ -80,11 +81,11 @@ describe('crypt_shared library', function () {
       }
     },
     async function () {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const cryptDir = dirname(getEncryptExtraOptions().cryptSharedLibPath!);
       const env = {
         MONGODB_URI: this.configuration.url(),
         EXTRA_OPTIONS: JSON.stringify({
-          // This test only runs when cryptSharedLibPath is undefined.
           cryptSharedLibSearchPaths: [cryptDir]
         })
       };

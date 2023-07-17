@@ -102,7 +102,7 @@ export class Encrypter {
   }
 
   close(client: MongoClient, force: boolean, callback: Callback): void {
-    // TODO: add type here
+    // TODO(NODE-5422): add typescript support
     this.autoEncrypter.teardown(!!force, (e: any) => {
       const internalClient = this[kInternalClient];
       if (internalClient != null && client !== internalClient) {

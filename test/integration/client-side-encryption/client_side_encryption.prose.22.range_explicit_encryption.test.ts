@@ -1,11 +1,12 @@
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptError } from '../../../src/client-side-encryption/errors';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 
