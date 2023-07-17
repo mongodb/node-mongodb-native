@@ -6,6 +6,7 @@ import {MongoError} from '../error';
 import { loadCredentials } from './providers';
 import * as  cryptoCallbacks from './cryptoCallbacks';
 import { serialize, deserialize } from 'bson';
+import { getMongoDBClientEncryption } from '../deps';
 
 /**
  * Configuration options for a automatic client encryption.

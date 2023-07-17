@@ -9,6 +9,7 @@ import { loadCredentials } from './providers/index';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { promisify } from 'util';
 import { serialize, deserialize } from 'bson';
+import { getMongoDBClientEncryption } from '../deps';
 
 /** @typedef {*} BSONValue - any serializable BSON value */
 /** @typedef {BSON.Long} Long A 64 bit integer, represented by the js-bson Long type.*/
