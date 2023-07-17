@@ -47,12 +47,7 @@ export class RenameOperation extends RunAdminCommandOperation {
       throw new MongoServerError(doc);
     }
 
-    let newColl: Collection<Document>;
-    try {
-      newColl = new Collection(coll.s.db, this.newName, coll.s.options);
-    } catch (err) {
-      return err;
-    }
+    const newColl: Collection<Document> = new Collection(coll.s.db, this.newName, coll.s.options);
 
     return newColl;
   }

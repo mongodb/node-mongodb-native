@@ -38,7 +38,6 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     const collectionName = this.collectionName;
 
     const doc = await super.executeCommand(server, session, this.command);
-    // TODO(NODE-3483): Replace these with MongoUnexpectedServerResponseError
     if (doc.result != null && typeof doc.result !== 'string')
       throw new MongoUnexpectedServerResponseError('Error with validation data');
     if (doc.result != null && doc.result.match(/exception|corrupt/) != null)

@@ -24,10 +24,8 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
       if (was === 0) return 'off';
       if (was === 1) return 'slow_only';
       if (was === 2) return 'all';
-      // TODO(NODE-3483)
       throw new MongoUnexpectedServerResponseError(`Illegal profiling level value ${was}`);
     } else {
-      // TODO(NODE-3483): Consider MongoUnexpectedServerResponseError
       throw new MongoUnexpectedServerResponseError('Error with profile command');
     }
   }
