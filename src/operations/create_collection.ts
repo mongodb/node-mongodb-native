@@ -1,5 +1,3 @@
-import { type Callback } from 'mongodb-legacy';
-
 import type { Document } from '../bson';
 import {
   MIN_SUPPORTED_QE_SERVER_VERSION,
@@ -11,6 +9,7 @@ import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';

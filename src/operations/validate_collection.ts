@@ -1,9 +1,9 @@
-import { type Callback, MongoUnexpectedServerResponseError } from 'mongodb-legacy';
-
 import type { Admin } from '../admin';
 import type { Document } from '../bson';
+import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
