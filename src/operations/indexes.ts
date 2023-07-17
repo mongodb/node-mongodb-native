@@ -9,13 +9,12 @@ import type { ClientSession } from '../sessions';
 import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
-  CommandCallbackOperation,
   CommandOperation,
   type CommandOperationOptions,
   type OperationParent
 } from './command';
 import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractCallbackOperation, AbstractOperation, Aspect, defineAspects } from './operation';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -353,19 +352,34 @@ export class DropIndexOperation extends CommandOperation<Document> {
 }
 
 /** @internal */
-export class DropIndexesOperation extends DropIndexOperation {
-  constructor(collection: Collection, options: DropIndexesOptions) {
-    super(collection, '*', options);
+export class DropIndexesOperation extends CommandOperation<boolean> {
+  override options: DropIndexesOptions;
+  collection: Collection;
+  indexName: string;
+
+  constructor(collection: Collection, indexName: string, options?: DropIndexesOptions) {
+    super(collection, options);
+
+    this.options = options ?? {};
+    this.collection = collection;
+    this.indexName = indexName;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     try {
-      super.execute(server, session);
+      await super.execute(server, session);
+      return true;
+    } catch (error) {
+      return false;
     }
-    super.execute(server, session, err => {
-      if (err) return callback(err, false);
-      callback(undefined, true);
-    });
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<boolean>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -437,17 +451,15 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     this.indexes = indexes;
   }
 
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<boolean> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const coll = this.collection;
     const indexes = this.indexes;
 
-    const info = await indexInformation(
-      coll.s.db,
-      coll.collectionName,
-      { ...this.options, readPreference: this.readPreference, session });
+    const info = await indexInformation(coll.s.db, coll.collectionName, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    });
     // Let's check for the index names
     if (!Array.isArray(indexes)) return info[indexes] != null;
     // Check in list of indexes
@@ -457,7 +469,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
       }
     }
 
-        // All keys found return true
+    // All keys found return true
     return true;
   }
 }
@@ -475,18 +487,15 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.name = name;
   }
 
-  override execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<Document> {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const db = this.db;
     const name = this.name;
 
-    return indexInformation(
-      db,
-      name,
-      { ...this.options, readPreference: this.readPreference, session }
-    );
+    return indexInformation(db, name, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    });
   }
 }
 
