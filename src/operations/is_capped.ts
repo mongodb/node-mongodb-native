@@ -26,6 +26,6 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
     if (collection == null || collection.options == null) {
       throw new MongoAPIError(`collection ${coll.namespace} not found`);
     }
-    return collection.options?.capped;
+    return !!collection.options?.capped;
   }
 }
