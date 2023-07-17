@@ -18,17 +18,17 @@ export interface IndexInformationOptions {
  * @param db - The Db instance on which to retrieve the index info.
  * @param name - The name of the collection.
  */
-export async function indexInformation(db: Db, name: string): Promise<any[]>;
+export async function indexInformation(db: Db, name: string): Promise<any>;
 export async function indexInformation(
   db: Db,
   name: string,
   options?: IndexInformationOptions
-): Promise<any[]>;
+): Promise<any>;
 export async function indexInformation(
   db: Db,
   name: string,
   options?: IndexInformationOptions
-): Promise<any[]> {
+): Promise<any> {
   if (options == null) {
     options = {};
   }
