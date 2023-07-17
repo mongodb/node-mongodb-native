@@ -13,7 +13,8 @@ const EXPECTED_PEER_DEPENDENCIES = [
   '@mongodb-js/zstd',
   'kerberos',
   'snappy',
-  'mongodb-client-encryption'
+  'mongodb-client-encryption',
+  'gcp-metadata'
 ];
 
 describe('package.json', function () {
