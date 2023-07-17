@@ -36,6 +36,7 @@ describe('Index Management Prose Tests', function () {
 
     let client: MongoClient;
     let timeoutController: TimeoutController;
+    let collection: Collection;
 
     /** creates a readable stream that emits every \<interval\> ms */
     const interval = (interval: number, signal: AbortSignal) =>
@@ -46,11 +47,9 @@ describe('Index Management Prose Tests', function () {
      * for indexes with name = `indexName`
      */
     const waitForIndexes = ({
-      collection,
       predicate,
       indexName
     }: {
-      collection: Collection;
       predicate: (arg0: Array<Document>) => boolean;
       indexName?: string;
     }): Promise<Array<Document>> =>
@@ -73,10 +72,13 @@ describe('Index Management Prose Tests', function () {
       client = this.configuration.newClient();
       await client.connect();
 
+      collection = await client.db('node-test').createCollection(new ObjectId().toHexString());
+
       timeoutController = new TimeoutController(60 * 1000 * 4);
     });
 
     afterEach(async () => {
+      await collection.drop();
       await client?.close();
       timeoutController?.clear(false);
     });
@@ -85,10 +87,6 @@ describe('Index Management Prose Tests', function () {
       'Case 1: Driver can successfully create and list search indexes',
       metadata,
       async function () {
-        const collection = await client
-          .db('test-db')
-          .createCollection(new ObjectId().toHexString());
-
         await collection.createSearchIndex({
           name: 'test-search-index',
           definition: {
@@ -97,7 +95,6 @@ describe('Index Management Prose Tests', function () {
         });
 
         const [index] = await waitForIndexes({
-          collection,
           predicate: indexes => indexes.every(index => index.queryable),
           indexName: 'test-search-index'
         });
@@ -113,10 +110,6 @@ describe('Index Management Prose Tests', function () {
       'Case 2: Driver can successfully create multiple indexes in batch',
       metadata,
       async function () {
-        const collection = await client
-          .db('test-db')
-          .createCollection(new ObjectId().toHexString());
-
         const indexDefinitions = [
           {
             name: 'test-search-index-1',
@@ -135,7 +128,6 @@ describe('Index Management Prose Tests', function () {
         await collection.createSearchIndexes(indexDefinitions);
 
         const indexes = await waitForIndexes({
-          collection,
           predicate: indexes => indexes.every(index => index.queryable)
         });
 
@@ -151,8 +143,6 @@ describe('Index Management Prose Tests', function () {
     );
 
     it('Case 3: Driver can successfully drop search indexes', metadata, async function () {
-      const collection = await client.db('test-db').createCollection(new ObjectId().toHexString());
-
       await collection.createSearchIndex({
         name: 'test-search-index',
         definition: {
@@ -161,7 +151,6 @@ describe('Index Management Prose Tests', function () {
       });
 
       await waitForIndexes({
-        collection,
         predicate: indexes => indexes.every(index => index.queryable),
         indexName: 'test-search-index'
       });
@@ -169,7 +158,6 @@ describe('Index Management Prose Tests', function () {
       await collection.dropSearchIndex('test-search-index');
 
       const indexes = await waitForIndexes({
-        collection,
         predicate: indexes => indexes.length === 0,
         indexName: 'test-search-index'
       });
@@ -178,8 +166,6 @@ describe('Index Management Prose Tests', function () {
     });
 
     it('Case 4: Driver can update a search index', metadata, async function () {
-      const collection = await client.db('test-db').createCollection(new ObjectId().toHexString());
-
       await collection.createSearchIndex({
         name: 'test-search-index',
         definition: {
@@ -188,7 +174,6 @@ describe('Index Management Prose Tests', function () {
       });
 
       await waitForIndexes({
-        collection,
         predicate: indexes => indexes.every(index => index.queryable),
         indexName: 'test-search-index'
       });
@@ -196,7 +181,6 @@ describe('Index Management Prose Tests', function () {
       await collection.updateSearchIndex('test-search-index', { mappings: { dynamic: true } });
 
       const [updatedIndex] = await waitForIndexes({
-        collection,
         predicate: indexes => indexes.every(index => index.queryable && index.status === 'READY'),
         indexName: 'test-search-index'
       });
@@ -211,7 +195,7 @@ describe('Index Management Prose Tests', function () {
       'Case 5: `dropSearchIndex` suppresses namespace not found errors',
       metadata,
       async function () {
-        const collection = await client.db('test-db').collection(new ObjectId().toHexString());
+        const collection = await client.db('node-test').collection(new ObjectId().toHexString());
 
         await collection.dropSearchIndex('test-search-index');
       }

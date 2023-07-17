@@ -1428,6 +1428,9 @@ task_groups:
             MONGODB_VERSION: "7.0"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
     teardown_group:
       - command: subprocess.exec
         params:
@@ -1436,22 +1439,37 @@ task_groups:
           add_expansions_to_env: true
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
-    # `setup_group`s get run once-per-task-group, but only changes that get written to disk
-    # are preserved across tasks inside the task group.  Specifically, any expansions loaded
-    # into memory will not be present for any tasks except the first task that gets run.
-    # We load the expansions file again to ensure that necessary enviroment variables are present.
-    setup_task:
-      # Load the expansion file to make an evergreen variable with the current unique version
-      - command: expansions.update
-        params:
-          file: src/expansion.yml
-      - command: expansions.update
-        params:
-          file: src/atlas-expansion.yml
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
       - test-aws-lambda-deployed
+
+  - name: test_atlas_task_group_search_indexes
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            MONGODB_VERSION: "7.0"
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
       - test-search-index-helpers
 
 pre:

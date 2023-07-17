@@ -547,6 +547,7 @@ SINGLETON_TASKS.push(
   ]
 );
 
+
 function* makeTypescriptTasks() {
   for (const TS_VERSION of ['next', 'current', '4.1.6']) {
     // 4.1.6 can consume the public API but not compile the driver
@@ -753,6 +754,13 @@ BUILD_VARIANTS.push({
   display_name: 'AWS Lambda handler tests',
   run_on: DEFAULT_OS,
   tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
+});
+
+BUILD_VARIANTS.push({
+  name: 'rhel8-test-search-indexes',
+  display_name: 'Search Index Tests',
+  run_on: DEFAULT_OS,
+  tasks: ['test_atlas_task_group_search_indexes']
 });
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
