@@ -60,10 +60,8 @@ export class AddUserOperation extends CommandOperation<Document> {
     // v5 removed the digestPassword option from AddUserOptions but we still want to throw
     // an error when digestPassword is provided.
     if ('digestPassword' in options && options.digestPassword != null) {
-      return Promise.reject(
-        new MongoInvalidArgumentError(
-          'Option "digestPassword" not supported via addUser, use db.command(...) instead'
-        )
+      throw new MongoInvalidArgumentError(
+        'Option "digestPassword" not supported via addUser, use db.command(...) instead'
       );
     }
 
@@ -81,12 +79,7 @@ export class AddUserOperation extends CommandOperation<Document> {
       roles = Array.isArray(options.roles) ? options.roles : [options.roles];
     }
 
-    let topology;
-    try {
-      topology = getTopology(db);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    const topology = getTopology(db);
 
     const digestPassword = topology.lastHello().maxWireVersion >= 7;
 
