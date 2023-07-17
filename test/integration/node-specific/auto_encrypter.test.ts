@@ -16,7 +16,7 @@ import { type MongoClient, MongoError, MongoNetworkTimeoutError } from '../../mo
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const cryptShared = (status: 'enabled' | 'disabled') => () => {
-  const isPathPresent = typeof getEncryptExtraOptions().cryptSharedLibPath !== 'string';
+  const isPathPresent = (typeof getEncryptExtraOptions().cryptSharedLibPath ?? '').length > 0;
 
   if (status === 'enabled') {
     return isPathPresent ? true : 'Test requires the shared library.';
