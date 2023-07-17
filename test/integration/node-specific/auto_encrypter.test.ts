@@ -287,7 +287,7 @@ describe('crypt_shared library', function () {
 
       it(
         `should not spawn mongocryptd on startup if ${opt} is true`,
-        { requires: { clientSideEncryption: true } },
+        { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
         function (done) {
           autoEncrypter = new AutoEncrypter(client, encryptionOptions);
 
