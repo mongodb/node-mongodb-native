@@ -54,7 +54,7 @@ export class AzureCredentialCache {
  * @type{ AzureCredentialCache }
  * @ignore
  */
-let tokenCache = new AzureCredentialCache();
+export let tokenCache = new AzureCredentialCache();
 
 /**
  * @typedef {object} KmsRequestResponsePayload

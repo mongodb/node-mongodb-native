@@ -746,6 +746,7 @@ export class ClientEncryption {
   }
 
   static get libmongocryptVersion() {
+    const { MongoCrypt } = getMongoDBClientEncryption();
     return MongoCrypt.libmongocryptVersion;
   }
 

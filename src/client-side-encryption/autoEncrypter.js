@@ -372,12 +372,11 @@ export class AutoEncrypter {
    * shared library was loaded.
    */
   get cryptSharedLibVersionInfo() {
-    return AutoEncrypter.cryptSharedLibVersionInfoTestingOverride != null ?
-      AutoEncrypter.cryptSharedLibVersionInfoTestingOverride :
-      this._mongocrypt.cryptSharedLibVersionInfo;
+    return this._mongocrypt.cryptSharedLibVersionInfo;
   }
 
   static get libmongocryptVersion() {
+    const { MongoCrypt } = getMongoDBClientEncryption();
     return MongoCrypt.libmongocryptVersion;
   }
 }
