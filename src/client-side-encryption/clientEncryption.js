@@ -120,7 +120,8 @@ export class ClientEncryption {
     this._onKmsProviderRefresh = options.onKmsProviderRefresh;
     this._keyVaultNamespace = options.keyVaultNamespace;
     this._keyVaultClient = options.keyVaultClient || client;
-    this._mongoCrypt = new getMongoDBClientEncryption().MongoCrypt(mongoCryptOptions);
+    const { MongoCrypt } = getMongoDBClientEncryption();
+    this._mongoCrypt = new MongoCrypt(mongoCryptOptions);
   }
 
   /**

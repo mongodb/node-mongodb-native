@@ -159,7 +159,8 @@ export class AutoEncrypter {
     }
 
     Object.assign(mongoCryptOptions, { cryptoCallbacks });
-    this._mongocrypt = new getMongoDBClientEncryption().MongoCrypt(mongoCryptOptions);
+    const { MongoCrypt } = getMongoDBClientEncryption();
+    this._mongocrypt = new MongoCrypt(mongoCryptOptions);
     this._contextCounter = 0;
 
     if (
