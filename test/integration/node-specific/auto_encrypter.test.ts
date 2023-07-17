@@ -105,7 +105,6 @@ describe('crypt_shared library', function () {
       function (done) {
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
@@ -142,7 +141,6 @@ describe('crypt_shared library', function () {
 
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
@@ -182,7 +180,6 @@ describe('crypt_shared library', function () {
 
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
@@ -222,7 +219,6 @@ describe('crypt_shared library', function () {
 
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
@@ -251,7 +247,6 @@ describe('crypt_shared library', function () {
       function (done) {
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
@@ -279,7 +274,6 @@ describe('crypt_shared library', function () {
     ['mongocryptdBypassSpawn', 'bypassAutoEncryption', 'bypassQueryAnalysis'].forEach(opt => {
       const encryptionOptions = {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => {},
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -297,7 +291,11 @@ describe('crypt_shared library', function () {
         function (done) {
           autoEncrypter = new AutoEncrypter(client, encryptionOptions);
 
-          const localMcdm = autoEncrypter._mongocryptdManager || { spawn: () => {} };
+          const localMcdm = autoEncrypter._mongocryptdManager || {
+            spawn: () => {
+              // intentional empty function
+            }
+          };
           sandbox.spy(localMcdm, 'spawn');
 
           autoEncrypter.init(err => {
@@ -311,7 +309,7 @@ describe('crypt_shared library', function () {
 
     it(
       'should not spawn a mongocryptd or retry on a server selection error if mongocryptdBypassSpawn: true',
-      { requires: { clientSideEncryption: true } },
+      { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
       function (done) {
         let called = false;
         const timeoutError = new MongoNetworkTimeoutError('msg');
@@ -327,7 +325,6 @@ describe('crypt_shared library', function () {
 
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => {},
           kmsProviders: {
             aws: { accessKeyId: 'example', secretAccessKey: 'example' },
             local: { key: Buffer.alloc(96) }
