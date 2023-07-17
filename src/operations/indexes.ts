@@ -15,7 +15,7 @@ import {
   type OperationParent
 } from './command';
 import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
+import { AbstractCallbackOperation, AbstractOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -177,7 +177,7 @@ function makeIndexSpec(
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
+export class IndexesOperation extends AbstractOperation<Document[]> {
   override options: IndexInformationOptions;
   collection: Collection;
 
@@ -187,27 +187,23 @@ export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
     this.collection = collection;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document[]>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
 
-    indexInformation(
-      coll.s.db,
-      coll.collectionName,
-      { full: true, ...options, readPreference: this.readPreference, session },
-      callback
-    );
+    return indexInformation(coll.s.db, coll.collectionName, {
+      full: true,
+      ...options,
+      readPreference: this.readPreference,
+      session
+    });
   }
 }
 
 /** @internal */
 export class CreateIndexesOperation<
   T extends string | string[] = string[]
-> extends CommandCallbackOperation<T> {
+> extends CommandOperation<T> {
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
@@ -240,11 +236,7 @@ export class CreateIndexesOperation<
     });
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -254,12 +246,9 @@ export class CreateIndexesOperation<
 
     if (options.commitQuorum != null) {
       if (serverWireVersion < 9) {
-        callback(
-          new MongoCompatibilityError(
-            'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-          )
+        throw new MongoCompatibilityError(
+          'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
         );
-        return;
       }
       cmd.commitQuorum = options.commitQuorum;
     }
@@ -267,15 +256,10 @@ export class CreateIndexesOperation<
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommandCallback(server, session, cmd, err => {
-      if (err) {
-        callback(err);
-        return;
-      }
+    await super.executeCommand(server, session, cmd);
 
-      const indexNames = indexes.map(index => index.name || '');
-      callback(undefined, indexNames as T);
-    });
+    const indexNames = indexes.map(index => index.name || '');
+    return indexNames as T;
   }
 }
 

@@ -4,7 +4,7 @@ import type { Db } from '../db';
 import { MongoTopologyClosedError } from '../error';
 import type { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { type Callback, getTopology } from '../utils';
+import { getTopology } from '../utils';
 
 /** @public */
 export interface IndexInformationOptions {
@@ -18,37 +18,26 @@ export interface IndexInformationOptions {
  * @param db - The Db instance on which to retrieve the index info.
  * @param name - The name of the collection.
  */
-export function indexInformation(db: Db, name: string, callback: Callback): void;
-export function indexInformation(
+export async function indexInformation(db: Db, name: string): Promise<any[]>;
+export async function indexInformation(
   db: Db,
   name: string,
-  options: IndexInformationOptions,
-  callback?: Callback
-): void;
-export function indexInformation(
+  options?: IndexInformationOptions
+): Promise<any[]>;
+export async function indexInformation(
   db: Db,
   name: string,
-  _optionsOrCallback: IndexInformationOptions | Callback,
-  _callback?: Callback
-): void {
-  let options = _optionsOrCallback as IndexInformationOptions;
-  let callback = _callback as Callback;
-  if ('function' === typeof _optionsOrCallback) {
-    callback = _optionsOrCallback;
+  options?: IndexInformationOptions
+): Promise<any[]> {
+  if (options == null) {
     options = {};
   }
   // If we specified full information
   const full = options.full == null ? false : options.full;
-
-  let topology;
-  try {
-    topology = getTopology(db);
-  } catch (error) {
-    return callback(error);
-  }
+  const topology = getTopology(db);
 
   // Did the user destroy the topology
-  if (topology.isDestroyed()) return callback(new MongoTopologyClosedError());
+  if (topology.isDestroyed()) throw new MongoTopologyClosedError();
   // Process all the results from the index command and collection
   function processResults(indexes: any) {
     // Contains all the information
@@ -67,17 +56,10 @@ export function indexInformation(
   }
 
   // Get the list of indexes of the specified collection
-  db.collection(name)
-    .listIndexes(options)
-    .toArray()
-    .then(
-      indexes => {
-        if (!Array.isArray(indexes)) return callback(undefined, []);
-        if (full) return callback(undefined, indexes);
-        callback(undefined, processResults(indexes));
-      },
-      error => callback(error)
-    );
+  const indexes = await db.collection(name).listIndexes(options).toArray();
+  if (!Array.isArray(indexes)) return [];
+  if (full) return indexes;
+  return processResults(indexes);
 }
 
 export function prepareDocs(
