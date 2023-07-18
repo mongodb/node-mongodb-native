@@ -36,7 +36,7 @@ if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
   env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyUsername=username&proxyPassword=p4ssw0rd' \
   bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 else
-  env SOCKS5_CONFIG='["127.0.0.1",1080,"username","p4ssw0rd"]' npm run check:socks5
+  env SOCKS5_CONFIG='["127.0.0.1",1080,"username","p4ssw0rd"]' npm run check:csfle
 fi
 kill $SOCKS5_PROXY_PID
 
@@ -48,7 +48,7 @@ if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
     env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyPort=1081' \
     bash "${PROJECT_DIRECTORY}/.evergreen/run-custom-csfle-tests.sh"
 else
-  env SOCKS5_CONFIG='["127.0.0.1",1081]' npm run check:socks5
+  env SOCKS5_CONFIG='["127.0.0.1",1081]' npm run check:csfle
 fi
 kill $SOCKS5_PROXY_PID
 
