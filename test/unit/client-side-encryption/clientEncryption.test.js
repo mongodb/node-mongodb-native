@@ -6,7 +6,9 @@ const { MongoClient } = require('../../../lib/mongo_client');
 const cryptoCallbacks = require('../../../src/client-side-encryption/cryptoCallbacks');
 const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
 const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption')
-const { Binary, EJSON, deserialize, Long, Int32 } = require('bson');
+const { Binary, BSON, deserialize, Long, Int32 } = require('../../mongodb');
+const { EJSON } = BSON;
+
 const {
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptCreateDataKeyError

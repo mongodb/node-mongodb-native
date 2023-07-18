@@ -1,4 +1,3 @@
-import { deserialize, EJSON, serialize } from 'bson';
 import { expect } from 'chai';
 import { spawnSync } from 'child_process';
 import * as fs from 'fs';
@@ -12,9 +11,11 @@ import { AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter
 import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptdManager';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { BSON, deserialize, serialize } from '../../mongodb';
 import { type MongoClient, MongoError, MongoNetworkTimeoutError } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
+const { EJSON } = BSON;
 const cryptShared = (status: 'enabled' | 'disabled') => () => {
   const isPathPresent = (getEncryptExtraOptions().cryptSharedLibPath ?? '').length > 0;
 
