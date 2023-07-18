@@ -33,6 +33,9 @@ fi
 SOCKS5_PROXY_PID=$!
 if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
   npm i --force mongodb-client-encryption@alpha
+  export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+  export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
+  export TEST_CSFLE=true
   [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
   env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyUsername=username&proxyPassword=p4ssw0rd' \
   npm run check:csfle
@@ -46,6 +49,9 @@ kill $SOCKS5_PROXY_PID
 SOCKS5_PROXY_PID=$!
 if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
   npm i --force mongodb-client-encryption@alpha
+  export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+  export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
+  export TEST_CSFLE=true
   [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
     env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyPort=1081' \
     npm run check:csfle
