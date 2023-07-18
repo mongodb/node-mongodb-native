@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoError } from '../error';
-import type { OneOrMore } from '../mongo_types';
+import { type OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -351,38 +351,6 @@ export class DropIndexOperation extends CommandOperation<Document> {
   }
 }
 
-/** @internal */
-export class DropIndexesOperation extends CommandOperation<boolean> {
-  override options: DropIndexesOptions;
-  collection: Collection;
-  indexName: string;
-
-  constructor(collection: Collection, indexName: string, options?: DropIndexesOptions) {
-    super(collection, options);
-
-    this.options = options ?? {};
-    this.collection = collection;
-    this.indexName = indexName;
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
-    try {
-      await super.execute(server, session);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<boolean>
-  ): void {
-    throw new Error('Method not implemented.');
-  }
-}
-
 /** @public */
 export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
   /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
@@ -508,4 +476,3 @@ defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION]);
