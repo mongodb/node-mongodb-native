@@ -5,6 +5,27 @@ source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 set -o errexit  # Exit the script with error if any of the commands fail
 set -o xtrace  # For debuggability, no external credentials are used here
 
+function setup_fle() {
+  export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  export CSFLE_KMS_PROVIDERS=${CSFLE_KMS_PROVIDERS}
+  export CRYPT_SHARED_LIB_PATH=${CRYPT_SHARED_LIB_PATH}
+  echo "csfle CRYPT_SHARED_LIB_PATH: $CRYPT_SHARED_LIB_PATH"
+
+  set -o xtrace   # Write all commands first to stderr
+  set -o errexit  # Exit the script with error if any of the commands fail
+
+  # Get access to the AWS temporary credentials:
+  echo "adding temporary AWS credentials to environment"
+  # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
+  . "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
+
+  npm i --force mongodb-client-encryption@alpha
+  export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
+  export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
+  export TEST_CSFLE=true
+}
+
 node -v
 
 PYTHON_BINARY=${PYTHON_BINARY:-python3}
@@ -32,10 +53,7 @@ fi
 "$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1080 --auth username:p4ssw0rd --map "127.0.0.1:12345 to $FIRST_HOST" &
 SOCKS5_PROXY_PID=$!
 if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
-  npm i --force mongodb-client-encryption@alpha
-  export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-  export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-  export TEST_CSFLE=true
+  setup_fle
   [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
   env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyUsername=username&proxyPassword=p4ssw0rd' \
   npm run check:csfle
@@ -48,10 +66,7 @@ kill $SOCKS5_PROXY_PID
 "$PYTHON_BINARY" "$SOCKS5_SERVER_SCRIPT" --port 1081 --map "127.0.0.1:12345 to $FIRST_HOST" &
 SOCKS5_PROXY_PID=$!
 if [[ $TEST_SOCKS5_CSFLE == "true" ]]; then
-  npm i --force mongodb-client-encryption@alpha
-  export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
-  export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
-  export TEST_CSFLE=true
+  setup_fle
   [ "$SSL" == "nossl" ] && [[ "$OSTYPE" == "linux-gnu"* ]] && \
     env MONGODB_URI='mongodb://127.0.0.1:12345/?proxyHost=127.0.0.1&proxyPort=1081' \
     npm run check:csfle
