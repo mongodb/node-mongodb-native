@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
-import * as sinon from 'sinon';
 
 import { LEGACY_HELLO_COMMAND, MongoClient, type MongoClientOptions } from '../mongodb';
 
@@ -82,11 +81,11 @@ describe('TLS Support', function () {
           tlsCertificateKeyFile: ''
         });
       });
-      afterEach(() => sinon.restore());
 
-      it('ignores file path and fails to connect', () => {
+      it('ignores file paths and attempts to connect', () => {
         expect(async () => {
           await client.connect();
+          await client.db('test').collection('test').insertOne({ hello: 'world' });
         }).to.throw();
       });
     });
