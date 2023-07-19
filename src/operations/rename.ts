@@ -3,7 +3,7 @@ import { Collection } from '../collection';
 import { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, checkCollectionName } from '../utils';
+import { checkCollectionName } from '../utils';
 import type { CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 import { RunAdminCommandOperation } from './run_command';
@@ -38,29 +38,18 @@ export class RenameOperation extends RunAdminCommandOperation {
     this.newName = newName;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Collection>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
     const coll = this.collection;
 
-    super.executeCallback(server, session, (err, doc) => {
-      if (err) return callback(err);
-      // We have an error
-      if (doc?.errmsg) {
-        return callback(new MongoServerError(doc));
-      }
+    const doc = await super.execute(server, session);
+    // We have an error
+    if (doc?.errmsg) {
+      throw new MongoServerError(doc);
+    }
 
-      let newColl: Collection<Document>;
-      try {
-        newColl = new Collection(coll.s.db, this.newName, coll.s.options);
-      } catch (err) {
-        return callback(err);
-      }
+    const newColl: Collection<Document> = new Collection(coll.s.db, this.newName, coll.s.options);
 
-      return callback(undefined, newColl);
-    });
+    return newColl;
   }
 }
 

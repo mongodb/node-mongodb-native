@@ -3,8 +3,8 @@ import type { Db } from '../db';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { type Callback } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -14,7 +14,7 @@ export interface DropCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class DropCollectionOperation extends CommandCallbackOperation<boolean> {
+export class DropCollectionOperation extends CommandOperation<boolean> {
   override options: DropCollectionOptions;
   db: Db;
   name: string;
@@ -26,68 +26,63 @@ export class DropCollectionOperation extends CommandCallbackOperation<boolean> {
     this.name = name;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<boolean>
-  ): void {
-    (async () => {
-      const db = this.db;
-      const options = this.options;
-      const name = this.name;
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
+    const db = this.db;
+    const options = this.options;
+    const name = this.name;
 
-      const encryptedFieldsMap = db.client.options.autoEncryption?.encryptedFieldsMap;
-      let encryptedFields: Document | undefined =
-        options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
+    const encryptedFieldsMap = db.client.options.autoEncryption?.encryptedFieldsMap;
+    let encryptedFields: Document | undefined =
+      options.encryptedFields ?? encryptedFieldsMap?.[`${db.databaseName}.${name}`];
 
-      if (!encryptedFields && encryptedFieldsMap) {
-        // If the MongoClient was configured with an encryptedFieldsMap,
-        // and no encryptedFields config was available in it or explicitly
-        // passed as an argument, the spec tells us to look one up using
-        // listCollections().
-        const listCollectionsResult = await db
-          .listCollections({ name }, { nameOnly: false })
-          .toArray();
-        encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
-      }
+    if (!encryptedFields && encryptedFieldsMap) {
+      // If the MongoClient was configured with an encryptedFieldsMap,
+      // and no encryptedFields config was available in it or explicitly
+      // passed as an argument, the spec tells us to look one up using
+      // listCollections().
+      const listCollectionsResult = await db
+        .listCollections({ name }, { nameOnly: false })
+        .toArray();
+      encryptedFields = listCollectionsResult?.[0]?.options?.encryptedFields;
+    }
 
-      if (encryptedFields) {
-        const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
-        const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
+    if (encryptedFields) {
+      const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
+      const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
 
-        for (const collectionName of [escCollection, ecocCollection]) {
-          // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
-          const dropOp = new DropCollectionOperation(db, collectionName);
-          try {
-            await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
-          } catch (err) {
-            if (
-              !(err instanceof MongoServerError) ||
-              err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
-            ) {
-              throw err;
-            }
+      for (const collectionName of [escCollection, ecocCollection]) {
+        // Drop auxilliary collections, ignoring potential NamespaceNotFound errors.
+        const dropOp = new DropCollectionOperation(db, collectionName);
+        try {
+          await dropOp.executeWithoutEncryptedFieldsCheck(server, session);
+        } catch (err) {
+          if (
+            !(err instanceof MongoServerError) ||
+            err.code !== MONGODB_ERROR_CODES.NamespaceNotFound
+          ) {
+            throw err;
           }
         }
       }
+    }
 
-      return this.executeWithoutEncryptedFieldsCheck(server, session);
-    })().then(
-      result => callback(undefined, result),
-      err => callback(err)
-    );
+    return this.executeWithoutEncryptedFieldsCheck(server, session);
   }
 
-  private executeWithoutEncryptedFieldsCheck(
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<boolean>
+  ): void {
+    throw new Error('Method not implemented.');
+  }
+
+  private async executeWithoutEncryptedFieldsCheck(
     server: Server,
     session: ClientSession | undefined
   ): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      super.executeCommandCallback(server, session, { drop: this.name }, (err, result) => {
-        if (err) return reject(err);
-        resolve(!!result.ok);
-      });
-    });
+    await super.executeCommand(server, session, { drop: this.name });
+    return true;
   }
 }
 
@@ -95,23 +90,24 @@ export class DropCollectionOperation extends CommandCallbackOperation<boolean> {
 export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropDatabaseOperation extends CommandCallbackOperation<boolean> {
+export class DropDatabaseOperation extends CommandOperation<boolean> {
   override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {
     super(db, options);
     this.options = options;
   }
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<boolean>
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
+    await super.executeCommand(server, session, { dropDatabase: 1 });
+    return true;
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<boolean>
   ): void {
-    super.executeCommandCallback(server, session, { dropDatabase: 1 }, (err, result) => {
-      if (err) return callback(err);
-      if (result.ok) return callback(undefined, true);
-      callback(undefined, false);
-    });
+    throw new Error('Method not implemented.');
   }
 }
 

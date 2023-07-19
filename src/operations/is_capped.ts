@@ -2,11 +2,10 @@ import type { Collection } from '../collection';
 import { MongoAPIError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { AbstractCallbackOperation, type OperationOptions } from './operation';
+import { AbstractOperation, type OperationOptions } from './operation';
 
 /** @internal */
-export class IsCappedOperation extends AbstractCallbackOperation<boolean> {
+export class IsCappedOperation extends AbstractOperation<boolean> {
   override options: OperationOptions;
   collection: Collection;
 
@@ -16,29 +15,17 @@ export class IsCappedOperation extends AbstractCallbackOperation<boolean> {
     this.collection = collection;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<boolean>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const coll = this.collection;
-
-    coll.s.db
+    const [collection] = await coll.s.db
       .listCollections(
         { name: coll.collectionName },
         { ...this.options, nameOnly: false, readPreference: this.readPreference, session }
       )
-      .toArray()
-      .then(
-        collections => {
-          if (collections.length === 0) {
-            // TODO(NODE-3485)
-            return callback(new MongoAPIError(`collection ${coll.namespace} not found`));
-          }
-
-          callback(undefined, !!collections[0].options?.capped);
-        },
-        error => callback(error)
-      );
+      .toArray();
+    if (collection == null || collection.options == null) {
+      throw new MongoAPIError(`collection ${coll.namespace} not found`);
+    }
+    return !!collection.options?.capped;
   }
 }
