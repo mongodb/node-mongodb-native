@@ -1,13 +1,13 @@
-import { MongoClient, MongoClientOptions, Topology } from '../mongodb';
-import { LEGACY_HELLO_COMMAND } from '../mongodb';
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 import * as sinon from 'sinon';
 
+import { LEGACY_HELLO_COMMAND, MongoClient, type MongoClientOptions } from '../mongodb';
+
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 
-describe('TLS Support', function() {
-  for (let key of REQUIRED_ENV) {
+describe('TLS Support', function () {
+  for (const key of REQUIRED_ENV) {
     if (process.env[key] == null) {
       throw new Error(`skipping SSL tests, ${key} environment variable is not defined`);
     }
@@ -16,7 +16,11 @@ describe('TLS Support', function() {
   const CONNECTION_STRING = process.env.MONGODB_URI as string;
   const TLS_CERT_KEY_FILE = process.env.SSL_KEY_FILE as string;
   const TLS_CA_FILE = process.env.SSL_CA_FILE as string;
-  const tlsSettings = { tls: true, tlsCertificateKeyFile: TLS_CERT_KEY_FILE, tlsCAFile: TLS_CA_FILE };
+  const tlsSettings = {
+    tls: true,
+    tlsCertificateKeyFile: TLS_CERT_KEY_FILE,
+    tlsCAFile: TLS_CA_FILE
+  };
 
   it(
     'should connect with tls via client options',
@@ -55,7 +59,7 @@ describe('TLS Support', function() {
         expect(client.options).property('key', 'abc');
       });
 
-      context('when client has been opened and closed more than once', function() {
+      context('when client has been opened and closed more than once', function () {
         it('should only read files once', async () => {
           await client.connect();
           await client.close();
@@ -90,11 +94,10 @@ describe('TLS Support', function() {
 });
 
 function makeConnectionTest(connectionString: string, clientOptions?: MongoClientOptions) {
-  return async function() {
+  return async function () {
     const client = new MongoClient(connectionString, clientOptions);
 
-    await client
-      .connect();
+    await client.connect();
     await client.db('admin').command({ [LEGACY_HELLO_COMMAND]: 1 });
     await client.db('test').collection('test').findOne({});
     return await client.close();

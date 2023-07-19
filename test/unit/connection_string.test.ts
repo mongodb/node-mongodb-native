@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
-import { promises as fs } from 'fs';
 import * as sinon from 'sinon';
 
 import {
@@ -17,8 +16,7 @@ import {
   MongoParseError,
   MongoRuntimeError,
   parseOptions,
-  resolveSRVRecord,
-  Topology
+  resolveSRVRecord
 } from '../mongodb';
 
 describe('Connection String', function () {
@@ -478,35 +476,6 @@ describe('Connection String', function () {
           }).to.throw(MongoParseError, 'All values of tls/ssl must be the same.');
         });
       });
-    });
-  });
-
-  context('when tls filepaths are provided', () => {
-    beforeEach(async () => {
-      sinon.stub(Topology.prototype, 'connect').yieldsRight();
-      await fs.writeFile('caFileName.txt', 'abc', { encoding: 'utf8' });
-      await fs.writeFile('certKeyFileName.txt', 'abc', { encoding: 'utf8' });
-    });
-
-    afterEach(() => sinon.restore());
-    afterEach(() => fs.unlink('caFileName.txt'));
-    afterEach(() => fs.unlink('certKeyFileName.txt'));
-
-    it('should read in files async', async () => {
-      const client = new MongoClient('mongodb://iLoveJavaScript?tls=true', {
-        tlsCAFile: 'caFileName.txt',
-        tlsCertificateKeyFile: 'certKeyFileName.txt'
-      });
-
-      expect(client.options).property('caFileName', 'caFileName.txt');
-      expect(client.options).property('certKeyFileName', 'certKeyFileName.txt');
-      expect(client.options).not.have.property('ca');
-      expect(client.options).not.have.property('key');
-
-      await client.connect();
-
-      expect(client.options).property('ca', 'abc');
-      expect(client.options).property('key', 'abc');
     });
   });
 
