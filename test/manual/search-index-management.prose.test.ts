@@ -38,24 +38,23 @@ describe('Index Management Prose Tests', function () {
     let timeoutController: TimeoutController;
     let collection: Collection;
 
-    /** creates a readable stream that emits every \<interval\> ms */
-    const interval = (interval: number, signal: AbortSignal) =>
-      Readable.from(setInterval(interval, undefined, { signal, ref: false }));
-
     /**
      * waits until the search indexes for `collection` satisfy `predicate`, optionally pre-filtering
      * for indexes with name = `indexName`
      */
-    const waitForIndexes = ({
+    function waitForIndexes({
       predicate,
       indexName
     }: {
       predicate: (arg0: Array<Document>) => boolean;
       indexName?: string;
-    }): Promise<Array<Document>> =>
-      interval(5000, timeoutController.signal)
+    }): Promise<Array<Document>> {
+      return Readable.from(
+        setInterval(5000, undefined, { signal: timeoutController.signal, ref: false })
+      )
         .map(() => collection.listSearchIndexes(indexName).toArray())
         .find(predicate);
+    }
 
     before(function () {
       this.configuration = this.configuration.makeAtlasTestConfiguration();
@@ -87,12 +86,14 @@ describe('Index Management Prose Tests', function () {
       'Case 1: Driver can successfully create and list search indexes',
       metadata,
       async function () {
-        await collection.createSearchIndex({
+        const name = await collection.createSearchIndex({
           name: 'test-search-index',
           definition: {
             mappings: { dynamic: false }
           }
         });
+
+        expect(name).to.equal('test-search-index');
 
         const [index] = await waitForIndexes({
           predicate: indexes => indexes.every(index => index.queryable),
@@ -125,7 +126,8 @@ describe('Index Management Prose Tests', function () {
           }
         ];
 
-        await collection.createSearchIndexes(indexDefinitions);
+        const names = await collection.createSearchIndexes(indexDefinitions);
+        expect(names).to.deep.equal(['test-search-index-1', 'test-search-index-2']);
 
         const indexes = await waitForIndexes({
           predicate: indexes => indexes.every(index => index.queryable)
@@ -143,12 +145,14 @@ describe('Index Management Prose Tests', function () {
     );
 
     it('Case 3: Driver can successfully drop search indexes', metadata, async function () {
-      await collection.createSearchIndex({
+      const name = await collection.createSearchIndex({
         name: 'test-search-index',
         definition: {
           mappings: { dynamic: false }
         }
       });
+
+      expect(name).to.equal('test-search-index');
 
       await waitForIndexes({
         predicate: indexes => indexes.every(index => index.queryable),
@@ -166,12 +170,14 @@ describe('Index Management Prose Tests', function () {
     });
 
     it('Case 4: Driver can update a search index', metadata, async function () {
-      await collection.createSearchIndex({
+      const name = await collection.createSearchIndex({
         name: 'test-search-index',
         definition: {
           mappings: { dynamic: false }
         }
       });
+
+      expect(name).to.equal('test-search-index');
 
       await waitForIndexes({
         predicate: indexes => indexes.every(index => index.queryable),
