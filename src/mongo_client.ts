@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 import { promisify } from 'util';
@@ -429,6 +430,18 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const options = this[kOptions];
 
+    if (options.tls) {
+      if (!options.ca && typeof options.caFileName === 'string' && options.caFileName.length > 0) {
+        options.ca = await fs.readFile(options.caFileName, { encoding: 'utf8' });
+      }
+      if (
+        !options.key &&
+        typeof options.certKeyFileName === 'string' &&
+        options.certKeyFileName.length > 0
+      ) {
+        options.key = await fs.readFile(options.certKeyFileName, { encoding: 'utf8' });
+      }
+    }
     if (typeof options.srvHost === 'string') {
       const hosts = await resolveSRVRecord(options);
 
@@ -779,6 +792,9 @@ export interface MongoOptions
    * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
    */
   tls: boolean;
+
+  caFileName?: string;
+  certKeyFileName?: string;
 
   /** @internal */
   [featureFlag: symbol]: any;
