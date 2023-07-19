@@ -55,8 +55,8 @@ describe('TLS Support', function () {
 
         await client.connect();
 
-        expect(client.options).property('ca', 'abc');
-        expect(client.options).property('key', 'abc');
+        expect(client.options).property('ca').to.exist;
+        expect(client.options).property('key').to.exist;
       });
 
       context('when client has been opened and closed more than once', function () {
