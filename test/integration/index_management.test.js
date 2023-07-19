@@ -311,7 +311,7 @@ describe('Indexes', function () {
         .command({
           configureFailPoint: 'failCommand',
           mode: {
-            times: 4
+            times: 1
           },
           data: {
             failCommands: ['dropIndexes'],
