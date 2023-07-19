@@ -1,15 +1,12 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { Callback, MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
-import {
-  type CollationOptions,
-  CommandCallbackOperation,
-  type CommandOperationOptions
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -25,7 +22,7 @@ export interface DeleteOptions extends CommandOperationOptions, WriteConcernOpti
 }
 
 /** @public */
-export interface DeleteResult {
+export interface DeleteResult extends Document {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined. */
   acknowledged: boolean;
   /** The number of documents that were deleted */
@@ -45,7 +42,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandCallbackOperation<DeleteResult> {
+export class DeleteOperation extends CommandOperation<DeleteResult> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -64,11 +61,10 @@ export class DeleteOperation extends CommandCallbackOperation<DeleteResult> {
     return this.statements.every(op => (op.limit != null ? op.limit > 0 : true));
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<DeleteResult> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -91,12 +87,19 @@ export class DeleteOperation extends CommandCallbackOperation<DeleteResult> {
     if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
         // TODO(NODE-3541): fix error for hint with unacknowledged writes
-        callback(new MongoCompatibilityError(`hint is not supported with unacknowledged writes`));
-        return;
+        throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
       }
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command) as TODO_NODE_3286;
+  }
+
+  protected override executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<DeleteResult>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -105,22 +108,18 @@ export class DeleteOneOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<DeleteResult>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
-      if (this.explain) return callback(undefined, res);
-
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        deletedCount: res.n
-      });
-    });
+    session: ClientSession | undefined
+  ): Promise<DeleteResult> {
+    const res = await super.execute(server, session);
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+    if (this.explain) return res;
+    return {
+      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      deletedCount: res.n
+    };
   }
 }
 
@@ -129,22 +128,19 @@ export class DeleteManyOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<DeleteResult>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
-      if (this.explain) return callback(undefined, res);
+    session: ClientSession | undefined
+  ): Promise<DeleteResult> {
+    const res = await super.execute(server, session);
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+    if (this.explain) return res;
 
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        deletedCount: res.n
-      });
-    });
+    return {
+      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      deletedCount: res.n
+    };
   }
 }
 

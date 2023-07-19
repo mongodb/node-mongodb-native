@@ -1,14 +1,11 @@
 import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
-import {
-  type CollationOptions,
-  CommandCallbackOperation,
-  type CommandOperationOptions
-} from './command';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @internal */
@@ -40,7 +37,7 @@ export interface AggregateOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class AggregateOperation<T = Document> extends CommandCallbackOperation<T> {
+export class AggregateOperation<T = Document> extends CommandOperation<T> {
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];
@@ -93,11 +90,7 @@ export class AggregateOperation<T = Document> extends CommandCallbackOperation<T
     this.pipeline.push(stage);
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     const options: AggregateOptions = this.options;
     const serverWireVersion = maxWireVersion(server);
     const command: Document = { aggregate: this.target, pipeline: this.pipeline };
@@ -137,7 +130,15 @@ export class AggregateOperation<T = Document> extends CommandCallbackOperation<T
       command.cursor.batchSize = options.batchSize;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command) as TODO_NODE_3286;
+  }
+
+  protected override executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<T>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 

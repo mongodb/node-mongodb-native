@@ -3,7 +3,7 @@ import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, decorateWithCollation, decorateWithReadConcern } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -13,7 +13,7 @@ export type DistinctOptions = CommandOperationOptions;
  * Return a list of distinct values for the given key across a collection.
  * @internal
  */
-export class DistinctOperation extends CommandCallbackOperation<any[]> {
+export class DistinctOperation extends CommandOperation<any[]> {
   override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */
@@ -38,11 +38,7 @@ export class DistinctOperation extends CommandCallbackOperation<any[]> {
     this.query = query;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<any[]>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<any[]> {
     const coll = this.collection;
     const key = this.key;
     const query = this.query;
@@ -73,17 +69,20 @@ export class DistinctOperation extends CommandCallbackOperation<any[]> {
     try {
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
-      return callback(err);
+      return err;
     }
 
-    super.executeCommandCallback(server, session, cmd, (err, result) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+    const result = await super.executeCommand(server, session, cmd);
 
-      callback(undefined, this.explain ? result : result.values);
-    });
+    return this.explain ? result : result.values;
+  }
+
+  protected override executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<any[]>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 
