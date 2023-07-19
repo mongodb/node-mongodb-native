@@ -305,7 +305,7 @@ describe('Indexes', function () {
       // Create an index on the collection
       await db.createIndex(collection.collectionName, 'a');
       /**@type {import('../tools/utils').FailPoint} */
-      const result = await client
+      await client
         .db()
         .admin()
         .command({
@@ -318,7 +318,6 @@ describe('Indexes', function () {
             errorCode: 91
           }
         });
-      console.log(result);
     });
 
     afterEach(async function () {
