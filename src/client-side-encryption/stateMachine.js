@@ -9,7 +9,7 @@ import { MongoNetworkTimeoutError } from '../error';
 import { debug, databaseNamespace, collectionNamespace } from './common';
 import { MongoCryptError } from './errors';
 import { BufferPool } from './buffer_pool';
-import { serialize, deserialize } from 'bson';
+import { serialize, deserialize } from '../bson';
 
 // libmongocrypt states
 const MONGOCRYPT_CTX_ERROR = 0;
