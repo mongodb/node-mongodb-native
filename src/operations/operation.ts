@@ -49,7 +49,6 @@ const kSession = Symbol('session');
  */
 export abstract class AbstractOperation<TResult = any> {
   ns!: MongoDBNamespace;
-  cmd!: Document;
   readPreference: ReadPreference;
   server!: Server;
   bypassPinningCheck: boolean;
