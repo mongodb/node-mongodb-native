@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-modules */
 'use strict';
 const BSON = require('bson');
 const { expect } = require('chai');
@@ -17,6 +16,7 @@ const { coerce, gte } = require('semver');
 const {
   externalSchema
 } = require('../../spec/client-side-encryption/external/external-schema.json');
+/* eslint-disable no-restricted-modules */
 const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
