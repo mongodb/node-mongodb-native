@@ -11,13 +11,15 @@ on:
   # As long as the commit hash has changed on main a release will be published
   workflow_dispatch: {}
 
+permissions:
+  id-token: write
+
 name: release-nightly
 
 jobs:
   release-nightly:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
+
     steps:
       - uses: actions/checkout@v3
       - name: actions/setup
