@@ -1,6 +1,128 @@
-import { loadAWSCredentials } from './aws'
-import { loadAzureCredentials, fetchAzureKMSToken }from './azure';
+import { loadAWSCredentials } from './aws';
+import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
+
+/**
+ * @public
+ */
+export type KMSProvider = 'aws' | 'azure' | 'gcp' | 'local';
+
+/**
+ * @public
+ * Configuration options that are used by specific KMS providers during key generation, encryption, and decryption.
+ */
+export interface KMSProviders {
+  /**
+   * Configuration options for using 'aws' as your KMS provider
+   */
+  aws?:
+    | {
+        /**
+         * The access key used for the AWS KMS provider
+         */
+        accessKeyId: string;
+
+        /**
+         * The secret access key used for the AWS KMS provider
+         */
+        secretAccessKey: string;
+
+        /**
+         * An optional AWS session token that will be used as the
+         * X-Amz-Security-Token header for AWS requests.
+         */
+        sessionToken?: string;
+      }
+    | Record<string, never>;
+
+  /**
+   * Configuration options for using 'local' as your KMS provider
+   */
+  local?: {
+    /**
+     * The master key used to encrypt/decrypt data keys.
+     * A 96-byte long Buffer or base64 encoded string.
+     */
+    key: Buffer | string;
+  };
+
+  /**
+   * Configuration options for using 'kmip' as your KMS provider
+   */
+  kmip?: {
+    /**
+     * The output endpoint string.
+     * The endpoint consists of a hostname and port separated by a colon.
+     * E.g. "example.com:123". A port is always present.
+     */
+    endpoint?: string;
+  };
+
+  /**
+   * Configuration options for using 'azure' as your KMS provider
+   */
+  azure?:
+    | {
+        /**
+         * The tenant ID identifies the organization for the account
+         */
+        tenantId: string;
+
+        /**
+         * The client ID to authenticate a registered application
+         */
+        clientId: string;
+
+        /**
+         * The client secret to authenticate a registered application
+         */
+        clientSecret: string;
+
+        /**
+         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+         * This is optional, and only needed if customer is using a non-commercial Azure instance
+         * (e.g. a government or China account, which use different URLs).
+         * Defaults to "login.microsoftonline.com"
+         */
+        identityPlatformEndpoint?: string | undefined;
+      }
+    | {
+        /**
+         * If present, an access token to authenticate with Azure.
+         */
+        accessToken: string;
+      }
+    | Record<string, never>;
+
+  /**
+   * Configuration options for using 'gcp' as your KMS provider
+   */
+  gcp?:
+    | {
+        /**
+         * The service account email to authenticate
+         */
+        email: string;
+
+        /**
+         * A PKCS#8 encrypted key. This can either be a base64 string or a binary representation
+         */
+        privateKey: string | Buffer;
+
+        /**
+         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+         * Defaults to "oauth2.googleapis.com"
+         */
+        endpoint?: string | undefined;
+      }
+    | {
+        /**
+         * If present, an access token to authenticate with GCP.
+         */
+        accessToken: string;
+      }
+    | Record<string, never>;
+}
 
 /**
  * Auto credential fetching should only occur when the provider is defined on the kmsProviders map
@@ -8,17 +130,17 @@ import { loadGCPCredentials } from './gcp';
  *
  * This is distinct from a nullish provider key.
  *
- * @param {'aws' | 'gcp' | 'azure'} provider
- * @param {object} kmsProviders
- *
- * @ignore
+ * @internal - exposed for testing purposes only
  */
-function isEmptyCredentials(provider, kmsProviders) {
+export function isEmptyCredentials(provider: KMSProvider, kmsProviders: KMSProviders) {
   return (
     provider in kmsProviders &&
     kmsProviders[provider] != null &&
     typeof kmsProviders[provider] === 'object' &&
-    Object.keys(kmsProviders[provider]).length === 0
+    // Typescript does not infer that kmsProviders[provider] is non-null,
+    // even though we check it two lines up.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    Object.keys(kmsProviders[provider]!).length === 0
   );
 }
 
@@ -27,12 +149,9 @@ function isEmptyCredentials(provider, kmsProviders) {
  * Credentials will only attempt to get loaded if they do not exist
  * and no existing credentials will get overwritten.
  *
- * @param {object} kmsProviders - The user provided KMS providers.
- * @returns {object} The new kms providers.
- *
- * @ignore
+ * @internal
  */
-async function loadCredentials(kmsProviders) {
+export async function loadCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {
@@ -48,5 +167,3 @@ async function loadCredentials(kmsProviders) {
   }
   return finalKMSProviders;
 }
-
-module.exports = { loadCredentials, isEmptyCredentials, fetchAzureKMSToken };

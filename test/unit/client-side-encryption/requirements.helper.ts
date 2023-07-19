@@ -1,19 +1,22 @@
-'use strict';
-
 // Data Key Stuff
-const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
-const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-const AWS_REGION = process.env.AWS_REGION;
-const AWS_CMK_ID = process.env.AWS_CMK_ID;
+export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+export const AWS_REGION = process.env.AWS_REGION;
+export const AWS_CMK_ID = process.env.AWS_CMK_ID;
 
-const awsKmsProviders = {
+export const awsKmsProviders = {
   aws: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
 };
-const awsDataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
+export const awsDataKeyOptions = { masterKey: { key: AWS_CMK_ID, region: AWS_REGION } };
 
-const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_CMK_ID].some(secret => !secret);
+export const SKIP_AWS_TESTS = [
+  AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY,
+  AWS_REGION,
+  AWS_CMK_ID
+].some(secret => !secret);
 
-function isAWSCredentialProviderInstalled() {
+export function isAWSCredentialProviderInstalled() {
   try {
     require.resolve('@aws-sdk/credential-providers');
     return true;
@@ -22,7 +25,7 @@ function isAWSCredentialProviderInstalled() {
   }
 }
 
-function isGCPCredentialProviderInstalled() {
+export function isGCPCredentialProviderInstalled() {
   try {
     require.resolve('gcp-metadata');
     return true;
@@ -31,18 +34,7 @@ function isGCPCredentialProviderInstalled() {
   }
 }
 
-module.exports = {
-  SKIP_AWS_TESTS,
-  KEYS: {
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    AWS_REGION,
-    AWS_CMK_ID
-  },
-  awsKmsProviders,
-  awsDataKeyOptions,
-  credentialProvidersInstalled: {
-    aws: isAWSCredentialProviderInstalled(),
-    gcp: isGCPCredentialProviderInstalled()
-  }
+export const credentialProvidersInstalled = {
+  aws: isAWSCredentialProviderInstalled(),
+  gcp: isGCPCredentialProviderInstalled()
 };

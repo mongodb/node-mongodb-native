@@ -1,32 +1,31 @@
-import {
-  MongoCryptAzureKMSRequestError,
-  MongoCryptKMSRequestNetworkTimeoutError
-} from '../errors';
+import { type Document } from 'bson';
+
+import { MongoCryptAzureKMSRequestError, MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
+import { type KMSProviders } from '.';
 import * as utils from './utils';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 
+interface AccessToken {
+  accessToken: string;
+  expiresOnTimestamp: number;
+}
 /**
- * @class
- * @ignore
+ * @internal
  */
 export class AzureCredentialCache {
-  constructor() {
-    /**
-     * @type { { accessToken: string, expiresOnTimestamp: number } | null}
-     */
-    this.cachedToken = null;
-  }
+  /** @internal */
+  cachedToken: AccessToken | null = null;
 
-  async getToken() {
+  async getToken(): Promise<AccessToken> {
     if (this.needsRefresh(this.cachedToken)) {
       this.cachedToken = await this._getToken();
     }
 
-    return { accessToken: this.cachedToken.accessToken };
+    return { ...this.cachedToken! };
   }
 
-  needsRefresh(token) {
+  needsRefresh(token: typeof this.cachedToken): boolean {
     if (token == null) {
       return true;
     }
@@ -36,7 +35,7 @@ export class AzureCredentialCache {
 
   /**
    * exposed for testing
-   * @ignore
+   * @internal
    */
   resetCache() {
     this.cachedToken = null;
@@ -44,38 +43,20 @@ export class AzureCredentialCache {
 
   /**
    * exposed for testing
-   * @ignore
+   * @internal
    */
-  _getToken() {
+  _getToken(): Promise<typeof this.cachedToken> {
     return fetchAzureKMSToken();
   }
 }
-/**
- * @type{ AzureCredentialCache }
- * @ignore
- */
-export let tokenCache = new AzureCredentialCache();
 
-/**
- * @typedef {object} KmsRequestResponsePayload
- * @property {string | undefined} access_token
- * @property {string | undefined} expires_in
- *
- * @ignore
- */
+/** @internal */
+export const tokenCache = new AzureCredentialCache();
 
-/**
- * @param { {body: string, status: number }} response
- * @returns { Promise<{ accessToken: string, expiresOnTimestamp: number } >}
- * @ignore
- */
-export async function parseResponse(response) {
+async function parseResponse(response: { body: string; status?: number }): Promise<AccessToken> {
   const { status, body: rawBody } = response;
 
-  /**
-   * @type { KmsRequestResponsePayload }
-   */
-  const body = (() => {
+  const body: { expires_in?: number; access_token?: string } = (() => {
     try {
       return JSON.parse(rawBody);
     } catch {
@@ -113,17 +94,32 @@ export async function parseResponse(response) {
 }
 
 /**
- * @param {object} options
- * @param {object | undefined} [options.headers]
- * @param {URL | undefined} [options.url]
+ * @internal
  *
- * @ignore
+ * exposed for CSFLE
+ * [prose test 18](https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/tests#azure-imds-credentials)
  */
-export function prepareRequest(options) {
+export interface AzureKMSRequestOptions {
+  headers?: Document;
+  url?: URL | string;
+}
+
+/**
+ * @internal
+ *
+ * parses any options provided by prose tests to `fetchAzureKMSToken` and merges them with
+ * the default values for headers and the request url.
+ */
+export function prepareRequest(options: AzureKMSRequestOptions): {
+  headers: Document;
+  url: URL;
+} {
   const url =
     options.url == null
       ? new URL('http://169.254.169.254/metadata/identity/oauth2/token')
-      : new URL(options.url);
+      : // TODO - figure out why typings are messed up.
+        // @ts-expect-error the URL constructor supports a url parameter, but the types say it doesn't
+        new URL(options.url);
 
   url.searchParams.append('api-version', '2018-02-01');
   url.searchParams.append('resource', 'https://vault.azure.net');
@@ -133,28 +129,16 @@ export function prepareRequest(options) {
 }
 
 /**
- * @typedef {object} AzureKMSRequestOptions
- * @property {object | undefined} headers
- * @property {URL | undefined} url
- * @ignore
- */
-
-/**
- * @typedef {object} AzureKMSRequestResponse
- * @property {string} accessToken
- * @property {number} expiresOnTimestamp
- * @ignore
- */
-
-/**
- * exported only for testing purposes in the driver
+ * @internal
  *
- * @param {AzureKMSRequestOptions} options
- * @returns {Promise<AzureKMSRequestResponse>}
+ * `AzureKMSRequestOptions` allows prose tests to modify the http request sent to the idms
+ * servers.  This is required to simulate different server conditions.  No options are expected to
+ * be set outside of tests.
  *
- * @ignore
+ * exposed for CSFLE
+ * [prose test 18](https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/tests#azure-imds-credentials)
  */
-export async function fetchAzureKMSToken(options = {}) {
+export async function fetchAzureKMSToken(options: AzureKMSRequestOptions = {}) {
   const { headers, url } = prepareRequest(options);
   const response = await utils.get(url, { headers }).catch(error => {
     if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
@@ -166,9 +150,11 @@ export async function fetchAzureKMSToken(options = {}) {
 }
 
 /**
- * @ignore
+ * @internal
+ *
+ * @throws Will reject with a `MongoCryptError` if the http request fails or the http response is malformed.
  */
-export async function loadAzureCredentials(kmsProviders) {
+export async function loadAzureCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
   const azure = await tokenCache.getToken();
   return { ...kmsProviders, azure };
 }

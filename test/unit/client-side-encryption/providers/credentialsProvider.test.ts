@@ -1,16 +1,26 @@
-'use strict';
+import { expect } from 'chai';
+import * as http from 'http';
+import * as sinon from 'sinon';
 
-const { expect } = require('chai');
-const http = require('http');
-const requirements = require('../requirements.helper');
-const { loadCredentials, isEmptyCredentials } = require('../../../../src/client-side-encryption/providers');
-const { tokenCache, fetchAzureKMSToken } = require('../../../../src/client-side-encryption/providers/azure');
-const sinon = require('sinon');
-const utils = require('../../../../src/client-side-encryption/providers/utils');
-const {
-  MongoCryptKMSRequestNetworkTimeoutError,
-  MongoCryptAzureKMSRequestError
-} = require('../../../../src/client-side-encryption/errors');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  MongoCryptAzureKMSRequestError,
+  MongoCryptKMSRequestNetworkTimeoutError
+} from '../../../../src/client-side-encryption/errors';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  isEmptyCredentials,
+  type KMSProviders,
+  loadCredentials
+} from '../../../../src/client-side-encryption/providers';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  fetchAzureKMSToken,
+  tokenCache
+} from '../../../../src/client-side-encryption/providers/azure';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as utils from '../../../../src/client-side-encryption/providers/utils';
+import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -19,23 +29,28 @@ const originalSessionToken = process.env.AWS_SESSION_TOKEN;
 describe('#loadCredentials', function () {
   context('isEmptyCredentials()', () => {
     it('returns true for an empty object', () => {
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: {} })).to.be.true;
+      expect(isEmptyCredentials('aws', { aws: {} })).to.be.true;
     });
 
     it('returns false for an object with keys', () => {
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: { password: 'secret' } })).to.be.false;
+      // @ts-expect-error Testing error conditions here
+      expect(isEmptyCredentials('aws', { aws: { password: 'secret' } })).to.be.false;
     });
 
     it('returns false for an nullish credentials', () => {
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: null })).to.be.false;
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: undefined })).to.be.false;
-      expect(isEmptyCredentials('rainyCloud', {})).to.be.false;
+      // @ts-expect-error Testing error conditions here
+      expect(isEmptyCredentials('aws', { aws: null })).to.be.false;
+      expect(isEmptyCredentials('aws', { aws: undefined })).to.be.false;
+      expect(isEmptyCredentials('aws', {})).to.be.false;
     });
 
     it('returns false for non object credentials', () => {
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: 0 })).to.be.false;
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: false })).to.be.false;
-      expect(isEmptyCredentials('rainyCloud', { rainyCloud: Symbol('secret') })).to.be.false;
+      // @ts-expect-error Testing error conditions here
+      expect(isEmptyCredentials('aws', { aws: 0 })).to.be.false;
+      // @ts-expect-error Testing error conditions here
+      expect(isEmptyCredentials('aws', { aws: false })).to.be.false;
+      // @ts-expect-error Testing error conditions here
+      expect(isEmptyCredentials('aws', { aws: Symbol('secret') })).to.be.false;
     });
   });
 
@@ -63,8 +78,8 @@ describe('#loadCredentials', function () {
 
         before(function () {
           if (!requirements.credentialProvidersInstalled.aws) {
-            this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
-            this.currentTest.skip();
+            this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
+            this.currentTest!.skip();
             return;
           }
         });
@@ -92,8 +107,8 @@ describe('#loadCredentials', function () {
 
           before(function () {
             if (!requirements.credentialProvidersInstalled.aws) {
-              this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
-              this.currentTest.skip();
+              this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
+              this.currentTest!.skip();
               return;
             }
           });
@@ -114,19 +129,19 @@ describe('#loadCredentials', function () {
         });
 
         context('when aws is not empty', function () {
-          const kmsProviders = {
+          const kmsProviders: KMSProviders = {
             local: {
               key: Buffer.alloc(96)
             },
             aws: {
               accessKeyId: 'example'
-            }
+            } as any
           };
 
           before(function () {
             if (!requirements.credentialProvidersInstalled.aws) {
-              this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
-              this.currentTest.skip();
+              this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
+              this.currentTest!.skip();
               return;
             }
           });
@@ -149,8 +164,8 @@ describe('#loadCredentials', function () {
 
       before(function () {
         if (requirements.credentialProvidersInstalled.aws) {
-          this.currentTest.skipReason = 'Credentials will be loaded when sdk present';
-          this.currentTest.skip();
+          this.currentTest!.skipReason = 'Credentials will be loaded when sdk present';
+          this.currentTest!.skip();
           return;
         }
       });
@@ -195,8 +210,8 @@ describe('#loadCredentials', function () {
     context('and gcp-metadata is installed', () => {
       beforeEach(function () {
         if (!requirements.credentialProvidersInstalled.gcp) {
-          this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
-          this.currentTest.skip();
+          this.currentTest!.skipReason = 'Tests require gcp-metadata to be installed';
+          this.currentTest!.skip();
           return;
         }
       });
@@ -233,8 +248,8 @@ describe('#loadCredentials', function () {
     context('and gcp-metadata is not installed', () => {
       beforeEach(function () {
         if (requirements.credentialProvidersInstalled.gcp) {
-          this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
-          this.currentTest.skip();
+          this.currentTest!.skipReason = 'Tests require gcp-metadata to be installed';
+          this.currentTest!.skip();
           return;
         }
       });
@@ -261,7 +276,7 @@ describe('#loadCredentials', function () {
       });
 
       context('when there is no cached token', () => {
-        let mockToken = {
+        const mockToken = {
           accessToken: 'mock token',
           expiresOnTimestamp: Date.now()
         };
@@ -269,7 +284,7 @@ describe('#loadCredentials', function () {
         let token;
 
         beforeEach(async () => {
-          sinon.stub(cache, '_getToken').returns(mockToken);
+          sinon.stub(cache, '_getToken').resolves(mockToken);
           token = await cache.getToken();
         });
         it('fetches a token', async () => {
@@ -282,7 +297,7 @@ describe('#loadCredentials', function () {
 
       context('when there is a cached token', () => {
         context('when the cached token expires <= 1 minute from the current time', () => {
-          let mockToken = {
+          const mockToken = {
             accessToken: 'mock token',
             expiresOnTimestamp: Date.now()
           };
@@ -294,7 +309,7 @@ describe('#loadCredentials', function () {
               accessToken: 'a new key',
               expiresOnTimestamp: Date.now() + 3000
             };
-            sinon.stub(cache, '_getToken').returns(mockToken);
+            sinon.stub(cache, '_getToken').resolves(mockToken);
             token = await cache.getToken();
           });
 
@@ -307,12 +322,12 @@ describe('#loadCredentials', function () {
         });
 
         context('when the cached token expires > 1 minute from the current time', () => {
-          let expiredToken = {
+          const expiredToken = {
             token: 'mock token',
             expiresOnTimestamp: Date.now()
           };
 
-          let expectedMockToken = {
+          const expectedMockToken = {
             accessToken: 'a new key',
             expiresOnTimestamp: Date.now() + 10000
           };
@@ -320,8 +335,8 @@ describe('#loadCredentials', function () {
           let token;
 
           beforeEach(async () => {
-            cache.cachedToken = expiredToken;
-            sinon.stub(cache, '_getToken').returns(expectedMockToken);
+            cache.cachedToken = expiredToken as any;
+            sinon.stub(cache, '_getToken').resolves(expectedMockToken);
             token = await cache.getToken();
           });
           it('returns the cached token', () => {
@@ -420,7 +435,9 @@ describe('#loadCredentials', function () {
       afterEach(() => sinon.restore());
       context('when the request times out', () => {
         before(() => {
-          sinon.stub(utils, 'get').rejects(new MongoCryptKMSRequestNetworkTimeoutError());
+          sinon
+            .stub(utils, 'get')
+            .rejects(new MongoCryptKMSRequestNetworkTimeoutError('request timed out'));
         });
 
         it('throws a MongoCryptKMSRequestError', async () => {
@@ -432,7 +449,7 @@ describe('#loadCredentials', function () {
       context('when the request returns a non-200 error', () => {
         context('when the request has no body', () => {
           before(() => {
-            sinon.stub(utils, 'get').resolves({ status: 400 });
+            sinon.stub(utils, 'get').resolves({ status: 400 } as any);
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
@@ -476,7 +493,7 @@ describe('#loadCredentials', function () {
       context('when the request returns a 200 response', () => {
         context('when the request has no body', () => {
           before(() => {
-            sinon.stub(utils, 'get').resolves({ status: 200 });
+            sinon.stub(utils, 'get').resolves({ status: 200 } as any);
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
@@ -547,7 +564,8 @@ describe('#loadCredentials', function () {
 
         it('returns the token in the `azure` field of the kms providers', async () => {
           const kmsProviders = await loadCredentials({ azure: {} });
-          expect(kmsProviders).to.have.property('azure').to.deep.equal({ accessToken: 'token' });
+          const azure = kmsProviders.azure;
+          expect(azure).to.have.property('accessToken', 'token');
         });
       });
     });

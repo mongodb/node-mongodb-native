@@ -1,22 +1,21 @@
-let awsCredentialProviders = null;
-/** @ignore */
-export async function loadAWSCredentials(kmsProviders) {
-  if (awsCredentialProviders == null) {
-    try {
-      // Ensure you always wrap an optional require in the try block NODE-3199
-      awsCredentialProviders = require('@aws-sdk/credential-providers');
-      // eslint-disable-next-line no-empty
-    } catch {}
+import { getAwsCredentialProvider } from '../../deps';
+import { type KMSProviders } from '.';
+
+/**
+ * @internal
+ */
+export async function loadAWSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+  const credentialProvider = getAwsCredentialProvider();
+
+  if ('kModuleError' in credentialProvider) {
+    return kmsProviders;
   }
 
-  if (awsCredentialProviders != null) {
-    const { fromNodeProviderChain } = awsCredentialProviders;
-    const provider = fromNodeProviderChain();
-    // The state machine is the only place calling this so it will
-    // catch if there is a rejection here.
-    const aws = await provider();
-    return { ...kmsProviders, aws };
-  }
-
-  return kmsProviders;
+  const { fromNodeProviderChain } = credentialProvider;
+  const provider = fromNodeProviderChain();
+  // The state machine is the only place calling this so it will
+  // catch if there is a rejection here.
+  const aws = await provider();
+  // TODO - figure out the type mismatch here
+  return { ...kmsProviders, aws };
 }

@@ -98,6 +98,26 @@ export function getAwsCredentialProvider():
 }
 
 /** @internal */
+export type GcpMetadata =
+  | typeof import('gcp-metadata')
+  | { kModuleError: MongoMissingDependencyError };
+
+export function getGcpMetadata(): GcpMetadata {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    const credentialProvider = require('gcp-metadata');
+    return credentialProvider;
+  } catch {
+    return makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `gcp-metadata` not found.' +
+          ' Please install it to enable getting gcp credentials via the official sdk.'
+      )
+    );
+  }
+}
+
+/** @internal */
 export type SnappyLib = {
   /**
    * In order to support both we must check the return value of the function
