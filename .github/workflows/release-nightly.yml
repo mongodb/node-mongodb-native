@@ -19,7 +19,6 @@ name: release-nightly
 jobs:
   release-nightly:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
       - name: actions/setup
