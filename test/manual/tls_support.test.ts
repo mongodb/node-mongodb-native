@@ -82,10 +82,11 @@ describe('TLS Support', function () {
         });
       });
 
-      it('ignores file paths and attempts to connect', () => {
+      it('ignores file paths and fails to connect', () => {
         expect(async () => {
           await client.connect();
           await client.db('test').collection('test').insertOne({ hello: 'world' });
+          await client.db('test').collection('test').findOne({});
         }).to.throw();
       });
     });
