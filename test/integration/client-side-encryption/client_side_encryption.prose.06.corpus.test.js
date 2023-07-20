@@ -9,6 +9,8 @@ const { EJSON } = require('bson');
 const { expect } = require('chai');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
+// eslint-disable-next-line no-restricted-modules
+const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption');
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
@@ -184,7 +186,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
   function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema) {
     let clientEncrypted, clientEncryption;
     beforeEach(function () {
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       return Promise.resolve()
         .then(() => {
           // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
@@ -233,7 +234,7 @@ describe('Client Side Encryption Prose Corpus Test', function () {
           clientEncrypted = this.configuration.newClient({}, { autoEncryption });
 
           return clientEncrypted.connect().then(() => {
-            clientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+            clientEncryption = new ClientEncryption(client, {
               bson: BSON,
               keyVaultNamespace,
               kmsProviders,

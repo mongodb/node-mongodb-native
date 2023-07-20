@@ -1,5 +1,7 @@
 import { expect } from 'chai';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import {
   Binary,
   BSON,
@@ -37,7 +39,6 @@ describe('14. Decryption Events', metadata, function () {
   let aggregateFailed: CommandFailedEvent | undefined;
 
   beforeEach(async function () {
-    const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
     // Create a MongoClient named ``setupClient``.
     setupClient = this.configuration.newClient();
     // Drop and create the collection ``db.decryption_events``.
@@ -55,7 +56,7 @@ describe('14. Decryption Events', metadata, function () {
     //     keyVaultNamespace: "keyvault.datakeys",
     //     kmsProviders: { "local": { "key": <base64 decoding of LOCAL_MASTERKEY> } }
     //   }
-    clientEncryption = new mongodbClientEncryption.ClientEncryption(setupClient, {
+    clientEncryption = new ClientEncryption(setupClient, {
       keyVaultNamespace: 'keyvault.datakeys',
       kmsProviders: { local: { key: LOCAL_KEY } },
       bson: BSON,

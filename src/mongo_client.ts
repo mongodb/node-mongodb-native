@@ -4,6 +4,7 @@ import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
+import { type AutoEncrypter } from './client-side-encryption/autoEncrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -17,7 +18,7 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import type { AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
@@ -375,6 +376,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this[kOptions].monitorCommands = value;
   }
 
+  /** @internal */
   get autoEncrypter(): AutoEncrypter | undefined {
     return this[kOptions].autoEncrypter;
   }
@@ -736,6 +738,7 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;

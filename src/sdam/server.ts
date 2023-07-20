@@ -1,6 +1,7 @@
 import { promisify } from 'util';
 
 import type { Document } from '../bson';
+import { type AutoEncrypter } from '../client-side-encryption/autoEncrypter';
 import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
 import {
   ConnectionPool,
@@ -20,7 +21,6 @@ import {
   SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../constants';
-import type { AutoEncrypter } from '../deps';
 import {
   type AnyError,
   isNetworkErrorBeforeHandshake,

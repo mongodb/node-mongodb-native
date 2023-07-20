@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+x-amzn-RequestId: 61524068-10fc-458d-8c85-aa23fd58ff56
+Cache-Control: no-cache, no-store, must-revalidate, private
+Expires: 0
+Pragma: no-cache
+Date: Fri, 29 Apr 2022 13:21:22 GMT
+Content-Type: application/x-amz-json-1.1
+Content-Length: 294
+Connection: close
+
+{"EncryptionAlgorithm":"SYMMETRIC_DEFAULT","KeyId":"arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0","KeyOrigin":"AWS_KMS","Plaintext":"H2XDIj1WU829c8Eaj4VYeq/L1b5+TDCNNXsvAbvPdqmAKTDl8jOSO7w/Xr0L4duYB/BKqHDIlgkhgN2LBYFrj3Vo/3YqGk79NbvAKCY5TrMPNs2ODGRq4vQ99CDlChnr"}

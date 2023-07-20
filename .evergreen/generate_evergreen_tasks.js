@@ -643,7 +643,7 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = [];
 
-const FLE_PINNED_COMMIT = 'c56c70340093070b1ef5c8a28190187eea21a6e9';
+const FLE_PINNED_COMMIT = '974a4614f8c1c3786e5e39fa63568d83f4f69ebd';
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
@@ -805,6 +805,13 @@ for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
+}
+
+// TODO(NODE-5283): fix socks5 fle tests on node 20+
+for (const variant of BUILD_VARIANTS.filter(
+  variant => variant.expansions && [20].includes(variant.expansions.NODE_LTS_VERSION)
+) ) {
+  variant.tasks = variant.tasks.filter(name => !['test-socks5-csfle'].includes(name));
 }
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));
