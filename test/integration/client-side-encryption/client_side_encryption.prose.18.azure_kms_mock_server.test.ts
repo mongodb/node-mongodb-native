@@ -1,5 +1,9 @@
 import { expect } from 'chai';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { fetchAzureKMSToken } from '../../../src/client-side-encryption/providers/azure';
 import { type Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
@@ -24,18 +28,6 @@ const metadata: MongoDBMetadataUI = {
 };
 
 context('Azure KMS Mock Server Tests', function () {
-  let fetchAzureKMSToken: (options: {
-    url: URL;
-    headers: Document;
-  }) => Promise<{ accessToken: string }>;
-  let MongoCryptAzureKMSRequestError;
-
-  beforeEach(async function () {
-    fetchAzureKMSToken = this.configuration.mongodbClientEncryption['___azureKMSProseTestExports'];
-    MongoCryptAzureKMSRequestError =
-      this.configuration.mongodbClientEncryption.MongoCryptAzureKMSRequestError;
-  });
-
   context('Case 1: Success', metadata, function () {
     // 	Do not set an ``X-MongoDB-HTTP-TestParams`` header.
 

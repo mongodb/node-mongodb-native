@@ -1,6 +1,5 @@
 'use strict';
 
-const mongodb = require('../../../mongodb');
 const process = require('process');
 
 /**
@@ -19,7 +18,7 @@ class ClientSideEncryptionFilter {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
-      mongodbClientEncryption = require('mongodb-client-encryption').extension(mongodb);
+      mongodbClientEncryption = require('mongodb-client-encryption');
     } catch (failedToGetFLELib) {
       if (process.env.TEST_CSFLE) {
         console.error({ failedToGetFLELib });

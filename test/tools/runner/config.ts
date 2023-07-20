@@ -350,11 +350,6 @@ export class TestConfiguration {
     return { writeConcern: { w: 1 } };
   }
 
-  // Accessors and methods Client-Side Encryption
-  get mongodbClientEncryption(): typeof import('mongodb-client-encryption') {
-    return this.clientSideEncryption && this.clientSideEncryption.mongodbClientEncryption;
-  }
-
   kmsProviders(localKey): Record<string, any> {
     return { local: { key: localKey } };
   }
