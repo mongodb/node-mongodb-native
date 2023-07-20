@@ -1099,10 +1099,6 @@ export const OPTIONS = {
     target: 'caFileName',
     type: 'string'
   },
-  tlsCertificateFile: {
-    target: 'certFileName',
-    type: 'string'
-  },
   tlsCertificateKeyFile: {
     target: 'certKeyFileName',
     type: 'string'
