@@ -16,19 +16,14 @@ export interface RenameOptions extends CommandOperationOptions {
 
 /** @internal */
 export class RenameOperation extends CommandOperation<Document> {
-  override options: RenameOptions;
-  collection: Collection;
-  newName: string;
-
-  constructor(collection: Collection, newName: string, options: RenameOptions) {
-    // Check the collection name
+  constructor(
+    public collection: Collection,
+    public newName: string,
+    public override options: RenameOptions
+  ) {
     checkCollectionName(newName);
     super(collection, options);
-
     this.ns = new MongoDBNamespace('admin', '$cmd');
-    this.options = options;
-    this.collection = collection;
-    this.newName = newName;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
