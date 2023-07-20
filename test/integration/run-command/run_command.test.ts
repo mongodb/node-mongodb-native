@@ -45,7 +45,7 @@ describe('RunCommand API', () => {
 
   it('does not support readConcern in options', { requires: { mongodb: '>=5.0' } }, async () => {
     const command = Object.freeze({ find: 'test', filter: {} });
-    //@ts-expect-error: Testing WC is not supported
+    //@ts-expect-error: Testing RC is not supported
     const res = await db.command(command, { readConcern: ReadConcern.MAJORITY });
     expect(res).to.have.property('ok', 1);
     expect(commandsStarted).to.not.have.nested.property('[0].command.readConcern');
