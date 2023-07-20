@@ -643,7 +643,7 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = [];
 
-const FLE_PINNED_COMMIT = 'c56c70340093070b1ef5c8a28190187eea21a6e9';
+const FLE_PINNED_COMMIT = '974a4614f8c1c3786e5e39fa63568d83f4f69ebd';
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
