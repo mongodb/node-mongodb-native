@@ -271,7 +271,7 @@ describe('Indexes', function () {
     }
   });
 
-  context('resolved dropIndexes', function () {
+  context('when dropIndexes succeeds', function () {
     let collection;
 
     beforeEach(async function () {
@@ -279,14 +279,13 @@ describe('Indexes', function () {
       await collection.insert({ a: 1 });
       // Create an index on the collection
       await db.createIndex(collection.collectionName, 'a');
-      /**@type {import('../tools/utils').FailPoint} */
     });
 
     afterEach(async function () {
       await db.dropCollection('test_drop_indexes');
     });
 
-    it('should return true and be undefined in the collection', async function () {
+    it('should return true and should no longer exist in the collection', async function () {
       // Drop all the indexes
       const result = await collection.dropIndexes();
       expect(result).to.equal(true);
@@ -296,7 +295,7 @@ describe('Indexes', function () {
     });
   });
 
-  context('rejected dropIndexes', function () {
+  context('when dropIndexes fails', function () {
     let collection;
 
     beforeEach(async function () {

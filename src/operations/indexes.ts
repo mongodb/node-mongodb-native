@@ -186,7 +186,7 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<Document[]> {
+  override execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
 
@@ -305,18 +305,17 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
     const indexName = this.indexes[0].name;
-    const cursor = this.db.collection(this.collectionName).listIndexes({ session });
-    try {
-      const indexes = await cursor.toArray();
-      if (indexName && indexes.some(index => index.name === indexName)) return indexName;
-      return await super.execute(server, session);
-    } catch (error) {
-      if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
-        // ignore "NamespaceNotFound" errors
-        return super.execute(server, session);
-      }
-      return error;
-    }
+    const indexes = await this.db
+      .collection(this.collectionName)
+      .listIndexes({ session })
+      .toArray()
+      .catch(error => {
+        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound)
+          return [];
+        throw error;
+      });
+    if (indexName && indexes.some(index => index.name === indexName)) return indexName;
+    return super.execute(server, session);
   }
 }
 
@@ -430,15 +429,9 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     });
     // Let's check for the index names
     if (!Array.isArray(indexes)) return info[indexes] != null;
-    // Check in list of indexes
-    for (let i = 0; i < indexes.length; i++) {
-      if (info[indexes[i]] == null) {
-        return false;
-      }
-    }
 
     // All keys found return true
-    return true;
+    return Array.prototype.every(indexName => info[indexName] != null);
   }
 }
 
