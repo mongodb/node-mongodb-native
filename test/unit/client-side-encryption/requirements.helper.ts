@@ -1,4 +1,5 @@
-import {getGcpMetadata , getAwsCredentialProvider} from '../../../src/deps';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { getAwsCredentialProvider, getGcpMetadata } from '../../../src/deps';
 
 // Data Key Stuff
 export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;

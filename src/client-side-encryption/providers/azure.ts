@@ -6,36 +6,43 @@ import * as utils from './utils';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 
+/**
+ * The access token that libmongocrypt expects for Azure kms.
+ */
 interface AccessToken {
+  accessToken: string;
+}
+
+/**
+ * The response from the azure idms endpoint, including the `expiresOnTimestamp`.
+ * `expiresOnTimestamp` is needed for caching.
+ */
+interface AzureTokenCacheEntry extends AccessToken {
   accessToken: string;
   expiresOnTimestamp: number;
 }
+
 /**
  * @internal
  */
 export class AzureCredentialCache {
-  /** @internal */
-  cachedToken: AccessToken | null = null;
+  cachedToken: AzureTokenCacheEntry | null = null;
 
   async getToken(): Promise<AccessToken> {
-    if (this.needsRefresh(this.cachedToken)) {
+    if (this.cachedToken == null || this.needsRefresh(this.cachedToken)) {
       this.cachedToken = await this._getToken();
     }
 
-    return { ...this.cachedToken! };
+    return { accessToken: this.cachedToken.accessToken };
   }
 
-  needsRefresh(token: typeof this.cachedToken): boolean {
-    if (token == null) {
-      return true;
-    }
+  needsRefresh(token: AzureTokenCacheEntry): boolean {
     const timeUntilExpirationMS = token.expiresOnTimestamp - Date.now();
     return timeUntilExpirationMS <= MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS;
   }
 
   /**
    * exposed for testing
-   * @internal
    */
   resetCache() {
     this.cachedToken = null;
@@ -43,9 +50,8 @@ export class AzureCredentialCache {
 
   /**
    * exposed for testing
-   * @internal
    */
-  _getToken(): Promise<typeof this.cachedToken> {
+  _getToken(): Promise<AzureTokenCacheEntry> {
     return fetchAzureKMSToken();
   }
 }
@@ -53,7 +59,8 @@ export class AzureCredentialCache {
 /** @internal */
 export const tokenCache = new AzureCredentialCache();
 
-async function parseResponse(response: { body: string; status?: number }): Promise<AccessToken> {
+/** @internal */
+async function parseResponse(response: { body: string; status?: number }): Promise<AzureTokenCacheEntry> {
   const { status, body: rawBody } = response;
 
   const body: { expires_in?: number; access_token?: string } = (() => {
@@ -120,7 +127,7 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
       : // The Node URL constructor technically supports "any object that converts to a valid URL string",
         // but Node types doesn't support this.  See the Node docs for new URL().
         // https://nodejs.org/api/url.html#new-urlinput-base
-        // @ts-ignore
+        // @ts-expect-error URL constructor typings incorrect
         new URL(options.url);
 
   url.searchParams.append('api-version', '2018-02-01');
@@ -140,7 +147,9 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
  * exposed for CSFLE
  * [prose test 18](https://github.com/mongodb/specifications/tree/master/source/client-side-encryption/tests#azure-imds-credentials)
  */
-export async function fetchAzureKMSToken(options: AzureKMSRequestOptions = {}) {
+export async function fetchAzureKMSToken(
+  options: AzureKMSRequestOptions = {}
+): Promise<AzureTokenCacheEntry> {
   const { headers, url } = prepareRequest(options);
   const response = await utils.get(url, { headers }).catch(error => {
     if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
