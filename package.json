@@ -35,6 +35,7 @@
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.201.0",
     "@mongodb-js/zstd": "^1.1.0",
+    "gcp-metadata": "^5.2.0",
     "kerberos": "^2.0.1",
     "mongodb-client-encryption": ">=2.3.0 <3",
     "snappy": "^7.2.2"
@@ -53,6 +54,9 @@
       "optional": true
     },
     "mongodb-client-encryption": {
+      "optional": true
+    },
+    "gcp-metadata": {
       "optional": true
     }
   },
@@ -89,6 +93,7 @@
     "js-yaml": "^4.1.0",
     "mocha": "^10.2.0",
     "mocha-sinon": "^2.1.2",
+    "mongodb-client-encryption": "^2.8.0",
     "mongodb-legacy": "^5.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",

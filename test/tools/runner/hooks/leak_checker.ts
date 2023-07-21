@@ -127,7 +127,7 @@ const leakCheckerBeforeEach = async function () {
 const leakCheckerAfterEach = async function () {
   let thrownError: Error | undefined;
   try {
-    currentLeakChecker.assert();
+    currentLeakChecker?.assert();
   } catch (error) {
     thrownError = error;
   }

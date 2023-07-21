@@ -201,6 +201,8 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
+export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,
@@ -285,7 +287,7 @@ export type {
 } from './cursor/list_search_indexes_cursor';
 export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
+export type { AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';

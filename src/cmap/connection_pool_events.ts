@@ -54,14 +54,19 @@ export abstract class ConnectionPoolMonitoringEvent {
  */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
-  options?: ConnectionPoolOptions;
+  options: Pick<
+    ConnectionPoolOptions,
+    'maxPoolSize' | 'minPoolSize' | 'maxConnecting' | 'maxIdleTimeMS' | 'waitQueueTimeoutMS'
+  >;
   /** @internal */
   name = CONNECTION_POOL_CREATED;
 
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
-    this.options = pool.options;
+    const { maxConnecting, maxPoolSize, minPoolSize, maxIdleTimeMS, waitQueueTimeoutMS } =
+      pool.options;
+    this.options = { maxConnecting, maxPoolSize, minPoolSize, maxIdleTimeMS, waitQueueTimeoutMS };
   }
 }
 

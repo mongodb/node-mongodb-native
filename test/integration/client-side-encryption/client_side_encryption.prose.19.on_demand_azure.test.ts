@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 import { env } from 'process';
 
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 import { Binary } from '../../mongodb';
 
 const metadata: MongoDBMetadataUI = {
@@ -17,16 +21,11 @@ const dataKeyOptions = {
 };
 
 describe('19. On-demand Azure Credentials', () => {
-  let clientEncryption: import('mongodb-client-encryption').ClientEncryption;
+  let clientEncryption;
   let keyVaultClient;
-  let MongoCryptAzureKMSRequestError;
 
   beforeEach(async function () {
     keyVaultClient = this.configuration.newClient();
-
-    const { ClientEncryption } = this.configuration.mongodbClientEncryption;
-    MongoCryptAzureKMSRequestError =
-      this.configuration.mongodbClientEncryption.MongoCryptAzureKMSRequestError;
 
     if (typeof env.AZUREKMS_VMNAME === 'string') {
       // If azure cloud env is present then EXPECTED_AZUREKMS_OUTCOME MUST be set

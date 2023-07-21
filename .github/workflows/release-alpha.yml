@@ -8,13 +8,14 @@ on:
         required: true
         type: string
 
+permissions:
+  id-token: write
+
 name: release-alpha
 
 jobs:
   release-alpha:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - shell: bash
         run: |
