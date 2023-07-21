@@ -1,12 +1,10 @@
 import type { Document } from '../bson';
 import { Collection } from '../collection';
-import { MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { checkCollectionName } from '../utils';
-import type { CommandOperationOptions } from './command';
+import { checkCollectionName, MongoDBNamespace } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
-import { RunAdminCommandOperation } from './run_command';
 
 /** @public */
 export interface RenameOptions extends CommandOperationOptions {
@@ -17,39 +15,36 @@ export interface RenameOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class RenameOperation extends RunAdminCommandOperation {
-  override options: RenameOptions;
-  collection: Collection;
-  newName: string;
-
-  constructor(collection: Collection, newName: string, options: RenameOptions) {
-    // Check the collection name
+export class RenameOperation extends CommandOperation<Document> {
+  constructor(
+    public collection: Collection,
+    public newName: string,
+    public override options: RenameOptions
+  ) {
     checkCollectionName(newName);
-
-    // Build the command
-    const renameCollection = collection.namespace;
-    const toCollection = collection.s.namespace.withCollection(newName).toString();
-    const dropTarget = typeof options.dropTarget === 'boolean' ? options.dropTarget : false;
-    const cmd = { renameCollection: renameCollection, to: toCollection, dropTarget: dropTarget };
-
-    super(collection, cmd, options);
-    this.options = options;
-    this.collection = collection;
-    this.newName = newName;
+    super(collection, options);
+    this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
-    const coll = this.collection;
+    // Build the command
+    const renameCollection = this.collection.namespace;
+    const toCollection = this.collection.s.namespace.withCollection(this.newName).toString();
+    const dropTarget =
+      typeof this.options.dropTarget === 'boolean' ? this.options.dropTarget : false;
 
-    const doc = await super.execute(server, session);
-    // We have an error
-    if (doc?.errmsg) {
-      throw new MongoServerError(doc);
-    }
+    const command = {
+      renameCollection: renameCollection,
+      to: toCollection,
+      dropTarget: dropTarget
+    };
 
-    const newColl: Collection<Document> = new Collection(coll.s.db, this.newName, coll.s.options);
+    await super.executeCommand(server, session, command);
+    return new Collection(this.collection.s.db, this.newName, this.collection.s.options);
+  }
 
-    return newColl;
+  protected executeCallback(_server: any, _session: any, _callback: any): void {
+    throw new Error('Method not implemented.');
   }
 }
 
