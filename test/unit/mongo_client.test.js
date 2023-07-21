@@ -46,9 +46,9 @@ describe('MongoOptions', function () {
      *
      * | nodejs native option  | driver spec compliant option name             | driver option type |
      * |:----------------------|:----------------------------------------------|:-------------------|
-     * | `ca`                  | `tlsCAFile`                                   | `string`           |
+     * | `caFile`              | `tlsCAFile`                                   | `string`           |
      * | `crl`                 | N/A                                           | `string`           |
-     * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
+     * | `certKeyFile`         | `tlsCertificateKeyFile`                       | `string`           |
      * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
      * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
      * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | `boolean`          |
@@ -58,9 +58,10 @@ describe('MongoOptions', function () {
     expect(options).to.not.have.property('tlsCertificateKeyFile');
     expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
-    expect(options).has.property('ca', '');
-    expect(options).has.property('key');
-    expect(options.key).has.length(0);
+    expect(options).to.not.have.property('key');
+    expect(options).to.not.have.property('ca');
+    expect(options).has.property('certKeyFileName', filename);
+    expect(options).has.property('caFileName', filename);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
     expect(options).has.property('tls', true);
   });
@@ -394,10 +395,10 @@ describe('MongoOptions', function () {
       const optsFromObject = parseOptions('mongodb://localhost/', {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
-      expect(optsFromObject).to.have.property('key', 'cert key');
+      expect(optsFromObject).to.have.property('certKeyFileName', 'testCertKey.pem');
 
       const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
-      expect(optsFromUri).to.have.property('key', 'cert key');
+      expect(optsFromUri).to.have.property('certKeyFileName', 'testCertKey.pem');
     });
   });
 
