@@ -431,15 +431,15 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const options = this[kOptions];
 
     if (options.tls) {
-      if (!options.ca && typeof options.caFileName === 'string' && options.caFileName.length > 0) {
-        options.ca = await fs.readFile(options.caFileName, { encoding: 'utf8' });
+      if (!options.ca && typeof options.tlsCAFile === 'string' && options.tlsCAFile.length > 0) {
+        options.ca = await fs.readFile(options.tlsCAFile, { encoding: 'utf8' });
       }
       if (
         !options.key &&
-        typeof options.certKeyFileName === 'string' &&
-        options.certKeyFileName.length > 0
+        typeof options.tlsCertificateKeyFile === 'string' &&
+        options.tlsCertificateKeyFile.length > 0
       ) {
-        options.key = await fs.readFile(options.certKeyFileName, { encoding: 'utf8' });
+        options.key = await fs.readFile(options.tlsCertificateKeyFile, { encoding: 'utf8' });
       }
     }
     if (typeof options.srvHost === 'string') {
@@ -801,8 +801,8 @@ export interface MongoOptions
    */
   tls: boolean;
 
-  caFileName?: string;
-  certKeyFileName?: string;
+  tlsCAFile?: string;
+  tlsCertificateKeyFile?: string;
 
   /** @internal */
   [featureFlag: symbol]: any;

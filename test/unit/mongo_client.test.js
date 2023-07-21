@@ -44,24 +44,22 @@ describe('MongoOptions', function () {
      *
      * ### Additional options:
      *
-     * | nodejs native option  | driver spec compliant option name             | driver option type |
-     * |:----------------------|:----------------------------------------------|:-------------------|
-     * | `caFileName`          | `tlsCAFile`                                   | `string`           |
-     * | `crl`                 | N/A                                           | `string`           |
-     * | `certKeyFileName`     | `tlsCertificateKeyFile`                       | `string`           |
-     * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
-     * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
-     * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | `boolean`          |
-     * | see note below        | `tlsInsecure`                                 | `boolean`          |
+     * | nodejs native option    | driver spec compliant option name             | driver option type |
+     * |:------------------------|:----------------------------------------------|:-------------------|
+     * | `tlsCAFile`             | `tlsCAFile`                                   | `string`           |
+     * | `crl`                   | N/A                                           | `string`           |
+     * | `tlsCertificateKeyFile` | `tlsCertificateKeyFile`                       | `string`           |
+     * | `passphrase`            | `tlsCertificateKeyFilePassword`               | `string`           |
+     * | `rejectUnauthorized`    | `tlsAllowInvalidCertificates`                 | `boolean`          |
+     * | `checkServerIdentity`   | `tlsAllowInvalidHostnames`                    | `boolean`          |
+     * | see note below          | `tlsInsecure`                                 | `boolean`          |
      *
      */
-    expect(options).to.not.have.property('tlsCertificateKeyFile');
-    expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
     expect(options).to.not.have.property('key');
     expect(options).to.not.have.property('ca');
-    expect(options).has.property('certKeyFileName', filename);
-    expect(options).has.property('caFileName', filename);
+    expect(options).to.have.property('tlsCertificateKeyFile', filename);
+    expect(options).to.have.property('tlsCAFile', filename);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
     expect(options).has.property('tls', true);
   });
@@ -395,10 +393,10 @@ describe('MongoOptions', function () {
       const optsFromObject = parseOptions('mongodb://localhost/', {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
-      expect(optsFromObject).to.have.property('certKeyFileName', 'testCertKey.pem');
+      expect(optsFromObject).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
 
       const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
-      expect(optsFromUri).to.have.property('certKeyFileName', 'testCertKey.pem');
+      expect(optsFromUri).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
     });
   });
 

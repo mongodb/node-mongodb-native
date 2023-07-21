@@ -314,13 +314,13 @@ export function executeUriValidationTest(
           .equal(optionValue);
         break;
       case 'tlsCertificateKeyFile':
-        expectedProp = 'certKeyFileName';
+        expectedProp = 'tlsCertificateKeyFile';
         expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
           .to.have.property(expectedProp)
           .equal(optionValue);
         break;
       case 'tlsCAFile':
-        expectedProp = 'caFileName';
+        expectedProp = 'tlsCAFile';
         expect(options, `${errorMessage} ${optionKey} -> ${expectedProp}`)
           .to.have.property(expectedProp)
           .equal(optionValue);

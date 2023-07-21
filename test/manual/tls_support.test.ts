@@ -47,8 +47,8 @@ describe('TLS Support', function () {
       });
 
       it('should read in files async at connect time', async () => {
-        expect(client.options).property('caFileName', TLS_CA_FILE);
-        expect(client.options).property('certKeyFileName', TLS_CERT_KEY_FILE);
+        expect(client.options).property('tlsCAFile', TLS_CA_FILE);
+        expect(client.options).property('tlsCertificateKeyFile', TLS_CERT_KEY_FILE);
         expect(client.options).not.have.property('ca');
         expect(client.options).not.have.property('key');
 
