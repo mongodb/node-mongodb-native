@@ -1,11 +1,11 @@
 import type { Socket, SocketConnectOpts } from 'net';
 import * as net from 'net';
-import { SocksClient } from 'socks';
 import type { ConnectionOptions as TLSConnectionOpts, TLSSocket } from 'tls';
 import * as tls from 'tls';
 
 import type { Document } from '../bson';
 import { LEGACY_HELLO_COMMAND } from '../constants';
+import { getSocks, type SocksLib } from '../deps';
 import {
   MongoCompatibilityError,
   MongoError,
@@ -419,6 +419,18 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
   }
 }
 
+let socks: SocksLib | null = null;
+function loadSocks() {
+  if (socks == null) {
+    const socksImport = getSocks();
+    if ('kModuleError' in socksImport) {
+      throw socksImport.kModuleError;
+    }
+    socks = socksImport;
+  }
+  return socks;
+}
+
 function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback<Stream>) {
   const hostAddress = HostAddress.fromHostPort(
     options.proxyHost ?? '', // proxyHost is guaranteed to set here
@@ -434,7 +446,7 @@ function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback
       proxyHost: undefined
     },
     (err, rawSocket) => {
-      if (err) {
+      if (err || !rawSocket) {
         return callback(err);
       }
 
@@ -445,8 +457,14 @@ function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback
         );
       }
 
+      try {
+        socks ??= loadSocks();
+      } catch (error) {
+        return callback(error);
+      }
+
       // Then, establish the Socks5 proxy connection:
-      SocksClient.createConnection({
+      socks.SocksClient.createConnection({
         existing_socket: rawSocket,
         timeout: options.connectTimeoutMS,
         command: 'connect',

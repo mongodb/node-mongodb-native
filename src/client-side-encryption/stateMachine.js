@@ -4,12 +4,25 @@ import * as tls from 'tls';
 import * as net from 'net';
 import * as fs from 'fs';
 import { once } from 'events';
-import { SocksClient } from 'socks';
 import { MongoNetworkTimeoutError } from '../error';
 import { debug, databaseNamespace, collectionNamespace } from './common';
 import { MongoCryptError } from './errors';
 import { BufferPool } from './buffer_pool';
 import { serialize, deserialize } from '../bson';
+import { getSocks } from '../deps';
+
+/** @type {import('../deps').SocksLib | null} */
+let socks = null;
+function loadSocks() {
+  if (socks == null) {
+    const socksImport = getSocks();
+    if ('kModuleError' in socksImport) {
+      throw socksImport.kModuleError;
+    }
+    socks = socksImport;
+  }
+  return socks;
+}
 
 // libmongocrypt states
 const MONGOCRYPT_CTX_ERROR = 0;
@@ -289,8 +302,9 @@ class StateMachine {
         rawSocket.on('error', onerror);
         try {
           await once(rawSocket, 'connect');
+          socks ??= loadSocks();
           options.socket = (
-            await SocksClient.createConnection({
+            await socks.SocksClient.createConnection({
               existing_socket: rawSocket,
               command: 'connect',
               destination: { host: options.host, port: options.port },
