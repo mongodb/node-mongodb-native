@@ -295,11 +295,7 @@ describe('Connection', function () {
 
         // First add a user.
         const db = client.db(configuration.db);
-
-        db.addUser(username, password, function (err) {
-          expect(err).to.not.exist;
-          restOfTest();
-        });
+        db.command({ createUser: username, pwd: password, roles: [] }).then(restOfTest, done);
 
         function restOfTest() {
           testClient = configuration.newClient(configuration.url({ username, password }));
@@ -324,10 +320,10 @@ describe('Connection', function () {
         client = configuration.newClient();
         const db = client.db(configuration.db);
 
-        db.addUser(username, password, { roles: ['readWrite', 'dbAdmin'] }, function (err) {
-          expect(err).to.not.exist;
-          restOfTest();
-        });
+        db.command({ createUser: username, pwd: password, roles: ['readWrite', 'dbAdmin'] }).then(
+          restOfTest,
+          done
+        );
 
         function restOfTest() {
           const opts = { auth: { username, password }, authSource: configuration.db };

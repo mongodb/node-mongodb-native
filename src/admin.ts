@@ -1,6 +1,5 @@
 import type { Document } from './bson';
 import type { Db } from './db';
-import { AddUserOperation, type AddUserOptions } from './operations/add_user';
 import type { CommandOperationOptions } from './operations/command';
 import { executeOperation } from './operations/execute_operation';
 import {
@@ -114,33 +113,6 @@ export class Admin {
    */
   async ping(options?: CommandOperationOptions): Promise<Document> {
     return this.command({ ping: 1 }, options);
-  }
-
-  /**
-   * Add a user to the database
-   *
-   * @param username - The username for the new user
-   * @param passwordOrOptions - An optional password for the new user, or the options for the command
-   * @param options - Optional settings for the command
-   * @deprecated Use the createUser command in `db.command()` instead.
-   * @see https://www.mongodb.com/docs/manual/reference/command/createUser/
-   */
-  async addUser(
-    username: string,
-    passwordOrOptions?: string | AddUserOptions,
-    options?: AddUserOptions
-  ): Promise<Document> {
-    options =
-      options != null && typeof options === 'object'
-        ? options
-        : passwordOrOptions != null && typeof passwordOrOptions === 'object'
-        ? passwordOrOptions
-        : undefined;
-    const password = typeof passwordOrOptions === 'string' ? passwordOrOptions : undefined;
-    return executeOperation(
-      this.s.db.client,
-      new AddUserOperation(this.s.db, username, password, { dbName: 'admin', ...options })
-    );
   }
 
   /**

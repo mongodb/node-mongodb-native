@@ -88,8 +88,7 @@ describe('URI', function () {
           pass = '$specialch@rs';
         var db = client.db(self.configuration.db);
 
-        db.addUser(user, pass, function (err) {
-          expect(err).to.not.exist;
+        db.command({ createUser: user, pwd: pass, roles: [] }).then(function () {
           var uri =
             'mongodb://' +
             encodeURIComponent(user) +
@@ -102,7 +101,7 @@ describe('URI', function () {
 
             c.close(() => client.close(done));
           });
-        });
+        }, done);
       });
     }
   });
