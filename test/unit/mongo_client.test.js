@@ -46,9 +46,9 @@ describe('MongoOptions', function () {
      *
      * | nodejs native option  | driver spec compliant option name             | driver option type |
      * |:----------------------|:----------------------------------------------|:-------------------|
-     * | `caFile`              | `tlsCAFile`                                   | `string`           |
+     * | `caFileName`          | `tlsCAFile`                                   | `string`           |
      * | `crl`                 | N/A                                           | `string`           |
-     * | `certKeyFile`         | `tlsCertificateKeyFile`                       | `string`           |
+     * | `certKeyFileName`     | `tlsCertificateKeyFile`                       | `string`           |
      * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
      * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
      * | `checkServerIdentity` | `tlsAllowInvalidHostnames`                    | `boolean`          |
