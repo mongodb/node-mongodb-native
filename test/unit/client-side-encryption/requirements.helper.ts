@@ -1,3 +1,5 @@
+import {getGcpMetadata , getAwsCredentialProvider} from '../../../src/deps';
+
 // Data Key Stuff
 export const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 export const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -17,21 +19,11 @@ export const SKIP_AWS_TESTS = [
 ].some(secret => !secret);
 
 export function isAWSCredentialProviderInstalled() {
-  try {
-    require.resolve('@aws-sdk/credential-providers');
-    return true;
-  } catch {
-    return false;
-  }
+  return !('kModuleError' in getAwsCredentialProvider());
 }
 
 export function isGCPCredentialProviderInstalled() {
-  try {
-    require.resolve('gcp-metadata');
-    return true;
-  } catch {
-    return false;
-  }
+  return !('kModuleError' in getGcpMetadata());
 }
 
 export const credentialProvidersInstalled = {
