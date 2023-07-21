@@ -9,7 +9,7 @@ export async function loadGCPCredentials(kmsProviders: KMSProviders): Promise<KM
     return kmsProviders;
   }
 
-  const { access_token: accessToken } = await gcpMetadata.instance({
+  const { access_token: accessToken } = await gcpMetadata.instance<{ access_token: string }>({
     property: 'service-accounts/default/token'
   });
   return { ...kmsProviders, gcp: { accessToken } };

@@ -16,6 +16,5 @@ export async function loadAWSCredentials(kmsProviders: KMSProviders): Promise<KM
   // The state machine is the only place calling this so it will
   // catch if there is a rejection here.
   const aws = await provider();
-  // TODO - figure out the type mismatch here
   return { ...kmsProviders, aws };
 }

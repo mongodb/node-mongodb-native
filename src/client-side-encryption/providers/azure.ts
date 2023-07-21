@@ -117,8 +117,10 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
   const url =
     options.url == null
       ? new URL('http://169.254.169.254/metadata/identity/oauth2/token')
-      : // TODO - figure out why typings are messed up.
-        // @ts-expect-error the URL constructor supports a url parameter, but the types say it doesn't
+      : // The Node URL constructor technically supports "any object that converts to a valid URL string",
+        // but Node types doesn't support this.  See the Node docs for new URL().
+        // https://nodejs.org/api/url.html#new-urlinput-base
+        // @ts-ignore
         new URL(options.url);
 
   url.searchParams.append('api-version', '2018-02-01');
