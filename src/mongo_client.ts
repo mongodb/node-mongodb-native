@@ -790,6 +790,14 @@ export interface MongoOptions
    * If `tlsInsecure` is set to `false`, then it will set the node native options `checkServerIdentity`
    * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
    * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
+   * 
+   * ### Note on `tlsCAFile` and `tlsCertificateKeyFile`
+   *
+   * The files specified by the paths passed in to the `tlsCAFile` and `tlsCertificateKeyFile` fields
+   * are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
+   * the `ca` and `key` fields are populated, they will not be read again on subsequent calls to
+   * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`
+   * and `key` fields will be undefined. 
    */
   tls: boolean;
 
