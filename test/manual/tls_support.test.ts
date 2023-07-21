@@ -76,18 +76,16 @@ describe('TLS Support', function () {
     context('when tls filepaths have length == 0', () => {
       beforeEach(async () => {
         client = new MongoClient(CONNECTION_STRING, {
+          serverSelectionTimeoutMS: 2000,
           tls: true,
           tlsCAFile: '',
           tlsCertificateKeyFile: ''
         });
       });
 
-      it('ignores file paths and fails to connect', () => {
-        expect(async () => {
-          await client.connect();
-          await client.db('test').collection('test').insertOne({ hello: 'world' });
-          await client.db('test').collection('test').findOne({});
-        }).to.throw();
+      it('ignores file paths and fails to connect', async () => {
+        const err = await client.connect().catch(e => e);
+        expect(err).to.be.instanceOf(Error);
       });
     });
   });
