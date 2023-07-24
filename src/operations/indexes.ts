@@ -431,7 +431,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     if (!Array.isArray(indexes)) return info[indexes] != null;
 
     // All keys found return true
-    return Array.prototype.every(indexName => info[indexName] != null);
+    return indexes.every(indexName => info[indexName] != null);
   }
 }
 

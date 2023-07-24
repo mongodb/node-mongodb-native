@@ -1,4 +1,4 @@
-'use strict';
+('use strict');
 const { expect } = require('chai');
 
 const { assert: test, setupDatabase } = require('./shared');
@@ -323,8 +323,52 @@ describe('Indexes', function () {
       await db.dropCollection('test_drop_indexes');
     });
 
-    it('should return false', async function () {
-      const result = await collection.dropIndexes();
+    it('should return false', {
+      metadata: {
+        requires: {
+          mongodb: '>4.0'
+        }
+      },
+
+      test: async function () {
+        const result = await collection.dropIndexes();
+        expect(result).to.equal(false);
+      }
+    });
+  });
+
+  context('indexExists', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = await db.createCollection('test_index_exists');
+      await collection.insert({ a: 1 });
+
+      await db.createIndex(collection.collectionName, 'a');
+      await db.createIndex(collection.collectionName, ['c', 'd', 'e']);
+    });
+
+    afterEach(async function () {
+      await db.dropCollection('test_index_exists');
+    });
+
+    it('should return true when index of type string exists', async function () {
+      const result = await collection.indexExists('a_1');
+      expect(result).to.equal(true);
+    });
+
+    it('should return false when index of type string does not exist', async function () {
+      const result = await collection.indexExists('b_2');
+      expect(result).to.equal(false);
+    });
+
+    it('should return true when an array of indexes exists', async function () {
+      const result = await collection.indexExists('c_1_d_1_e_1');
+      expect(result).to.equal(true);
+    });
+
+    it('should return false when an array of indexes does not exist', async function () {
+      const result = await collection.indexExists('d_1_e_1_f_1');
       expect(result).to.equal(false);
     });
   });
