@@ -605,32 +605,30 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /**
-   * Runs a given operation with an implicitly created session. The lifetime of the session
-   * will be handled without the need for user interaction.
+   * A convenience method for creating and handling the clean up of a ClientSession.
+   * The session will always be ended when the executor finishes.
    *
-   * NOTE: presently the operation MUST return a Promise (either explicit or implicitly as an async function)
-   *
-   * @param options - Optional settings for the command
-   * @param callback - An callback to execute with an implicitly created session
+   * @param executor - An executor function that all operations using the provided session must be invoked in
+   * @param options - optional settings for the command
    */
-  async withSession<T = any>(callback: WithSessionCallback<T>): Promise<T>;
+  async withSession<T = any>(executor: WithSessionCallback<T>): Promise<T>;
   async withSession<T = any>(
     options: ClientSessionOptions,
-    callback: WithSessionCallback<T>
+    executor: WithSessionCallback<T>
   ): Promise<T>;
   async withSession<T = any>(
-    optionsOrOperation: ClientSessionOptions | WithSessionCallback<T>,
-    callback?: WithSessionCallback<T>
+    optionsOrExecutor: ClientSessionOptions | WithSessionCallback<T>,
+    executor?: WithSessionCallback<T>
   ): Promise<T> {
     const options = {
       // Always define an owner
       owner: Symbol(),
       // If it's an object inherit the options
-      ...(typeof optionsOrOperation === 'object' ? optionsOrOperation : {})
+      ...(typeof optionsOrExecutor === 'object' ? optionsOrExecutor : {})
     };
 
     const withSessionCallback =
-      typeof optionsOrOperation === 'function' ? optionsOrOperation : callback;
+      typeof optionsOrExecutor === 'function' ? optionsOrExecutor : executor;
 
     if (withSessionCallback == null) {
       throw new MongoInvalidArgumentError('Missing required callback parameter');
