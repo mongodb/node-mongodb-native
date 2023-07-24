@@ -586,7 +586,6 @@ functions:
     - command: shell.exec
       type: test
       params:
-        timeout_secs: 10
         working_dir: src
         script: |
           export PROJECT_DIRECTORY="$(pwd)"
