@@ -455,6 +455,26 @@ describe('MongoOptions', function () {
     expect(optionsUndefined.checkServerIdentity).to.equal(undefined);
   });
 
+  context('when tlsCAPath is provided as an empty string', function () {
+    it('throws MongoParseError', function () {
+      expect(() => {
+        parseOptions('mongodb://localhost:27017/?tls=true', {
+          tlsCAFile: ''
+        });
+      }).to.throw(MongoParseError);
+    });
+  });
+
+  context('when tlsCertificateKeyFile is provided as an empty string', function () {
+    it('throws MongoParseError', function () {
+      expect(() => {
+        parseOptions('mongodb://localhost:27017/?tls=true', {
+          tlsCertificateKeyFile: ''
+        });
+      }).to.throw(MongoParseError);
+    });
+  });
+
   describe('compressors', function () {
     it('can be set when passed in as an array in the options object', function () {
       const clientViaOpt = new MongoClient('mongodb://localhost', {
