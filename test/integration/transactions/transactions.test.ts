@@ -104,19 +104,18 @@ describe('Transactions', function () {
           expect(withTransactionResult).to.be.undefined;
         });
 
-        it('should return raw command when transaction is successfully committed', async () => {
+        it('should return result of executor when transaction is successfully committed', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
             .withTransaction(async session => {
               await collection.insertOne({ a: 1 }, { session });
               await collection.findOne({ a: 1 }, { session });
+              return 'committed!';
             })
             .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.exist;
-          expect(withTransactionResult).to.be.an('object');
-          expect(withTransactionResult).to.have.property('ok', 1);
+          expect(withTransactionResult).to.equal('committed!');
         });
 
         it('should throw when transaction is aborted due to an error', async () => {
