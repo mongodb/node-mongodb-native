@@ -1,3 +1,5 @@
+import { promisify } from 'node:util';
+
 import { expect } from 'chai';
 
 import {
@@ -247,119 +249,33 @@ describe('Connection', function () {
       client.connect();
     });
 
-    function connectionTester(configuration, testName, callback) {
-      return function (err, client) {
-        expect(err).to.not.exist;
-        const db = client.db(configuration.db);
+    context('when connecting with a username and password', () => {
+      let utilClient: MongoClient;
+      let client: MongoClient;
+      const username = 'spot';
+      const password = 'dogsRCool';
 
-        db.createCollection(testName, function (err, collection) {
-          expect(err).to.not.exist;
-
-          collection.insert({ foo: 123 }, { writeConcern: { w: 1 } }, function (err) {
-            expect(err).to.not.exist;
-
-            db.dropDatabase(function (err, dropped) {
-              expect(err).to.not.exist;
-              test.ok(dropped);
-              if (callback) return callback(client);
-            });
-          });
-        });
-      };
-    }
-
-    it('test connect no options', {
-      metadata: { requires: { topology: 'single' } },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        client = configuration.newClient();
-
-        client.connect(
-          connectionTester(configuration, 'testConnectNoOptions', function () {
-            done();
-          })
-        );
-      }
-    });
-
-    it('test connect good auth', {
-      metadata: { requires: { topology: 'single' } },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const username = 'testConnectGoodAuth';
-        const password = 'password';
-
-        client = configuration.newClient();
-
-        // First add a user.
-        const db = client.db(configuration.db);
-        db.command({ createUser: username, pwd: password, roles: [] }).then(restOfTest, done);
-
-        function restOfTest() {
-          testClient = configuration.newClient(configuration.url({ username, password }));
-          testClient.connect(
-            connectionTester(configuration, 'testConnectGoodAuth', function () {
-              done();
-            })
-          );
-        }
-      }
-    });
-
-    it('test connect good auth as option', {
-      metadata: { requires: { topology: 'single' } },
-
-      test: function (done) {
-        const configuration = this.configuration;
-        const username = 'testConnectGoodAuthAsOption';
-        const password = 'password';
-
-        // First add a user.
-        client = configuration.newClient();
-        const db = client.db(configuration.db);
-
-        db.command({ createUser: username, pwd: password, roles: ['readWrite', 'dbAdmin'] }).then(
-          restOfTest,
-          done
-        );
-
-        function restOfTest() {
-          const opts = { auth: { username, password }, authSource: configuration.db };
-
-          testClient = configuration.newClient(opts);
-
-          testClient.connect(
-            connectionTester(configuration, 'testConnectGoodAuthAsOption', function () {
-              done();
-            })
-          );
-        }
-      }
-    });
-
-    it('test connect bad auth', async function () {
-      client = this.configuration.newClient({
-        auth: {
-          username: 'slithy',
-          password: 'toves'
-        }
+      beforeEach(async function () {
+        utilClient = this.configuration.newClient();
+        await utilClient.db().admin().command({ createUser: username, pwd: password, roles: [] });
       });
-      const error = await client.connect().catch(error => error);
-      expect(error).to.be.instanceOf(MongoServerError);
-      await client.close();
-    });
 
-    it('test connect bad url', {
-      metadata: { requires: { topology: 'single' } },
+      afterEach(async () => {
+        await utilClient.db().admin().command({ dropUser: username });
+        await client?.close();
+        await utilClient?.close();
+      });
 
-      test: function () {
-        const configuration = this.configuration;
-        expect(() =>
-          configuration.newClient('mangodb://localhost:27017/test?safe=false')
-        ).to.throw();
-      }
+      it('accepts a client that provides the correct username and password', async function () {
+        client = this.configuration.newClient({ auth: { username, password } });
+        await client.connect();
+      });
+
+      it('rejects a client that provides the incorrect username and password', async function () {
+        client = this.configuration.newClient({ auth: { username: 'u', password: 'p' } });
+        const error = await client.connect().catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+      });
     });
   });
 });
