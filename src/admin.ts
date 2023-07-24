@@ -1,4 +1,4 @@
-import type { Document } from './bson';
+import { type Document, resolveBSONOptions } from './bson';
 import type { Db } from './db';
 import type { CommandOperationOptions } from './operations/command';
 import { executeOperation } from './operations/execute_operation';
@@ -8,7 +8,7 @@ import {
   type ListDatabasesResult
 } from './operations/list_databases';
 import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
-import { RunCommandOperation, type RunCommandOptions } from './operations/run_command';
+import { RunAdminCommandOperation, type RunCommandOptions } from './operations/run_command';
 import {
   ValidateCollectionOperation,
   type ValidateCollectionOptions
@@ -75,7 +75,11 @@ export class Admin {
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     return executeOperation(
       this.s.db.client,
-      new RunCommandOperation(this.s.db, command, { dbName: 'admin', ...options })
+      new RunAdminCommandOperation(command, {
+        ...resolveBSONOptions(options),
+        session: options?.session,
+        readPreference: options?.readPreference
+      })
     );
   }
 

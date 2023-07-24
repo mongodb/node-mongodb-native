@@ -754,7 +754,7 @@ function endTransaction(
   // send the command
   executeOperation(
     session.client,
-    new RunAdminCommandOperation(undefined, command, {
+    new RunAdminCommandOperation(command, {
       session,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
@@ -778,7 +778,7 @@ function endTransaction(
 
         return executeOperation(
           session.client,
-          new RunAdminCommandOperation(undefined, command, {
+          new RunAdminCommandOperation(command, {
             session,
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
@@ -989,7 +989,7 @@ export function applySession(
     if (
       session.supports.causalConsistency &&
       session.operationTime &&
-      commandSupportsReadConcern(command, options)
+      commandSupportsReadConcern(command)
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
