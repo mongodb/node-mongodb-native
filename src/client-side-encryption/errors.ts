@@ -5,6 +5,7 @@ import { type Document } from '../bson';
  * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
 export class MongoCryptError extends Error {
+  /** @internal */
   constructor(message: string, options: { cause?: Error } = {}) {
     super(message, options);
   }
@@ -20,6 +21,7 @@ export class MongoCryptError extends Error {
  */
 export class MongoCryptCreateDataKeyError extends MongoCryptError {
   encryptedFields: Document;
+  /** @internal */
   constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
     super(`Unable to complete creating data keys: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
@@ -36,6 +38,7 @@ export class MongoCryptCreateDataKeyError extends MongoCryptError {
  */
 export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
   encryptedFields: Document;
+  /** @internal */
   constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
     super(`Unable to create collection: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
@@ -53,6 +56,7 @@ export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
 export class MongoCryptAzureKMSRequestError extends MongoCryptError {
   /** The body of the http response that failed, if present. */
   body?: Document;
+  /** @internal */
   constructor(message: string, body?: Document) {
     super(message);
     this.body = body;

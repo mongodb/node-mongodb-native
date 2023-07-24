@@ -1,8 +1,8 @@
-import { type Document } from 'bson';
+import { type Document } from '../../bson';
 
 import { MongoCryptAzureKMSRequestError, MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
-import { type KMSProviders } from '.';
-import * as utils from './utils';
+import { type KMSProviders } from './index';
+import { get } from './utils';
 
 const MINIMUM_TOKEN_REFRESH_IN_MILLISECONDS = 6000;
 
@@ -124,11 +124,7 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
   const url =
     options.url == null
       ? new URL('http://169.254.169.254/metadata/identity/oauth2/token')
-      : // The Node URL constructor technically supports "any object that converts to a valid URL string",
-        // but Node types doesn't support this.  See the Node docs for new URL().
-        // https://nodejs.org/api/url.html#new-urlinput-base
-        // @ts-expect-error URL constructor typings incorrect
-        new URL(options.url);
+      : new URL(options.url.toString());
 
   url.searchParams.append('api-version', '2018-02-01');
   url.searchParams.append('resource', 'https://vault.azure.net');
@@ -151,7 +147,7 @@ export async function fetchAzureKMSToken(
   options: AzureKMSRequestOptions = {}
 ): Promise<AzureTokenCacheEntry> {
   const { headers, url } = prepareRequest(options);
-  const response = await utils.get(url, { headers }).catch(error => {
+  const response = await get(url, { headers }).catch(error => {
     if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
       throw new MongoCryptAzureKMSRequestError(`[Azure KMS] ${error.message}`);
     }

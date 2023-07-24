@@ -132,15 +132,13 @@ export interface KMSProviders {
  *
  * @internal - exposed for testing purposes only
  */
-export function isEmptyCredentials(provider: KMSProvider, kmsProviders: KMSProviders) {
+export function isEmptyCredentials(providerName: KMSProvider, kmsProviders: KMSProviders) {
+  const provider = kmsProviders[providerName];
   return (
-    provider in kmsProviders &&
-    kmsProviders[provider] != null &&
-    typeof kmsProviders[provider] === 'object' &&
-    // Typescript does not infer that kmsProviders[provider] is non-null,
-    // even though we check it two lines up.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    Object.keys(kmsProviders[provider]!).length === 0
+    provider &&
+    provider != null &&
+    typeof provider === 'object' &&
+    Object.keys(provider).length === 0
   );
 }
 
