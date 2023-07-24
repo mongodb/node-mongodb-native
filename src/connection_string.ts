@@ -1096,10 +1096,20 @@ export const OPTIONS = {
     }
   },
   tlsCAFile: {
-    type: 'string'
+    transform({ name, values: [value] }) {
+      if (typeof value === 'string' && value.length === 0) {
+        throw new MongoParseError(`${name} must have non-zero length`);
+      }
+      return value;
+    }
   },
   tlsCertificateKeyFile: {
-    type: 'string'
+    transform({ name, values: [value] }) {
+      if (typeof value === 'string' && value.length === 0) {
+        throw new MongoParseError(`${name} must have non-zero length`);
+      }
+      return value;
+    }
   },
   tlsCertificateKeyFilePassword: {
     target: 'passphrase',
