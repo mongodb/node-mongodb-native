@@ -1,16 +1,18 @@
-import { MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
 import * as http from 'http';
+import { clearTimeout, setTimeout } from 'timers';
+
+import { MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
 
 /**
- * @param {URL | string} url
- * @param {http.RequestOptions} options
- *
- * @returns { Promise<{ body: string, status: number }> }
- * @ignore
+ * @internal
  */
-function get(url, options = {}) {
+export function get(
+  url: URL | string,
+  options: http.RequestOptions = {}
+): Promise<{ body: string; status: number | undefined }> {
   return new Promise((resolve, reject) => {
-    let timeoutId;
+    /* eslint-disable prefer-const */
+    let timeoutId: NodeJS.Timeout;
     const request = http
       .get(url, options, response => {
         response.setEncoding('utf8');
@@ -33,5 +35,3 @@ function get(url, options = {}) {
     }, 10000);
   });
 }
-
-module.exports = { get };

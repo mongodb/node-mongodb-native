@@ -1,63 +1,75 @@
+import { type Document } from '../bson';
+
 /**
- * @class
+ * @public
  * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
 export class MongoCryptError extends Error {
-  constructor(message, options = {}) {
-    super(message);
-    if (options.cause != null) {
-      this.cause = options.cause;
-    }
+  /** @internal */
+  constructor(message: string, options: { cause?: Error } = {}) {
+    super(message, options);
   }
 
-  get name() {
+  override get name() {
     return 'MongoCryptError';
   }
 }
 
 /**
- * @class
+ * @public
  * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create data keys
  */
 export class MongoCryptCreateDataKeyError extends MongoCryptError {
-  constructor({ encryptedFields, cause }) {
+  encryptedFields: Document;
+  /** @internal */
+  constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
     super(`Unable to complete creating data keys: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
   }
 
-  get name() {
+  override get name() {
     return 'MongoCryptCreateDataKeyError';
   }
 }
 
 /**
- * @class
+ * @public
  * An error indicating that `ClientEncryption.createEncryptedCollection()` failed to create a collection
  */
 export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
-  constructor({ encryptedFields, cause }) {
+  encryptedFields: Document;
+  /** @internal */
+  constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
     super(`Unable to create collection: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
   }
 
-  get name() {
+  override get name() {
     return 'MongoCryptCreateEncryptedCollectionError';
   }
 }
 
 /**
- * @class
+ * @public
  * An error indicating that mongodb-client-encryption failed to auto-refresh Azure KMS credentials.
  */
 export class MongoCryptAzureKMSRequestError extends MongoCryptError {
-  /**
-   * @param {string} message
-   * @param {object | undefined} body
-   */
-  constructor(message, body) {
+  /** The body of the http response that failed, if present. */
+  body?: Document;
+  /** @internal */
+  constructor(message: string, body?: Document) {
     super(message);
     this.body = body;
   }
+
+  override get name(): string {
+    return 'MongoCryptAzureKMSRequestError';
+  }
 }
 
-export class MongoCryptKMSRequestNetworkTimeoutError extends MongoCryptError {}
+/** @public */
+export class MongoCryptKMSRequestNetworkTimeoutError extends MongoCryptError {
+  override get name(): string {
+    return 'MongoCryptKMSRequestNetworkTimeoutError';
+  }
+}

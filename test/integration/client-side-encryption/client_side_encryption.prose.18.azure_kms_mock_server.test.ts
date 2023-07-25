@@ -3,11 +3,14 @@ import { expect } from 'chai';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoCryptAzureKMSRequestError } from '../../../src/client-side-encryption/errors';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { fetchAzureKMSToken } from '../../../src/client-side-encryption/providers/azure';
+import {
+  type AzureKMSRequestOptions,
+  fetchAzureKMSToken
+} from '../../../src/client-side-encryption/providers/azure';
 import { type Document } from '../../mongodb';
 
 const BASE_URL = new URL(`http://127.0.0.1:8080/metadata/identity/oauth2/token`);
-class KMSRequestOptions {
+class KMSRequestOptions implements AzureKMSRequestOptions {
   url: URL = BASE_URL;
   headers: Document;
   constructor(testCase?: 'empty-json' | 'bad-json' | '404' | '500' | 'slow') {

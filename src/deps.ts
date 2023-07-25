@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import type { Document } from './bson';
-import type { AWSCredentials } from './cmap/auth/mongodb_aws';
 import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
 import type { MongoClient } from './mongo_client';
@@ -76,6 +75,18 @@ export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissin
   }
 }
 
+/**
+ * @internal
+ * Copy of the AwsCredentialIdentityProvider interface from [`smithy/types`](https://socket.dev/npm/package/\@smithy/types/files/1.1.1/dist-types/identity/awsCredentialIdentity.d.ts),
+ * the return type of the aws-sdk's `fromNodeProviderChain().provider()`.
+ */
+export interface AWSCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string;
+  expiration?: Date;
+}
+
 type CredentialProvider = {
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
 };
@@ -92,6 +103,26 @@ export function getAwsCredentialProvider():
       new MongoMissingDependencyError(
         'Optional module `@aws-sdk/credential-providers` not found.' +
           ' Please install it to enable getting aws credentials via the official sdk.'
+      )
+    );
+  }
+}
+
+/** @internal */
+export type GcpMetadata =
+  | typeof import('gcp-metadata')
+  | { kModuleError: MongoMissingDependencyError };
+
+export function getGcpMetadata(): GcpMetadata {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    const credentialProvider = require('gcp-metadata');
+    return credentialProvider;
+  } catch {
+    return makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `gcp-metadata` not found.' +
+          ' Please install it to enable getting gcp credentials via the official sdk.'
       )
     );
   }

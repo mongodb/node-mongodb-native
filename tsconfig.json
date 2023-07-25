@@ -9,7 +9,8 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "lib": [
-      "es2021"
+      "es2021",
+      "ES2022.Error"
     ],
     // We don't make use of tslib helpers, all syntax used is supported by target engine
     "importHelpers": false,
