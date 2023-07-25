@@ -121,10 +121,7 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
   headers: Document;
   url: URL;
 } {
-  const url =
-    options.url == null
-      ? new URL('http://169.254.169.254/metadata/identity/oauth2/token')
-      : new URL(options.url.toString());
+  const url = new URL(options.url?.toString() ?? 'http://169.254.169.254/metadata/identity/oauth2/token');
 
   url.searchParams.append('api-version', '2018-02-01');
   url.searchParams.append('resource', 'https://vault.azure.net');
