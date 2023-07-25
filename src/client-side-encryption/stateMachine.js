@@ -8,7 +8,7 @@ import { SocksClient } from 'socks';
 import { MongoNetworkTimeoutError } from '../error';
 import { debug, databaseNamespace, collectionNamespace } from './common';
 import { MongoCryptError } from './errors';
-import { BufferPool } from './buffer_pool';
+import { BufferPool } from '../utils';
 import { serialize, deserialize } from '../bson';
 
 // libmongocrypt states
