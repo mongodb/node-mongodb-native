@@ -1,11 +1,26 @@
 import * as crypto from 'crypto';
 
-export function makeAES256Hook(method, mode) {
-  return function (key, iv, input, output) {
+type AES256Callback = (
+  key: Uint8Array,
+  iv: Uint8Array,
+  input: Uint8Array,
+  output: Uint8Array
+) => number | Error;
+
+export function makeAES256Hook(
+  method: 'createCipheriv' | 'createDecipheriv',
+  mode: 'aes-256-cbc' | 'aes-256-ctr'
+): AES256Callback {
+  return function (
+    key: Uint8Array,
+    iv: Uint8Array,
+    input: Uint8Array,
+    output: Uint8Array
+  ): number | Error {
     let result;
 
     try {
-      let cipher = crypto[method](mode, key, iv);
+      const cipher = crypto[method](mode, key, iv);
       cipher.setAutoPadding(false);
       result = cipher.update(input);
       const final = cipher.final();
@@ -21,7 +36,7 @@ export function makeAES256Hook(method, mode) {
   };
 }
 
-export function randomHook(buffer, count) {
+export function randomHook(buffer: Uint8Array, count: number): number | Error {
   try {
     crypto.randomFillSync(buffer, 0, count);
   } catch (e) {
@@ -30,7 +45,7 @@ export function randomHook(buffer, count) {
   return count;
 }
 
-export function sha256Hook(input, output) {
+export function sha256Hook(input: Uint8Array, output: Uint8Array): number | Error {
   let result;
   try {
     result = crypto.createHash('sha256').update(input).digest();
@@ -42,8 +57,9 @@ export function sha256Hook(input, output) {
   return result.length;
 }
 
-export function makeHmacHook(algorithm) {
-  return (key, input, output) => {
+type HMACHook = (key: Uint8Array, input: Uint8Array, output: Uint8Array) => number | Error;
+export function makeHmacHook(algorithm: 'sha512' | 'sha256'): HMACHook {
+  return (key: Uint8Array, input: Uint8Array, output: Uint8Array): number | Error => {
     let result;
     try {
       result = crypto.createHmac(algorithm, key).update(input).digest();
@@ -56,11 +72,16 @@ export function makeHmacHook(algorithm) {
   };
 }
 
-export function signRsaSha256Hook(key, input, output) {
+export function signRsaSha256Hook(
+  key: Uint8Array,
+  input: Uint8Array,
+  output: Uint8Array
+): number | Error {
   let result;
   try {
     const signer = crypto.createSign('sha256WithRSAEncryption');
     const privateKey = Buffer.from(
+      // TODO: check this
       `-----BEGIN PRIVATE KEY-----\n${key.toString('base64')}\n-----END PRIVATE KEY-----\n`
     );
 
@@ -72,7 +93,6 @@ export function signRsaSha256Hook(key, input, output) {
   result.copy(output);
   return result.length;
 }
-
 
 export const aes256CbcEncryptHook = makeAES256Hook('createCipheriv', 'aes-256-cbc');
 export const aes256CbcDecryptHook = makeAES256Hook('createDecipheriv', 'aes-256-cbc');
