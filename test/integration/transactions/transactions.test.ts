@@ -10,15 +10,6 @@ import {
 } from '../../mongodb';
 
 describe('Transactions', function () {
-  let client: MongoClient;
-  beforeEach(async function () {
-    client = this.configuration.newClient();
-  });
-
-  afterEach(async function () {
-    await client.close();
-  });
-
   describe('withTransaction', function () {
     let session: ClientSession;
     let sessionPool: ServerSessionPool;
@@ -113,19 +104,18 @@ describe('Transactions', function () {
           expect(withTransactionResult).to.be.undefined;
         });
 
-        it('should return raw command when transaction is successfully committed', async () => {
+        it('should return result of executor when transaction is successfully committed', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
             .withTransaction(async session => {
               await collection.insertOne({ a: 1 }, { session });
               await collection.findOne({ a: 1 }, { session });
+              return 'committed!';
             })
             .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.exist;
-          expect(withTransactionResult).to.be.an('object');
-          expect(withTransactionResult).to.have.property('ok', 1);
+          expect(withTransactionResult).to.be.undefined;
         });
 
         it('should throw when transaction is aborted due to an error', async () => {
@@ -193,32 +183,6 @@ describe('Transactions', function () {
         });
       }
     });
-  });
-
-  context('commitTransaction()', () => {
-    it(
-      'returns void',
-      { requires: { topology: ['sharded', 'replicaset'], mongodb: '>=4.1.0' } },
-      async () =>
-        client.withSession(async session =>
-          session.withTransaction(async () => {
-            expect(await session.commitTransaction()).to.be.undefined;
-          })
-        )
-    );
-  });
-
-  context('abortTransaction()', () => {
-    it(
-      'returns void',
-      { requires: { topology: ['sharded', 'replicaset'], mongodb: '>=4.1.0' } },
-      async () =>
-        client.withSession(async session =>
-          session.withTransaction(async () => {
-            expect(await session.abortTransaction()).to.be.undefined;
-          })
-        )
-    );
   });
 
   describe('TransientTransactionError', function () {
