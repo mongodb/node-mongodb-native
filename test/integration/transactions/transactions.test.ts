@@ -10,6 +10,15 @@ import {
 } from '../../mongodb';
 
 describe('Transactions', function () {
+  let client: MongoClient;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   describe('withTransaction', function () {
     let session: ClientSession;
     let sessionPool: ServerSessionPool;
@@ -184,6 +193,32 @@ describe('Transactions', function () {
         });
       }
     });
+  });
+
+  context('commitTransaction()', () => {
+    it(
+      'returns void',
+      { requires: { topology: ['sharded', 'replicaset'], mongodb: '>=4.1.0' } },
+      async () =>
+        client.withSession(async session =>
+          session.withTransaction(async () => {
+            expect(await session.commitTransaction()).to.be.undefined;
+          })
+        )
+    );
+  });
+
+  context('abortTransaction()', () => {
+    it(
+      'returns void',
+      { requires: { topology: ['sharded', 'replicaset'], mongodb: '>=4.1.0' } },
+      async () =>
+        client.withSession(async session =>
+          session.withTransaction(async () => {
+            expect(await session.abortTransaction()).to.be.undefined;
+          })
+        )
+    );
   });
 
   describe('TransientTransactionError', function () {
