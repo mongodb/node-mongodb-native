@@ -1,52 +1,224 @@
-import { databaseNamespace } from './common';
-import { StateMachine } from './stateMachine';
-import { MongocryptdManager } from './mongocryptdManager';
-import {MongoClient} from '../mongo_client';
-import {MongoError} from '../error';
-import { loadCredentials } from './providers';
-import * as  cryptoCallbacks from './cryptoCallbacks';
-import { serialize, deserialize } from '../bson';
-import { AutoEncryptionOptions, getMongoDBClientEncryption } from '../deps';
+import type { MongoCrypt } from 'mongodb-client-encryption';
 
-/**
- * Configuration options for a automatic client encryption.
- *
- * @typedef {Object} AutoEncrypter~AutoEncryptionOptions
- * @property {MongoClient} [keyVaultClient] A `MongoClient` used to fetch keys from a key vault
- * @property {string} [keyVaultNamespace] The namespace where keys are stored in the key vault
- * @property {KMSProviders} [kmsProviders] Configuration options that are used by specific KMS providers during key generation, encryption, and decryption.
- * @property {object} [schemaMap] A map of namespaces to a local JSON schema for encryption
- * @property {boolean} [bypassAutoEncryption] Allows the user to bypass auto encryption, maintaining implicit decryption
- * @property {AutoEncrypter~logger} [options.logger] An optional hook to catch logging messages from the underlying encryption engine
- * @property {AutoEncrypter~AutoEncryptionExtraOptions} [extraOptions] Extra options related to the mongocryptd process
- */
+import { deserialize, type Document, serialize } from '../bson';
+import { type ProxyOptions } from '../cmap/connection';
+import { getMongoDBClientEncryption } from '../deps';
+import { type AnyError, MongoError, MongoRuntimeError } from '../error';
+import { MongoClient, type MongoClientOptions } from '../mongo_client';
+import { type Callback } from '../utils';
+import { databaseNamespace } from './common';
+import * as cryptoCallbacks from './cryptoCallbacks';
+import { MongocryptdManager } from './mongocryptdManager';
+import { type KMSProviders, loadCredentials } from './providers';
+import { StateMachine } from './stateMachine';
+
+/** @public */
+export interface AutoEncryptionTlsOptions {
+  /**
+   * Specifies the location of a local .pem file that contains
+   * either the client's TLS/SSL certificate and key.
+   */
+  tlsCertificateKeyFile?: string;
+  /**
+   * Specifies the password to de-crypt the tlsCertificateKeyFile.
+   */
+  tlsCertificateKeyFilePassword?: string;
+  /**
+   * Specifies the location of a local .pem file that contains the
+   * root certificate chain from the Certificate Authority.
+   * This file is used to validate the certificate presented by the
+   * KMS provider.
+   */
+  tlsCAFile?: string;
+}
+
+/** @public */
+export interface AutoEncryptionOptions {
+  /** @internal client for metadata lookups */
+  metadataClient?: MongoClient;
+  /** A `MongoClient` used to fetch keys from a key vault */
+  keyVaultClient?: MongoClient;
+  /** The namespace where keys are stored in the key vault */
+  keyVaultNamespace?: string;
+  /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
+  kmsProviders?: {
+    /** Configuration options for using 'aws' as your KMS provider */
+    aws?:
+      | {
+          /** The access key used for the AWS KMS provider */
+          accessKeyId: string;
+          /** The secret access key used for the AWS KMS provider */
+          secretAccessKey: string;
+          /**
+           * An optional AWS session token that will be used as the
+           * X-Amz-Security-Token header for AWS requests.
+           */
+          sessionToken?: string;
+        }
+      | Record<string, never>;
+    /** Configuration options for using 'local' as your KMS provider */
+    local?: {
+      /**
+       * The master key used to encrypt/decrypt data keys.
+       * A 96-byte long Buffer or base64 encoded string.
+       */
+      key: Buffer | string;
+    };
+    /** Configuration options for using 'azure' as your KMS provider */
+    azure?:
+      | {
+          /** The tenant ID identifies the organization for the account */
+          tenantId: string;
+          /** The client ID to authenticate a registered application */
+          clientId: string;
+          /** The client secret to authenticate a registered application */
+          clientSecret: string;
+          /**
+           * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+           * This is optional, and only needed if customer is using a non-commercial Azure instance
+           * (e.g. a government or China account, which use different URLs).
+           * Defaults to "login.microsoftonline.com"
+           */
+          identityPlatformEndpoint?: string | undefined;
+        }
+      | {
+          /**
+           * If present, an access token to authenticate with Azure.
+           */
+          accessToken: string;
+        }
+      | Record<string, never>;
+    /** Configuration options for using 'gcp' as your KMS provider */
+    gcp?:
+      | {
+          /** The service account email to authenticate */
+          email: string;
+          /** A PKCS#8 encrypted key. This can either be a base64 string or a binary representation */
+          privateKey: string | Buffer;
+          /**
+           * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+           * Defaults to "oauth2.googleapis.com"
+           */
+          endpoint?: string | undefined;
+        }
+      | {
+          /**
+           * If present, an access token to authenticate with GCP.
+           */
+          accessToken: string;
+        }
+      | Record<string, never>;
+    /**
+     * Configuration options for using 'kmip' as your KMS provider
+     */
+    kmip?: {
+      /**
+       * The output endpoint string.
+       * The endpoint consists of a hostname and port separated by a colon.
+       * E.g. "example.com:123". A port is always present.
+       */
+      endpoint?: string;
+    };
+  };
+  /**
+   * A map of namespaces to a local JSON schema for encryption
+   *
+   * **NOTE**: Supplying options.schemaMap provides more security than relying on JSON Schemas obtained from the server.
+   * It protects against a malicious server advertising a false JSON Schema, which could trick the client into sending decrypted data that should be encrypted.
+   * Schemas supplied in the schemaMap only apply to configuring automatic encryption for Client-Side Field Level Encryption.
+   * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
+   */
+  schemaMap?: Document;
+  /** Supply a schema for the encrypted fields in the document  */
+  encryptedFieldsMap?: Document;
+  /** Allows the user to bypass auto encryption, maintaining implicit decryption */
+  bypassAutoEncryption?: boolean;
+  /** Allows users to bypass query analysis */
+  bypassQueryAnalysis?: boolean;
+  options?: {
+    /** An optional hook to catch logging messages from the underlying encryption engine */
+    logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
+  };
+  extraOptions?: {
+    /**
+     * A local process the driver communicates with to determine how to encrypt values in a command.
+     * Defaults to "mongodb://%2Fvar%2Fmongocryptd.sock" if domain sockets are available or "mongodb://localhost:27020" otherwise
+     */
+    mongocryptdURI?: string;
+    /** If true, autoEncryption will not attempt to spawn a mongocryptd before connecting  */
+    mongocryptdBypassSpawn?: boolean;
+    /** The path to the mongocryptd executable on the system */
+    mongocryptdSpawnPath?: string;
+    /** Command line arguments to use when auto-spawning a mongocryptd */
+    mongocryptdSpawnArgs?: string[];
+    /**
+     * Full path to a MongoDB Crypt shared library to be used (instead of mongocryptd).
+     *
+     * This needs to be the path to the file itself, not a directory.
+     * It can be an absolute or relative path. If the path is relative and
+     * its first component is `$ORIGIN`, it will be replaced by the directory
+     * containing the mongodb-client-encryption native addon file. Otherwise,
+     * the path will be interpreted relative to the current working directory.
+     *
+     * Currently, loading different MongoDB Crypt shared library files from different
+     * MongoClients in the same process is not supported.
+     *
+     * If this option is provided and no MongoDB Crypt shared library could be loaded
+     * from the specified location, creating the MongoClient will fail.
+     *
+     * If this option is not provided and `cryptSharedLibRequired` is not specified,
+     * the AutoEncrypter will attempt to spawn and/or use mongocryptd according
+     * to the mongocryptd-specific `extraOptions` options.
+     *
+     * Specifying a path prevents mongocryptd from being used as a fallback.
+     *
+     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
+     */
+    cryptSharedLibPath?: string;
+    /**
+     * If specified, never use mongocryptd and instead fail when the MongoDB Crypt
+     * shared library could not be loaded.
+     *
+     * This is always true when `cryptSharedLibPath` is specified.
+     *
+     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
+     */
+    cryptSharedLibRequired?: boolean;
+    /**
+     * Search paths for a MongoDB Crypt shared library to be used (instead of mongocryptd)
+     * Only for driver testing!
+     * @internal
+     */
+    cryptSharedLibSearchPaths?: string[];
+  };
+  proxyOptions?: ProxyOptions;
+  /** The TLS options to use connecting to the KMS provider */
+  tlsOptions?: {
+    aws?: AutoEncryptionTlsOptions;
+    local?: AutoEncryptionTlsOptions;
+    azure?: AutoEncryptionTlsOptions;
+    gcp?: AutoEncryptionTlsOptions;
+    kmip?: AutoEncryptionTlsOptions;
+  };
+}
 
 /**
  * Extra options related to the mongocryptd process
  * \* _Available in MongoDB 6.0 or higher._
- * @typedef {object} AutoEncrypter~AutoEncryptionExtraOptions
- * @property {string} [mongocryptdURI] A local process the driver communicates with to determine how to encrypt values in a command. Defaults to "mongodb://%2Fvar%2Fmongocryptd.sock" if domain sockets are available or "mongodb://localhost:27020" otherwise
- * @property {boolean} [mongocryptdBypassSpawn=false] If true, autoEncryption will not attempt to spawn a mongocryptd before connecting
- * @property {string} [mongocryptdSpawnPath] The path to the mongocryptd executable on the system
- * @property {string[]} [mongocryptdSpawnArgs] Command line arguments to use when auto-spawning a mongocryptd
- * @property {string} [cryptSharedLibPath] Full path to a MongoDB Crypt shared library on the system. If specified, autoEncryption will not attempt to spawn a mongocryptd, but makes use of the shared library file specified. Note that the path must point to the shared libary file itself, not the folder which contains it \*
- * @property {boolean} [cryptSharedLibRequired] If true, never use mongocryptd and fail when the MongoDB Crypt shared libary cannot be loaded. Defaults to true if [cryptSharedLibPath] is specified and false otherwise \*
  */
-
 export type AutoEncryptionExtraOptions = NonNullable<AutoEncryptionOptions['extraOptions']>;
 
-/**
- * @callback AutoEncrypter~logger
- * @description A callback that is invoked with logging information from
- * the underlying C++ Bindings.
- * @param {AutoEncrypter~logLevel} level The level of logging.
- * @param {string} message The message to log
- */
+/** @public */
+export const AutoEncryptionLoggerLevel = Object.freeze({
+  FatalError: 0,
+  Error: 1,
+  Warning: 2,
+  Info: 3,
+  Trace: 4
+} as const);
 
 /**
- * @name AutoEncrypter~logLevel
- * @enum {number}
- * @description
+ * @public
  * The level of severity of the log message
  *
  * | Value | Level |
@@ -57,12 +229,29 @@ export type AutoEncryptionExtraOptions = NonNullable<AutoEncryptionOptions['extr
  * | 3 | Info |
  * | 4 | Trace |
  */
+export type AutoEncryptionLoggerLevel =
+  (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
 
 /**
  * @internal An internal class to be used by the driver for auto encryption
  * **NOTE**: Not meant to be instantiated directly, this is for internal use only.
  */
 export class AutoEncrypter {
+  _client: MongoClient;
+  _bypassEncryption: boolean;
+  _keyVaultNamespace: string;
+  _keyVaultClient: MongoClient;
+  _metaDataClient: MongoClient;
+  _proxyOptions: ProxyOptions;
+  _tlsOptions: Record<string, AutoEncryptionTlsOptions>;
+  _kmsProviders: KMSProviders;
+  _bypassMongocryptdAndCryptShared: boolean;
+  _contextCounter: number;
+
+  _mongocryptdManager?: MongocryptdManager;
+  _mongocryptdClient?: MongoClient;
+
+  _mongocrypt: MongoCrypt;
   /**
    * Create an AutoEncrypter
    *
@@ -72,8 +261,6 @@ export class AutoEncrypter {
    * It protects against a malicious server advertising a false JSON Schema, which could trick the client into sending unencrypted data that should be encrypted.
    * Schemas supplied in the schemaMap only apply to configuring automatic encryption for Client-Side Field Level Encryption.
    * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
-   * @param {MongoClient} client The client autoEncryption is enabled on
-   * @param {AutoEncrypter~AutoEncryptionOptions} [options] Optional settings
    *
    * @example <caption>Create an AutoEncrypter that makes use of mongocryptd</caption>
    * // Enabling autoEncryption via a MongoClient using mongocryptd
@@ -109,7 +296,7 @@ export class AutoEncrypter {
    * await client.connect();
    * // From here on, the client will be encrypting / decrypting automatically
    */
-  constructor(client, options) {
+  constructor(client: MongoClient, options: AutoEncryptionOptions) {
     this._client = client;
     this._bypassEncryption = options.bypassAutoEncryption === true;
 
@@ -118,10 +305,10 @@ export class AutoEncrypter {
     this._metaDataClient = options.metadataClient || client;
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
-    this._onKmsProviderRefresh = options.onKmsProviderRefresh;
     this._kmsProviders = options.kmsProviders || {};
 
-    const mongoCryptOptions = {};
+    // TODO: Add proper type support here, once the bindings are finished.
+    const mongoCryptOptions: Document = {};
     if (options.schemaMap) {
       mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)
         ? options.schemaMap
@@ -138,8 +325,8 @@ export class AutoEncrypter {
       ? serialize(this._kmsProviders)
       : this._kmsProviders;
 
-    if (options.logger) {
-      mongoCryptOptions.logger = options.logger;
+    if (options.options?.logger) {
+      mongoCryptOptions.logger = options.options.logger;
     }
 
     if (options.extraOptions && options.extraOptions.cryptSharedLibPath) {
@@ -150,18 +337,18 @@ export class AutoEncrypter {
       mongoCryptOptions.bypassQueryAnalysis = options.bypassQueryAnalysis;
     }
 
-    this._bypassMongocryptdAndCryptShared = this._bypassEncryption || options.bypassQueryAnalysis;
+    this._bypassMongocryptdAndCryptShared = this._bypassEncryption || !!options.bypassQueryAnalysis;
 
     if (options.extraOptions && options.extraOptions.cryptSharedLibSearchPaths) {
       // Only for driver testing
-      mongoCryptOptions.cryptSharedLibSearchPaths =
-        options.extraOptions.cryptSharedLibSearchPaths;
+      mongoCryptOptions.cryptSharedLibSearchPaths = options.extraOptions.cryptSharedLibSearchPaths;
     } else if (!this._bypassMongocryptdAndCryptShared) {
       mongoCryptOptions.cryptSharedLibSearchPaths = ['$SYSTEM'];
     }
 
     Object.assign(mongoCryptOptions, { cryptoCallbacks });
-    const { MongoCrypt } = getMongoDBClientEncryption();
+    // TODO - fix typing issue here.
+    const { MongoCrypt } = getMongoDBClientEncryption()!;
     this._mongocrypt = new MongoCrypt(mongoCryptOptions);
     this._contextCounter = 0;
 
@@ -177,14 +364,11 @@ export class AutoEncrypter {
     // that we are not using the CSFLE shared library.
     if (!this._bypassMongocryptdAndCryptShared && !this.cryptSharedLibVersionInfo) {
       this._mongocryptdManager = new MongocryptdManager(options.extraOptions);
-      const clientOptions = {
+      const clientOptions: MongoClientOptions = {
         serverSelectionTimeoutMS: 10000
       };
 
-      if (
-        options.extraOptions == null ||
-        typeof options.extraOptions.mongocryptdURI !== 'string'
-      ) {
+      if (options.extraOptions == null || typeof options.extraOptions.mongocryptdURI !== 'string') {
         clientOptions.family = 4;
       }
 
@@ -193,14 +377,29 @@ export class AutoEncrypter {
   }
 
   /**
-   * @ignore
-   * @param {Function} callback Invoked when the mongocryptd client either successfully connects or errors
+   * Initializes the auto encrypter by spawning a mongocryptd and connecting to it.
+   *
+   * This function is a no-op when bypassSpawn is set or the crypt shared library is used.
    */
-  init(callback) {
+  init(callback: Callback<MongoClient>) {
     if (this._bypassMongocryptdAndCryptShared || this.cryptSharedLibVersionInfo) {
       return callback();
     }
-    const _callback = (err, res) => {
+    if (!this._mongocryptdManager) {
+      return callback(
+        new MongoRuntimeError(
+          'Reached impossible state: mongocryptdManager is undefined when neither bypassSpawn nor the shared lib are specified.'
+        )
+      );
+    }
+    if (!this._mongocryptdClient) {
+      return callback(
+        new MongoRuntimeError(
+          'Reached impossible state: mongocryptdClient is undefined when neither bypassSpawn nor the shared lib are specified.'
+        )
+      );
+    }
+    const _callback = (err?: AnyError, res?: MongoClient) => {
       if (
         err &&
         err.message &&
@@ -220,35 +419,41 @@ export class AutoEncrypter {
     if (this._mongocryptdManager.bypassSpawn) {
       return this._mongocryptdClient.connect().then(
         result => {
-          return _callback(null, result);
+          return _callback(undefined, result);
         },
         error => {
-          _callback(error, null);
+          _callback(error, undefined);
         }
       );
     }
 
     this._mongocryptdManager.spawn(() => {
+      if (!this._mongocryptdClient) {
+        return callback(
+          new MongoRuntimeError(
+            'Reached impossible state: mongocryptdClient is undefined after spawning libmongocrypt.'
+          )
+        );
+      }
       this._mongocryptdClient.connect().then(
         result => {
-          return _callback(null, result);
+          return _callback(undefined, result);
         },
         error => {
-          _callback(error, null);
+          _callback(error, undefined);
         }
       );
     });
   }
 
   /**
-   * @ignore
-   * @param {Function} callback Invoked when the mongocryptd client either successfully disconnects or errors
+   * Cleans up the `_mongocryptdClient`, if present.
    */
-  teardown(force, callback) {
+  teardown(force: boolean, callback: Callback<void>) {
     if (this._mongocryptdClient) {
       this._mongocryptdClient.close(force).then(
         result => {
-          return callback(null, result);
+          return callback(undefined, result);
         },
         error => {
           callback(error);
@@ -259,15 +464,16 @@ export class AutoEncrypter {
     }
   }
 
+  encrypt(ns: string, cmd: Document, callback: Callback<Document | Uint8Array>): void;
   /**
-   * @ignore
    * Encrypt a command for a given namespace.
-   *
-   * @param {string} ns The namespace for this encryption context
-   * @param {object} cmd The command to encrypt
-   * @param {Function} callback
    */
-  encrypt(ns, cmd, options, callback) {
+  encrypt(
+    ns: string,
+    cmd: Document,
+    options?: Document | Callback<Document | Uint8Array>,
+    callback?: Callback<Document | Uint8Array>
+  ) {
     if (typeof ns !== 'string') {
       throw new TypeError('Parameter `ns` must be a string');
     }
@@ -276,10 +482,14 @@ export class AutoEncrypter {
       throw new TypeError('Parameter `cmd` must be an object');
     }
 
-    if (typeof options === 'function' && callback == null) {
-      callback = options;
-      options = {};
+    callback =
+      typeof options === 'function' ? (options as Callback<Document | Uint8Array>) : callback;
+
+    if (callback == null) {
+      throw new TypeError('Callback must be provided');
     }
+
+    options = typeof options === 'function' ? {} : options;
 
     // If `bypassAutoEncryption` has been specified, don't encrypt
     if (this._bypassEncryption) {
@@ -293,7 +503,7 @@ export class AutoEncrypter {
     try {
       context = this._mongocrypt.makeEncryptionContext(databaseNamespace(ns), commandBuffer);
     } catch (err) {
-      callback(err, null);
+      callback(err, undefined);
       return;
     }
 
@@ -313,17 +523,22 @@ export class AutoEncrypter {
   }
 
   /**
-   * @ignore
    * Decrypt a command response
    *
-   * @param {Buffer} buffer
-   * @param {Function} callback
+   * TODO: type options
    */
-  decrypt(response, options, callback) {
-    if (typeof options === 'function' && callback == null) {
-      callback = options;
-      options = {};
+  decrypt(
+    response: Uint8Array,
+    options: Document | Callback<Document>,
+    callback?: Callback<Document>
+  ) {
+    callback = typeof options === 'function' ? (options as Callback<Document>) : callback;
+
+    if (callback == null) {
+      throw new TypeError('Callback must be provided');
     }
+
+    options = typeof options === 'function' ? {} : options;
 
     const buffer = Buffer.isBuffer(response) ? response : serialize(response, options);
 
@@ -331,7 +546,7 @@ export class AutoEncrypter {
     try {
       context = this._mongocrypt.makeDecryptionContext(buffer);
     } catch (err) {
-      callback(err, null);
+      callback(err, undefined);
       return;
     }
 
@@ -344,14 +559,15 @@ export class AutoEncrypter {
       tlsOptions: this._tlsOptions
     });
 
+    // @ts-expect-error unique symbol cannot be used as an index type
     const decorateResult = this[Symbol.for('@@mdb.decorateDecryptionResult')];
-    stateMachine.execute(this, context, function (err, result) {
+    stateMachine.execute(this, context, function (error?: Error, result?: Document) {
       // Only for testing/internal usage
-      if (!err && result && decorateResult) {
-        err = decorateDecryptionResult(result, response);
-        if (err) return callback(err);
+      if (!error && result && decorateResult) {
+        const error = decorateDecryptionResult(result, response);
+        if (error) return callback!(error);
       }
-      callback(err, result);
+      callback!(error, result);
     });
   }
 
@@ -362,10 +578,8 @@ export class AutoEncrypter {
    * option. It can be empty, and any provider specified here will override
    * the original ones.
    */
-  async askForKMSCredentials() {
-    return this._onKmsProviderRefresh
-      ? this._onKmsProviderRefresh()
-      : loadCredentials(this._kmsProviders);
+  async askForKMSCredentials(): Promise<KMSProviders> {
+    return loadCredentials(this._kmsProviders);
   }
 
   /**
@@ -378,7 +592,7 @@ export class AutoEncrypter {
   }
 
   static get libmongocryptVersion() {
-    const { MongoCrypt } = getMongoDBClientEncryption();
+    const { MongoCrypt } = getMongoDBClientEncryption()!;
     return MongoCrypt.libmongocryptVersion;
   }
 }
@@ -390,9 +604,12 @@ export class AutoEncrypter {
  * we do not need to worry about circular references.
  *
  * @internal
- * @ignore
  */
-function decorateDecryptionResult(decrypted, original, isTopLevelDecorateCall = true) {
+function decorateDecryptionResult(
+  decrypted: Document,
+  original: Document,
+  isTopLevelDecorateCall = true
+): Error | void {
   const decryptedKeys = Symbol.for('@@mdb.decryptedKeys');
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
@@ -411,6 +628,7 @@ function decorateDecryptionResult(decrypted, original, isTopLevelDecorateCall = 
     // An object was decrypted by libmongocrypt if and only if it was
     // a BSON Binary object with subtype 6.
     if (originalValue && originalValue._bsontype === 'Binary' && originalValue.sub_type === 6) {
+      // @ts-expect-error unique symbols cannot be used as index type
       if (!decrypted[decryptedKeys]) {
         Object.defineProperty(decrypted, decryptedKeys, {
           value: [],
@@ -419,6 +637,7 @@ function decorateDecryptionResult(decrypted, original, isTopLevelDecorateCall = 
           writable: false
         });
       }
+      // @ts-expect-error unique symbols cannot be used as index type
       decrypted[decryptedKeys].push(k);
       // Do not recurse into this decrypted value. It could be a subdocument/array,
       // in which case there is no original value associated with its subfields.

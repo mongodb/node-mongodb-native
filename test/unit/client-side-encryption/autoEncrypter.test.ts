@@ -1,20 +1,20 @@
-'use strict';
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as sinon from 'sinon';
 
-const fs = require('fs');
-const path = require('path');
-const sinon = require('sinon');
-const { MongoClient } = require('../../../src/mongo_client');
-const { BSON } = require('../../mongodb');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptdManager';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoClient } from '../../../src/mongo_client';
+import { BSON } from '../../mongodb';
+import * as requirements from './requirements.helper';
+
 const bson = BSON;
 const { EJSON } = BSON;
-const requirements = require('./requirements.helper');
-const { MongoError, MongoNetworkTimeoutError } = require('../../../src/error');
-const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
-
-const { AutoEncrypter } = require('../../../src/client-side-encryption/autoEncrypter');
-const { MongocryptdManager } = require('../../../src/client-side-encryption/mongocryptdManager');
-
-const { expect } = require('chai');
 
 function readExtendedJsonToBuffer(path) {
   const ejson = EJSON.parse(fs.readFileSync(path, 'utf8'));
@@ -27,7 +27,9 @@ function readHttpResponse(path) {
   return Buffer.from(data, 'utf8');
 }
 
-const TEST_COMMAND = JSON.parse(fs.readFileSync(`${__dirname}/data/cmd.json`));
+const TEST_COMMAND = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/cmd.json`, { encoding: 'utf-8' })
+);
 const MOCK_COLLINFO_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/collection-info.json`);
 const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
   `${__dirname}/data/mongocryptd-reply.json`
@@ -35,13 +37,7 @@ const MOCK_MONGOCRYPTD_RESPONSE = readExtendedJsonToBuffer(
 const MOCK_KEYDOCUMENT_RESPONSE = readExtendedJsonToBuffer(`${__dirname}/data/key-document.json`);
 const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(`${__dirname}/data/kms-decrypt-reply.txt`);
 
-class MockClient {
-  constructor() {
-    this.topology = {
-      bson
-    };
-  }
-}
+class MockClient {}
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -49,7 +45,7 @@ const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 describe('AutoEncrypter', function () {
   this.timeout(12000);
   let ENABLE_LOG_TEST = false;
-  let sandbox = sinon.createSandbox();
+  const sandbox = sinon.createSandbox();
   beforeEach(() => {
     sandbox.restore();
     sandbox.stub(StateMachine.prototype, 'kmsRequest').callsFake(request => {
@@ -91,11 +87,14 @@ describe('AutoEncrypter', function () {
 
   describe('#constructor', function () {
     context('when using mongocryptd', function () {
-      const client = new MockClient();
+      const client = new MockClient() as MongoClient;
       const autoEncrypterOptions = {
         mongocryptdBypassSpawn: true,
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -104,21 +103,19 @@ describe('AutoEncrypter', function () {
       const autoEncrypter = new AutoEncrypter(client, autoEncrypterOptions);
 
       it('instantiates a mongo client on the auto encrypter', function () {
-        expect(autoEncrypter)
-          .to.have.property('_mongocryptdClient')
-          .to.be.instanceOf(MongoClient);
+        expect(autoEncrypter).to.have.property('_mongocryptdClient').to.be.instanceOf(MongoClient);
       });
 
       it('sets serverSelectionTimeoutMS to 10000ms', function () {
         expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
-        const options = autoEncrypter._mongocryptdClient.s.options;
+        const options = autoEncrypter._mongocryptdClient?.s.options;
         expect(options).to.have.property('serverSelectionTimeoutMS', 10000);
       });
 
       context('when mongocryptdURI is not specified', () => {
         it('sets the ip address family to ipv4', function () {
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
-          const options = autoEncrypter._mongocryptdClient.s.options;
+          const options = autoEncrypter._mongocryptdClient?.s.options;
           expect(options).to.have.property('family', 4);
         });
       });
@@ -131,7 +128,7 @@ describe('AutoEncrypter', function () {
           });
 
           expect(autoEncrypter).to.have.nested.property('_mongocryptdClient.s.options');
-          const options = autoEncrypter._mongocryptdClient.s.options;
+          const options = autoEncrypter._mongocryptdClient?.s.options;
           expect(options).not.to.have.property('family', 4);
         });
       });
@@ -144,7 +141,10 @@ describe('AutoEncrypter', function () {
       bypassAutoEncryption: true,
       mongocryptdBypassSpawn: true,
       keyVaultNamespace: 'admin.datakeys',
-      logger: () => { },
+      options: {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        logger: () => {}
+      },
       kmsProviders: {
         aws: { accessKeyId: 'example', secretAccessKey: 'example' },
         local: { key: Buffer.alloc(96) }
@@ -161,10 +161,13 @@ describe('AutoEncrypter', function () {
   describe('state machine', function () {
     it('should decrypt mock data', function (done) {
       const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
-      const client = new MockClient();
+      const client = new MockClient() as MongoClient;
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -187,7 +190,10 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -225,7 +231,10 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: {}
         },
@@ -266,7 +275,10 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => { },
+          options: {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            logger: () => {}
+          },
           kmsProviders: {
             aws: {}
           }
@@ -305,7 +317,10 @@ describe('AutoEncrypter', function () {
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
-          logger: () => { },
+          options: {
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            logger: () => {}
+          },
           kmsProviders: {
             aws: {}
           }
@@ -323,7 +338,10 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: { accessKeyId: 'example', secretAccessKey: 'example' },
           local: { key: Buffer.alloc(96) }
@@ -356,7 +374,10 @@ describe('AutoEncrypter', function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
-        logger: () => { },
+        options: {
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          logger: () => {}
+        },
         kmsProviders: {
           aws: {}
         },
