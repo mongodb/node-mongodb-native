@@ -147,12 +147,11 @@ export class UpdateOneOperation extends UpdateOperation {
   ): Promise<UpdateResult | Document> {
     const res = await super.execute(server, session);
     if (this.explain != null) return res;
-    if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
     return {
       acknowledged: this.writeConcern?.w !== 0 ?? true,
-      modifiedCount: res.nModified != null ? res.nModified : res.n,
+      modifiedCount: res.nModified ?? res.n,
       upsertedId:
         Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
       upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
@@ -186,7 +185,7 @@ export class UpdateManyOperation extends UpdateOperation {
 
     return {
       acknowledged: this.writeConcern?.w !== 0 ?? true,
-      modifiedCount: res.nModified != null ? res.nModified : res.n,
+      modifiedCount: res.nModified ?? res.n,
       upsertedId:
         Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
       upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
@@ -238,7 +237,7 @@ export class ReplaceOneOperation extends UpdateOperation {
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
     return {
-      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      acknowledged: this.writeConcern?.w !== 0,
       modifiedCount: res.nModified != null ? res.nModified : res.n,
       upsertedId:
         Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,

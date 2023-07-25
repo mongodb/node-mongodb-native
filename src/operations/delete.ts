@@ -117,7 +117,7 @@ export class DeleteOneOperation extends DeleteOperation {
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
     if (this.explain) return res;
     return {
-      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      acknowledged: this.writeConcern?.w !== 0,
       deletedCount: res.n
     };
   }
@@ -138,7 +138,7 @@ export class DeleteManyOperation extends DeleteOperation {
     if (this.explain) return res;
 
     return {
-      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      acknowledged: this.writeConcern?.w !== 0,
       deletedCount: res.n
     };
   }

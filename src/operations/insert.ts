@@ -88,7 +88,7 @@ export class InsertOneOperation extends InsertOperation {
     }
 
     return {
-      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      acknowledged: this.writeConcern?.w !== 0,
       insertedId: this.documents[0]._id
     };
   }
@@ -149,7 +149,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
       }
     }
     return {
-      acknowledged: writeConcern?.w !== 0 ?? true,
+      acknowledged: writeConcern?.w !== 0,
       insertedCount: res.insertedCount,
       insertedIds: res.insertedIds
     };
