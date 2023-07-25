@@ -132,14 +132,12 @@ export interface KMSProviders {
  *
  * @internal - exposed for testing purposes only
  */
-export function isEmptyCredentials(providerName: KMSProvider, kmsProviders: KMSProviders) {
+export function isEmptyCredentials(providerName: KMSProvider, kmsProviders: KMSProviders): boolean {
   const provider = kmsProviders[providerName];
-  return (
-    provider &&
-    provider != null &&
-    typeof provider === 'object' &&
-    Object.keys(provider).length === 0
-  );
+  if (provider == null) {
+    return false;
+  }
+  return typeof provider === 'object' && Object.keys(provider).length === 0;
 }
 
 /**
