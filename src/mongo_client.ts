@@ -22,6 +22,8 @@ import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
+import { executeOperation } from './operations/execute_operation';
+import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
@@ -520,12 +522,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (servers.length !== 0) {
       const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
       if (endSessions.length !== 0) {
-        await this.db('admin')
-          .command(
+        await executeOperation(
+          this,
+          new RunAdminCommandOperation(
             { endSessions },
             { readPreference: ReadPreference.primaryPreferred, noResponse: true }
           )
-          .catch(() => null); // outcome does not matter
+        ).catch(() => null); // outcome does not matter;
       }
     }
 

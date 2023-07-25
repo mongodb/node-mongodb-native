@@ -5,6 +5,15 @@ const sinon = require('sinon');
 const { Topology } = require('../../mongodb');
 
 describe('URI', function () {
+  let client;
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await client.close();
+  });
+
   it('should correctly allow for w:0 overriding on the connect url', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -72,39 +81,34 @@ describe('URI', function () {
     }
   });
 
-  it('should correctly connect using uri encoded username and password', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
+  context('when connecting with a username and password that have URI escapable characters', () => {
+    let utilClient;
+    let client;
+    const username = 'u$ser';
+    const password = '$specialch@rs';
 
-    test: function (done) {
-      var self = this;
-      const configuration = this.configuration;
-      const client = configuration.newClient();
+    beforeEach(async function () {
+      utilClient = this.configuration.newClient();
+      await utilClient.db().admin().command({ createUser: username, pwd: password, roles: [] });
+    });
 
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-        var user = 'u$ser',
-          pass = '$specialch@rs';
-        var db = client.db(self.configuration.db);
+    afterEach(async () => {
+      await utilClient.db().admin().command({ dropUser: username });
+      await client?.close();
+      await utilClient?.close();
+    });
 
-        db.addUser(user, pass, function (err) {
-          expect(err).to.not.exist;
-          var uri =
-            'mongodb://' +
-            encodeURIComponent(user) +
-            ':' +
-            encodeURIComponent(pass) +
-            '@localhost:27017/integration_tests';
-
-          configuration.newClient(uri).connect(function (err, c) {
-            expect(err).to.not.exist;
-
-            c.close(() => client.close(done));
-          });
-        });
-      });
-    }
+    it(
+      'accepts a client that provides the correct username and password',
+      { requires: { topology: 'single' } },
+      async function () {
+        const mongodbUri = `mongodb://${encodeURIComponent(username)}:${encodeURIComponent(
+          password
+        )}@${this.configuration.options.host}`;
+        client = this.configuration.newClient(mongodbUri);
+        await client.connect();
+      }
+    );
   });
 
   it('should correctly translate uri options', {

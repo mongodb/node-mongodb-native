@@ -9,7 +9,6 @@ import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_com
 import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
-import { AddUserOperation, type AddUserOptions } from './operations/add_user';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
 import type { IndexInformationOptions } from './operations/common_functions';
@@ -259,7 +258,14 @@ export class Db {
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(this.client, new RunCommandOperation(this, command, options));
+    return executeOperation(
+      this.client,
+      new RunCommandOperation(this, command, {
+        ...resolveBSONOptions(options),
+        session: options?.session,
+        readPreference: options?.readPreference
+      })
+    );
   }
 
   /**
@@ -415,33 +421,6 @@ export class Db {
     return executeOperation(
       this.client,
       new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options))
-    );
-  }
-
-  /**
-   * Add a user to the database
-   *
-   * @param username - The username for the new user
-   * @param passwordOrOptions - An optional password for the new user, or the options for the command
-   * @param options - Optional settings for the command
-   * @deprecated Use the createUser command in `db.command()` instead.
-   * @see https://www.mongodb.com/docs/manual/reference/command/createUser/
-   */
-  async addUser(
-    username: string,
-    passwordOrOptions?: string | AddUserOptions,
-    options?: AddUserOptions
-  ): Promise<Document> {
-    options =
-      options != null && typeof options === 'object'
-        ? options
-        : passwordOrOptions != null && typeof passwordOrOptions === 'object'
-        ? passwordOrOptions
-        : undefined;
-    const password = typeof passwordOrOptions === 'string' ? passwordOrOptions : undefined;
-    return executeOperation(
-      this.client,
-      new AddUserOperation(this, username, password, resolveOptions(this, options))
     );
   }
 

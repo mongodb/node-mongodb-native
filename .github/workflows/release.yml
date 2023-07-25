@@ -6,14 +6,13 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 name: release
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - id: release
         uses: google-github-actions/release-please-action@v3
