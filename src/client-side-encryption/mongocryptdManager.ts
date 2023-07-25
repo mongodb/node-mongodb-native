@@ -1,3 +1,8 @@
+import type { ChildProcess } from 'child_process';
+
+import { type Callback } from '../utils';
+import { type AutoEncryptionExtraOptions } from './autoEncrypter';
+
 /**
  * @internal
  * An internal class that handles spawning a mongocryptd.
@@ -5,14 +10,13 @@
 export class MongocryptdManager {
   static DEFAULT_MONGOCRYPTD_URI = 'mongodb://localhost:27020';
 
-  /**
-   * @ignore
-   * Creates a new Mongocryptd Manager
-   * @param {AutoEncrypter~AutoEncryptionExtraOptions} [extraOptions] extra options that determine how/when to spawn a mongocryptd
-   */
-  constructor(extraOptions) {
-    extraOptions = extraOptions || {};
+  uri: string;
+  bypassSpawn: boolean;
+  spawnPath: string;
+  spawnArgs: Array<string>;
+  _child?: ChildProcess;
 
+  constructor(extraOptions: AutoEncryptionExtraOptions = {}) {
     this.uri =
       typeof extraOptions.mongocryptdURI === 'string' && extraOptions.mongocryptdURI.length > 0
         ? extraOptions.mongocryptdURI
@@ -30,19 +34,19 @@ export class MongocryptdManager {
         .filter(arg => typeof arg === 'string')
         .every(arg => arg.indexOf('--idleShutdownTimeoutSecs') < 0)
     ) {
-      this.spawnArgs.push('--idleShutdownTimeoutSecs', 60);
+      this.spawnArgs.push('--idleShutdownTimeoutSecs', '60');
     }
   }
 
   /**
-   * @ignore
    * Will check to see if a mongocryptd is up. If it is not up, it will attempt
    * to spawn a mongocryptd in a detached process, and then wait for it to be up.
-   * @param {Function} callback Invoked when we think a mongocryptd is up
    */
-  spawn(callback) {
+  spawn(callback: Callback<void>) {
     const cmdName = this.spawnPath || 'mongocryptd';
 
+    // TODO - figure out why we can't type this.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { spawn } = require('child_process');
 
     // Spawned with stdio: ignore and detatched:true

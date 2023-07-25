@@ -6,7 +6,7 @@ import {MongoError} from '../error';
 import { loadCredentials } from './providers';
 import * as  cryptoCallbacks from './cryptoCallbacks';
 import { serialize, deserialize } from '../bson';
-import { getMongoDBClientEncryption } from '../deps';
+import { AutoEncryptionOptions, getMongoDBClientEncryption } from '../deps';
 
 /**
  * Configuration options for a automatic client encryption.
@@ -32,6 +32,8 @@ import { getMongoDBClientEncryption } from '../deps';
  * @property {string} [cryptSharedLibPath] Full path to a MongoDB Crypt shared library on the system. If specified, autoEncryption will not attempt to spawn a mongocryptd, but makes use of the shared library file specified. Note that the path must point to the shared libary file itself, not the folder which contains it \*
  * @property {boolean} [cryptSharedLibRequired] If true, never use mongocryptd and fail when the MongoDB Crypt shared libary cannot be loaded. Defaults to true if [cryptSharedLibPath] is specified and false otherwise \*
  */
+
+export type AutoEncryptionExtraOptions = NonNullable<AutoEncryptionOptions['extraOptions']>;
 
 /**
  * @callback AutoEncrypter~logger
