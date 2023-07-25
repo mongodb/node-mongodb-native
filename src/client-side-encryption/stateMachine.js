@@ -3,7 +3,6 @@ import { promisify } from 'util';
 import * as tls from 'tls';
 import * as net from 'net';
 import * as fs from 'fs';
-import { once } from 'events';
 import { SocksClient } from 'socks';
 import { MongoNetworkTimeoutError } from '../error';
 import { debug, databaseNamespace, collectionNamespace } from './common';
@@ -288,6 +287,7 @@ class StateMachine {
         rawSocket.on('timeout', ontimeout);
         rawSocket.on('error', onerror);
         try {
+          const { once } = require('events');
           await once(rawSocket, 'connect');
           options.socket = (
             await SocksClient.createConnection({

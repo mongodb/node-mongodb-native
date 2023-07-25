@@ -1,5 +1,3 @@
-import { spawn } from 'child_process'
-
 /**
  * @internal
  * An internal class that handles spawning a mongocryptd.
@@ -44,6 +42,8 @@ export class MongocryptdManager {
    */
   spawn(callback) {
     const cmdName = this.spawnPath || 'mongocryptd';
+
+    const { spawn } = require('child_process');
 
     // Spawned with stdio: ignore and detatched:true
     // to ensure child can outlive parent.
