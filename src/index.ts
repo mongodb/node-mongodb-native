@@ -378,7 +378,6 @@ export type {
   WithId,
   WithoutId
 } from './mongo_types';
-export type { AddUserOptions, RoleSpecification } from './operations/add_user';
 export type {
   AggregateOperation,
   AggregateOptions,
@@ -434,12 +433,7 @@ export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { SearchIndexDescription } from './operations/search_indexes/create';
 export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
-export type {
-  CollStats,
-  CollStatsOptions,
-  DbStatsOptions,
-  WiredTigerData
-} from './operations/stats';
+export type { DbStatsOptions } from './operations/stats';
 export type {
   ReplaceOptions,
   UpdateOptions,

@@ -152,7 +152,6 @@ export * from '../src/gridfs/upload';
 export * from '../src/mongo_client';
 export * from '../src/mongo_logger';
 export * from '../src/mongo_types';
-export * from '../src/operations/add_user';
 export * from '../src/operations/aggregate';
 export * from '../src/operations/bulk_write';
 export * from '../src/operations/collections';
