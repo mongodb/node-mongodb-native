@@ -1,4 +1,4 @@
-('use strict');
+'use strict';
 const { expect } = require('chai');
 
 const { assert: test, setupDatabase } = require('./shared');
@@ -17,7 +17,7 @@ describe('Indexes', function () {
     db = client.db();
   });
 
-  this.afterEach(async function () {
+  afterEach(async function () {
     await client.close();
   });
 
@@ -326,7 +326,7 @@ describe('Indexes', function () {
     it('should return false', {
       metadata: {
         requires: {
-          mongodb: '>4.0'
+          mongodb: '>=4.0'
         }
       },
 
@@ -363,12 +363,12 @@ describe('Indexes', function () {
     });
 
     it('should return true when an array of indexes exists', async function () {
-      const result = await collection.indexExists('c_1_d_1_e_1');
+      const result = await collection.indexExists(['c_1_d_1_e_1', 'a_1']);
       expect(result).to.equal(true);
     });
 
     it('should return false when an array of indexes does not exist', async function () {
-      const result = await collection.indexExists('d_1_e_1_f_1');
+      const result = await collection.indexExists(['d_1_e_1', 'c_1']);
       expect(result).to.equal(false);
     });
   });
