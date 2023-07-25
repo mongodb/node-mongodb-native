@@ -95,11 +95,11 @@ export {
 
 // enums
 export { BatchType } from './bulk/common';
+export { AutoEncryptionLoggerLevel } from './client-side-encryption/autoEncrypter';
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
-export { AutoEncryptionLoggerLevel } from './deps';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';
@@ -202,6 +202,10 @@ export type {
   UpdateDescription
 } from './change_stream';
 export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+export type {
+  AutoEncryptionOptions,
+  AutoEncryptionTlsOptions
+} from './client-side-encryption/autoEncrypter';
 export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
@@ -287,7 +291,6 @@ export type {
 } from './cursor/list_search_indexes_cursor';
 export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';

@@ -1,4 +1,3 @@
-import type { MongoCrypt } from 'mongodb-client-encryption';
 
 import { deserialize, type Document, serialize } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
@@ -251,7 +250,8 @@ export class AutoEncrypter {
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
 
-  _mongocrypt: MongoCrypt;
+  _mongocrypt: import('mongodb-client-encryption').MongoCrypt;
+
   /**
    * Create an AutoEncrypter
    *
@@ -508,8 +508,11 @@ export class AutoEncrypter {
     }
 
     // TODO: should these be accessors from the addon?
+    // @ts-expect-error
     context.id = this._contextCounter++;
+    // @ts-expect-error
     context.ns = ns;
+    // @ts-expect-error
     context.document = cmd;
 
     const stateMachine = new StateMachine({
@@ -551,6 +554,7 @@ export class AutoEncrypter {
     }
 
     // TODO: should this be an accessor from the addon?
+    // @ts-expect-error
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({

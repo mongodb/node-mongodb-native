@@ -78,7 +78,7 @@ const INSECURE_TLS_OPTIONS = [
  * a finishing state or an error is reached. Do not instantiate directly.
  * @class StateMachine
  */
-class StateMachine {
+export class StateMachine {
   constructor(options) {
     this.options = options || {};
 
@@ -473,5 +473,3 @@ class StateMachine {
       );
   }
 }
-
-module.exports = { StateMachine };

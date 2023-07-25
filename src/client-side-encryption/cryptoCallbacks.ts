@@ -82,7 +82,7 @@ export function signRsaSha256Hook(
     const signer = crypto.createSign('sha256WithRSAEncryption');
     const privateKey = Buffer.from(
       // TODO: check this
-      `-----BEGIN PRIVATE KEY-----\n${key.toString('base64')}\n-----END PRIVATE KEY-----\n`
+      `-----BEGIN PRIVATE KEY-----\n${key.toString()}\n-----END PRIVATE KEY-----\n`
     );
 
     result = signer.update(input).end().sign(privateKey);

@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
-import { type AutoEncrypter } from './client-side-encryption/autoEncrypter';
+import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -18,7 +18,6 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
-import type { AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';

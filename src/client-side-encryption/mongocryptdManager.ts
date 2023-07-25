@@ -45,9 +45,7 @@ export class MongocryptdManager {
   spawn(callback: Callback<void>) {
     const cmdName = this.spawnPath || 'mongocryptd';
 
-    // TODO - figure out why we can't type this.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { spawn } = require('child_process');
+    const { spawn } = require('child_process') as typeof import('child_process');
 
     // Spawned with stdio: ignore and detatched:true
     // to ensure child can outlive parent.

@@ -219,9 +219,8 @@ try {
   aws4 = require('aws4');
 } catch {} // eslint-disable-line
 
-type MongoCrypt = { MongoCrypt: any };
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
-export function getMongoDBClientEncryption(): MongoCrypt | null {
+export function getMongoDBClientEncryption(): typeof import('mongodb-client-encryption') | null {
   let mongodbClientEncryption = null;
 
   try {
@@ -235,5 +234,3 @@ export function getMongoDBClientEncryption(): MongoCrypt | null {
 
   return mongodbClientEncryption;
 }
-
-export type MongodbClientEncryption = ReturnType<typeof getMongoDBClientEncryption>;

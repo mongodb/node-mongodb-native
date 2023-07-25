@@ -1,6 +1,6 @@
-import { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+import { AutoEncrypter, type AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import { type AutoEncryptionOptions, getMongoDBClientEncryption } from './deps';
+import { getMongoDBClientEncryption } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, type MongoClientOptions } from './mongo_client';
 import { type Callback } from './utils';
