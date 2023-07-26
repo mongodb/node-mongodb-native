@@ -142,7 +142,7 @@ class FindAndModifyOperation extends CommandCallbackOperation<Document> {
       upsert: false
     };
 
-    options.includeResultMetadata ??= false;
+    options.includeResultMetadata ??= true;
 
     const sort = formatSort(options.sort);
     if (sort) {
