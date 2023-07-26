@@ -435,13 +435,10 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const options = this[kOptions];
 
     if (options.tls) {
-      if (typeof options.tlsCAFile === 'string' && options.tlsCAFile.length > 0) {
+      if (options.tlsCAFile) {
         options.ca ??= await fs.readFile(options.tlsCAFile, { encoding: 'utf8' });
       }
-      if (
-        typeof options.tlsCertificateKeyFile === 'string' &&
-        options.tlsCertificateKeyFile.length > 0
-      ) {
+      if (options.tlsCertificateKeyFile) {
         options.key ??= await fs.readFile(options.tlsCertificateKeyFile, { encoding: 'utf8' });
       }
     }

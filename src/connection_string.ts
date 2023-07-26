@@ -1097,17 +1097,27 @@ export const OPTIONS = {
   },
   tlsCAFile: {
     transform({ name, values: [value] }) {
-      if (typeof value === 'string' && value.length === 0) {
-        throw new MongoParseError(`${name} must have non-zero length`);
+      if (typeof value !== 'string') {
+        throw new MongoParseError(`${name} must be of type string`);
       }
+
+      if (value.length === 0) {
+        throw new MongoParseError(`${name} must be have non-zero length`);
+      }
+
       return value;
     }
   },
   tlsCertificateKeyFile: {
     transform({ name, values: [value] }) {
-      if (typeof value === 'string' && value.length === 0) {
-        throw new MongoParseError(`${name} must have non-zero length`);
+      if (typeof value !== 'string') {
+        throw new MongoParseError(`${name} must be of type string`);
       }
+
+      if (value.length === 0) {
+        throw new MongoParseError(`${name} must be have non-zero length`);
+      }
+
       return value;
     }
   },
