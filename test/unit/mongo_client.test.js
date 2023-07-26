@@ -44,7 +44,7 @@ describe('MongoOptions', function () {
      *
      * ### Additional options:
      *
-     * | nodejs native option  | driver spec equicalient option name           | driver option type |
+     * | nodejs native option  | driver spec equivalent option name           | driver option type |
      * |:----------------------|:----------------------------------------------|:-------------------|
      * | `ca`                  | `tlsCAFile`                                   | `string`           |
      * | `crl`                 | N/A                                           | `string`           |
