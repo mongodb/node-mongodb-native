@@ -541,25 +541,29 @@ function attemptTransactionCommit<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
-  options?: TransactionOptions
+  result: any,
+  options: TransactionOptions
 ): Promise<T> {
-  return session.commitTransaction().catch((err: MongoError) => {
-    if (
-      err instanceof MongoError &&
-      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
-      !isMaxTimeMSExpiredError(err)
-    ) {
-      if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
-        return attemptTransactionCommit(session, startTime, fn, options);
+  return session.commitTransaction().then(
+    () => result,
+    (err: MongoError) => {
+      if (
+        err instanceof MongoError &&
+        hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
+        !isMaxTimeMSExpiredError(err)
+      ) {
+        if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
+          return attemptTransactionCommit(session, startTime, fn, result, options);
+        }
+
+        if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+          return attemptTransaction(session, startTime, fn, options);
+        }
       }
 
-      if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-        return attemptTransaction(session, startTime, fn, options);
-      }
+      throw err;
     }
-
-    throw err;
-  });
+  );
 }
 
 const USER_EXPLICIT_TXN_END_STATES = new Set<TxnState>([
@@ -576,7 +580,7 @@ function attemptTransaction<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
-  options?: TransactionOptions
+  options: TransactionOptions = {}
 ): Promise<any> {
   session.startTransaction(options);
 
@@ -600,7 +604,7 @@ function attemptTransaction<T>(
         return result;
       }
 
-      return attemptTransactionCommit(session, startTime, fn, options).then(() => result);
+      return attemptTransactionCommit(session, startTime, fn, result, options);
     },
     err => {
       function maybeRetryOrThrow(err: MongoError): Promise<any> {

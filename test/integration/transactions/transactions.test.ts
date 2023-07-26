@@ -8,6 +8,7 @@ import {
   MongoNetworkError,
   type ServerSessionPool
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {
   describe('withTransaction', function () {
@@ -135,6 +136,47 @@ describe('Transactions', function () {
         });
       }
     );
+
+    context('when retried', () => {
+      let client: MongoClient;
+      let collection: Collection<{ a: number }>;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: ['commitTransaction'],
+            errorCode: 24,
+            errorLabels: ['TransientTransactionError'],
+            closeConnection: false
+          }
+        } as FailPoint);
+
+        collection = await client.db('withTransaction').createCollection('withTransactionRetry');
+      });
+
+      afterEach(async () => {
+        await client?.close();
+      });
+
+      it('returns the value of the final call to the executor', async () => {
+        const session = client.startSession();
+
+        let counter = 0;
+        const withTransactionResult = await session
+          .withTransaction(async session => {
+            await collection.insertOne({ a: 1 }, { session });
+            counter += 1;
+            return counter;
+          })
+          .finally(async () => await session.endSession());
+
+        expect(withTransactionResult).to.equal(counter);
+      });
+    });
   });
 
   describe('startTransaction', function () {
