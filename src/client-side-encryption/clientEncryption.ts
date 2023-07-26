@@ -1,5 +1,4 @@
 import type { ExplicitEncryptionContextOptions, MongoCrypt } from 'mongodb-client-encryption';
-import { promisify } from 'util';
 
 import { type Binary, type Document, type Long, serialize } from '../bson';
 import { type BulkWriteResult } from '../bulk/common';
@@ -198,9 +197,10 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
+    // @ts-expect-error We did not convert promiseOrCallback to TS
     return promiseOrCallback(callback, cb => {
       stateMachine.execute(this, context, (err, dataKey) => {
-        if (err) {
+        if (err || !dataKey) {
           cb(err, null);
           return;
         }
@@ -210,8 +210,8 @@ export class ClientEncryption implements StateMachineExecutable {
 
         this._keyVaultClient
           .db(dbName)
-          .collection(collectionName)
-          .insertOne(dataKey, { writeConcern: { w: 'majority' } })
+          .collection<DataKey>(collectionName)
+          .insertOne(dataKey as DataKey, { writeConcern: { w: 'majority' } })
           .then(
             result => {
               return cb(null, result.insertedId);
@@ -256,9 +256,6 @@ export class ClientEncryption implements StateMachineExecutable {
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
       keyEncryptionKeyBson = serialize(keyEncryptionKey);
-    } else {
-      // Always make sure `options` is an object below.
-      options = {};
     }
     const filterBson = serialize(filter);
     const context = this._mongoCrypt.makeRewrapManyDataKeyContext(filterBson, keyEncryptionKeyBson);
@@ -267,16 +264,14 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    const execute = promisify(stateMachine.execute.bind(stateMachine));
-
-    const dataKey = await execute(this, context);
+    const dataKey = await stateMachine.executeAsync(this, context);
     if (!dataKey || dataKey.v.length === 0) {
       return {};
     }
 
     const dbName = databaseNamespace(this._keyVaultNamespace);
     const collectionName = collectionNamespace(this._keyVaultNamespace);
-    const replacements = dataKey.v.map(key => ({
+    const replacements = dataKey.v.map((key: DataKey) => ({
       updateOne: {
         filter: { _id: key._id },
         update: {
@@ -293,7 +288,7 @@ export class ClientEncryption implements StateMachineExecutable {
 
     const result = await this._keyVaultClient
       .db(dbName)
-      .collection(collectionName)
+      .collection<DataKey>(collectionName)
       .bulkWrite(replacements, {
         writeConcern: { w: 'majority' }
       });
@@ -661,9 +656,10 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
+    // @ts-expect-error We did not convert promiseOrCallback to TS
     return promiseOrCallback(callback, cb => {
       stateMachine.execute(this, context, (err, result) => {
-        if (err) {
+        if (err || !result) {
           cb(err, null);
           return;
         }
@@ -705,32 +701,38 @@ export class ClientEncryption implements StateMachineExecutable {
     expressionMode: boolean,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    const valueBuffer = serialize({ v: value });
-    const contextOptions: ExplicitEncryptionContextOptions = Object.assign({}, options, {
-      expressionMode
-    });
-    if (options.keyId) {
-      contextOptions.keyId = options.keyId.buffer;
+    const { algorithm, keyId, keyAltName, contentionFactor, queryType, rangeOptions } = options;
+    const contextOptions: ExplicitEncryptionContextOptions = {
+      expressionMode,
+      algorithm
+    };
+    if (keyId) {
+      contextOptions.keyId = keyId.buffer;
     }
-    if (options.keyAltName) {
-      const keyAltName = options.keyAltName;
-      if (options.keyId) {
+    if (keyAltName) {
+      if (keyId) {
         throw new TypeError(`"options" cannot contain both "keyId" and "keyAltName"`);
       }
-      const keyAltNameType = typeof keyAltName;
-      if (keyAltNameType !== 'string') {
+      if (typeof keyAltName !== 'string') {
         throw new TypeError(
-          `"options.keyAltName" must be of type string, but was of type ${keyAltNameType}`
+          `"options.keyAltName" must be of type string, but was of type ${typeof keyAltName}`
         );
       }
 
       contextOptions.keyAltName = serialize({ keyAltName });
     }
-
-    if (typeof options.rangeOptions === 'object') {
-      contextOptions.rangeOptions = serialize(options.rangeOptions);
+    if (typeof contentionFactor === 'number' || typeof contentionFactor === 'bigint') {
+      contextOptions.contentionFactor = contentionFactor;
+    }
+    if (typeof queryType === 'string') {
+      contextOptions.queryType = queryType;
     }
 
+    if (typeof rangeOptions === 'object') {
+      contextOptions.rangeOptions = serialize(rangeOptions);
+    }
+
+    const valueBuffer = serialize({ v: value });
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
@@ -738,7 +740,7 @@ export class ClientEncryption implements StateMachineExecutable {
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
     const result = await stateMachine.executeAsync(this, context);
-    return result.v;
+    return result.v as Binary;
   }
 }
 

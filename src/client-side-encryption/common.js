@@ -1,14 +1,4 @@
-/**
- * @ignore
- * Helper function for logging. Enabled by setting the environment flag MONGODB_CRYPT_DEBUG.
- * @param {*} msg Anything you want to be logged.
- */
-export function debug(msg) {
-  if (process.env.MONGODB_CRYPT_DEBUG) {
-    // eslint-disable-next-line no-console
-    console.error(msg);
-  }
-}
+/* eslint-disable */
 
 /**
  * @ignore

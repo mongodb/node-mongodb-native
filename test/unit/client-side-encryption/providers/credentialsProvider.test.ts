@@ -77,9 +77,9 @@ describe('#loadCredentials', function () {
         const kmsProviders = { aws: {} };
 
         before(function () {
-          if (!requirements.credentialProvidersInstalled.aws) {
-            this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
-            this.currentTest!.skip();
+          if (!requirements.credentialProvidersInstalled.aws && this.currentTest) {
+            this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
+            this.currentTest.skip();
             return;
           }
         });
@@ -106,9 +106,9 @@ describe('#loadCredentials', function () {
           };
 
           before(function () {
-            if (!requirements.credentialProvidersInstalled.aws) {
-              this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
-              this.currentTest!.skip();
+            if (!requirements.credentialProvidersInstalled.aws && this.currentTest) {
+              this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
+              this.currentTest.skip();
               return;
             }
           });
@@ -139,9 +139,9 @@ describe('#loadCredentials', function () {
           };
 
           before(function () {
-            if (!requirements.credentialProvidersInstalled.aws) {
-              this.currentTest!.skipReason = 'Cannot refresh credentials without sdk provider';
-              this.currentTest!.skip();
+            if (!requirements.credentialProvidersInstalled.aws && this.currentTest) {
+              this.currentTest.skipReason = 'Cannot refresh credentials without sdk provider';
+              this.currentTest.skip();
               return;
             }
           });
@@ -163,9 +163,9 @@ describe('#loadCredentials', function () {
       };
 
       before(function () {
-        if (requirements.credentialProvidersInstalled.aws) {
-          this.currentTest!.skipReason = 'Credentials will be loaded when sdk present';
-          this.currentTest!.skip();
+        if (requirements.credentialProvidersInstalled.aws && this.currentTest) {
+          this.currentTest.skipReason = 'Credentials will be loaded when sdk present';
+          this.currentTest.skip();
           return;
         }
       });
@@ -209,9 +209,9 @@ describe('#loadCredentials', function () {
 
     context('and gcp-metadata is installed', () => {
       beforeEach(function () {
-        if (!requirements.credentialProvidersInstalled.gcp) {
-          this.currentTest!.skipReason = 'Tests require gcp-metadata to be installed';
-          this.currentTest!.skip();
+        if (!requirements.credentialProvidersInstalled.gcp && this.currentTest) {
+          this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
+          this.currentTest.skip();
           return;
         }
       });
@@ -247,9 +247,9 @@ describe('#loadCredentials', function () {
 
     context('and gcp-metadata is not installed', () => {
       beforeEach(function () {
-        if (requirements.credentialProvidersInstalled.gcp) {
-          this.currentTest!.skipReason = 'Tests require gcp-metadata to be installed';
-          this.currentTest!.skip();
+        if (requirements.credentialProvidersInstalled.gcp && this.currentTest) {
+          this.currentTest.skipReason = 'Tests require gcp-metadata to be installed';
+          this.currentTest.skip();
           return;
         }
       });

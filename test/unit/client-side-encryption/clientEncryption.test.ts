@@ -96,7 +96,6 @@ describe('ClientEncryption', function () {
   });
 
   describe('createEncryptedCollection()', () => {
-    /** @type {InstanceType<ClientEncryption>} */
     let clientEncryption;
     const client = new MockClient();
     let db;

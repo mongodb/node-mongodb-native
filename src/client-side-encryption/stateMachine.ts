@@ -10,7 +10,7 @@ import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient } from '../mongo_client';
 import { BufferPool, type Callback } from '../utils';
 import { type ClientEncryptionTlsOptions, type DataKey } from './clientEncryption';
-import { collectionNamespace, databaseNamespace, debug } from './common';
+import { collectionNamespace, databaseNamespace } from './common';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptdManager';
 import { type KMSProvider, type KMSProviders } from './providers';
@@ -46,6 +46,17 @@ const INSECURE_TLS_OPTIONS = [
   'tlsDisableCertificateRevocationCheck'
 ];
 
+/**
+ * Helper function for logging. Enabled by setting the environment flag MONGODB_CRYPT_DEBUG.
+ * @param msg - Anything you want to be logged.
+ */
+export function debug(msg: unknown) {
+  if (process.env.MONGODB_CRYPT_DEBUG) {
+    // eslint-disable-next-line no-console
+    console.error(msg);
+  }
+}
+
 declare module 'mongodb-client-encryption' {
   // the properties added to `MongoCryptContext` here are only used for the `StateMachine`'s
   // execute method and are not part of the C++ bindings.
@@ -74,7 +85,8 @@ export class StateMachine {
   // TODO: figure out state machine options type
   constructor(private options: Document = {}) {}
 
-  executeAsync(executor: StateMachineExecutable, context: MongoCryptContext): Promise<unknown> {
+  executeAsync(executor: StateMachineExecutable, context: MongoCryptContext): Promise<Document> {
+    // @ts-expect-error The callback version allows undefined for the result, but we'll never actually have an undefined result without an error.
     return promisify(this.execute.bind(this))(executor, context);
   }
 
@@ -84,7 +96,7 @@ export class StateMachine {
   execute(
     executor: StateMachineExecutable,
     context: MongoCryptContext,
-    callback: Callback<Uint8Array | { v: Document }>
+    callback: Callback<Document>
   ) {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
@@ -222,7 +234,7 @@ export class StateMachine {
           callback(new MongoCryptError(message));
           return;
         }
-        callback(undefined, deserialize(finalizedContext, this.options) as { v: Document });
+        callback(undefined, deserialize(finalizedContext, this.options));
         return;
       }
       case MONGOCRYPT_CTX_ERROR: {
@@ -263,6 +275,7 @@ export class StateMachine {
     return new Promise(async (resolve, reject) => {
       const buffer = new BufferPool();
 
+      /* eslint-disable prefer-const */
       let socket: net.Socket;
       let rawSocket: net.Socket;
 
@@ -297,8 +310,8 @@ export class StateMachine {
         rawSocket.on('error', onerror);
         try {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const { once } = require('events') as typeof import('events');
-          await once(rawSocket, 'connect');
+          const events = require('events') as typeof import('events');
+          await events.once(rawSocket, 'connect');
           options.socket = (
             await SocksClient.createConnection({
               existing_socket: rawSocket,

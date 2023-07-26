@@ -45,6 +45,7 @@ export class MongocryptdManager {
   spawn(callback: Callback<void>) {
     const cmdName = this.spawnPath || 'mongocryptd';
 
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { spawn } = require('child_process') as typeof import('child_process');
 
     // Spawned with stdio: ignore and detatched:true
@@ -54,7 +55,9 @@ export class MongocryptdManager {
       detached: true
     });
 
-    this._child.on('error', () => {});
+    this._child.on('error', () => {
+      // perhaps questionable, but we swallow mongocryptd spawn errors.
+    });
 
     // unref child to remove handle from event loop
     this._child.unref();

@@ -270,6 +270,7 @@ export class AutoEncrypter implements StateMachineExecutable {
    * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
    *
    * @example <caption>Create an AutoEncrypter that makes use of mongocryptd</caption>
+   * ```ts
    * // Enabling autoEncryption via a MongoClient using mongocryptd
    * const { MongoClient } = require('mongodb');
    * const client = new MongoClient(URL, {
@@ -282,10 +283,12 @@ export class AutoEncrypter implements StateMachineExecutable {
    *     }
    *   }
    * });
+   * ```
    *
    * await client.connect();
    * // From here on, the client will be encrypting / decrypting automatically
    * @example <caption>Create an AutoEncrypter that makes use of libmongocrypt's CSFLE shared library</caption>
+   * ```ts
    * // Enabling autoEncryption via a MongoClient using CSFLE shared library
    * const { MongoClient } = require('mongodb');
    * const client = new MongoClient(URL, {
@@ -299,6 +302,7 @@ export class AutoEncrypter implements StateMachineExecutable {
    *     }
    *   }
    * });
+   * ```
    *
    * await client.connect();
    * // From here on, the client will be encrypting / decrypting automatically
@@ -423,7 +427,7 @@ export class AutoEncrypter implements StateMachineExecutable {
     };
 
     if (this._mongocryptdManager.bypassSpawn) {
-      return this._mongocryptdClient.connect().then(
+      this._mongocryptdClient.connect().then(
         result => {
           return _callback(undefined, result);
         },
@@ -431,6 +435,7 @@ export class AutoEncrypter implements StateMachineExecutable {
           _callback(error, undefined);
         }
       );
+      return;
     }
 
     this._mongocryptdManager.spawn(() => {
@@ -571,8 +576,10 @@ export class AutoEncrypter implements StateMachineExecutable {
       // Only for testing/internal usage
       if (!error && result && decorateResult) {
         const error = decorateDecryptionResult(result, response);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (error) return callback!(error);
       }
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       callback!(error, result);
     });
   }
