@@ -1,14 +1,14 @@
+import * as fs from 'fs';
+import * as net from 'net';
+import { SocksClient } from 'socks';
+import * as tls from 'tls';
 import { promisify } from 'util';
 
-import * as tls from 'tls';
-import * as net from 'net';
-import * as fs from 'fs';
-import { SocksClient } from 'socks';
+import { deserialize, serialize } from '../bson';
 import { MongoNetworkTimeoutError } from '../error';
-import { debug, databaseNamespace, collectionNamespace } from './common';
-import { MongoCryptError } from './errors';
 import { BufferPool } from '../utils';
-import { serialize, deserialize } from '../bson';
+import { collectionNamespace, databaseNamespace, debug } from './common';
+import { MongoCryptError } from './errors';
 
 // libmongocrypt states
 const MONGOCRYPT_CTX_ERROR = 0;
@@ -355,9 +355,7 @@ export class StateMachine {
     const tlsOptionNames = Object.keys(tlsOptions);
     for (const option of INSECURE_TLS_OPTIONS) {
       if (tlsOptionNames.includes(option)) {
-        return new MongoCryptError(
-          `Insecure TLS options prohibited for ${kmsProvider}: ${option}`
-        );
+        return new MongoCryptError(`Insecure TLS options prohibited for ${kmsProvider}: ${option}`);
       }
     }
   }

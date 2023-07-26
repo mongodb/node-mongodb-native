@@ -1,19 +1,22 @@
-'use strict';
-const fs = require('fs');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { MongoClient } = require('../../../lib/mongo_client');
-const cryptoCallbacks = require('../../../src/client-side-encryption/cryptoCallbacks');
-const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
-const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption')
-const { Binary, BSON, deserialize, Long, Int32 } = require('../../mongodb');
-const { EJSON } = BSON;
+import { expect } from 'chai';
+import * as fs from 'fs';
+import { resolve } from 'path';
+import * as sinon from 'sinon';
 
-const {
-  MongoCryptCreateEncryptedCollectionError,
-  MongoCryptCreateDataKeyError
-} = require('../../../src/client-side-encryption/errors');
-const { resolve } = require('path');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import * as cryptoCallbacks from '../../../src/client-side-encryption/cryptoCallbacks';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import {
+  MongoCryptCreateDataKeyError,
+  MongoCryptCreateEncryptedCollectionError
+} from '../../../src/client-side-encryption/errors';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { Binary, BSON, deserialize } from '../../mongodb';
+
+const { EJSON } = BSON;
 
 class MockClient {
   db(dbName) {
@@ -25,14 +28,11 @@ class MockClient {
   }
 }
 
-
 describe('ClientEncryption', function () {
   this.timeout(12000);
 
-
-
   context('with stubbed key material and fixed random source', function () {
-    let sandbox = sinon.createSandbox();
+    const sandbox = sinon.createSandbox();
 
     afterEach(() => {
       sandbox.restore();
@@ -44,7 +44,7 @@ describe('ClientEncryption', function () {
       );
       let rndPos = 0;
       sandbox.stub(cryptoCallbacks, 'randomHook').callsFake((buffer, count) => {
-        if (rndPos + count > rndData) {
+        if (rndPos + count > rndData.length) {
           return new Error('Out of fake random data');
         }
         buffer.set(rndData.subarray(rndPos, rndPos + count));
@@ -56,10 +56,12 @@ describe('ClientEncryption', function () {
       sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, cb) => {
         filter = deserialize(filter);
         const keyIds = filter.$or[0]._id.$in.map(key => key.toString('hex'));
-        const fileNames = keyIds.map(
-          keyId => resolve(`${__dirname}/data/keys/${keyId.toUpperCase()}-local-document.json`)
+        const fileNames = keyIds.map(keyId =>
+          resolve(`${__dirname}/data/keys/${keyId.toUpperCase()}-local-document.json`)
         );
-        const contents = fileNames.map(filename => EJSON.parse(fs.readFileSync(filename)));
+        const contents = fileNames.map(filename =>
+          EJSON.parse(fs.readFileSync(filename, { encoding: 'utf-8' }))
+        );
         cb(null, contents);
       });
     });
@@ -118,21 +120,27 @@ describe('ClientEncryption', function () {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName)
           .catch(error => error);
-        expect(error).to.be.instanceOf(TypeError, /provider/);
+        expect(error)
+          .to.be.instanceOf(TypeError)
+          .to.match(/provider/);
       });
 
       it('throws TypeError if options.createCollectionOptions are omitted', async () => {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, {})
           .catch(error => error);
-        expect(error).to.be.instanceOf(TypeError, /encryptedFields/);
+        expect(error)
+          .to.be.instanceOf(TypeError)
+          .to.match(/encryptedFields/);
       });
 
       it('throws TypeError if options.createCollectionOptions.encryptedFields are omitted', async () => {
         const error = await clientEncryption
           .createEncryptedCollection(db, collectionName, { createCollectionOptions: {} })
           .catch(error => error);
-        expect(error).to.be.instanceOf(TypeError, /Cannot read properties/);
+        expect(error)
+          .to.be.instanceOf(TypeError)
+          .to.match(/Cannot read properties/);
       });
     });
 

@@ -220,7 +220,9 @@ try {
 } catch {} // eslint-disable-line
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
-export function getMongoDBClientEncryption(): typeof import('mongodb-client-encryption') | null {
+export function getMongoDBClientEncryption():
+  | typeof import('mongodb-client-encryption')
+  | { kModuleError: MongoMissingDependencyError } {
   let mongodbClientEncryption = null;
 
   try {
@@ -228,8 +230,12 @@ export function getMongoDBClientEncryption(): typeof import('mongodb-client-encr
     // Cannot be moved to helper utility function, bundlers search and replace the actual require call
     // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
     mongodbClientEncryption = require('mongodb-client-encryption');
-  } catch {
-    // ignore
+  } catch (cause) {
+    const kModuleError = new MongoMissingDependencyError(
+      'Optional module `mongodb-client-encryption` not found. Please install it to use auto encryption or ClientEncryption.',
+      { cause }
+    );
+    return { kModuleError };
   }
 
   return mongodbClientEncryption;

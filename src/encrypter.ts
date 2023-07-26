@@ -118,7 +118,7 @@ export class Encrypter {
 
   static checkForMongoCrypt(): void {
     const mongodbClientEncryption = getMongoDBClientEncryption();
-    if (mongodbClientEncryption == null) {
+    if ('kModuleError' in mongodbClientEncryption) {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project'

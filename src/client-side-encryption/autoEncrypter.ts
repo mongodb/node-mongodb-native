@@ -1,4 +1,3 @@
-
 import { deserialize, type Document, serialize } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
@@ -252,6 +251,14 @@ export class AutoEncrypter {
 
   _mongocrypt: import('mongodb-client-encryption').MongoCrypt;
 
+  static getMongoCrypt(): import('mongodb-client-encryption').MongoCryptConstructor {
+    const encryption = getMongoDBClientEncryption();
+    if ('kModuleError' in encryption) {
+      throw encryption.kModuleError;
+    }
+    return encryption.MongoCrypt;
+  }
+
   /**
    * Create an AutoEncrypter
    *
@@ -347,8 +354,7 @@ export class AutoEncrypter {
     }
 
     Object.assign(mongoCryptOptions, { cryptoCallbacks });
-    // TODO - fix typing issue here.
-    const { MongoCrypt } = getMongoDBClientEncryption()!;
+    const MongoCrypt = AutoEncrypter.getMongoCrypt();
     this._mongocrypt = new MongoCrypt(mongoCryptOptions);
     this._contextCounter = 0;
 
@@ -508,11 +514,11 @@ export class AutoEncrypter {
     }
 
     // TODO: should these be accessors from the addon?
-    // @ts-expect-error
+    // @ts-expect-error - this is not defined in the bindings
     context.id = this._contextCounter++;
-    // @ts-expect-error
+    // @ts-expect-error - this is not defined in the bindings
     context.ns = ns;
-    // @ts-expect-error
+    // @ts-expect-error - this is not defined in the bindings
     context.document = cmd;
 
     const stateMachine = new StateMachine({
@@ -554,7 +560,7 @@ export class AutoEncrypter {
     }
 
     // TODO: should this be an accessor from the addon?
-    // @ts-expect-error
+    // @ts-expect-error - this is not defined in the bindings
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({
@@ -591,13 +597,12 @@ export class AutoEncrypter {
    * as `{ version: bigint, versionStr: string }`, or `null` if no CSFLE
    * shared library was loaded.
    */
-  get cryptSharedLibVersionInfo() {
+  get cryptSharedLibVersionInfo(): { version: bigint; versionStr: string } | null {
     return this._mongocrypt.cryptSharedLibVersionInfo;
   }
 
-  static get libmongocryptVersion() {
-    const { MongoCrypt } = getMongoDBClientEncryption()!;
-    return MongoCrypt.libmongocryptVersion;
+  static get libmongocryptVersion(): string {
+    return AutoEncrypter.getMongoCrypt().libmongocryptVersion;
   }
 }
 
