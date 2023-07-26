@@ -91,7 +91,7 @@ describe('Transactions', function () {
           await client.close();
         });
 
-        it('should return undefined when transaction is aborted explicitly', async () => {
+        it('returns result of executor when transaction is aborted explicitly', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
@@ -99,13 +99,14 @@ describe('Transactions', function () {
               await collection.insertOne({ a: 1 }, { session });
               await collection.findOne({ a: 1 }, { session });
               await session.abortTransaction();
+              return 'aborted!';
             })
             .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.be.undefined;
+          expect(withTransactionResult).to.equal('aborted!');
         });
 
-        it('should return result of executor when transaction is successfully committed', async () => {
+        it('returns result of executor when transaction is successfully committed', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
@@ -174,7 +175,8 @@ describe('Transactions', function () {
           })
           .finally(async () => await session.endSession());
 
-        expect(withTransactionResult).to.equal(counter);
+        expect(counter).to.equal(3);
+        expect(withTransactionResult).to.equal(3);
       });
     });
   });
