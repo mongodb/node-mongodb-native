@@ -137,7 +137,7 @@ describe('Transactions', function () {
       }
     );
 
-    context('when retried', () => {
+    context('when retried', { requires: { mongodb: '>=4.2.0', topology: '!single' } }, () => {
       let client: MongoClient;
       let collection: Collection<{ a: number }>;
 
