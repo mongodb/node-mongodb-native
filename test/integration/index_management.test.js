@@ -326,7 +326,7 @@ describe('Indexes', function () {
     it('should return false', {
       metadata: {
         requires: {
-          mongodb: '>=4.0'
+          mongodb: '>4.0'
         }
       },
 
