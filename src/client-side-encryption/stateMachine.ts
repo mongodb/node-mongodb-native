@@ -8,9 +8,8 @@ import { promisify } from 'util';
 import { deserialize, type Document, serialize } from '../bson';
 import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient } from '../mongo_client';
-import { BufferPool, type Callback } from '../utils';
+import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils';
 import { type ClientEncryptionTlsOptions, type DataKey } from './clientEncryption';
-import { collectionNamespace, databaseNamespace } from './common';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptdManager';
 import { type KMSProvider, type KMSProviders } from './providers';
@@ -423,10 +422,10 @@ export class StateMachine {
     filter: Document,
     callback: Callback<Uint8Array | null>
   ) {
-    const dbName = databaseNamespace(ns);
+    const { db } = MongoDBCollectionNamespace.fromString(ns);
 
     client
-      .db(dbName)
+      .db(db)
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false
@@ -458,11 +457,11 @@ export class StateMachine {
     callback: Callback<Uint8Array>
   ) {
     const options = { promoteLongs: false, promoteValues: false };
-    const dbName = databaseNamespace(ns);
+    const { db } = MongoDBCollectionNamespace.fromString(ns);
     const rawCommand = deserialize(command, options);
 
     client
-      .db(dbName)
+      .db(db)
       .command(rawCommand, options)
       .then(
         response => {
@@ -488,8 +487,8 @@ export class StateMachine {
     filter: Uint8Array,
     callback: Callback<Array<DataKey>>
   ) {
-    const dbName = databaseNamespace(keyVaultNamespace);
-    const collectionName = collectionNamespace(keyVaultNamespace);
+    const { db: dbName, collection: collectionName } =
+      MongoDBCollectionNamespace.fromString(keyVaultNamespace);
 
     client
       .db(dbName)

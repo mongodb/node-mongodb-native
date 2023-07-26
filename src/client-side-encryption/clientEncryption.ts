@@ -11,8 +11,8 @@ import { type MongoClient } from '../mongo_client';
 import { type Filter } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { type Callback } from '../utils';
-import { collectionNamespace, databaseNamespace, maybeCallback, promiseOrCallback } from './common';
+import { type Callback, MongoDBCollectionNamespace } from '../utils';
+import { maybeCallback, promiseOrCallback } from './common';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongoCryptCreateDataKeyError, MongoCryptCreateEncryptedCollectionError } from './errors';
 import { type KMSProvider, type KMSProviders, loadCredentials } from './providers/index';
@@ -205,8 +205,9 @@ export class ClientEncryption implements StateMachineExecutable {
           return;
         }
 
-        const dbName = databaseNamespace(this._keyVaultNamespace);
-        const collectionName = collectionNamespace(this._keyVaultNamespace);
+        const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+          this._keyVaultNamespace
+        );
 
         this._keyVaultClient
           .db(dbName)
@@ -269,8 +270,10 @@ export class ClientEncryption implements StateMachineExecutable {
       return {};
     }
 
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     const replacements = dataKey.v.map((key: DataKey) => ({
       updateOne: {
         filter: { _id: key._id },
@@ -312,8 +315,10 @@ export class ClientEncryption implements StateMachineExecutable {
    *
    */
   async deleteKey(_id: Binary): Promise<DeleteResult> {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -333,8 +338,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   getKeys(): FindCursor<DataKey> {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -357,8 +364,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   async getKey(_id: Binary): Promise<DataKey | null> {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -382,8 +391,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   async getKeyByAltName(keyAltName: string) {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     return this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -411,8 +422,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   async addKeyAltName(_id: Binary, keyAltName: string) {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     const { value } = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
@@ -449,8 +462,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   async removeKeyAltName(_id: Binary, keyAltName: string) {
-    const dbName = databaseNamespace(this._keyVaultNamespace);
-    const collectionName = collectionNamespace(this._keyVaultNamespace);
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
+
     const pipeline = [
       {
         $set: {

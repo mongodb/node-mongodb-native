@@ -1,24 +1,5 @@
 /* eslint-disable */
 
-/**
- * @ignore
- * Gets the database portion of a namespace string
- * @param {string} ns A string in the format of a namespace (database.collection)
- * @returns {string} The database portion of the namespace
- */
-export function databaseNamespace(ns) {
-  return ns.split('.')[0];
-}
-/**
- * @ignore
- * Gets the collection portion of a namespace string
- * @param {string} ns A string in the format of a namespace (database.collection)
- * @returns {string} The collection portion of the namespace
- */
-export function collectionNamespace(ns) {
-  return ns.split('.').slice(1).join('.');
-}
-
 export function maybeCallback(promiseFn, callback) {
   const promise = promiseFn();
   if (callback == null) {

@@ -3,8 +3,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
 import { type AnyError, MongoError, MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
-import { type Callback } from '../utils';
-import { databaseNamespace } from './common';
+import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongocryptdManager } from './mongocryptdManager';
 import { type KMSProviders, loadCredentials } from './providers';
@@ -512,7 +511,10 @@ export class AutoEncrypter implements StateMachineExecutable {
 
     let context;
     try {
-      context = this._mongocrypt.makeEncryptionContext(databaseNamespace(ns), commandBuffer);
+      context = this._mongocrypt.makeEncryptionContext(
+        MongoDBCollectionNamespace.fromString(ns).db,
+        commandBuffer
+      );
     } catch (err) {
       callback(err, undefined);
       return;
