@@ -8,7 +8,7 @@ import { databaseNamespace } from './common';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongocryptdManager } from './mongocryptdManager';
 import { type KMSProviders, loadCredentials } from './providers';
-import { StateMachine } from './stateMachine';
+import { StateMachine, type StateMachineExecutable } from './stateMachine';
 
 /** @public */
 export interface AutoEncryptionTlsOptions {
@@ -234,7 +234,7 @@ export type AutoEncryptionLoggerLevel =
  * @internal An internal class to be used by the driver for auto encryption
  * **NOTE**: Not meant to be instantiated directly, this is for internal use only.
  */
-export class AutoEncrypter {
+export class AutoEncrypter implements StateMachineExecutable {
   _client: MongoClient;
   _bypassEncryption: boolean;
   _keyVaultNamespace: string;
@@ -514,11 +514,8 @@ export class AutoEncrypter {
     }
 
     // TODO: should these be accessors from the addon?
-    // @ts-expect-error - this is not defined in the bindings
     context.id = this._contextCounter++;
-    // @ts-expect-error - this is not defined in the bindings
     context.ns = ns;
-    // @ts-expect-error - this is not defined in the bindings
     context.document = cmd;
 
     const stateMachine = new StateMachine({
@@ -560,7 +557,6 @@ export class AutoEncrypter {
     }
 
     // TODO: should this be an accessor from the addon?
-    // @ts-expect-error - this is not defined in the bindings
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({

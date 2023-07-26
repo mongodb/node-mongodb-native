@@ -1,23 +1,28 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter, once } from 'events';
+import * as fs from 'fs';
+import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
+import * as net from 'net';
+import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
+import * as tls from 'tls';
 
-const { EventEmitter, once } = require('events');
-const net = require('net');
-const tls = require('tls');
-const fs = require('fs');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { serialize, Long, Int32 } =  require('../../mongodb');
-const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
-const { Db } = require('../../../src/db');
-const { MongoClient } = require('../../../src/mongo_client');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { Db } from '../../../src/db';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoClient } from '../../../src/mongo_client';
+import { Int32, Long, serialize } from '../../mongodb';
 
 describe('StateMachine', function () {
-  class MockRequest {
-    constructor(message, bytesNeeded) {
+  class MockRequest implements MongoCryptKMSRequest {
+    _bytesNeeded: number;
+    endpoint = 'some.fake.host.com';
+    _kmsProvider = 'aws';
+
+    constructor(public _message: Buffer, bytesNeeded) {
       this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
-      this._message = message;
-      this.endpoint = 'some.fake.host.com';
-      this._kmsProvider = 'aws';
     }
 
     get message() {
@@ -30,6 +35,10 @@ describe('StateMachine', function () {
 
     get kmsProvider() {
       return this._kmsProvider;
+    }
+
+    get status() {
+      return { type: 1, code: 2, message: 'something went wrong' };
     }
 
     addResponse(buffer) {
@@ -61,6 +70,7 @@ describe('StateMachine', function () {
     const options = { promoteLongs: false, promoteValues: false };
     const serializedCommand = serialize(command);
     const stateMachine = new StateMachine();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     const callback = () => {};
 
     context('when executing the command', function () {
@@ -77,7 +87,9 @@ describe('StateMachine', function () {
         super();
         this.on('connect', callback);
       }
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       write() {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       destroy() {}
       end(callback) {
         Promise.resolve().then(callback);
@@ -107,6 +119,7 @@ describe('StateMachine', function () {
             () => (status = 'resolved'),
             () => (status = 'rejected')
           )
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .catch(() => {});
 
         this.fakeSocket.emit('connect');
@@ -293,7 +306,7 @@ describe('StateMachine', function () {
         await stateMachine.kmsRequest(request);
       } catch (err) {
         expect(err.name).to.equal('MongoCryptError');
-        expect(err.originalError.code).to.equal('ECONNRESET');
+        expect(err.cause.code).to.equal('ECONNRESET');
         expect(hasTlsConnection).to.equal(true);
         return;
       }
@@ -316,7 +329,7 @@ describe('StateMachine', function () {
         await stateMachine.kmsRequest(request);
       } catch (err) {
         expect(err.name).to.equal('MongoCryptError');
-        expect(err.originalError.code).to.equal('ECONNRESET');
+        expect(err.cause.code).to.equal('ECONNRESET');
         expect(hasTlsConnection).to.equal(true);
         return;
       }

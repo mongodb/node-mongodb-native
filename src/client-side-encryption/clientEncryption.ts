@@ -17,7 +17,7 @@ import { collectionNamespace, databaseNamespace, maybeCallback, promiseOrCallbac
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongoCryptCreateDataKeyError, MongoCryptCreateEncryptedCollectionError } from './errors';
 import { type KMSProvider, type KMSProviders, loadCredentials } from './providers/index';
-import { StateMachine } from './stateMachine';
+import { StateMachine, type StateMachineExecutable } from './stateMachine';
 
 /**
  * The schema for a DataKey in the key vault collection.
@@ -36,7 +36,7 @@ export interface DataKey {
 /**
  * The public interface for explicit in-use encryption
  */
-export class ClientEncryption {
+export class ClientEncryption implements StateMachineExecutable {
   _client: MongoClient;
   _keyVaultNamespace: string;
   _keyVaultClient: MongoClient;
