@@ -609,7 +609,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    * The session will always be ended when the executor finishes.
    *
    * @param executor - An executor function that all operations using the provided session must be invoked in
-   * @param options - optional settings for the command
+   * @param options - optional settings for the session
    */
   async withSession<T = any>(executor: WithSessionCallback<T>): Promise<T>;
   async withSession<T = any>(
