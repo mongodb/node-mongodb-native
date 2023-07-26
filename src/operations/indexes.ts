@@ -429,7 +429,6 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     });
     // Let's check for the index names
     if (!Array.isArray(indexes)) return info[indexes] != null;
-
     // All keys found return true
     return indexes.every(indexName => info[indexName] != null);
   }
