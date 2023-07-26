@@ -1,10 +1,9 @@
 import type { Db } from '../db';
-import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
+import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { enumToString } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { type Callback, enumToString } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
 
@@ -22,7 +21,7 @@ export type ProfilingLevel = (typeof ProfilingLevel)[keyof typeof ProfilingLevel
 export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
-export class SetProfilingLevelOperation extends CommandCallbackOperation<ProfilingLevel> {
+export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
   override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
   profile: 0 | 1 | 2;
@@ -48,27 +47,28 @@ export class SetProfilingLevelOperation extends CommandCallbackOperation<Profili
     this.level = level;
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<ProfilingLevel>
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<ProfilingLevel> {
     const level = this.level;
 
     if (!levelValues.has(level)) {
-      return callback(
-        new MongoInvalidArgumentError(
-          `Profiling level must be one of "${enumToString(ProfilingLevel)}"`
-        )
+      throw new MongoInvalidArgumentError(
+        `Profiling level must be one of "${enumToString(ProfilingLevel)}"`
       );
     }
 
     // TODO(NODE-3483): Determine error to put here
-    super.executeCommandCallback(server, session, { profile: this.profile }, (err, doc) => {
-      if (err == null && doc.ok === 1) return callback(undefined, level);
-      return err != null
-        ? callback(err)
-        : callback(new MongoRuntimeError('Error with profile command'));
-    });
+    await super.executeCommand(server, session, { profile: this.profile });
+    return level;
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<ProfilingLevel>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }

@@ -2,6 +2,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
+import type { AutoEncrypter } from '../client-side-encryption/autoEncrypter';
 import {
   CLOSE,
   CLUSTER_TIME_RECEIVED,
@@ -12,7 +13,6 @@ import {
   PINNED,
   UNPINNED
 } from '../constants';
-import type { AutoEncrypter } from '../deps';
 import {
   MongoCompatibilityError,
   MongoMissingDependencyError,
@@ -113,7 +113,7 @@ export interface ConnectionOptions
   id: number | '<monitor>';
   generation: number;
   hostAddress: HostAddress;
-  // Settings
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   serverApi?: ServerApi;
   monitorCommands: boolean;
@@ -598,6 +598,8 @@ export class CryptoConnection extends Connection {
       ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
       : null;
 
+    // TODO(NODE-5422): add typescript support
+    // @ts-expect-error no typescript support yet
     autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
       if (err || encrypted == null) {
         callback(err, null);

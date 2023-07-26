@@ -1921,50 +1921,6 @@ describe('Operations', function () {
   });
 
   /**
-   * Example of retrieving a collections stats using a Promise.
-   *
-   * example-class Collection
-   * example-method stats
-   */
-  it('shouldCorrectlyReturnACollectionsStatsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Crete the collection for the distinct example
-        const collection = db.collection('collection_stats_test_with_promise');
-
-        // Insert some documents
-        return collection
-          .insertMany([{ a: 1 }, { hello: 'world' }], configuration.writeConcernMax())
-          .then(function (result) {
-            expect(result).to.exist;
-            // Retrieve the statistics for the collection
-            return collection.stats();
-          })
-          .then(function (stats) {
-            expect(stats.count).to.equal(2);
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
    * An examples showing the creation and dropping of an index using Promises.
    *
    * example-class Collection
@@ -2204,118 +2160,6 @@ describe('Operations', function () {
           expect(collections.length > 0).to.exist;
           return client.close();
         });
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of adding a user to the database using a Promise.
-   *
-   * example-class Db
-   * example-method addUser
-   */
-  it('shouldCorrectlyAddUserToDbWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1
-      });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Add a user to the database
-        return db
-          .addUser('user', 'name')
-          .then(function (result) {
-            expect(result).to.exist;
-            // Remove the user from the db
-            return db.removeUser('user');
-          })
-          .then(function (result) {
-            expect(result).to.exist;
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
-   * An example of removing a user using a Promise.
-   *
-   * example-class Db
-   * example-method removeUser
-   */
-  it.skip('shouldCorrectlyAddAndRemoveUserWithPromises', {
-    metadata: { requires: { topology: 'single', mongodb: '<=3.4.x' } },
-
-    test: function () {
-      const configuration = this.configuration;
-
-      const client = configuration.newClient();
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Add a user to the database
-
-        return db
-          .addUser('user3', 'name')
-          .then(function (result) {
-            expect(result).to.exist;
-            return client.close();
-          })
-          .then(() => {
-            const secondClient = configuration.newClient(
-              'mongodb://user3:name@localhost:27017/integration_tests'
-            );
-
-            return secondClient.connect();
-          })
-          .then(function (client) {
-            // Logout the db
-            return client.logout().then(function () {
-              return client;
-            });
-          })
-          .then(function (client) {
-            // Remove the user
-            const db = client.db(configuration.db);
-            return db.removeUser('user3');
-          })
-          .then(function (result) {
-            expect(result).to.equal(true);
-
-            // Should error out due to user no longer existing
-            const thirdClient = configuration.newClient(
-              'mongodb://user3:name@localhost:27017/integration_tests',
-              { serverSelectionTimeoutMS: 10 }
-            );
-
-            return thirdClient.connect();
-          })
-          .catch(function (err) {
-            expect(err).to.exist;
-            return client.close();
-          });
       });
       // END
     }
@@ -3145,96 +2989,6 @@ describe('Operations', function () {
   });
 
   /**
-   * An example of how to add a user to the admin database using a Promise.
-   *
-   * example-class Admin
-   * example-method addUser
-   */
-  it('shouldCorrectlyAddAUserToAdminDbWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Use the admin database for the operation
-        const adminDb = db.admin();
-
-        // Add the new user to the admin database
-        return adminDb
-          .addUser('admin11', 'admin11')
-          .then(function (result) {
-            expect(result).to.exist;
-
-            return adminDb.removeUser('admin11');
-          })
-          .then(function (result) {
-            expect(result).to.exist;
-            return client.close();
-          });
-      });
-    }
-  });
-
-  /**
-   * An example of how to remove a user from the admin database using a Promise.
-   *
-   * example-class Admin
-   * example-method removeUser
-   */
-  it('shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function () {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-
-      return client.connect().then(function (client) {
-        const db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Use the admin database for the operation
-        const adminDb = db.admin();
-
-        // Add the new user to the admin database
-        return adminDb
-          .addUser('admin12', 'admin12')
-          .then(function (result) {
-            expect(result).to.exist;
-
-            // Remove the user
-            return adminDb.removeUser('admin12');
-          })
-          .then(function (result) {
-            expect(result).to.equal(true);
-            return client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
    * An example of listing all available databases. using a Promise.
    *
    * example-class Admin
@@ -3307,20 +3061,10 @@ describe('Operations', function () {
         // Collections are not created until the first document is inserted
         return collection
           .insertOne({ a: 1 }, { writeConcern: { w: 1 } })
-          .then(function (doc) {
-            expect(doc).to.exist;
-            // Add the new user to the admin database
-            return adminDb.addUser('admin13', 'admin13');
-          })
           .then(function (result) {
             expect(result).to.exist;
             // Retrieve the server Info
             return adminDb.serverStatus();
-          })
-          .then(function (info) {
-            expect(info != null).to.exist;
-
-            return adminDb.removeUser('admin13');
           })
           .then(function (result) {
             expect(result).to.exist;

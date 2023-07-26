@@ -157,11 +157,6 @@ describe('Command Write Concern', function () {
       db.collection('test').dropIndexes(writeConcernTestOptions)
     ));
 
-  it('successfully pass through writeConcern to createUser command', () =>
-    writeConcernTest('createUser', (db, writeConcernTestOptions) =>
-      db.admin().addUser('kay:kay', 'abc123', writeConcernTestOptions)
-    ));
-
   it('successfully pass through writeConcern to dropUser command', () =>
     writeConcernTest('dropUser', (db, writeConcernTestOptions) =>
       db.admin().removeUser('kay:kay', writeConcernTestOptions)

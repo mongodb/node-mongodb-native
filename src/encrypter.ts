@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
+import { AutoEncrypter } from './client-side-encryption/autoEncrypter';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import { type AutoEncryptionOptions, getMongoDBClientEncryption } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, type MongoClientOptions } from './mongo_client';
-import { type Callback, getMongoDBClientEncryption } from './utils';
-
-let AutoEncrypterClass: { new (...args: ConstructorParameters<AutoEncrypter>): AutoEncrypter };
+import { type Callback } from './utils';
 
 /** @internal */
 const kInternalClient = Symbol('internalClient');
@@ -57,7 +54,7 @@ export class Encrypter {
       };
     }
 
-    this.autoEncrypter = new AutoEncrypterClass(client, options.autoEncryption);
+    this.autoEncrypter = new AutoEncrypter(client, options.autoEncryption);
   }
 
   getInternalClient(client: MongoClient, uri: string, options: MongoClientOptions): MongoClient {
@@ -105,7 +102,8 @@ export class Encrypter {
   }
 
   close(client: MongoClient, force: boolean, callback: Callback): void {
-    this.autoEncrypter.teardown(!!force, e => {
+    // TODO(NODE-5422): add typescript support
+    this.autoEncrypter.teardown(!!force, (e: any) => {
       const internalClient = this[kInternalClient];
       if (internalClient != null && client !== internalClient) {
         internalClient.close(force).then(
@@ -126,6 +124,5 @@ export class Encrypter {
           'Please add `mongodb-client-encryption` as a dependency of your project'
       );
     }
-    AutoEncrypterClass = mongodbClientEncryption.extension(require('../lib/index')).AutoEncrypter;
   }
 }

@@ -36,14 +36,6 @@ describe('When executing an operation for the first time', () => {
   });
 
   describe(`class Admin`, () => {
-    describe(`#addUser()`, () => {
-      it('should connect the client', async () => {
-        const admin = client.db().admin();
-        await admin.addUser('neal', 'iLoveJavaScript', { roles: ['root'] }).catch(() => null);
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#buildInfo()`, () => {
       it('should connect the client', async () => {
         const admin = client.db().admin();
@@ -531,14 +523,6 @@ describe('When executing an operation for the first time', () => {
       });
     });
 
-    describe(`#stats()`, () => {
-      it('should connect the client', async () => {
-        const c = client.db().collection('test');
-        await c.stats();
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#updateMany()`, () => {
       it('should connect the client', async () => {
         const c = client.db().collection('test');
@@ -557,14 +541,6 @@ describe('When executing an operation for the first time', () => {
   });
 
   describe(`class Db`, () => {
-    describe(`#addUser()`, () => {
-      it('should connect the client', async () => {
-        const db = client.db();
-        await db.addUser('neal', 'iLoveJavaScript', { roles: ['dbAdmin'] }).catch(() => null);
-        expect(client).to.have.property('topology').that.is.instanceOf(Topology);
-      });
-    });
-
     describe(`#collections()`, () => {
       it('should connect the client', async () => {
         const db = client.db();

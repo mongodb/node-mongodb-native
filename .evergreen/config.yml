@@ -165,6 +165,8 @@ functions:
             export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+            export AWS_REGION='${AWS_REGION}'
+            export AWS_CMK_ID='${AWS_CMK_ID}'
             export AWS_DEFAULT_REGION='us-east-1'
             export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
             export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
@@ -218,6 +220,8 @@ functions:
             export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
             export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
             export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+            export AWS_REGION='${AWS_REGION}'
+            export AWS_CMK_ID='${AWS_CMK_ID}'
             export AWS_DEFAULT_REGION='us-east-1'
             export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
             export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
@@ -501,6 +505,8 @@ functions:
           cat <<EOT > prepare_client_encryption.sh
           export CLIENT_ENCRYPTION='${CLIENT_ENCRYPTION}'
           export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
+          export AWS_REGION='${AWS_REGION}'
+          export AWS_CMK_ID='${AWS_CMK_ID}'
           export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
           export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
@@ -921,6 +927,8 @@ functions:
           export CSFLE_KMS_PROVIDERS='${CSFLE_KMS_PROVIDERS}'
           export AWS_ACCESS_KEY_ID='${AWS_ACCESS_KEY_ID}'
           export AWS_SECRET_ACCESS_KEY='${AWS_SECRET_ACCESS_KEY}'
+          export AWS_REGION='${AWS_REGION}'
+          export AWS_CMK_ID='${AWS_CMK_ID}'
           export CSFLE_GIT_REF='${CSFLE_GIT_REF}'
           export CDRIVER_GIT_REF='${CDRIVER_GIT_REF}'
           EOT
@@ -2668,7 +2676,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
+          CSFLE_GIT_REF: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
@@ -2698,7 +2706,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
+          CSFLE_GIT_REF: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
@@ -2728,7 +2736,7 @@ tasks:
       - func: bootstrap kms servers
       - func: run custom csfle tests
         vars:
-          CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
+          CSFLE_GIT_REF: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
@@ -3646,7 +3654,6 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -3697,7 +3704,6 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0

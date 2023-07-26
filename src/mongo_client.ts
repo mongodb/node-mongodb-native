@@ -4,6 +4,7 @@ import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
+import { type AutoEncrypter } from './client-side-encryption/autoEncrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -17,11 +18,13 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import type { AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
+import { executeOperation } from './operations/execute_operation';
+import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
@@ -375,6 +378,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this[kOptions].monitorCommands = value;
   }
 
+  /** @internal */
   get autoEncrypter(): AutoEncrypter | undefined {
     return this[kOptions].autoEncrypter;
   }
@@ -519,12 +523,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (servers.length !== 0) {
       const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
       if (endSessions.length !== 0) {
-        await this.db('admin')
-          .command(
+        await executeOperation(
+          this,
+          new RunAdminCommandOperation(
             { endSessions },
             { readPreference: ReadPreference.primaryPreferred, noResponse: true }
           )
-          .catch(() => null); // outcome does not matter
+        ).catch(() => null); // outcome does not matter;
       }
     }
 
@@ -736,6 +741,7 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;

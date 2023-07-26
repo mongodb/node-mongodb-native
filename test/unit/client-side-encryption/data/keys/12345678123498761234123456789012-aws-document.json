@@ -1,0 +1,32 @@
+{
+    "_id": {
+        "$binary": {
+            "base64": "EjRWeBI0mHYSNBI0VniQEg==",
+            "subType": "04"
+        }
+    },
+    "keyMaterial": {
+        "$binary": {
+            "base64": "AQICAHhQNmWG2CzOm1dq3kWLM+iDUZhEqnhJwH9wZVpuZ94A8gG69plztrxKXh9M8C54okakAAAAwjCBvwYJKoZIhvcNAQcGoIGxMIGuAgEAMIGoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDN5KpQl1MfBbXDngKQIBEIB7zzdKA1fG4Jaqte1TRUzAB7zbS6sr1og+T5lo/WDXjELnvvsfWflvrEK/Dc1dnpSldVgkidjdT//H6HX5cJ+aw2CgNZz2F15PqEvU1h2QKGBbs4Omhb0L8jBv5fMa/9nenxl5j5y4wO0XPGtiV2G/dUztYNB6qz0YhdTl",
+            "subType": "00"
+        }
+    },
+    "creationDate": {
+        "$date": {
+            "$numberLong": "1648914327152"
+        }
+    },
+    "updateDate": {
+        "$date": {
+            "$numberLong": "1648914327152"
+        }
+    },
+    "status": {
+        "$numberInt": "0"
+    },
+    "masterKey": {
+        "provider": "aws",
+        "region": "us-east-1",
+        "key": "arn:aws:kms:us-east-1:579766882180:key/89fcc2c4-08b0-4bd9-9f25-e30687b580d0"
+    }
+}

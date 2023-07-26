@@ -725,4 +725,9 @@ describe('Connection String', function () {
       ]);
     });
   });
+
+  it('rejects a connection string with an unsupported scheme', () => {
+    expect(() => new MongoClient('mango://localhost:23')).to.throw(/Invalid scheme/i);
+    expect(() => new MongoClient('mango+srv://localhost:23')).to.throw(/Invalid scheme/i);
+  });
 });

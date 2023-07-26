@@ -1,10 +1,10 @@
 import type { Admin } from '../admin';
 import type { Document } from '../bson';
-import { MongoRuntimeError } from '../error';
+import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { type Callback } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface ValidateCollectionOptions extends CommandOperationOptions {
@@ -13,7 +13,7 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class ValidateCollectionOperation extends CommandCallbackOperation<Document> {
+export class ValidateCollectionOperation extends CommandOperation<Document> {
   override options: ValidateCollectionOptions;
   collectionName: string;
   command: Document;
@@ -34,26 +34,25 @@ export class ValidateCollectionOperation extends CommandCallbackOperation<Docume
     this.collectionName = collectionName;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const collectionName = this.collectionName;
 
-    super.executeCommandCallback(server, session, this.command, (err, doc) => {
-      if (err != null) return callback(err);
+    const doc = await super.executeCommand(server, session, this.command);
+    if (doc.result != null && typeof doc.result !== 'string')
+      throw new MongoUnexpectedServerResponseError('Error with validation data');
+    if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
+      throw new MongoUnexpectedServerResponseError(`Invalid collection ${collectionName}`);
+    if (doc.valid != null && !doc.valid)
+      throw new MongoUnexpectedServerResponseError(`Invalid collection ${collectionName}`);
 
-      // TODO(NODE-3483): Replace these with MongoUnexpectedServerResponseError
-      if (doc.ok === 0) return callback(new MongoRuntimeError('Error with validate command'));
-      if (doc.result != null && typeof doc.result !== 'string')
-        return callback(new MongoRuntimeError('Error with validation data'));
-      if (doc.result != null && doc.result.match(/exception|corrupt/) != null)
-        return callback(new MongoRuntimeError(`Invalid collection ${collectionName}`));
-      if (doc.valid != null && !doc.valid)
-        return callback(new MongoRuntimeError(`Invalid collection ${collectionName}`));
+    return doc;
+  }
 
-      return callback(undefined, doc);
-    });
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
