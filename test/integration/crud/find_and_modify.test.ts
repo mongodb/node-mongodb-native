@@ -56,7 +56,6 @@ describe('Collection (#findOneAnd...)', function () {
         it('returns null', async function () {
           const result = await collection.findOneAndDelete(
             { a: 2 },
-            { includeResultMetadata: false }
           );
           expect(result).to.equal(null);
         });
@@ -197,7 +196,6 @@ describe('Collection (#findOneAnd...)', function () {
           const result = await collection.findOneAndUpdate(
             { a: 1 },
             { $set: { a: 1 } },
-            { includeResultMetadata: false }
           );
           expect(result.b).to.equal(1);
         });
@@ -208,7 +206,6 @@ describe('Collection (#findOneAnd...)', function () {
           const result = await collection.findOneAndUpdate(
             { a: 2 },
             { $set: { a: 1 } },
-            { includeResultMetadata: false }
           );
           expect(result).to.equal(null);
         });
@@ -386,7 +383,6 @@ describe('Collection (#findOneAnd...)', function () {
           const result = await collection.findOneAndReplace(
             { a: 2 },
             { a: 1 },
-            { includeResultMetadata: false }
           );
           expect(result).to.equal(null);
         });
