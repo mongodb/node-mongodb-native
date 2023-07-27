@@ -4,6 +4,8 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import { type CommandStartedEvent, MongoClient, type MongoClientOptions } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';
@@ -105,7 +107,6 @@ const metadata = {
 describe('Connection Pool Deadlock Prevention', function () {
   installNodeDNSWorkaroundHooks();
   beforeEach(async function () {
-    const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
     const url: string = this.configuration.url();
 
     this.clientTest = new CapturingMongoClient(url);
@@ -131,7 +132,7 @@ describe('Connection Pool Deadlock Prevention', function () {
 
     await this.clientTest.db('db').createCollection('coll', { validator: { $jsonSchema } });
 
-    this.clientEncryption = new mongodbClientEncryption.ClientEncryption(this.clientTest, {
+    this.clientEncryption = new ClientEncryption(this.clientTest, {
       kmsProviders: { local: { key: LOCAL_KEY } },
       keyVaultNamespace: 'keyvault.datakeys',
       keyVaultClient: this.keyVaultClient,

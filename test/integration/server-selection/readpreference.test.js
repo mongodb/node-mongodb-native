@@ -110,41 +110,6 @@ describe('ReadPreference', function () {
     }
   });
 
-  it('Should correctly apply collection level read Preference to stats', {
-    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
-
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        expect(err).to.not.exist;
-        // Set read preference
-        var collection = db.collection('read_pref_1', {
-          readPreference: ReadPreference.SECONDARY_PREFERRED
-        });
-        // Save checkout function
-        var command = client.topology.command;
-        // Set up our checker method
-        client.topology.command = function () {
-          var args = Array.prototype.slice.call(arguments, 0);
-          if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
-          }
-
-          return command.apply(db.s.topology, args);
-        };
-
-        // Perform the map reduce
-        collection.stats(function (/* err */) {
-          // expect(err).to.not.exist;
-          client.topology.command = command;
-          client.close(done);
-        });
-      });
-    }
-  });
-
   it('Should correctly honor the readPreferences at DB and individual command level', {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
@@ -414,7 +379,14 @@ describe('ReadPreference', function () {
       });
 
       const db = utilClient.db(configuration.db);
-      await db.addUser('default', 'pass', { roles: 'readWrite' }).catch(() => null);
+      await db
+        .command({
+          createUser: 'default',
+          pwd: 'pass',
+          roles: [{ role: 'readWrite', db: configuration.db }]
+        })
+        .catch(() => null);
+
       await db.createCollection('before_collection').catch(() => null);
       await db.createIndex(collectionName, { aloha: 1 }).catch(() => null);
 
@@ -430,7 +402,6 @@ describe('ReadPreference', function () {
     const methods = {
       'Collection#createIndex': [{ quote: 'text' }],
       'Db#createIndex': [collectionName, { quote: 'text' }],
-      'Db#addUser': ['thomas', 'pass', { roles: 'readWrite' }],
       'Db#removeUser': ['default'],
       'Db#createCollection': ['created_collection'],
       'Db#dropCollection': ['before_collection'],

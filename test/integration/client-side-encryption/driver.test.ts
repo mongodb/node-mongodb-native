@@ -2,10 +2,11 @@ import { EJSON, UUID } from 'bson';
 import { expect } from 'chai';
 import * as crypto from 'crypto';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
 import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
 import * as BSON from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
-import { type ClientEncryption } from '../../tools/unified-spec-runner/schema';
 import { getEncryptExtraOptions } from '../../tools/utils';
 
 const metadata = {
@@ -127,12 +128,11 @@ describe('Client Side Encryption Functional', function () {
         }
       });
 
-      const mongodbClientEncryption = this.configuration.mongodbClientEncryption;
       const kmsProviders = this.configuration.kmsProviders(crypto.randomBytes(96));
 
       await client.connect();
 
-      const encryption: ClientEncryption = new mongodbClientEncryption.ClientEncryption(client, {
+      const encryption = new ClientEncryption(client, {
         bson: BSON,
         keyVaultNamespace,
         kmsProviders,

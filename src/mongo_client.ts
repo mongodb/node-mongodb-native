@@ -4,6 +4,7 @@ import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
+import { type AutoEncrypter } from './client-side-encryption/autoEncrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -17,11 +18,13 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
-import type { AutoEncrypter, AutoEncryptionOptions } from './deps';
+import type { AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
+import { executeOperation } from './operations/execute_operation';
+import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
 import type { TagSet } from './sdam/server_description';
@@ -253,7 +256,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
 }
 
 /** @public */
-export type WithSessionCallback = (session: ClientSession) => Promise<any>;
+export type WithSessionCallback<T = unknown> = (session: ClientSession) => Promise<T>;
 
 /** @internal */
 export interface MongoClientPrivate {
@@ -375,6 +378,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this[kOptions].monitorCommands = value;
   }
 
+  /** @internal */
   get autoEncrypter(): AutoEncrypter | undefined {
     return this[kOptions].autoEncrypter;
   }
@@ -519,12 +523,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (servers.length !== 0) {
       const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
       if (endSessions.length !== 0) {
-        await this.db('admin')
-          .command(
+        await executeOperation(
+          this,
+          new RunAdminCommandOperation(
             { endSessions },
             { readPreference: ReadPreference.primaryPreferred, noResponse: true }
           )
-          .catch(() => null); // outcome does not matter
+        ).catch(() => null); // outcome does not matter;
       }
     }
 
@@ -600,29 +605,30 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   }
 
   /**
-   * Runs a given operation with an implicitly created session. The lifetime of the session
-   * will be handled without the need for user interaction.
+   * A convenience method for creating and handling the clean up of a ClientSession.
+   * The session will always be ended when the executor finishes.
    *
-   * NOTE: presently the operation MUST return a Promise (either explicit or implicitly as an async function)
-   *
-   * @param options - Optional settings for the command
-   * @param callback - An callback to execute with an implicitly created session
+   * @param executor - An executor function that all operations using the provided session must be invoked in
+   * @param options - optional settings for the session
    */
-  async withSession(callback: WithSessionCallback): Promise<void>;
-  async withSession(options: ClientSessionOptions, callback: WithSessionCallback): Promise<void>;
-  async withSession(
-    optionsOrOperation: ClientSessionOptions | WithSessionCallback,
-    callback?: WithSessionCallback
-  ): Promise<void> {
+  async withSession<T = any>(executor: WithSessionCallback<T>): Promise<T>;
+  async withSession<T = any>(
+    options: ClientSessionOptions,
+    executor: WithSessionCallback<T>
+  ): Promise<T>;
+  async withSession<T = any>(
+    optionsOrExecutor: ClientSessionOptions | WithSessionCallback<T>,
+    executor?: WithSessionCallback<T>
+  ): Promise<T> {
     const options = {
       // Always define an owner
       owner: Symbol(),
       // If it's an object inherit the options
-      ...(typeof optionsOrOperation === 'object' ? optionsOrOperation : {})
+      ...(typeof optionsOrExecutor === 'object' ? optionsOrExecutor : {})
     };
 
     const withSessionCallback =
-      typeof optionsOrOperation === 'function' ? optionsOrOperation : callback;
+      typeof optionsOrExecutor === 'function' ? optionsOrExecutor : executor;
 
     if (withSessionCallback == null) {
       throw new MongoInvalidArgumentError('Missing required callback parameter');
@@ -631,7 +637,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const session = this.startSession(options);
 
     try {
-      await withSessionCallback(session);
+      return await withSessionCallback(session);
     } finally {
       try {
         await session.endSession();
@@ -736,6 +742,7 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;

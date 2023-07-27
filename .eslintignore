@@ -2,3 +2,6 @@
 lib
 test/disabled
 !etc/docs
+
+src/client-side-encryption
+test/unit/client-side-encryption

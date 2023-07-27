@@ -2,20 +2,19 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
 import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoError } from '../error';
-import type { OneOrMore } from '../mongo_types';
+import { type OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
-  CommandCallbackOperation,
   CommandOperation,
   type CommandOperationOptions,
   type OperationParent
 } from './command';
 import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -177,7 +176,7 @@ function makeIndexSpec(
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
+export class IndexesOperation extends AbstractOperation<Document[]> {
   override options: IndexInformationOptions;
   collection: Collection;
 
@@ -187,27 +186,23 @@ export class IndexesOperation extends AbstractCallbackOperation<Document[]> {
     this.collection = collection;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document[]>
-  ): void {
+  override execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
 
-    indexInformation(
-      coll.s.db,
-      coll.collectionName,
-      { full: true, ...options, readPreference: this.readPreference, session },
-      callback
-    );
+    return indexInformation(coll.s.db, coll.collectionName, {
+      full: true,
+      ...options,
+      readPreference: this.readPreference,
+      session
+    });
   }
 }
 
 /** @internal */
 export class CreateIndexesOperation<
   T extends string | string[] = string[]
-> extends CommandCallbackOperation<T> {
+> extends CommandOperation<T> {
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
@@ -240,11 +235,7 @@ export class CreateIndexesOperation<
     });
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -254,12 +245,9 @@ export class CreateIndexesOperation<
 
     if (options.commitQuorum != null) {
       if (serverWireVersion < 9) {
-        callback(
-          new MongoCompatibilityError(
-            'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-          )
+        throw new MongoCompatibilityError(
+          'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
         );
-        return;
       }
       cmd.commitQuorum = options.commitQuorum;
     }
@@ -267,15 +255,18 @@ export class CreateIndexesOperation<
     // collation is set on each index, it should not be defined at the root
     this.options.collation = undefined;
 
-    super.executeCommandCallback(server, session, cmd, err => {
-      if (err) {
-        callback(err);
-        return;
-      }
+    await super.executeCommand(server, session, cmd);
 
-      const indexNames = indexes.map(index => index.name || '');
-      callback(undefined, indexNames as T);
-    });
+    const indexNames = indexes.map(index => index.name || '');
+    return indexNames as T;
+  }
+
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<T>
+  ): void {
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -289,15 +280,9 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
   ) {
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<string>
-  ): void {
-    super.executeCallback(server, session, (err, indexNames) => {
-      if (err || !indexNames) return callback(err);
-      return callback(undefined, indexNames[0]);
-    });
+  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
+    const indexNames = await super.execute(server, session);
+    return indexNames[0];
   }
 }
 
@@ -318,30 +303,19 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.collectionName = collectionName;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
     const indexName = this.indexes[0].name;
-    const cursor = this.db.collection(this.collectionName).listIndexes({ session });
-    cursor.toArray().then(
-      indexes => {
-        indexes = Array.isArray(indexes) ? indexes : [indexes];
-        if (indexes.some(index => index.name === indexName)) {
-          callback(undefined, indexName);
-          return;
-        }
-        super.executeCallback(server, session, callback);
-      },
-      error => {
-        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound) {
-          // ignore "NamespaceNotFound" errors
-          return super.executeCallback(server, session, callback);
-        }
-        return callback(error);
-      }
-    );
+    const indexes = await this.db
+      .collection(this.collectionName)
+      .listIndexes({ session })
+      .toArray()
+      .catch(error => {
+        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound)
+          return [];
+        throw error;
+      });
+    if (indexName && indexes.some(index => index.name === indexName)) return indexName;
+    return super.execute(server, session);
   }
 }
 
@@ -349,7 +323,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
 export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
-export class DropIndexOperation extends CommandCallbackOperation<Document> {
+export class DropIndexOperation extends CommandOperation<Document> {
   override options: DropIndexesOptions;
   collection: Collection;
   indexName: string;
@@ -362,31 +336,17 @@ export class DropIndexOperation extends CommandCallbackOperation<Document> {
     this.indexName = indexName;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    super.executeCommandCallback(server, session, cmd, callback);
-  }
-}
-
-/** @internal */
-export class DropIndexesOperation extends DropIndexOperation {
-  constructor(collection: Collection, options: DropIndexesOptions) {
-    super(collection, '*', options);
+    return super.executeCommand(server, session, cmd);
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback
+  protected executeCallback(
+    _server: Server,
+    _session: ClientSession | undefined,
+    _callback: Callback<Document>
   ): void {
-    super.executeCallback(server, session, err => {
-      if (err) return callback(err, false);
-      callback(undefined, true);
-    });
+    throw new Error('Method not implemented.');
   }
 }
 
@@ -442,7 +402,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
 }
 
 /** @internal */
-export class IndexExistsOperation extends AbstractCallbackOperation<boolean> {
+export class IndexExistsOperation extends AbstractOperation<boolean> {
   override options: IndexInformationOptions;
   collection: Collection;
   indexes: string | string[];
@@ -458,39 +418,24 @@ export class IndexExistsOperation extends AbstractCallbackOperation<boolean> {
     this.indexes = indexes;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<boolean>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const coll = this.collection;
     const indexes = this.indexes;
 
-    indexInformation(
-      coll.s.db,
-      coll.collectionName,
-      { ...this.options, readPreference: this.readPreference, session },
-      (err, indexInformation) => {
-        // If we have an error return
-        if (err != null) return callback(err);
-        // Let's check for the index names
-        if (!Array.isArray(indexes)) return callback(undefined, indexInformation[indexes] != null);
-        // Check in list of indexes
-        for (let i = 0; i < indexes.length; i++) {
-          if (indexInformation[indexes[i]] == null) {
-            return callback(undefined, false);
-          }
-        }
-
-        // All keys found return true
-        return callback(undefined, true);
-      }
-    );
+    const info = await indexInformation(coll.s.db, coll.collectionName, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    });
+    // Let's check for the index names
+    if (!Array.isArray(indexes)) return info[indexes] != null;
+    // All keys found return true
+    return indexes.every(indexName => info[indexName] != null);
   }
 }
 
 /** @internal */
-export class IndexInformationOperation extends AbstractCallbackOperation<Document> {
+export class IndexInformationOperation extends AbstractOperation<Document> {
   override options: IndexInformationOptions;
   db: Db;
   name: string;
@@ -502,20 +447,15 @@ export class IndexInformationOperation extends AbstractCallbackOperation<Documen
     this.name = name;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const db = this.db;
     const name = this.name;
 
-    indexInformation(
-      db,
-      name,
-      { ...this.options, readPreference: this.readPreference, session },
-      callback
-    );
+    return indexInformation(db, name, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    });
   }
 }
 
@@ -528,4 +468,3 @@ defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(DropIndexesOperation, [Aspect.WRITE_OPERATION]);

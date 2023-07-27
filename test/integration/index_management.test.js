@@ -1,11 +1,24 @@
 'use strict';
 const { expect } = require('chai');
+
 const { assert: test, setupDatabase } = require('./shared');
 const shared = require('../tools/contexts');
 
 describe('Indexes', function () {
+  let client;
+  let db;
+
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  beforeEach(function () {
+    client = this.configuration.newClient();
+    db = client.db();
+  });
+
+  afterEach(async function () {
+    await client.close();
   });
 
   it('Should correctly execute createIndex', {
@@ -258,39 +271,106 @@ describe('Indexes', function () {
     }
   });
 
-  it('shouldCorrectlyDropIndexes', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  context('when dropIndexes succeeds', function () {
+    let collection;
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      db.createCollection('test_drop_indexes', function (err, collection) {
-        collection.insert({ a: 1 }, configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
-          // Create an index on the collection
-          db.createIndex(
-            collection.collectionName,
-            'a',
-            configuration.writeConcernMax(),
-            function (err, indexName) {
-              test.equal('a_1', indexName);
-              // Drop all the indexes
-              collection.dropIndexes(function (err, result) {
-                test.equal(true, result);
+    beforeEach(async function () {
+      collection = await db.createCollection('test_drop_indexes');
+      await collection.insert({ a: 1 });
+      // Create an index on the collection
+      await db.createIndex(collection.collectionName, 'a');
+    });
 
-                collection.indexInformation(function (err, result) {
-                  test.ok(result['a_1'] == null);
-                  client.close(done);
-                });
-              });
-            }
-          );
+    afterEach(async function () {
+      await db.dropCollection('test_drop_indexes');
+    });
+
+    it('should return true and should no longer exist in the collection', async function () {
+      // Drop all the indexes
+      const result = await collection.dropIndexes();
+      expect(result).to.equal(true);
+
+      const res = await collection.indexInformation();
+      expect(res['a_1']).to.equal(undefined);
+    });
+  });
+
+  context('when dropIndexes fails', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = await db.createCollection('test_drop_indexes');
+      await collection.insert({ a: 1 });
+      // Create an index on the collection
+      await db.createIndex(collection.collectionName, 'a');
+      /**@type {import('../tools/utils').FailPoint} */
+      await client
+        .db()
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: {
+            times: 1
+          },
+          data: {
+            failCommands: ['dropIndexes'],
+            errorCode: 91
+          }
         });
-      });
-    }
+    });
+
+    afterEach(async function () {
+      await db.dropCollection('test_drop_indexes');
+    });
+
+    it('should return false', {
+      metadata: {
+        requires: {
+          mongodb: '>4.0'
+        }
+      },
+
+      test: async function () {
+        const result = await collection.dropIndexes();
+        expect(result).to.equal(false);
+      }
+    });
+  });
+
+  context('indexExists', function () {
+    let collection;
+
+    beforeEach(async function () {
+      collection = await db.createCollection('test_index_exists');
+      await collection.insert({ a: 1 });
+
+      await db.createIndex(collection.collectionName, 'a');
+      await db.createIndex(collection.collectionName, ['c', 'd', 'e']);
+    });
+
+    afterEach(async function () {
+      await db.dropCollection('test_index_exists');
+    });
+
+    it('should return true when index of type string exists', async function () {
+      const result = await collection.indexExists('a_1');
+      expect(result).to.equal(true);
+    });
+
+    it('should return false when index of type string does not exist', async function () {
+      const result = await collection.indexExists('b_2');
+      expect(result).to.equal(false);
+    });
+
+    it('should return true when an array of indexes exists', async function () {
+      const result = await collection.indexExists(['c_1_d_1_e_1', 'a_1']);
+      expect(result).to.equal(true);
+    });
+
+    it('should return false when an array of indexes does not exist', async function () {
+      const result = await collection.indexExists(['d_1_e_1', 'c_1']);
+      expect(result).to.equal(false);
+    });
   });
 
   it('shouldCorrectlyHandleDistinctIndexes', {

@@ -67,7 +67,7 @@ export interface ClientSessionOptions {
 }
 
 /** @public */
-export type WithTransactionCallback<T = void> = (session: ClientSession) => Promise<T>;
+export type WithTransactionCallback<T = any> = (session: ClientSession) => Promise<T>;
 
 /** @public */
 export type ClientSessionEvents = {
@@ -432,18 +432,16 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   }
 
   /**
-   * Runs a provided callback within a transaction, retrying either the commitTransaction operation
-   * or entire transaction as needed (and when the error permits) to better ensure that
-   * the transaction can complete successfully.
+   * Starts a transaction and runs a provided function, ensuring the commitTransaction is always attempted when all operations run in the function have completed.
    *
    * **IMPORTANT:** This method requires the user to return a Promise, and `await` all operations.
-   * Any callbacks that do not return a Promise will result in undefined behavior.
    *
    * @remarks
    * This function:
-   * - Will return the command response from the final commitTransaction if every operation is successful (can be used as a truthy object)
-   * - Will return `undefined` if the transaction is explicitly aborted with `await session.abortTransaction()`
-   * - Will throw if one of the operations throws or `throw` statement is used inside the `withTransaction` callback
+   * - If all operations successfully complete and the `commitTransaction` operation is successful, then this function will return the result of the provided function.
+   * - If the transaction is unable to complete or an error is thrown from within the provided function, then this function will throw an error.
+   *   - If the transaction is manually aborted within the provided function it will not throw.
+   * - May be called multiple times if the driver needs to attempt to retry the operations.
    *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/developer/quickstart/node-transactions/
@@ -452,7 +450,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * @param options - optional settings for the transaction
    * @returns A raw command response or undefined
    */
-  async withTransaction<T = void>(
+  async withTransaction<T = any>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions
   ): Promise<Document | undefined> {
@@ -543,25 +541,29 @@ function attemptTransactionCommit<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
-  options?: TransactionOptions
+  result: any,
+  options: TransactionOptions
 ): Promise<T> {
-  return session.commitTransaction().catch((err: MongoError) => {
-    if (
-      err instanceof MongoError &&
-      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
-      !isMaxTimeMSExpiredError(err)
-    ) {
-      if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
-        return attemptTransactionCommit(session, startTime, fn, options);
+  return session.commitTransaction().then(
+    () => result,
+    (err: MongoError) => {
+      if (
+        err instanceof MongoError &&
+        hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
+        !isMaxTimeMSExpiredError(err)
+      ) {
+        if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
+          return attemptTransactionCommit(session, startTime, fn, result, options);
+        }
+
+        if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+          return attemptTransaction(session, startTime, fn, options);
+        }
       }
 
-      if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-        return attemptTransaction(session, startTime, fn, options);
-      }
+      throw err;
     }
-
-    throw err;
-  });
+  );
 }
 
 const USER_EXPLICIT_TXN_END_STATES = new Set<TxnState>([
@@ -574,11 +576,11 @@ function userExplicitlyEndedTransaction(session: ClientSession) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction<TSchema>(
+function attemptTransaction<T>(
   session: ClientSession,
   startTime: number,
-  fn: WithTransactionCallback<TSchema>,
-  options?: TransactionOptions
+  fn: WithTransactionCallback<T>,
+  options: TransactionOptions = {}
 ): Promise<any> {
   session.startTransaction(options);
 
@@ -591,18 +593,18 @@ function attemptTransaction<TSchema>(
 
   if (!isPromiseLike(promise)) {
     session.abortTransaction().catch(() => null);
-    throw new MongoInvalidArgumentError(
-      'Function provided to `withTransaction` must return a Promise'
+    return Promise.reject(
+      new MongoInvalidArgumentError('Function provided to `withTransaction` must return a Promise')
     );
   }
 
   return promise.then(
-    () => {
+    result => {
       if (userExplicitlyEndedTransaction(session)) {
-        return;
+        return result;
       }
 
-      return attemptTransactionCommit(session, startTime, fn, options);
+      return attemptTransactionCommit(session, startTime, fn, result, options);
     },
     err => {
       function maybeRetryOrThrow(err: MongoError): Promise<any> {
@@ -754,7 +756,7 @@ function endTransaction(
   // send the command
   executeOperation(
     session.client,
-    new RunAdminCommandOperation(undefined, command, {
+    new RunAdminCommandOperation(command, {
       session,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
@@ -778,7 +780,7 @@ function endTransaction(
 
         return executeOperation(
           session.client,
-          new RunAdminCommandOperation(undefined, command, {
+          new RunAdminCommandOperation(command, {
             session,
             readPreference: ReadPreference.primary,
             bypassPinningCheck: true
@@ -989,7 +991,7 @@ export function applySession(
     if (
       session.supports.causalConsistency &&
       session.operationTime &&
-      commandSupportsReadConcern(command, options)
+      commandSupportsReadConcern(command)
     ) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });

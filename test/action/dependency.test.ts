@@ -7,13 +7,15 @@ import { expect } from 'chai';
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
 import { itInNodeProcess } from '../tools/utils';
 
-const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', 'socks'];
+const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url'];
 const EXPECTED_PEER_DEPENDENCIES = [
   '@aws-sdk/credential-providers',
   '@mongodb-js/zstd',
   'kerberos',
   'snappy',
-  'mongodb-client-encryption'
+  'mongodb-client-encryption',
+  'gcp-metadata',
+  'socks'
 ];
 
 describe('package.json', function () {
@@ -82,7 +84,11 @@ describe('package.json', function () {
       });
 
       context(`when ${depName} is installed`, () => {
-        beforeEach(async () => {
+        beforeEach(async function () {
+          if (depName === 'mongodb-client-encryption') {
+            execSync(`npm install --no-save "${depName}"@alpha`);
+            return;
+          }
           execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
         });
 
@@ -118,10 +124,7 @@ describe('package.json', function () {
     'mongodb-connection-string-url',
     'whatwg-url',
     'webidl-conversions',
-    'tr46',
-    'socks',
-    'ip',
-    'smart-buffer'
+    'tr46'
   ];
 
   describe('mongodb imports', () => {

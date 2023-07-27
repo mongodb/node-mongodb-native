@@ -53,7 +53,6 @@ import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
   CreateIndexOperation,
-  DropIndexesOperation,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
@@ -80,7 +79,6 @@ import {
 } from './operations/search_indexes/create';
 import { DropSearchIndexOperation } from './operations/search_indexes/drop';
 import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
-import { type CollStats, CollStatsOperation, type CollStatsOptions } from './operations/stats';
 import {
   ReplaceOneOperation,
   type ReplaceOptions,
@@ -647,11 +645,16 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async dropIndexes(options?: DropIndexesOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+  async dropIndexes(options?: DropIndexesOptions): Promise<boolean> {
+    try {
+      await executeOperation(
+        this.client,
+        new DropIndexOperation(this as TODO_NODE_3286, '*', resolveOptions(this, options))
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -796,21 +799,6 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       this.client,
       new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
-  }
-
-  /**
-   * Get all the collection statistics.
-   *
-   * @deprecated the `collStats` operation will be removed in the next major release.  Please
-   * use an aggregation pipeline with the [`$collStats`](https://www.mongodb.com/docs/manual/reference/operator/aggregation/collStats/) stage instead
-   *
-   * @param options - Optional settings for the command
-   */
-  async stats(options?: CollStatsOptions): Promise<CollStats> {
-    return executeOperation(
-      this.client,
-      new CollStatsOperation(this as TODO_NODE_3286, options) as TODO_NODE_3286
     );
   }
 

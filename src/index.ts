@@ -201,6 +201,8 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
+export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,
@@ -285,7 +287,7 @@ export type {
 } from './cursor/list_search_indexes_cursor';
 export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncrypter, AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
+export type { AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
@@ -376,7 +378,6 @@ export type {
   WithId,
   WithoutId
 } from './mongo_types';
-export type { AddUserOptions, RoleSpecification } from './operations/add_user';
 export type {
   AggregateOperation,
   AggregateOptions,
@@ -432,12 +433,7 @@ export type { RenameOptions } from './operations/rename';
 export type { RunCommandOptions } from './operations/run_command';
 export type { SearchIndexDescription } from './operations/search_indexes/create';
 export type { SetProfilingLevelOptions } from './operations/set_profiling_level';
-export type {
-  CollStats,
-  CollStatsOptions,
-  DbStatsOptions,
-  WiredTigerData
-} from './operations/stats';
+export type { DbStatsOptions } from './operations/stats';
 export type {
   ReplaceOptions,
   UpdateOptions,

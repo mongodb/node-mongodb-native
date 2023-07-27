@@ -1,9 +1,11 @@
 import type { BSONSerializeOptions, Document } from '../bson';
+import { type Db } from '../db';
+import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, MongoDBNamespace } from '../utils';
-import { CommandCallbackOperation, type OperationParent } from './command';
+import { MongoDBNamespace } from '../utils';
+import { AbstractOperation } from './operation';
 
 /** @public */
 export type RunCommandOptions = {
@@ -11,63 +13,43 @@ export type RunCommandOptions = {
   session?: ClientSession;
   /** The read preference */
   readPreference?: ReadPreferenceLike;
-
-  // The following options were "accidentally" supported
-  // Since the options are generally supported through inheritance
-
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  willRetryWrite?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  omitReadPreference?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  writeConcern?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  explain?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  readConcern?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  collation?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  maxTimeMS?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  comment?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  retryWrites?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  dbName?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  authdb?: any;
-  /** @deprecated This is an internal option that has undefined behavior for this API */
-  noResponse?: any;
-
-  /** @internal Used for transaction commands */
-  bypassPinningCheck?: boolean;
 } & BSONSerializeOptions;
 
 /** @internal */
-export class RunCommandOperation<T = Document> extends CommandCallbackOperation<T> {
-  override options: RunCommandOptions;
-  command: Document;
-
-  constructor(parent: OperationParent | undefined, command: Document, options?: RunCommandOptions) {
-    super(parent, options);
-    this.options = options ?? {};
-    this.command = command;
+export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
+  constructor(parent: Db, public command: Document, public override options: RunCommandOptions) {
+    super(options);
+    this.ns = parent.s.namespace.withCollection('$cmd');
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<T>
-  ): void {
-    const command = this.command;
-    this.executeCommandCallback(server, session, command, callback);
+  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+    this.server = server;
+    return server.commandAsync(this.ns, this.command, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    }) as TODO_NODE_3286;
   }
 }
 
-export class RunAdminCommandOperation<T = Document> extends RunCommandOperation<T> {
-  constructor(parent: OperationParent | undefined, command: Document, options?: RunCommandOptions) {
-    super(parent, command, options);
-    this.ns = new MongoDBNamespace('admin');
+export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T> {
+  constructor(
+    public command: Document,
+    public override options: RunCommandOptions & {
+      noResponse?: boolean;
+      bypassPinningCheck?: boolean;
+    }
+  ) {
+    super(options);
+    this.ns = new MongoDBNamespace('admin', '$cmd');
+  }
+
+  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+    this.server = server;
+    return server.commandAsync(this.ns, this.command, {
+      ...this.options,
+      readPreference: this.readPreference,
+      session
+    }) as TODO_NODE_3286;
   }
 }

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { type AddUserOptions, type MongoClient, MongoServerError } from '../mongodb';
+import { type MongoClient, MongoServerError } from '../mongodb';
 import { TestBuilder, UnifiedTestSuiteBuilder } from '../tools/utils';
 
 const metadata: MongoDBMetadataUI = {
@@ -25,10 +25,6 @@ describe('listDatabases()', function () {
     let adminClient: MongoClient;
     let authorizedClient: MongoClient;
 
-    const authorizedUserOptions: AddUserOptions = {
-      roles: [{ role: 'read', db: mockAuthorizedDb }]
-    };
-
     beforeEach(async function () {
       adminClient = this.configuration.newClient();
 
@@ -37,7 +33,11 @@ describe('listDatabases()', function () {
         .createCollection(mockAuthorizedCollection)
         .catch(() => null);
 
-      await adminClient.db('admin').addUser(username, password, authorizedUserOptions);
+      await adminClient.db('admin').command({
+        createUser: username,
+        pwd: password,
+        roles: [{ role: 'read', db: mockAuthorizedDb }]
+      });
 
       authorizedClient = this.configuration.newClient({
         auth: { username: username, password: password }
@@ -189,6 +189,7 @@ describe('listDatabases()', function () {
       });
     }
   });
+
   UnifiedTestSuiteBuilder.describe('comment option')
     .createEntities(UnifiedTestSuiteBuilder.defaultEntities)
     .initialData({

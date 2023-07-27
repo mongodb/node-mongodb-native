@@ -157,14 +157,6 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
-/* @internal */
-export interface AWSCredentials {
-  accessKeyId?: string;
-  secretAccessKey?: string;
-  sessionToken?: string;
-  expiration?: Date;
-}
-
 async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {

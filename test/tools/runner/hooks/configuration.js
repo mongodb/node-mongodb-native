@@ -71,18 +71,23 @@ const testSkipBeforeEachHook = async function () {
   const metadata = this.currentTest.metadata;
 
   if (metadata && metadata.requires && Object.keys(metadata.requires).length > 0) {
-    const failedFilter = filters.find(filter => !filter.filter(this.currentTest));
-
+    const failedFilter = filters.find(filter => filter.filter(this.currentTest) !== true);
     if (failedFilter) {
       const filterName = failedFilter.constructor.name;
-      const metadataString = inspect(metadata.requires, {
-        colors: true,
-        compact: true,
-        depth: 10,
-        breakLength: Infinity
-      });
+      if (filterName === 'GenericPredicateFilter') {
+        this.currentTest.skipReason = `filtered by ${filterName}: ${failedFilter.filter(
+          this.currentTest
+        )}`;
+      } else {
+        const metadataString = inspect(metadata.requires, {
+          colors: true,
+          compact: true,
+          depth: 10,
+          breakLength: Infinity
+        });
 
-      this.currentTest.skipReason = `filtered by ${filterName} requires ${metadataString}`;
+        this.currentTest.skipReason = `filtered by ${filterName} requires ${metadataString}`;
+      }
 
       this.skip();
     }

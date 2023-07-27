@@ -81,6 +81,7 @@ describe('Sessions Spec', function () {
 
     describe('withSession', function () {
       let client: MongoClient;
+
       beforeEach(async function () {
         client = await this.configuration.newClient().connect();
       });
@@ -183,6 +184,13 @@ describe('Sessions Spec', function () {
 
         expect(client.s.sessionPool.sessions).to.have.length(1);
         expect(sessionWasEnded).to.be.true;
+      });
+
+      it('resolves with the value the callback returns', async () => {
+        const result = await client.withSession(async session => {
+          return client.db('test').collection('foo').find({}, { session }).toArray();
+        });
+        expect(result).to.be.an('array');
       });
     });
 

@@ -8,6 +8,7 @@ import {
   MongoNetworkError,
   type ServerSessionPool
 } from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 
 describe('Transactions', function () {
   describe('withTransaction', function () {
@@ -90,7 +91,7 @@ describe('Transactions', function () {
           await client.close();
         });
 
-        it('should return undefined when transaction is aborted explicitly', async () => {
+        it('returns result of executor when transaction is aborted explicitly', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
@@ -98,25 +99,25 @@ describe('Transactions', function () {
               await collection.insertOne({ a: 1 }, { session });
               await collection.findOne({ a: 1 }, { session });
               await session.abortTransaction();
+              return 'aborted!';
             })
             .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.be.undefined;
+          expect(withTransactionResult).to.equal('aborted!');
         });
 
-        it('should return raw command when transaction is successfully committed', async () => {
+        it('returns result of executor when transaction is successfully committed', async () => {
           const session = client.startSession();
 
           const withTransactionResult = await session
             .withTransaction(async session => {
               await collection.insertOne({ a: 1 }, { session });
               await collection.findOne({ a: 1 }, { session });
+              return 'committed!';
             })
             .finally(async () => await session.endSession());
 
-          expect(withTransactionResult).to.exist;
-          expect(withTransactionResult).to.be.an('object');
-          expect(withTransactionResult).to.have.property('ok', 1);
+          expect(withTransactionResult).to.equal('committed!');
         });
 
         it('should throw when transaction is aborted due to an error', async () => {
@@ -136,6 +137,48 @@ describe('Transactions', function () {
         });
       }
     );
+
+    context('when retried', { requires: { mongodb: '>=4.2.0', topology: '!single' } }, () => {
+      let client: MongoClient;
+      let collection: Collection<{ a: number }>;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 },
+          data: {
+            failCommands: ['commitTransaction'],
+            errorCode: 24,
+            errorLabels: ['TransientTransactionError'],
+            closeConnection: false
+          }
+        } as FailPoint);
+
+        collection = await client.db('withTransaction').createCollection('withTransactionRetry');
+      });
+
+      afterEach(async () => {
+        await client?.close();
+      });
+
+      it('returns the value of the final call to the executor', async () => {
+        const session = client.startSession();
+
+        let counter = 0;
+        const withTransactionResult = await session
+          .withTransaction(async session => {
+            await collection.insertOne({ a: 1 }, { session });
+            counter += 1;
+            return counter;
+          })
+          .finally(async () => await session.endSession());
+
+        expect(counter).to.equal(3);
+        expect(withTransactionResult).to.equal(3);
+      });
+    });
   });
 
   describe('startTransaction', function () {

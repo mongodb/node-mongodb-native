@@ -1,12 +1,10 @@
 import type {
   Document,
-  type FindCursor,
-  type MongoClient,
   MongoLoggableComponent,
   ObjectId,
   ReadConcernLevel,
   ReadPreferenceMode,
-  type ServerApiVersion,
+  ServerApiVersion,
   SeverityLevel,
   TagSet,
   W
@@ -332,20 +330,3 @@ export interface ExpectedLogMessage {
  * A type that represents the test filter provided to the unifed runner.
  */
 export type TestFilter = (test: Test, ctx: TestConfiguration) => string | false;
-
-/**
- * This interface represents the bare minimum of type information needed to get *some* type
- * safety on the client encryption object in unified tests.
- */
-export interface ClientEncryption {
-  // eslint-disable-next-line @typescript-eslint/no-misused-new
-  new (client: MongoClient, options: any): ClientEncryption;
-  createDataKey(provider, options?: Document): Promise<any>;
-  rewrapManyDataKey(filter, options): Promise<any>;
-  deleteKey(id): Promise<any>;
-  getKey(id): Promise<any>;
-  getKeys(): FindCursor;
-  addKeyAltName(id, keyAltName): Promise<any>;
-  removeKeyAltName(id, keyAltName): Promise<any>;
-  getKeyByAltName(keyAltName): Promise<any>;
-}
