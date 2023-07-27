@@ -293,7 +293,9 @@ export class AutoEncrypter implements StateMachineExecutable {
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
 
-    const mongoCryptOptions: MongoCryptOptions = {};
+    const mongoCryptOptions: MongoCryptOptions = {
+      cryptoCallbacks
+    };
     if (options.schemaMap) {
       mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)
         ? options.schemaMap
@@ -331,7 +333,6 @@ export class AutoEncrypter implements StateMachineExecutable {
       mongoCryptOptions.cryptSharedLibSearchPaths = ['$SYSTEM'];
     }
 
-    Object.assign(mongoCryptOptions, { cryptoCallbacks });
     const MongoCrypt = AutoEncrypter.getMongoCrypt();
     this._mongocrypt = new MongoCrypt(mongoCryptOptions);
     this._contextCounter = 0;

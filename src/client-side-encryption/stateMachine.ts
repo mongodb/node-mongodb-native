@@ -96,13 +96,22 @@ export type CSFLEKMSTlsOptions = {
   azure?: CSFLETlsOptions;
 };
 
+/**
+ * An interface representing an object that can be passed to the `StateMachine.execute` method.
+ *
+ * Not all properties are required for all operations.
+ */
 export interface StateMachineExecutable {
   _keyVaultNamespace: string;
   _keyVaultClient: MongoClient;
+
+  /** only used for auto encryption */
   _metaDataClient?: MongoClient;
+  /** only used for auto encryption */
   _mongocryptdClient?: MongoClient;
+  /** only used for auto encryption */
   _mongocryptdManager?: MongocryptdManager;
-  askForKMSCredentials: () => Promise<KMSProviders | Buffer>;
+  askForKMSCredentials: () => Promise<KMSProviders>;
 }
 
 export type StateMachineOptions = {
@@ -231,9 +240,7 @@ export class StateMachine {
         executor
           .askForKMSCredentials()
           .then(kmsProviders => {
-            context.provideKMSProviders(
-              !Buffer.isBuffer(kmsProviders) ? serialize(kmsProviders) : kmsProviders
-            );
+            context.provideKMSProviders(serialize(kmsProviders));
             this.execute(executor, context, callback);
           })
           .catch(err => {
@@ -269,7 +276,8 @@ export class StateMachine {
         // TODO: Maybe rework the logic here so that instead of doing
         // the callback here, finalize stores the result, and then
         // we wait to MONGOCRYPT_CTX_DONE to do the callback
-        if ((context.state as 0) === MONGOCRYPT_CTX_ERROR) {
+        // @ts-expect-error finalize can change the state, check for error
+        if (context.state === MONGOCRYPT_CTX_ERROR) {
           const message = context.status.message || 'Finalization error';
           callback(new MongoCryptError(message));
           return;
