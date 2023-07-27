@@ -42,7 +42,7 @@ describe('CRUD API explain option', function () {
     {
       name: 'findOneAndDelete',
       op: async (explain: boolean | string) =>
-        await collection.findOneAndDelete({ a: 1 }, { explain })
+        await collection.findOneAndDelete({ a: 1 }, { explain, includeResultMetadata: true })
     },
     {
       name: 'findOne',
@@ -52,7 +52,11 @@ describe('CRUD API explain option', function () {
     {
       name: 'findOneAndReplace',
       op: async (explain: boolean | string) =>
-        await collection.findOneAndReplace({ a: 1 }, { a: 2 }, { explain })
+        await collection.findOneAndReplace(
+          { a: 1 },
+          { a: 2 },
+          { explain, includeResultMetadata: true }
+        )
     },
     {
       name: 'aggregate',
