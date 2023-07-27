@@ -5,11 +5,18 @@ import { SocksClient } from 'socks';
 import * as tls from 'tls';
 import { promisify } from 'util';
 
-import { deserialize, type Document, serialize } from '../bson';
+import {
+  type BSONSerializeOptions,
+  deserialize,
+  type Document,
+  pluckBSONSerializeOptions,
+  serialize
+} from '../bson';
+import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { MongoNetworkTimeoutError } from '../error';
-import { type MongoClient } from '../mongo_client';
+import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils';
-import { type ClientEncryptionTlsOptions, type DataKey } from './clientEncryption';
+import { type DataKey } from './clientEncryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptdManager';
 import { type KMSProvider, type KMSProviders } from './providers';
@@ -66,6 +73,29 @@ declare module 'mongodb-client-encryption' {
   }
 }
 
+/**
+ * TLS options to use when connecting. The spec specifically calls out which insecure
+ * tls options are not allowed:
+ *
+ *  - tlsAllowInvalidCertificates
+ *  - tlsAllowInvalidHostnames
+ *  - tlsInsecure
+ *  - tlsDisableOCSPEndpointCheck
+ *  - tlsDisableCertificateRevocationCheck
+ */
+export type CSFLETlsOptions = Pick<
+  MongoClientOptions,
+  'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
+>;
+
+export type CSFLEKMSTlsOptions = {
+  aws?: CSFLETlsOptions;
+  gcp?: CSFLETlsOptions;
+  kmip?: CSFLETlsOptions;
+  local?: CSFLETlsOptions;
+  azure?: CSFLETlsOptions;
+};
+
 export interface StateMachineExecutable {
   _keyVaultNamespace: string;
   _keyVaultClient: MongoClient;
@@ -75,14 +105,25 @@ export interface StateMachineExecutable {
   askForKMSCredentials: () => Promise<KMSProviders | Buffer>;
 }
 
+export type StateMachineOptions = {
+  /** socks5 proxy options, if set. */
+  proxyOptions: ProxyOptions;
+
+  /** TLS options for KMS requests, if set. */
+  tlsOptions: CSFLEKMSTlsOptions;
+} & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'> &
+  CommandOptions;
+
 /**
  * @internal
  * An internal class that executes across a MongoCryptContext until either
  * a finishing state or an error is reached. Do not instantiate directly.
  */
 export class StateMachine {
-  // TODO: figure out state machine options type
-  constructor(private options: Document = {}) {}
+  constructor(
+    private options: StateMachineOptions,
+    private bsonOptions = pluckBSONSerializeOptions(options)
+  ) {}
 
   executeAsync(executor: StateMachineExecutable, context: MongoCryptContext): Promise<Document> {
     // @ts-expect-error The callback version allows undefined for the result, but we'll never actually have an undefined result without an error.
@@ -265,8 +306,11 @@ export class StateMachine {
   kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    // TODO: type these options
-    const options: Document = { host: parsedUrl[0], servername: parsedUrl[0], port };
+    const options: tls.ConnectionOptions & { host: string; port: number } = {
+      host: parsedUrl[0],
+      servername: parsedUrl[0],
+      port
+    };
     const message = request.message;
 
     // TODO(NODE-3959): We can adopt `for-await on(socket, 'data')` with logic to control abort
@@ -372,11 +416,7 @@ export class StateMachine {
    *
    * @returns An error if any option is invalid.
    */
-  validateTlsOptions(
-    kmsProvider: KMSProvider,
-    // TODO: should this be `ClientEncryptionTlsOptions`?
-    tlsOptions: ClientEncryptionTlsOptions
-  ): MongoCryptError | void {
+  validateTlsOptions(kmsProvider: string, tlsOptions: CSFLETlsOptions): MongoCryptError | void {
     const tlsOptionNames = Object.keys(tlsOptions);
     for (const option of INSECURE_TLS_OPTIONS) {
       if (tlsOptionNames.includes(option)) {
@@ -391,8 +431,7 @@ export class StateMachine {
    * @param tlsOptions - The client TLS options for the provider.
    * @param options - The existing connection options.
    */
-  // TODO: should this be `ClientEncryptionTlsOptions`?
-  setTlsOptions(tlsOptions: ClientEncryptionTlsOptions, options: Document) {
+  setTlsOptions(tlsOptions: CSFLETlsOptions, options: tls.ConnectionOptions) {
     if (tlsOptions.tlsCertificateKeyFile) {
       const cert = fs.readFileSync(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;
@@ -465,7 +504,7 @@ export class StateMachine {
       .command(rawCommand, options)
       .then(
         response => {
-          return callback(undefined, serialize(response, this.options));
+          return callback(undefined, serialize(response, this.bsonOptions));
         },
         err => {
           callback(err);

@@ -202,10 +202,7 @@ export type {
   UpdateDescription
 } from './change_stream';
 export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
-export type {
-  AutoEncryptionOptions,
-  AutoEncryptionTlsOptions
-} from './client-side-encryption/autoEncrypter';
+export type { AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
 export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {

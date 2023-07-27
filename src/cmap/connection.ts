@@ -598,8 +598,6 @@ export class CryptoConnection extends Connection {
       ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
       : null;
 
-    // TODO(NODE-5422): add typescript support
-    // @ts-expect-error no typescript support yet
     autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
       if (err || encrypted == null) {
         callback(err, null);
@@ -612,6 +610,7 @@ export class CryptoConnection extends Connection {
       }
       if (indexKeys != null && cmd.createIndexes) {
         for (const [offset, index] of indexKeys.entries()) {
+          // @ts-expect-error `encrypted` is a generic "command", but we've narrowed for only `createIndexes` commands here
           encrypted.indexes[offset].key = index;
         }
       }

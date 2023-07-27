@@ -1,5 +1,7 @@
+import { type MongoCryptOptions } from 'mongodb-client-encryption';
+
 import { deserialize, type Document, serialize } from '../bson';
-import { type ProxyOptions } from '../cmap/connection';
+import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
 import { type AnyError, MongoError, MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -7,27 +9,7 @@ import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongocryptdManager } from './mongocryptdManager';
 import { type KMSProviders, loadCredentials } from './providers';
-import { StateMachine, type StateMachineExecutable } from './stateMachine';
-
-/** @public */
-export interface AutoEncryptionTlsOptions {
-  /**
-   * Specifies the location of a local .pem file that contains
-   * either the client's TLS/SSL certificate and key.
-   */
-  tlsCertificateKeyFile?: string;
-  /**
-   * Specifies the password to de-crypt the tlsCertificateKeyFile.
-   */
-  tlsCertificateKeyFilePassword?: string;
-  /**
-   * Specifies the location of a local .pem file that contains the
-   * root certificate chain from the Certificate Authority.
-   * This file is used to validate the certificate presented by the
-   * KMS provider.
-   */
-  tlsCAFile?: string;
-}
+import { type CSFLEKMSTlsOptions, StateMachine, type StateMachineExecutable } from './stateMachine';
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -190,13 +172,7 @@ export interface AutoEncryptionOptions {
   };
   proxyOptions?: ProxyOptions;
   /** The TLS options to use connecting to the KMS provider */
-  tlsOptions?: {
-    aws?: AutoEncryptionTlsOptions;
-    local?: AutoEncryptionTlsOptions;
-    azure?: AutoEncryptionTlsOptions;
-    gcp?: AutoEncryptionTlsOptions;
-    kmip?: AutoEncryptionTlsOptions;
-  };
+  tlsOptions?: CSFLEKMSTlsOptions;
 }
 
 /**
@@ -240,7 +216,7 @@ export class AutoEncrypter implements StateMachineExecutable {
   _keyVaultClient: MongoClient;
   _metaDataClient: MongoClient;
   _proxyOptions: ProxyOptions;
-  _tlsOptions: Record<string, AutoEncryptionTlsOptions>;
+  _tlsOptions: CSFLEKMSTlsOptions;
   _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
@@ -317,22 +293,21 @@ export class AutoEncrypter implements StateMachineExecutable {
     this._tlsOptions = options.tlsOptions || {};
     this._kmsProviders = options.kmsProviders || {};
 
-    // TODO: Add proper type support here, once the bindings are finished.
-    const mongoCryptOptions: Document = {};
+    const mongoCryptOptions: MongoCryptOptions = {};
     if (options.schemaMap) {
       mongoCryptOptions.schemaMap = Buffer.isBuffer(options.schemaMap)
         ? options.schemaMap
-        : serialize(options.schemaMap);
+        : (serialize(options.schemaMap) as Buffer);
     }
 
     if (options.encryptedFieldsMap) {
       mongoCryptOptions.encryptedFieldsMap = Buffer.isBuffer(options.encryptedFieldsMap)
         ? options.encryptedFieldsMap
-        : serialize(options.encryptedFieldsMap);
+        : (serialize(options.encryptedFieldsMap) as Buffer);
     }
 
     mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? serialize(this._kmsProviders)
+      ? (serialize(this._kmsProviders) as Buffer)
       : this._kmsProviders;
 
     if (options.options?.logger) {
@@ -475,13 +450,19 @@ export class AutoEncrypter implements StateMachineExecutable {
   }
 
   encrypt(ns: string, cmd: Document, callback: Callback<Document | Uint8Array>): void;
+  encrypt(
+    ns: string,
+    cmd: Document,
+    options: CommandOptions,
+    callback: Callback<Document | Uint8Array>
+  ): void;
   /**
    * Encrypt a command for a given namespace.
    */
   encrypt(
     ns: string,
     cmd: Document,
-    options?: Document | Callback<Document | Uint8Array>,
+    options?: CommandOptions | Callback<Document | Uint8Array>,
     callback?: Callback<Document | Uint8Array>
   ) {
     if (typeof ns !== 'string') {
@@ -492,8 +473,7 @@ export class AutoEncrypter implements StateMachineExecutable {
       throw new TypeError('Parameter `cmd` must be an object');
     }
 
-    callback =
-      typeof options === 'function' ? (options as Callback<Document | Uint8Array>) : callback;
+    callback = typeof options === 'function' ? options : callback;
 
     if (callback == null) {
       throw new TypeError('Callback must be provided');
@@ -537,15 +517,13 @@ export class AutoEncrypter implements StateMachineExecutable {
 
   /**
    * Decrypt a command response
-   *
-   * TODO: type options
    */
   decrypt(
     response: Uint8Array,
-    options: Document | Callback<Document>,
+    options: CommandOptions | Callback<Document>,
     callback?: Callback<Document>
   ) {
-    callback = typeof options === 'function' ? (options as Callback<Document>) : callback;
+    callback = typeof options === 'function' ? options : callback;
 
     if (callback == null) {
       throw new TypeError('Callback must be provided');

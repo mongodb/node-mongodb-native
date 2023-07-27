@@ -1,4 +1,8 @@
-import type { ExplicitEncryptionContextOptions, MongoCrypt } from 'mongodb-client-encryption';
+import type {
+  ExplicitEncryptionContextOptions,
+  MongoCrypt,
+  MongoCryptOptions
+} from 'mongodb-client-encryption';
 
 import { type Binary, type Document, type Long, serialize } from '../bson';
 import { type BulkWriteResult } from '../bulk/common';
@@ -16,7 +20,7 @@ import { maybeCallback, promiseOrCallback } from './common';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongoCryptCreateDataKeyError, MongoCryptCreateEncryptedCollectionError } from './errors';
 import { type KMSProvider, type KMSProviders, loadCredentials } from './providers/index';
-import { StateMachine, type StateMachineExecutable } from './stateMachine';
+import { type CSFLEKMSTlsOptions, StateMachine, type StateMachineExecutable } from './stateMachine';
 
 /**
  * The schema for a DataKey in the key vault collection.
@@ -40,7 +44,7 @@ export class ClientEncryption implements StateMachineExecutable {
   _keyVaultNamespace: string;
   _keyVaultClient: MongoClient;
   _proxyOptions: ProxyOptions;
-  _tlsOptions: Record<string, ClientEncryptionTlsOptions>;
+  _tlsOptions: CSFLEKMSTlsOptions;
   _kmsProviders: KMSProviders;
 
   _mongoCrypt: MongoCrypt;
@@ -91,12 +95,13 @@ export class ClientEncryption implements StateMachineExecutable {
       throw new TypeError('Missing required option `keyVaultNamespace`');
     }
 
-    // TODO: type this
-    const mongoCryptOptions: Document = { ...options, cryptoCallbacks };
-
-    mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? serialize(this._kmsProviders)
-      : this._kmsProviders;
+    const mongoCryptOptions: MongoCryptOptions = {
+      ...options,
+      cryptoCallbacks,
+      kmsProviders: !Buffer.isBuffer(this._kmsProviders)
+        ? (serialize(this._kmsProviders) as Buffer)
+        : this._kmsProviders
+    };
 
     this._keyVaultNamespace = options.keyVaultNamespace;
     this._keyVaultClient = options.keyVaultClient || client;
@@ -808,37 +813,6 @@ export interface RewrapManyDataKeyOptions {
 }
 
 /**
- * TLS options to use when connecting. The spec specifically calls out which insecure
- * tls options are not allowed:
- *
- *  - tlsAllowInvalidCertificates
- *  - tlsAllowInvalidHostnames
- *  - tlsInsecure
- *  - tlsDisableOCSPEndpointCheck
- *  - tlsDisableCertificateRevocationCheck
- */
-export interface ClientEncryptionTlsOptions {
-  /**
-   * Specifies the location of a local .pem file that contains
-   * either the client's TLS/SSL certificate and key or only the
-   * client's TLS/SSL key when tlsCertificateFile is used to
-   * provide the certificate.
-   */
-  tlsCertificateKeyFile?: string;
-  /**
-   * Specifies the password to de-crypt the tlsCertificateKeyFile.
-   */
-  tlsCertificateKeyFilePassword?: string;
-  /**
-   * Specifies the location of a local .pem file that contains the
-   * root certificate chain from the Certificate Authority.
-   * This file is used to validate the certificate presented by the
-   * KMS provider.
-   */
-  tlsCAFile?: string;
-}
-
-/**
  * Additional settings to provide when creating a new `ClientEncryption` instance.
  */
 export interface ClientEncryptionOptions {
@@ -873,7 +847,7 @@ export interface ClientEncryptionOptions {
   /**
    * TLS options for kms providers to use.
    */
-  tlsOptions?: { [kms in keyof KMSProviders]?: ClientEncryptionTlsOptions };
+  tlsOptions?: CSFLEKMSTlsOptions;
 }
 
 /**

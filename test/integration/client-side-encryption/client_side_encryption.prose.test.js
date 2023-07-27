@@ -1507,7 +1507,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with no tls');
         } catch (e) {
           // Expect an error indicating TLS handshake failed.
-          expect(e.originalError.message).to.include('certificate required');
+          expect(e.cause.message).to.include('certificate required');
         }
       });
 
@@ -1530,7 +1530,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with invalid certificate');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an expired certificate.
-          expect(e.originalError.message).to.include('certificate has expired');
+          expect(e.cause.message).to.include('certificate has expired');
         }
       });
 
@@ -1542,7 +1542,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with invalid hostnames');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
-          expect(e.originalError.message).to.include('does not match certificate');
+          expect(e.cause.message).to.include('does not match certificate');
         }
       });
     });
@@ -1560,7 +1560,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with no tls');
         } catch (e) {
           //Expect an error indicating TLS handshake failed.
-          expect(e.originalError.message).to.include('certificate required');
+          expect(e.cause.message).to.include('certificate required');
         }
       });
 
@@ -1581,7 +1581,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with expired certificates');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an expired certificate.
-          expect(e.originalError.message).to.include('certificate has expired');
+          expect(e.cause.message).to.include('certificate has expired');
         }
       });
 
@@ -1591,7 +1591,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with invalid hostnames');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
-          expect(e.originalError.message).to.include('does not match certificate');
+          expect(e.cause.message).to.include('does not match certificate');
         }
       });
     });
@@ -1611,7 +1611,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with no tls');
         } catch (e) {
           //Expect an error indicating TLS handshake failed.
-          expect(e.originalError.message).to.include('certificate required');
+          expect(e.cause.message).to.include('certificate required');
         }
       });
 
@@ -1632,7 +1632,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with expired certificates');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an expired certificate.
-          expect(e.originalError.message).to.include('certificate has expired');
+          expect(e.cause.message).to.include('certificate has expired');
         }
       });
 
@@ -1642,7 +1642,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with invalid hostnames');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
-          expect(e.originalError.message).to.include('does not match certificate');
+          expect(e.cause.message).to.include('does not match certificate');
         }
       });
     });
@@ -1661,7 +1661,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with no tls');
         } catch (e) {
           //Expect an error indicating TLS handshake failed.
-          expect(e.originalError.message).to.match(/before secure TLS connection|handshake/);
+          expect(e.cause.message).to.match(/before secure TLS connection|handshake/);
         }
       });
 
@@ -1677,7 +1677,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with expired certificates');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an expired certificate.
-          expect(e.originalError.message).to.include('certificate has expired');
+          expect(e.cause.message).to.include('certificate has expired');
         }
       });
 
@@ -1687,7 +1687,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           expect.fail('it must fail with invalid hostnames');
         } catch (e) {
           // Expect an error indicating TLS handshake failed due to an invalid hostname.
-          expect(e.originalError.message).to.include('does not match certificate');
+          expect(e.cause.message).to.include('does not match certificate');
         }
       });
     });
