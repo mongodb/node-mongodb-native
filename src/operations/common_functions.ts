@@ -1,10 +1,8 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
-import { MongoTopologyClosedError } from '../error';
 import type { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { type Callback, getTopology } from '../utils';
 
 /** @public */
 export interface IndexInformationOptions {
@@ -18,66 +16,31 @@ export interface IndexInformationOptions {
  * @param db - The Db instance on which to retrieve the index info.
  * @param name - The name of the collection.
  */
-export function indexInformation(db: Db, name: string, callback: Callback): void;
-export function indexInformation(
+export async function indexInformation(db: Db, name: string): Promise<any>;
+export async function indexInformation(
   db: Db,
   name: string,
-  options: IndexInformationOptions,
-  callback?: Callback
-): void;
-export function indexInformation(
+  options?: IndexInformationOptions
+): Promise<any>;
+export async function indexInformation(
   db: Db,
   name: string,
-  _optionsOrCallback: IndexInformationOptions | Callback,
-  _callback?: Callback
-): void {
-  let options = _optionsOrCallback as IndexInformationOptions;
-  let callback = _callback as Callback;
-  if ('function' === typeof _optionsOrCallback) {
-    callback = _optionsOrCallback;
+  options?: IndexInformationOptions
+): Promise<any> {
+  if (options == null) {
     options = {};
   }
   // If we specified full information
   const full = options.full == null ? false : options.full;
-
-  let topology;
-  try {
-    topology = getTopology(db);
-  } catch (error) {
-    return callback(error);
-  }
-
-  // Did the user destroy the topology
-  if (topology.isDestroyed()) return callback(new MongoTopologyClosedError());
-  // Process all the results from the index command and collection
-  function processResults(indexes: any) {
-    // Contains all the information
-    const info: any = {};
-    // Process all the indexes
-    for (let i = 0; i < indexes.length; i++) {
-      const index = indexes[i];
-      // Let's unpack the object
-      info[index.name] = [];
-      for (const name in index.key) {
-        info[index.name].push([name, index.key[name]]);
-      }
-    }
-
-    return info;
-  }
-
   // Get the list of indexes of the specified collection
-  db.collection(name)
-    .listIndexes(options)
-    .toArray()
-    .then(
-      indexes => {
-        if (!Array.isArray(indexes)) return callback(undefined, []);
-        if (full) return callback(undefined, indexes);
-        callback(undefined, processResults(indexes));
-      },
-      error => callback(error)
-    );
+  const indexes = await db.collection(name).listIndexes(options).toArray();
+  if (full) return indexes;
+
+  const info: Record<string, Array<[string, unknown]>> = {};
+  for (const index of indexes) {
+    info[index.name] = Object.entries(index.key);
+  }
+  return info;
 }
 
 export function prepareDocs(
