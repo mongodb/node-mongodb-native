@@ -41,12 +41,8 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
         : coll.initializeOrderedBulkOp(options);
 
     // for each op go through and add to the bulk
-    try {
-      for (let i = 0; i < operations.length; i++) {
-        bulk.raw(operations[i]);
-      }
-    } catch (err) {
-      return err;
+    for (let i = 0; i < operations.length; i++) {
+      bulk.raw(operations[i]);
     }
 
     // Execute the bulk

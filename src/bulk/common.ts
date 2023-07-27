@@ -13,7 +13,7 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { AbstractCallbackOperation, type Hint } from '../operations/operation';
+import { AbstractOperation, type Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../operations/update';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -471,13 +471,12 @@ export function mergeBatchResults(
   }
 }
 
-function executeCommands(
+async function executeCommands(
   bulkOperation: BulkOperationBase,
-  options: BulkWriteOptions,
-  callback: Callback<BulkWriteResult>
-) {
+  options: BulkWriteOptions
+): Promise<BulkWriteResult> {
   if (bulkOperation.s.batches.length === 0) {
-    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult));
+    return new BulkWriteResult(bulkOperation.s.bulkResult);
   }
 
   const batch = bulkOperation.s.batches.shift() as Batch;
@@ -485,22 +484,20 @@ function executeCommands(
   function resultHandler(err?: AnyError, result?: Document) {
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
-      return callback(
-        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult))
-      );
+      throw new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult));
     }
 
     if (err instanceof MongoWriteConcernError) {
-      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, err, callback);
+      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, err);
     }
 
     // Merge the results together
     mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
     const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
-    if (bulkOperation.handleWriteError(callback, writeResult)) return;
+    bulkOperation.handleWriteError(writeResult);
 
     // Execute the next command in line
-    executeCommands(bulkOperation, options, callback);
+    return executeCommands(bulkOperation, options);
   }
 
   const finalOptions = resolveOptions(bulkOperation, {
@@ -567,22 +564,19 @@ function executeCommands(
   }
 }
 
-function handleMongoWriteConcernError(
+async function handleMongoWriteConcernError(
   batch: Batch,
   bulkResult: BulkResult,
-  err: MongoWriteConcernError,
-  callback: Callback<BulkWriteResult>
-) {
+  err: MongoWriteConcernError
+): Promise<BulkWriteResult> {
   mergeBatchResults(batch, bulkResult, undefined, err.result);
 
-  callback(
-    new MongoBulkWriteError(
-      {
-        message: err.result?.writeConcernError.errmsg,
-        code: err.result?.writeConcernError.result
-      },
-      new BulkWriteResult(bulkResult)
-    )
+  throw new MongoBulkWriteError(
+    {
+      message: err.result?.writeConcernError.errmsg,
+      code: err.result?.writeConcernError.result
+    },
+    new BulkWriteResult(bulkResult)
   );
 }
 
@@ -835,18 +829,14 @@ export interface BulkWriteOptions extends CommandOperationOptions {
  * We would like this logic to simply live inside the BulkWriteOperation class
  * @internal
  */
-class BulkWriteShimOperation extends AbstractCallbackOperation {
+class BulkWriteShimOperation extends AbstractOperation {
   bulkOperation: BulkOperationBase;
   constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
     super(options);
     this.bulkOperation = bulkOperation;
   }
 
-  executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<any>
-  ): void {
+  execute(server: Server, session: ClientSession | undefined): Promise<any> {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation
@@ -854,7 +844,7 @@ class BulkWriteShimOperation extends AbstractCallbackOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return executeCommands(this.bulkOperation, this.options, callback);
+    return executeCommands(this.bulkOperation, this.options);
   }
 }
 
@@ -1187,33 +1177,26 @@ export abstract class BulkOperationBase {
    * Handles the write error before executing commands
    * @internal
    */
-  handleWriteError(callback: Callback<BulkWriteResult>, writeResult: BulkWriteResult): boolean {
+  handleWriteError(writeResult: BulkWriteResult): void {
     if (this.s.bulkResult.writeErrors.length > 0) {
       const msg = this.s.bulkResult.writeErrors[0].errmsg
         ? this.s.bulkResult.writeErrors[0].errmsg
         : 'write operation failed';
 
-      callback(
-        new MongoBulkWriteError(
-          {
-            message: msg,
-            code: this.s.bulkResult.writeErrors[0].code,
-            writeErrors: this.s.bulkResult.writeErrors
-          },
-          writeResult
-        )
+      throw new MongoBulkWriteError(
+        {
+          message: msg,
+          code: this.s.bulkResult.writeErrors[0].code,
+          writeErrors: this.s.bulkResult.writeErrors
+        },
+        writeResult
       );
-
-      return true;
     }
 
     const writeConcernError = writeResult.getWriteConcernError();
     if (writeConcernError) {
-      callback(new MongoBulkWriteError(writeConcernError, writeResult));
-      return true;
+      throw new MongoBulkWriteError(writeConcernError, writeResult);
     }
-
-    return false;
   }
 
   abstract addToOperationsList(
