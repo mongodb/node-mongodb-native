@@ -171,7 +171,11 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       it('returns the raw result', async function () {
-        const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } }, { includeResultMetadata: true });
+        const result = await collection.findOneAndUpdate(
+          { a: 1 },
+          { $set: { a: 1 } },
+          { includeResultMetadata: true }
+        );
         expect(result.value.b).to.equal(1);
       });
     });
@@ -349,7 +353,11 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       it('returns the raw result', async function () {
-        const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 }, { includeResultMetadata: true });
+        const result = await collection.findOneAndReplace(
+          { a: 1 },
+          { a: 1 },
+          { includeResultMetadata: true }
+        );
         expect(result.value.b).to.equal(1);
       });
     });
