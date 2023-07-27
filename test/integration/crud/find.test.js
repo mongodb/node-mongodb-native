@@ -1222,7 +1222,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
+              { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
               function (err, updated_doc) {
                 expect(err).to.not.exist;
                 expect(updated_doc.value).to.not.exist;
@@ -1283,7 +1283,7 @@ describe('Find', function () {
                   'transactions.id': { $ne: transaction.transactionId }
                 },
                 { $push: { transactions: transaction } },
-                { returnDocument: ReturnDocument.AFTER, safe: true },
+                { returnDocument: ReturnDocument.AFTER, safe: true, includeResultMetadata: true },
                 function (err) {
                   expect(err).to.not.exist;
                   client.close(done);
@@ -1369,7 +1369,11 @@ describe('Find', function () {
           function (err, collection) {
             var q = { x: 1 };
             var set = { y: 2, _id: new ObjectId() };
-            var opts = { returnDocument: ReturnDocument.AFTER, upsert: true };
+            var opts = {
+              returnDocument: ReturnDocument.AFTER,
+              upsert: true,
+              includeResultMetadata: true
+            };
             // Original doc
             var doc = { _id: new ObjectId(), x: 1 };
 
@@ -1521,7 +1525,7 @@ describe('Find', function () {
                     collection.findOneAndUpdate(
                       { _id: id },
                       { $set: { login: 'user1' } },
-                      {},
+                      { includeResultMetadata: true },
                       function (err) {
                         test.ok(err !== null);
                         p_client.close(done);
@@ -2095,7 +2099,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
+              { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
               function (err, updated_doc) {
                 expect(updated_doc.value.a).to.equal(1);
                 expect(updated_doc.value.b).to.equal(3);

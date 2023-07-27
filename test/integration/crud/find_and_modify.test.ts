@@ -9,7 +9,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndDelete', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -30,7 +30,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -47,10 +47,7 @@ describe('Collection (#findOneAnd...)', function () {
 
       context('when there is a match', function () {
         it('returns the deleted document', async function () {
-          const result = await collection.findOneAndDelete(
-            { a: 1 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndDelete({ a: 1 });
           expect(result.b).to.equal(1);
         });
       });
@@ -155,7 +152,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndUpdate', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -180,7 +177,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -337,7 +334,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndReplace', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -362,7 +359,7 @@ describe('Collection (#findOneAnd...)', function () {
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -379,11 +376,7 @@ describe('Collection (#findOneAnd...)', function () {
 
       context('when there is a match', function () {
         it('returns the replaced document', async function () {
-          const result = await collection.findOneAndReplace(
-            { a: 1 },
-            { a: 1 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
           expect(result.b).to.equal(1);
         });
       });
