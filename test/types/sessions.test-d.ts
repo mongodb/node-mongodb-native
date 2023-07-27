@@ -15,3 +15,13 @@ expectType<ClientSession>(
   })
 );
 expectError(client.startSession({ defaultTransactionOptions: { readConcern: 1 } }));
+
+let something: any;
+expectType<number>(await client.withSession(async () => 2));
+expectType<string>(await client.withSession<string>(async () => something));
+const untypedFn: any = () => 2;
+expectType<any>(await client.withSession(untypedFn));
+const unknownFn: () => Promise<unknown> = async () => 2;
+expectType<unknown>(await client.withSession(unknownFn));
+// Not a promise returning function
+expectError(await client.withSession(() => null));
