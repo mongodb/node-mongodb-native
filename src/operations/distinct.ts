@@ -66,11 +66,7 @@ export class DistinctOperation extends CommandOperation<any[]> {
     decorateWithReadConcern(cmd, coll, options);
 
     // Have we specified collation
-    try {
-      decorateWithCollation(cmd, coll, options);
-    } catch (err) {
-      return err;
-    }
+    decorateWithCollation(cmd, coll, options);
 
     const result = await super.executeCommand(server, session, cmd);
 

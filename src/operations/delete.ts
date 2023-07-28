@@ -22,7 +22,7 @@ export interface DeleteOptions extends CommandOperationOptions, WriteConcernOpti
 }
 
 /** @public */
-export interface DeleteResult extends Document {
+export interface DeleteResult {
   /** Indicates whether this write result was acknowledged. If not, then all other members of this result will be undefined. */
   acknowledged: boolean;
   /** The number of documents that were deleted */
@@ -42,7 +42,9 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<DeleteResult> {
+export class DeleteOperation extends CommandOperation<
+  DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }
+> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -64,7 +66,7 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
   override async execute(
     server: Server,
     session: ClientSession | undefined
-  ): Promise<DeleteResult> {
+  ): Promise<DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -91,7 +93,15 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    return super.executeCommand(server, session, command) as TODO_NODE_3286;
+    const res = (await super.executeCommand(server, session, command)) as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+    if (this.explain) return res;
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      deletedCount: res.n
+    };
   }
 
   protected override executeCallback(
@@ -111,15 +121,8 @@ export class DeleteOneOperation extends DeleteOperation {
   override async execute(
     server: Server,
     session: ClientSession | undefined
-  ): Promise<DeleteResult> {
-    const res = await super.execute(server, session);
-    if (res.code) throw new MongoServerError(res);
-    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
-    if (this.explain) return res;
-    return {
-      acknowledged: this.writeConcern?.w !== 0,
-      deletedCount: res.n
-    };
+  ): Promise<DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }> {
+    return super.execute(server, session);
   }
 }
 
@@ -132,15 +135,7 @@ export class DeleteManyOperation extends DeleteOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<DeleteResult> {
-    const res = await super.execute(server, session);
-    if (res.code) throw new MongoServerError(res);
-    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
-    if (this.explain) return res;
-
-    return {
-      acknowledged: this.writeConcern?.w !== 0,
-      deletedCount: res.n
-    };
+    return super.execute(server, session);
   }
 }
 

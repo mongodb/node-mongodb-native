@@ -138,21 +138,19 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     let res;
     try {
       res = await bulkWriteOperation.execute(server, session);
+      return {
+        acknowledged: writeConcern?.w !== 0,
+        insertedCount: res.insertedCount,
+        insertedIds: res.insertedIds
+      };
     } catch (err) {
-      if (err || res == null) {
-        if (err && err.message === 'Operation must be an object with an operation key') {
-          throw new MongoInvalidArgumentError(
-            'Collection.insertMany() cannot be called with an array that has null/undefined values'
-          );
-        }
-        return err;
+      if (err && err.message === 'Operation must be an object with an operation key') {
+        throw new MongoInvalidArgumentError(
+          'Collection.insertMany() cannot be called with an array that has null/undefined values'
+        );
       }
+      throw err;
     }
-    return {
-      acknowledged: writeConcern?.w !== 0,
-      insertedCount: res.insertedCount,
-      insertedIds: res.insertedIds
-    };
   }
 }
 
