@@ -69,7 +69,7 @@ describe('StateMachine', function () {
     };
     const options = { promoteLongs: false, promoteValues: false };
     const serializedCommand = serialize(command);
-    const stateMachine = new StateMachine();
+    const stateMachine = new StateMachine({} as any);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const callback = () => {};
 
@@ -110,7 +110,7 @@ describe('StateMachine', function () {
       });
 
       it('should only resolve once bytesNeeded drops to zero', function (done) {
-        const stateMachine = new StateMachine();
+        const stateMachine = new StateMachine({} as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
         stateMachine
@@ -154,7 +154,7 @@ describe('StateMachine', function () {
           context(`when the option is ${option}`, function () {
             const stateMachine = new StateMachine({
               tlsOptions: { aws: { [option]: true } }
-            });
+            } as any);
             const request = new MockRequest(Buffer.from('foobar'), 500);
 
             it('rejects with the validation error', function (done) {
@@ -171,7 +171,7 @@ describe('StateMachine', function () {
         context('when providing tlsCertificateKeyFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           const buffer = Buffer.from('foobar');
           let connectOptions;
@@ -198,7 +198,7 @@ describe('StateMachine', function () {
         context('when providing tlsCAFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCAFile: 'test.pem' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           const buffer = Buffer.from('foobar');
           let connectOptions;
@@ -224,7 +224,7 @@ describe('StateMachine', function () {
         context('when providing tlsCertificateKeyFilePassword', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFilePassword: 'test' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           let connectOptions;
 
@@ -299,7 +299,7 @@ describe('StateMachine', function () {
           proxyHost: 'localhost',
           proxyPort: socks5srv.address().port
         }
-      });
+      } as any);
 
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
@@ -322,7 +322,7 @@ describe('StateMachine', function () {
           proxyUsername: 'foo',
           proxyPassword: 'bar'
         }
-      });
+      } as any);
 
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
