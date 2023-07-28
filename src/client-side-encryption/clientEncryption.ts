@@ -5,7 +5,7 @@ import type {
 } from 'mongodb-client-encryption';
 
 import { type Binary, type Document, type Long, serialize } from '../bson';
-import { type BulkWriteResult } from '../bulk/common';
+import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
 import { type FindCursor } from '../cursor/find_cursor';
@@ -204,7 +204,7 @@ export class ClientEncryption implements StateMachineExecutable {
 
     // @ts-expect-error We did not convert promiseOrCallback to TS
     return promiseOrCallback(callback, cb => {
-      stateMachine.execute(this, context, (err, dataKey) => {
+      stateMachine.execute<DataKey>(this, context, (err, dataKey) => {
         if (err || !dataKey) {
           cb(err, null);
           return;
@@ -217,7 +217,7 @@ export class ClientEncryption implements StateMachineExecutable {
         this._keyVaultClient
           .db(dbName)
           .collection<DataKey>(collectionName)
-          .insertOne(dataKey as DataKey, { writeConcern: { w: 'majority' } })
+          .insertOne(dataKey, { writeConcern: { w: 'majority' } })
           .then(
             result => {
               return cb(null, result.insertedId);
@@ -270,7 +270,7 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    const dataKey = await stateMachine.executeAsync(this, context);
+    const dataKey = await stateMachine.executeAsync<{ v: DataKey[] }>(this, context);
     if (!dataKey || dataKey.v.length === 0) {
       return {};
     }
@@ -279,20 +279,22 @@ export class ClientEncryption implements StateMachineExecutable {
       this._keyVaultNamespace
     );
 
-    const replacements = dataKey.v.map((key: DataKey) => ({
-      updateOne: {
-        filter: { _id: key._id },
-        update: {
-          $set: {
-            masterKey: key.masterKey,
-            keyMaterial: key.keyMaterial
-          },
-          $currentDate: {
-            updateDate: true
+    const replacements = dataKey.v.map(
+      (key: DataKey): AnyBulkWriteOperation<DataKey> => ({
+        updateOne: {
+          filter: { _id: key._id },
+          update: {
+            $set: {
+              masterKey: key.masterKey,
+              keyMaterial: key.keyMaterial
+            },
+            $currentDate: {
+              updateDate: true
+            }
           }
         }
-      }
-    }));
+      })
+    );
 
     const result = await this._keyVaultClient
       .db(dbName)
@@ -667,7 +669,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  decrypt(value: Binary, callback?: Callback<Document>): Promise<Document> | void {
+  decrypt<T = any>(value: Binary, callback?: Callback<T>): Promise<T> | void {
     const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
@@ -678,7 +680,7 @@ export class ClientEncryption implements StateMachineExecutable {
 
     // @ts-expect-error We did not convert promiseOrCallback to TS
     return promiseOrCallback(callback, cb => {
-      stateMachine.execute(this, context, (err, result) => {
+      stateMachine.execute<{ v: T }>(this, context, (err, result) => {
         if (err || !result) {
           cb(err, null);
           return;
@@ -759,8 +761,8 @@ export class ClientEncryption implements StateMachineExecutable {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const result = await stateMachine.executeAsync(this, context);
-    return result.v as Binary;
+    const result = await stateMachine.executeAsync<{ v: Binary }>(this, context);
+    return result.v;
   }
 }
 

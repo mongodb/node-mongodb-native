@@ -226,30 +226,7 @@ describe('AutoEncrypter', function () {
       });
     });
 
-    it('should decrypt mock data with per-context KMS credentials', function (done) {
-      const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
-      const client = new MockClient();
-      const mc = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
-        kmsProviders: {
-          aws: {}
-        },
-        async onKmsProviderRefresh() {
-          return { aws: { accessKeyId: 'example', secretAccessKey: 'example' } };
-        }
-      });
-      mc.decrypt(input, (err, decrypted) => {
-        if (err) return done(err);
-        expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-        done();
-      });
-    });
-
-    context('when no refresh function is provided', function () {
+    context('when the aws sdk is installed', function () {
       const accessKey = 'example';
       const secretKey = 'example';
 

@@ -139,7 +139,7 @@ export class StateMachine {
     private bsonOptions = pluckBSONSerializeOptions(options)
   ) {}
 
-  executeAsync(executor: StateMachineExecutable, context: MongoCryptContext): Promise<Document> {
+  executeAsync<T>(executor: StateMachineExecutable, context: MongoCryptContext): Promise<T> {
     // @ts-expect-error The callback version allows undefined for the result, but we'll never actually have an undefined result without an error.
     return promisify(this.execute.bind(this))(executor, context);
   }
@@ -147,10 +147,10 @@ export class StateMachine {
   /**
    * Executes the state machine according to the specification
    */
-  execute(
+  execute<T extends Document>(
     executor: StateMachineExecutable,
     context: MongoCryptContext,
-    callback: Callback<Document>
+    callback: Callback<T>
   ) {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
@@ -287,7 +287,7 @@ export class StateMachine {
           callback(new MongoCryptError(message));
           return;
         }
-        callback(undefined, deserialize(finalizedContext, this.options));
+        callback(undefined, deserialize(finalizedContext, this.options) as T);
         return;
       }
       case MONGOCRYPT_CTX_ERROR: {

@@ -515,7 +515,7 @@ export class AutoEncrypter implements StateMachineExecutable {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
-    stateMachine.execute(this, context, callback);
+    stateMachine.execute<Document>(this, context, callback);
   }
 
   /**
