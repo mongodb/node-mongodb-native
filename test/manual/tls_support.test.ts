@@ -37,13 +37,13 @@ describe('TLS Support', function () {
 
   context('when tls filepaths are provided', () => {
     let client: MongoClient;
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
     context('when tls filepaths have length > 0', () => {
       beforeEach(async () => {
         client = new MongoClient(CONNECTION_STRING, tlsSettings);
-      });
-
-      afterEach(async () => {
-        if (client) await client.close();
       });
 
       it('should read in files async at connect time', async () => {
@@ -71,6 +71,38 @@ describe('TLS Support', function () {
           expect((await fs.stat(TLS_CA_FILE)).atime).to.deep.equal(caFileAccessTime);
           expect((await fs.stat(TLS_CERT_KEY_FILE)).atime).to.deep.equal(certKeyFileAccessTime);
         });
+      });
+    });
+
+    context('when tlsCAFile has length === 0', () => {
+      beforeEach(() => {
+        client = new MongoClient(CONNECTION_STRING, {
+          tls: true,
+          tlsCAFile: '',
+          tlsCertificateKeyFile: TLS_CERT_KEY_FILE
+        });
+      });
+
+      it('should throw an error at connect time', async () => {
+        const err = await client.connect().catch(e => e);
+
+        expect(err).to.be.instanceof(Error);
+      });
+    });
+
+    context('when tlsCertificateKeyFile has length === 0', () => {
+      beforeEach(() => {
+        client = new MongoClient(CONNECTION_STRING, {
+          tls: true,
+          tlsCAFile: TLS_CA_FILE,
+          tlsCertificateKeyFile: ''
+        });
+      });
+
+      it('should throw an error at connect time', async () => {
+        const err = await client.connect().catch(e => e);
+
+        expect(err).to.be.instanceof(Error);
       });
     });
   });
