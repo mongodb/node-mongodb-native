@@ -852,7 +852,8 @@ class BulkWriteShimOperation extends AbstractOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return promisify(executeCommands)(this.bulkOperation, this.options);
+    const executeCommandsAsync = promisify(executeCommands);
+    return executeCommandsAsync(this.bulkOperation, this.options);
   }
 }
 
