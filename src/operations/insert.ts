@@ -135,9 +135,8 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
       options
     );
 
-    let res;
     try {
-      res = await bulkWriteOperation.execute(server, session);
+      const res = await bulkWriteOperation.execute(server, session);
       return {
         acknowledged: writeConcern?.w !== 0,
         insertedCount: res.insertedCount,

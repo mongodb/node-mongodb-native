@@ -42,9 +42,7 @@ export interface DeleteStatement {
 }
 
 /** @internal */
-export class DeleteOperation extends CommandOperation<
-  DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }
-> {
+export class DeleteOperation extends CommandOperation<DeleteResult> {
   override options: DeleteOptions;
   statements: DeleteStatement[];
 
@@ -66,7 +64,7 @@ export class DeleteOperation extends CommandOperation<
   override async execute(
     server: Server,
     session: ClientSession | undefined
-  ): Promise<DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }> {
+  ): Promise<DeleteResult> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -121,7 +119,7 @@ export class DeleteOneOperation extends DeleteOperation {
   override async execute(
     server: Server,
     session: ClientSession | undefined
-  ): Promise<DeleteResult & { code?: number; writeErrors?: Error[]; n?: number }> {
+  ): Promise<DeleteResult> {
     return super.execute(server, session);
   }
 }
