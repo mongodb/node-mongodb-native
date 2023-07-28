@@ -74,6 +74,8 @@ declare module 'mongodb-client-encryption' {
 }
 
 /**
+ * @public
+ *
  * TLS options to use when connecting. The spec specifically calls out which insecure
  * tls options are not allowed:
  *
@@ -88,6 +90,7 @@ export type CSFLETlsOptions = Pick<
   'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
 >;
 
+/** @public */
 export type CSFLEKMSTlsOptions = {
   aws?: CSFLETlsOptions;
   gcp?: CSFLETlsOptions;
@@ -97,6 +100,8 @@ export type CSFLEKMSTlsOptions = {
 };
 
 /**
+ * @internal
+ *
  * An interface representing an object that can be passed to the `StateMachine.execute` method.
  *
  * Not all properties are required for all operations.

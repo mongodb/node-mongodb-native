@@ -93,6 +93,14 @@ export {
   UnorderedBulkOperation
 };
 
+export type { AutoEncryptionExtraOptions } from './client-side-encryption/autoEncrypter';
+export type { KMSProviders } from './client-side-encryption/providers/index';
+export type {
+  CSFLEKMSTlsOptions,
+  CSFLETlsOptions,
+  StateMachineExecutable
+} from './client-side-encryption/stateMachine';
+
 // enums
 export { BatchType } from './bulk/common';
 export { AutoEncryptionLoggerLevel } from './client-side-encryption/autoEncrypter';

@@ -176,6 +176,8 @@ export interface AutoEncryptionOptions {
 }
 
 /**
+ * @public
+ *
  * Extra options related to the mongocryptd process
  * \* _Available in MongoDB 6.0 or higher._
  */
