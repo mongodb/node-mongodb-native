@@ -229,6 +229,39 @@ describe('Transactions', function () {
     });
   });
 
+  context('when completing a transaction', () => {
+    let client: MongoClient;
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it(
+      'commitTransaction() resolve void',
+      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
+      async () =>
+        client.withSession(async session =>
+          session.withTransaction(async session => {
+            expect(await session.commitTransaction()).to.be.undefined;
+          })
+        )
+    );
+
+    it(
+      'abortTransaction() resolve void',
+      { requires: { mongodb: '>=4.2.0', topology: '!single' } },
+      async () =>
+        client.withSession(async session =>
+          session.withTransaction(async session => {
+            expect(await session.abortTransaction()).to.be.undefined;
+          })
+        )
+    );
+  });
+
   describe('TransientTransactionError', function () {
     it('should have a TransientTransactionError label inside of a transaction', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
