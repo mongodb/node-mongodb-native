@@ -941,7 +941,7 @@ describe('Find', function () {
               collection.findOneAndUpdate(
                 { a: 2 },
                 { $set: { b: 3 } },
-                { returnDocument: ReturnDocument.AFTER },
+                { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
                 function (err, result) {
                   expect(result.value.a).to.equal(2);
                   expect(result.value.b).to.equal(3);
