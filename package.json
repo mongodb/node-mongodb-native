@@ -37,7 +37,7 @@
     "@mongodb-js/zstd": "^1.1.0",
     "gcp-metadata": "^5.2.0",
     "kerberos": "^2.0.1",
-    "mongodb-client-encryption": ">=6.0.0-alpha.0 <7",
+    "mongodb-client-encryption": ">=6.0.0-alpha.1 <7",
     "snappy": "^7.2.2"
   },
   "peerDependenciesMeta": {
@@ -94,7 +94,7 @@
     "js-yaml": "^4.1.0",
     "mocha": "^10.2.0",
     "mocha-sinon": "^2.1.2",
-    "mongodb-client-encryption": "^6.0.0-alpha.0",
+    "mongodb-client-encryption": "^6.0.0-alpha.1",
     "mongodb-legacy": "^5.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",
