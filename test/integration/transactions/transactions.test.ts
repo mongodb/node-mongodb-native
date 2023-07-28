@@ -240,7 +240,7 @@ describe('Transactions', function () {
     });
 
     it(
-      'commitTransaction() resolve void',
+      'commitTransaction() resolves void',
       { requires: { mongodb: '>=4.2.0', topology: '!single' } },
       async () =>
         client.withSession(async session =>
@@ -251,7 +251,7 @@ describe('Transactions', function () {
     );
 
     it(
-      'abortTransaction() resolve void',
+      'abortTransaction() resolves void',
       { requires: { mongodb: '>=4.2.0', topology: '!single' } },
       async () =>
         client.withSession(async session =>
