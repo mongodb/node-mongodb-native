@@ -115,25 +115,10 @@ export class DeleteOneOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<DeleteResult> {
-    return super.execute(server, session);
-  }
 }
-
 export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<DeleteResult> {
-    return super.execute(server, session);
   }
 }
 

@@ -152,13 +152,6 @@ export class UpdateOneOperation extends UpdateOperation {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<UpdateResult | Document> {
-    return super.execute(server, session);
-  }
 }
 
 /** @internal */
@@ -173,13 +166,6 @@ export class UpdateManyOperation extends UpdateOperation {
     if (!hasAtomicOperators(update)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<UpdateResult | Document> {
-    return super.execute(server, session);
   }
 }
 
@@ -214,13 +200,6 @@ export class ReplaceOneOperation extends UpdateOperation {
     if (hasAtomicOperators(replacement)) {
       throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
-  }
-
-  override async execute(
-    server: Server,
-    session: ClientSession | undefined
-  ): Promise<UpdateResult | Document> {
-    return super.execute(server, session);
   }
 }
 
