@@ -1,7 +1,7 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
-import type { InferIdType } from '../mongo_types';
+import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { type Callback, hasAtomicOperators, type MongoDBNamespace } from '../utils';
@@ -59,7 +59,10 @@ export interface UpdateStatement {
   hint?: Hint;
 }
 
-/** @internal */
+/**
+ * @internal
+ * UpdateOperation is used in bulk write, while UpdateOneOperation and UpdateManyOperation are only used in the collections API
+ */
 export class UpdateOperation extends CommandOperation<Document> {
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
@@ -115,19 +118,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    const res = await super.executeCommand(server, session, command);
-    if (this.explain != null) return res;
-    if (res.code) throw new MongoServerError(res);
-    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
-
-    return {
-      acknowledged: this.writeConcern?.w !== 0,
-      modifiedCount: res.nModified ?? res.n,
-      upsertedId:
-        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
-      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
-      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
-    };
+    return super.executeCommand(server, session, command);
   }
 
   protected override executeCallback(
@@ -152,6 +143,25 @@ export class UpdateOneOperation extends UpdateOperation {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
   }
+
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      modifiedCount: res.nModified != null ? res.nModified : res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
+  }
 }
 
 /** @internal */
@@ -166,6 +176,25 @@ export class UpdateManyOperation extends UpdateOperation {
     if (!hasAtomicOperators(update)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
+  }
+
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      modifiedCount: res.nModified != null ? res.nModified : res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
   }
 }
 

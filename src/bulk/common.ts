@@ -830,6 +830,8 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   let?: Document;
 }
 
+const executeCommandsAsync = promisify(executeCommands);
+
 /**
  * TODO(NODE-4063)
  * BulkWrites merge complexity is implemented in executeCommands
@@ -852,7 +854,6 @@ class BulkWriteShimOperation extends AbstractOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    const executeCommandsAsync = promisify(executeCommands);
     return executeCommandsAsync(this.bulkOperation, this.options);
   }
 }
