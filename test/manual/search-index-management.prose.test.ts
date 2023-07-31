@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 import { clearTimeout, setTimeout as setTimeoutCb } from 'timers';
 import { setInterval } from 'timers/promises';
 
-import { type Collection, type Document, isSuperset, type MongoClient, ObjectId } from '../mongodb';
+import { type Collection, type Document, type MongoClient, ObjectId } from '../mongodb';
 
 class TimeoutController extends AbortController {
   timeoutId: NodeJS.Timeout;
