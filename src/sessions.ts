@@ -413,14 +413,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Commits the currently active transaction in this session.
    */
-  async commitTransaction(): Promise<Document> {
+  async commitTransaction(): Promise<void> {
     return endTransactionAsync(this, 'commitTransaction');
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
-  async abortTransaction(): Promise<Document> {
+  async abortTransaction(): Promise<void> {
     return endTransactionAsync(this, 'abortTransaction');
   }
 
@@ -636,14 +636,14 @@ const endTransactionAsync = promisify(
   endTransaction as (
     session: ClientSession,
     commandName: 'abortTransaction' | 'commitTransaction',
-    callback: (error: Error, result: Document) => void
+    callback: (error: Error) => void
   ) => void
 );
 
 function endTransaction(
   session: ClientSession,
   commandName: 'abortTransaction' | 'commitTransaction',
-  callback: Callback<Document>
+  callback: Callback<void>
 ) {
   // handle any initial problematic cases
   const txnState = session.transaction.state;
@@ -717,7 +717,7 @@ function endTransaction(
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
 
-  function commandHandler(error?: Error, result?: Document) {
+  function commandHandler(error?: Error) {
     if (commandName !== 'commitTransaction') {
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
       if (session.loadBalanced) {
@@ -746,7 +746,7 @@ function endTransaction(
       }
     }
 
-    callback(error, result);
+    callback(error);
   }
 
   if (session.transaction.recoveryToken) {
@@ -761,7 +761,7 @@ function endTransaction(
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
     }),
-    (error, result) => {
+    error => {
       if (command.abortTransaction) {
         // always unpin on abort regardless of command outcome
         session.unpin();
@@ -789,7 +789,7 @@ function endTransaction(
         );
       }
 
-      commandHandler(error, result);
+      commandHandler(error);
     }
   );
 }
