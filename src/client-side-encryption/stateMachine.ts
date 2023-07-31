@@ -68,7 +68,7 @@ const INSECURE_TLS_OPTIONS = [
  * Helper function for logging. Enabled by setting the environment flag MONGODB_CRYPT_DEBUG.
  * @param msg - Anything you want to be logged.
  */
-export function debug(msg: unknown) {
+function debug(msg: unknown) {
   if (process.env.MONGODB_CRYPT_DEBUG) {
     // eslint-disable-next-line no-console
     console.error(msg);
