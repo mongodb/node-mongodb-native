@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { type Stream } from './cmap/connect';
 import { MongoMissingDependencyError } from './error';
 import type { Callback } from './utils';
 
@@ -148,6 +149,40 @@ export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyE
   } catch (cause) {
     const kModuleError = new MongoMissingDependencyError(
       'Optional module `snappy` not found. Please install it to enable snappy compression',
+      { cause }
+    );
+    return { kModuleError };
+  }
+}
+
+export type SocksLib = {
+  SocksClient: {
+    createConnection(options: {
+      command: 'connect';
+      destination: { host: string; port: number };
+      proxy: {
+        /** host and port are ignored because we pass existing_socket */
+        host: 'iLoveJavaScript';
+        port: 0;
+        type: 5;
+        userId?: string;
+        password?: string;
+      };
+      timeout?: number;
+      /** We always create our own socket, and pass it to this API for proxy negotiation */
+      existing_socket: Stream;
+    }): Promise<{ socket: Stream }>;
+  };
+};
+
+export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyError } {
+  try {
+    // Ensure you always wrap an optional require in the try block NODE-3199
+    const value = require('socks');
+    return value;
+  } catch (cause) {
+    const kModuleError = new MongoMissingDependencyError(
+      'Optional module `socks` not found. Please install it to connections over a SOCKS5 proxy',
       { cause }
     );
     return { kModuleError };

@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
-import { SocksClient } from 'socks';
 import * as tls from 'tls';
 import { promisify } from 'util';
 
@@ -13,6 +12,7 @@ import {
   serialize
 } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
+import { getSocks, type SocksLib } from '../deps';
 import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils';
@@ -20,6 +20,18 @@ import { type DataKey } from './clientEncryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptdManager';
 import { type KMSProvider, type KMSProviders } from './providers';
+
+let socks: SocksLib | null = null;
+function loadSocks(): SocksLib {
+  if (socks == null) {
+    const socksImport = getSocks();
+    if ('kModuleError' in socksImport) {
+      throw socksImport.kModuleError;
+    }
+    socks = socksImport;
+  }
+  return socks;
+}
 
 // libmongocrypt states
 const MONGOCRYPT_CTX_ERROR = 0;
@@ -368,8 +380,9 @@ export class StateMachine {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           const events = require('events') as typeof import('events');
           await events.once(rawSocket, 'connect');
+          socks ??= loadSocks();
           options.socket = (
-            await SocksClient.createConnection({
+            await socks.SocksClient.createConnection({
               existing_socket: rawSocket,
               command: 'connect',
               destination: { host: options.host, port: options.port },

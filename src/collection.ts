@@ -53,7 +53,6 @@ import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
   CreateIndexOperation,
-  DropIndexesOperation,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
@@ -646,11 +645,16 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async dropIndexes(options?: DropIndexesOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new DropIndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+  async dropIndexes(options?: DropIndexesOptions): Promise<boolean> {
+    try {
+      await executeOperation(
+        this.client,
+        new DropIndexOperation(this as TODO_NODE_3286, '*', resolveOptions(this, options))
+      );
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
