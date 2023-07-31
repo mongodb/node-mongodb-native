@@ -64,6 +64,28 @@ describe('MongoOptions', function () {
     expect(options).has.property('tls', true);
   });
 
+  context('tlsCAFile', function () {
+    it('throws MongoParseError when passed a URL Object', function () {
+      it('throws MongoParseError when passed a URL Object', function () {
+        expect(
+          () =>
+            new MongoClient('mongodb://localhost:27017', {
+              tlsCAFile: new URL('file://hello')
+            })
+        ).to.throw(MongoParseError);
+      });
+    });
+  });
+  context('tlsCertificateKeyFile', function () {
+    it('throws MongoParseError when passed a URL Object', function () {
+      expect(
+        () =>
+          new MongoClient('mongodb://localhost:27017', {
+            tlsCertificateKeyFile: new URL('file://hello')
+          })
+      ).to.throw(MongoParseError);
+    });
+  });
   const ALL_OPTIONS = {
     appName: 'cats',
     auth: { username: 'username', password: 'password' },
