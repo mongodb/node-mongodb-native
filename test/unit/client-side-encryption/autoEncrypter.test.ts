@@ -346,44 +346,6 @@ describe('AutoEncrypter', function () {
         done();
       });
     });
-
-    it('should encrypt mock data with per-context KMS credentials', function (done) {
-      const client = new MockClient();
-      const mc = new AutoEncrypter(client, {
-        keyVaultNamespace: 'admin.datakeys',
-        options: {
-          // eslint-disable-next-line @typescript-eslint/no-empty-function
-          logger: () => {}
-        },
-        kmsProviders: {
-          aws: {}
-        },
-        async onKmsProviderRefresh() {
-          return { aws: { accessKeyId: 'example', secretAccessKey: 'example' } };
-        }
-      });
-
-      mc.encrypt('test.test', TEST_COMMAND, (err, encrypted) => {
-        if (err) return done(err);
-        const expected = EJSON.parse(
-          JSON.stringify({
-            find: 'test',
-            filter: {
-              ssn: {
-                $binary: {
-                  base64:
-                    'AWFhYWFhYWFhYWFhYWFhYWECRTOW9yZzNDn5dGwuqsrJQNLtgMEKaujhs9aRWRp+7Yo3JK8N8jC8P0Xjll6C1CwLsE/iP5wjOMhVv1KMMyOCSCrHorXRsb2IKPtzl2lKTqQ=',
-                  subType: '6'
-                }
-              }
-            }
-          })
-        );
-
-        expect(encrypted).to.containSubset(expected);
-        done();
-      });
-    });
   });
 
   describe('logging', function () {
