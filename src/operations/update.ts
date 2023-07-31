@@ -230,6 +230,25 @@ export class ReplaceOneOperation extends UpdateOperation {
       throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
   }
+
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0 ?? true,
+      modifiedCount: res.nModified != null ? res.nModified : res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
+  }
 }
 
 export function makeUpdateStatement(
