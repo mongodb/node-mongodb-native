@@ -60,6 +60,9 @@ const INSECURE_TLS_OPTIONS = [
   'tlsInsecure',
   'tlsAllowInvalidCertificates',
   'tlsAllowInvalidHostnames',
+
+  // These options are disallowed by the spec, so we explicitly filter them out if provided, even
+  // though the StateMachine does not declare support for these options.
   'tlsDisableOCSPEndpointCheck',
   'tlsDisableCertificateRevocationCheck'
 ];
@@ -94,8 +97,6 @@ declare module 'mongodb-client-encryption' {
  *  - tlsAllowInvalidCertificates
  *  - tlsAllowInvalidHostnames
  *  - tlsInsecure
- *  - tlsDisableOCSPEndpointCheck
- *  - tlsDisableCertificateRevocationCheck
  */
 export type CSFLETlsOptions = Pick<
   MongoClientOptions,

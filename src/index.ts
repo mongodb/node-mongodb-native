@@ -93,14 +93,6 @@ export {
   UnorderedBulkOperation
 };
 
-export type { AutoEncryptionExtraOptions } from './client-side-encryption/autoEncrypter';
-export type { KMSProviders } from './client-side-encryption/providers/index';
-export type {
-  CSFLEKMSTlsOptions,
-  CSFLETlsOptions,
-  StateMachineExecutable
-} from './client-side-encryption/stateMachine';
-
 // enums
 export { BatchType } from './bulk/common';
 export { AutoEncryptionLoggerLevel } from './client-side-encryption/autoEncrypter';
@@ -211,7 +203,14 @@ export type {
 } from './change_stream';
 export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
 export type { AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
+export type { AutoEncryptionExtraOptions } from './client-side-encryption/autoEncrypter';
 export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
+export type { KMSProviders } from './client-side-encryption/providers/index';
+export type {
+  CSFLEKMSTlsOptions,
+  CSFLETlsOptions,
+  StateMachineExecutable
+} from './client-side-encryption/stateMachine';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,
