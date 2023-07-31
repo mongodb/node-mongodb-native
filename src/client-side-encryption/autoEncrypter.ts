@@ -8,7 +8,7 @@ import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './cryptoCallbacks';
 import { MongocryptdManager } from './mongocryptdManager';
-import { type KMSProviders, loadCredentials } from './providers';
+import { type KMSProviders, refreshKMSCredentials } from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine, type StateMachineExecutable } from './stateMachine';
 
 /** @public */
@@ -575,7 +575,7 @@ export class AutoEncrypter implements StateMachineExecutable {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return loadCredentials(this._kmsProviders);
+    return refreshKMSCredentials(this._kmsProviders);
   }
 
   /**
