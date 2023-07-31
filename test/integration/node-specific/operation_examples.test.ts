@@ -1020,9 +1020,12 @@ describe('Operations', function () {
 
             // Simple findAndModify command returning the old document and
             // removing it at the same time
-            return collection.findOneAndDelete({ b: 1 }, [['b', 1]], {
-              includeResultMetadata: true
-            });
+            return collection.findOneAndDelete(
+              { b: 1 },
+              {
+                includeResultMetadata: true
+              }
+            );
           })
           .then(function (doc) {
             expect(doc.value.b).to.equal(1);
