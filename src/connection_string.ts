@@ -1096,16 +1096,10 @@ export const OPTIONS = {
     }
   },
   tlsCAFile: {
-    transform({ name, values: [value] }) {
-      if (typeof value !== 'string') throw new MongoParseError(`${name} must be a string`);
-      return value;
-    }
+    type: 'string'
   },
   tlsCertificateKeyFile: {
-    transform({ name, values: [value] }) {
-      if (typeof value !== 'string') throw new MongoParseError(`${name} must be a string`);
-      return value;
-    }
+    type: 'string'
   },
   tlsCertificateKeyFilePassword: {
     target: 'passphrase',
