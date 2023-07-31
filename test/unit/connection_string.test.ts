@@ -44,6 +44,13 @@ describe('Connection String', function () {
     });
   });
 
+  it('throws an error related to the option that was given an empty value', function () {
+    expect(() => parseOptions('mongodb://localhost?tls=', {})).to.throw(
+      MongoAPIError,
+      /tls" cannot/i
+    );
+  });
+
   it('should provide a default port if one is not provided', function () {
     const options = parseOptions('mongodb://hostname');
     expect(options.hosts[0].socketPath).to.be.undefined;

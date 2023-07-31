@@ -305,7 +305,7 @@ export function parseOptions(
     }
 
     if (!isReadPreferenceTags && values.includes('')) {
-      throw new MongoAPIError('URI cannot contain options with no value');
+      throw new MongoAPIError(`URI option "${key}" cannot be specified with no value`);
     }
 
     if (!urlOptions.has(key)) {

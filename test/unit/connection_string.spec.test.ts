@@ -10,7 +10,6 @@ const skipTests = [
 ];
 
 describe('Connection String spec tests', function () {
-  // TODO(NODE-3920): validate repeated options
   const suites = loadSpecTests('connection-string');
 
   for (const suite of suites) {
