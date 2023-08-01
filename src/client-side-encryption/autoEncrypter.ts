@@ -1,4 +1,8 @@
-import { type MongoCryptOptions } from 'mongodb-client-encryption';
+import {
+  type MongoCrypt,
+  type MongoCryptConstructor,
+  type MongoCryptOptions
+} from 'mongodb-client-encryption';
 
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
@@ -226,9 +230,11 @@ export class AutoEncrypter implements StateMachineExecutable {
   _mongocryptdManager?: MongocryptdManager;
   _mongocryptdClient?: MongoClient;
 
-  _mongocrypt: import('mongodb-client-encryption').MongoCrypt;
+  /** @internal */
+  _mongocrypt: any;
 
-  static getMongoCrypt(): import('mongodb-client-encryption').MongoCryptConstructor {
+  /** @internal */
+  static getMongoCrypt(): MongoCryptConstructor {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
       throw encryption.kModuleError;

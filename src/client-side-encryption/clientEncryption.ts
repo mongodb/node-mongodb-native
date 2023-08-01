@@ -1,6 +1,7 @@
 import type {
   ExplicitEncryptionContextOptions,
   MongoCrypt,
+  MongoCryptConstructor,
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
@@ -47,9 +48,11 @@ export class ClientEncryption implements StateMachineExecutable {
   _tlsOptions: CSFLEKMSTlsOptions;
   _kmsProviders: KMSProviders;
 
+  /** @internal */
   _mongoCrypt: MongoCrypt;
 
-  static getMongoCrypt(): import('mongodb-client-encryption').MongoCryptConstructor {
+  /** @internal */
+  static getMongoCrypt(): MongoCryptConstructor {
     const encryption = getMongoDBClientEncryption();
     if ('kModuleError' in encryption) {
       throw encryption.kModuleError;
