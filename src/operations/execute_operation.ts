@@ -118,6 +118,8 @@ async function executeOperationAsync<
     throw new MongoExpiredSessionError('Use of expired sessions is not permitted');
   } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
     throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
+  } else if (session.client !== client) {
+    throw new MongoRuntimeError('ClientSession must be from the same MongoClient');
   }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;
