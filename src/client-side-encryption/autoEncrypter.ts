@@ -231,7 +231,7 @@ export class AutoEncrypter implements StateMachineExecutable {
   _mongocryptdClient?: MongoClient;
 
   /** @internal */
-  _mongocrypt: any;
+  _mongocrypt: MongoCrypt;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
