@@ -91,15 +91,7 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    const res = (await super.executeCommand(server, session, command)) as TODO_NODE_3286;
-    if (res.code) throw new MongoServerError(res);
-    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
-    if (this.explain) return res;
-
-    return {
-      acknowledged: this.writeConcern?.w !== 0,
-      deletedCount: res.n
-    };
+    return super.executeCommand(server, session, command) as TODO_NODE_3286;
   }
 
   protected override executeCallback(
@@ -115,10 +107,40 @@ export class DeleteOneOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
+
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<DeleteResult> {
+    const res = (await super.execute(server, session)) as TODO_NODE_3286;
+    if (this.explain) return res;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      deletedCount: res.n
+    };
+  }
 }
 export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
+  }
+
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<DeleteResult> {
+    const res = (await super.execute(server, session)) as TODO_NODE_3286;
+    if (this.explain) return res;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
+
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      deletedCount: res.n
+    };
   }
 }
 
