@@ -44,6 +44,13 @@ describe('Connection String', function () {
     });
   });
 
+  it('throws an error related to the option that was given an empty value', function () {
+    expect(() => parseOptions('mongodb://localhost?tls=', {})).to.throw(
+      MongoAPIError,
+      /tls" cannot/i
+    );
+  });
+
   it('should provide a default port if one is not provided', function () {
     const options = parseOptions('mongodb://hostname');
     expect(options.hosts[0].socketPath).to.be.undefined;
@@ -122,21 +129,18 @@ describe('Connection String', function () {
 
   describe('readPreferenceTags option', function () {
     context('when the option is passed in the uri', () => {
-      it('should throw an error if no value is passed for readPreferenceTags', () => {
-        expect(() => parseOptions('mongodb://hostname?readPreferenceTags=')).to.throw(
-          MongoAPIError
-        );
-      });
       it('should parse a single read preference tag', () => {
         const options = parseOptions('mongodb://hostname?readPreferenceTags=bar:foo');
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
       });
+
       it('should parse multiple readPreferenceTags', () => {
         const options = parseOptions(
           'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar'
         );
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }]);
       });
+
       it('should parse multiple readPreferenceTags for the same key', () => {
         const options = parseOptions(
           'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=bar:banana&readPreferenceTags=baz:bar'
@@ -147,6 +151,19 @@ describe('Connection String', function () {
           { baz: 'bar' }
         ]);
       });
+
+      it('should parse multiple and empty readPreferenceTags', () => {
+        const options = parseOptions(
+          'mongodb://hostname?readPreferenceTags=bar:foo&readPreferenceTags=baz:bar&readPreferenceTags='
+        );
+        expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }, { baz: 'bar' }, {}]);
+      });
+
+      it('will set "__proto__" as own property on readPreferenceTag', () => {
+        const options = parseOptions('mongodb://hostname?readPreferenceTags=__proto__:foo');
+        expect(options.readPreference.tags?.[0]).to.have.own.property('__proto__', 'foo');
+        expect(Object.getPrototypeOf(options.readPreference.tags?.[0])).to.be.null;
+      });
     });
 
     context('when the option is passed in the options object', () => {
@@ -156,12 +173,14 @@ describe('Connection String', function () {
         });
         expect(options.readPreference.tags).to.deep.equal([]);
       });
+
       it('should parse a single readPreferenceTags object', () => {
         const options = parseOptions('mongodb://hostname?', {
           readPreferenceTags: [{ bar: 'foo' }]
         });
         expect(options.readPreference.tags).to.deep.equal([{ bar: 'foo' }]);
       });
+
       it('should parse multiple readPreferenceTags', () => {
         const options = parseOptions('mongodb://hostname?', {
           readPreferenceTags: [{ bar: 'foo' }, { baz: 'bar' }]
@@ -490,6 +509,18 @@ describe('Connection String', function () {
       expect(thrownError).to.be.instanceOf(MongoInvalidArgumentError);
       expect(thrownError.message).to.equal(
         'bunnies is not a valid compression mechanism. Must be one of: none,snappy,zlib,zstd.'
+      );
+    });
+
+    it('throws an error for repeated options that can only appear once', function () {
+      // At the time of writing, readPreferenceTags is the only options that can be repeated
+      expect(() => parseOptions('mongodb://localhost/?compressors=zstd&compressors=zstd')).to.throw(
+        MongoInvalidArgumentError,
+        /cannot appear more than once/
+      );
+      expect(() => parseOptions('mongodb://localhost/?tls=true&tls=true')).to.throw(
+        MongoInvalidArgumentError,
+        /cannot appear more than once/
       );
     });
 

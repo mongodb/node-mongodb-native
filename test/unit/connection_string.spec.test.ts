@@ -10,8 +10,6 @@ const skipTests = [
 ];
 
 describe('Connection String spec tests', function () {
-  // TODO(NODE-3920): validate repeated options
-  const testsThatDoNotThrowOnWarn = ['Repeated option keys'];
   const suites = loadSpecTests('connection-string');
 
   for (const suite of suites) {
@@ -22,10 +20,7 @@ describe('Connection String spec tests', function () {
             return this.skip();
           }
 
-          executeUriValidationTest(
-            test,
-            testsThatDoNotThrowOnWarn.some(t => t === test.description)
-          );
+          executeUriValidationTest(test);
         });
       }
     });
