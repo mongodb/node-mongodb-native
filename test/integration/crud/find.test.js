@@ -735,7 +735,7 @@ describe('Find', function () {
   /**
    * Test findOneAndUpdate a document with fields
    */
-  it('shouldCorrectlyFindOneAndUpdateDocumentAndReturnSelectedFieldsOnly', {
+  it('returns selected fields only for findOneAndUpdate', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
