@@ -1,5 +1,4 @@
 import * as dns from 'dns';
-import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
@@ -1108,16 +1107,10 @@ export const OPTIONS = {
     }
   },
   tlsCAFile: {
-    target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    type: 'string'
   },
   tlsCertificateKeyFile: {
-    target: 'key',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    type: 'string'
   },
   tlsCertificateKeyFilePassword: {
     target: 'passphrase',
