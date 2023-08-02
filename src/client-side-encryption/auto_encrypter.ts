@@ -7,10 +7,11 @@ import {
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
-import { type AnyError, MongoError, MongoRuntimeError } from '../error';
+import { type AnyError, MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
+import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders, refreshKMSCredentials } from './providers';
 import {
@@ -373,7 +374,9 @@ export class AutoEncrypter implements StateMachineExecutable {
       options.extraOptions.cryptSharedLibRequired &&
       !this.cryptSharedLibVersionInfo
     ) {
-      throw new MongoError('`cryptSharedLibRequired` set but no crypt_shared library loaded');
+      throw new MongoCryptInvalidArgumentError(
+        '`cryptSharedLibRequired` set but no crypt_shared library loaded'
+      );
     }
 
     // Only instantiate mongocryptd manager/client once we know for sure
@@ -422,7 +425,7 @@ export class AutoEncrypter implements StateMachineExecutable {
         (err.message.match(/timed out after/) || err.message.match(/ENOTFOUND/))
       ) {
         callback(
-          new MongoError(
+          new MongoRuntimeError(
             'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn'
           )
         );
@@ -497,18 +500,10 @@ export class AutoEncrypter implements StateMachineExecutable {
     options?: CommandOptions | Callback<Document | Uint8Array>,
     callback?: Callback<Document | Uint8Array>
   ) {
-    if (typeof ns !== 'string') {
-      throw new TypeError('Parameter `ns` must be a string');
-    }
-
-    if (typeof cmd !== 'object') {
-      throw new TypeError('Parameter `cmd` must be an object');
-    }
-
     callback = typeof options === 'function' ? options : callback;
 
     if (callback == null) {
-      throw new TypeError('Callback must be provided');
+      throw new MongoCryptInvalidArgumentError('Callback must be provided');
     }
 
     options = typeof options === 'function' ? {} : options;
@@ -556,7 +551,7 @@ export class AutoEncrypter implements StateMachineExecutable {
     callback = typeof options === 'function' ? options : callback;
 
     if (callback == null) {
-      throw new TypeError('Callback must be provided');
+      throw new MongoCryptInvalidArgumentError('Callback must be provided');
     }
 
     options = typeof options === 'function' ? {} : options;
@@ -636,7 +631,7 @@ function decorateDecryptionResult(
       original = deserialize(original);
     }
     if (Buffer.isBuffer(decrypted)) {
-      return new Error('Expected result of decryption to be deserialized BSON object');
+      return new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
     }
   }
 

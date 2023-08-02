@@ -19,7 +19,11 @@ import { type DeleteResult } from '../operations/delete';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import { maybeCallback, promiseOrCallback } from './common';
 import * as cryptoCallbacks from './crypto_callbacks';
-import { MongoCryptCreateDataKeyError, MongoCryptCreateEncryptedCollectionError } from './errors';
+import {
+  MongoCryptCreateDataKeyError,
+  MongoCryptCreateEncryptedCollectionError,
+  MongoCryptInvalidArgumentError
+} from './errors';
 import { type KMSProvider, type KMSProviders, refreshKMSCredentials } from './providers/index';
 import {
   type CSFLEKMSTlsOptions,
@@ -99,7 +103,7 @@ export class ClientEncryption implements StateMachineExecutable {
     this._kmsProviders = options.kmsProviders || {};
 
     if (options.keyVaultNamespace == null) {
-      throw new TypeError('Missing required option `keyVaultNamespace`');
+      throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
     }
 
     const mongoCryptOptions: MongoCryptOptions = {
@@ -176,7 +180,7 @@ export class ClientEncryption implements StateMachineExecutable {
     const dataKey = Object.assign({ provider }, options.masterKey);
 
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
-      throw new TypeError(
+      throw new MongoCryptInvalidArgumentError(
         `Option "keyAltNames" must be an array of strings, but was of type ${typeof options.keyAltNames}.`
       );
     }
@@ -185,7 +189,7 @@ export class ClientEncryption implements StateMachineExecutable {
     if (options.keyAltNames && options.keyAltNames.length > 0) {
       keyAltNames = options.keyAltNames.map((keyAltName, i) => {
         if (typeof keyAltName !== 'string') {
-          throw new TypeError(
+          throw new MongoCryptInvalidArgumentError(
             `Option "keyAltNames" must be an array of strings, but item at index ${i} was of type ${typeof keyAltName}`
           );
         }
@@ -740,10 +744,12 @@ export class ClientEncryption implements StateMachineExecutable {
     }
     if (keyAltName) {
       if (keyId) {
-        throw new TypeError(`"options" cannot contain both "keyId" and "keyAltName"`);
+        throw new MongoCryptInvalidArgumentError(
+          `"options" cannot contain both "keyId" and "keyAltName"`
+        );
       }
       if (typeof keyAltName !== 'string') {
-        throw new TypeError(
+        throw new MongoCryptInvalidArgumentError(
           `"options.keyAltName" must be of type string, but was of type ${typeof keyAltName}`
         );
       }
