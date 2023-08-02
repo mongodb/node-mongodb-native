@@ -250,7 +250,7 @@ export class AutoEncrypter implements StateMachineExecutable {
    * it will mark it as decrypted.  Compass uses this to determine which
    * fields were decrypted.
    */
-  [kDecorateResult]?: boolean;
+  [kDecorateResult] = false;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
@@ -533,7 +533,6 @@ export class AutoEncrypter implements StateMachineExecutable {
     context.document = cmd;
 
     const stateMachine = new StateMachine({
-      ...options,
       promoteValues: false,
       promoteLongs: false,
       proxyOptions: this._proxyOptions,

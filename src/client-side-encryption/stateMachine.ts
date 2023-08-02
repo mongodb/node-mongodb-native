@@ -11,7 +11,7 @@ import {
   pluckBSONSerializeOptions,
   serialize
 } from '../bson';
-import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
+import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
@@ -138,8 +138,7 @@ export type StateMachineOptions = {
 
   /** TLS options for KMS requests, if set. */
   tlsOptions: CSFLEKMSTlsOptions;
-} & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'> &
-  CommandOptions;
+} & Pick<BSONSerializeOptions, 'promoteLongs' | 'promoteValues'>;
 
 /**
  * @internal

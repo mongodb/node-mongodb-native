@@ -48,7 +48,7 @@ export class MongocryptdManager {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { spawn } = require('child_process') as typeof import('child_process');
 
-    // Spawned with stdio: ignore and detatched:true
+    // Spawned with stdio: ignore and detached: true
     // to ensure child can outlive parent.
     this._child = spawn(cmdName, this.spawnArgs, {
       stdio: 'ignore',
@@ -56,7 +56,19 @@ export class MongocryptdManager {
     });
 
     this._child.on('error', () => {
-      // perhaps questionable, but we swallow mongocryptd spawn errors.
+      // From the FLE spec:
+      // "The stdout and stderr of the spawned process MUST not be exposed in the driver
+      // (e.g. redirect to /dev/null). Users can pass the argument --logpath to
+      // extraOptions.mongocryptdSpawnArgs if they need to inspect mongocryptd logs.
+      // If spawning is necessary, the driver MUST spawn mongocryptd whenever server
+      // selection on the MongoClient to mongocryptd fails. If the MongoClient fails to
+      // connect after spawning, the server selection error is propagated to the user."
+      // The AutoEncrypter and MongoCryptdManager should work together to spawn
+      // mongocryptd whenever necessary.  Additionally, the `mongocryptd` intentionally
+      // shuts down after 60s and gets respawned when necessary.  We rely on server
+      // selection timeouts when connecting to the `mongocryptd` to inform users that something
+      // has been configured incorrectly.  For those reasons, we suppress stderr from
+      // the `mongocryptd` process and immediately unref the process.
     });
 
     // unref child to remove handle from event loop

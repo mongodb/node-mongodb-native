@@ -347,7 +347,7 @@ export class MongoDBCollectionNamespace extends MongoDBNamespace {
     super(db, collection);
   }
 
-  static override fromString(namespace?: string | undefined): MongoDBCollectionNamespace {
+  static override fromString(namespace?: string): MongoDBCollectionNamespace {
     return super.fromString(namespace) as MongoDBCollectionNamespace;
   }
 }
