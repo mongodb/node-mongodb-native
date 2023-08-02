@@ -16,9 +16,9 @@ import { getSocks, type SocksLib } from '../deps';
 import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils';
-import { type DataKey } from './clientEncryption';
+import { type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
-import { type MongocryptdManager } from './mongocryptdManager';
+import { type MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProvider, type KMSProviders } from './providers';
 
 let socks: SocksLib | null = null;

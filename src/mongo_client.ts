@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
-import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
+import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,

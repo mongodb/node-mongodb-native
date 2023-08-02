@@ -10,10 +10,14 @@ import { getMongoDBClientEncryption } from '../deps';
 import { type AnyError, MongoError, MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
-import * as cryptoCallbacks from './cryptoCallbacks';
-import { MongocryptdManager } from './mongocryptdManager';
+import * as cryptoCallbacks from './crypto_callbacks';
+import { MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders, refreshKMSCredentials } from './providers';
-import { type CSFLEKMSTlsOptions, StateMachine, type StateMachineExecutable } from './stateMachine';
+import {
+  type CSFLEKMSTlsOptions,
+  StateMachine,
+  type StateMachineExecutable
+} from './state_machine';
 
 /** @public */
 export interface AutoEncryptionOptions {

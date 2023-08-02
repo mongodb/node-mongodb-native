@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'child_process';
 
 import { type Callback } from '../utils';
-import { type AutoEncryptionExtraOptions } from './autoEncrypter';
+import { type AutoEncryptionExtraOptions } from './auto_encrypter';
 
 /**
  * @internal

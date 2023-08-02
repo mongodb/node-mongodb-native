@@ -95,7 +95,7 @@ export {
 
 // enums
 export { BatchType } from './bulk/common';
-export { AutoEncryptionLoggerLevel } from './client-side-encryption/autoEncrypter';
+export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypter';
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
@@ -201,16 +201,16 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
-export type { AutoEncryptionOptions } from './client-side-encryption/autoEncrypter';
-export type { AutoEncryptionExtraOptions } from './client-side-encryption/autoEncrypter';
-export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
+export type { AutoEncrypter } from './client-side-encryption/auto_encrypter';
+export type { AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
+export type { AutoEncryptionExtraOptions } from './client-side-encryption/auto_encrypter';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
 export type { KMSProviders } from './client-side-encryption/providers/index';
 export type {
   CSFLEKMSTlsOptions,
   CSFLETlsOptions,
   StateMachineExecutable
-} from './client-side-encryption/stateMachine';
+} from './client-side-encryption/state_machine';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,

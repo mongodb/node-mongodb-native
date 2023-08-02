@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptdManager';
+import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 
 describe('MongocryptdManager', function () {
   it('should default to having spawnArgs of --idleShutdownTimeoutSecs=60', function () {

@@ -8,7 +8,7 @@ import { setTimeout } from 'timers';
 import * as tls from 'tls';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { Db } from '../../../src/db';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports

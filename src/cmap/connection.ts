@@ -2,7 +2,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
-import type { AutoEncrypter } from '../client-side-encryption/autoEncrypter';
+import type { AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import {
   CLOSE,
   CLUSTER_TIME_RECEIVED,

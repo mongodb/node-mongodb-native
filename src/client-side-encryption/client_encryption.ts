@@ -18,10 +18,14 @@ import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import { maybeCallback, promiseOrCallback } from './common';
-import * as cryptoCallbacks from './cryptoCallbacks';
+import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptCreateDataKeyError, MongoCryptCreateEncryptedCollectionError } from './errors';
 import { type KMSProvider, type KMSProviders, refreshKMSCredentials } from './providers/index';
-import { type CSFLEKMSTlsOptions, StateMachine, type StateMachineExecutable } from './stateMachine';
+import {
+  type CSFLEKMSTlsOptions,
+  StateMachine,
+  type StateMachineExecutable
+} from './state_machine';
 
 /**
  * The schema for a DataKey in the key vault collection.

@@ -17,7 +17,7 @@ const {
   externalSchema
 } = require('../../spec/client-side-encryption/external/external-schema.json');
 /* eslint-disable no-restricted-modules */
-const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption');
+const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
 
 const getKmsProviders = (localKey, kmipEndpoint, azureEndpoint, gcpEndpoint) => {
   const result = BSON.EJSON.parse(process.env.CSFLE_KMS_PROVIDERS || '{}');
