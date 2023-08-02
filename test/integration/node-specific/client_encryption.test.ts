@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import {
   ClientEncryption,
   type DataKey
-} from '../../../src/client-side-encryption/clientEncryption';
+} from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
 import { Binary, type Collection, Int32, Long, type MongoClient } from '../../mongodb';

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import * as cryptoCallbacks from '../../../src/client-side-encryption/cryptoCallbacks';
 import { type MongoClient } from '../../mongodb';

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
 import { BSON, Collection, type Db, MongoServerError } from '../../mongodb';
