@@ -208,13 +208,38 @@ describe('Connection String', function () {
     });
   });
 
-  it('should parse boolean values', function () {
-    let options = parseOptions('mongodb://hostname?retryWrites=1');
-    expect(options.retryWrites).to.equal(true);
-    options = parseOptions('mongodb://hostname?retryWrites=false');
-    expect(options.retryWrites).to.equal(false);
-    options = parseOptions('mongodb://hostname?retryWrites=t');
-    expect(options.retryWrites).to.equal(true);
+  context('boolean options', function () {
+    const valuesExpectations: { value: string; expectation: 'error' | boolean }[] = [
+      { value: 'true', expectation: true },
+      { value: 'false', expectation: false },
+      { value: '-1', expectation: 'error' },
+      { value: '1', expectation: 'error' },
+      { value: '0', expectation: 'error' },
+      { value: 't', expectation: 'error' },
+      { value: 'f', expectation: 'error' },
+      { value: 'n', expectation: 'error' },
+      { value: 'y', expectation: 'error' },
+      { value: 'yes', expectation: 'error' },
+      { value: 'no', expectation: 'error' },
+      { value: 'unknown', expectation: 'error' }
+    ];
+    for (const { value, expectation } of valuesExpectations) {
+      const connString = `mongodb://hostname?retryWrites=${value}`;
+      context(`when provided '${value}'`, function () {
+        if (expectation === 'error') {
+          it('throws MongoParseError', function () {
+            expect(() => {
+              parseOptions(connString);
+            }).to.throw(MongoParseError);
+          });
+        } else {
+          it(`parses as ${expectation}`, function () {
+            const options = parseOptions(connString);
+            expect(options).to.have.property('retryWrites', expectation);
+          });
+        }
+      });
+    }
   });
 
   it('should parse compression options', function () {
