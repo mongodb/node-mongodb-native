@@ -211,6 +211,15 @@ export const AutoEncryptionLoggerLevel = Object.freeze({
 export type AutoEncryptionLoggerLevel =
   (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
 
+// Typescript errors if we index objects with `Symbol.for(...)`, so
+// to avoid TS errors we pull them out into variables.  Then we can type
+// the objects (and class) that we expect to see them on and prevent TS
+// errors.
+/** @internal */
+const kDecorateResult = Symbol.for('@@mdb.decorateDecryptionResult');
+/** @internal */
+const kDecoratedKeys = Symbol.for('@@mdb.decryptedKeys');
+
 /**
  * @internal An internal class to be used by the driver for auto encryption
  * **NOTE**: Not meant to be instantiated directly, this is for internal use only.
@@ -232,6 +241,16 @@ export class AutoEncrypter implements StateMachineExecutable {
 
   /** @internal */
   _mongocrypt: MongoCrypt;
+
+  /**
+   * Used by devtools to enable decorating decryption results.
+   *
+   * When set and enabled, `decrypt` will automatically recursively
+   * traverse a decrypted document and if a field has been decrypted,
+   * it will mark it as decrypted.  Compass uses this to determine which
+   * fields were decrypted.
+   */
+  [kDecorateResult]?: boolean;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
@@ -509,7 +528,6 @@ export class AutoEncrypter implements StateMachineExecutable {
       return;
     }
 
-    // TODO: should these be accessors from the addon?
     context.id = this._contextCounter++;
     context.ns = ns;
     context.document = cmd;
@@ -550,7 +568,6 @@ export class AutoEncrypter implements StateMachineExecutable {
       return;
     }
 
-    // TODO: should this be an accessor from the addon?
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({
@@ -559,8 +576,7 @@ export class AutoEncrypter implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    // @ts-expect-error unique symbol cannot be used as an index type
-    const decorateResult = this[Symbol.for('@@mdb.decorateDecryptionResult')];
+    const decorateResult = this[kDecorateResult];
     stateMachine.execute(this, context, function (error?: Error, result?: Document) {
       // Only for testing/internal usage
       if (!error && result && decorateResult) {
@@ -607,11 +623,10 @@ export class AutoEncrypter implements StateMachineExecutable {
  * @internal
  */
 function decorateDecryptionResult(
-  decrypted: Document,
+  decrypted: Document & { [kDecoratedKeys]?: Array<string> },
   original: Document,
   isTopLevelDecorateCall = true
 ): Error | void {
-  const decryptedKeys = Symbol.for('@@mdb.decryptedKeys');
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
     if (Buffer.isBuffer(original)) {
@@ -629,17 +644,17 @@ function decorateDecryptionResult(
     // An object was decrypted by libmongocrypt if and only if it was
     // a BSON Binary object with subtype 6.
     if (originalValue && originalValue._bsontype === 'Binary' && originalValue.sub_type === 6) {
-      // @ts-expect-error unique symbols cannot be used as index type
-      if (!decrypted[decryptedKeys]) {
-        Object.defineProperty(decrypted, decryptedKeys, {
+      if (!decrypted[kDecoratedKeys]) {
+        Object.defineProperty(decrypted, kDecoratedKeys, {
           value: [],
           configurable: true,
           enumerable: false,
           writable: false
         });
       }
-      // @ts-expect-error unique symbols cannot be used as index type
-      decrypted[decryptedKeys].push(k);
+      // this is defined in the preceeding if-statement
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      decrypted[kDecoratedKeys]!.push(k);
       // Do not recurse into this decrypted value. It could be a subdocument/array,
       // in which case there is no original value associated with its subfields.
       continue;
