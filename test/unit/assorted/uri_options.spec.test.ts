@@ -14,7 +14,10 @@ describe('URI option spec tests', function () {
     'tlsDisableCertificateRevocationCheck can be set to true',
     'tlsDisableCertificateRevocationCheck can be set to false',
     'tlsDisableOCSPEndpointCheck can be set to true',
-    'tlsDisableOCSPEndpointCheck can be set to false'
+    'tlsDisableOCSPEndpointCheck can be set to false',
+
+    // Skipped because we now only accept true/false for boolean options
+    'Invalid loadBalanced value'
   ];
 
   const testsThatDoNotThrowOnWarn = [
