@@ -71,9 +71,7 @@ expectAssignable<SchemaWithIdType | null>(await typeTestCollection.findOne());
 expectAssignable<SchemaWithIdInterface | null>(await interfaceTestCollection.findOne());
 expectAssignable<SchemaWithIdType>((await typeTestCollection.find().toArray())[0]);
 expectAssignable<SchemaWithIdInterface>((await interfaceTestCollection.find().toArray())[0]);
-expectAssignable<SchemaWithIdType | null>(
-  await typeTestCollection.findOneAndDelete({ a: 1 })
-);
+expectAssignable<SchemaWithIdType | null>(await typeTestCollection.findOneAndDelete({ a: 1 }));
 expectAssignable<SchemaWithIdInterface | null>(
   await interfaceTestCollection.findOneAndDelete({ a: 1 })
 );
@@ -94,7 +92,7 @@ expectAssignable<SchemaWithIdType | null>(
     .value
 );
 expectAssignable<SchemaWithIdInterface | null>(
-  await interfaceTestCollection.findOneAndUpdate({ a: 1 },{ a: 5 })
+  await interfaceTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })
 );
 
 // OptionalId assignability when wrapping a schema with _id: number
