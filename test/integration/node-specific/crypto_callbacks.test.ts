@@ -4,7 +4,7 @@ import * as sinon from 'sinon';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import * as cryptoCallbacks from '../../../src/client-side-encryption/cryptoCallbacks';
+import * as cryptoCallbacks from '../../../src/client-side-encryption/crypto_callbacks';
 import { type MongoClient } from '../../mongodb';
 
 // Data Key Stuff

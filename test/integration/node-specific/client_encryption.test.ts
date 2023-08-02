@@ -8,7 +8,7 @@ import {
   type DataKey
 } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { Binary, type Collection, Int32, Long, type MongoClient } from '../../mongodb';
 
 function readHttpResponse(path) {
