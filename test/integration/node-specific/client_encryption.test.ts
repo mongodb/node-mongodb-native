@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
 
+import { MongoCryptInvalidArgumentError } from '../../../lib/client-side-encryption/errors';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import {
   ClientEncryption,
@@ -440,7 +441,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
     });
 
     it('throws if algorithm is not provided', metadata, async function () {
@@ -449,7 +450,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
     });
 
     it(`throws if algorithm does not equal 'rangePreview'`, metadata, async function () {
@@ -458,7 +459,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(TypeError);
+      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
     });
 
     it(
@@ -538,7 +539,7 @@ describe('ClientEncryption integration tests', function () {
         it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, function () {
           const options = makeOptions(val);
           expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            TypeError
+            MongoCryptInvalidArgumentError
           );
         });
       });
@@ -547,7 +548,7 @@ describe('ClientEncryption integration tests', function () {
         it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, function () {
           const options = makeOptions([val]);
           expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            TypeError
+            MongoCryptInvalidArgumentError
           );
         });
       });

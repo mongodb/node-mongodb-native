@@ -3,6 +3,8 @@ import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { MongoCryptInvalidArgumentError } from '../../../lib/client-side-encryption/errors';
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -532,7 +534,7 @@ describe('Range Explicit Encryption', function () {
             })
             .catch(e => e);
 
-          expect(resultOrError).to.be.instanceOf(TypeError);
+          expect(resultOrError).to.be.instanceOf(MongoCryptInvalidArgumentError);
         }
       );
     });
