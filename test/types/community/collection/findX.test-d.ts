@@ -288,7 +288,7 @@ const fooObjWithArray: FooWithArray = {
 const fooFilterWithArray: Filter<FooWithArray> = fooObjWithArray;
 
 declare const coll: Collection<{ a: number; b: string }>;
-// Passing no options will return the modify result.
+// Passing no options will return the deleted document.
 expectType<WithId<{ a: number; b: string }> | null>(await coll.findOneAndDelete({ a: 3 }));
 expectType<WithId<{ a: number; b: string }> | null>(
   await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' })
@@ -304,7 +304,7 @@ expectType<WithId<{ a: number; b: string }> | null>(
   )
 );
 
-// Passing empty options will return the modify result.
+// Passing empty options will return the deleted document.
 expectType<WithId<{ a: number; b: string }> | null>(await coll.findOneAndDelete({ a: 3 }, {}));
 expectType<WithId<{ a: number; b: string }> | null>(
   await coll.findOneAndReplace({ a: 3 }, { a: 5, b: 'new string' }, {})
