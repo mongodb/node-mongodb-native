@@ -7,7 +7,6 @@ import type { Server } from '../sdam/server';
 import { MIN_SECONDARY_WRITE_WIRE_VERSION } from '../sdam/server_selection';
 import type { ClientSession } from '../sessions';
 import {
-  type Callback,
   commandSupportsReadConcern,
   decorateWithExplain,
   maxWireVersion,
@@ -15,7 +14,7 @@ import {
 } from '../utils';
 import { WriteConcern, type WriteConcernOptions } from '../write_concern';
 import type { ReadConcernLike } from './../read_concern';
-import { AbstractCallbackOperation, Aspect, type OperationOptions } from './operation';
+import { AbstractOperation, Aspect, type OperationOptions } from './operation';
 
 /** @public */
 export interface CollationOptions {
@@ -68,7 +67,7 @@ export interface OperationParent {
 }
 
 /** @internal */
-export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
+export abstract class CommandOperation<T> extends AbstractOperation<T> {
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
@@ -154,24 +153,5 @@ export abstract class CommandOperation<T> extends AbstractCallbackOperation<T> {
     }
 
     return server.commandAsync(this.ns, cmd, options);
-  }
-}
-
-/** @internal */
-export abstract class CommandCallbackOperation<T = any> extends CommandOperation<T> {
-  constructor(parent?: OperationParent, options?: CommandOperationOptions) {
-    super(parent, options);
-  }
-
-  executeCommandCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    cmd: Document,
-    callback: Callback
-  ): void {
-    super.executeCommand(server, session, cmd).then(
-      res => callback(undefined, res),
-      err => callback(err, undefined)
-    );
   }
 }

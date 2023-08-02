@@ -5,8 +5,7 @@ import { MongoServerError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
 export interface EvalOptions extends CommandOperationOptions {
@@ -14,7 +13,7 @@ export interface EvalOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EvalOperation extends CommandCallbackOperation<Document> {
+export class EvalOperation extends CommandOperation<Document> {
   override options: EvalOptions;
   code: Code;
   parameters?: Document | Document[];
@@ -38,11 +37,7 @@ export class EvalOperation extends CommandCallbackOperation<Document> {
     });
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     let finalCode = this.code;
     let finalParameters: Document[] = [];
 
@@ -65,18 +60,15 @@ export class EvalOperation extends CommandCallbackOperation<Document> {
     }
 
     // Execute the command
-    super.executeCommandCallback(server, session, cmd, (err, result) => {
-      if (err) return callback(err);
-      if (result && result.ok === 1) {
-        return callback(undefined, result.retval);
-      }
+    const result = await super.executeCommand(server, session, cmd);
+    if (result && result.ok === 1) {
+      return result.retval;
+    }
 
-      if (result) {
-        callback(new MongoServerError({ message: `eval failed: ${result.errmsg}` }));
-        return;
-      }
+    if (result) {
+      throw new MongoServerError({ message: `eval failed: ${result.errmsg}` });
+    }
 
-      callback(err, result);
-    });
+    return result;
   }
 }
