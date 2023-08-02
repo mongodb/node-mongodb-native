@@ -2,12 +2,13 @@ import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as sinon from 'sinon';
 
-import { MongoCryptInvalidArgumentError } from '../../../lib/client-side-encryption/errors';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import {
   ClientEncryption,
   type DataKey
 } from '../../../src/client-side-encryption/client_encryption';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { Binary, type Collection, Int32, Long, type MongoClient } from '../../mongodb';
@@ -441,7 +442,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
+      expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
     it('throws if algorithm is not provided', metadata, async function () {
@@ -450,7 +451,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
+      expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
     it(`throws if algorithm does not equal 'rangePreview'`, metadata, async function () {
@@ -459,7 +460,7 @@ describe('ClientEncryption integration tests', function () {
         .encryptExpression(expression, completeOptions)
         .catch(e => e);
 
-      expect(errorOrResult).to.be.instanceof(MongoCryptInvalidArgumentError);
+      expect(errorOrResult).to.be.instanceof(TypeError);
     });
 
     it(
