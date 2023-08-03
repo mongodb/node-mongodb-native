@@ -2,7 +2,6 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -43,14 +42,6 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     const response = await super.executeCommand(server, session, cmd);
 
     return response?.n || 0;
-  }
-
-  protected override executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<number>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 

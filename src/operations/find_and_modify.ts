@@ -5,7 +5,7 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { type Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
@@ -214,14 +214,6 @@ class FindAndModifyOperation extends CommandOperation<Document> {
     // Execute the command
     const result = await super.executeCommand(server, session, cmd);
     return options.includeResultMetadata ? result : result.value ?? null;
-  }
-
-  protected override executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 
