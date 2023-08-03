@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { MongoCryptInvalidArgumentError } from '../../../lib/client-side-encryption/errors';
-/* eslint-disable @typescript-eslint/no-restricted-imports */
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { MongoCryptCreateEncryptedCollectionError } from '../../../src/client-side-encryption/errors';
@@ -92,7 +90,7 @@ describe('21. Automatic Data Encryption Keys', () => {
         })
         .catch(error => error);
 
-      expect(result).to.be.instanceOf(MongoCryptInvalidArgumentError);
+      expect(result).to.be.instanceOf(TypeError);
     });
 
     it('Case 3: Invalid keyId', metadata, async () => {
