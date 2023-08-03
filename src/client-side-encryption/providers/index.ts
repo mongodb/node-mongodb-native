@@ -5,7 +5,7 @@ import { loadGCPCredentials } from './gcp';
 /**
  * @public
  */
-export type KMSProvider = 'aws' | 'azure' | 'gcp' | 'local';
+export type ClientEncryptionDataKeyProvider = 'aws' | 'azure' | 'gcp' | 'local' | 'kmip';
 
 /**
  * @public
@@ -132,7 +132,10 @@ export interface KMSProviders {
  *
  * @internal - exposed for testing purposes only
  */
-export function isEmptyCredentials(providerName: KMSProvider, kmsProviders: KMSProviders): boolean {
+export function isEmptyCredentials(
+  providerName: ClientEncryptionDataKeyProvider,
+  kmsProviders: KMSProviders
+): boolean {
   const provider = kmsProviders[providerName];
   if (provider == null) {
     return false;
