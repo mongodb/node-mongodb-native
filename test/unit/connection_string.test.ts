@@ -772,7 +772,7 @@ describe('Connection String', function () {
       let [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
-        .that.matches(/useNewUrlParser is a deprecated option/);
+        .that.matches(/useNewUrlParser has no effect/);
 
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
@@ -780,7 +780,7 @@ describe('Connection String', function () {
       [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
-        .that.matches(/useNewUrlParser is a deprecated option/);
+        .that.matches(/useNewUrlParser has no effect/);
     });
 
     it('useUnifiedTopology emits a warning', async () => {
@@ -789,7 +789,7 @@ describe('Connection String', function () {
       let [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
-        .that.matches(/useUnifiedTopology is a deprecated option/);
+        .that.matches(/useUnifiedTopology has no effect/);
 
       willBeWarning = once(process, 'warning');
       //@ts-expect-error: using unsupported option on purpose
@@ -797,7 +797,7 @@ describe('Connection String', function () {
       [warning] = await willBeWarning;
       expect(warning)
         .to.have.property('message')
-        .that.matches(/useUnifiedTopology is a deprecated option/);
+        .that.matches(/useUnifiedTopology has no effect/);
     });
   });
 });

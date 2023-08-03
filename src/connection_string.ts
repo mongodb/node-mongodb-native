@@ -1226,11 +1226,13 @@ export const OPTIONS = {
   // Legacy options from v3 era
   useNewUrlParser: {
     type: 'boolean',
-    deprecated: 'useNewUrlParser is no longer used it can be removed'
+    deprecated:
+      'useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
   } as OptionDescriptor,
   useUnifiedTopology: {
     type: 'boolean',
-    deprecated: 'useUnifiedTopology is no longer used it can be removed'
+    deprecated:
+      'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
   } as OptionDescriptor,
   // MongoLogger
   // TODO(NODE-4849): Tighten the type of mongodbLogPath
