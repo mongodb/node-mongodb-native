@@ -424,7 +424,7 @@ describe('Sessions Spec', function () {
     });
   });
 
-  context.only('when using a LegacyMongoClient', () => {
+  context('when using a LegacyMongoClient', () => {
     let legacyClient;
     beforeEach(async function () {
       legacyClient = new LegacyMongoClient(this.configuration.url());
