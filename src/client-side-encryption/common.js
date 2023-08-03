@@ -1,33 +1,4 @@
-/**
- * @ignore
- * Helper function for logging. Enabled by setting the environment flag MONGODB_CRYPT_DEBUG.
- * @param {*} msg Anything you want to be logged.
- */
-export function debug(msg) {
-  if (process.env.MONGODB_CRYPT_DEBUG) {
-    // eslint-disable-next-line no-console
-    console.error(msg);
-  }
-}
-
-/**
- * @ignore
- * Gets the database portion of a namespace string
- * @param {string} ns A string in the format of a namespace (database.collection)
- * @returns {string} The database portion of the namespace
- */
-export function databaseNamespace(ns) {
-  return ns.split('.')[0];
-}
-/**
- * @ignore
- * Gets the collection portion of a namespace string
- * @param {string} ns A string in the format of a namespace (database.collection)
- * @returns {string} The collection portion of the namespace
- */
-export function collectionNamespace(ns) {
-  return ns.split('.').slice(1).join('.');
-}
+/* eslint-disable */
 
 export function maybeCallback(promiseFn, callback) {
   const promise = promiseFn();

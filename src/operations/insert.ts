@@ -5,7 +5,7 @@ import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
@@ -44,14 +44,6 @@ export class InsertOperation extends CommandOperation<Document> {
     }
 
     return super.executeCommand(server, session, command);
-  }
-
-  protected override executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 

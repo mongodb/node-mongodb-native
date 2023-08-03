@@ -3,7 +3,6 @@ import type { Document } from '../bson';
 import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
@@ -46,13 +45,5 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
       throw new MongoUnexpectedServerResponseError(`Invalid collection ${collectionName}`);
 
     return doc;
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }

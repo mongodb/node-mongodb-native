@@ -9,7 +9,6 @@ import { MongoCompatibilityError } from '../error';
 import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { CreateIndexOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
@@ -169,14 +168,6 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     }
 
     return coll;
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Collection>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 
   private async executeWithoutEncryptedFieldsCheck(

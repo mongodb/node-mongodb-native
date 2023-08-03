@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as util from 'util';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import { type CommandStartedEvent, MongoClient, type MongoClientOptions } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 import { getEncryptExtraOptions } from '../../tools/utils';

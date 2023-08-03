@@ -1,7 +1,7 @@
 import { promisify } from 'util';
 
 import type { Document } from '../bson';
-import { type AutoEncrypter } from '../client-side-encryption/autoEncrypter';
+import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
 import {
   ConnectionPool,

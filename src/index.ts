@@ -95,11 +95,11 @@ export {
 
 // enums
 export { BatchType } from './bulk/common';
+export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypter';
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
-export { AutoEncryptionLoggerLevel } from './deps';
 export { MongoErrorLabel } from './error';
 export { ExplainVerbosity } from './explain';
 export { ServerApiVersion } from './mongo_client';
@@ -201,8 +201,16 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export type { AutoEncrypter } from './client-side-encryption/autoEncrypter';
-export type { MongocryptdManager } from './client-side-encryption/mongocryptdManager';
+export type { AutoEncrypter } from './client-side-encryption/auto_encrypter';
+export type { AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
+export type { AutoEncryptionExtraOptions } from './client-side-encryption/auto_encrypter';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
+export type { KMSProviders } from './client-side-encryption/providers/index';
+export type {
+  CSFLEKMSTlsOptions,
+  CSFLETlsOptions,
+  StateMachineExecutable
+} from './client-side-encryption/state_machine';
 export type { AuthContext } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,
@@ -287,7 +295,6 @@ export type {
 } from './cursor/list_search_indexes_cursor';
 export type { RunCursorCommandOptions } from './cursor/run_command_cursor';
 export type { DbOptions, DbPrivate } from './db';
-export type { AutoEncryptionOptions, AutoEncryptionTlsOptions } from './deps';
 export type { Encrypter, EncrypterOptions } from './encrypter';
 export type { AnyError, ErrorDescription, MongoNetworkErrorOptions } from './error';
 export type { Explain, ExplainOptions, ExplainVerbosityLike } from './explain';
@@ -389,7 +396,6 @@ export type {
   CommandOperationOptions,
   OperationParent
 } from './operations/command';
-export type { CommandCallbackOperation } from './operations/command';
 export type { IndexInformationOptions } from './operations/common_functions';
 export type { CountOptions } from './operations/count';
 export type { CountDocumentsOptions } from './operations/count_documents';
@@ -402,7 +408,6 @@ export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/
 export type { DistinctOptions } from './operations/distinct';
 export type { DropCollectionOptions, DropDatabaseOptions } from './operations/drop';
 export type { EstimatedDocumentCountOptions } from './operations/estimated_document_count';
-export type { EvalOptions } from './operations/eval';
 export type { ExecutionResult } from './operations/execute_operation';
 export type { FindOptions } from './operations/find';
 export type {
@@ -421,12 +426,7 @@ export type {
 export type { InsertManyResult, InsertOneOptions, InsertOneResult } from './operations/insert';
 export type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 export type { ListDatabasesOptions, ListDatabasesResult } from './operations/list_databases';
-export type {
-  AbstractCallbackOperation,
-  AbstractOperation,
-  Hint,
-  OperationOptions
-} from './operations/operation';
+export type { AbstractOperation, Hint, OperationOptions } from './operations/operation';
 export type { ProfilingLevelOptions } from './operations/profiling_level';
 export type { RemoveUserOptions } from './operations/remove_user';
 export type { RenameOptions } from './operations/rename';

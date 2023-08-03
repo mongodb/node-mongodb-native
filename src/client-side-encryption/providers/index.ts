@@ -147,7 +147,7 @@ export function isEmptyCredentials(providerName: KMSProvider, kmsProviders: KMSP
  *
  * @internal
  */
-export async function loadCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
+export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
   let finalKMSProviders = kmsProviders;
 
   if (isEmptyCredentials('aws', kmsProviders)) {

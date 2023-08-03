@@ -52,7 +52,7 @@ export class GetMoreOperation extends AbstractOperation {
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.
    */
-  async execute(server: Server, _session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, _session: ClientSession | undefined): Promise<Document> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Getmore must run on the same server operation began on');
     }

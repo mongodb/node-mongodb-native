@@ -6,7 +6,7 @@ import { type OneOrMore } from '../mongo_types';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
 import {
   type CollationOptions,
   CommandOperation,
@@ -186,7 +186,7 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
-  override execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
+  override async execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
 
@@ -260,14 +260,6 @@ export class CreateIndexesOperation<
     const indexNames = indexes.map(index => index.name || '');
     return indexNames as T;
   }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<T>
-  ): void {
-    throw new Error('Method not implemented.');
-  }
 }
 
 /** @internal */
@@ -340,14 +332,6 @@ export class DropIndexOperation extends CommandOperation<Document> {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
     return super.executeCommand(server, session, cmd);
   }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
-  }
 }
 
 /** @public */
@@ -390,14 +374,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     }
 
     return super.executeCommand(server, session, command);
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<Document>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 
@@ -447,7 +423,7 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.name = name;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const db = this.db;
     const name = this.name;
 
