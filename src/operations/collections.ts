@@ -19,7 +19,10 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
     this.db = db;
   }
 
-  async execute(server: Server, session: ClientSession | undefined): Promise<Collection[]> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined
+  ): Promise<Collection[]> {
     // Let's get the collection names
     const documents = await this.db
       .listCollections(

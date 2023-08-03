@@ -186,7 +186,7 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
-  override execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
+  override async execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
 
@@ -423,7 +423,7 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.name = name;
   }
 
-  override execute(server: Server, session: ClientSession | undefined): Promise<Document> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const db = this.db;
     const name = this.name;
 
