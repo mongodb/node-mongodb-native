@@ -16,17 +16,16 @@ describe('URI option spec tests', function () {
     'tlsDisableOCSPEndpointCheck can be set to true',
     'tlsDisableOCSPEndpointCheck can be set to false',
 
-    // Skipped because we now only accept true/false for boolean options
+    // NOTE(NODE-3989): Skipped because we now only accept true/false for boolean options. The spec expects us to
+    // warn on other accepted but deprecated values, but as of NODE-3989, we now throw on these
+    // values
     'Invalid loadBalanced value'
   ];
 
   const testsThatDoNotThrowOnWarn = [
     // TODO(NODE-3923): compression option validation
     'Too high zlibCompressionLevel causes a warning',
-    'Too low zlibCompressionLevel causes a warning',
-
-    // TODO(NODE-3989): Fix legacy boolean parsing
-    'Invalid loadBalanced value'
+    'Too low zlibCompressionLevel causes a warning'
   ];
 
   for (const suite of suites) {
