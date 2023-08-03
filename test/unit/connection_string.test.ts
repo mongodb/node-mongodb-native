@@ -227,16 +227,16 @@ describe('Connection String', function () {
       const connString = `mongodb://hostname?retryWrites=${value}`;
       context(`when provided '${value}'`, function () {
         if (expectation === 'error') {
-            it('throws MongoParseError', function () {
-              expect(() => {
-                parseOptions(connString);
-              }).to.throw(MongoParseError);
-            });
+          it('throws MongoParseError', function () {
+            expect(() => {
+              parseOptions(connString);
+            }).to.throw(MongoParseError);
+          });
         } else {
-            it(`parses as ${expectation}`, function () {
-              const options = parseOptions(connString);
-              expect(options).to.have.property('retryWrites', expectation);
-            });
+          it(`parses as ${expectation}`, function () {
+            const options = parseOptions(connString);
+            expect(options).to.have.property('retryWrites', expectation);
+          });
         }
       });
     }
