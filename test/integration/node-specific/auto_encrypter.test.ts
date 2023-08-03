@@ -6,11 +6,11 @@ import * as sinon from 'sinon';
 import { promisify } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { AutoEncrypter } from '../../../src/client-side-encryption/autoEncrypter';
+import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptdManager';
+import { MongocryptdManager } from '../../../src/client-side-encryption/mongocryptd_manager';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { BSON, deserialize, serialize } from '../../mongodb';
 import { type MongoClient, MongoError, MongoNetworkTimeoutError } from '../../mongodb';
 import { getEncryptExtraOptions } from '../../tools/utils';

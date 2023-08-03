@@ -1,5 +1,4 @@
 import { type Document } from '../../bson';
-
 import { MongoCryptAzureKMSRequestError, MongoCryptKMSRequestNetworkTimeoutError } from '../errors';
 import { type KMSProviders } from './index';
 import { get } from './utils';
@@ -60,7 +59,10 @@ export class AzureCredentialCache {
 export const tokenCache = new AzureCredentialCache();
 
 /** @internal */
-async function parseResponse(response: { body: string; status?: number }): Promise<AzureTokenCacheEntry> {
+async function parseResponse(response: {
+  body: string;
+  status?: number;
+}): Promise<AzureTokenCacheEntry> {
   const { status, body: rawBody } = response;
 
   const body: { expires_in?: number; access_token?: string } = (() => {
@@ -121,7 +123,9 @@ export function prepareRequest(options: AzureKMSRequestOptions): {
   headers: Document;
   url: URL;
 } {
-  const url = new URL(options.url?.toString() ?? 'http://169.254.169.254/metadata/identity/oauth2/token');
+  const url = new URL(
+    options.url?.toString() ?? 'http://169.254.169.254/metadata/identity/oauth2/token'
+  );
 
   url.searchParams.append('api-version', '2018-02-01');
   url.searchParams.append('resource', 'https://vault.azure.net');

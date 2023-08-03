@@ -5,7 +5,7 @@ import { gte as semverGte, lte as semverLte } from 'semver';
 import { isDeepStrictEqual } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import {
   type AutoEncryptionOptions,
   type CollectionOptions,
