@@ -7,6 +7,7 @@ import {
   MongoError,
   MongoErrorLabel,
   MongoExpiredSessionError,
+  MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNotConnectedError,
   MongoRuntimeError,
@@ -119,7 +120,7 @@ async function executeOperationAsync<
   } else if (session.snapshotEnabled && !topology.capabilities.supportsSnapshotReads) {
     throw new MongoCompatibilityError('Snapshot reads require MongoDB 5.0 or later');
   } else if (session.client !== client) {
-    throw new MongoRuntimeError('ClientSession must be from the same MongoClient');
+    throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
 
   const readPreference = operation.readPreference ?? ReadPreference.primary;

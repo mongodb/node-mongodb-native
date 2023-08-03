@@ -7,7 +7,7 @@ import {
   type CommandStartedEvent,
   MongoClient,
   MongoDriverError,
-  MongoRuntimeError
+  MongoInvalidArgumentError
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
@@ -33,16 +33,34 @@ describe('Sessions Prose Tests', () => {
      * - Start session from client2
      * - Call collection.insertOne(session,...)
      * - Assert that an error was reported because session was not started from client1
+     *
+     * This validation lives in our executeOperation layer so it applies universally.
+     * A find and an insert provide enough coverage, we determined we do not need to enumerate every possible operation.
      */
-    context('when session is started from a different client than operation is being run on', () =>
-      it('the operation throws a MongoRuntimeError', async () => {
-        const db = client1.db();
-        const collection = db.collection('test');
-        const session = client2.startSession();
-        const error = await collection.insertOne({}, { session }).catch(error => error);
-        expect(error).to.be.instanceOf(MongoRuntimeError);
-        expect(error).to.match(/ClientSession must be from the same MongoClient/i);
-      })
+    context(
+      'when session is started from a different client than operation is being run on',
+      () => {
+        it('insertOne operation throws a MongoInvalidArgumentError', async () => {
+          const db = client1.db();
+          const collection = db.collection('test');
+          const session = client2.startSession();
+          const error = await collection.insertOne({}, { session }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+        });
+
+        it('find operation throws a MongoInvalidArgumentError', async () => {
+          const db = client1.db();
+          const collection = db.collection('test');
+          const session = client2.startSession();
+          const error = await collection
+            .find({}, { session })
+            .toArray()
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+        });
+      }
     );
   });
 
