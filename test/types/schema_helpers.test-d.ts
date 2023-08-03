@@ -79,17 +79,10 @@ expectAssignable<SchemaWithIdType | null>(
   await typeTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })
 );
 expectAssignable<SchemaWithIdInterface | null>(
-  (
-    await interfaceTestCollection.findOneAndReplace(
-      { a: 1 },
-      { a: 5 },
-      { includeResultMetadata: true }
-    )
-  ).value
+    await interfaceTestCollection.findOneAndReplace({ a: 1 }, { a: 5 })
 );
 expectAssignable<SchemaWithIdType | null>(
-  (await typeTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 }, { includeResultMetadata: true }))
-    .value
+  await typeTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })
 );
 expectAssignable<SchemaWithIdInterface | null>(
   await interfaceTestCollection.findOneAndUpdate({ a: 1 }, { a: 5 })
