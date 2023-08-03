@@ -445,7 +445,9 @@ export type { CountDocumentsOptions } from './operations/count_documents';
 export type {
   ClusteredCollectionOptions,
   CreateCollectionOptions,
-  TimeSeriesCollectionOptions
+  TimeSeriesCollectionOptions,
+  ValidationAction,
+  ValidationLevel
 } from './operations/create_collection';
 export type { DeleteOptions, DeleteResult, DeleteStatement } from './operations/delete';
 export type { DistinctOptions } from './operations/distinct';

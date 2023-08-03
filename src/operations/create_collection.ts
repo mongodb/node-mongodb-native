@@ -60,6 +60,12 @@ export interface ClusteredCollectionOptions extends Document {
 }
 
 /** @public */
+export type ValidationLevel = 'off' | 'strict' | 'moderate';
+
+/** @public */
+export type ValidationAction = 'error' | 'warn';
+
+/** @public */
 export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Create a capped collection */
   capped?: boolean;
@@ -76,9 +82,9 @@ export interface CreateCollectionOptions extends CommandOperationOptions {
   /** Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation */
   validator?: Document;
   /** Determines how strictly MongoDB applies the validation rules to existing documents during an update */
-  validationLevel?: string;
+  validationLevel?: ValidationLevel;
   /** Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted */
-  validationAction?: string;
+  validationAction?: ValidationAction;
   /** Allows users to specify a default configuration for indexes when creating a collection */
   indexOptionDefaults?: Document;
   /** The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view (i.e., does not include the database name and implies the same database as the view to create) */
