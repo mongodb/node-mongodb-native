@@ -569,7 +569,6 @@ export class AutoEncrypter implements StateMachineExecutable {
     context.id = this._contextCounter++;
 
     const stateMachine = new StateMachine({
-      ...options,
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
