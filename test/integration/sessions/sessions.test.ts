@@ -427,7 +427,10 @@ describe('Sessions Spec', function () {
   context('when using a LegacyMongoClient', () => {
     let legacyClient;
     beforeEach(async function () {
-      legacyClient = new LegacyMongoClient(this.configuration.url());
+      const options = this.configuration.serverApi
+        ? { serverApi: this.configuration.serverApi }
+        : {};
+      legacyClient = new LegacyMongoClient(this.configuration.url(), options);
     });
 
     afterEach(async function () {
