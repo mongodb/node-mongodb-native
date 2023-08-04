@@ -42,10 +42,6 @@ export class RenameOperation extends CommandOperation<Document> {
     await super.executeCommand(server, session, command);
     return new Collection(this.collection.s.db, this.newName, this.collection.s.options);
   }
-
-  protected executeCallback(_server: any, _session: any, _callback: any): void {
-    throw new Error('Method not implemented.');
-  }
 }
 
 defineAspects(RenameOperation, [Aspect.WRITE_OPERATION]);

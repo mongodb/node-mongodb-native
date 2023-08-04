@@ -1,7 +1,8 @@
 'use strict';
 
 const { expect } = require('chai');
-const maybeCallback = require('../../../src/client-side-encryption/common').maybeCallback;
+// eslint-disable-next-line no-restricted-modules
+const { maybeCallback } = require('../../../src/client-side-encryption/common');
 
 describe('maybeCallback()', () => {
   it('should accept two arguments', () => {

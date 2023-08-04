@@ -4,7 +4,7 @@ import { MongoCompatibilityError, MongoServerError } from '../error';
 import { type TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
@@ -92,14 +92,6 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
     }
 
     return super.executeCommand(server, session, command) as TODO_NODE_3286;
-  }
-
-  protected override executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<DeleteResult>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 

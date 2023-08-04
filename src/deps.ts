@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { Document } from './bson';
 import { type Stream } from './cmap/connect';
-import type { ProxyOptions } from './cmap/connection';
 import { MongoMissingDependencyError } from './error';
-import type { MongoClient } from './mongo_client';
 import type { Callback } from './utils';
 
 function makeErrorModule(error: any) {
@@ -257,212 +254,10 @@ try {
   aws4 = require('aws4');
 } catch {} // eslint-disable-line
 
-/** @public */
-export const AutoEncryptionLoggerLevel = Object.freeze({
-  FatalError: 0,
-  Error: 1,
-  Warning: 2,
-  Info: 3,
-  Trace: 4
-} as const);
-
-/** @public */
-export type AutoEncryptionLoggerLevel =
-  (typeof AutoEncryptionLoggerLevel)[keyof typeof AutoEncryptionLoggerLevel];
-
-/** @public */
-export interface AutoEncryptionTlsOptions {
-  /**
-   * Specifies the location of a local .pem file that contains
-   * either the client's TLS/SSL certificate and key.
-   */
-  tlsCertificateKeyFile?: string;
-  /**
-   * Specifies the password to de-crypt the tlsCertificateKeyFile.
-   */
-  tlsCertificateKeyFilePassword?: string;
-  /**
-   * Specifies the location of a local .pem file that contains the
-   * root certificate chain from the Certificate Authority.
-   * This file is used to validate the certificate presented by the
-   * KMS provider.
-   */
-  tlsCAFile?: string;
-}
-
-/** @public */
-export interface AutoEncryptionOptions {
-  /** @internal client for metadata lookups */
-  metadataClient?: MongoClient;
-  /** A `MongoClient` used to fetch keys from a key vault */
-  keyVaultClient?: MongoClient;
-  /** The namespace where keys are stored in the key vault */
-  keyVaultNamespace?: string;
-  /** Configuration options that are used by specific KMS providers during key generation, encryption, and decryption. */
-  kmsProviders?: {
-    /** Configuration options for using 'aws' as your KMS provider */
-    aws?:
-      | {
-          /** The access key used for the AWS KMS provider */
-          accessKeyId: string;
-          /** The secret access key used for the AWS KMS provider */
-          secretAccessKey: string;
-          /**
-           * An optional AWS session token that will be used as the
-           * X-Amz-Security-Token header for AWS requests.
-           */
-          sessionToken?: string;
-        }
-      | Record<string, never>;
-    /** Configuration options for using 'local' as your KMS provider */
-    local?: {
-      /**
-       * The master key used to encrypt/decrypt data keys.
-       * A 96-byte long Buffer or base64 encoded string.
-       */
-      key: Buffer | string;
-    };
-    /** Configuration options for using 'azure' as your KMS provider */
-    azure?:
-      | {
-          /** The tenant ID identifies the organization for the account */
-          tenantId: string;
-          /** The client ID to authenticate a registered application */
-          clientId: string;
-          /** The client secret to authenticate a registered application */
-          clientSecret: string;
-          /**
-           * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-           * This is optional, and only needed if customer is using a non-commercial Azure instance
-           * (e.g. a government or China account, which use different URLs).
-           * Defaults to "login.microsoftonline.com"
-           */
-          identityPlatformEndpoint?: string | undefined;
-        }
-      | {
-          /**
-           * If present, an access token to authenticate with Azure.
-           */
-          accessToken: string;
-        }
-      | Record<string, never>;
-    /** Configuration options for using 'gcp' as your KMS provider */
-    gcp?:
-      | {
-          /** The service account email to authenticate */
-          email: string;
-          /** A PKCS#8 encrypted key. This can either be a base64 string or a binary representation */
-          privateKey: string | Buffer;
-          /**
-           * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-           * Defaults to "oauth2.googleapis.com"
-           */
-          endpoint?: string | undefined;
-        }
-      | {
-          /**
-           * If present, an access token to authenticate with GCP.
-           */
-          accessToken: string;
-        }
-      | Record<string, never>;
-    /**
-     * Configuration options for using 'kmip' as your KMS provider
-     */
-    kmip?: {
-      /**
-       * The output endpoint string.
-       * The endpoint consists of a hostname and port separated by a colon.
-       * E.g. "example.com:123". A port is always present.
-       */
-      endpoint?: string;
-    };
-  };
-  /**
-   * A map of namespaces to a local JSON schema for encryption
-   *
-   * **NOTE**: Supplying options.schemaMap provides more security than relying on JSON Schemas obtained from the server.
-   * It protects against a malicious server advertising a false JSON Schema, which could trick the client into sending decrypted data that should be encrypted.
-   * Schemas supplied in the schemaMap only apply to configuring automatic encryption for Client-Side Field Level Encryption.
-   * Other validation rules in the JSON schema will not be enforced by the driver and will result in an error.
-   */
-  schemaMap?: Document;
-  /** Supply a schema for the encrypted fields in the document  */
-  encryptedFieldsMap?: Document;
-  /** Allows the user to bypass auto encryption, maintaining implicit decryption */
-  bypassAutoEncryption?: boolean;
-  /** Allows users to bypass query analysis */
-  bypassQueryAnalysis?: boolean;
-  options?: {
-    /** An optional hook to catch logging messages from the underlying encryption engine */
-    logger?: (level: AutoEncryptionLoggerLevel, message: string) => void;
-  };
-  extraOptions?: {
-    /**
-     * A local process the driver communicates with to determine how to encrypt values in a command.
-     * Defaults to "mongodb://%2Fvar%2Fmongocryptd.sock" if domain sockets are available or "mongodb://localhost:27020" otherwise
-     */
-    mongocryptdURI?: string;
-    /** If true, autoEncryption will not attempt to spawn a mongocryptd before connecting  */
-    mongocryptdBypassSpawn?: boolean;
-    /** The path to the mongocryptd executable on the system */
-    mongocryptdSpawnPath?: string;
-    /** Command line arguments to use when auto-spawning a mongocryptd */
-    mongocryptdSpawnArgs?: string[];
-    /**
-     * Full path to a MongoDB Crypt shared library to be used (instead of mongocryptd).
-     *
-     * This needs to be the path to the file itself, not a directory.
-     * It can be an absolute or relative path. If the path is relative and
-     * its first component is `$ORIGIN`, it will be replaced by the directory
-     * containing the mongodb-client-encryption native addon file. Otherwise,
-     * the path will be interpreted relative to the current working directory.
-     *
-     * Currently, loading different MongoDB Crypt shared library files from different
-     * MongoClients in the same process is not supported.
-     *
-     * If this option is provided and no MongoDB Crypt shared library could be loaded
-     * from the specified location, creating the MongoClient will fail.
-     *
-     * If this option is not provided and `cryptSharedLibRequired` is not specified,
-     * the AutoEncrypter will attempt to spawn and/or use mongocryptd according
-     * to the mongocryptd-specific `extraOptions` options.
-     *
-     * Specifying a path prevents mongocryptd from being used as a fallback.
-     *
-     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
-     */
-    cryptSharedLibPath?: string;
-    /**
-     * If specified, never use mongocryptd and instead fail when the MongoDB Crypt
-     * shared library could not be loaded.
-     *
-     * This is always true when `cryptSharedLibPath` is specified.
-     *
-     * Requires the MongoDB Crypt shared library, available in MongoDB 6.0 or higher.
-     */
-    cryptSharedLibRequired?: boolean;
-    /**
-     * Search paths for a MongoDB Crypt shared library to be used (instead of mongocryptd)
-     * Only for driver testing!
-     * @internal
-     */
-    cryptSharedLibSearchPaths?: string[];
-  };
-  proxyOptions?: ProxyOptions;
-  /** The TLS options to use connecting to the KMS provider */
-  tlsOptions?: {
-    aws?: AutoEncryptionTlsOptions;
-    local?: AutoEncryptionTlsOptions;
-    azure?: AutoEncryptionTlsOptions;
-    gcp?: AutoEncryptionTlsOptions;
-    kmip?: AutoEncryptionTlsOptions;
-  };
-}
-
-type MongoCrypt = { MongoCrypt: any };
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
-export function getMongoDBClientEncryption(): MongoCrypt | null {
+export function getMongoDBClientEncryption():
+  | typeof import('mongodb-client-encryption')
+  | { kModuleError: MongoMissingDependencyError } {
   let mongodbClientEncryption = null;
 
   try {
@@ -470,11 +265,13 @@ export function getMongoDBClientEncryption(): MongoCrypt | null {
     // Cannot be moved to helper utility function, bundlers search and replace the actual require call
     // in a way that makes this line throw at bundle time, not runtime, catching here will make bundling succeed
     mongodbClientEncryption = require('mongodb-client-encryption');
-  } catch {
-    // ignore
+  } catch (cause) {
+    const kModuleError = new MongoMissingDependencyError(
+      'Optional module `mongodb-client-encryption` not found. Please install it to use auto encryption or ClientEncryption.',
+      { cause }
+    );
+    return { kModuleError };
   }
 
   return mongodbClientEncryption;
 }
-
-export type MongodbClientEncryption = ReturnType<typeof getMongoDBClientEncryption>;
