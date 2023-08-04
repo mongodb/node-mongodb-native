@@ -36,6 +36,7 @@ export {
   Timestamp
 } from './bson';
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
@@ -207,7 +208,6 @@ export type { AutoEncryptionExtraOptions } from './client-side-encryption/auto_e
 export type {
   AWSEncryptionKeyOptions,
   AzureEncryptionKeyOptions,
-  ClientEncryption,
   ClientEncryptionCreateDataKeyProviderOptions,
   ClientEncryptionEncryptOptions,
   ClientEncryptionOptions,
