@@ -1223,9 +1223,17 @@ export const OPTIONS = {
   pfx: { type: 'any' },
   secureProtocol: { type: 'any' },
   index: { type: 'any' },
-  // Legacy Options, these are unused but left here to avoid errors with CSFLE lib
-  useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
-  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor,
+  // Legacy options from v3 era
+  useNewUrlParser: {
+    type: 'boolean',
+    deprecated:
+      'useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
+  } as OptionDescriptor,
+  useUnifiedTopology: {
+    type: 'boolean',
+    deprecated:
+      'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
+  } as OptionDescriptor,
   // MongoLogger
   // TODO(NODE-4849): Tighten the type of mongodbLogPath
   mongodbLogPath: { type: 'any' }
