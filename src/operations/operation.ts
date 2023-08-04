@@ -1,10 +1,8 @@
-import { promisify } from 'util';
-
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
   READ_OPERATION: Symbol('READ_OPERATION'),
@@ -102,25 +100,6 @@ export abstract class AbstractOperation<TResult = any> {
   get canRetryWrite(): boolean {
     return true;
   }
-}
-
-/** @internal */
-export abstract class AbstractCallbackOperation<TResult = any> extends AbstractOperation {
-  constructor(options: OperationOptions = {}) {
-    super(options);
-  }
-
-  execute(server: Server, session: ClientSession | undefined): Promise<TResult> {
-    return promisify((callback: (e: Error, r: TResult) => void) => {
-      this.executeCallback(server, session, callback as any);
-    })();
-  }
-
-  protected abstract executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<TResult>
-  ): void;
 }
 
 export function defineAspects(

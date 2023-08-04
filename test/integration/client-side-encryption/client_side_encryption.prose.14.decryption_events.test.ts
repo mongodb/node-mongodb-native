@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { ClientEncryption } from '../../../src/client-side-encryption/clientEncryption';
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
 import {
   Binary,
   BSON,

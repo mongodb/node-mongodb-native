@@ -10,7 +10,7 @@ const { expect } = require('chai');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 // eslint-disable-next-line no-restricted-modules
-const { ClientEncryption } = require('../../../src/client-side-encryption/clientEncryption');
+const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {

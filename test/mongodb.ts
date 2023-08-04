@@ -164,7 +164,6 @@ export * from '../src/operations/delete';
 export * from '../src/operations/distinct';
 export * from '../src/operations/drop';
 export * from '../src/operations/estimated_document_count';
-export * from '../src/operations/eval';
 export * from '../src/operations/execute_operation';
 export * from '../src/operations/find';
 export * from '../src/operations/find_and_modify';

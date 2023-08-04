@@ -1,6 +1,6 @@
-import { AutoEncrypter } from './client-side-encryption/autoEncrypter';
+import { AutoEncrypter, type AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import { MONGO_CLIENT_EVENTS } from './constants';
-import { type AutoEncryptionOptions, getMongoDBClientEncryption } from './deps';
+import { getMongoDBClientEncryption } from './deps';
 import { MongoInvalidArgumentError, MongoMissingDependencyError } from './error';
 import { MongoClient, type MongoClientOptions } from './mongo_client';
 import { type Callback } from './utils';
@@ -118,7 +118,7 @@ export class Encrypter {
 
   static checkForMongoCrypt(): void {
     const mongodbClientEncryption = getMongoDBClientEncryption();
-    if (mongodbClientEncryption == null) {
+    if ('kModuleError' in mongodbClientEncryption) {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project'
