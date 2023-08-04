@@ -597,7 +597,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     return client.connect();
   }
 
-  /** Starts a new session on the server */
+  /**
+   * Creates a new ClientSession. When using the returned session in an operation
+   * a corresponding ServerSession will be created.
+   *
+   * @remarks
+   * A ClientSession instance may only be passed to operations being performed on the same
+   * MongoClient it was started from.
+   */
   startSession(options?: ClientSessionOptions): ClientSession {
     const session = new ClientSession(
       this,
