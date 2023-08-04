@@ -638,7 +638,7 @@ describe('CRUD API', function () {
       it('returns the modify result', async function () {
         const result = await collection.findOneAndDelete(
           { a: 1 },
-          { projection: { b: 1 }, sort: { a: 1 } }
+          { projection: { b: 1 }, sort: { a: 1 }, includeResultMetadata: true }
         );
         expect(result?.lastErrorObject.n).to.equal(1);
         expect(result?.value.b).to.equal(1);
@@ -685,7 +685,8 @@ describe('CRUD API', function () {
             projection: { b: 1, c: 1 },
             sort: { a: 1 },
             returnDocument: ReturnDocument.AFTER,
-            upsert: true
+            upsert: true,
+            includeResultMetadata: true
           }
         );
         expect(result?.lastErrorObject.n).to.equal(1);
@@ -742,7 +743,8 @@ describe('CRUD API', function () {
             projection: { b: 1, d: 1 },
             sort: { a: 1 },
             returnDocument: ReturnDocument.AFTER,
-            upsert: true
+            upsert: true,
+            includeResultMetadata: true
           }
         );
         expect(result?.lastErrorObject.n).to.equal(1);

@@ -9,7 +9,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndDelete', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -25,12 +25,12 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       it('returns the raw result', async function () {
-        const result = await collection.findOneAndDelete({ a: 1 });
+        const result = await collection.findOneAndDelete({ a: 1 }, { includeResultMetadata: true });
         expect(result.value.b).to.equal(1);
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -47,20 +47,14 @@ describe('Collection (#findOneAnd...)', function () {
 
       context('when there is a match', function () {
         it('returns the deleted document', async function () {
-          const result = await collection.findOneAndDelete(
-            { a: 1 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndDelete({ a: 1 });
           expect(result.b).to.equal(1);
         });
       });
 
       context('when there is no match', function () {
         it('returns null', async function () {
-          const result = await collection.findOneAndDelete(
-            { a: 2 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndDelete({ a: 2 });
           expect(result).to.equal(null);
         });
       });
@@ -155,7 +149,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndUpdate', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -171,12 +165,16 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       it('returns the raw result', async function () {
-        const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
+        const result = await collection.findOneAndUpdate(
+          { a: 1 },
+          { $set: { a: 1 } },
+          { includeResultMetadata: true }
+        );
         expect(result.value.b).to.equal(1);
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -193,22 +191,14 @@ describe('Collection (#findOneAnd...)', function () {
 
       context('when there is a match', function () {
         it('returns the modified document', async function () {
-          const result = await collection.findOneAndUpdate(
-            { a: 1 },
-            { $set: { a: 1 } },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
           expect(result.b).to.equal(1);
         });
       });
 
       context('when there is no match', function () {
         it('returns null', async function () {
-          const result = await collection.findOneAndUpdate(
-            { a: 2 },
-            { $set: { a: 1 } },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndUpdate({ a: 2 }, { $set: { a: 1 } });
           expect(result).to.equal(null);
         });
       });
@@ -267,7 +257,11 @@ describe('Collection (#findOneAnd...)', function () {
         });
 
         it('returns the raw result', async function () {
-          const result = await collection.findOneAndUpdate({ a: 1 }, { $set: { a: 1 } });
+          const result = await collection.findOneAndUpdate(
+            { a: 1 },
+            { $set: { a: 1 } },
+            { includeResultMetadata: true }
+          );
           expect(result.value.b).to.equal(1);
         });
       }
@@ -333,7 +327,7 @@ describe('Collection (#findOneAnd...)', function () {
   });
 
   describe('#findOneAndReplace', function () {
-    context('when no options are passed', function () {
+    context('when passing includeResultMetadata: true', function () {
       let client;
       let collection;
 
@@ -349,12 +343,16 @@ describe('Collection (#findOneAnd...)', function () {
       });
 
       it('returns the raw result', async function () {
-        const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
+        const result = await collection.findOneAndReplace(
+          { a: 1 },
+          { a: 1 },
+          { includeResultMetadata: true }
+        );
         expect(result.value.b).to.equal(1);
       });
     });
 
-    context('when passing includeResultMetadata: false', function () {
+    context('when no options are passed', function () {
       let client;
       let collection;
 
@@ -371,22 +369,14 @@ describe('Collection (#findOneAnd...)', function () {
 
       context('when there is a match', function () {
         it('returns the replaced document', async function () {
-          const result = await collection.findOneAndReplace(
-            { a: 1 },
-            { a: 1 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndReplace({ a: 1 }, { a: 1 });
           expect(result.b).to.equal(1);
         });
       });
 
       context('when there is no match', function () {
         it('returns null', async function () {
-          const result = await collection.findOneAndReplace(
-            { a: 2 },
-            { a: 1 },
-            { includeResultMetadata: false }
-          );
+          const result = await collection.findOneAndReplace({ a: 2 }, { a: 1 });
           expect(result).to.equal(null);
         });
       });

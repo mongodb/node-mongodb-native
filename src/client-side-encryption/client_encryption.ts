@@ -444,7 +444,7 @@ export class ClientEncryption implements StateMachineExecutable {
       this._keyVaultNamespace
     );
 
-    const { value } = await this._keyVaultClient
+    const value = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
       .findOneAndUpdate(
@@ -506,7 +506,7 @@ export class ClientEncryption implements StateMachineExecutable {
         }
       }
     ];
-    const { value } = await this._keyVaultClient
+    const value = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
       .findOneAndUpdate({ _id }, pipeline, {

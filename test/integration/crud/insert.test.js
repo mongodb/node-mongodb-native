@@ -883,7 +883,8 @@ describe('crud - insert', function () {
                     {
                       returnDocument: ReturnDocument.AFTER,
                       safe: true,
-                      serializeFunctions: true
+                      serializeFunctions: true,
+                      includeResultMetadata: true
                     },
                     function (err, result) {
                       test.ok(result.value.f._bsontype === 'Code');

@@ -23,42 +23,30 @@ describe('Find', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        expect(err).to.not.exist;
-
-        var db = client.db(configuration.db);
-        const collection = db.collection('test_find_simple');
-        const docs = [{ a: 2 }, { b: 3 }];
-
-        // Insert some test documents
-        collection.insert(docs, configuration.writeConcernMax(), err => {
-          expect(err).to.not.exist;
-
-          // Ensure correct insertion testing via the cursor and the count function
-          collection.find().toArray(function (err, documents) {
-            expect(err).to.not.exist;
-            test.equal(2, documents.length);
-
-            collection.count(function (err, count) {
-              expect(err).to.not.exist;
-              test.equal(2, count);
-
-              // Fetch values by selection
-              collection.find({ a: docs[0].a }).toArray(function (err, documents) {
-                expect(err).to.not.exist;
-
-                test.equal(1, documents.length);
-                test.equal(docs[0].a, documents[0].a);
-                // Let's close the db
-                client.close(done);
-              });
-            });
-          });
-        });
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+
+      const db = client.db(configuration.db);
+      await db.dropCollection('test_find_simple').catch(() => null);
+      const collection = db.collection('test_find_simple');
+      const docs = [{ a: 2 }, { b: 3 }];
+
+      await collection.insert(docs, configuration.writeConcernMax());
+
+      const insertedDocs = await collection.find().toArray();
+      expect(insertedDocs).to.have.length(2);
+
+      const docCount = await collection.count();
+      expect(docCount).to.equal(2);
+
+      const valuesBySelection = await collection.find({ a: docs[0].a }).toArray();
+      expect(valuesBySelection).to.have.length(1);
+      expect(valuesBySelection[0].a).to.deep.equal(docs[0].a);
     }
   });
 
@@ -114,98 +102,61 @@ describe('Find', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('test_find_advanced');
-        const docs = [{ a: 1 }, { a: 2 }, { b: 3 }];
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => await client.close());
 
-        // Insert some test documents
-        collection.insert(docs, configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
+      //await client.db(configuration.db).dropDatabase(configuration.db);
+      const db = client.db(configuration.db);
+      await db.dropCollection('test_find_advanced').catch(() => null);
+      const collection = db.collection('test_find_advanced');
+      const docs = [{ a: 1 }, { a: 2 }, { b: 3 }];
 
-          // Locate by less than
-          collection.find({ a: { $lt: 10 } }).toArray(function (err, documents) {
-            test.equal(2, documents.length);
-            // Check that the correct documents are returned
-            var results = [];
-            // Check that we have all the results we want
-            documents.forEach(function (doc) {
-              if (doc.a === 1 || doc.a === 2) results.push(1);
-            });
-            test.equal(2, results.length);
+      await collection.insert(docs, configuration.writeConcernMax());
 
-            // Locate by greater than
-            collection.find({ a: { $gt: 1 } }).toArray(function (err, documents) {
-              test.equal(1, documents.length);
-              test.equal(2, documents[0].a);
+      const aLT10Docs = await collection.find({ a: { $lt: 10 } }).toArray();
+      expect(aLT10Docs).to.have.length(2);
+      expect(aLT10Docs.filter(doc => doc.a === 1 || doc.a === 2)).to.have.length(2);
 
-              // Locate by less than or equal to
-              collection.find({ a: { $lte: 1 } }).toArray(function (err, documents) {
-                test.equal(1, documents.length);
-                test.equal(1, documents[0].a);
+      const aGT1 = await collection.find({ a: { $gt: 1 } }).toArray();
+      expect(aGT1).to.have.length(1);
+      expect(aGT1[0].a).to.equal(2);
 
-                // Locate by greater than or equal to
-                collection.find({ a: { $gte: 1 } }).toArray(function (err, documents) {
-                  test.equal(2, documents.length);
-                  // Check that the correct documents are returned
-                  var results = [];
-                  // Check that we have all the results we want
-                  documents.forEach(function (doc) {
-                    if (doc.a === 1 || doc.a === 2) results.push(1);
-                  });
-                  test.equal(2, results.length);
+      const aLTE1 = await collection.find({ a: { $lte: 1 } }).toArray();
+      expect(aLTE1).to.have.length(1);
+      expect(aLTE1[0].a).to.equal(1);
 
-                  // Locate by between
-                  collection.find({ a: { $gt: 1, $lt: 3 } }).toArray(function (err, documents) {
-                    test.equal(1, documents.length);
-                    test.equal(2, documents[0].a);
+      const aGTE1 = await collection.find({ a: { $gte: 1 } }).toArray();
+      expect(aGTE1).to.have.length(2);
 
-                    // Locate in clause
-                    collection.find({ a: { $in: [1, 2] } }).toArray(function (err, documents) {
-                      test.equal(2, documents.length);
-                      // Check that the correct documents are returned
-                      var results = [];
-                      // Check that we have all the results we want
-                      documents.forEach(function (doc) {
-                        if (doc.a === 1 || doc.a === 2) results.push(1);
-                      });
-                      test.equal(2, results.length);
+      expect(aGTE1.filter(doc => doc.a === 1 || doc.a === 2)).to.have.length(2);
 
-                      // Locate in _id clause
-                      collection
-                        .find({ _id: { $in: [docs[0]['_id'], docs[1]['_id']] } })
-                        .toArray(function (err, documents) {
-                          test.equal(2, documents.length);
-                          // Check that the correct documents are returned
-                          var results = [];
-                          // Check that we have all the results we want
-                          documents.forEach(function (doc) {
-                            if (doc.a === 1 || doc.a === 2) results.push(1);
-                          });
-                          test.equal(2, results.length);
-                          // Let's close the db
-                          client.close(done);
-                        });
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+      const aGT1LT3 = await collection.find({ a: { $gt: 1, $lt: 3 } }).toArray();
+      expect(aGT1LT3).to.have.length(1);
+      expect(aGT1LT3[0].a).to.equal(2);
+
+      const aIN = await collection.find({ a: { $in: [1, 2] } }).toArray();
+      expect(aIN).to.have.length(2);
+
+      expect(aIN.filter(doc => doc.a === 1 || doc.a === 2)).to.have.length(2);
+
+      const byID = await collection
+        .find({ _id: { $in: [docs[0]['_id'], docs[1]['_id']] } })
+        .toArray();
+      expect(byID).to.have.length(2);
+      expect(byID.filter(doc => doc.a === 1 || doc.a === 2)).to.have.length(2);
     }
   });
-
   /**
    * Test sorting of results
    */
   it('shouldCorrectlyPerformFindWithSort', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     test: function (done) {
@@ -784,35 +735,30 @@ describe('Find', function () {
   /**
    * Test findOneAndUpdate a document with fields
    */
-  it('shouldCorrectlyfindOneAndUpdateDocumentAndReturnSelectedFieldsOnly', {
+  it('returns selected fields only for findOneAndUpdate', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('test_find_and_modify_a_document_2', function (err, collection) {
-          // Test return new document on change
-          collection.insert({ a: 1, b: 2 }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            // Let's modify the document in place
-            collection.findOneAndUpdate(
-              { a: 1 },
-              { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER, projection: { a: 1 } },
-              function (err, updated_doc) {
-                expect(Object.keys(updated_doc.value).length).to.equal(2);
-                expect(updated_doc.value.a).to.equal(1);
-                client.close(done);
-              }
-            );
-          });
-        });
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+      const db = client.db(configuration.db);
+      const coll = db.collection('test_find_and_modify_a_document_2');
+      await coll.insert({ a: 1, b: 2 }, configuration.writeConcernMax());
+
+      const updatedDoc = await coll.findOneAndUpdate(
+        { a: 1 },
+        { $set: { b: 3 } },
+        { returnDocument: ReturnDocument.AFTER, projection: { a: 1 } }
+      );
+
+      expect(Object.keys(updatedDoc).length).to.equal(2);
+      expect(updatedDoc.a).to.equal(1);
     }
   });
 
@@ -866,28 +812,24 @@ describe('Find', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection(
-          'AttemptTofindOneAndUpdateNonExistingDocument',
-          function (err, collection) {
-            // Let's modify the document in place
-            collection.findOneAndUpdate(
-              { name: 'test1' },
-              { $set: { name: 'test2' } },
-              {},
-              function (err, updated_doc) {
-                expect(updated_doc.value).to.not.exist;
-                test.ok(err == null || err.errmsg.match('No matching object found'));
-                client.close(done);
-              }
-            );
-          }
-        );
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+
+      const db = client.db(configuration.db);
+      const coll = db.collection('AttemptTofindOneAndUpdateNonExistingDocument');
+
+      const updatedDoc = await coll.findOneAndUpdate(
+        { name: 'test1' },
+        { $set: { name: 'test2' } },
+        {}
+      );
+
+      expect(updatedDoc).to.be.null;
     }
   });
 
@@ -999,7 +941,7 @@ describe('Find', function () {
               collection.findOneAndUpdate(
                 { a: 2 },
                 { $set: { b: 3 } },
-                { returnDocument: ReturnDocument.AFTER },
+                { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
                 function (err, result) {
                   expect(result.value.a).to.equal(2);
                   expect(result.value.b).to.equal(3);
@@ -1073,39 +1015,34 @@ describe('Find', function () {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_return_new_modified_document',
-          function (err, collection) {
-            var id = new ObjectId();
-            var doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
-
-            collection.insert(doc, configuration.writeConcernMax(), function (err) {
-              expect(err).to.not.exist;
-
-              // Find and modify returning the new object
-              collection.findOneAndUpdate(
-                { _id: id },
-                { $set: { 'c.c': 100 } },
-                { returnDocument: ReturnDocument.AFTER },
-                function (err, item) {
-                  expect(item.value._id.toString()).to.equal(doc._id.toString());
-                  expect(item.value.a).to.equal(doc.a);
-                  expect(item.value.b).to.equal(doc.b);
-                  expect(item.value.c.a).to.equal(doc.c.a);
-                  expect(item.value.c.b).to.equal(doc.c.b);
-                  expect(item.value.c.c).to.equal(100);
-                  client.close(done);
-                }
-              );
-            });
-          }
-        );
+    test: async function () {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      await client.connect();
+      this.defer(async () => {
+        await client.close();
       });
+
+      const db = client.db(configuration.db);
+      const col = await db.collection('Should_correctly_return_new_modified_document');
+
+      const id = new ObjectId();
+      const doc = { _id: id, a: 1, b: 1, c: { a: 1, b: 1 } };
+
+      await col.insert(doc, configuration.writeConcernMax());
+
+      const item = await col.findOneAndUpdate(
+        { _id: id },
+        { $set: { 'c.c': 100 } },
+        { returnDocument: ReturnDocument.AFTER }
+      );
+
+      expect(item._id.toString()).to.equal(doc._id.toString());
+      expect(item.a).to.equal(doc.a);
+      expect(item.b).to.equal(doc.b);
+      expect(item.c.a).to.equal(doc.c.a);
+      expect(item.c.b).to.equal(doc.c.b);
+      expect(item.c.c).to.equal(100);
     }
   });
 
@@ -1285,7 +1222,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
+              { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
               function (err, updated_doc) {
                 expect(err).to.not.exist;
                 expect(updated_doc.value).to.not.exist;
@@ -1346,7 +1283,7 @@ describe('Find', function () {
                   'transactions.id': { $ne: transaction.transactionId }
                 },
                 { $push: { transactions: transaction } },
-                { returnDocument: ReturnDocument.AFTER, safe: true },
+                { returnDocument: ReturnDocument.AFTER, safe: true, includeResultMetadata: true },
                 function (err) {
                   expect(err).to.not.exist;
                   client.close(done);
@@ -1432,7 +1369,11 @@ describe('Find', function () {
           function (err, collection) {
             var q = { x: 1 };
             var set = { y: 2, _id: new ObjectId() };
-            var opts = { returnDocument: ReturnDocument.AFTER, upsert: true };
+            var opts = {
+              returnDocument: ReturnDocument.AFTER,
+              upsert: true,
+              includeResultMetadata: true
+            };
             // Original doc
             var doc = { _id: new ObjectId(), x: 1 };
 
@@ -1584,7 +1525,7 @@ describe('Find', function () {
                     collection.findOneAndUpdate(
                       { _id: id },
                       { $set: { login: 'user1' } },
-                      {},
+                      { includeResultMetadata: true },
                       function (err) {
                         test.ok(err !== null);
                         p_client.close(done);
@@ -2158,7 +2099,7 @@ describe('Find', function () {
             collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b: 3 } },
-              { returnDocument: ReturnDocument.AFTER },
+              { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true },
               function (err, updated_doc) {
                 expect(updated_doc.value.a).to.equal(1);
                 expect(updated_doc.value.b).to.equal(3);

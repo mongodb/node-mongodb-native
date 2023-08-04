@@ -936,7 +936,7 @@ describe('Operations', function () {
             return collection.findOneAndUpdate(
               { a: 1 },
               { $set: { b1: 1 } },
-              { returnDocument: ReturnDocument.AFTER }
+              { returnDocument: ReturnDocument.AFTER, includeResultMetadata: true }
             );
           })
           .then(function (doc) {
@@ -945,7 +945,11 @@ describe('Operations', function () {
 
             // Simple findAndModify command returning the new document and
             // removing it at the same time
-            return collection.findOneAndUpdate({ b: 1 }, { $set: { b: 2 } }, { remove: true });
+            return collection.findOneAndUpdate(
+              { b: 1 },
+              { $set: { b: 2 } },
+              { remove: true, includeResultMetadata: true }
+            );
           })
           .then(function (doc) {
             expect(doc).to.exist;
@@ -961,7 +965,12 @@ describe('Operations', function () {
             return collection.findOneAndUpdate(
               { d: 1 },
               { $set: { d: 1, f: 1 } },
-              { returnDocument: ReturnDocument.AFTER, upsert: true, writeConcern: { w: 1 } }
+              {
+                returnDocument: ReturnDocument.AFTER,
+                upsert: true,
+                writeConcern: { w: 1 },
+                includeResultMetadata: true
+              }
             );
           })
           .then(function (doc) {
@@ -1011,7 +1020,12 @@ describe('Operations', function () {
 
             // Simple findAndModify command returning the old document and
             // removing it at the same time
-            return collection.findOneAndDelete({ b: 1 }, [['b', 1]]);
+            return collection.findOneAndDelete(
+              { b: 1 },
+              {
+                includeResultMetadata: true
+              }
+            );
           })
           .then(function (doc) {
             expect(doc.value.b).to.equal(1);
@@ -1647,121 +1661,84 @@ describe('Operations', function () {
       requires: { topology: ['single'] }
     },
 
-    test: function () {
+    test: async function () {
       const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), {
+      const client: MongoClient = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1
       });
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+      // LINE client.connect().then(() => {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE done();
+      // BEGIN
+      // Open a couple of collections
 
-      /* eslint-disable */
+      await client.connect();
+      this.defer(async () => await client.close());
+      const db = client.db(configuration.db);
+      /* es-lint-disable */
+      let [collection1] = await Promise.all([
+        db.createCollection('test_rename_collection_with_promise'),
+        db.createCollection('test_rename_collection2_with_promise')
+      ]);
 
-      return client.connect().then(function (client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE client.connect().then(() => {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-        // Open a couple of collections
+      // Attempt to rename a collection to a number
+      // @ts-expect-error need to test that it will fail on number inputs
+      let err = await collection1.rename(5).catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', 'Collection name must be a String');
 
-        var collection1, collection2;
+      // Attempt to rename a collection to an empty string
+      err = await collection1.rename('').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', 'Collection names cannot be empty');
 
-        return Promise.all([
-          db.createCollection('test_rename_collection_with_promise'),
-          db.createCollection('test_rename_collection2_with_promise')
-        ])
-          .then(function (collections) {
-            collection1 = collections[0];
-            collection2 = collections[1];
+      // Attemp to rename a collection to an illegal name including the character $
+      err = await collection1.rename('te$t').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', "Collection names must not contain '$'");
 
-            expect(collection2).to.exist;
+      // Attempt to rename a collection to an illegal name starting with the character .
+      err = await collection1.rename('.test').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', "Collection names must not start or end with '.'");
+      // Attempt to rename a collection to an illegal name ending with the character .
+      err = await collection1.rename('test.').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', "Collection names must not start or end with '.'");
 
-            // Attemp to rename a collection to a number
-            try {
-              collection1.rename(5, function (err, collection) {});
-            } catch (err) {
-              expect(err instanceof Error).to.exist;
-              expect(err.message).to.equal('Collection name must be a String');
-            }
+      // Attempt to rename a collection to an illegal name with an empty middle name
+      err = await collection1.rename('tes..t').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', 'Collection names cannot be empty');
 
-            // Attemp to rename a collection to an empty string
-            try {
-              collection1.rename('', function (err, collection) {});
-            } catch (err) {
-              expect(err instanceof Error).to.exist;
-              expect(err.message).to.equal('Collection names cannot be empty');
-            }
+      // Attempt to rename a collection to an illegal name with an empty middle name
+      err = await collection1.rename('tes..t').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err).to.have.property('message', 'Collection names cannot be empty');
 
-            // Attemp to rename a collection to an illegal name including the character $
-            try {
-              collection1.rename('te$t', function (err, collection) {});
-            } catch (err) {
-              expect(err instanceof Error).to.exist;
-              expect(err.message).to.equal("Collection names must not contain '$'");
-            }
+      // Insert a couple of documents
+      await collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax());
 
-            // Attemp to rename a collection to an illegal name starting with the character .
-            try {
-              collection1.rename('.test', function (err, collection) {});
-            } catch (err) {
-              expect(err instanceof Error).to.exist;
-              expect(err.message).to.equal("Collection names must not start or end with '.'");
-            }
+      // Attempt to rename the first collection to the second one, this will fail
+      err = await collection1.rename('test_rename_collection2_with_promise').catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+      expect(err.message).to.have.length.gt(0);
 
-            // Attemp to rename a collection to an illegal name ending with the character .
-            try {
-              collection1.rename('test.', function (err, collection) {});
-            } catch (err) {
-              expect(err instanceof Error).to.exist;
-              expect(err.message).to.equal("Collection names must not start or end with '.'");
-            }
+      // Attempt to rename the first collection to a name that does not exist
+      // this will be successful
+      collection1 = await collection1.rename('test_rename_collection3_with_promise');
 
-            // Attemp to rename a collection to an illegal name with an empty middle name
-            try {
-              collection1.rename('tes..t', function (err, collection) {});
-            } catch (err) {
-              expect(err.message).to.equal('Collection names cannot be empty');
-            }
+      // Ensure that the collection is pointing to the new one
+      expect(collection1.collectionName).to.equal('test_rename_collection3_with_promise');
 
-            // Insert a couple of documents
-            return collection1.insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax());
-          })
-          .then(function (docs) {
-            expect(docs).to.exist;
+      expect(await collection1.count()).equals(2);
 
-            // Attemp to rename the first collection to the second one, this will fail
-            return collection1.rename('test_rename_collection2_with_promise');
-          })
-          .catch(function (err) {
-            expect(err instanceof Error).to.exist;
-            expect(err.message.length > 0).to.exist;
-
-            // Attemp to rename the first collection to a name that does not exist
-            // this will be successful
-            return collection1.rename('test_rename_collection3_with_promise');
-          })
-          .then(function (collection2) {
-            expect(collection2.collectionName).to.equal('test_rename_collection3_with_promise');
-
-            // Ensure that the collection is pointing to the new one
-            return collection2.count();
-          })
-          .then(function (count) {
-            expect(count).to.equal(2);
-          })
-          .then(
-            () => client.close(),
-            e => {
-              client.close();
-              throw e;
-            }
-          );
-      });
+      /* es-lint-enable */
       // END
-      /* eslint-enable */
     }
   });
 
@@ -4000,7 +3977,10 @@ describe('Operations', function () {
           .insertMany([{ a: 1, b: 1 }], { writeConcern: { w: 1 } })
           .then(function (r) {
             expect(r).property('insertedCount').to.equal(1);
-            return col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } });
+            return col.findOneAndDelete(
+              { a: 1 },
+              { projection: { b: 1 }, sort: { a: 1 }, includeResultMetadata: true }
+            );
           })
           .then(function (r) {
             expect(r.lastErrorObject.n).to.equal(1);
@@ -4051,7 +4031,8 @@ describe('Operations', function () {
                 projection: { b: 1, c: 1 },
                 sort: { a: 1 },
                 returnDocument: ReturnDocument.AFTER,
-                upsert: true
+                upsert: true,
+                includeResultMetadata: true
               }
             )
             .then(function (r) {
@@ -4106,7 +4087,8 @@ describe('Operations', function () {
                 projection: { b: 1, d: 1 },
                 sort: { a: 1 },
                 returnDocument: ReturnDocument.AFTER,
-                upsert: true
+                upsert: true,
+                includeResultMetadata: true
               }
             );
           })

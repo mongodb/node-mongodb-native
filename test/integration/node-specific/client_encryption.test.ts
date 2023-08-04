@@ -141,7 +141,10 @@ describe('ClientEncryption integration tests', function () {
 
         // Remove and re-insert with a fixed UUID to guarantee consistent output
         const doc = (
-          await keyVaultColl.findOneAndDelete({ _id: dataKey }, { writeConcern: { w: 'majority' } })
+          await keyVaultColl.findOneAndDelete(
+            { _id: dataKey },
+            { writeConcern: { w: 'majority' }, includeResultMetadata: true }
+          )
         ).value;
         doc._id = new Binary(Buffer.alloc(16), 4);
         await keyVaultColl.insertOne(doc, { writeConcern: { w: 'majority' } });
