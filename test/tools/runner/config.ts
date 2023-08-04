@@ -7,6 +7,7 @@ import {
   type AuthMechanism,
   HostAddress,
   MongoClient,
+  type ServerApi,
   TopologyType,
   type WriteConcernSettings
 } from '../../mongodb';
@@ -71,7 +72,7 @@ export class TestConfiguration {
     auth?: { username: string; password: string; authSource?: string };
     proxyURIParams?: ProxyParams;
   };
-  serverApi: string;
+  serverApi: ServerApi;
 
   constructor(uri: string, context: Record<string, any>) {
     const url = new ConnectionString(uri);

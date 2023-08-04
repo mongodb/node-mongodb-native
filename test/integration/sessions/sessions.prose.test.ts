@@ -6,11 +6,64 @@ import {
   type Collection,
   type CommandStartedEvent,
   MongoClient,
-  MongoDriverError
+  MongoDriverError,
+  MongoInvalidArgumentError
 } from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 describe('Sessions Prose Tests', () => {
+  describe('5. Session argument is for the right client', () => {
+    let client1: MongoClient;
+    let client2: MongoClient;
+    beforeEach(async function () {
+      client1 = this.configuration.newClient();
+      client2 = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      await client1?.close();
+      await client2?.close();
+    });
+
+    /**
+     * Steps:
+     * - Create client1 and client2
+     * - Get database from client1
+     * - Get collection from database
+     * - Start session from client2
+     * - Call collection.insertOne(session,...)
+     * - Assert that an error was reported because session was not started from client1
+     *
+     * This validation lives in our executeOperation layer so it applies universally.
+     * A find and an insert provide enough coverage, we determined we do not need to enumerate every possible operation.
+     */
+    context(
+      'when session is started from a different client than operation is being run on',
+      () => {
+        it('insertOne operation throws a MongoInvalidArgumentError', async () => {
+          const db = client1.db();
+          const collection = db.collection('test');
+          const session = client2.startSession();
+          const error = await collection.insertOne({}, { session }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+        });
+
+        it('find operation throws a MongoInvalidArgumentError', async () => {
+          const db = client1.db();
+          const collection = db.collection('test');
+          const session = client2.startSession();
+          const error = await collection
+            .find({}, { session })
+            .toArray()
+            .catch(error => error);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
+          expect(error).to.match(/ClientSession must be from the same MongoClient/i);
+        });
+      }
+    );
+  });
+
   describe('14. Implicit sessions only allocate their server session after a successful connection checkout', () => {
     let client: MongoClient;
     let testCollection: Collection<{ _id: number; a?: number }>;
