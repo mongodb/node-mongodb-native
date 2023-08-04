@@ -1,15 +1,11 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
-import type { InferIdType } from '../mongo_types';
+import type { InferIdType, TODO_NODE_3286 } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, hasAtomicOperators, type MongoDBNamespace } from '../utils';
-import {
-  type CollationOptions,
-  CommandCallbackOperation,
-  type CommandOperationOptions
-} from './command';
+import { hasAtomicOperators, type MongoDBNamespace } from '../utils';
+import { type CollationOptions, CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects, type Hint } from './operation';
 
 /** @public */
@@ -63,8 +59,11 @@ export interface UpdateStatement {
   hint?: Hint;
 }
 
-/** @internal */
-export class UpdateOperation extends CommandCallbackOperation<Document> {
+/**
+ * @internal
+ * UpdateOperation is used in bulk write, while UpdateOneOperation and UpdateManyOperation are only used in the collections API
+ */
+export class UpdateOperation extends CommandOperation<Document> {
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
 
@@ -88,11 +87,7 @@ export class UpdateOperation extends CommandCallbackOperation<Document> {
     return this.statements.every(op => op.multi == null || op.multi === false);
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -119,12 +114,11 @@ export class UpdateOperation extends CommandCallbackOperation<Document> {
     if (unacknowledgedWrite) {
       if (this.statements.find((o: Document) => o.hint)) {
         // TODO(NODE-3541): fix error for hint with unacknowledged writes
-        callback(new MongoCompatibilityError(`hint is not supported with unacknowledged writes`));
-        return;
+        throw new MongoCompatibilityError(`hint is not supported with unacknowledged writes`);
       }
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
   }
 }
 
@@ -142,26 +136,23 @@ export class UpdateOneOperation extends UpdateOperation {
     }
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<UpdateResult | Document>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || !res) return callback(err);
-      if (this.explain != null) return callback(undefined, res);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        modifiedCount: res.nModified != null ? res.nModified : res.n,
-        upsertedId:
-          Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
-        upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
-        matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
-      });
-    });
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      modifiedCount: res.nModified ?? res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
   }
 }
 
@@ -179,26 +170,23 @@ export class UpdateManyOperation extends UpdateOperation {
     }
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<UpdateResult | Document>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || !res) return callback(err);
-      if (this.explain != null) return callback(undefined, res);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        modifiedCount: res.nModified != null ? res.nModified : res.n,
-        upsertedId:
-          Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
-        upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
-        matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
-      });
-    });
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      modifiedCount: res.nModified ?? res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
   }
 }
 
@@ -235,26 +223,23 @@ export class ReplaceOneOperation extends UpdateOperation {
     }
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<UpdateResult | Document>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || !res) return callback(err);
-      if (this.explain != null) return callback(undefined, res);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) return callback(new MongoServerError(res.writeErrors[0]));
+    session: ClientSession | undefined
+  ): Promise<UpdateResult> {
+    const res = await super.execute(server, session);
+    if (this.explain != null) return res as TODO_NODE_3286;
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        modifiedCount: res.nModified != null ? res.nModified : res.n,
-        upsertedId:
-          Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
-        upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
-        matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
-      });
-    });
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      modifiedCount: res.nModified ?? res.n,
+      upsertedId:
+        Array.isArray(res.upserted) && res.upserted.length > 0 ? res.upserted[0]._id : null,
+      upsertedCount: Array.isArray(res.upserted) && res.upserted.length ? res.upserted.length : 0,
+      matchedCount: Array.isArray(res.upserted) && res.upserted.length > 0 ? 0 : res.n
+    };
   }
 }
 

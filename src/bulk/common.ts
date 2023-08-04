@@ -1,3 +1,5 @@
+import { promisify } from 'util';
+
 import { type BSONSerializeOptions, type Document, ObjectId, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
@@ -13,7 +15,7 @@ import type { CollationOptions, CommandOperationOptions } from '../operations/co
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
-import { AbstractCallbackOperation, type Hint } from '../operations/operation';
+import { AbstractOperation, type Hint } from '../operations/operation';
 import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../operations/update';
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
@@ -828,6 +830,8 @@ export interface BulkWriteOptions extends CommandOperationOptions {
   let?: Document;
 }
 
+const executeCommandsAsync = promisify(executeCommands);
+
 /**
  * TODO(NODE-4063)
  * BulkWrites merge complexity is implemented in executeCommands
@@ -835,18 +839,14 @@ export interface BulkWriteOptions extends CommandOperationOptions {
  * We would like this logic to simply live inside the BulkWriteOperation class
  * @internal
  */
-class BulkWriteShimOperation extends AbstractCallbackOperation {
+class BulkWriteShimOperation extends AbstractOperation {
   bulkOperation: BulkOperationBase;
   constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
     super(options);
     this.bulkOperation = bulkOperation;
   }
 
-  executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<any>
-  ): void {
+  execute(_server: Server, session: ClientSession | undefined): Promise<any> {
     if (this.options.session == null) {
       // An implicit session could have been created by 'executeOperation'
       // So if we stick it on finalOptions here, each bulk operation
@@ -854,7 +854,7 @@ class BulkWriteShimOperation extends AbstractCallbackOperation {
       // an explicit session would be
       this.options.session = session;
     }
-    return executeCommands(this.bulkOperation, this.options, callback);
+    return executeCommandsAsync(this.bulkOperation, this.options);
   }
 }
 

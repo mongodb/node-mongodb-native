@@ -6,9 +6,11 @@ import * as sinon from 'sinon';
 import {
   ClientEncryption,
   type DataKey
-} from '../../../src/client-side-encryption/clientEncryption';
+} from '../../../src/client-side-encryption/client_encryption';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { StateMachine } from '../../../src/client-side-encryption/stateMachine';
+import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
+/* eslint-disable @typescript-eslint/no-restricted-imports */
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 import { Binary, type Collection, Int32, Long, type MongoClient } from '../../mongodb';
 
 function readHttpResponse(path) {
@@ -538,7 +540,7 @@ describe('ClientEncryption integration tests', function () {
         it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, function () {
           const options = makeOptions(val);
           expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            TypeError
+            MongoCryptInvalidArgumentError
           );
         });
       });
@@ -547,7 +549,7 @@ describe('ClientEncryption integration tests', function () {
         it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, function () {
           const options = makeOptions([val]);
           expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            TypeError
+            MongoCryptInvalidArgumentError
           );
         });
       });

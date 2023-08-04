@@ -1,23 +1,28 @@
-'use strict';
+import { expect } from 'chai';
+import { EventEmitter, once } from 'events';
+import * as fs from 'fs';
+import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
+import * as net from 'net';
+import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
+import * as tls from 'tls';
 
-const { EventEmitter, once } = require('events');
-const net = require('net');
-const tls = require('tls');
-const fs = require('fs');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { serialize, Long, Int32 } =  require('../../mongodb');
-const { StateMachine } = require('../../../src/client-side-encryption/stateMachine');
-const { Db } = require('../../../src/db');
-const { MongoClient } = require('../../../src/mongo_client');
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { StateMachine } from '../../../src/client-side-encryption/state_machine';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { Db } from '../../../src/db';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { MongoClient } from '../../../src/mongo_client';
+import { Int32, Long, serialize } from '../../mongodb';
 
 describe('StateMachine', function () {
-  class MockRequest {
-    constructor(message, bytesNeeded) {
+  class MockRequest implements MongoCryptKMSRequest {
+    _bytesNeeded: number;
+    endpoint = 'some.fake.host.com';
+    _kmsProvider = 'aws';
+
+    constructor(public _message: Buffer, bytesNeeded) {
       this._bytesNeeded = typeof bytesNeeded === 'number' ? bytesNeeded : 1024;
-      this._message = message;
-      this.endpoint = 'some.fake.host.com';
-      this._kmsProvider = 'aws';
     }
 
     get message() {
@@ -30,6 +35,10 @@ describe('StateMachine', function () {
 
     get kmsProvider() {
       return this._kmsProvider;
+    }
+
+    get status() {
+      return { type: 1, code: 2, message: 'something went wrong' };
     }
 
     addResponse(buffer) {
@@ -60,7 +69,8 @@ describe('StateMachine', function () {
     };
     const options = { promoteLongs: false, promoteValues: false };
     const serializedCommand = serialize(command);
-    const stateMachine = new StateMachine();
+    const stateMachine = new StateMachine({} as any);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     const callback = () => {};
 
     context('when executing the command', function () {
@@ -77,7 +87,9 @@ describe('StateMachine', function () {
         super();
         this.on('connect', callback);
       }
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       write() {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       destroy() {}
       end(callback) {
         Promise.resolve().then(callback);
@@ -98,7 +110,7 @@ describe('StateMachine', function () {
       });
 
       it('should only resolve once bytesNeeded drops to zero', function (done) {
-        const stateMachine = new StateMachine();
+        const stateMachine = new StateMachine({} as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
         let status = 'pending';
         stateMachine
@@ -107,6 +119,7 @@ describe('StateMachine', function () {
             () => (status = 'resolved'),
             () => (status = 'rejected')
           )
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           .catch(() => {});
 
         this.fakeSocket.emit('connect');
@@ -141,7 +154,7 @@ describe('StateMachine', function () {
           context(`when the option is ${option}`, function () {
             const stateMachine = new StateMachine({
               tlsOptions: { aws: { [option]: true } }
-            });
+            } as any);
             const request = new MockRequest(Buffer.from('foobar'), 500);
 
             it('rejects with the validation error', function (done) {
@@ -158,7 +171,7 @@ describe('StateMachine', function () {
         context('when providing tlsCertificateKeyFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           const buffer = Buffer.from('foobar');
           let connectOptions;
@@ -185,7 +198,7 @@ describe('StateMachine', function () {
         context('when providing tlsCAFile', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCAFile: 'test.pem' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           const buffer = Buffer.from('foobar');
           let connectOptions;
@@ -211,7 +224,7 @@ describe('StateMachine', function () {
         context('when providing tlsCertificateKeyFilePassword', function () {
           const stateMachine = new StateMachine({
             tlsOptions: { aws: { tlsCertificateKeyFilePassword: 'test' } }
-          });
+          } as any);
           const request = new MockRequest(Buffer.from('foobar'), -1);
           let connectOptions;
 
@@ -286,14 +299,14 @@ describe('StateMachine', function () {
           proxyHost: 'localhost',
           proxyPort: socks5srv.address().port
         }
-      });
+      } as any);
 
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
         await stateMachine.kmsRequest(request);
       } catch (err) {
         expect(err.name).to.equal('MongoCryptError');
-        expect(err.originalError.code).to.equal('ECONNRESET');
+        expect(err.cause.code).to.equal('ECONNRESET');
         expect(hasTlsConnection).to.equal(true);
         return;
       }
@@ -309,14 +322,14 @@ describe('StateMachine', function () {
           proxyUsername: 'foo',
           proxyPassword: 'bar'
         }
-      });
+      } as any);
 
       const request = new MockRequest(Buffer.from('foobar'), 500);
       try {
         await stateMachine.kmsRequest(request);
       } catch (err) {
         expect(err.name).to.equal('MongoCryptError');
-        expect(err.originalError.code).to.equal('ECONNRESET');
+        expect(err.cause.code).to.equal('ECONNRESET');
         expect(hasTlsConnection).to.equal(true);
         return;
       }

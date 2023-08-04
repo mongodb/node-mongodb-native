@@ -1,10 +1,11 @@
+import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
-import { type AutoEncrypter } from './client-side-encryption/autoEncrypter';
+import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
@@ -18,7 +19,6 @@ import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
-import type { AutoEncryptionOptions } from './deps';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
 import { MongoLogger, type MongoLoggerOptions } from './mongo_logger';
@@ -433,6 +433,14 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const options = this[kOptions];
 
+    if (options.tls) {
+      if (typeof options.tlsCAFile === 'string') {
+        options.ca ??= await fs.readFile(options.tlsCAFile, { encoding: 'utf8' });
+      }
+      if (typeof options.tlsCertificateKeyFile === 'string') {
+        options.key ??= await fs.readFile(options.tlsCertificateKeyFile, { encoding: 'utf8' });
+      }
+    }
     if (typeof options.srvHost === 'string') {
       const hosts = await resolveSRVRecord(options);
 
@@ -768,7 +776,7 @@ export interface MongoOptions
    *
    * ### Additional options:
    *
-   * | nodejs native option  | driver spec compliant option name             | driver option type |
+   * | nodejs native option  | driver spec equivalent option name            | driver option type |
    * |:----------------------|:----------------------------------------------|:-------------------|
    * | `ca`                  | `tlsCAFile`                                   | `string`           |
    * | `crl`                 | N/A                                           | `string`           |
@@ -784,8 +792,19 @@ export interface MongoOptions
    * If `tlsInsecure` is set to `false`, then it will set the node native options `checkServerIdentity`
    * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
    * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
+   *
+   * ### Note on `tlsCAFile` and `tlsCertificateKeyFile`
+   *
+   * The files specified by the paths passed in to the `tlsCAFile` and `tlsCertificateKeyFile` fields
+   * are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
+   * the `ca` and `key` fields are populated, they will not be read again on subsequent calls to
+   * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`
+   * and `key` fields will be undefined.
    */
   tls: boolean;
+
+  tlsCAFile?: string;
+  tlsCertificateKeyFile?: string;
 
   /** @internal */
   [featureFlag: symbol]: any;

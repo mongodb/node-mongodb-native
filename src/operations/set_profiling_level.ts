@@ -2,7 +2,7 @@ import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback, enumToString } from '../utils';
+import { enumToString } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 const levelValues = new Set(['off', 'slow_only', 'all']);
@@ -62,13 +62,5 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     // TODO(NODE-3483): Determine error to put here
     await super.executeCommand(server, session, { profile: this.profile });
     return level;
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<ProfilingLevel>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }

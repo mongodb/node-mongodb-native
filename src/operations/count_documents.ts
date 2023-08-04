@@ -2,7 +2,6 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
 import { AggregateOperation, type AggregateOptions } from './aggregate';
 
 /** @public */
@@ -32,26 +31,16 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection.s.namespace, pipeline, options);
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<number>
-  ): void {
-    super.executeCallback(server, session, (err, result) => {
-      if (err || !result) {
-        callback(err);
-        return;
-      }
+  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
+    const result = await super.execute(server, session);
 
-      // NOTE: We're avoiding creating a cursor here to reduce the callstack.
-      const response = result as unknown as Document;
-      if (response.cursor == null || response.cursor.firstBatch == null) {
-        callback(undefined, 0);
-        return;
-      }
+    // NOTE: We're avoiding creating a cursor here to reduce the callstack.
+    const response = result as unknown as Document;
+    if (response.cursor == null || response.cursor.firstBatch == null) {
+      return 0;
+    }
 
-      const docs = response.cursor.firstBatch;
-      callback(undefined, docs.length ? docs[0].n : 0);
-    });
+    const docs = response.cursor.firstBatch;
+    return docs.length ? docs[0].n : 0;
   }
 }

@@ -2,8 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -17,7 +16,7 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class EstimatedDocumentCountOperation extends CommandCallbackOperation<number> {
+export class EstimatedDocumentCountOperation extends CommandOperation<number> {
   override options: EstimatedDocumentCountOptions;
   collectionName: string;
 
@@ -27,11 +26,7 @@ export class EstimatedDocumentCountOperation extends CommandCallbackOperation<nu
     this.collectionName = collection.collectionName;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<number>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
     const cmd: Document = { count: this.collectionName };
 
     if (typeof this.options.maxTimeMS === 'number') {
@@ -44,14 +39,9 @@ export class EstimatedDocumentCountOperation extends CommandCallbackOperation<nu
       cmd.comment = this.options.comment;
     }
 
-    super.executeCommandCallback(server, session, cmd, (err, response) => {
-      if (err) {
-        callback(err);
-        return;
-      }
+    const response = await super.executeCommand(server, session, cmd);
 
-      callback(undefined, response?.n || 0);
-    });
+    return response?.n || 0;
   }
 }
 

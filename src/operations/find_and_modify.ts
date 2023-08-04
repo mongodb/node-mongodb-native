@@ -5,9 +5,9 @@ import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortForCmd } from '../sort';
-import { type Callback, decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
+import { decorateWithCollation, hasAtomicOperators, maxWireVersion } from '../utils';
 import type { WriteConcern, WriteConcernSettings } from '../write_concern';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -122,7 +122,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 }
 
 /** @internal */
-class FindAndModifyOperation extends CommandCallbackOperation<Document> {
+class FindAndModifyOperation extends CommandOperation<Document> {
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;
@@ -179,11 +179,7 @@ class FindAndModifyOperation extends CommandCallbackOperation<Document> {
     this.query = query;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const coll = this.collection;
     const query = this.query;
     const options = { ...this.options, ...this.bsonOptions };
@@ -199,7 +195,7 @@ class FindAndModifyOperation extends CommandCallbackOperation<Document> {
     try {
       decorateWithCollation(cmd, coll, options);
     } catch (err) {
-      return callback(err);
+      return err;
     }
 
     if (options.hint) {
@@ -207,23 +203,17 @@ class FindAndModifyOperation extends CommandCallbackOperation<Document> {
       // in place to check.
       const unacknowledgedWrite = this.writeConcern?.w === 0;
       if (unacknowledgedWrite || maxWireVersion(server) < 8) {
-        callback(
-          new MongoCompatibilityError(
-            'The current topology does not support a hint on findAndModify commands'
-          )
+        throw new MongoCompatibilityError(
+          'The current topology does not support a hint on findAndModify commands'
         );
-
-        return;
       }
 
       cmd.hint = options.hint;
     }
 
     // Execute the command
-    super.executeCommandCallback(server, session, cmd, (err, result) => {
-      if (err) return callback(err);
-      return callback(undefined, options.includeResultMetadata ? result : result.value ?? null);
-    });
+    const result = await super.executeCommand(server, session, cmd);
+    return options.includeResultMetadata ? result : result.value ?? null;
   }
 }
 

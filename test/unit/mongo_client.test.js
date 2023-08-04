@@ -44,7 +44,7 @@ describe('MongoOptions', function () {
      *
      * ### Additional options:
      *
-     * | nodejs native option  | driver spec compliant option name             | driver option type |
+     * | nodejs native option  | driver spec equivalent option name           | driver option type |
      * |:----------------------|:----------------------------------------------|:-------------------|
      * | `ca`                  | `tlsCAFile`                                   | `string`           |
      * | `crl`                 | N/A                                           | `string`           |
@@ -55,12 +55,11 @@ describe('MongoOptions', function () {
      * | see note below        | `tlsInsecure`                                 | `boolean`          |
      *
      */
-    expect(options).to.not.have.property('tlsCertificateKeyFile');
-    expect(options).to.not.have.property('tlsCAFile');
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
-    expect(options).has.property('ca', '');
-    expect(options).has.property('key');
-    expect(options.key).has.length(0);
+    expect(options).to.not.have.property('key');
+    expect(options).to.not.have.property('ca');
+    expect(options).to.have.property('tlsCertificateKeyFile', filename);
+    expect(options).to.have.property('tlsCAFile', filename);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
     expect(options).has.property('tls', true);
   });
@@ -394,23 +393,11 @@ describe('MongoOptions', function () {
       const optsFromObject = parseOptions('mongodb://localhost/', {
         tlsCertificateKeyFile: 'testCertKey.pem'
       });
-      expect(optsFromObject).to.have.property('key', 'cert key');
+      expect(optsFromObject).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
 
       const optsFromUri = parseOptions('mongodb://localhost?tlsCertificateKeyFile=testCertKey.pem');
-      expect(optsFromUri).to.have.property('key', 'cert key');
+      expect(optsFromUri).to.have.property('tlsCertificateKeyFile', 'testCertKey.pem');
     });
-  });
-
-  it('throws an error if multiple tls parameters are not all set to the same value', () => {
-    expect(() => parseOptions('mongodb://localhost?tls=true&tls=false')).to.throw(
-      'All values of tls/ssl must be the same.'
-    );
-  });
-
-  it('throws an error if multiple ssl parameters are not all set to the same value', () => {
-    expect(() => parseOptions('mongodb://localhost?ssl=true&ssl=false')).to.throw(
-      'All values of tls/ssl must be the same.'
-    );
   });
 
   it('throws an error if tls and ssl parameters are not all set to the same value', () => {
@@ -420,16 +407,6 @@ describe('MongoOptions', function () {
     expect(() => parseOptions('mongodb://localhost?tls=false&ssl=true')).to.throw(
       'All values of tls/ssl must be the same.'
     );
-  });
-
-  it('correctly sets tls if multiple tls parameters are all set to the same value', () => {
-    expect(parseOptions('mongodb://localhost?tls=true&tls=true')).to.have.property('tls', true);
-    expect(parseOptions('mongodb://localhost?tls=false&tls=false')).to.have.property('tls', false);
-  });
-
-  it('correctly sets tls if multiple ssl parameters are all set to the same value', () => {
-    expect(parseOptions('mongodb://localhost?ssl=true&ssl=true')).to.have.property('tls', true);
-    expect(parseOptions('mongodb://localhost?ssl=false&ssl=false')).to.have.property('tls', false);
   });
 
   it('correctly sets tls if tls and ssl parameters are all set to the same value', () => {

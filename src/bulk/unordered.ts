@@ -4,7 +4,7 @@ import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import type { DeleteStatement } from '../operations/delete';
 import type { UpdateStatement } from '../operations/update';
-import type { Callback } from '../utils';
+import { type Callback } from '../utils';
 import {
   Batch,
   BatchType,

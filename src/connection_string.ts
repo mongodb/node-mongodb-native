@@ -1,5 +1,4 @@
 import * as dns from 'dns';
-import * as fs from 'fs';
 import ConnectionString from 'mongodb-connection-string-url';
 import { URLSearchParams } from 'url';
 
@@ -205,6 +204,9 @@ function getUIntFromOptions(name: string, value: unknown): number {
 }
 
 function* entriesFromString(value: string): Generator<[string, string]> {
+  if (value === '') {
+    return;
+  }
   const keyValuePairs = value.split(',');
   for (const keyValue of keyValuePairs) {
     const [key, value] = keyValue.split(/:(.*)/);
@@ -291,10 +293,18 @@ export function parseOptions(
   }
 
   for (const key of url.searchParams.keys()) {
-    const values = [...url.searchParams.getAll(key)];
+    const values = url.searchParams.getAll(key);
 
-    if (values.includes('')) {
-      throw new MongoAPIError('URI cannot contain options with no value');
+    const isReadPreferenceTags = /readPreferenceTags/i.test(key);
+
+    if (!isReadPreferenceTags && values.length > 1) {
+      throw new MongoInvalidArgumentError(
+        `URI option "${key}" cannot appear more than once in the connection string`
+      );
+    }
+
+    if (!isReadPreferenceTags && values.includes('')) {
+      throw new MongoAPIError(`URI option "${key}" cannot be specified with no value`);
     }
 
     if (!urlOptions.has(key)) {
@@ -1097,16 +1107,10 @@ export const OPTIONS = {
     }
   },
   tlsCAFile: {
-    target: 'ca',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    type: 'string'
   },
   tlsCertificateKeyFile: {
-    target: 'key',
-    transform({ values: [value] }) {
-      return fs.readFileSync(String(value), { encoding: 'ascii' });
-    }
+    type: 'string'
   },
   tlsCertificateKeyFilePassword: {
     target: 'passphrase',

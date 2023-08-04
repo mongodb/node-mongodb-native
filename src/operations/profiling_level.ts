@@ -2,7 +2,6 @@ import type { Db } from '../db';
 import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 
 /** @public */
@@ -28,13 +27,5 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     } else {
       throw new MongoUnexpectedServerResponseError('Error with profile command');
     }
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<string>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }

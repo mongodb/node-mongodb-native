@@ -5,15 +5,15 @@ import { MongoInvalidArgumentError, MongoServerError } from '../error';
 import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { prepareDocs } from './common_functions';
-import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
-export class InsertOperation extends CommandCallbackOperation<Document> {
+export class InsertOperation extends CommandOperation<Document> {
   override options: BulkWriteOptions;
   documents: Document[];
 
@@ -24,11 +24,7 @@ export class InsertOperation extends CommandCallbackOperation<Document> {
     this.documents = documents;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<Document>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
     const command: Document = {
@@ -47,7 +43,7 @@ export class InsertOperation extends CommandCallbackOperation<Document> {
       command.comment = options.comment;
     }
 
-    super.executeCommandCallback(server, session, command, callback);
+    return super.executeCommand(server, session, command);
   }
 }
 
@@ -72,24 +68,21 @@ export class InsertOneOperation extends InsertOperation {
     super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<InsertOneResult>
-  ): void {
-    super.executeCallback(server, session, (err, res) => {
-      if (err || res == null) return callback(err);
-      if (res.code) return callback(new MongoServerError(res));
-      if (res.writeErrors) {
-        // This should be a WriteError but we can't change it now because of error hierarchy
-        return callback(new MongoServerError(res.writeErrors[0]));
-      }
+    session: ClientSession | undefined
+  ): Promise<InsertOneResult> {
+    const res = await super.execute(server, session);
+    if (res.code) throw new MongoServerError(res);
+    if (res.writeErrors) {
+      // This should be a WriteError but we can't change it now because of error hierarchy
+      throw new MongoServerError(res.writeErrors[0]);
+    }
 
-      callback(undefined, {
-        acknowledged: this.writeConcern?.w !== 0 ?? true,
-        insertedId: this.documents[0]._id
-      });
-    });
+    return {
+      acknowledged: this.writeConcern?.w !== 0,
+      insertedId: this.documents[0]._id
+    };
   }
 }
 
@@ -104,7 +97,7 @@ export interface InsertManyResult<TSchema = Document> {
 }
 
 /** @internal */
-export class InsertManyOperation extends AbstractCallbackOperation<InsertManyResult> {
+export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
   override options: BulkWriteOptions;
   collection: Collection;
   docs: Document[];
@@ -121,11 +114,10 @@ export class InsertManyOperation extends AbstractCallbackOperation<InsertManyRes
     this.docs = docs;
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<InsertManyResult>
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<InsertManyResult> {
     const coll = this.collection;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
     const writeConcern = WriteConcern.fromOptions(options);
@@ -135,21 +127,21 @@ export class InsertManyOperation extends AbstractCallbackOperation<InsertManyRes
       options
     );
 
-    bulkWriteOperation.executeCallback(server, session, (err, res) => {
-      if (err || res == null) {
-        if (err && err.message === 'Operation must be an object with an operation key') {
-          err = new MongoInvalidArgumentError(
-            'Collection.insertMany() cannot be called with an array that has null/undefined values'
-          );
-        }
-        return callback(err);
-      }
-      callback(undefined, {
-        acknowledged: writeConcern?.w !== 0 ?? true,
+    try {
+      const res = await bulkWriteOperation.execute(server, session);
+      return {
+        acknowledged: writeConcern?.w !== 0,
         insertedCount: res.insertedCount,
         insertedIds: res.insertedIds
-      });
-    });
+      };
+    } catch (err) {
+      if (err && err.message === 'Operation must be an object with an operation key') {
+        throw new MongoInvalidArgumentError(
+          'Collection.insertMany() cannot be called with an array that has null/undefined values'
+        );
+      }
+      throw err;
+    }
   }
 }
 

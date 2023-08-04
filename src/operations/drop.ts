@@ -3,7 +3,6 @@ import type { Db } from '../db';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { type Callback } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -69,14 +68,6 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     return this.executeWithoutEncryptedFieldsCheck(server, session);
   }
 
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<boolean>
-  ): void {
-    throw new Error('Method not implemented.');
-  }
-
   private async executeWithoutEncryptedFieldsCheck(
     server: Server,
     session: ClientSession | undefined
@@ -100,14 +91,6 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     await super.executeCommand(server, session, { dropDatabase: 1 });
     return true;
-  }
-
-  protected executeCallback(
-    _server: Server,
-    _session: ClientSession | undefined,
-    _callback: Callback<boolean>
-  ): void {
-    throw new Error('Method not implemented.');
   }
 }
 

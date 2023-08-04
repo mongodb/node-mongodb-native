@@ -7,11 +7,10 @@ import type {
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
-import { AbstractCallbackOperation, Aspect, defineAspects } from './operation';
+import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
-export class BulkWriteOperation extends AbstractCallbackOperation<BulkWriteResult> {
+export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
   override options: BulkWriteOptions;
   collection: Collection;
   operations: AnyBulkWriteOperation[];
@@ -27,11 +26,10 @@ export class BulkWriteOperation extends AbstractCallbackOperation<BulkWriteResul
     this.operations = operations;
   }
 
-  override executeCallback(
+  override async execute(
     server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<BulkWriteResult>
-  ): void {
+    session: ClientSession | undefined
+  ): Promise<BulkWriteResult> {
     const coll = this.collection;
     const operations = this.operations;
     const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
@@ -43,19 +41,13 @@ export class BulkWriteOperation extends AbstractCallbackOperation<BulkWriteResul
         : coll.initializeOrderedBulkOp(options);
 
     // for each op go through and add to the bulk
-    try {
-      for (let i = 0; i < operations.length; i++) {
-        bulk.raw(operations[i]);
-      }
-    } catch (err) {
-      return callback(err);
+    for (let i = 0; i < operations.length; i++) {
+      bulk.raw(operations[i]);
     }
 
     // Execute the bulk
-    bulk.execute({ ...options, session }).then(
-      result => callback(undefined, result),
-      error => callback(error)
-    );
+    const result = await bulk.execute({ ...options, session });
+    return result;
   }
 }
 

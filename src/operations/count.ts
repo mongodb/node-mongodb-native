@@ -2,8 +2,8 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { Callback, MongoDBNamespace } from '../utils';
-import { CommandCallbackOperation, type CommandOperationOptions } from './command';
+import type { MongoDBNamespace } from '../utils';
+import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
 /** @public */
@@ -19,7 +19,7 @@ export interface CountOptions extends CommandOperationOptions {
 }
 
 /** @internal */
-export class CountOperation extends CommandCallbackOperation<number> {
+export class CountOperation extends CommandOperation<number> {
   override options: CountOptions;
   collectionName?: string;
   query: Document;
@@ -32,11 +32,7 @@ export class CountOperation extends CommandCallbackOperation<number> {
     this.query = filter;
   }
 
-  override executeCallback(
-    server: Server,
-    session: ClientSession | undefined,
-    callback: Callback<number>
-  ): void {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
     const options = this.options;
     const cmd: Document = {
       count: this.collectionName,
@@ -59,9 +55,8 @@ export class CountOperation extends CommandCallbackOperation<number> {
       cmd.maxTimeMS = options.maxTimeMS;
     }
 
-    super.executeCommandCallback(server, session, cmd, (err, result) => {
-      callback(err, result ? result.n : 0);
-    });
+    const result = await super.executeCommand(server, session, cmd);
+    return result ? result.n : 0;
   }
 }
 
