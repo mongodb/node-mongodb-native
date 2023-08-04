@@ -25,14 +25,6 @@ functions:
     - command: expansions.update
       params:
         file: src/expansion.yml
-  run search index management tests:
-    - command: subprocess.exec
-      params:
-        binary: bash
-        working_dir: src
-        add_expansions_to_env: true
-        args:
-          - .evergreen/run-search-index-management-tests.sh
   bootstrap mongo-orchestration:
     - command: subprocess.exec
       params:
@@ -1204,6 +1196,18 @@ tasks:
           env:
             TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
             AWS_REGION: us-east-1
+  - name: test-search-index-helpers
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_VERSION: 20
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/run-search-index-management-tests.sh
   - name: test-latest-server
     tags:
       - latest
@@ -2651,17 +2655,6 @@ tasks:
         variant: '*'
         status: '*'
         patch_optional: true
-  - name: test-search-index-helpers
-    tags: []
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_NAME: 20
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-      - func: run search index management tests
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -3473,6 +3466,8 @@ task_groups:
           working_dir: src
           binary: bash
           add_expansions_to_env: true
+          env:
+            MONGODB_VERSION: '7.0'
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
@@ -3490,6 +3485,33 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - test-aws-lambda-deployed
+  - name: test_atlas_task_group_search_indexes
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            MONGODB_VERSION: '7.0'
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-search-index-helpers
 pre:
   - func: fetch source
   - func: windows fix
@@ -4063,8 +4085,8 @@ buildvariants:
     tasks:
       - test-lambda-example
       - test-lambda-aws-auth-example
-  - name: rhel8-test-seach-index-management-helpers
-    display_name: Search Index Management Helpers Tests
+  - name: rhel8-test-search-indexes
+    display_name: Search Index Tests
     run_on: rhel80-large
     tasks:
-      - test-search-index-helpers
+      - test_atlas_task_group_search_indexes

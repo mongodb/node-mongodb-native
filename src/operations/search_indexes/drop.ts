@@ -1,6 +1,7 @@
 import type { Document } from 'bson';
 
 import type { Collection } from '../../collection';
+import { MONGODB_ERROR_CODES, MongoServerError } from '../../error';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { AbstractOperation } from '../operation';
@@ -22,7 +23,14 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
       command.name = this.name;
     }
 
-    await server.commandAsync(namespace, command, { session });
-    return;
+    try {
+      await server.commandAsync(namespace, command, { session });
+    } catch (error) {
+      const isNamespaceNotFoundError =
+        error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;
+      if (!isNamespaceNotFoundError) {
+        throw error;
+      }
+    }
   }
 }
