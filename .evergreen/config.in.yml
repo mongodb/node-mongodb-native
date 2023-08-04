@@ -45,15 +45,6 @@ functions:
       params:
         file: src/expansion.yml
 
-  "run search index management tests":
-    - command: subprocess.exec
-      params:
-        binary: bash
-        working_dir: src
-        add_expansions_to_env: true
-        args:
-          - .evergreen/run-search-index-management-tests.sh
-
   "bootstrap mongo-orchestration":
     - command: subprocess.exec
       params:
@@ -1281,6 +1272,19 @@ tasks:
             TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
             AWS_REGION: us-east-1
 
+  - name: test-search-index-helpers
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_VERSION: 20
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - .evergreen/run-search-index-management-tests.sh
+
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -1420,6 +1424,8 @@ task_groups:
           working_dir: src
           binary: bash
           add_expansions_to_env: true
+          env:
+            MONGODB_VERSION: "7.0"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
@@ -1437,6 +1443,34 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - test-aws-lambda-deployed
+
+  - name: test_atlas_task_group_search_indexes
+    setup_group:
+      - func: fetch source
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          env:
+            MONGODB_VERSION: "7.0"
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
+      - command: expansions.update
+        params:
+          file: src/atlas-expansion.yml
+    teardown_group:
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          add_expansions_to_env: true
+          args:
+            - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - test-search-index-helpers
 
 pre:
   - func: "fetch source"

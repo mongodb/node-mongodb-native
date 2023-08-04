@@ -547,6 +547,7 @@ SINGLETON_TASKS.push(
   ]
 );
 
+
 function* makeTypescriptTasks() {
   for (const TS_VERSION of ['next', 'current', '4.1.6']) {
     // 4.1.6 can consume the public API but not compile the driver
@@ -688,26 +689,6 @@ const coverageTask = {
 };
 
 SINGLETON_TASKS.push(coverageTask);
-SINGLETON_TASKS.push({
-  name: 'test-search-index-helpers',
-  tags: [],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_NAME: LATEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'run search index management tests' }
-  ]
-})
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
@@ -776,11 +757,11 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
-  name: 'rhel8-test-seach-index-management-helpers',
-  display_name: 'Search Index Management Helpers Tests',
+  name: 'rhel8-test-search-indexes',
+  display_name: 'Search Index Tests',
   run_on: DEFAULT_OS,
-  tasks: ['test-search-index-helpers']
-})
+  tasks: ['test_atlas_task_group_search_indexes']
+});
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
