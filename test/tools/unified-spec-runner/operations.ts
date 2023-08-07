@@ -12,6 +12,7 @@ import {
   type Document,
   type GridFSFile,
   type MongoClient,
+  MongoError,
   type ObjectId,
   ReadConcern,
   ReadPreference,
@@ -342,13 +343,22 @@ operations.set('failPoint', async ({ entities, operation }) => {
 operations.set('insertOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { document, ...opts } = operation.arguments!;
-  return collection.insertOne(document, opts);
+  // Looping exposes the fact that we can generate _ids for inserted
+  // documents and we don't want the original operation to get modified
+  // and use the same _id for each insert.
+  return collection.insertOne({ ...document }, opts);
 });
 
 operations.set('insertMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { documents, ...opts } = operation.arguments!;
-  return collection.insertMany(documents, opts);
+  // Looping exposes the fact that we can generate _ids for inserted
+  // documents and we don't want the original operation to get modified
+  // and use the same _id for each insert.
+  const clonedDocuments = documents.map(doc => {
+    return { ...doc };
+  });
+  return collection.insertMany(clonedDocuments, opts);
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
@@ -437,7 +447,8 @@ operations.set('loop', async ({ entities, operation, client, testConfig }) => {
           entities
             .getEntity('failures', storeFailuresAsEntity)
             .push({ error: error.message, time: Date.now() });
-        } else if (storeErrorsAsEntity) {
+        } else if (storeErrorsAsEntity && !(error instanceof MongoError)) {
+          // Checking not a MongoError ensures it's coming from the test runner.
           entities
             .getEntity('errors', storeErrorsAsEntity)
             .push({ error: error.message, time: Date.now() });

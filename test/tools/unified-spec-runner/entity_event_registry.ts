@@ -40,7 +40,7 @@ const MAPPINGS = {
 
 /**
  * Registers events that need to be stored in the entities map, since
- * the UnifiedMongoClient does not contain a ciclical dependency on the
+ * the UnifiedMongoClient does not contain a cyclical dependency on the
  * entities map itself.
  */
 export class EntityEventRegistry {
