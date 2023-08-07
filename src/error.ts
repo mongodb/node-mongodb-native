@@ -732,11 +732,11 @@ export class MongoSystemError extends MongoError {
   reason?: TopologyDescription;
 
   /** @internal */
-  constructor(message: string, reason: TopologyDescription, options?: { cause?: Error }) {
+  constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
-      super(reason.error.message || reason.error, options);
+      super(reason.error.message || reason.error);
     } else {
-      super(message, options);
+      super(message);
     }
 
     if (reason) {
