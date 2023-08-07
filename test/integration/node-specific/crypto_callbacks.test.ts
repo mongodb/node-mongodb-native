@@ -42,10 +42,7 @@ describe('cryptoCallbacks', function () {
     }
 
     sandbox = sinon.createSandbox();
-
-    for (const name of hookNames) {
-      sandbox.spy(cryptoCallbacks, name);
-    }
+    sandbox.spy(cryptoCallbacks);
 
     client = this.configuration.newClient();
 
@@ -124,7 +121,7 @@ describe('cryptoCallbacks', function () {
       sandbox?.restore();
     });
 
-    ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook'].forEach(hookName => {
+    for (const hookName of ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook') {
       it(`should properly propagate an error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
@@ -150,11 +147,11 @@ describe('cryptoCallbacks', function () {
 
         expect(result).to.be.instanceOf(Error);
       });
-    });
+    }
 
     // These ones will fail with an error, but that error will get overridden
     // with "failed to create KMS message" in mongocrypt-kms-ctx.c
-    ['hmacSha256Hook', 'sha256Hook'].forEach(hookName => {
+    for (const hookName of ['hmacSha256Hook', 'sha256Hook']) {
       it(`should error with a specific kms error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
@@ -167,7 +164,7 @@ describe('cryptoCallbacks', function () {
         const result = await encryption.createDataKey('aws', dataKeyOptions).catch(error => error);
         expect(result).to.match(/failed to create KMS message/);
       });
-    });
+    }
 
     it('should error asynchronously with error when randomHook fails', async function () {
       const error = new Error('some random error text');
