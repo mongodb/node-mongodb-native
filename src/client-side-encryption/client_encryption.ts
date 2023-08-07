@@ -5,7 +5,7 @@ import type {
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
-import { type Binary, type Document, type Long, serialize } from '../bson';
+import { type Binary, type Document, type Long, serialize, type UUID } from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
@@ -16,8 +16,7 @@ import { type MongoClient } from '../mongo_client';
 import { type Filter } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { type Callback, MongoDBCollectionNamespace } from '../utils';
-import { maybeCallback, promiseOrCallback } from './common';
+import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
   MongoCryptCreateDataKeyError,
@@ -35,7 +34,7 @@ import {
  * The schema for a DataKey in the key vault collection.
  */
 export interface DataKey {
-  _id: Binary;
+  _id: UUID;
   version?: number;
   keyAltNames?: string[];
   keyMaterial: Binary;
@@ -125,18 +124,6 @@ export class ClientEncryption implements StateMachineExecutable {
    *
    * @example
    * ```ts
-   * // Using callbacks to create a local key
-   * clientEncryption.createDataKey('local', (err, dataKey) => {
-   *   if (err) {
-   *     // This means creating the key failed.
-   *   } else {
-   *     // key creation succeeded
-   *   }
-   * });
-   * ```
-   *
-   * @example
-   * ```ts
    * // Using async/await to create a local key
    * const dataKeyId = await clientEncryption.createDataKey('local');
    * ```
@@ -164,19 +151,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * });
    * ```
    */
-  createDataKey(
+  async createDataKey(
     provider: KMSProvider,
-    options?: ClientEncryptionCreateDataKeyProviderOptions,
-    callback?: Callback<DataKey>
-  ) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    if (options == null) {
-      options = {};
-    }
-
+    options: ClientEncryptionCreateDataKeyProviderOptions = {}
+  ): Promise<UUID> {
     const dataKey = Object.assign({ provider }, options.masterKey);
 
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
@@ -213,32 +191,17 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    // @ts-expect-error We did not convert promiseOrCallback to TS
-    return promiseOrCallback(callback, cb => {
-      stateMachine.execute<DataKey>(this, context, (err, dataKey) => {
-        if (err || !dataKey) {
-          cb(err, null);
-          return;
-        }
+    const updatedDataKey = await stateMachine.executeAsync<DataKey>(this, context);
 
-        const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
-          this._keyVaultNamespace
-        );
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
 
-        this._keyVaultClient
-          .db(dbName)
-          .collection<DataKey>(collectionName)
-          .insertOne(dataKey, { writeConcern: { w: 'majority' } })
-          .then(
-            result => {
-              return cb(null, result.insertedId);
-            },
-            err => {
-              cb(err, null);
-            }
-          );
-      });
-    });
+    const { insertedId } = await this._keyVaultClient
+      .db(dbName)
+      .collection<DataKey>(collectionName)
+      .insertOne(updatedDataKey, { writeConcern: { w: 'majority' } });
+    return insertedId;
   }
 
   /**
@@ -590,21 +553,7 @@ export class ClientEncryption implements StateMachineExecutable {
    *
    * @param value - The value that you wish to serialize. Must be of a type that can be serialized into BSON
    * @param options -
-   * @param callback - Optional callback to invoke when value is encrypted
-   * @returns If no callback is provided, returns a Promise that either resolves with the encrypted value, or rejects with an error. If a callback is provided, returns nothing.
-   *
-   * @example
-   * ```ts
-   * // Encryption with callback API
-   * function encryptMyData(value, callback) {
-   *   clientEncryption.createDataKey('local', (err, keyId) => {
-   *     if (err) {
-   *       return callback(err);
-   *     }
-   *     clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' }, callback);
-   *   });
-   * }
-   * ```
+   * @returns a Promise that either resolves with the encrypted value, or rejects with an error.
    *
    * @example
    * ```ts
@@ -624,12 +573,8 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  encrypt(
-    value: unknown,
-    options: ClientEncryptionEncryptOptions,
-    callback: Callback<Binary>
-  ): Promise<Binary> | void {
-    return maybeCallback(() => this._encrypt(value, false, options), callback);
+  async encrypt(value: unknown, options: ClientEncryptionEncryptOptions): Promise<Binary> {
+    return this._encrypt(value, false, options);
   }
 
   /**
@@ -661,16 +606,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * Explicitly decrypt a provided encrypted value
    *
    * @param value - An encrypted value
-   * @param callback - Optional callback to invoke when value is decrypted
-   * @returns If no callback is provided, returns a Promise that either resolves with the decrypted value, or rejects with an error. If a callback is provided, returns nothing.
-   *
-   * ```ts
-   * @example
-   * // Decrypting value with callback API
-   * function decryptMyValue(value, callback) {
-   *   clientEncryption.decrypt(value, callback);
-   * }
-   * ```
+   * @returns a Promise that either resolves with the decrypted value, or rejects with an error
    *
    * @example
    * ```ts
@@ -680,7 +616,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  decrypt<T = any>(value: Binary, callback?: Callback<T>): Promise<T> | void {
+  async decrypt<T = any>(value: Binary): Promise<T> {
     const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
@@ -689,17 +625,9 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    // @ts-expect-error We did not convert promiseOrCallback to TS
-    return promiseOrCallback(callback, cb => {
-      stateMachine.execute<{ v: T }>(this, context, (err, result) => {
-        if (err || !result) {
-          cb(err, null);
-          return;
-        }
+    const { v } = await stateMachine.executeAsync<{ v: T }>(this, context);
 
-        cb(null, result.v);
-      });
-    });
+    return v;
   }
 
   /**

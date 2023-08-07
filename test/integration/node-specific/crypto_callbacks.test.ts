@@ -25,9 +25,15 @@ const SKIP_AWS_TESTS = [AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AW
 describe('cryptoCallbacks', function () {
   let client: MongoClient;
   let sandbox;
-  before(function () {
-    sandbox = sinon.createSandbox();
-  });
+
+  const hookNames = new Set([
+    'aes256CbcEncryptHook',
+    'aes256CbcDecryptHook',
+    'randomHook',
+    'hmacSha512Hook',
+    'hmacSha256Hook',
+    'sha256Hook'
+  ]);
 
   beforeEach(function () {
     if (SKIP_AWS_TESTS) {
@@ -35,14 +41,19 @@ describe('cryptoCallbacks', function () {
       return;
     }
 
-    sandbox.restore();
+    sandbox = sinon.createSandbox();
+
+    for (const name of hookNames) {
+      sandbox.spy(cryptoCallbacks, name);
+    }
+
     client = this.configuration.newClient();
 
     return client.connect();
   });
 
   afterEach(async function () {
-    sandbox.restore();
+    sandbox?.restore();
     await client?.close();
   });
 
@@ -69,20 +80,7 @@ describe('cryptoCallbacks', function () {
     expect(output).to.deep.equal(expectedOutput);
   }).skipReason = 'TODO(NODE-3370): fix key formatting error "asn1_check_tlen:wrong tag"';
 
-  const hookNames = new Set([
-    'aes256CbcEncryptHook',
-    'aes256CbcDecryptHook',
-    'randomHook',
-    'hmacSha512Hook',
-    'hmacSha256Hook',
-    'sha256Hook'
-  ]);
-
-  it('should invoke crypto callbacks when doing encryption', function (done) {
-    for (const name of hookNames) {
-      sandbox.spy(cryptoCallbacks, name);
-    }
-
+  it('should invoke crypto callbacks when doing encryption', async function () {
     function assertCertainHooksCalled(expectedSet?) {
       expectedSet = expectedSet || new Set([]);
       for (const name of hookNames) {
@@ -102,50 +100,32 @@ describe('cryptoCallbacks', function () {
       kmsProviders
     });
 
-    try {
-      assertCertainHooksCalled();
-    } catch (e) {
-      return done(e);
-    }
+    assertCertainHooksCalled();
 
-    encryption.createDataKey('aws', dataKeyOptions, (err, dataKey) => {
-      try {
-        expect(err).to.not.exist;
-        assertCertainHooksCalled(new Set(['hmacSha256Hook', 'sha256Hook', 'randomHook']));
-      } catch (e) {
-        return done(e);
-      }
+    const dataKeyId = await encryption.createDataKey('aws', dataKeyOptions);
+    assertCertainHooksCalled(new Set(['hmacSha256Hook', 'sha256Hook', 'randomHook']));
 
-      const encryptOptions = {
-        keyId: dataKey,
-        algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-      };
+    const encryptOptions = {
+      keyId: dataKeyId,
+      algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+    };
 
-      encryption.encrypt('hello', encryptOptions, (err, encryptedValue) => {
-        try {
-          expect(err).to.not.exist;
-          assertCertainHooksCalled(
-            new Set(['aes256CbcEncryptHook', 'hmacSha512Hook', 'hmacSha256Hook', 'sha256Hook'])
-          );
-        } catch (e) {
-          return done(e);
-        }
-        encryption.decrypt(encryptedValue, err => {
-          try {
-            expect(err).to.not.exist;
-            assertCertainHooksCalled(new Set(['aes256CbcDecryptHook', 'hmacSha512Hook']));
-          } catch (e) {
-            return done(e);
-          }
-          done();
-        });
-      });
-    });
+    const encryptedValue = await encryption.encrypt('hello', encryptOptions);
+    assertCertainHooksCalled(
+      new Set(['aes256CbcEncryptHook', 'hmacSha512Hook', 'hmacSha256Hook', 'sha256Hook'])
+    );
+
+    await encryption.decrypt(encryptedValue);
+    assertCertainHooksCalled(new Set(['aes256CbcDecryptHook', 'hmacSha512Hook']));
   });
 
   describe('error testing', function () {
+    beforeEach(async function () {
+      sandbox?.restore();
+    });
+
     ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook'].forEach(hookName => {
-      it(`should properly propagate an error when ${hookName} fails`, function (done) {
+      it(`should properly propagate an error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
 
@@ -154,40 +134,28 @@ describe('cryptoCallbacks', function () {
           kmsProviders
         });
 
-        function finish(err) {
-          try {
-            expect(err, 'Expected an error to exist').to.exist;
-            expect(err).to.have.property('message', error.message);
-            done();
-          } catch (e) {
-            done(e);
-          }
-        }
+        const result = await (async () => {
+          const dataKeyId = await encryption.createDataKey('aws', dataKeyOptions);
+          const encryptOptions = {
+            keyId: dataKeyId,
+            algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
+          };
 
-        try {
-          encryption.createDataKey('aws', dataKeyOptions, (err, dataKey) => {
-            if (err) return finish(err);
+          const encryptedValue = await encryption.encrypt('hello', encryptOptions);
+          await encryption.decrypt(encryptedValue);
+        })().then(
+          () => null,
+          error => error
+        );
 
-            const encryptOptions = {
-              keyId: dataKey,
-              algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
-            };
-
-            encryption.encrypt('hello', encryptOptions, (err, encryptedValue) => {
-              if (err) return finish(err);
-              encryption.decrypt(encryptedValue, err => finish(err));
-            });
-          });
-        } catch (e) {
-          done(new Error('We should not be here'));
-        }
+        expect(result).to.be.instanceOf(Error);
       });
     });
 
     // These ones will fail with an error, but that error will get overridden
     // with "failed to create KMS message" in mongocrypt-kms-ctx.c
     ['hmacSha256Hook', 'sha256Hook'].forEach(hookName => {
-      it(`should error with a specific kms error when ${hookName} fails`, function () {
+      it(`should error with a specific kms error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
 
@@ -196,13 +164,12 @@ describe('cryptoCallbacks', function () {
           kmsProviders
         });
 
-        expect(() => encryption.createDataKey('aws', dataKeyOptions, () => undefined)).to.throw(
-          'failed to create KMS message'
-        );
+        const result = await encryption.createDataKey('aws', dataKeyOptions).catch(error => error);
+        expect(result).to.match(/failed to create KMS message/);
       });
     });
 
-    it('should error synchronously with error when randomHook fails', function (done) {
+    it('should error asynchronously with error when randomHook fails', async function () {
       const error = new Error('some random error text');
       sandbox.stub(cryptoCallbacks, 'randomHook').returns(error);
 
@@ -211,18 +178,8 @@ describe('cryptoCallbacks', function () {
         kmsProviders
       });
 
-      try {
-        encryption.createDataKey('aws', dataKeyOptions, () => {
-          done(new Error('We should not be here'));
-        });
-      } catch (err) {
-        try {
-          expect(err).to.have.property('message', 'some random error text');
-          done();
-        } catch (e) {
-          done(e);
-        }
-      }
+      const result = await encryption.createDataKey('aws', dataKeyOptions).catch(error => error);
+      expect(result).to.have.property('message', 'some random error text');
     });
   });
 });

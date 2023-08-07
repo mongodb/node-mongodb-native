@@ -121,6 +121,7 @@ const EXPECTED_EXPORTS = [
   'TopologyOpeningEvent',
   'TopologyType',
   'UnorderedBulkOperation',
+  'UUID',
   'WriteConcern'
 ];
 

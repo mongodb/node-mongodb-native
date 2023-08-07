@@ -33,7 +33,8 @@ export {
   MaxKey,
   MinKey,
   ObjectId,
-  Timestamp
+  Timestamp,
+  UUID
 } from './bson';
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
