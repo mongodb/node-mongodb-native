@@ -28,12 +28,18 @@
     - [`MongoServerClosedError`](#MongoServerClosedError-1)
   - [`MongoNetworkError`](#MongoNetworkError-1)
     - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
+  - [`MongoCryptError`](#MongoCryptError-1)
+    - [`MongoCryptInvalidArgumentError`](#MongoCryptError-1)
+    - [`MongoCryptCreateDataKeyError`](#MongoCryptCreateDataKeyError-1)
+    - [`MongoCryptCreateEncryptedCollectionError`](#MongoCryptCreateEncryptedCollectionError-1)
+    - [`MongoCryptCreateAzureKMSRequestError`](#MongoCryptCreateAzureKMSRequestError-1)
+    - [`MongoCryptCreateAzureKMSRequestNetworkTimeoutError`](#MongoCryptCreateAzureKMSRequestNetworkTimeoutError-1)
 
 ## Errors
 
 All errors are derived from the `MongoError` class which should **never** be instantiated.
-There are four main error classes which stem from `MongoError`: `MongoDriverError`,
-`MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
+There are five main error classes which stem from `MongoError`: `MongoDriverError`,
+`MongoNetworkError`, `MongoServerError`, `MongoCryptError` and `MongoSystemError`.
 
 ### `MongoError`
 
@@ -46,6 +52,12 @@ graph TD
     MongoError --- MongoNetworkError
     MongoError --- MongoServerError
     MongoError --- MongoSystemError
+    MongoError --- MongoCryptError
+    MongoCryptError --- MongoCryptInvalidArgumentError
+    MongoCryptError --- MongoCryptCreateDataKeyError
+    MongoCryptError --- MongoCryptCreateEncryptedCollectionError
+    MongoCryptError --- MongoCryptCreateAzureKMSRequestError
+    MongoCryptError --- MongoCryptCreateAzureKMSRequestNetworkTimeoutError
     MongoDriverError --- MongoAPIError
     MongoDriverError --- MongoRuntimeError
 
@@ -55,14 +67,28 @@ linkStyle 2 stroke:#116149
 linkStyle 3 stroke:#116149
 linkStyle 4 stroke:#116149
 linkStyle 5 stroke:#116149
+linkStyle 6 stroke:#116149
+linkStyle 7 stroke:#116149
+linkStyle 8 stroke:#116149
+linkStyle 9 stroke:#116149
+linkStyle 10 stroke:#116149
+linkStyle 11 stroke:#116149
 
 style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoCryptError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoSystemError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoNetworkError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+
+
+style MongoCryptCreateDataKeyError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoCryptCreateEncryptedCollectionError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoCryptInvalidArgumentError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoCryptCreateAzureKMSRequestError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+style MongoCryptCreateAzureKMSRequestNetworkTimeoutError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 ```
 
 Children of `MongoError` include:
@@ -71,6 +97,7 @@ Children of `MongoError` include:
 - [`MongoNetworkError`](#MongoNetworkError)
 - [`MongoServerError`](#MongoServerError)
 - [`MongoSystemError`](#MongoSystemError)
+- [`MongoCryptError`](#MongoCryptError)
 
 ### `MongoDriverError`
 
@@ -143,6 +170,21 @@ These are errors which originate from faulty environment setup.
 
 - #### MongoServerSelectionError
   - Thrown when the driver fails to select a server to complete an operation
+
+### `MongoCryptError`
+
+These are errors thrown from the `mongodb-client-encryption` bindings
+
+- #### MongoCryptInvalidArgumentError
+  - Thrown when <!-- TODO -->
+- #### MongoCryptInvalidCreateDataKeyError
+  - Thrown when <!-- TODO -->
+- #### MongoCryptInvalidCreateEncryptedCollectionError
+  - Thrown when <!-- TODO -->
+- #### MongoCryptInvalidCreateAzureKMSRequestError
+  - Thrown when <!-- TODO -->
+- #### MongoCryptInvalidCreateAzureKMSRequestNetworkTimeoutError
+  - Thrown when <!-- TODO -->
 
 ## Test Plan
 
