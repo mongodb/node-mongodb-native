@@ -108,10 +108,6 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
-interface OptionsWithCause {
-  cause?: Error;
-}
-
 function isAggregateError(e: Error): e is Error & { errors: Error[] } {
   return 'errors' in e && Array.isArray(e.errors);
 }
@@ -136,7 +132,7 @@ export class MongoError extends Error {
   connectionGeneration?: number;
 
   /** @internal */
-  constructor(message: string | Error, options?: OptionsWithCause) {
+  constructor(message: string | Error, options?: { cause?: Error }) {
     super(MongoError.buildErrorMessage(message), options);
     this[kErrorLabels] = new Set();
   }
@@ -736,7 +732,7 @@ export class MongoSystemError extends MongoError {
   reason?: TopologyDescription;
 
   /** @internal */
-  constructor(message: string, reason: TopologyDescription, options?: OptionsWithCause) {
+  constructor(message: string, reason: TopologyDescription, options?: { cause?: Error }) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error, options);
     } else {
