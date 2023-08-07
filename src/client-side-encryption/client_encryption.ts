@@ -155,8 +155,6 @@ export class ClientEncryption implements StateMachineExecutable {
     provider: KMSProvider,
     options: ClientEncryptionCreateDataKeyProviderOptions = {}
   ): Promise<UUID> {
-    const dataKey = Object.assign({ provider }, options.masterKey);
-
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
       throw new MongoCryptInvalidArgumentError(
         `Option "keyAltNames" must be an array of strings, but was of type ${typeof options.keyAltNames}.`
@@ -181,17 +179,22 @@ export class ClientEncryption implements StateMachineExecutable {
       keyMaterial = serialize({ keyMaterial: options.keyMaterial });
     }
 
-    const dataKeyBson = serialize(dataKey);
+    const dataKeyBson = serialize({
+      provider,
+      ...options.masterKey
+    });
+
     const context = this._mongoCrypt.makeDataKeyContext(dataKeyBson, {
       keyAltNames,
       keyMaterial
     });
+
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
 
-    const updatedDataKey = await stateMachine.executeAsync<DataKey>(this, context);
+    const dataKey = await stateMachine.executeAsync<DataKey>(this, context);
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
@@ -200,7 +203,8 @@ export class ClientEncryption implements StateMachineExecutable {
     const { insertedId } = await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
-      .insertOne(updatedDataKey, { writeConcern: { w: 'majority' } });
+      .insertOne(dataKey, { writeConcern: { w: 'majority' } });
+
     return insertedId;
   }
 
