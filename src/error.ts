@@ -218,8 +218,8 @@ export class MongoServerError extends MongoError {
  */
 export class MongoDriverError extends MongoError {
   /** @internal */
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -239,8 +239,8 @@ export class MongoDriverError extends MongoError {
 
 export class MongoAPIError extends MongoDriverError {
   /** @internal */
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -714,8 +714,8 @@ export class MongoMissingCredentialsError extends MongoAPIError {
  */
 export class MongoMissingDependencyError extends MongoAPIError {
   /** @internal */
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options: { cause?: Error } = {}) {
+    super(message, options);
   }
 
   override get name(): string {
