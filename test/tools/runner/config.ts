@@ -159,6 +159,10 @@ export class TestConfiguration {
   }
 
   newClient(dbOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
+    if (process.env.DRIVERS_ATLAS_TESTING_URI) {
+      return new MongoClient(process.env.DRIVERS_ATLAS_TESTING_URI);
+    }
+
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
     // support MongoClient constructor form (url, options) for `newClient`
@@ -257,6 +261,10 @@ export class TestConfiguration {
       proxyURIParams: this.options.proxyURIParams,
       ...options
     };
+
+    if (process.env.DRIVERS_ATLAS_TESTING_URI) {
+      return process.env.DRIVERS_ATLAS_TESTING_URI;
+    }
 
     const FILLER_HOST = 'fillerHost';
 

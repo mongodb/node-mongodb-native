@@ -105,6 +105,10 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
 };
 
 const testConfigBeforeHook = async function () {
+  if (process.env.DRIVERS_ATLAS_TESTING_URI) {
+    this.configuration = new TestConfiguration(process.env.DRIVERS_ATLAS_TESTING_URI, {});
+    return;
+  }
   // TODO(NODE-5035): Implement OIDC support. Creating the MongoClient will fail
   // with "MongoInvalidArgumentError: AuthMechanism 'MONGODB-OIDC' not supported"
   // as is expected until that ticket goes in. Then this condition gets removed.
