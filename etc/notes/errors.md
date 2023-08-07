@@ -18,6 +18,7 @@
   - [`MongoNetworkError`](#MongoNetworkError)
   - [`MongoServerError`](#MongoServerError)
   - [`MongoSystemError`](#MongoSystemError)
+  - [`MongoCryptError`](#MongoCryptError)
 - [Test Plan](#Test-Plan)
   - [`MongoAPIError`](#MongoAPIError-1)
     - [`MongoInvalidArgumentError`](#MongoInvalidArgumentError-1)
@@ -28,12 +29,6 @@
     - [`MongoServerClosedError`](#MongoServerClosedError-1)
   - [`MongoNetworkError`](#MongoNetworkError-1)
     - [`MongoNetworkTimeoutError`](#MongoNetworkTimeoutError-1)
-  - [`MongoCryptError`](#MongoCryptError-1)
-    - [`MongoCryptInvalidArgumentError`](#MongoCryptError-1)
-    - [`MongoCryptCreateDataKeyError`](#MongoCryptCreateDataKeyError-1)
-    - [`MongoCryptCreateEncryptedCollectionError`](#MongoCryptCreateEncryptedCollectionError-1)
-    - [`MongoCryptCreateAzureKMSRequestError`](#MongoCryptCreateAzureKMSRequestError-1)
-    - [`MongoCryptCreateAzureKMSRequestNetworkTimeoutError`](#MongoCryptCreateAzureKMSRequestNetworkTimeoutError-1)
 
 ## Errors
 
@@ -53,11 +48,6 @@ graph TD
     MongoError --- MongoServerError
     MongoError --- MongoSystemError
     MongoError --- MongoCryptError
-    MongoCryptError --- MongoCryptInvalidArgumentError
-    MongoCryptError --- MongoCryptCreateDataKeyError
-    MongoCryptError --- MongoCryptCreateEncryptedCollectionError
-    MongoCryptError --- MongoCryptCreateAzureKMSRequestError
-    MongoCryptError --- MongoCryptCreateAzureKMSRequestNetworkTimeoutError
     MongoDriverError --- MongoAPIError
     MongoDriverError --- MongoRuntimeError
 
@@ -82,13 +72,6 @@ style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-
-
-style MongoCryptCreateDataKeyError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoCryptCreateEncryptedCollectionError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoCryptInvalidArgumentError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoCryptCreateAzureKMSRequestError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoCryptCreateAzureKMSRequestNetworkTimeoutError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 ```
 
 Children of `MongoError` include:
@@ -176,15 +159,15 @@ These are errors which originate from faulty environment setup.
 These are errors thrown from the `mongodb-client-encryption` bindings
 
 - #### MongoCryptInvalidArgumentError
-  - Thrown when <!-- TODO -->
+  - Thrown when an invalid argument has been provided to an encryption API
 - #### MongoCryptInvalidCreateDataKeyError
-  - Thrown when <!-- TODO -->
+  - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create data keys
 - #### MongoCryptInvalidCreateEncryptedCollectionError
-  - Thrown when <!-- TODO -->
+  - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create a collection
 - #### MongoCryptInvalidCreateAzureKMSRequestError
-  - Thrown when <!-- TODO -->
-- #### MongoCryptInvalidCreateAzureKMSRequestNetworkTimeoutError
-  - Thrown when <!-- TODO -->
+  - Thrown when `mongodb-client-encryption` failed to auto-refresh Azure KMS credentials
+- #### MongoCryptKMSRequestNetworkTimeoutError
+  - Thrown when `mongodb-client-encryption` times out when fetching KMS credentials
 
 ## Test Plan
 
