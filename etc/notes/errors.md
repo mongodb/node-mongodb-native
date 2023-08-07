@@ -42,31 +42,18 @@ The base class from which all errors in the Node driver subclass.
 `MongoError` should **never** be be directly instantiated.
 
 ```mermaid
+
 graph TD
-    MongoError --- MongoDriverError
-    MongoError --- MongoNetworkError
-    MongoError --- MongoServerError
-    MongoError --- MongoSystemError
-    MongoError --- MongoCryptError
-    MongoDriverError --- MongoAPIError
-    MongoDriverError --- MongoRuntimeError
+    MongoError:::node --- MongoDriverError
+    MongoError:::node --- MongoNetworkError
+    MongoError:::node --- MongoServerError
+    MongoError:::node --- MongoSystemError
+    MongoError:::node --- MongoCryptError
+    MongoDriverError:::node --- MongoAPIError
+    MongoDriverError:::node --- MongoRuntimeError
 
-linkStyle 0 stroke:#116149
-linkStyle 1 stroke:#116149
-linkStyle 2 stroke:#116149
-linkStyle 3 stroke:#116149
-linkStyle 4 stroke:#116149
-linkStyle 5 stroke:#116149
-linkStyle 6 stroke:#116149
-
-style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoCryptError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoSystemError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoNetworkError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+linkStyle 0,1,2,3,4,5,6 stroke:#116149
+classDef node fill:#13aa52,stroke:#21313c,color:#FAFBFC
 ```
 
 Children of `MongoError` include:
