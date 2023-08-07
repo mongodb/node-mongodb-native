@@ -121,7 +121,7 @@ describe('cryptoCallbacks', function () {
       sandbox?.restore();
     });
 
-    for (const hookName of ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook') {
+    for (const hookName of ['aes256CbcEncryptHook', 'aes256CbcDecryptHook', 'hmacSha512Hook']) {
       it(`should properly propagate an error when ${hookName} fails`, async function () {
         const error = new Error('some random error text');
         sandbox.stub(cryptoCallbacks, hookName).returns(error);
