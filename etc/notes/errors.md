@@ -58,7 +58,6 @@ linkStyle 3 stroke:#116149
 linkStyle 4 stroke:#116149
 linkStyle 5 stroke:#116149
 linkStyle 6 stroke:#116149
-linkStyle 7 stroke:#116149
 
 style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
 style MongoCryptError fill:#13aa52,stroke:#21313c,color:#FAFBFC
