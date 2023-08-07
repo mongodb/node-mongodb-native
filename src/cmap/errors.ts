@@ -9,6 +9,7 @@ export class PoolClosedError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
+  /** @internal */
   constructor(pool: ConnectionPool) {
     super('Attempted to check out a connection from closed connection pool');
     this.address = pool.address;
@@ -27,6 +28,7 @@ export class PoolClearedError extends MongoNetworkError {
   /** The address of the connection pool */
   address: string;
 
+  /** @internal */
   constructor(pool: ConnectionPool, message?: string) {
     const errorMessage = message
       ? message
@@ -47,6 +49,7 @@ export class PoolClearedError extends MongoNetworkError {
  * @category Error
  */
 export class PoolClearedOnNetworkError extends PoolClearedError {
+  /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
   }
@@ -64,6 +67,7 @@ export class WaitQueueTimeoutError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
+  /** @internal */
   constructor(message: string, address: string) {
     super(message);
     this.address = address;

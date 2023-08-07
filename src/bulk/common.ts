@@ -598,7 +598,7 @@ export class MongoBulkWriteError extends MongoServerError {
   writeErrors: OneOrMore<WriteError> = [];
   err?: WriteConcernError;
 
-  /** Creates a new MongoBulkWriteError */
+  /** @internal Creates a new MongoBulkWriteError */
   constructor(
     error:
       | { message: string; code: number; writeErrors?: WriteError[] }
