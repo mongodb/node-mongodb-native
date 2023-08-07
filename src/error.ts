@@ -108,6 +108,10 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
+interface OptionsWithCause {
+  cause?: Error;
+}
+
 function isAggregateError(e: Error): e is Error & { errors: Error[] } {
   return 'errors' in e && Array.isArray(e.errors);
 }
@@ -130,16 +134,10 @@ export class MongoError extends Error {
   code?: number | string;
   topologyVersion?: TopologyVersion;
   connectionGeneration?: number;
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  cause?: Error; // depending on the node version, this may or may not exist on the base
 
-  constructor(message: string | Error) {
-    super(MongoError.buildErrorMessage(message));
-    if (message instanceof Error) {
-      this.cause = message;
-    }
-
+  /** @internal */
+  constructor(message: string | Error, options?: OptionsWithCause) {
+    super(MongoError.buildErrorMessage(message), options);
     this[kErrorLabels] = new Set();
   }
 
@@ -198,6 +196,7 @@ export class MongoServerError extends MongoError {
   ok?: number;
   [key: string]: any;
 
+  /** @internal */
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
     if (message.errorLabels) {
@@ -222,8 +221,9 @@ export class MongoServerError extends MongoError {
  * @category Error
  */
 export class MongoDriverError extends MongoError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -242,8 +242,9 @@ export class MongoDriverError extends MongoError {
  */
 
 export class MongoAPIError extends MongoDriverError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -262,8 +263,9 @@ export class MongoAPIError extends MongoDriverError {
  * @category Error
  */
 export class MongoRuntimeError extends MongoDriverError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -279,8 +281,12 @@ export class MongoRuntimeError extends MongoDriverError {
  * @category Error
  */
 export class MongoBatchReExecutionError extends MongoAPIError {
-  constructor(message = 'This batch has already been executed, create new batch to execute') {
-    super(message);
+  /** @internal */
+  constructor(
+    message = 'This batch has already been executed, create new batch to execute',
+    options?: OptionsWithCause
+  ) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -296,8 +302,9 @@ export class MongoBatchReExecutionError extends MongoAPIError {
  * @category Error
  */
 export class MongoDecompressionError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -313,8 +320,9 @@ export class MongoDecompressionError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoNotConnectedError extends MongoAPIError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -330,8 +338,9 @@ export class MongoNotConnectedError extends MongoAPIError {
  * @category Error
  */
 export class MongoTransactionError extends MongoAPIError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -347,8 +356,9 @@ export class MongoTransactionError extends MongoAPIError {
  * @category Error
  */
 export class MongoExpiredSessionError extends MongoAPIError {
-  constructor(message = 'Cannot use a session that has ended') {
-    super(message);
+  /** @internal */
+  constructor(message = 'Cannot use a session that has ended', options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -364,8 +374,9 @@ export class MongoExpiredSessionError extends MongoAPIError {
  * @category Error
  */
 export class MongoKerberosError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -381,8 +392,9 @@ export class MongoKerberosError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoAWSError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -398,8 +410,9 @@ export class MongoAWSError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoAzureError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -414,8 +427,9 @@ export class MongoAzureError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoChangeStreamError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -430,8 +444,12 @@ export class MongoChangeStreamError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoTailableCursorError extends MongoAPIError {
-  constructor(message = 'Tailable cursor does not support this operation') {
-    super(message);
+  /** @internal */
+  constructor(
+    message = 'Tailable cursor does not support this operation',
+    options?: OptionsWithCause
+  ) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -445,8 +463,9 @@ export class MongoTailableCursorError extends MongoAPIError {
  * @category Error
  */
 export class MongoGridFSStreamError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -462,8 +481,9 @@ export class MongoGridFSStreamError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoGridFSChunkError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -488,8 +508,9 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -505,8 +526,9 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoCursorInUseError extends MongoAPIError {
-  constructor(message = 'Cursor is already initialized') {
-    super(message);
+  /** @internal */
+  constructor(message = 'Cursor is already initialized', options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -522,8 +544,9 @@ export class MongoCursorInUseError extends MongoAPIError {
  * @category Error
  */
 export class MongoServerClosedError extends MongoAPIError {
-  constructor(message = 'Server is closed') {
-    super(message);
+  /** @internal */
+  constructor(message = 'Server is closed', options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -538,8 +561,9 @@ export class MongoServerClosedError extends MongoAPIError {
  * @category Error
  */
 export class MongoCursorExhaustedError extends MongoAPIError {
-  constructor(message?: string) {
-    super(message || 'Cursor is exhausted');
+  /** @internal */
+  constructor(message?: string, options?: OptionsWithCause) {
+    super(message || 'Cursor is exhausted', options);
   }
 
   override get name(): string {
@@ -555,8 +579,9 @@ export class MongoCursorExhaustedError extends MongoAPIError {
  * @category Error
  */
 export class MongoTopologyClosedError extends MongoAPIError {
-  constructor(message = 'Topology is closed') {
-    super(message);
+  /** @internal */
+  constructor(message = 'Topology is closed', options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -585,6 +610,7 @@ export class MongoNetworkError extends MongoError {
   /** @internal */
   [kBeforeHandshake]?: boolean;
 
+  /** @internal */
   constructor(message: string | Error, options?: MongoNetworkErrorOptions) {
     super(message);
 
@@ -607,6 +633,7 @@ export class MongoNetworkError extends MongoError {
  * mongodb-client-encryption has a dependency on this error with an instanceof check
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
+  /** @internal */
   constructor(message: string, options?: MongoNetworkErrorOptions) {
     super(message, options);
   }
@@ -622,8 +649,9 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
  * @category Error
  */
 export class MongoParseError extends MongoDriverError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -640,8 +668,9 @@ export class MongoParseError extends MongoDriverError {
  * @category Error
  */
 export class MongoInvalidArgumentError extends MongoAPIError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -658,8 +687,9 @@ export class MongoInvalidArgumentError extends MongoAPIError {
  * @category Error
  */
 export class MongoCompatibilityError extends MongoAPIError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -676,8 +706,9 @@ export class MongoCompatibilityError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingCredentialsError extends MongoAPIError {
-  constructor(message: string) {
-    super(message);
+  /** @internal */
+  constructor(message: string, options?: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -692,9 +723,9 @@ export class MongoMissingCredentialsError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingDependencyError extends MongoAPIError {
-  constructor(message: string, { cause }: { cause?: Error } = {}) {
-    super(message);
-    if (cause) this.cause = cause;
+  /** @internal */
+  constructor(message: string, options: OptionsWithCause) {
+    super(message, options);
   }
 
   override get name(): string {
@@ -710,11 +741,12 @@ export class MongoSystemError extends MongoError {
   /** An optional reason context, such as an error saved during flow of monitoring and selecting servers */
   reason?: TopologyDescription;
 
-  constructor(message: string, reason: TopologyDescription) {
+  /** @internal */
+  constructor(message: string, reason: TopologyDescription, options?: OptionsWithCause) {
     if (reason && reason.error) {
-      super(reason.error.message || reason.error);
+      super(reason.error.message || reason.error, options);
     } else {
-      super(message);
+      super(message, options);
     }
 
     if (reason) {
@@ -735,8 +767,9 @@ export class MongoSystemError extends MongoError {
  * @category Error
  */
 export class MongoServerSelectionError extends MongoSystemError {
-  constructor(message: string, reason: TopologyDescription) {
-    super(message, reason);
+  /** @internal */
+  constructor(message: string, reason: TopologyDescription, options?: OptionsWithCause) {
+    super(message, reason, options);
   }
 
   override get name(): string {
@@ -766,6 +799,8 @@ export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
 
+  // TODO
+  /** @internal */
   constructor(message: ErrorDescription, result?: Document) {
     if (result && Array.isArray(result.errorLabels)) {
       message.errorLabels = result.errorLabels;

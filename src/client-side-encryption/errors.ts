@@ -1,10 +1,11 @@
 import { type Document } from '../bson';
+import { MongoError } from '../error';
 
 /**
  * @public
  * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
-export class MongoCryptError extends Error {
+export class MongoCryptError extends MongoError {
   /** @internal */
   constructor(message: string, options: { cause?: Error } = {}) {
     super(message, options);
