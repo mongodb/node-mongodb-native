@@ -31,6 +31,7 @@ tests:
           # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
           # against an Atlas cluster and the expectError will be removed.
           isError: true
+          errorContains: Search index commands are only supported with Atlas
     expectEvents:
       - client: *client0
         events:
@@ -39,4 +40,3 @@ tests:
                 dropSearchIndex: *collection0
                 name: *indexName
                 $db: *database0
-

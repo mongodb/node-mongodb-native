@@ -33,7 +33,6 @@ import type { TagSet } from './sdam/server_description';
 import {
   DEFAULT_PK_FACTORY,
   emitWarning,
-  emitWarningOnce,
   HostAddress,
   isRecord,
   matchesParentDomain,
@@ -162,29 +161,16 @@ function checkTLSOptions(allOptions: CaseInsensitiveMap): void {
   check('tlsAllowInvalidCertificates', 'tlsDisableOCSPEndpointCheck');
   check('tlsDisableCertificateRevocationCheck', 'tlsDisableOCSPEndpointCheck');
 }
-
-const TRUTHS = new Set(['true', 't', '1', 'y', 'yes']);
-const FALSEHOODS = new Set(['false', 'f', '0', 'n', 'no', '-1']);
 function getBoolean(name: string, value: unknown): boolean {
   if (typeof value === 'boolean') return value;
-  const valueString = String(value).toLowerCase();
-  if (TRUTHS.has(valueString)) {
-    if (valueString !== 'true') {
-      emitWarningOnce(
-        `deprecated value for ${name} : ${valueString} - please update to ${name} : true instead`
-      );
-    }
-    return true;
+  switch (value) {
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    default:
+      throw new MongoParseError(`${name} must be either "true" or "false"`);
   }
-  if (FALSEHOODS.has(valueString)) {
-    if (valueString !== 'false') {
-      emitWarningOnce(
-        `deprecated value for ${name} : ${valueString} - please update to ${name} : false instead`
-      );
-    }
-    return false;
-  }
-  throw new MongoParseError(`Expected ${name} to be stringified boolean value, got: ${value}`);
 }
 
 function getIntFromOptions(name: string, value: unknown): number {
@@ -1223,9 +1209,17 @@ export const OPTIONS = {
   pfx: { type: 'any' },
   secureProtocol: { type: 'any' },
   index: { type: 'any' },
-  // Legacy Options, these are unused but left here to avoid errors with CSFLE lib
-  useNewUrlParser: { type: 'boolean' } as OptionDescriptor,
-  useUnifiedTopology: { type: 'boolean' } as OptionDescriptor,
+  // Legacy options from v3 era
+  useNewUrlParser: {
+    type: 'boolean',
+    deprecated:
+      'useNewUrlParser has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
+  } as OptionDescriptor,
+  useUnifiedTopology: {
+    type: 'boolean',
+    deprecated:
+      'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
+  } as OptionDescriptor,
   // MongoLogger
   // TODO(NODE-4849): Tighten the type of mongodbLogPath
   mongodbLogPath: { type: 'any' }

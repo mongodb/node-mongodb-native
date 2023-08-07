@@ -7,6 +7,7 @@ import {
   type AuthMechanism,
   HostAddress,
   MongoClient,
+  type ServerApi,
   TopologyType,
   type WriteConcernSettings
 } from '../../mongodb';
@@ -71,9 +72,9 @@ export class TestConfiguration {
     auth?: { username: string; password: string; authSource?: string };
     proxyURIParams?: ProxyParams;
   };
-  serverApi: string;
+  serverApi: ServerApi;
 
-  constructor(uri: string, context: Record<string, any>) {
+  constructor(private uri: string, private context: Record<string, any>) {
     const url = new ConnectionString(uri);
     const { hosts } = url;
     const hostAddresses = hosts.map(HostAddress.fromString);
@@ -352,5 +353,26 @@ export class TestConfiguration {
 
   kmsProviders(localKey): Record<string, any> {
     return { local: { key: localKey } };
+  }
+
+  makeAtlasTestConfiguration(): AtlasTestConfiguration {
+    return new AtlasTestConfiguration(this.uri, this.context);
+  }
+}
+
+/**
+ * A specialized configuration used to connect to Atlas for testing.
+ *
+ * This class requires that the Atlas srv URI is set as the `MONGODB_URI` in the environment.
+ */
+export class AtlasTestConfiguration extends TestConfiguration {
+  override newClient(): MongoClient {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return new MongoClient(process.env.MONGODB_URI!);
+  }
+
+  override url(): string {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return process.env.MONGODB_URI!;
   }
 }
