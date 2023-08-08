@@ -14,14 +14,20 @@ describe('ClientEncryption', function () {
   describe('Errors', function () {
     const errors = [
       new MongoCryptAzureKMSRequestError(''),
-      new MongoCryptCreateDataKeyError({
-        encryptedFields: {},
-        cause: new Error()
-      }),
-      new MongoCryptCreateEncryptedCollectionError({
-        encryptedFields: {},
-        cause: new Error()
-      }),
+      new MongoCryptCreateDataKeyError(
+        {
+          encryptedFields: {}
+        },
+        {
+          cause: new Error()
+        }
+      ),
+      new MongoCryptCreateEncryptedCollectionError(
+        {
+          encryptedFields: {}
+        },
+        { cause: new Error() }
+      ),
       new MongoCryptError(''),
       new MongoCryptInvalidArgumentError('')
     ];
