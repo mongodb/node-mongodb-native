@@ -9,8 +9,6 @@ source ".evergreen/init-node-and-npm-env.sh"
 
 set -o xtrace
 
-npm install mongodb-client-encryption@alpha
-
 export MONGODB_URI="mongodb://localhost:27017"
 
 export EXPECTED_AZUREKMS_OUTCOME=${EXPECTED_AZUREKMS_OUTCOME:-omitted}
