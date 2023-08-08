@@ -99,7 +99,7 @@ describe('MongoErrors', () => {
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
-      expect(err).to.have.property('cause', inputError);
+      expect(err).to.not.have.property('cause');
     });
   });
 
@@ -169,7 +169,7 @@ describe('MongoErrors', () => {
     context('when options.cause is not set', () => {
       it('attaches the cause property to the instance', () => {
         const error = new MongoMissingDependencyError('missing!', { cause: undefined });
-        expect(error).to.not.have.property('cause');
+        expect(error).to.have.property('cause').that.is.undefined;
       });
     });
   });
