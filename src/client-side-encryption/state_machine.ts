@@ -19,7 +19,7 @@ import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils'
 import { type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
-import { type KMSProvider, type KMSProviders } from './providers';
+import { type ClientEncryptionDataKeyProvider, type KMSProviders } from './providers';
 
 let socks: SocksLib | null = null;
 function loadSocks(): SocksLib {
@@ -97,19 +97,21 @@ declare module 'mongodb-client-encryption' {
  *  - tlsAllowInvalidCertificates
  *  - tlsAllowInvalidHostnames
  *  - tlsInsecure
+ *
+ * These options are not included in the type, and are ignored if provided.
  */
-export type CSFLETlsOptions = Pick<
+export type ClientEncryptionTlsOptions = Pick<
   MongoClientOptions,
   'tlsCAFile' | 'tlsCertificateKeyFile' | 'tlsCertificateKeyFilePassword'
 >;
 
 /** @public */
 export type CSFLEKMSTlsOptions = {
-  aws?: CSFLETlsOptions;
-  gcp?: CSFLETlsOptions;
-  kmip?: CSFLETlsOptions;
-  local?: CSFLETlsOptions;
-  azure?: CSFLETlsOptions;
+  aws?: ClientEncryptionTlsOptions;
+  gcp?: ClientEncryptionTlsOptions;
+  kmip?: ClientEncryptionTlsOptions;
+  local?: ClientEncryptionTlsOptions;
+  azure?: ClientEncryptionTlsOptions;
 };
 
 /**
@@ -122,6 +124,7 @@ export type CSFLEKMSTlsOptions = {
 export interface StateMachineExecutable {
   _keyVaultNamespace: string;
   _keyVaultClient: MongoClient;
+  askForKMSCredentials: () => Promise<KMSProviders>;
 
   /** only used for auto encryption */
   _metaDataClient?: MongoClient;
@@ -129,7 +132,6 @@ export interface StateMachineExecutable {
   _mongocryptdClient?: MongoClient;
   /** only used for auto encryption */
   _mongocryptdManager?: MongocryptdManager;
-  askForKMSCredentials: () => Promise<KMSProviders>;
 }
 
 export type StateMachineOptions = {
@@ -402,7 +404,7 @@ export class StateMachine {
 
       const tlsOptions = this.options.tlsOptions;
       if (tlsOptions) {
-        const kmsProvider = request.kmsProvider as KMSProvider;
+        const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
         const providerTlsOptions = tlsOptions[kmsProvider];
         if (providerTlsOptions) {
           const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
@@ -441,7 +443,10 @@ export class StateMachine {
    *
    * @returns An error if any option is invalid.
    */
-  validateTlsOptions(kmsProvider: string, tlsOptions: CSFLETlsOptions): MongoCryptError | void {
+  validateTlsOptions(
+    kmsProvider: string,
+    tlsOptions: ClientEncryptionTlsOptions
+  ): MongoCryptError | void {
     const tlsOptionNames = Object.keys(tlsOptions);
     for (const option of INSECURE_TLS_OPTIONS) {
       if (tlsOptionNames.includes(option)) {
@@ -456,7 +461,7 @@ export class StateMachine {
    * @param tlsOptions - The client TLS options for the provider.
    * @param options - The existing connection options.
    */
-  setTlsOptions(tlsOptions: CSFLETlsOptions, options: tls.ConnectionOptions) {
+  setTlsOptions(tlsOptions: ClientEncryptionTlsOptions, options: tls.ConnectionOptions) {
     if (tlsOptions.tlsCertificateKeyFile) {
       const cert = fs.readFileSync(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;

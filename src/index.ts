@@ -36,6 +36,7 @@ export {
   Timestamp
 } from './bson';
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
+export { ClientEncryption } from './client-side-encryption/client_encryption';
 export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
@@ -204,11 +205,34 @@ export type {
 export type { AutoEncrypter } from './client-side-encryption/auto_encrypter';
 export type { AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 export type { AutoEncryptionExtraOptions } from './client-side-encryption/auto_encrypter';
-export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
-export type { KMSProviders } from './client-side-encryption/providers/index';
 export type {
+  AWSEncryptionKeyOptions,
+  AzureEncryptionKeyOptions,
+  ClientEncryptionCreateDataKeyProviderOptions,
+  ClientEncryptionEncryptOptions,
+  ClientEncryptionOptions,
+  ClientEncryptionRewrapManyDataKeyProviderOptions,
+  ClientEncryptionRewrapManyDataKeyResult,
+  DataKey,
+  GCPEncryptionKeyOptions,
+  RangeOptions
+} from './client-side-encryption/client_encryption';
+export {
+  MongoCryptAzureKMSRequestError,
+  MongoCryptCreateDataKeyError,
+  MongoCryptCreateEncryptedCollectionError,
+  MongoCryptError,
+  MongoCryptInvalidArgumentError,
+  MongoCryptKMSRequestNetworkTimeoutError
+} from './client-side-encryption/errors';
+export type { MongocryptdManager } from './client-side-encryption/mongocryptd_manager';
+export type {
+  ClientEncryptionDataKeyProvider,
+  KMSProviders
+} from './client-side-encryption/providers/index';
+export type {
+  ClientEncryptionTlsOptions,
   CSFLEKMSTlsOptions,
-  CSFLETlsOptions,
   StateMachineExecutable
 } from './client-side-encryption/state_machine';
 export type { AuthContext } from './cmap/auth/auth_provider';
