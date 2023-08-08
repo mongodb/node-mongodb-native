@@ -328,7 +328,8 @@ The following steps will walk you through how to start and test a load balancer.
 The following steps will walk you through how to run the tests for CSFLE.
 
 1. Install [MongoDB Client Encryption][npm-csfle] if you haven't already:
-   `npm install mongodb-client-encryption`
+   `npm install mongodb-client-encryption`.  Note: if developing changes in `mongodb-client-encryption`,
+   you can link it locally using `etc/tooling/fle.sh`.
 
 1. Create the following environment variables using a command like `export AWS_REGION="us-east-1"`.
 

@@ -27,6 +27,7 @@ const EXPECTED_EXPORTS = [
   'CancellationToken',
   'ChangeStream',
   'ChangeStreamCursor',
+  'ClientEncryption',
   'ClientSession',
   'Code',
   'Collection',
@@ -71,6 +72,12 @@ const EXPECTED_EXPORTS = [
   'MongoChangeStreamError',
   'MongoClient',
   'MongoCompatibilityError',
+  'MongoCryptAzureKMSRequestError',
+  'MongoCryptCreateDataKeyError',
+  'MongoCryptCreateEncryptedCollectionError',
+  'MongoCryptError',
+  'MongoCryptInvalidArgumentError',
+  'MongoCryptKMSRequestNetworkTimeoutError',
   'MongoCursorExhaustedError',
   'MongoCursorInUseError',
   'MongoDecompressionError',
@@ -121,6 +128,7 @@ const EXPECTED_EXPORTS = [
   'TopologyOpeningEvent',
   'TopologyType',
   'UnorderedBulkOperation',
+  'UUID',
   'WriteConcern'
 ];
 

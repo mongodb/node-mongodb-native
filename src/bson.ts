@@ -19,7 +19,8 @@ export {
   MinKey,
   ObjectId,
   serialize,
-  Timestamp
+  Timestamp,
+  UUID
 } from 'bson';
 
 /**

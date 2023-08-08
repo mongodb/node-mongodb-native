@@ -5,7 +5,7 @@ import type {
   MongoCryptOptions
 } from 'mongodb-client-encryption';
 
-import { type Binary, type Document, type Long, serialize } from '../bson';
+import { type Binary, type Document, type Long, serialize, type UUID } from '../bson';
 import { type AnyBulkWriteOperation, type BulkWriteResult } from '../bulk/common';
 import { type ProxyOptions } from '../cmap/connection';
 import { type Collection } from '../collection';
@@ -16,26 +16,26 @@ import { type MongoClient } from '../mongo_client';
 import { type Filter } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
-import { type Callback, MongoDBCollectionNamespace } from '../utils';
-import { maybeCallback, promiseOrCallback } from './common';
+import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import {
   MongoCryptCreateDataKeyError,
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptInvalidArgumentError
 } from './errors';
-import { type KMSProvider, type KMSProviders, refreshKMSCredentials } from './providers/index';
 import {
-  type CSFLEKMSTlsOptions,
-  StateMachine,
-  type StateMachineExecutable
-} from './state_machine';
+  type ClientEncryptionDataKeyProvider,
+  type KMSProviders,
+  refreshKMSCredentials
+} from './providers/index';
+import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /**
+ * @public
  * The schema for a DataKey in the key vault collection.
  */
 export interface DataKey {
-  _id: Binary;
+  _id: UUID;
   version?: number;
   keyAltNames?: string[];
   keyMaterial: Binary;
@@ -46,14 +46,21 @@ export interface DataKey {
 }
 
 /**
+ * @public
  * The public interface for explicit in-use encryption
  */
-export class ClientEncryption implements StateMachineExecutable {
+export class ClientEncryption {
+  /** @internal */
   _client: MongoClient;
+  /** @internal */
   _keyVaultNamespace: string;
+  /** @internal */
   _keyVaultClient: MongoClient;
+  /** @internal */
   _proxyOptions: ProxyOptions;
+  /** @internal */
   _tlsOptions: CSFLEKMSTlsOptions;
+  /** @internal */
   _kmsProviders: KMSProviders;
 
   /** @internal */
@@ -125,18 +132,6 @@ export class ClientEncryption implements StateMachineExecutable {
    *
    * @example
    * ```ts
-   * // Using callbacks to create a local key
-   * clientEncryption.createDataKey('local', (err, dataKey) => {
-   *   if (err) {
-   *     // This means creating the key failed.
-   *   } else {
-   *     // key creation succeeded
-   *   }
-   * });
-   * ```
-   *
-   * @example
-   * ```ts
    * // Using async/await to create a local key
    * const dataKeyId = await clientEncryption.createDataKey('local');
    * ```
@@ -164,21 +159,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * });
    * ```
    */
-  createDataKey(
-    provider: KMSProvider,
-    options?: ClientEncryptionCreateDataKeyProviderOptions,
-    callback?: Callback<DataKey>
-  ) {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    if (options == null) {
-      options = {};
-    }
-
-    const dataKey = Object.assign({ provider }, options.masterKey);
-
+  async createDataKey(
+    provider: ClientEncryptionDataKeyProvider,
+    options: ClientEncryptionCreateDataKeyProviderOptions = {}
+  ): Promise<UUID> {
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
       throw new MongoCryptInvalidArgumentError(
         `Option "keyAltNames" must be an array of strings, but was of type ${typeof options.keyAltNames}.`
@@ -203,42 +187,33 @@ export class ClientEncryption implements StateMachineExecutable {
       keyMaterial = serialize({ keyMaterial: options.keyMaterial });
     }
 
-    const dataKeyBson = serialize(dataKey);
+    const dataKeyBson = serialize({
+      provider,
+      ...options.masterKey
+    });
+
     const context = this._mongoCrypt.makeDataKeyContext(dataKeyBson, {
       keyAltNames,
       keyMaterial
     });
+
     const stateMachine = new StateMachine({
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
 
-    // @ts-expect-error We did not convert promiseOrCallback to TS
-    return promiseOrCallback(callback, cb => {
-      stateMachine.execute<DataKey>(this, context, (err, dataKey) => {
-        if (err || !dataKey) {
-          cb(err, null);
-          return;
-        }
+    const dataKey = await stateMachine.executeAsync<DataKey>(this, context);
 
-        const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
-          this._keyVaultNamespace
-        );
+    const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
+      this._keyVaultNamespace
+    );
 
-        this._keyVaultClient
-          .db(dbName)
-          .collection<DataKey>(collectionName)
-          .insertOne(dataKey, { writeConcern: { w: 'majority' } })
-          .then(
-            result => {
-              return cb(null, result.insertedId);
-            },
-            err => {
-              cb(err, null);
-            }
-          );
-      });
-    });
+    const { insertedId } = await this._keyVaultClient
+      .db(dbName)
+      .collection<DataKey>(collectionName)
+      .insertOne(dataKey, { writeConcern: { w: 'majority' } });
+
+    return insertedId;
   }
 
   /**
@@ -268,7 +243,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  async rewrapManyDataKey(filter: Filter<DataKey>, options: RewrapManyDataKeyOptions) {
+  async rewrapManyDataKey(
+    filter: Filter<DataKey>,
+    options: ClientEncryptionRewrapManyDataKeyProviderOptions
+  ) {
     let keyEncryptionKeyBson = undefined;
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
@@ -533,7 +511,7 @@ export class ClientEncryption implements StateMachineExecutable {
     db: Db,
     name: string,
     options: {
-      provider: KMSProvider;
+      provider: ClientEncryptionDataKeyProvider;
       createCollectionOptions: Omit<CreateCollectionOptions, 'encryptedFields'> & {
         encryptedFields: Document;
       };
@@ -569,7 +547,7 @@ export class ClientEncryption implements StateMachineExecutable {
         (result): result is PromiseRejectedResult => result.status === 'rejected'
       );
       if (rejection != null) {
-        throw new MongoCryptCreateDataKeyError({ encryptedFields, cause: rejection.reason });
+        throw new MongoCryptCreateDataKeyError(encryptedFields, { cause: rejection.reason });
       }
     }
 
@@ -580,7 +558,7 @@ export class ClientEncryption implements StateMachineExecutable {
       });
       return { collection, encryptedFields };
     } catch (cause) {
-      throw new MongoCryptCreateEncryptedCollectionError({ encryptedFields, cause });
+      throw new MongoCryptCreateEncryptedCollectionError(encryptedFields, { cause });
     }
   }
 
@@ -590,21 +568,7 @@ export class ClientEncryption implements StateMachineExecutable {
    *
    * @param value - The value that you wish to serialize. Must be of a type that can be serialized into BSON
    * @param options -
-   * @param callback - Optional callback to invoke when value is encrypted
-   * @returns If no callback is provided, returns a Promise that either resolves with the encrypted value, or rejects with an error. If a callback is provided, returns nothing.
-   *
-   * @example
-   * ```ts
-   * // Encryption with callback API
-   * function encryptMyData(value, callback) {
-   *   clientEncryption.createDataKey('local', (err, keyId) => {
-   *     if (err) {
-   *       return callback(err);
-   *     }
-   *     clientEncryption.encrypt(value, { keyId, algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic' }, callback);
-   *   });
-   * }
-   * ```
+   * @returns a Promise that either resolves with the encrypted value, or rejects with an error.
    *
    * @example
    * ```ts
@@ -624,12 +588,8 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  encrypt(
-    value: unknown,
-    options: ClientEncryptionEncryptOptions,
-    callback: Callback<Binary>
-  ): Promise<Binary> | void {
-    return maybeCallback(() => this._encrypt(value, false, options), callback);
+  async encrypt(value: unknown, options: ClientEncryptionEncryptOptions): Promise<Binary> {
+    return this._encrypt(value, false, options);
   }
 
   /**
@@ -661,16 +621,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * Explicitly decrypt a provided encrypted value
    *
    * @param value - An encrypted value
-   * @param callback - Optional callback to invoke when value is decrypted
-   * @returns If no callback is provided, returns a Promise that either resolves with the decrypted value, or rejects with an error. If a callback is provided, returns nothing.
-   *
-   * ```ts
-   * @example
-   * // Decrypting value with callback API
-   * function decryptMyValue(value, callback) {
-   *   clientEncryption.decrypt(value, callback);
-   * }
-   * ```
+   * @returns a Promise that either resolves with the decrypted value, or rejects with an error
    *
    * @example
    * ```ts
@@ -680,7 +631,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  decrypt<T = any>(value: Binary, callback?: Callback<T>): Promise<T> | void {
+  async decrypt<T = any>(value: Binary): Promise<T> {
     const valueBuffer = serialize({ v: value });
     const context = this._mongoCrypt.makeExplicitDecryptionContext(valueBuffer);
 
@@ -689,20 +640,13 @@ export class ClientEncryption implements StateMachineExecutable {
       tlsOptions: this._tlsOptions
     });
 
-    // @ts-expect-error We did not convert promiseOrCallback to TS
-    return promiseOrCallback(callback, cb => {
-      stateMachine.execute<{ v: T }>(this, context, (err, result) => {
-        if (err || !result) {
-          cb(err, null);
-          return;
-        }
+    const { v } = await stateMachine.executeAsync<{ v: T }>(this, context);
 
-        cb(null, result.v);
-      });
-    });
+    return v;
   }
 
   /**
+   * @internal
    * Ask the user for KMS credentials.
    *
    * This returns anything that looks like the kmsProviders original input
@@ -718,6 +662,7 @@ export class ClientEncryption implements StateMachineExecutable {
   }
 
   /**
+   * @internal
    * A helper that perform explicit encryption of values and expressions.
    * Explicitly encrypt a provided value. Note that either `options.keyId` or `options.keyAltName` must
    * be specified. Specifying both `options.keyId` and `options.keyAltName` is considered an error.
@@ -780,6 +725,7 @@ export class ClientEncryption implements StateMachineExecutable {
 }
 
 /**
+ * @public
  * Options to provide when encrypting data.
  */
 export interface ClientEncryptionEncryptOptions {
@@ -817,9 +763,12 @@ export interface ClientEncryptionEncryptOptions {
   rangeOptions?: RangeOptions;
 }
 
-/** @experimental */
-export interface RewrapManyDataKeyOptions {
-  provider: KMSProvider;
+/**
+ * @public
+ * @experimental
+ */
+export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
+  provider: ClientEncryptionDataKeyProvider;
   masterKey?:
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
@@ -828,6 +777,7 @@ export interface RewrapManyDataKeyOptions {
 }
 
 /**
+ * @public
  * Additional settings to provide when creating a new `ClientEncryption` instance.
  */
 export interface ClientEncryptionOptions {
@@ -858,6 +808,7 @@ export interface ClientEncryptionOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an AWS encryption key
  */
 export interface AWSEncryptionKeyOptions {
@@ -878,6 +829,7 @@ export interface AWSEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an AWS encryption key
  */
 export interface GCPEncryptionKeyOptions {
@@ -913,6 +865,7 @@ export interface GCPEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an Azure encryption key
  */
 export interface AzureEncryptionKeyOptions {
@@ -933,6 +886,7 @@ export interface AzureEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Options to provide when creating a new data key.
  */
 export interface ClientEncryptionCreateDataKeyProviderOptions {
@@ -955,9 +909,12 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
   keyMaterial?: Buffer | Binary;
 }
 
-/** @experimental */
-export interface RewrapManyDataKeyOptions {
-  provider: KMSProvider;
+/**
+ * @public
+ * @experimental
+ */
+export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
+  provider: ClientEncryptionDataKeyProvider;
   masterKey?:
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
@@ -965,18 +922,22 @@ export interface RewrapManyDataKeyOptions {
     | undefined;
 }
 
-/** @experimental */
+/**
+ * @public
+ * @experimental
+ */
 export interface ClientEncryptionRewrapManyDataKeyResult {
   /** The result of rewrapping data keys. If unset, no keys matched the filter. */
   bulkWriteResult?: BulkWriteResult;
 }
 
 /**
+ * @public
  * RangeOptions specifies index options for a Queryable Encryption field supporting "rangePreview" queries.
  * min, max, sparsity, and range must match the values set in the encryptedFields of the destination collection.
  * For double and decimal128, min/max/precision must all be set, or all be unset.
  */
-interface RangeOptions {
+export interface RangeOptions {
   min?: any;
   max?: any;
   sparsity: Long;
@@ -984,6 +945,7 @@ interface RangeOptions {
 }
 
 /**
+ * @public
  * Options to provide when encrypting data.
  */
 export interface ClientEncryptionEncryptOptions {

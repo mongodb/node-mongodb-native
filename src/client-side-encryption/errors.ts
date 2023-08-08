@@ -38,7 +38,7 @@ export class MongoCryptInvalidArgumentError extends MongoCryptError {
 export class MongoCryptCreateDataKeyError extends MongoCryptError {
   encryptedFields: Document;
   /** @internal */
-  constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
+  constructor(encryptedFields: Document, { cause }: { cause: Error }) {
     super(`Unable to complete creating data keys: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
   }
@@ -55,7 +55,7 @@ export class MongoCryptCreateDataKeyError extends MongoCryptError {
 export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
   encryptedFields: Document;
   /** @internal */
-  constructor({ encryptedFields, cause }: { encryptedFields: Document; cause: Error }) {
+  constructor(encryptedFields: Document, { cause }: { cause: Error }) {
     super(`Unable to create collection: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
   }

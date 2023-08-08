@@ -2,7 +2,6 @@ import * as BSON from 'bson';
 import { expect } from 'chai';
 import { readFileSync } from 'fs';
 import * as path from 'path';
-import * as util from 'util';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
@@ -138,11 +137,8 @@ describe('Connection Pool Deadlock Prevention', function () {
       keyVaultClient: this.keyVaultClient,
       extraOptions: getEncryptExtraOptions()
     });
-    this.clientEncryption.encryptPromisified = util.promisify(
-      this.clientEncryption.encrypt.bind(this.clientEncryption)
-    );
 
-    this.ciphertext = await this.clientEncryption.encryptPromisified('string0', {
+    this.ciphertext = await this.clientEncryption.encrypt('string0', {
       algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic',
       keyAltName: 'local'
     });
