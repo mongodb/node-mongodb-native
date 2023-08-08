@@ -703,7 +703,10 @@ oneOffFuncAsTasks.push({
       }
     },
     {
-      func: 'run tests'
+      func: 'run tests',
+      vars: {
+        CLIENT_ENCRYPTION: true
+      }
     }
   ]
 });

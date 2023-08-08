@@ -2767,6 +2767,8 @@ tasks:
         vars:
           PACKAGE: mongodb-client-encryption@6.0.0-alpha.1
       - func: run tests
+        vars:
+          CLIENT_ENCRYPTION: true
   - name: test-latest-server-noauth
     tags:
       - latest

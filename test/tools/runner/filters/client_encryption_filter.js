@@ -1,5 +1,7 @@
 'use strict';
 
+const { readFileSync } = require('fs');
+const { resolve } = require('path');
 const process = require('process');
 
 /**
@@ -25,13 +27,20 @@ class ClientSideEncryptionFilter {
       }
     }
 
+    const { version } = JSON.parse(
+      readFileSync(
+        resolve(__dirname, '../../../../node_modules/mongodb-client-encryption', 'package.json')
+      )
+    );
+
     this.enabled = !!(CSFLE_KMS_PROVIDERS && mongodbClientEncryption);
 
     // Adds these fields onto the context so that they can be reused by tests
     context.clientSideEncryption = {
       enabled: this.enabled,
       mongodbClientEncryption,
-      CSFLE_KMS_PROVIDERS
+      CSFLE_KMS_PROVIDERS,
+      version
     };
 
     callback();
