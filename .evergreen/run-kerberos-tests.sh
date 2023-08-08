@@ -21,7 +21,7 @@ echo "Running kinit"
 kinit -k -t "$(pwd)/.evergreen/drivers.keytab" -p ${KRB5_PRINCIPAL}
 
 set -o xtrace
-npm install kerberos@">=2.0.0-beta.0"
+npm install kerberos@2.0.1
 npm run check:kerberos
 
 set +o xtrace
