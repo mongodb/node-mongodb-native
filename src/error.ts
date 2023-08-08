@@ -130,6 +130,7 @@ export class MongoError extends Error {
   code?: number | string;
   topologyVersion?: TopologyVersion;
   connectionGeneration?: number;
+  override cause?: Error;
 
   /** @internal */
   constructor(message: string | Error, options?: { cause?: Error }) {
