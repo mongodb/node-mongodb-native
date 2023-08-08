@@ -23,14 +23,15 @@ import {
   MongoCryptCreateEncryptedCollectionError,
   MongoCryptInvalidArgumentError
 } from './errors';
-import { type KMSProvider, type KMSProviders, refreshKMSCredentials } from './providers/index';
 import {
-  type CSFLEKMSTlsOptions,
-  StateMachine,
-  type StateMachineExecutable
-} from './state_machine';
+  type ClientEncryptionDataKeyProvider,
+  type KMSProviders,
+  refreshKMSCredentials
+} from './providers/index';
+import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /**
+ * @public
  * The schema for a DataKey in the key vault collection.
  */
 export interface DataKey {
@@ -45,14 +46,21 @@ export interface DataKey {
 }
 
 /**
+ * @public
  * The public interface for explicit in-use encryption
  */
-export class ClientEncryption implements StateMachineExecutable {
+export class ClientEncryption {
+  /** @internal */
   _client: MongoClient;
+  /** @internal */
   _keyVaultNamespace: string;
+  /** @internal */
   _keyVaultClient: MongoClient;
+  /** @internal */
   _proxyOptions: ProxyOptions;
+  /** @internal */
   _tlsOptions: CSFLEKMSTlsOptions;
+  /** @internal */
   _kmsProviders: KMSProviders;
 
   /** @internal */
@@ -152,7 +160,7 @@ export class ClientEncryption implements StateMachineExecutable {
    * ```
    */
   async createDataKey(
-    provider: KMSProvider,
+    provider: ClientEncryptionDataKeyProvider,
     options: ClientEncryptionCreateDataKeyProviderOptions = {}
   ): Promise<UUID> {
     if (options.keyAltNames && !Array.isArray(options.keyAltNames)) {
@@ -235,7 +243,10 @@ export class ClientEncryption implements StateMachineExecutable {
    * }
    * ```
    */
-  async rewrapManyDataKey(filter: Filter<DataKey>, options: RewrapManyDataKeyOptions) {
+  async rewrapManyDataKey(
+    filter: Filter<DataKey>,
+    options: ClientEncryptionRewrapManyDataKeyProviderOptions
+  ) {
     let keyEncryptionKeyBson = undefined;
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
@@ -500,7 +511,7 @@ export class ClientEncryption implements StateMachineExecutable {
     db: Db,
     name: string,
     options: {
-      provider: KMSProvider;
+      provider: ClientEncryptionDataKeyProvider;
       createCollectionOptions: Omit<CreateCollectionOptions, 'encryptedFields'> & {
         encryptedFields: Document;
       };
@@ -536,7 +547,7 @@ export class ClientEncryption implements StateMachineExecutable {
         (result): result is PromiseRejectedResult => result.status === 'rejected'
       );
       if (rejection != null) {
-        throw new MongoCryptCreateDataKeyError({ encryptedFields, cause: rejection.reason });
+        throw new MongoCryptCreateDataKeyError(encryptedFields, { cause: rejection.reason });
       }
     }
 
@@ -547,7 +558,7 @@ export class ClientEncryption implements StateMachineExecutable {
       });
       return { collection, encryptedFields };
     } catch (cause) {
-      throw new MongoCryptCreateEncryptedCollectionError({ encryptedFields, cause });
+      throw new MongoCryptCreateEncryptedCollectionError(encryptedFields, { cause });
     }
   }
 
@@ -635,6 +646,7 @@ export class ClientEncryption implements StateMachineExecutable {
   }
 
   /**
+   * @internal
    * Ask the user for KMS credentials.
    *
    * This returns anything that looks like the kmsProviders original input
@@ -650,6 +662,7 @@ export class ClientEncryption implements StateMachineExecutable {
   }
 
   /**
+   * @internal
    * A helper that perform explicit encryption of values and expressions.
    * Explicitly encrypt a provided value. Note that either `options.keyId` or `options.keyAltName` must
    * be specified. Specifying both `options.keyId` and `options.keyAltName` is considered an error.
@@ -712,6 +725,7 @@ export class ClientEncryption implements StateMachineExecutable {
 }
 
 /**
+ * @public
  * Options to provide when encrypting data.
  */
 export interface ClientEncryptionEncryptOptions {
@@ -749,9 +763,12 @@ export interface ClientEncryptionEncryptOptions {
   rangeOptions?: RangeOptions;
 }
 
-/** @experimental */
-export interface RewrapManyDataKeyOptions {
-  provider: KMSProvider;
+/**
+ * @public
+ * @experimental
+ */
+export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
+  provider: ClientEncryptionDataKeyProvider;
   masterKey?:
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
@@ -760,6 +777,7 @@ export interface RewrapManyDataKeyOptions {
 }
 
 /**
+ * @public
  * Additional settings to provide when creating a new `ClientEncryption` instance.
  */
 export interface ClientEncryptionOptions {
@@ -790,6 +808,7 @@ export interface ClientEncryptionOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an AWS encryption key
  */
 export interface AWSEncryptionKeyOptions {
@@ -810,6 +829,7 @@ export interface AWSEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an AWS encryption key
  */
 export interface GCPEncryptionKeyOptions {
@@ -845,6 +865,7 @@ export interface GCPEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Configuration options for making an Azure encryption key
  */
 export interface AzureEncryptionKeyOptions {
@@ -865,6 +886,7 @@ export interface AzureEncryptionKeyOptions {
 }
 
 /**
+ * @public
  * Options to provide when creating a new data key.
  */
 export interface ClientEncryptionCreateDataKeyProviderOptions {
@@ -887,9 +909,12 @@ export interface ClientEncryptionCreateDataKeyProviderOptions {
   keyMaterial?: Buffer | Binary;
 }
 
-/** @experimental */
-export interface RewrapManyDataKeyOptions {
-  provider: KMSProvider;
+/**
+ * @public
+ * @experimental
+ */
+export interface ClientEncryptionRewrapManyDataKeyProviderOptions {
+  provider: ClientEncryptionDataKeyProvider;
   masterKey?:
     | AWSEncryptionKeyOptions
     | AzureEncryptionKeyOptions
@@ -897,18 +922,22 @@ export interface RewrapManyDataKeyOptions {
     | undefined;
 }
 
-/** @experimental */
+/**
+ * @public
+ * @experimental
+ */
 export interface ClientEncryptionRewrapManyDataKeyResult {
   /** The result of rewrapping data keys. If unset, no keys matched the filter. */
   bulkWriteResult?: BulkWriteResult;
 }
 
 /**
+ * @public
  * RangeOptions specifies index options for a Queryable Encryption field supporting "rangePreview" queries.
  * min, max, sparsity, and range must match the values set in the encryptedFields of the destination collection.
  * For double and decimal128, min/max/precision must all be set, or all be unset.
  */
-interface RangeOptions {
+export interface RangeOptions {
   min?: any;
   max?: any;
   sparsity: Long;
@@ -916,6 +945,7 @@ interface RangeOptions {
 }
 
 /**
+ * @public
  * Options to provide when encrypting data.
  */
 export interface ClientEncryptionEncryptOptions {

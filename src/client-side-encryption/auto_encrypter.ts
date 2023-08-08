@@ -14,11 +14,7 @@ import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
 import { type KMSProviders, refreshKMSCredentials } from './providers';
-import {
-  type CSFLEKMSTlsOptions,
-  StateMachine,
-  type StateMachineExecutable
-} from './state_machine';
+import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
 export interface AutoEncryptionOptions {
@@ -229,7 +225,7 @@ const kDecoratedKeys = Symbol.for('@@mdb.decryptedKeys');
  * @internal An internal class to be used by the driver for auto encryption
  * **NOTE**: Not meant to be instantiated directly, this is for internal use only.
  */
-export class AutoEncrypter implements StateMachineExecutable {
+export class AutoEncrypter {
   _client: MongoClient;
   _bypassEncryption: boolean;
   _keyVaultNamespace: string;
