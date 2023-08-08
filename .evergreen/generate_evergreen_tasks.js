@@ -677,6 +677,37 @@ for (const version of ['5.0', 'rapid', 'latest']) {
   }
 }
 
+oneOffFuncAsTasks.push({
+  name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
+  tags: ['run-custom-dependency-tests'],
+  commands: [
+    {
+      func: 'install dependencies',
+      vars: {
+        NODE_LTS_VERSION: LOWEST_LTS
+      }
+    },
+    {
+      func: 'bootstrap mongo-orchestration',
+      vars: {
+        VERSION: '7.0',
+        TOPOLOGY: 'replica_set'
+      }
+    },
+    { func: 'bootstrap kms servers' },
+    {
+      func: 'install package',
+      vars: {
+        // TODO: update the package version here
+        PACKAGE: 'mongodb-client-encryption@6.0.0-alpha.1'
+      }
+    },
+    {
+      func: 'run tests'
+    }
+  ]
+});
+
 const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),
   tags: [],
@@ -779,13 +810,6 @@ for (const variant of BUILD_VARIANTS.filter(
   variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(name => !['test-socks5'].includes(name));
-}
-
-// TODO(NODE-5283): fix socks5 fle tests on node 20+
-for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && [20].includes(variant.expansions.NODE_LTS_VERSION)
-) ) {
-  variant.tasks = variant.tasks.filter(name => !['test-socks5-csfle'].includes(name));
 }
 
 const fileData = yaml.load(fs.readFileSync(`${__dirname}/config.in.yml`, 'utf8'));

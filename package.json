@@ -40,6 +40,9 @@
     "snappy": "^7.2.2",
     "socks": "^2.7.1"
   },
+  "overrides": {
+    "node-gyp": "9.4.0"
+  },
   "peerDependenciesMeta": {
     "@aws-sdk/credential-providers": {
       "optional": true
