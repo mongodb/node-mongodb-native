@@ -33,7 +33,8 @@ export {
   MaxKey,
   MinKey,
   ObjectId,
-  Timestamp
+  Timestamp,
+  UUID
 } from './bson';
 export { AnyBulkWriteOperation, BulkWriteOptions, MongoBulkWriteError } from './bulk/common';
 export { ClientEncryption } from './client-side-encryption/client_encryption';

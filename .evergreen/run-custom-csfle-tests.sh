@@ -57,8 +57,6 @@ bash ./etc/build-static.sh
 
 npm run rebuild # just in case this is necessary?
 
-ls
-ls lib
 BINDINGS_DIR=$(pwd)
 popd # libmongocrypt/bindings/node
 popd # ../csfle-deps-tmp

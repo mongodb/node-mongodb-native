@@ -11,7 +11,7 @@ import {
 import { MongoCryptInvalidArgumentError } from '../../../src/client-side-encryption/errors';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
-import { Binary, type Collection, Int32, Long, type MongoClient } from '../../mongodb';
+import { Binary, type Collection, Int32, Long, type MongoClient, UUID } from '../../mongodb';
 
 function readHttpResponse(path) {
   let data = readFileSync(path, 'utf8').toString();
@@ -160,7 +160,7 @@ describe('ClientEncryption integration tests', function () {
       }
     );
 
-    it('should fail to create a data key if keyMaterial is wrong', metadata, function (done) {
+    it('should fail to create a data key if keyMaterial is wrong', metadata, async function () {
       const encryption = new ClientEncryption(client, {
         keyVaultNamespace: 'client.encryption',
         kmsProviders: { local: { key: 'A'.repeat(128) } }
@@ -169,13 +169,8 @@ describe('ClientEncryption integration tests', function () {
       const dataKeyOptions = {
         keyMaterial: new Binary(Buffer.alloc(97))
       };
-      try {
-        encryption.createDataKey('local', dataKeyOptions);
-        expect.fail('missed exception');
-      } catch (err) {
-        expect(err.message).to.equal('keyMaterial should have length 96, but has length 97');
-        done();
-      }
+      const error = await encryption.createDataKey('local', dataKeyOptions).catch(error => error);
+      expect(error.message).to.equal('keyMaterial should have length 96, but has length 97');
     });
 
     it(
@@ -496,6 +491,26 @@ describe('ClientEncryption integration tests', function () {
     });
   });
 
+  describe('createDataKey()', () => {
+    let clientEncryption;
+
+    beforeEach(function () {
+      clientEncryption = new ClientEncryption(client, {
+        keyVaultNamespace: 'client.encryption',
+        kmsProviders: { local: { key: Buffer.alloc(96) } }
+      });
+    });
+
+    it('returns a UUID instance', async () => {
+      const dataKey = await clientEncryption.createDataKey('local', {
+        name: 'local',
+        kmsProviders: { local: { key: Buffer.alloc(96) } }
+      });
+
+      expect(dataKey).to.be.instanceOf(UUID);
+    });
+  });
+
   describe('ClientEncryptionKeyAltNames', function () {
     let client: MongoClient;
     let clientEncryption: ClientEncryption;
@@ -539,23 +554,21 @@ describe('ClientEncryption integration tests', function () {
     }
 
     describe('errors', function () {
-      [42, 'hello', { keyAltNames: 'foobar' }, /foobar/].forEach(val => {
-        it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, function () {
+      for (const val of [42, 'hello', { keyAltNames: 'foobar' }, /foobar/]) {
+        it(`should fail if typeof keyAltNames = ${typeof val}`, metadata, async function () {
           const options = makeOptions(val);
-          expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            MongoCryptInvalidArgumentError
-          );
+          const error = await clientEncryption.createDataKey('aws', options).catch(error => error);
+          expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
-      });
+      }
 
-      [undefined, null, 42, { keyAltNames: 'foobar' }, ['foobar'], /foobar/].forEach(val => {
-        it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, function () {
+      for (const val of [undefined, null, 42, { keyAltNames: 'foobar' }, ['foobar'], /foobar/]) {
+        it(`should fail if typeof keyAltNames[x] = ${typeof val}`, metadata, async function () {
           const options = makeOptions([val]);
-          expect(() => clientEncryption.createDataKey('aws', options, () => undefined)).to.throw(
-            MongoCryptInvalidArgumentError
-          );
+          const error = await clientEncryption.createDataKey('aws', options).catch(error => error);
+          expect(error).to.be.instanceOf(MongoCryptInvalidArgumentError);
         });
-      });
+      }
     });
 
     it('should create a key with keyAltNames', metadata, async function () {
