@@ -179,11 +179,12 @@ TASKS.push(
         { func: 'stop-load-balancer' }
       ]
     },
-    {
-      name: 'test-auth-kerberos',
-      tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
-    },
+    // TODO(NODE-5519): Kerberos kinit errors.
+    // {
+    //  name: 'test-auth-kerberos',
+    //  tags: ['auth', 'kerberos'],
+    //  commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
+    //},
     {
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
@@ -793,13 +794,6 @@ for (const variant of BUILD_VARIANTS.filter(
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
   );
-}
-
-// TODO(NODE-5021): Drop support for Kerberos 1.x on in 6.0.0
-for (const variant of BUILD_VARIANTS.filter(
-  variant => variant.expansions && ['latest'].includes(variant.expansions.NODE_LTS_VERSION)
-)) {
-  variant.tasks = variant.tasks.filter(name => !['test-auth-kerberos'].includes(name));
 }
 
 // TODO(NODE-4897): Debug socks5 tests on node latest
