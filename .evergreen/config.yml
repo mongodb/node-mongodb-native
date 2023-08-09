@@ -2765,7 +2765,7 @@ tasks:
       - func: bootstrap kms servers
       - func: install package
         vars:
-          PACKAGE: mongodb-client-encryption@6.0.0-alpha.1
+          PACKAGE: mongodb-client-encryption@6.0.0-alpha.3
       - func: run tests
         vars:
           CLIENT_ENCRYPTION: true
