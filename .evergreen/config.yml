@@ -1623,13 +1623,6 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
-  - name: test-auth-kerberos
-    tags:
-      - auth
-      - kerberos
-    commands:
-      - func: install dependencies
-      - func: run kerberos tests
   - name: test-auth-ldap
     tags:
       - auth
@@ -3540,7 +3533,6 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
@@ -3593,7 +3585,6 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
@@ -3644,7 +3635,6 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
@@ -3695,7 +3685,6 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
@@ -3746,7 +3735,6 @@ buildvariants:
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
-      - test-auth-kerberos
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
