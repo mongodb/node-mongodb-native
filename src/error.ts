@@ -134,11 +134,12 @@ export class MongoError extends Error {
 
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -204,11 +205,12 @@ export class MongoServerError extends MongoError {
 
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -238,11 +240,12 @@ export class MongoServerError extends MongoError {
 export class MongoDriverError extends MongoError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -268,11 +271,12 @@ export class MongoDriverError extends MongoError {
 export class MongoAPIError extends MongoDriverError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -298,11 +302,12 @@ export class MongoAPIError extends MongoDriverError {
 export class MongoRuntimeError extends MongoDriverError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -325,11 +330,12 @@ export class MongoRuntimeError extends MongoDriverError {
 export class MongoBatchReExecutionError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -352,11 +358,12 @@ export class MongoBatchReExecutionError extends MongoAPIError {
 export class MongoDecompressionError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -379,11 +386,12 @@ export class MongoDecompressionError extends MongoRuntimeError {
 export class MongoNotConnectedError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -406,11 +414,12 @@ export class MongoNotConnectedError extends MongoAPIError {
 export class MongoTransactionError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -433,11 +442,12 @@ export class MongoTransactionError extends MongoAPIError {
 export class MongoExpiredSessionError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -460,11 +470,12 @@ export class MongoExpiredSessionError extends MongoAPIError {
 export class MongoKerberosError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -487,11 +498,12 @@ export class MongoKerberosError extends MongoRuntimeError {
 export class MongoAWSError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -514,11 +526,12 @@ export class MongoAWSError extends MongoRuntimeError {
 export class MongoAzureError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -540,11 +553,12 @@ export class MongoAzureError extends MongoRuntimeError {
 export class MongoChangeStreamError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -566,11 +580,12 @@ export class MongoChangeStreamError extends MongoRuntimeError {
 export class MongoTailableCursorError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -591,11 +606,12 @@ export class MongoTailableCursorError extends MongoAPIError {
 export class MongoGridFSStreamError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -618,11 +634,12 @@ export class MongoGridFSStreamError extends MongoRuntimeError {
 export class MongoGridFSChunkError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -654,11 +671,12 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
 export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -681,11 +699,12 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
 export class MongoCursorInUseError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -708,11 +727,12 @@ export class MongoCursorInUseError extends MongoAPIError {
 export class MongoServerClosedError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -734,11 +754,12 @@ export class MongoServerClosedError extends MongoAPIError {
 export class MongoCursorExhaustedError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -761,11 +782,12 @@ export class MongoCursorExhaustedError extends MongoAPIError {
 export class MongoTopologyClosedError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -801,11 +823,12 @@ export class MongoNetworkError extends MongoError {
 
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -833,11 +856,12 @@ export class MongoNetworkError extends MongoError {
 export class MongoNetworkTimeoutError extends MongoNetworkError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -858,11 +882,12 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
 export class MongoParseError extends MongoDriverError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -886,11 +911,12 @@ export class MongoParseError extends MongoDriverError {
 export class MongoInvalidArgumentError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -914,11 +940,12 @@ export class MongoInvalidArgumentError extends MongoAPIError {
 export class MongoCompatibilityError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -942,11 +969,12 @@ export class MongoCompatibilityError extends MongoAPIError {
 export class MongoMissingCredentialsError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -968,11 +996,12 @@ export class MongoMissingCredentialsError extends MongoAPIError {
 export class MongoMissingDependencyError extends MongoAPIError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -995,11 +1024,12 @@ export class MongoSystemError extends MongoError {
 
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -1030,11 +1060,12 @@ export class MongoSystemError extends MongoError {
 export class MongoServerSelectionError extends MongoSystemError {
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
@@ -1071,11 +1102,12 @@ export class MongoWriteConcernError extends MongoServerError {
 
   /**
    * **Do not use this constructor!**
+   *
    * Meant for internal use only.
    *
    * @remarks
-   * This class is only meant to be constructed within the driver. As such this constructor is
-   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatiblity guarantees and may change at any time.
    *
    * @public
    **/
