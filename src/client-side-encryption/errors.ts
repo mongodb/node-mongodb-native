@@ -7,7 +7,8 @@ import { MongoError } from '../error';
  */
 export class MongoCryptError extends MongoError {
   /**
-   * Do not use this constructor. It is meant for internal use only.
+   * **Do not use this constructor!**
+   * Meant for internal use only.
    *
    * @remarks
    * This class is only meant to be constructed within the driver. As such this constructor is
@@ -31,7 +32,8 @@ export class MongoCryptError extends MongoError {
  */
 export class MongoCryptInvalidArgumentError extends MongoCryptError {
   /**
-   * Do not use this constructor. It is meant for internal use only.
+   * **Do not use this constructor!**
+   * Meant for internal use only.
    *
    * @remarks
    * This class is only meant to be constructed within the driver. As such this constructor is
@@ -54,7 +56,8 @@ export class MongoCryptInvalidArgumentError extends MongoCryptError {
 export class MongoCryptCreateDataKeyError extends MongoCryptError {
   encryptedFields: Document;
   /**
-   * Do not use this constructor. It is meant for internal use only.
+   * **Do not use this constructor!**
+   * Meant for internal use only.
    *
    * @remarks
    * This class is only meant to be constructed within the driver. As such this constructor is
@@ -79,7 +82,8 @@ export class MongoCryptCreateDataKeyError extends MongoCryptError {
 export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
   encryptedFields: Document;
   /**
-   * Do not use this constructor. It is meant for internal use only.
+   * **Do not use this constructor!**
+   * Meant for internal use only.
    *
    * @remarks
    * This class is only meant to be constructed within the driver. As such this constructor is
@@ -105,7 +109,8 @@ export class MongoCryptAzureKMSRequestError extends MongoCryptError {
   /** The body of the http response that failed, if present. */
   body?: Document;
   /**
-   * Do not use this constructor. It is meant for internal use only.
+   * **Do not use this constructor!**
+   * Meant for internal use only.
    *
    * @remarks
    * This class is only meant to be constructed within the driver. As such this constructor is
