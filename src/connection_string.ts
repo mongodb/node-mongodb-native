@@ -347,10 +347,10 @@ export function parseOptions(
     allProvidedOptions.set(key, values);
   }
 
-  if (
+  const didMapTLSCertificateFile =
     allProvidedOptions.has('tlsCertificateKeyFile') &&
-    !allProvidedOptions.has('tlsCertificateFile')
-  ) {
+    !allProvidedOptions.has('tlsCertificateFile');
+  if (didMapTLSCertificateFile) {
     allProvidedOptions.set('tlsCertificateFile', allProvidedOptions.get('tlsCertificateKeyFile'));
   }
 
@@ -387,7 +387,9 @@ export function parseOptions(
       }
     } else {
       const { deprecated } = descriptor;
-      if (deprecated) {
+      const shouldEmitTLSCertificateFileDeprecation =
+        didMapTLSCertificateFile && key === 'tlsCertificateFile';
+      if (deprecated && !shouldEmitTLSCertificateFileDeprecation) {
         const deprecatedMsg = typeof deprecated === 'string' ? `: ${deprecated}` : '';
         emitWarning(`${key} is a deprecated option${deprecatedMsg}`);
       }
