@@ -6,7 +6,15 @@ import { MongoError } from '../error';
  * An error indicating that something went wrong specifically with MongoDB Client Encryption
  */
 export class MongoCryptError extends MongoError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, options: { cause?: Error } = {}) {
     super(message, options);
   }
@@ -22,7 +30,15 @@ export class MongoCryptError extends MongoError {
  * An error indicating an invalid argument was provided to an encryption API.
  */
 export class MongoCryptInvalidArgumentError extends MongoCryptError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -37,7 +53,15 @@ export class MongoCryptInvalidArgumentError extends MongoCryptError {
  */
 export class MongoCryptCreateDataKeyError extends MongoCryptError {
   encryptedFields: Document;
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(encryptedFields: Document, { cause }: { cause: Error }) {
     super(`Unable to complete creating data keys: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
@@ -54,7 +78,15 @@ export class MongoCryptCreateDataKeyError extends MongoCryptError {
  */
 export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
   encryptedFields: Document;
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(encryptedFields: Document, { cause }: { cause: Error }) {
     super(`Unable to create collection: ${cause.message}`, { cause });
     this.encryptedFields = encryptedFields;
@@ -72,7 +104,15 @@ export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
 export class MongoCryptAzureKMSRequestError extends MongoCryptError {
   /** The body of the http response that failed, if present. */
   body?: Document;
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, body?: Document) {
     super(message);
     this.body = body;

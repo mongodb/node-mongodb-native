@@ -9,7 +9,15 @@ export class PoolClosedError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool) {
     super('Attempted to check out a connection from closed connection pool');
     this.address = pool.address;
@@ -28,7 +36,15 @@ export class PoolClearedError extends MongoNetworkError {
   /** The address of the connection pool */
   address: string;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool, message?: string) {
     const errorMessage = message
       ? message
@@ -49,7 +65,15 @@ export class PoolClearedError extends MongoNetworkError {
  * @category Error
  */
 export class PoolClearedOnNetworkError extends PoolClearedError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool) {
     super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
   }
@@ -67,7 +91,15 @@ export class WaitQueueTimeoutError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, address: string) {
     super(message);
     this.address = address;

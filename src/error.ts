@@ -132,7 +132,15 @@ export class MongoError extends Error {
   connectionGeneration?: number;
   override cause?: Error;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string | Error, options?: { cause?: Error }) {
     super(MongoError.buildErrorMessage(message), options);
     this[kErrorLabels] = new Set();
@@ -193,7 +201,15 @@ export class MongoServerError extends MongoError {
   ok?: number;
   [key: string]: any;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: ErrorDescription) {
     super(message.message || message.errmsg || message.$err || 'n/a');
     if (message.errorLabels) {
@@ -218,7 +234,15 @@ export class MongoServerError extends MongoError {
  * @category Error
  */
 export class MongoDriverError extends MongoError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, options?: { cause?: Error }) {
     super(message, options);
   }
@@ -239,7 +263,15 @@ export class MongoDriverError extends MongoError {
  */
 
 export class MongoAPIError extends MongoDriverError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, options?: { cause?: Error }) {
     super(message, options);
   }
@@ -260,7 +292,15 @@ export class MongoAPIError extends MongoDriverError {
  * @category Error
  */
 export class MongoRuntimeError extends MongoDriverError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -278,7 +318,15 @@ export class MongoRuntimeError extends MongoDriverError {
  * @category Error
  */
 export class MongoBatchReExecutionError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'This batch has already been executed, create new batch to execute') {
     super(message);
   }
@@ -296,7 +344,15 @@ export class MongoBatchReExecutionError extends MongoAPIError {
  * @category Error
  */
 export class MongoDecompressionError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -314,7 +370,15 @@ export class MongoDecompressionError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoNotConnectedError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -332,7 +396,15 @@ export class MongoNotConnectedError extends MongoAPIError {
  * @category Error
  */
 export class MongoTransactionError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -350,7 +422,15 @@ export class MongoTransactionError extends MongoAPIError {
  * @category Error
  */
 export class MongoExpiredSessionError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'Cannot use a session that has ended') {
     super(message);
   }
@@ -368,7 +448,15 @@ export class MongoExpiredSessionError extends MongoAPIError {
  * @category Error
  */
 export class MongoKerberosError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -386,7 +474,15 @@ export class MongoKerberosError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoAWSError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -404,7 +500,15 @@ export class MongoAWSError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoAzureError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -421,7 +525,15 @@ export class MongoAzureError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoChangeStreamError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -438,7 +550,15 @@ export class MongoChangeStreamError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoTailableCursorError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'Tailable cursor does not support this operation') {
     super(message);
   }
@@ -454,7 +574,15 @@ export class MongoTailableCursorError extends MongoAPIError {
  * @category Error
  */
 export class MongoGridFSStreamError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -472,7 +600,15 @@ export class MongoGridFSStreamError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoGridFSChunkError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -499,7 +635,15 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -517,7 +661,15 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
  * @category Error
  */
 export class MongoCursorInUseError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'Cursor is already initialized') {
     super(message);
   }
@@ -535,7 +687,15 @@ export class MongoCursorInUseError extends MongoAPIError {
  * @category Error
  */
 export class MongoServerClosedError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'Server is closed') {
     super(message);
   }
@@ -552,7 +712,15 @@ export class MongoServerClosedError extends MongoAPIError {
  * @category Error
  */
 export class MongoCursorExhaustedError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message?: string) {
     super(message || 'Cursor is exhausted');
   }
@@ -570,7 +738,15 @@ export class MongoCursorExhaustedError extends MongoAPIError {
  * @category Error
  */
 export class MongoTopologyClosedError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message = 'Topology is closed') {
     super(message);
   }
@@ -601,7 +777,15 @@ export class MongoNetworkError extends MongoError {
   /** @internal */
   [kBeforeHandshake]?: boolean;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string | Error, options?: MongoNetworkErrorOptions) {
     super(message);
 
@@ -624,7 +808,15 @@ export class MongoNetworkError extends MongoError {
  * mongodb-client-encryption has a dependency on this error with an instanceof check
  */
 export class MongoNetworkTimeoutError extends MongoNetworkError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, options?: MongoNetworkErrorOptions) {
     super(message, options);
   }
@@ -640,7 +832,15 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
  * @category Error
  */
 export class MongoParseError extends MongoDriverError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -659,7 +859,15 @@ export class MongoParseError extends MongoDriverError {
  * @category Error
  */
 export class MongoInvalidArgumentError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -678,7 +886,15 @@ export class MongoInvalidArgumentError extends MongoAPIError {
  * @category Error
  */
 export class MongoCompatibilityError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -697,7 +913,15 @@ export class MongoCompatibilityError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingCredentialsError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string) {
     super(message);
   }
@@ -714,7 +938,15 @@ export class MongoMissingCredentialsError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingDependencyError extends MongoAPIError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, options: { cause?: Error } = {}) {
     super(message, options);
   }
@@ -732,7 +964,15 @@ export class MongoSystemError extends MongoError {
   /** An optional reason context, such as an error saved during flow of monitoring and selecting servers */
   reason?: TopologyDescription;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
       super(reason.error.message || reason.error);
@@ -758,7 +998,15 @@ export class MongoSystemError extends MongoError {
  * @category Error
  */
 export class MongoServerSelectionError extends MongoSystemError {
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, reason: TopologyDescription) {
     super(message, reason);
   }
@@ -790,7 +1038,15 @@ export class MongoWriteConcernError extends MongoServerError {
   /** The result document (provided if ok: 1) */
   result?: Document;
 
-  /** @internal */
+  /**
+   * Do not use this constructor. It is meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. As such this constructor is
+   * not subject to compatibility guarantees under semantic versioning and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: ErrorDescription, result?: Document) {
     if (result && Array.isArray(result.errorLabels)) {
       message.errorLabels = result.errorLabels;
