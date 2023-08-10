@@ -12,8 +12,6 @@ const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb')
 const { MongoLogger } = require('../mongodb');
 const sinon = require('sinon');
 const { Writable } = require('stream');
-const { once } = require('events');
-const { setTimeout } = require('timers/promises');
 
 describe('MongoOptions', function () {
   it('MongoClient should always freeze public options', function () {
