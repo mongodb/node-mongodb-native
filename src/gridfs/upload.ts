@@ -3,7 +3,7 @@ import { Writable } from 'stream';
 import type { Document } from '../bson';
 import { ObjectId } from '../bson';
 import type { Collection } from '../collection';
-import { type AnyError, MongoAPIError, MONGODB_ERROR_CODES, MongoError } from '../error';
+import { MongoAPIError, MONGODB_ERROR_CODES, MongoError } from '../error';
 import type { Callback } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
@@ -38,7 +38,7 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
  * Do not instantiate this class directly. Use `openUploadStream()` instead.
  * @public
  */
-export class GridFSBucketWriteStream extends Writable implements NodeJS.WritableStream {
+export class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;
   chunks: Collection<GridFSChunk>;
   filename: string;
@@ -59,15 +59,7 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
   };
   writeConcern?: WriteConcern;
 
-  /** @event */
-  static readonly CLOSE = 'close';
-  /** @event */
-  static readonly ERROR = 'error';
-  /**
-   * `end()` was called and the write stream successfully wrote the file metadata and all the chunks to MongoDB.
-   * @event
-   */
-  static readonly FINISH = 'finish';
+  fileMetadata: GridFSFile | null = null;
 
   /**
    * @param bucket - Handle for this stream's corresponding bucket
@@ -116,6 +108,16 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
   }
 
   /**
+   * The stream is considered constructed when the indexes ßare done being created
+   */
+  override _construct(callback: (error?: Error | null) => void): void {
+    if (this.bucket.s.checkedIndexes) {
+      return process.nextTick(callback);
+    }
+    this.bucket.once('index', callback);
+  }
+
+  /**
    * Write a buffer to the stream.
    *
    * @param chunk - Buffer to write
@@ -123,22 +125,20 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
    * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
-  override write(chunk: Buffer | string): boolean;
-  override write(chunk: Buffer | string, callback: Callback<void>): boolean;
-  override write(chunk: Buffer | string, encoding: BufferEncoding | undefined): boolean;
-  override write(
+  override _write(
     chunk: Buffer | string,
-    encoding: BufferEncoding | undefined,
+    encoding: BufferEncoding,
     callback: Callback<void>
-  ): boolean;
-  override write(
-    chunk: Buffer | string,
-    encodingOrCallback?: Callback<void> | BufferEncoding,
-    callback?: Callback<void>
-  ): boolean {
-    const encoding = typeof encodingOrCallback === 'function' ? undefined : encodingOrCallback;
-    callback = typeof encodingOrCallback === 'function' ? encodingOrCallback : callback;
-    return waitForIndexes(this, () => doWrite(this, chunk, encoding, callback));
+  ): void {
+    doWrite(this, chunk, encoding, callback);
+  }
+
+  override _final(callback: (error?: Error | null) => void): void {
+    if (this.state.streamEnd) {
+      return process.nextTick(callback);
+    }
+    this.state.streamEnd = true;
+    writeRemnant(this, callback);
   }
 
   /**
@@ -159,76 +159,15 @@ export class GridFSBucketWriteStream extends Writable implements NodeJS.Writable
     this.state.aborted = true;
     await this.chunks.deleteMany({ files_id: this.id });
   }
-
-  /**
-   * Tells the stream that no more data will be coming in. The stream will
-   * persist the remaining data to MongoDB, write the files document, and
-   * then emit a 'finish' event.
-   *
-   * @param chunk - Buffer to write
-   * @param encoding - Optional encoding for the buffer
-   * @param callback - Function to call when all files and chunks have been persisted to MongoDB
-   */
-  override end(): this;
-  override end(chunk: Buffer): this;
-  override end(callback: Callback<GridFSFile | void>): this;
-  override end(chunk: Buffer, callback: Callback<GridFSFile | void>): this;
-  override end(chunk: Buffer, encoding: BufferEncoding): this;
-  override end(
-    chunk: Buffer,
-    encoding: BufferEncoding | undefined,
-    callback: Callback<GridFSFile | void>
-  ): this;
-  override end(
-    chunkOrCallback?: Buffer | Callback<GridFSFile | void>,
-    encodingOrCallback?: BufferEncoding | Callback<GridFSFile | void>,
-    callback?: Callback<GridFSFile | void>
-  ): this {
-    const chunk = typeof chunkOrCallback === 'function' ? undefined : chunkOrCallback;
-    const encoding = typeof encodingOrCallback === 'function' ? undefined : encodingOrCallback;
-    callback =
-      typeof chunkOrCallback === 'function'
-        ? chunkOrCallback
-        : typeof encodingOrCallback === 'function'
-        ? encodingOrCallback
-        : callback;
-
-    if (this.state.streamEnd || checkAborted(this, callback)) return this;
-
-    this.state.streamEnd = true;
-
-    if (callback) {
-      this.once(GridFSBucketWriteStream.FINISH, (result: GridFSFile) => {
-        if (callback) callback(undefined, result);
-      });
-    }
-
-    if (!chunk) {
-      waitForIndexes(this, () => !!writeRemnant(this));
-      return this;
-    }
-
-    this.write(chunk, encoding, () => {
-      writeRemnant(this);
-    });
-
-    return this;
-  }
 }
 
-function __handleError(
-  stream: GridFSBucketWriteStream,
-  error: AnyError,
-  callback?: Callback
-): void {
+function handleError(stream: GridFSBucketWriteStream, error: Error, callback: Callback): void {
   if (stream.state.errored) {
+    process.nextTick(callback);
     return;
   }
   stream.state.errored = true;
-  if (callback) {
-    return callback(error);
-  }
-  stream.emit(GridFSBucketWriteStream.ERROR, error);
+  process.nextTick(callback, error);
 }
 
 function createChunkDoc(filesId: ObjectId, n: number, data: Buffer): GridFSChunk {
@@ -271,13 +210,16 @@ async function checkChunksIndex(stream: GridFSBucketWriteStream): Promise<void> 
   }
 }
 
-function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolean {
-  if (stream.done) return true;
+function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
+  if (stream.done) {
+    return process.nextTick(callback);
+  }
+
   if (stream.state.streamEnd && stream.state.outstandingRequests === 0 && !stream.state.errored) {
     // Set done so we do not trigger duplicate createFilesDoc
     stream.done = true;
     // Create a new files doc
-    const filesDoc = createFilesDoc(
+    const fileMetadata = createFilesDoc(
       stream.id,
       stream.length,
       stream.chunkSizeBytes,
@@ -287,24 +229,21 @@ function checkDone(stream: GridFSBucketWriteStream, callback?: Callback): boolea
       stream.options.metadata
     );
 
-    if (checkAborted(stream, callback)) {
-      return false;
+    if (isAborted(stream, callback)) {
+      return;
     }
 
-    stream.files.insertOne(filesDoc, { writeConcern: stream.writeConcern }).then(
+    stream.files.insertOne(fileMetadata, { writeConcern: stream.writeConcern }).then(
       () => {
-        stream.emit(GridFSBucketWriteStream.FINISH, filesDoc);
-        stream.emit(GridFSBucketWriteStream.CLOSE);
+        stream.fileMetadata = fileMetadata;
+        callback();
       },
-      error => {
-        return __handleError(stream, error, callback);
-      }
+      error => handleError(stream, error, callback)
     );
-
-    return true;
+    return;
   }
 
-  return false;
+  process.nextTick(callback);
 }
 
 async function checkIndexes(stream: GridFSBucketWriteStream): Promise<void> {
@@ -377,11 +316,11 @@ function createFilesDoc(
 function doWrite(
   stream: GridFSBucketWriteStream,
   chunk: Buffer | string,
-  encoding?: BufferEncoding,
-  callback?: Callback<void>
-): boolean {
-  if (checkAborted(stream, callback)) {
-    return false;
+  encoding: BufferEncoding,
+  callback: Callback<void>
+): void {
+  if (isAborted(stream, callback)) {
+    return;
   }
 
   const inputBuf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
@@ -392,13 +331,8 @@ function doWrite(
   if (stream.pos + inputBuf.length < stream.chunkSizeBytes) {
     inputBuf.copy(stream.bufToStore, stream.pos);
     stream.pos += inputBuf.length;
-
-    callback && callback();
-
-    // Note that we reverse the typical semantics of write's return value
-    // to be compatible with node's `.pipe()` function.
-    // True means client can keep writing.
-    return true;
+    process.nextTick(callback);
+    return;
   }
 
   // Otherwise, buffer is too big for current chunk, so we need to flush
@@ -418,8 +352,8 @@ function doWrite(
       ++stream.state.outstandingRequests;
       ++outstandingRequests;
 
-      if (checkAborted(stream, callback)) {
-        return false;
+      if (isAborted(stream, callback)) {
+        return;
       }
 
       stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
@@ -429,13 +363,10 @@ function doWrite(
 
           if (!outstandingRequests) {
             stream.emit('drain', doc);
-            callback && callback();
-            checkDone(stream);
+            checkDone(stream, callback);
           }
         },
-        error => {
-          return __handleError(stream, error);
-        }
+        error => handleError(stream, error, callback)
       );
 
       spaceRemaining = stream.chunkSizeBytes;
@@ -445,29 +376,9 @@ function doWrite(
     inputBufRemaining -= numToCopy;
     numToCopy = Math.min(spaceRemaining, inputBufRemaining);
   }
-
-  // Note that we reverse the typical semantics of write's return value
-  // to be compatible with node's `.pipe()` function.
-  // False means the client should wait for the 'drain' event.
-  return false;
 }
 
-function waitForIndexes(
-  stream: GridFSBucketWriteStream,
-  callback: (res: boolean) => boolean
-): boolean {
-  if (stream.bucket.s.checkedIndexes) {
-    return callback(false);
-  }
-
-  stream.bucket.once('index', () => {
-    callback(true);
-  });
-
-  return true;
-}
-
-function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boolean {
+function writeRemnant(stream: GridFSBucketWriteStream, callback: Callback): void {
   // Buffer is empty, so don't bother to insert
   if (stream.pos === 0) {
     return checkDone(stream, callback);
@@ -482,28 +393,22 @@ function writeRemnant(stream: GridFSBucketWriteStream, callback?: Callback): boo
   const doc = createChunkDoc(stream.id, stream.n, remnant);
 
   // If the stream was aborted, do not write remnant
-  if (checkAborted(stream, callback)) {
-    return false;
+  if (isAborted(stream, callback)) {
+    return;
   }
 
   stream.chunks.insertOne(doc, { writeConcern: stream.writeConcern }).then(
     () => {
       --stream.state.outstandingRequests;
-      checkDone(stream);
+      checkDone(stream, callback);
     },
-    error => {
-      return __handleError(stream, error);
-    }
+    error => handleError(stream, error, callback)
   );
-  return true;
 }
 
-function checkAborted(stream: GridFSBucketWriteStream, callback?: Callback<void>): boolean {
+function isAborted(stream: GridFSBucketWriteStream, callback: Callback<void>): boolean {
   if (stream.state.aborted) {
-    if (typeof callback === 'function') {
-      // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-      callback(new MongoAPIError('Stream has been aborted'));
-    }
+    process.nextTick(callback, new MongoAPIError('Stream has been aborted'));
     return true;
   }
   return false;

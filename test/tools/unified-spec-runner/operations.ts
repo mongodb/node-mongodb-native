@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { once, Writable } from 'node:stream';
+
 import { expect } from 'chai';
 
 import {
@@ -417,15 +419,15 @@ operations.set('upload', async ({ entities, operation }) => {
   const bucket = entities.getEntity('bucket', operation.object);
 
   const stream = bucket.openUploadStream(operation.arguments!.filename, {
-    chunkSizeBytes: operation.arguments!.chunkSizeBytes
+    chunkSizeBytes: operation.arguments?.chunkSizeBytes
   });
 
-  return new Promise<ObjectId>((resolve, reject) => {
-    stream.end(Buffer.from(operation.arguments!.source.$$hexBytes, 'hex'), (error, file) => {
-      if (error) reject(error);
-      resolve((file as GridFSFile)._id as ObjectId);
-    });
-  });
+  const data = Buffer.from(operation.arguments!.source.$$hexBytes, 'hex');
+  const willFinish = once(stream, 'finish');
+  stream.end(data);
+  await willFinish;
+
+  return stream.fileMetadata?._id;
 });
 
 operations.set('wait', async ({ operation }) => {
