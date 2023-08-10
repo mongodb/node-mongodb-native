@@ -58,7 +58,7 @@ The following table describes add-on compponent version compatibility for the No
 | kerberos                  | ^1.0.0      | ^1.0.0 \|\| ^2.0.0 | ^1.0.0 \|\| ^2.0.0 | ^2.0.0      |
 | mongodb-client-encryption | ^1.0.0      | ^1.0.0 \|\| ^2.0.0 | ^2.3.0             | ^6.0.0      |
 | mongodb-legacy            | N/A         | ^4.0.0             | ^5.0.0             | ^6.0.0      |
-| @mongodb-js/zstd          | N/A         | ^1.0.0             | ^1.0.0             | ^1.1.0      |
+| \@mongodb-js/zstd         | N/A         | ^1.0.0             | ^1.0.0             | ^1.1.0      |
 
 #### Typescript Version
 
