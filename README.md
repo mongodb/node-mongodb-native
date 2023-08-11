@@ -49,7 +49,7 @@ For server and runtime version compatibility matrices, please refer to the follo
 
 #### Component Support Matrix
 
-The following table describes add-on compponent version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
+The following table describes add-on component version compatibility for the Node.js driver. Only packages with versions in these supported ranges are stable when used in combination.
 
 | Component                                                                            | `mongodb@3.x`      | `mongodb@4.x`      | `mongodb@5.x`      | `mongodb@6.x` |
 | ------------------------------------------------------------------------------------ | ------------------ | ------------------ | ------------------ | ------------- |
