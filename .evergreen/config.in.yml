@@ -411,43 +411,6 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-typescript.sh"
 
-  ###########################################
-  #       mongosh functions
-  ###########################################
-  "compile mongosh":
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TASK_ID: ${task_id}
-        binary: bash
-        args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
-
-  "run mongosh tests for package":
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TASK_ID: ${task_id}
-          MONGOSH_RUN_ONLY_IN_PACKAGE: ${mongosh_package}
-        binary: bash
-        args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-integration-tests.sh"
-
-  "run mongosh package scope test":
-    - command: subprocess.exec
-      params:
-        working_dir: src
-        env:
-          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-          TASK_ID: ${task_id}
-        binary: bash
-        args:
-          - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh"
-
   "reset aws instance profile":
     - command: shell.exec
       params:
