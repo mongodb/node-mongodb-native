@@ -427,7 +427,7 @@ operations.set('upload', async ({ entities, operation }) => {
   stream.end(data);
   await willFinish;
 
-  return stream.fileMetadata?._id;
+  return stream.gridFSFile?._id;
 });
 
 operations.set('wait', async ({ operation }) => {

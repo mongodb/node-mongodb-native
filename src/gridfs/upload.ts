@@ -40,26 +40,56 @@ export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
  */
 export class GridFSBucketWriteStream extends Writable {
   bucket: GridFSBucket;
+  /** A Collection instance where the file's chunks are stored */
   chunks: Collection<GridFSChunk>;
-  filename: string;
+  /** A Collection instance where the file's GridFSFile document is stored */
   files: Collection<GridFSFile>;
+  /** The name of the file */
+  filename: string;
+  /** Options controlling the metadata inserted along with the file */
   options: GridFSBucketWriteStreamOptions;
+  /** Indicates the stream is finished uploading */
   done: boolean;
+  /** The ObjectId used for the `_id` field on the GridFSFile document */
   id: ObjectId;
+  /** The number of bytes that each chunk will be limited to */
   chunkSizeBytes: number;
+  /** Space used to store a chunk currently being inserted */
   bufToStore: Buffer;
+  /** Accumulates the number of bytes inserted as the stream uploads chunks */
   length: number;
+  /** Accumulates the number of chunks inserted as the stream uploads file contents */
   n: number;
+  /** Tracks the current offset into the buffered bytes being uploaded */
   pos: number;
+  /** Contains a number of properties indicating the current state of the stream */
   state: {
+    /** If set the stream has ended */
     streamEnd: boolean;
+    /** Indicates the number of chunks that still need to be inserted to exhaust the current buffered data */
     outstandingRequests: number;
+    /** If set an error occurred during insertion */
     errored: boolean;
+    /** If set the stream was intentionally aborted */
     aborted: boolean;
   };
+  /** The write concern setting to be used with every insert operation */
   writeConcern?: WriteConcern;
-
-  fileMetadata: GridFSFile | null = null;
+  /**
+   * The document containing information about the inserted file.
+   * This property is defined _after_ the finish event has been emitted.
+   * It will remain `null` if an error occurs.
+   *
+   * @example
+   * ```ts
+   * fs.createReadStream('file.txt')
+   *   .pipe(bucket.openUploadStream('file.txt'))
+   *   .on('finish', function () {
+   *     console.log(this.gridFSFile)
+   *   })
+   * ```
+   */
+  gridFSFile: GridFSFile | null = null;
 
   /**
    * @param bucket - Handle for this stream's corresponding bucket
@@ -219,7 +249,7 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
     // Set done so we do not trigger duplicate createFilesDoc
     stream.done = true;
     // Create a new files doc
-    const fileMetadata = createFilesDoc(
+    const gridFSFile = createFilesDoc(
       stream.id,
       stream.length,
       stream.chunkSizeBytes,
@@ -233,9 +263,9 @@ function checkDone(stream: GridFSBucketWriteStream, callback: Callback): void {
       return;
     }
 
-    stream.files.insertOne(fileMetadata, { writeConcern: stream.writeConcern }).then(
+    stream.files.insertOne(gridFSFile, { writeConcern: stream.writeConcern }).then(
       () => {
-        stream.fileMetadata = fileMetadata;
+        stream.gridFSFile = gridFSFile;
         callback();
       },
       error => handleError(stream, error, callback)
@@ -362,7 +392,6 @@ function doWrite(
           --outstandingRequests;
 
           if (!outstandingRequests) {
-            stream.emit('drain', doc);
             checkDone(stream, callback);
           }
         },
