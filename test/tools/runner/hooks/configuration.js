@@ -156,7 +156,10 @@ const testConfigBeforeHook = async function () {
     serverless: process.env.SERVERLESS === '1',
     auth: process.env.AUTH === 'auth',
     tls: process.env.SSL === 'ssl',
-    csfle: this.configuration.clientSideEncryption.enabled,
+    csfle: {
+      enabled: this.configuration.clientSideEncryption.enabled,
+      version: this.configuration.clientSideEncryption.version
+    },
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),

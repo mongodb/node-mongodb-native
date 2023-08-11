@@ -316,6 +316,12 @@ functions:
           COMPRESSOR="${COMPRESSOR}" \
           SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  install package:
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          npm install --force ${PACKAGE}
   run lint checks:
     - command: subprocess.exec
       type: test
@@ -2745,6 +2751,24 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: master
+  - name: test-latest-driver-mongodb-client-encryption-6.0.0
+    tags:
+      - run-custom-dependency-tests
+    commands:
+      - func: install dependencies
+        vars:
+          NODE_LTS_VERSION: 16
+      - func: bootstrap mongo-orchestration
+        vars:
+          VERSION: '7.0'
+          TOPOLOGY: replica_set
+      - func: bootstrap kms servers
+      - func: install package
+        vars:
+          PACKAGE: mongodb-client-encryption@6.0.0-alpha.3
+      - func: run tests
+        vars:
+          CLIENT_ENCRYPTION: true
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -3676,6 +3700,7 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -3726,6 +3751,7 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -4015,6 +4041,7 @@ buildvariants:
       - run-custom-csfle-tests-rapid-master
       - run-custom-csfle-tests-latest-pinned-commit
       - run-custom-csfle-tests-latest-master
+      - test-latest-driver-mongodb-client-encryption-6.0.0
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large
