@@ -1,4 +1,4 @@
-import { OneOrMore } from './src/mongo_types';
+import { type OneOrMore } from './src/mongo_types';
 import type { TestConfiguration } from './test/tools/runner/config';
 
 declare global {
