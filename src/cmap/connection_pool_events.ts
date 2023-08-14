@@ -28,12 +28,17 @@ export class ConnectionPoolMonitoringEvent {
  */
 export class ConnectionPoolCreatedEvent extends ConnectionPoolMonitoringEvent {
   /** The options used to create this connection pool */
-  options?: ConnectionPoolOptions;
+  options: Omit<ConnectionPoolOptions, 'credentials'> & { credentials?: Record<never, never> };
 
   /** @internal */
   constructor(pool: ConnectionPool) {
     super(pool);
-    this.options = pool.options;
+    if (pool.options.credentials != null) {
+      // Intentionally remove credentials: NODE-5460
+      this.options = { ...pool.options, credentials: {} };
+    } else {
+      this.options = pool.options;
+    }
   }
 }
 
