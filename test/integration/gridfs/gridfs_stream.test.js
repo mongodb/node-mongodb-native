@@ -360,33 +360,32 @@ describe('GridFS Stream', function () {
     }
   });
 
-  it('should emit close after all chunks are received', {
-    metadata: { requires: { topology: ['single'] } },
+  it('emits end and close after all chunks are received', async function () {
+    const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload', chunkSizeBytes: 6000 });
 
-    test(done) {
-      const db = client.db();
-      const bucket = new GridFSBucket(db, {
-        bucketName: 'gridfsdownload',
-        chunkSizeBytes: 6000
-      });
+    const readStream = fs.createReadStream('./LICENSE.md');
+    const uploadStream = bucket.openUploadStream('LICENSE.md');
 
-      const readStream = fs.createReadStream('./LICENSE.md');
-      const uploadStream = bucket.openUploadStream('teststart.dat');
-      uploadStream.once('finish', function () {
-        const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
+    const finishedUpload = once(uploadStream, 'finish');
+    readStream.pipe(uploadStream);
+    await finishedUpload;
 
-        const events = [];
-        downloadStream.on('data', () => events.push('data'));
-        downloadStream.on('close', () => events.push('close'));
-        downloadStream.on('end', () => {
-          expect(events).to.deep.equal(['data', 'data', 'close']);
-          expect(downloadStream).to.exist;
-          client.close(done);
-        });
-      });
+    const downloadStream = bucket.openDownloadStreamByName('LICENSE.md');
 
-      readStream.pipe(uploadStream);
+    const closeEvent = once(downloadStream, 'close');
+    const endEvent = once(downloadStream, 'end');
+
+    // This always comes in two chunks because
+    // our LICENSE is 11323 characters and we set chunkSize to 6000
+    const chunks = [];
+    for await (const data of downloadStream) {
+      chunks.push(data);
     }
+
+    await endEvent;
+    await closeEvent;
+
+    expect(chunks).to.have.lengthOf(2);
   });
 
   /**
@@ -435,7 +434,7 @@ describe('GridFS Stream', function () {
     }
   });
 
-  it('Aborting an upload', {
+  it('writing to an aborted stream throws API error', {
     metadata: { requires: { topology: ['single'] } },
 
     async test() {
@@ -464,57 +463,20 @@ describe('GridFS Stream', function () {
     }
   });
 
-  /**
-   * Calling abort() on a GridFSBucketReadStream
-   *
-   * @example-class GridFSBucketReadStream
-   * @example-method abort
-   */
-  it('Destroying a download stream', {
-    metadata: { requires: { topology: ['single'], apiVersion: false } },
+  it('aborting a download stream emits close and cleans up cursor', async () => {
+    const bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
+    const readStream = fs.createReadStream('./LICENSE.md');
+    const uploadStream = bucket.openUploadStream('LICENSE.md');
+    const finishUpload = once(uploadStream, 'finish');
+    readStream.pipe(uploadStream);
+    await finishUpload;
+    const downloadStream = bucket.openDownloadStream(uploadStream.gridFSFile._id);
 
-    test(done) {
-      const bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
-      const readStream = fs.createReadStream('./LICENSE.md');
-      const uploadStream = bucket.openUploadStream('test.dat');
+    const downloadClose = once(downloadStream, 'close');
+    await downloadStream.abort();
 
-      // Wait for stream to finish
-      uploadStream.once('finish', function () {
-        const id = uploadStream.id;
-        const downloadStream = bucket.openDownloadStream(id);
-        const finished = {};
-        downloadStream.on('data', function () {
-          expect.fail('Should be unreachable');
-        });
-
-        downloadStream.on('error', function () {
-          expect.fail('Should be unreachable');
-        });
-
-        downloadStream.on('end', function () {
-          expect(downloadStream.s.cursor).to.not.exist;
-          if (finished.close) {
-            client.close(done);
-            return;
-          }
-          finished.end = true;
-        });
-
-        downloadStream.on('close', function () {
-          if (finished.end) {
-            client.close(done);
-            return;
-          }
-          finished.close = true;
-        });
-
-        downloadStream.abort(function (error) {
-          expect(error).to.not.exist;
-        });
-      });
-
-      readStream.pipe(uploadStream);
-    }
+    await downloadClose;
+    expect(downloadStream.s.cursor).to.not.exist;
   });
 
   /**

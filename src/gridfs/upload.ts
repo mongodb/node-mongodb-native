@@ -138,7 +138,9 @@ export class GridFSBucketWriteStream extends Writable {
   }
 
   /**
-   * The stream is considered constructed when the indexes ßare done being created
+   * @internal
+   *
+   * The stream is considered constructed when the indexes are done being created
    */
   override _construct(callback: (error?: Error | null) => void): void {
     if (this.bucket.s.checkedIndexes) {
@@ -148,12 +150,12 @@ export class GridFSBucketWriteStream extends Writable {
   }
 
   /**
+   * @internal
    * Write a buffer to the stream.
    *
    * @param chunk - Buffer to write
-   * @param encodingOrCallback - Optional encoding for the buffer
+   * @param encoding - Optional encoding for the buffer
    * @param callback - Function to call when the chunk was added to the buffer, or if the entire chunk was persisted to MongoDB if this chunk caused a flush.
-   * @returns False if this write required flushing a chunk to MongoDB. True otherwise.
    */
   override _write(
     chunk: Buffer | string,
@@ -163,6 +165,7 @@ export class GridFSBucketWriteStream extends Writable {
     doWrite(this, chunk, encoding, callback);
   }
 
+  /** @internal */
   override _final(callback: (error?: Error | null) => void): void {
     if (this.state.streamEnd) {
       return process.nextTick(callback);
