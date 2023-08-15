@@ -29,46 +29,60 @@ describe('MongoOptions', function () {
     expect(options.prototype).to.not.exist;
   });
 
-  it('should rename tls options correctly', function () {
-    const filename = `${os.tmpdir()}/tmp.pem`;
-    fs.closeSync(fs.openSync(filename, 'w'));
-    const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
-      tlsCertificateKeyFile: filename,
-      tlsCertificateFile: filename,
-      tlsCAFile: filename,
-      sslCRL: filename,
-      tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword',
-      sslValidate: false
+  describe('tls options', () => {
+    let filename;
+    before(() => {
+      filename = `${os.tmpdir()}/tmp.pem`;
+      fs.closeSync(fs.openSync(filename, 'w'));
     });
-    fs.unlinkSync(filename);
+    after(() => {
+      fs.unlinkSync(filename);
+    });
+    it('should rename tls options correctly', function () {
+      const options = parseOptions('mongodb://localhost:27017/?ssl=true', {
+        tlsCertificateKeyFile: filename,
+        tlsCertificateFile: filename,
+        tlsCAFile: filename,
+        sslCRL: filename,
+        tlsCertificateKeyFilePassword: 'tlsCertificateKeyFilePassword',
+        sslValidate: false
+      });
 
-    /*
-     * If set TLS enabled, equivalent to setting the ssl option.
-     *
-     * ### Additional options:
-     *
-     * |    nodejs option     | MongoDB equivalent                                 | type                                   |
-     * |:---------------------|----------------------------------------------------|:---------------------------------------|
-     * | `ca`                 | sslCA, tlsCAFile                                   | `string \| Buffer \| Buffer[]`         |
-     * | `crl`                | sslCRL                                             | `string \| Buffer \| Buffer[]`         |
-     * | `cert`               | sslCert, tlsCertificateFile                        | `string \| Buffer \| Buffer[]`         |
-     * | `key`                | sslKey, tlsCertificateKeyFile                      | `string \| Buffer \| KeyObject[]`      |
-     * | `passphrase`         | sslPass, tlsCertificateKeyFilePassword             | `string`                               |
-     * | `rejectUnauthorized` | sslValidate                                        | `boolean`                              |
-     *
-     */
-    expect(options).to.not.have.property('tlsCertificateKeyFile');
-    expect(options).to.not.have.property('tlsCAFile');
-    expect(options).to.not.have.property('sslCRL');
-    expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
-    expect(options).has.property('ca', '');
-    expect(options).has.property('crl', '');
-    expect(options).has.property('cert', '');
-    expect(options).has.property('key');
-    expect(options.key).has.length(0);
-    expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
-    expect(options).has.property('rejectUnauthorized', false);
-    expect(options).has.property('tls', true);
+      /*
+       * If set TLS enabled, equivalent to setting the ssl option.
+       *
+       * ### Additional options:
+       *
+       * |    nodejs option     | MongoDB equivalent                                 | type                                   |
+       * |:---------------------|----------------------------------------------------|:---------------------------------------|
+       * | `ca`                 | sslCA, tlsCAFile                                   | `string \| Buffer \| Buffer[]`         |
+       * | `crl`                | sslCRL                                             | `string \| Buffer \| Buffer[]`         |
+       * | `cert`               | sslCert, tlsCertificateFile                        | `string \| Buffer \| Buffer[]`         |
+       * | `key`                | sslKey, tlsCertificateKeyFile                      | `string \| Buffer \| KeyObject[]`      |
+       * | `passphrase`         | sslPass, tlsCertificateKeyFilePassword             | `string`                               |
+       * | `rejectUnauthorized` | sslValidate                                        | `boolean`                              |
+       *
+       */
+      expect(options).to.not.have.property('tlsCertificateKeyFile');
+      expect(options).to.not.have.property('tlsCAFile');
+      expect(options).to.not.have.property('sslCRL');
+      expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
+      expect(options).has.property('ca', '');
+      expect(options).has.property('crl', '');
+      expect(options).has.property('cert', '');
+      expect(options).has.property('key');
+      expect(options.key).has.length(0);
+      expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
+      expect(options).has.property('rejectUnauthorized', false);
+      expect(options).has.property('tls', true);
+    });
+
+    it('should not emit a deprecation warning for `tlsCertificateKeyFile` when `tlsCaFile` is specified', () => {
+      const promiseSpy = sinon.spy(process, 'emitWarning');
+      new MongoClient(`mongodb://localhost:27017/my_db?tlsCertificateKeyFile=${filename}`);
+
+      expect(promiseSpy).not.to.have.been.called;
+    });
   });
 
   const ALL_OPTIONS = {
