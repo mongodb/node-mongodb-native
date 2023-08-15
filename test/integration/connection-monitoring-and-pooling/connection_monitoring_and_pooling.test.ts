@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { MongoClient } from '../../../src';
+import { MongoClient, MongoCredentials } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
 
@@ -39,6 +39,18 @@ describe('Connection Monitoring and Pooling (Node Driver)', function () {
           await client.connect();
           const [event] = await poolCreated;
           expect(event).to.have.deep.nested.property('options.credentials', {});
+
+          const poolOptions = Array.from(client.topology?.s.servers.values() ?? []).map(
+            s => s.s.pool.options
+          );
+          expect(poolOptions).to.have.length.of.at.least(1);
+
+          for (const { credentials = {} } of poolOptions) {
+            expect(
+              Object.keys(credentials),
+              'pool.options.credentials must exist and have keys'
+            ).to.not.equal(0);
+          }
         }
       });
 
