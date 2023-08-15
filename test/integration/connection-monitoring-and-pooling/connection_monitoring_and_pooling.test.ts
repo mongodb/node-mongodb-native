@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { once } from 'events';
 
-import { MongoClient, MongoCredentials } from '../../../src';
+import { MongoClient } from '../../../src';
 import { loadSpecTests } from '../../spec';
 import { CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
 
