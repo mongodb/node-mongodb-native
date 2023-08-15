@@ -138,7 +138,7 @@ These are errors which originate from faulty environment setup.
 
 ### `MongoCryptError`
 
-These are errors thrown from the `mongodb-client-encryption` bindings
+These are errors thrown from the driver's client side encryption logic.
 
 - #### MongoCryptInvalidArgumentError
   - Thrown when an invalid argument has been provided to an encryption API
