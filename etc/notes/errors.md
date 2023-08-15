@@ -147,9 +147,9 @@ These are errors thrown from the `mongodb-client-encryption` bindings
 - #### MongoCryptInvalidCreateEncryptedCollectionError
   - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create a collection
 - #### MongoCryptInvalidCreateAzureKMSRequestError
-  - Thrown when `mongodb-client-encryption` failed to auto-refresh Azure KMS credentials
+  - Thrown when auto-fetching KMS credentials fails to auto-refresh Azure KMS credentials
 - #### MongoCryptKMSRequestNetworkTimeoutError
-  - Thrown when `mongodb-client-encryption` times out when fetching KMS credentials
+  - Thrown when auto-fetching KMS credentials times out
 
 ## Test Plan
 
