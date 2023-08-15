@@ -46,6 +46,18 @@ describe('Connection Monitoring and Pooling (Node Driver)', function () {
           await client.connect();
           const [event] = await poolCreated;
           expect(event).to.have.deep.nested.property('options.credentials', {});
+
+          const poolOptions = Array.from(client.topology?.s.servers.values() ?? []).map(
+            s => s.pool.options
+          );
+          expect(poolOptions).to.have.length.of.at.least(1);
+
+          for (const { credentials = {} } of poolOptions) {
+            expect(
+              Object.keys(credentials),
+              'pool.options.credentials must exist and have keys'
+            ).to.not.equal(0);
+          }
         }
       });
 
