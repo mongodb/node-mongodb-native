@@ -30,7 +30,7 @@
     "socks": "^2.7.1"
   },
   "optionalDependencies": {
-    "saslprep": "^1.0.3"
+    "@mongodb-js/saslprep": "^1.1.0"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.201.0",
@@ -69,7 +69,6 @@
     "@types/kerberos": "^1.1.2",
     "@types/mocha": "^10.0.1",
     "@types/node": "^20.1.0",
-    "@types/saslprep": "^1.0.1",
     "@types/semver": "^7.5.0",
     "@types/sinon": "^10.0.14",
     "@types/sinon-chai": "^3.2.9",
