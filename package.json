@@ -26,10 +26,8 @@
   },
   "dependencies": {
     "bson": "^5.4.0",
-    "mongodb-connection-string-url": "^2.6.0"
-  },
-  "optionalDependencies": {
-    "saslprep": "^1.0.3"
+    "mongodb-connection-string-url": "^2.6.0",
+    "@mongodb-js/saslprep": "^1.1.0"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.188.0",

@@ -189,19 +189,6 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
   }
 }
 
-export let saslprep: typeof import('saslprep') | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `saslprep` not found.' +
-        ' Please install it to enable Stringprep Profile for User Names and Passwords'
-    )
-  );
-
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  saslprep = require('saslprep');
-} catch {} // eslint-disable-line
-
 interface AWS4 {
   /**
    * Created these inline types to better assert future usage of this API
