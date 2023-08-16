@@ -147,9 +147,9 @@ These are errors thrown from the driver's client side encryption logic.
 - #### MongoCryptInvalidCreateEncryptedCollectionError
   - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create a collection
 - #### MongoCryptInvalidCreateAzureKMSRequestError
-  - Thrown when auto-fetching KMS credentials fails to auto-refresh Azure KMS credentials
+  - Thrown when the driver encounters an error when fetching Azure KMS credentials
 - #### MongoCryptKMSRequestNetworkTimeoutError
-  - Thrown when auto-fetching KMS credentials times out
+  - Thrown when the HTTP request to the IDMS server times out when fetching Azure KMS credentials
 
 ## Test Plan
 
