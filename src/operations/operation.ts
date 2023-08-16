@@ -92,7 +92,7 @@ export abstract class AbstractOperation<TResult = any> {
   ): void;
 
   hasAspect(aspect: symbol): boolean {
-    const ctor = this.constructor as OperationConstructor;
+    const ctor = this.constructor as { aspects?: Set<symbol> };
     if (ctor.aspects == null) {
       return false;
     }
