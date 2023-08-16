@@ -1171,9 +1171,8 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError)
-          .to.be.instanceOf(Error)
-          .to.have.property('name', 'MongoServerSelectionError');
+        expect(insertError).to.be.instanceOf(Error);
+        expect(insertError).to.have.property('cause').that.is.instanceOf(MongoServerSelectionError);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
         expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
