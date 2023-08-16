@@ -438,7 +438,11 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         options.ca ??= await fs.readFile(options.tlsCAFile, { encoding: 'utf8' });
       }
       if (typeof options.tlsCertificateKeyFile === 'string') {
-        options.key ??= await fs.readFile(options.tlsCertificateKeyFile, { encoding: 'utf8' });
+        if (!options.key || !options.cert) {
+          const contents = await fs.readFile(options.tlsCertificateKeyFile, { encoding: 'utf8' });
+          options.key ??= contents;
+          options.cert ??= contents;
+        }
       }
     }
     if (typeof options.srvHost === 'string') {
@@ -787,6 +791,7 @@ export interface MongoOptions
    * |:----------------------|:----------------------------------------------|:-------------------|
    * | `ca`                  | `tlsCAFile`                                   | `string`           |
    * | `crl`                 | N/A                                           | `string`           |
+   * | `cert`                | `tlsCertificateKeyFile`                       | `string`           |
    * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
    * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
    * | `rejectUnauthorized`  | `tlsAllowInvalidCertificates`                 | `boolean`          |
@@ -804,9 +809,9 @@ export interface MongoOptions
    *
    * The files specified by the paths passed in to the `tlsCAFile` and `tlsCertificateKeyFile` fields
    * are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
-   * the `ca` and `key` fields are populated, they will not be read again on subsequent calls to
-   * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`
-   * and `key` fields will be undefined.
+   * the `ca`, `cert` and `key` fields are populated, they will not be read again on subsequent calls to
+   * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`,
+   * `cert` and `key` fields will be undefined.
    */
   tls: boolean;
 
