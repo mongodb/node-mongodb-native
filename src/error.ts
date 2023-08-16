@@ -139,11 +139,11 @@ export class MongoError extends Error {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
-  constructor(message: string | Error, options?: { cause?: Error }) {
+  constructor(message: string, options?: { cause?: Error }) {
     super(MongoError.buildErrorMessage(message), options);
     this[kErrorLabels] = new Set();
   }
@@ -210,7 +210,7 @@ export class MongoServerError extends MongoError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -245,7 +245,7 @@ export class MongoDriverError extends MongoError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -276,7 +276,7 @@ export class MongoAPIError extends MongoDriverError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -307,7 +307,7 @@ export class MongoRuntimeError extends MongoDriverError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -335,7 +335,7 @@ export class MongoBatchReExecutionError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -363,7 +363,7 @@ export class MongoDecompressionError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -391,7 +391,7 @@ export class MongoNotConnectedError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -419,7 +419,7 @@ export class MongoTransactionError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -447,7 +447,7 @@ export class MongoExpiredSessionError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -475,7 +475,7 @@ export class MongoKerberosError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -503,7 +503,7 @@ export class MongoAWSError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -531,7 +531,7 @@ export class MongoAzureError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -558,7 +558,7 @@ export class MongoChangeStreamError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -585,7 +585,7 @@ export class MongoTailableCursorError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -611,7 +611,7 @@ export class MongoGridFSStreamError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -639,7 +639,7 @@ export class MongoGridFSChunkError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -676,7 +676,7 @@ export class MongoUnexpectedServerResponseError extends MongoRuntimeError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -704,7 +704,7 @@ export class MongoCursorInUseError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -732,7 +732,7 @@ export class MongoServerClosedError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -759,7 +759,7 @@ export class MongoCursorExhaustedError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -787,7 +787,7 @@ export class MongoTopologyClosedError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -809,7 +809,8 @@ export function isNetworkErrorBeforeHandshake(err: MongoNetworkError): boolean {
 /** @public */
 export interface MongoNetworkErrorOptions {
   /** Indicates the timeout happened before a connection handshake completed */
-  beforeHandshake: boolean;
+  beforeHandshake?: boolean;
+  cause?: Error;
 }
 
 /**
@@ -828,12 +829,12 @@ export class MongoNetworkError extends MongoError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
-  constructor(message: string | Error, options?: MongoNetworkErrorOptions) {
-    super(message);
+  constructor(message: string, options?: MongoNetworkErrorOptions) {
+    super(message, { cause: options?.cause });
 
     if (options && typeof options.beforeHandshake === 'boolean') {
       this[kBeforeHandshake] = options.beforeHandshake;
@@ -861,7 +862,7 @@ export class MongoNetworkTimeoutError extends MongoNetworkError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -887,7 +888,7 @@ export class MongoParseError extends MongoDriverError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -916,7 +917,7 @@ export class MongoInvalidArgumentError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -945,7 +946,7 @@ export class MongoCompatibilityError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -974,7 +975,7 @@ export class MongoMissingCredentialsError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -1001,7 +1002,7 @@ export class MongoMissingDependencyError extends MongoAPIError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -1029,13 +1030,13 @@ export class MongoSystemError extends MongoError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
   constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
-      super(reason.error.message || reason.error);
+      super(message, { cause: reason.error });
     } else {
       super(message);
     }
@@ -1065,7 +1066,7 @@ export class MongoServerSelectionError extends MongoSystemError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -1107,7 +1108,7 @@ export class MongoWriteConcernError extends MongoServerError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/

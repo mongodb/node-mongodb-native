@@ -16,7 +16,7 @@ export class PoolClosedError extends MongoDriverError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -45,7 +45,7 @@ export class PoolClearedError extends MongoNetworkError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -76,7 +76,7 @@ export class PoolClearedOnNetworkError extends PoolClearedError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -104,7 +104,7 @@ export class WaitQueueTimeoutError extends MongoDriverError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/

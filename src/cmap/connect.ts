@@ -502,7 +502,7 @@ function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback
 function connectionFailureError(type: ErrorHandlerEventName, err: Error) {
   switch (type) {
     case 'error':
-      return new MongoNetworkError(err);
+      return new MongoNetworkError('error', { cause: err });
     case 'timeout':
       return new MongoNetworkTimeoutError('connection timed out');
     case 'close':

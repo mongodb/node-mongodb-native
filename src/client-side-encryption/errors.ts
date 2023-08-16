@@ -13,7 +13,7 @@ export class MongoCryptError extends MongoError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -39,7 +39,7 @@ export class MongoCryptInvalidArgumentError extends MongoCryptError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -64,7 +64,7 @@ export class MongoCryptCreateDataKeyError extends MongoCryptError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -91,7 +91,7 @@ export class MongoCryptCreateEncryptedCollectionError extends MongoCryptError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
@@ -119,7 +119,7 @@ export class MongoCryptAzureKMSRequestError extends MongoCryptError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/

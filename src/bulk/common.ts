@@ -605,7 +605,7 @@ export class MongoBulkWriteError extends MongoServerError {
    *
    * @remarks
    * This class is only meant to be constructed within the driver. This constructor is
-   * not subject to semantic versioning compatiblity guarantees and may change at any time.
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
    *
    * @public
    **/
