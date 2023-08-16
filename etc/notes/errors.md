@@ -143,9 +143,9 @@ These are errors thrown from the driver's client side encryption logic.
 - #### MongoCryptInvalidArgumentError
   - Thrown when an invalid argument has been provided to an encryption API
 - #### MongoCryptInvalidCreateDataKeyError
-  - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create data keys
+  - Thrown when the driver fails to create data keys for an encrypted collection
 - #### MongoCryptInvalidCreateEncryptedCollectionError
-  - Thrown when `ClientEncryption.createEncryptedCollection()` failed to create a collection
+  - Thrown when the driver fails to create an encrypted collection
 - #### MongoCryptInvalidCreateAzureKMSRequestError
   - Thrown when the driver encounters an error when fetching Azure KMS credentials
 - #### MongoCryptKMSRequestNetworkTimeoutError
