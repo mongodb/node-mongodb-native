@@ -5,9 +5,10 @@ import * as path from 'node:path';
 import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
+import { setDifference } from '../mongodb';
 import { itInNodeProcess } from '../tools/utils';
 
-const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url'];
+const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', '@mongodb-js/saslprep'];
 const EXPECTED_PEER_DEPENDENCIES = [
   '@aws-sdk/credential-providers',
   '@mongodb-js/zstd',
@@ -21,7 +22,7 @@ const EXPECTED_PEER_DEPENDENCIES = [
 describe('package.json', function () {
   describe('dependencies', function () {
     it('only contains the expected dependencies', function () {
-      expect(dependencies).to.have.keys(EXPECTED_DEPENDENCIES);
+      expect(Object.keys(dependencies)).to.deep.equal(EXPECTED_DEPENDENCIES);
     });
   });
 
@@ -118,7 +119,7 @@ describe('package.json', function () {
 
   const EXPECTED_IMPORTS = [
     'bson',
-    'saslprep',
+    '@mongodb-js/saslprep',
     'sparse-bitfield',
     'memory-pager',
     'mongodb-connection-string-url',
@@ -150,7 +151,7 @@ describe('package.json', function () {
 
     context('when importing mongodb', () => {
       it('only contains the expected imports', function () {
-        expect(imports).to.deep.equal(EXPECTED_IMPORTS);
+        expect(setDifference(imports, EXPECTED_IMPORTS)).to.deep.equal(new Set());
       });
 
       it('does not import optional dependencies', () => {
