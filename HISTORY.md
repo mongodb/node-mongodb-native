@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.17.0](https://github.com/mongodb/node-mongodb-native/compare/v4.16.0...v4.17.0) (2023-08-17)
+
+
+### Features
+
+* **NODE-5272:** do not create or drop ecc collections ([#3678](https://github.com/mongodb/node-mongodb-native/issues/3678)) ([d26ad61](https://github.com/mongodb/node-mongodb-native/commit/d26ad6166ae58c9976770eec84f32f9c2c17a0f3))
+* **NODE-5398:** use mongodb-js/saslprep instead of saslprep ([#3820](https://github.com/mongodb/node-mongodb-native/issues/3820)) ([5244711](https://github.com/mongodb/node-mongodb-native/commit/5244711723cc7b05c50dac6ba4b7363b5af2ac37))
+
+
+### Bug Fixes
+
+* **NODE-5262:** AWS Lambda metadata detection logic is too permissive ([#3683](https://github.com/mongodb/node-mongodb-native/issues/3683)) ([c0c3d99](https://github.com/mongodb/node-mongodb-native/commit/c0c3d99784fc487f1cbe0eb02a63c58a1242d872))
+* **NODE-5311:** construct error messages for AggregateErrors in Node16+ ([#3683](https://github.com/mongodb/node-mongodb-native/issues/3683)) ([98b7bdf](https://github.com/mongodb/node-mongodb-native/commit/98b7bdf2d6c08ba9470bbda0fad3251ea0a08949))
+* **NODE-5316:** prevent parallel topology creation in MongoClient.connect ([#3696](https://github.com/mongodb/node-mongodb-native/issues/3696)) ([e13038d](https://github.com/mongodb/node-mongodb-native/commit/e13038d1c7246e95b32993fc97331713b542fd74))
+* **NODE-5356:** prevent scram auth from throwing TypeError if saslprep is not a function ([#3732](https://github.com/mongodb/node-mongodb-native/issues/3732)) ([2d028af](https://github.com/mongodb/node-mongodb-native/commit/2d028af31d17a25a16c1ef73749a266fe7cf3a33))
+* **NODE-5536:** remove credentials from ConnectionPoolCreatedEvent options ([#3812](https://github.com/mongodb/node-mongodb-native/issues/3812)) ([2910dca](https://github.com/mongodb/node-mongodb-native/commit/2910dcae38ce29e0ee5afc497ac146de2a4bb984))
+
 ## [4.16.0](https://github.com/mongodb/node-mongodb-native/compare/v4.15.0...v4.16.0) (2023-04-18)
 
 
