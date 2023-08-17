@@ -4,17 +4,20 @@ const { Double } = require('bson');
 const stream = require('stream');
 const fs = require('fs');
 const { expect } = require('chai');
-const { GridFSBucket, ObjectId } = require('../../mongodb');
-const sinon = require('sinon');
-const { sleep } = require('../../tools/utils');
+const { promisify } = require('node:util');
+const { once } = require('node:events');
+const { GridFSBucket, ObjectId, MongoAPIError } = require('../../mongodb');
 
 describe('GridFS Stream', function () {
   let client;
+  let db;
   beforeEach(async function () {
     client = this.configuration.newClient();
+    db = client.db('gridfs_stream_tests');
   });
 
   afterEach(async function () {
+    await db.dropDatabase().catch(() => null);
     await client.close();
   });
 
@@ -357,33 +360,32 @@ describe('GridFS Stream', function () {
     }
   });
 
-  it('should emit close after all chunks are received', {
-    metadata: { requires: { topology: ['single'] } },
+  it('emits end and close after all chunks are received', async function () {
+    const bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload', chunkSizeBytes: 6000 });
 
-    test(done) {
-      const db = client.db();
-      const bucket = new GridFSBucket(db, {
-        bucketName: 'gridfsdownload',
-        chunkSizeBytes: 6000
-      });
+    const readStream = fs.createReadStream('./LICENSE.md');
+    const uploadStream = bucket.openUploadStream('LICENSE.md');
 
-      const readStream = fs.createReadStream('./LICENSE.md');
-      const uploadStream = bucket.openUploadStream('teststart.dat');
-      uploadStream.once('finish', function () {
-        const downloadStream = bucket.openDownloadStreamByName('teststart.dat');
+    const finishedUpload = once(uploadStream, 'finish');
+    readStream.pipe(uploadStream);
+    await finishedUpload;
 
-        const events = [];
-        downloadStream.on('data', () => events.push('data'));
-        downloadStream.on('close', () => events.push('close'));
-        downloadStream.on('end', () => {
-          expect(events).to.deep.equal(['data', 'data', 'close']);
-          expect(downloadStream).to.exist;
-          client.close(done);
-        });
-      });
+    const downloadStream = bucket.openDownloadStreamByName('LICENSE.md');
 
-      readStream.pipe(uploadStream);
+    const closeEvent = once(downloadStream, 'close');
+    const endEvent = once(downloadStream, 'end');
+
+    // This always comes in two chunks because
+    // our LICENSE is 11323 characters and we set chunkSize to 6000
+    const chunks = [];
+    for await (const data of downloadStream) {
+      chunks.push(data);
     }
+
+    await endEvent;
+    await closeEvent;
+
+    expect(chunks).to.have.lengthOf(2);
   });
 
   /**
@@ -432,165 +434,49 @@ describe('GridFS Stream', function () {
     }
   });
 
-  /**
-   * Aborting an upload
-   *
-   * @example-class GridFSBucketWriteStream
-   * @example-method abort
-   */
-  it('Aborting an upload', {
+  it('writing to an aborted stream throws API error', {
     metadata: { requires: { topology: ['single'] } },
 
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
-        const CHUNKS_COLL = 'gridfsabort.chunks';
-        const uploadStream = bucket.openUploadStream('test.dat');
+    async test() {
+      const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+      const chunks = db.collection('gridfsabort.chunks');
+      const uploadStream = bucket.openUploadStream('test.dat');
 
-        const id = uploadStream.id;
-        const query = { files_id: id };
-        uploadStream.write('a', 'utf8', function (error) {
-          expect(error).to.not.exist;
+      const willError = once(uploadStream, 'error');
 
-          db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            expect(error).to.not.exist;
-            expect(c).to.equal(1);
-            uploadStream.abort(function (error) {
-              expect(error).to.not.exist;
-              db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                expect(error).to.not.exist;
-                expect(c).to.equal(0);
-                uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-                  uploadStream.end('c', 'utf8', function (error) {
-                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-                    // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function (error) {
-                      expect(error.toString()).to.equal(
-                        // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-                        'MongoAPIError: Cannot call abort() on a stream twice'
-                      );
-                      client.close(done);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
+      const id = uploadStream.id;
+      const query = { files_id: id };
+
+      const writeAsync = promisify(uploadStream.write.bind(uploadStream));
+
+      await writeAsync('a', 'utf8');
+
+      expect(await chunks.countDocuments(query)).to.equal(1);
+
+      await uploadStream.abort();
+
+      expect(await chunks.countDocuments(query)).to.equal(0);
+
+      expect(await writeAsync('b', 'utf8').catch(e => e)).to.be.instanceOf(MongoAPIError);
+      expect(await uploadStream.abort().catch(e => e)).to.be.instanceOf(MongoAPIError);
+      expect((await willError)[0]).to.be.instanceOf(MongoAPIError);
     }
   });
 
-  /**
-   * Aborting an upload
-   */
-  it('Destroy an upload', {
-    metadata: { requires: { topology: ['single'] } },
+  it('aborting a download stream emits close and cleans up cursor', async () => {
+    const bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
+    const readStream = fs.createReadStream('./LICENSE.md');
+    const uploadStream = bucket.openUploadStream('LICENSE.md');
+    const finishUpload = once(uploadStream, 'finish');
+    readStream.pipe(uploadStream);
+    await finishUpload;
+    const downloadStream = bucket.openDownloadStream(uploadStream.gridFSFile._id);
 
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
-        const CHUNKS_COLL = 'gridfsabort.chunks';
-        const uploadStream = bucket.openUploadStream('test.dat');
+    const downloadClose = once(downloadStream, 'close');
+    await downloadStream.abort();
 
-        const id = uploadStream.id;
-        const query = { files_id: id };
-        uploadStream.write('a', 'utf8', function (error) {
-          expect(error).to.not.exist;
-
-          db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            expect(error).to.not.exist;
-            expect(c).to.equal(1);
-            uploadStream.abort(function (error) {
-              expect(error).to.not.exist;
-              db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                expect(error).to.not.exist;
-                expect(c).to.equal(0);
-                uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-                  uploadStream.end('c', 'utf8', function (error) {
-                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-                    // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function (error) {
-                      expect(error.toString()).to.equal(
-                        // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-                        'MongoAPIError: Cannot call abort() on a stream twice'
-                      );
-                      client.close(done);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  /**
-   * Calling abort() on a GridFSBucketReadStream
-   *
-   * @example-class GridFSBucketReadStream
-   * @example-method abort
-   */
-  it('Destroying a download stream', {
-    metadata: { requires: { topology: ['single'], apiVersion: false } },
-
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
-        const readStream = fs.createReadStream('./LICENSE.md');
-        const uploadStream = bucket.openUploadStream('test.dat');
-
-        // Wait for stream to finish
-        uploadStream.once('finish', function () {
-          const id = uploadStream.id;
-          const downloadStream = bucket.openDownloadStream(id);
-          const finished = {};
-          downloadStream.on('data', function () {
-            expect.fail('Should be unreachable');
-          });
-
-          downloadStream.on('error', function () {
-            expect.fail('Should be unreachable');
-          });
-
-          downloadStream.on('end', function () {
-            expect(downloadStream.s.cursor).to.not.exist;
-            if (finished.close) {
-              client.close(done);
-              return;
-            }
-            finished.end = true;
-          });
-
-          downloadStream.on('close', function () {
-            if (finished.end) {
-              client.close(done);
-              return;
-            }
-            finished.close = true;
-          });
-
-          downloadStream.abort(function (error) {
-            expect(error).to.not.exist;
-          });
-        });
-
-        readStream.pipe(uploadStream);
-      });
-    }
+    await downloadClose;
+    expect(downloadStream.s.cursor).to.not.exist;
   });
 
   /**
@@ -872,134 +758,6 @@ describe('GridFS Stream', function () {
         });
       });
     }
-  });
-
-  /**
-   * NODE-822 GridFSBucketWriteStream end method does not handle optional parameters
-   */
-  it('should correctly handle calling end function with only a callback', {
-    metadata: { requires: { topology: ['single'] } },
-
-    test(done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      client.connect(function (err, client) {
-        const db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
-        const CHUNKS_COLL = 'gridfsabort.chunks';
-        const uploadStream = bucket.openUploadStream('test.dat');
-
-        const id = uploadStream.id;
-        const query = { files_id: id };
-        uploadStream.write('a', 'utf8', function (error) {
-          expect(error).to.not.exist;
-
-          db.collection(CHUNKS_COLL).count(query, function (error, c) {
-            expect(error).to.not.exist;
-            expect(c).to.equal(1);
-
-            uploadStream.abort(function (error) {
-              expect(error).to.not.exist;
-
-              db.collection(CHUNKS_COLL).count(query, function (error, c) {
-                expect(error).to.not.exist;
-                expect(c).to.equal(0);
-
-                uploadStream.write('b', 'utf8', function (error) {
-                  expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-
-                  uploadStream.end(function (error) {
-                    expect(error.toString()).to.equal('MongoAPIError: Stream has been aborted');
-
-                    // Fail if user tries to abort an aborted stream
-                    uploadStream.abort().then(null, function (error) {
-                      expect(error.toString()).to.equal(
-                        // TODO(NODE-3485): Replace with MongoGridFSStreamClosedError
-                        'MongoAPIError: Cannot call abort() on a stream twice'
-                      );
-                      client.close(done);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    }
-  });
-
-  describe('upload stream end()', () => {
-    let client, db;
-
-    afterEach(async () => {
-      sinon.restore();
-      await client.close();
-    });
-
-    it('should not call the callback on repeat calls to end', {
-      metadata: { requires: { topology: ['single'] } },
-
-      async test() {
-        const configuration = this.configuration;
-        client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1
-        });
-        await client.connect();
-        db = client.db(configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
-        const uploadStream = bucket.openUploadStream('test.dat');
-
-        const endPromise = new Promise(resolve => {
-          uploadStream.end('1', resolve);
-        });
-
-        const endPromise2 = new Promise((resolve, reject) => {
-          uploadStream.end('2', () => {
-            reject(new Error('Expected callback to not be called on duplicate end'));
-          });
-        });
-
-        await endPromise;
-        // in the fail case, the callback would be called when the actual write is finished,
-        // so we need to give it a moment
-        await Promise.race([endPromise2, sleep(100)]);
-      }
-    });
-
-    it('should not write a chunk on repeat calls to end', {
-      metadata: { requires: { topology: ['single'] } },
-
-      async test() {
-        const configuration = this.configuration;
-        client = configuration.newClient(configuration.writeConcernMax(), {
-          maxPoolSize: 1
-        });
-        await client.connect();
-        db = client.db(this.configuration.db);
-        const bucket = new GridFSBucket(db, { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
-        const uploadStream = bucket.openUploadStream('test.dat');
-        const spy = sinon.spy(uploadStream, 'write');
-
-        const endPromise = new Promise(resolve => {
-          uploadStream.end('1', resolve);
-        });
-
-        await endPromise;
-        expect(spy).to.have.been.calledWith('1');
-
-        uploadStream.end('2');
-
-        // wait for potential async calls to happen before we close the client
-        // so that we don't get a client not connected failure in the afterEach
-        // in the failure case since it would be confusing and unnecessary
-        // given the assertions we already have for this case
-        await sleep(100);
-
-        expect(spy).not.to.have.been.calledWith('2');
-        expect(spy.calledOnce).to.be.true;
-      }
-    });
   });
 
   it('should return only end - start bytes when the end is within a chunk', {

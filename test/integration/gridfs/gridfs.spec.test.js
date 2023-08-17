@@ -1,71 +1,54 @@
 'use strict';
 
 const { EJSON } = require('bson');
-const { setupDatabase } = require('./../shared');
 const { expect } = require('chai');
+const { once } = require('node:events');
 const { GridFSBucket } = require('../../mongodb');
 
 describe('GridFS spec', function () {
-  before(function () {
-    return setupDatabase(this.configuration);
+  let client;
+  let db;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    db = client.db('gridfs_spec_tests');
+  });
+
+  afterEach(async function () {
+    await db.dropDatabase().catch(() => null);
+    await client.close();
   });
 
   const UPLOAD_SPEC = require('../../spec/gridfs/gridfs-upload.json');
-  UPLOAD_SPEC.tests.forEach(function (specTest) {
-    (function (testSpec) {
-      it(testSpec.description, {
-        metadata: { requires: { topology: ['single'] } },
 
-        test(done) {
-          const configuration = this.configuration;
-          const client = configuration.newClient(configuration.writeConcernMax(), {
-            maxPoolSize: 1
-          });
-          client.connect(function (err, client) {
-            const db = client.db(configuration.db);
-            db.dropDatabase(function (error) {
-              expect(error).to.not.exist;
+  for (const testSpec of UPLOAD_SPEC.tests) {
+    it(testSpec.description, async function () {
+      const bucket = new GridFSBucket(db, { bucketName: 'expected' });
 
-              const bucket = new GridFSBucket(db, { bucketName: 'expected' });
-              const res = bucket.openUploadStream(
-                testSpec.act.arguments.filename,
-                testSpec.act.arguments.options
-              );
-              const buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
+      const uploadStream = bucket.openUploadStream(
+        testSpec.act.arguments.filename,
+        testSpec.act.arguments.options
+      );
 
-              res.on('error', function (err) {
-                expect(err).to.not.exist;
-              });
+      const buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
 
-              res.on('finish', function () {
-                const data = testSpec.assert.data;
-                let num = data.length;
-                data.forEach(function (data) {
-                  const collection = data.insert;
-                  db.collection(collection)
-                    .find({})
-                    .toArray(function (error, docs) {
-                      expect(data.documents.length).to.equal(docs.length);
+      const finished = once(uploadStream, 'finish');
 
-                      for (let i = 0; i < docs.length; ++i) {
-                        testResultDoc(data.documents[i], docs[i], res.id);
-                      }
+      uploadStream.write(buf);
+      uploadStream.end();
 
-                      if (--num === 0) {
-                        client.close(done);
-                      }
-                    });
-                });
-              });
+      await finished;
 
-              res.write(buf);
-              res.end();
-            });
-          });
+      for (const data of testSpec.assert.data) {
+        const docs = await db.collection(data.insert).find({}).toArray();
+
+        expect(data.documents.length).to.equal(docs.length);
+        for (let i = 0; i < docs.length; ++i) {
+          testResultDoc(data.documents[i], docs[i], uploadStream.id);
         }
-      });
-    })(specTest);
-  });
+      }
+    });
+  }
 
   const DOWNLOAD_SPEC = require('../../spec/gridfs/gridfs-download.json');
   DOWNLOAD_SPEC.tests.forEach(function (specTest) {

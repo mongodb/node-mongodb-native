@@ -1,14 +1,14 @@
+import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 
 import { Binary, type Document } from '../../bson';
-import { saslprep } from '../../deps';
 import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { emitWarning, ns } from '../../utils';
+import { ns } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -33,12 +33,6 @@ class ScramSHA extends AuthProvider {
     const credentials = authContext.credentials;
     if (!credentials) {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
-    }
-    if (
-      cryptoMethod === 'sha256' &&
-      ('kModuleError' in saslprep || typeof saslprep !== 'function')
-    ) {
-      emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
     const nonce = await this.randomBytesAsync(24);
@@ -141,13 +135,8 @@ async function continueScramConversation(
   const username = cleanUsername(credentials.username);
   const password = credentials.password;
 
-  let processedPassword;
-  if (cryptoMethod === 'sha256') {
-    processedPassword =
-      'kModuleError' in saslprep || typeof saslprep !== 'function' ? password : saslprep(password);
-  } else {
-    processedPassword = passwordDigest(username, password);
-  }
+  const processedPassword =
+    cryptoMethod === 'sha256' ? saslprep(password) : passwordDigest(username, password);
 
   const payload = Buffer.isBuffer(response.payload)
     ? new Binary(response.payload)
