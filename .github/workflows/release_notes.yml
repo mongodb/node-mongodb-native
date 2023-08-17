@@ -1,0 +1,48 @@
+name: release_notes
+
+on:
+  workflow_dispatch:
+    inputs:
+      releasePr:
+        description: 'Enter release PR number'
+        required: true
+        type: number
+
+jobs:
+  release_notes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: actions/setup
+        uses: ./.github/actions/setup
+
+      # See: https://github.com/googleapis/release-please/issues/1274
+
+      # Get the PRs that are in this release
+      # Outputs a list of comma seperated PR numbers, parsed from HISTORY.md
+      - id: pr_list
+        run: node .github/scripts/pr_list.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # From the list of PRs, gather the highlight sections of the PR body
+      # output JSON with "highlights" key (to preserve newlines)
+      - id: highlights
+        run: node .github/scripts/highlights.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_LIST: ${{ steps.pr_list.outputs.pr_list }}
+
+      # The combined output is available
+      - id: release_notes
+        run: node .github/scripts/release_notes.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HIGHLIGHTS: ${{ steps.highlights.outputs.highlights }}
+
+      # Update the release PR body
+      - run: gh pr edit ${{ inputs.releasePr }} --body-file ${{ steps.release_notes.outputs.release_notes_path }}
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
