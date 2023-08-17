@@ -19,10 +19,6 @@ export const Aspect = {
 /** @public */
 export type Hint = string | Document;
 
-export interface OperationConstructor extends Function {
-  aspects?: Set<symbol>;
-}
-
 /** @public */
 export interface OperationOptions extends BSONSerializeOptions {
   /** Specify ClientSession for this command */
@@ -96,7 +92,7 @@ export abstract class AbstractOperation<TResult = any> {
   ): void;
 
   hasAspect(aspect: symbol): boolean {
-    const ctor = this.constructor as OperationConstructor;
+    const ctor = this.constructor as { aspects?: Set<symbol> };
     if (ctor.aspects == null) {
       return false;
     }
@@ -122,7 +118,7 @@ export abstract class AbstractOperation<TResult = any> {
 }
 
 export function defineAspects(
-  operation: OperationConstructor,
+  operation: { new (...args: any[]): any },
   aspects: symbol | symbol[] | Set<symbol>
 ): Set<symbol> {
   if (!Array.isArray(aspects) && !(aspects instanceof Set)) {
