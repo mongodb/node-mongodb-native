@@ -51,11 +51,13 @@ describe('TLS Support', function () {
         expect(client.options).property('tlsCertificateKeyFile', TLS_CERT_KEY_FILE);
         expect(client.options).not.have.property('ca');
         expect(client.options).not.have.property('key');
+        expect(client.options).not.have.property('cert');
 
         await client.connect();
 
         expect(client.options).property('ca').to.exist;
         expect(client.options).property('key').to.exist;
+        expect(client.options).property('cert').to.exist;
       });
 
       context('when client has been opened and closed more than once', function () {
