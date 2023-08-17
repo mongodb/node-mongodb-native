@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [main]
+    branches: [5.x]
   workflow_dispatch: {}
 
 permissions:
@@ -8,7 +8,7 @@ permissions:
   pull-requests: write
   id-token: write
 
-name: release
+name: release-5x
 
 jobs:
   release-please:
@@ -24,7 +24,7 @@ jobs:
           pull-request-title-pattern: 'chore${scope}: release ${version} [skip-ci]'
           pull-request-header: 'Please run the release_notes action before releasing to generate release highlights'
           changelog-path: HISTORY.md
-          default-branch: main
+          default-branch: 5.x
 
       # If release-please created a release, publish to npm
       - if: ${{ steps.release.outputs.release_created }}
@@ -33,6 +33,6 @@ jobs:
         name: actions/setup
         uses: ./.github/actions/setup
       - if: ${{ steps.release.outputs.release_created }}
-        run: npm publish --provenance
+        run: npm publish --provenance --tag=5x
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
