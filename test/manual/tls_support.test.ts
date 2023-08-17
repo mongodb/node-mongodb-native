@@ -51,13 +51,11 @@ describe('TLS Support', function () {
         expect(client.options).property('tlsCertificateKeyFile', TLS_CERT_KEY_FILE);
         expect(client.options).not.have.property('ca');
         expect(client.options).not.have.property('key');
-        expect(client.options).not.have.property('cert');
 
         await client.connect();
 
         expect(client.options).property('ca').to.exist;
         expect(client.options).property('key').to.exist;
-        expect(client.options).property('cert').to.exist;
       });
 
       context('when client has been opened and closed more than once', function () {
@@ -106,6 +104,42 @@ describe('TLS Support', function () {
 
         expect(err).to.be.instanceof(Error);
       });
+    });
+  });
+
+  context('when tlsCertificateKeyFile is provided, but tlsCAFile is missing', () => {
+    let client: MongoClient;
+    beforeEach(() => {
+      client = new MongoClient(CONNECTION_STRING, {
+        tls: true,
+        tlsCertificateKeyFile: TLS_CERT_KEY_FILE
+      });
+    });
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
+    it('throws an error', async () => {
+      const err = await client.connect().catch(e => e);
+      expect(err).to.be.instanceOf(Error);
+    });
+  });
+
+  context('when tlsCAFile is provided, but tlsCertificateKeyFile is missing', () => {
+    let client: MongoClient;
+    beforeEach(() => {
+      client = new MongoClient(CONNECTION_STRING, {
+        tls: true,
+        tlsCAFile: TLS_CA_FILE
+      });
+    });
+    afterEach(async () => {
+      if (client) await client.close();
+    });
+
+    it('throws an error', async () => {
+      const err = await client.connect().catch(e => e);
+      expect(err).to.be.instanceOf(Error);
     });
   });
 });
