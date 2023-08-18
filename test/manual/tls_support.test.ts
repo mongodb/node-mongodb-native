@@ -114,7 +114,9 @@ describe('TLS Support', function () {
     beforeEach(() => {
       client = new MongoClient(CONNECTION_STRING, {
         tls: true,
-        tlsCertificateKeyFile: TLS_CERT_KEY_FILE
+        tlsCertificateKeyFile: TLS_CERT_KEY_FILE,
+        serverSelectionTimeoutMS: 5000,
+        connectTimeoutMS: 5000
       });
     });
     afterEach(async () => {
@@ -123,6 +125,7 @@ describe('TLS Support', function () {
 
     it('throws an error', async () => {
       const err = await client.connect().catch(e => e);
+      console.log(client);
       expect(err).to.be.instanceOf(Error);
     });
   });
@@ -139,9 +142,9 @@ describe('TLS Support', function () {
       if (client) await client.close();
     });
 
-    it('throws an error', async () => {
-      const err = await client.connect().catch(e => e);
-      expect(err).to.be.instanceOf(Error);
+    it('connects without error', async () => {
+      const clientOrError = await client.connect().catch(e => e);
+      expect(clientOrError).to.be.instanceOf(MongoClient);
     });
   });
 });
