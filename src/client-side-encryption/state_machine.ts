@@ -216,17 +216,20 @@ export class StateMachine {
               mongocryptdManager &&
               !mongocryptdManager.bypassSpawn
             ) {
-              mongocryptdManager.spawn(() => {
-                // TODO: should we be shadowing the variables here?
-                this.markCommand(mongocryptdClient, context.ns, command, (err, markedCommand) => {
-                  if (err || !markedCommand) return callback(err);
+              mongocryptdManager.spawn().then(
+                () => {
+                  // TODO: should we be shadowing the variables here?
+                  this.markCommand(mongocryptdClient, context.ns, command, (err, markedCommand) => {
+                    if (err || !markedCommand) return callback(err);
 
-                  context.addMongoOperationResponse(markedCommand);
-                  context.finishMongoOperation();
+                    context.addMongoOperationResponse(markedCommand);
+                    context.finishMongoOperation();
 
-                  this.execute(executor, context, callback);
-                });
-              });
+                    this.execute(executor, context, callback);
+                  });
+                },
+                error => callback(error)
+              );
               return;
             }
             return callback(err);

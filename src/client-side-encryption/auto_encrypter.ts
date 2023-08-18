@@ -444,23 +444,26 @@ export class AutoEncrypter {
       return;
     }
 
-    this._mongocryptdManager.spawn(() => {
-      if (!this._mongocryptdClient) {
-        return callback(
-          new MongoRuntimeError(
-            'Reached impossible state: mongocryptdClient is undefined after spawning libmongocrypt.'
-          )
-        );
-      }
-      this._mongocryptdClient.connect().then(
-        result => {
-          return _callback(undefined, result);
-        },
-        error => {
-          _callback(error, undefined);
+    this._mongocryptdManager.spawn().then(
+      () => {
+        if (!this._mongocryptdClient) {
+          return callback(
+            new MongoRuntimeError(
+              'Reached impossible state: mongocryptdClient is undefined after spawning libmongocrypt.'
+            )
+          );
         }
-      );
-    });
+        this._mongocryptdClient.connect().then(
+          result => {
+            return _callback(undefined, result);
+          },
+          error => {
+            _callback(error, undefined);
+          }
+        );
+      },
+      error => callback(error)
+    );
   }
 
   /**

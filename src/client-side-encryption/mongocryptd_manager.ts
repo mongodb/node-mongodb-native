@@ -1,6 +1,5 @@
 import type { ChildProcess } from 'child_process';
 
-import { type Callback } from '../utils';
 import { type AutoEncryptionExtraOptions } from './auto_encrypter';
 
 /**
@@ -42,7 +41,7 @@ export class MongocryptdManager {
    * Will check to see if a mongocryptd is up. If it is not up, it will attempt
    * to spawn a mongocryptd in a detached process, and then wait for it to be up.
    */
-  spawn(callback: Callback<void>) {
+  async spawn(): Promise<void> {
     const cmdName = this.spawnPath || 'mongocryptd';
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -73,7 +72,5 @@ export class MongocryptdManager {
 
     // unref child to remove handle from event loop
     this._child.unref();
-
-    process.nextTick(callback);
   }
 }
