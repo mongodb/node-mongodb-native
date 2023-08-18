@@ -125,7 +125,6 @@ describe('TLS Support', function () {
 
     it('throws an error', async () => {
       const err = await client.connect().catch(e => e);
-      console.log(client);
       expect(err).to.be.instanceOf(Error);
     });
   });
