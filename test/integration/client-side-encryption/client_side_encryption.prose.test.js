@@ -8,7 +8,12 @@ const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
-const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
+const {
+  MongoServerError,
+  MongoServerSelectionError,
+  MongoClient,
+  MongoRuntimeError
+} = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
@@ -1171,17 +1176,17 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError).to.be.instanceOf(Error);
+        expect(insertError).to.be.instanceOf(MongoRuntimeError);
         expect(insertError).to.have.property('cause').that.is.instanceOf(MongoServerSelectionError);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
-        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
+        expect(insertError.cause, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
-            /ECONNREFUSED/.test(error.message) ||
+            /ECONNREFUSED/.test(error?.cause.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
 
-        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
+        //expect(insertError.cause).to.be.instanceOf(MongoServerSelectionError);
       });
     });
 
@@ -1263,16 +1268,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         const error = await client.connect().catch(e => e);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
-        expect(
-          error,
-          'Error MUST be a MongoServerSelectionError error that contains ECONNREFUSED information'
-        )
-          .to.be.instanceOf(MongoServerSelectionError)
-          .that.satisfies(
-            error =>
-              /ECONNREFUSED/.test(error.message) ||
-              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
-          );
+        expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
+          MongoServerSelectionError
+        );
+        expect(error, 'Error MUST contain ECONNREFUSED information').to.satisfy(
+          error =>
+            /ECONNREFUSED/.test(error.cause.message) ||
+            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
+        );
       });
     });
 

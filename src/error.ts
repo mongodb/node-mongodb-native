@@ -149,7 +149,7 @@ export class MongoError extends Error {
   }
 
   /** @internal */
-  private static buildErrorMessage(e: Error | string): string {
+  static buildErrorMessage(e: Error | string): string {
     if (typeof e === 'string') {
       return e;
     }
@@ -311,8 +311,8 @@ export class MongoRuntimeError extends MongoDriverError {
    *
    * @public
    **/
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: { cause?: Error }) {
+    super(message, options);
   }
 
   override get name(): string {

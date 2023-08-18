@@ -53,7 +53,7 @@ export class PoolClearedError extends MongoNetworkError {
     const errorMessage = message
       ? message
       : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
-    super(errorMessage);
+    super(errorMessage, pool.serverError ? { cause: pool.serverError } : undefined);
     this.address = pool.address;
 
     this.addErrorLabel(MongoErrorLabel.RetryableWriteError);

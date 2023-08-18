@@ -422,7 +422,8 @@ export class AutoEncrypter {
       ) {
         callback(
           new MongoRuntimeError(
-            'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn'
+            'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
+            { cause: err }
           )
         );
         return;
