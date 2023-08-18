@@ -466,19 +466,8 @@ export class AutoEncrypter {
   /**
    * Cleans up the `_mongocryptdClient`, if present.
    */
-  teardown(force: boolean, callback: Callback<void>) {
-    if (this._mongocryptdClient) {
-      this._mongocryptdClient.close(force).then(
-        result => {
-          return callback(undefined, result);
-        },
-        error => {
-          callback(error);
-        }
-      );
-    } else {
-      callback();
-    }
+  async teardown(force: boolean): Promise<void> {
+    await this._mongocryptdClient?.close(force);
   }
 
   encrypt(ns: string, cmd: Document, callback: Callback<Document | Uint8Array>): void;
