@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as tls from 'tls';
-import { promisify } from 'util';
 
 import {
   type BSONSerializeOptions,
@@ -15,7 +14,7 @@ import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
-import { BufferPool, type Callback, MongoDBCollectionNamespace } from '../utils';
+import { BufferPool, MongoDBCollectionNamespace } from '../utils';
 import { type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
@@ -153,179 +152,134 @@ export class StateMachine {
     private bsonOptions = pluckBSONSerializeOptions(options)
   ) {}
 
-  executeAsync<T>(executor: StateMachineExecutable, context: MongoCryptContext): Promise<T> {
-    // @ts-expect-error The callback version allows undefined for the result, but we'll never actually have an undefined result without an error.
-    return promisify(this.execute.bind(this))(executor, context);
-  }
-
   /**
    * Executes the state machine according to the specification
    */
-  execute<T extends Document>(
+  async execute<T extends Document>(
     executor: StateMachineExecutable,
-    context: MongoCryptContext,
-    callback: Callback<T>
-  ) {
+    context: MongoCryptContext
+  ): Promise<T> {
     const keyVaultNamespace = executor._keyVaultNamespace;
     const keyVaultClient = executor._keyVaultClient;
     const metaDataClient = executor._metaDataClient;
     const mongocryptdClient = executor._mongocryptdClient;
     const mongocryptdManager = executor._mongocryptdManager;
+    let result: T | null = null;
 
-    debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
-    switch (context.state) {
-      case MONGOCRYPT_CTX_NEED_MONGO_COLLINFO: {
-        const filter = deserialize(context.nextMongoOperation());
-        if (!metaDataClient) {
-          return callback(
-            new MongoCryptError(
+    while (context.state !== MONGOCRYPT_CTX_DONE && context.state !== MONGOCRYPT_CTX_ERROR) {
+      debug(`[context#${context.id}] ${stateToString.get(context.state) || context.state}`);
+
+      switch (context.state) {
+        case MONGOCRYPT_CTX_NEED_MONGO_COLLINFO: {
+          const filter = deserialize(context.nextMongoOperation());
+          if (!metaDataClient) {
+            throw new MongoCryptError(
               'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_COLLINFO but metadata client is undefined'
-            )
-          );
-        }
-        this.fetchCollectionInfo(metaDataClient, context.ns, filter, (err, collInfo) => {
-          if (err) {
-            return callback(err);
+            );
           }
+          const collInfo = await this.fetchCollectionInfo(metaDataClient, context.ns, filter);
 
           if (collInfo) {
             context.addMongoOperationResponse(collInfo);
           }
 
           context.finishMongoOperation();
-          this.execute(executor, context, callback);
-        });
-
-        return;
-      }
-
-      case MONGOCRYPT_CTX_NEED_MONGO_MARKINGS: {
-        const command = context.nextMongoOperation();
-        if (!mongocryptdClient) {
-          return callback(
-            new MongoCryptError(
-              'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_MARKINGS but mongocryptdClient is undefined'
-            )
-          );
+          break;
         }
-        this.markCommand(mongocryptdClient, context.ns, command, (err, markedCommand) => {
-          if (err || !markedCommand) {
+
+        case MONGOCRYPT_CTX_NEED_MONGO_MARKINGS: {
+          const command = context.nextMongoOperation();
+          if (!mongocryptdClient) {
+            throw new MongoCryptError(
+              'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_MARKINGS but mongocryptdClient is undefined'
+            );
+          }
+          let markedCommand: Uint8Array;
+          try {
+            markedCommand = await this.markCommand(mongocryptdClient, context.ns, command);
+          } catch (err) {
             // If we are not bypassing spawning, then we should retry once on a MongoTimeoutError (server selection error)
             if (
               err instanceof MongoNetworkTimeoutError &&
               mongocryptdManager &&
               !mongocryptdManager.bypassSpawn
             ) {
-              mongocryptdManager.spawn().then(
-                () => {
-                  // TODO: should we be shadowing the variables here?
-                  this.markCommand(mongocryptdClient, context.ns, command, (err, markedCommand) => {
-                    if (err || !markedCommand) return callback(err);
-
-                    context.addMongoOperationResponse(markedCommand);
-                    context.finishMongoOperation();
-
-                    this.execute(executor, context, callback);
-                  });
-                },
-                error => callback(error)
-              );
-              return;
+              await mongocryptdManager.spawn();
+              // TODO: should we be shadowing the variables here?
+              markedCommand = await this.markCommand(mongocryptdClient, context.ns, command);
+            } else {
+              throw err;
             }
-            return callback(err);
           }
           context.addMongoOperationResponse(markedCommand);
           context.finishMongoOperation();
+          break;
+        }
 
-          this.execute(executor, context, callback);
-        });
+        case MONGOCRYPT_CTX_NEED_MONGO_KEYS: {
+          const filter = context.nextMongoOperation();
+          const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter);
 
-        return;
-      }
-
-      case MONGOCRYPT_CTX_NEED_MONGO_KEYS: {
-        const filter = context.nextMongoOperation();
-        this.fetchKeys(keyVaultClient, keyVaultNamespace, filter, (err, keys) => {
-          if (err || !keys) return callback(err);
-          keys.forEach(key => {
+          // if (keys.length === 0) {
+          //   return { v: [] } as any;
+          // }
+          for (const key of keys) {
             context.addMongoOperationResponse(serialize(key));
-          });
+          }
 
           context.finishMongoOperation();
-          this.execute(executor, context, callback);
-        });
 
-        return;
-      }
-
-      case MONGOCRYPT_CTX_NEED_KMS_CREDENTIALS: {
-        executor
-          .askForKMSCredentials()
-          .then(kmsProviders => {
-            context.provideKMSProviders(serialize(kmsProviders));
-            this.execute(executor, context, callback);
-          })
-          .catch(err => {
-            callback(err);
-          });
-
-        return;
-      }
-
-      case MONGOCRYPT_CTX_NEED_KMS: {
-        const promises = [];
-
-        let request;
-        while ((request = context.nextKMSRequest())) {
-          promises.push(this.kmsRequest(request));
+          break;
         }
 
-        Promise.all(promises)
-          .then(() => {
-            context.finishKMSRequests();
-            this.execute(executor, context, callback);
-          })
-          .catch(err => {
-            callback(err);
-          });
-
-        return;
-      }
-
-      // terminal states
-      case MONGOCRYPT_CTX_READY: {
-        const finalizedContext = context.finalize();
-        // TODO: Maybe rework the logic here so that instead of doing
-        // the callback here, finalize stores the result, and then
-        // we wait to MONGOCRYPT_CTX_DONE to do the callback
-        // @ts-expect-error finalize can change the state, check for error
-        if (context.state === MONGOCRYPT_CTX_ERROR) {
-          const message = context.status.message || 'Finalization error';
-          callback(new MongoCryptError(message));
-          return;
+        case MONGOCRYPT_CTX_NEED_KMS_CREDENTIALS: {
+          const kmsProviders = await executor.askForKMSCredentials();
+          context.provideKMSProviders(serialize(kmsProviders));
+          break;
         }
-        callback(undefined, deserialize(finalizedContext, this.options) as T);
-        return;
-      }
-      case MONGOCRYPT_CTX_ERROR: {
-        const message = context.status.message;
-        callback(
-          new MongoCryptError(
-            message ??
-              'unidentifiable error in MongoCrypt - received an error status from `libmongocrypt` but received no error message.'
-          )
-        );
-        return;
-      }
 
-      case MONGOCRYPT_CTX_DONE:
-        callback();
-        return;
+        case MONGOCRYPT_CTX_NEED_KMS: {
+          const promises = [];
 
-      default:
-        callback(new MongoCryptError(`Unknown state: ${context.state}`));
-        return;
+          let request;
+          while ((request = context.nextKMSRequest())) {
+            promises.push(this.kmsRequest(request));
+          }
+
+          await Promise.all(promises);
+          context.finishKMSRequests();
+
+          break;
+        }
+
+        case MONGOCRYPT_CTX_READY: {
+          const finalizedContext = context.finalize();
+          // TODO: Maybe rework the logic here so that instead of doing
+          // the callback here, finalize stores the result, and then
+          // we wait to MONGOCRYPT_CTX_DONE to do the callback
+          // @ts-expect-error finalize can change the state, check for error
+          if (context.state === MONGOCRYPT_CTX_ERROR) {
+            const message = context.status.message || 'Finalization error';
+            throw new MongoCryptError(message);
+          }
+          result = deserialize(finalizedContext, this.options) as T;
+          break;
+        }
+
+        default:
+          throw new MongoCryptError(`Unknown state: ${context.state}`);
+      }
     }
+
+    if (context.state === MONGOCRYPT_CTX_ERROR || result == null) {
+      const message = context.status.message;
+      throw new MongoCryptError(
+        message ??
+          'unidentifiable error in MongoCrypt - received an error status from `libmongocrypt` but received no error message.'
+      );
+    }
+
+    return result;
   }
 
   /**
@@ -488,30 +442,23 @@ export class StateMachine {
    * @param filter - A filter for the listCollections command
    * @param callback - Invoked with the info of the requested collection, or with an error
    */
-  fetchCollectionInfo(
+  async fetchCollectionInfo(
     client: MongoClient,
     ns: string,
-    filter: Document,
-    callback: Callback<Uint8Array | null>
-  ) {
+    filter: Document
+  ): Promise<Uint8Array | null> {
     const { db } = MongoDBCollectionNamespace.fromString(ns);
 
-    client
+    const collections = await client
       .db(db)
       .listCollections(filter, {
         promoteLongs: false,
         promoteValues: false
       })
-      .toArray()
-      .then(
-        collections => {
-          const info = collections.length > 0 ? serialize(collections[0]) : null;
-          return callback(undefined, info);
-        },
-        err => {
-          callback(err);
-        }
-      );
+      .toArray();
+
+    const info = collections.length > 0 ? serialize(collections[0]) : null;
+    return info;
   }
 
   /**
@@ -522,27 +469,14 @@ export class StateMachine {
    * @param command - The command to execute.
    * @param callback - Invoked with the serialized and marked bson command, or with an error
    */
-  markCommand(
-    client: MongoClient,
-    ns: string,
-    command: Uint8Array,
-    callback: Callback<Uint8Array>
-  ) {
+  async markCommand(client: MongoClient, ns: string, command: Uint8Array): Promise<Uint8Array> {
     const options = { promoteLongs: false, promoteValues: false };
     const { db } = MongoDBCollectionNamespace.fromString(ns);
     const rawCommand = deserialize(command, options);
 
-    client
-      .db(db)
-      .command(rawCommand, options)
-      .then(
-        response => {
-          return callback(undefined, serialize(response, this.bsonOptions));
-        },
-        err => {
-          callback(err);
-        }
-      );
+    const response = await client.db(db).command(rawCommand, options);
+
+    return serialize(response, this.bsonOptions);
   }
 
   /**
@@ -556,24 +490,15 @@ export class StateMachine {
   fetchKeys(
     client: MongoClient,
     keyVaultNamespace: string,
-    filter: Uint8Array,
-    callback: Callback<Array<DataKey>>
-  ) {
+    filter: Uint8Array
+  ): Promise<DataKey[]> {
     const { db: dbName, collection: collectionName } =
       MongoDBCollectionNamespace.fromString(keyVaultNamespace);
 
-    client
+    return client
       .db(dbName)
       .collection<DataKey>(collectionName, { readConcern: { level: 'majority' } })
       .find(deserialize(filter))
-      .toArray()
-      .then(
-        keys => {
-          return callback(undefined, keys);
-        },
-        err => {
-          callback(err);
-        }
-      );
+      .toArray();
   }
 }
