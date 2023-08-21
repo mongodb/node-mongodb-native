@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.8.0](https://github.com/mongodb/node-mongodb-native/compare/v5.7.0...v5.8.0) (2023-08-21)
+
+
+### Features
+
+* **NODE-5399:** use mongodb-js/saslprep instead of saslprep ([#3818](https://github.com/mongodb/node-mongodb-native/issues/3818)) ([c0d3927](https://github.com/mongodb/node-mongodb-native/commit/c0d39273793d09cc9a0c1ca9955afaf77f9f62c6))
+* **NODE-5429:** deprecate the `AutoEncrypter` interface ([#3764](https://github.com/mongodb/node-mongodb-native/issues/3764)) ([9bb0d95](https://github.com/mongodb/node-mongodb-native/commit/9bb0d955e73a6bc819992617c99c4406d7f9c550))
+* **NODE-5465,NODE-5538:** lower `@aws-sdk/credential-providers` version to 3.188.0 and `zstd` to `^1.0.0` ([#3821](https://github.com/mongodb/node-mongodb-native/issues/3821)) ([39ff81d](https://github.com/mongodb/node-mongodb-native/commit/39ff81d40220e1fc03627fce8f5af85f11283e97))
+* **NODE-5489:** update kerberos dependency ([8c25d6d](https://github.com/mongodb/node-mongodb-native/commit/8c25d6d0a7cb0a766f356e7320d09c964d21542b))
+
+
+### Bug Fixes
+
+* **NODE-5489:** set kerberos compatibility to ^1.0.0 || ^2.0.0 ([#3803](https://github.com/mongodb/node-mongodb-native/issues/3803)) ([c3b35b3](https://github.com/mongodb/node-mongodb-native/commit/c3b35b321b6ac0408af4dc10251c84a196a6f953))
+* **NODE-5495:** do not emit deprecation warning when tlsCertificateKeyFile is specified and tlsCertificateFile is not ([#3810](https://github.com/mongodb/node-mongodb-native/issues/3810)) ([e81d4a2](https://github.com/mongodb/node-mongodb-native/commit/e81d4a2fc0ffc1d32dc3e124ceadd887e0a78ec4))
+* **NODE-5537:** remove credentials from ConnectionPoolCreatedEvent options ([#3813](https://github.com/mongodb/node-mongodb-native/issues/3813)) ([4cf1e96](https://github.com/mongodb/node-mongodb-native/commit/4cf1e96c68410d743c592b27e8864917ca16e160))
+
 ## [5.7.0](https://github.com/mongodb/node-mongodb-native/compare/v5.6.0...v5.7.0) (2023-07-06)
 
 
