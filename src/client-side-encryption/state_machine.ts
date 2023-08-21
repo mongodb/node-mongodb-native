@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as tls from 'tls';
@@ -288,11 +288,10 @@ export class StateMachine {
     const message = request.message;
 
     // TODO(NODE-3959): We can adopt `for-await on(socket, 'data')` with logic to control abort
-    // eslint-disable-next-line no-async-promise-executor, @typescript-eslint/no-misused-promises
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       const buffer = new BufferPool();
 
-      /* eslint-disable prefer-const */
       let socket: net.Socket;
       let rawSocket: net.Socket;
 
@@ -356,7 +355,11 @@ export class StateMachine {
         if (providerTlsOptions) {
           const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
           if (error) reject(error);
-          this.setTlsOptions(providerTlsOptions, options);
+          try {
+            await this.setTlsOptions(providerTlsOptions, options);
+          } catch (error) {
+            return onerror(error);
+          }
         }
       }
       socket = tls.connect(options, () => {
@@ -418,13 +421,16 @@ export class StateMachine {
    * @param tlsOptions - The client TLS options for the provider.
    * @param options - The existing connection options.
    */
-  setTlsOptions(tlsOptions: ClientEncryptionTlsOptions, options: tls.ConnectionOptions) {
+  async setTlsOptions(
+    tlsOptions: ClientEncryptionTlsOptions,
+    options: tls.ConnectionOptions
+  ): Promise<void> {
     if (tlsOptions.tlsCertificateKeyFile) {
-      const cert = fs.readFileSync(tlsOptions.tlsCertificateKeyFile);
+      const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
       options.cert = options.key = cert;
     }
     if (tlsOptions.tlsCAFile) {
-      options.ca = fs.readFileSync(tlsOptions.tlsCAFile);
+      options.ca = await fs.readFile(tlsOptions.tlsCAFile);
     }
     if (tlsOptions.tlsCertificateKeyFilePassword) {
       options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;
