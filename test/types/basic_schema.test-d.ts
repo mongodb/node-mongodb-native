@@ -55,7 +55,7 @@ expectNotType<insertOneArg>({ a: 2 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // InferIdType -
-
+// eslint-disable-next-line @typescript-eslint/ban-types
 type Empty = {};
 const a: never = 0 as never;
 const oid = new ObjectId();
