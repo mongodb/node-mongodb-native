@@ -28,14 +28,14 @@ describe('Error (Integration)', function () {
       it(`uses the AggregateError's message`, () => {
         const error = new AggregateError([new Error('non-empty')]);
         error.message = 'custom error message';
-        const mongoError = new MongoError(error, { cause: error });
+        const mongoError = new MongoError(MongoError.buildErrorMessage(error), { cause: error });
         expect(mongoError.message).to.equal('custom error message');
       });
     });
 
     it('sets the AggregateError to the cause property', () => {
       const error = new AggregateError([new Error('error 1')]);
-      const mongoError = new MongoError(error, { cause: error });
+      const mongoError = new MongoError(MongoError.buildErrorMessage(error), { cause: error });
       expect(mongoError.cause).to.equal(error);
     });
   });

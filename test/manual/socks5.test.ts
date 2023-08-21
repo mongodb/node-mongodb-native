@@ -53,7 +53,7 @@ describe('Socks5 Connectivity', function () {
           await testConnection(cs.toString(), {});
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
-          expect(err.cause.message).to.match(/Received invalid Socks5 initial handshake/);
+          expect(err.message).to.match(/Received invalid Socks5 initial handshake/);
           return;
         }
         expect.fail('missed exception');
@@ -68,7 +68,7 @@ describe('Socks5 Connectivity', function () {
           });
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
-          expect(err.cause.message).to.match(/Received invalid Socks5 initial handshake/);
+          expect(err.message).to.match(/Received invalid Socks5 initial handshake/);
           return;
         }
         expect.fail('missed exception');
@@ -82,7 +82,7 @@ describe('Socks5 Connectivity', function () {
           await testConnection(cs.toString(), {});
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
-          expect(err.cause.message).to.match(/Received invalid Socks5 initial handshake/);
+          expect(err.message).to.match(/Received invalid Socks5 initial handshake/);
           return;
         }
         expect.fail('missed exception');
@@ -96,7 +96,7 @@ describe('Socks5 Connectivity', function () {
           });
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
-          expect(err.cause.message).to.match(/Received invalid Socks5 initial handshake/);
+          expect(err.message).to.match(/Received invalid Socks5 initial handshake/);
           return;
         }
         expect.fail('missed exception');
@@ -113,7 +113,7 @@ describe('Socks5 Connectivity', function () {
           await testConnection(cs.toString(), {});
         } catch (err) {
           expect(err.name).to.equal('MongoServerSelectionError');
-          expect(err.cause.message).to.match(/Socket closed/);
+          expect(err.message).to.match(/Socket closed/);
           return;
         }
         expect.fail('missed exception');

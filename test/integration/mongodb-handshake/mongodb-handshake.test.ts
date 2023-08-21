@@ -42,7 +42,7 @@ describe('MongoDB Handshake', () => {
       } else {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
       }
-      expect(error.cause ?? error).to.match(/client metadata document must be less/);
+      expect(error).to.match(/client metadata document must be less/);
     });
   });
 

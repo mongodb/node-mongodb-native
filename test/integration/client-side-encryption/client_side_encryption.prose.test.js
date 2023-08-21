@@ -8,12 +8,7 @@ const { dropCollection, APMEventCollector } = require('../shared');
 
 const { EJSON } = BSON;
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
-const {
-  MongoServerError,
-  MongoServerSelectionError,
-  MongoClient,
-  MongoRuntimeError
-} = require('../../mongodb');
+const { MongoServerError, MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { getEncryptExtraOptions } = require('../../tools/utils');
 const { installNodeDNSWorkaroundHooks } = require('../../tools/runner/hooks/configuration');
 const { coerce, gte } = require('semver');
@@ -1176,13 +1171,12 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError).to.be.instanceOf(MongoRuntimeError);
-        expect(insertError).to.have.property('cause').that.is.instanceOf(MongoServerSelectionError);
+        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
-        expect(insertError.cause, 'Error must contain ECONNREFUSED').to.satisfy(
+        expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
-            /ECONNREFUSED/.test(error?.cause.message) ||
+            /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
 
