@@ -1265,7 +1265,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         );
         expect(error, 'Error MUST contain ECONNREFUSED information').to.satisfy(
           error =>
-            /ECONNREFUSED/.test(error.cause.message) ||
+            /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
       });
