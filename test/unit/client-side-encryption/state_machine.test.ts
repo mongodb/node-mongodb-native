@@ -1,11 +1,12 @@
 import { expect } from 'chai';
 import { EventEmitter, once } from 'events';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import { type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import * as tls from 'tls';
+import { promisify } from 'util';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
@@ -176,22 +177,24 @@ describe('StateMachine', function () {
           const buffer = Buffer.from('foobar');
           let connectOptions;
 
-          it('sets the cert and key options in the tls connect options', function (done) {
-            this.sinon.stub(fs, 'readFileSync').callsFake(fileName => {
+          it('sets the cert and key options in the tls connect options', async function () {
+            this.sinon.stub(fs, 'readFile').callsFake(fileName => {
               expect(fileName).to.equal('test.pem');
-              return buffer;
+              return Promise.resolve(buffer);
             });
             this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
-            stateMachine.kmsRequest(request).then(function () {
-              expect(connectOptions.cert).to.equal(buffer);
-              expect(connectOptions.key).to.equal(buffer);
-              done();
-            });
+            const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+            await promisify(setTimeout)(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
+
+            await kmsRequestPromise;
+            expect(connectOptions.cert).to.equal(buffer);
+            expect(connectOptions.key).to.equal(buffer);
           });
         });
 
@@ -203,21 +206,23 @@ describe('StateMachine', function () {
           const buffer = Buffer.from('foobar');
           let connectOptions;
 
-          it('sets the ca options in the tls connect options', function (done) {
-            this.sinon.stub(fs, 'readFileSync').callsFake(fileName => {
+          it('sets the ca options in the tls connect options', async function () {
+            this.sinon.stub(fs, 'readFile').callsFake(fileName => {
               expect(fileName).to.equal('test.pem');
-              return buffer;
+              return Promise.resolve(buffer);
             });
             this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
-            stateMachine.kmsRequest(request).then(function () {
-              expect(connectOptions.ca).to.equal(buffer);
-              done();
-            });
+            const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+            await promisify(setTimeout)(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
+
+            await kmsRequestPromise;
+            expect(connectOptions.ca).to.equal(buffer);
           });
         });
 
@@ -228,17 +233,19 @@ describe('StateMachine', function () {
           const request = new MockRequest(Buffer.from('foobar'), -1);
           let connectOptions;
 
-          it('sets the passphrase option in the tls connect options', function (done) {
+          it('sets the passphrase option in the tls connect options', async function () {
             this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
               connectOptions = options;
               this.fakeSocket = new MockSocket(callback);
               return this.fakeSocket;
             });
-            stateMachine.kmsRequest(request).then(function () {
-              expect(connectOptions.passphrase).to.equal('test');
-              done();
-            });
+            const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+            await promisify(setTimeout)(0);
             this.fakeSocket.emit('data', Buffer.alloc(0));
+
+            await kmsRequestPromise;
+            expect(connectOptions.passphrase).to.equal('test');
           });
         });
       });

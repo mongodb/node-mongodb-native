@@ -292,6 +292,7 @@ export class StateMachine {
     return new Promise(async (resolve, reject) => {
       const buffer = new BufferPool();
 
+      // eslint-disable-next-line prefer-const
       let socket: net.Socket;
       let rawSocket: net.Socket;
 
