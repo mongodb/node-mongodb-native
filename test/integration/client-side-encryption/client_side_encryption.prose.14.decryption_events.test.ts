@@ -75,10 +75,11 @@ describe('14. Decryption Events', metadata, function () {
       keyId: keyId,
       algorithm: 'AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic'
     });
-    // Copy ``ciphertext`` into a variable named ``malformedCiphertext``.
-    // Change the last byte to 0. This will produce an invalid HMAC tag.
+    // Copy ``ciphertext`` into a variable named ``malformedCiphertext``. Change the
+    // last byte to a different value. This will produce an invalid HMAC tag.
     const buffer = Buffer.from(cipherText.buffer);
-    buffer.writeInt8(0, buffer.length - 1);
+    const lastByte = buffer.readInt8(buffer.length - 1);
+    buffer.writeInt8(lastByte === 0 ? 1 : 0, buffer.length - 1);
     malformedCiphertext = new Binary(buffer, 6);
     // Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
     //   AutoEncryptionOpts {
