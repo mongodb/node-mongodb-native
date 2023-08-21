@@ -1179,8 +1179,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
-
-        //expect(insertError.cause).to.be.instanceOf(MongoServerSelectionError);
       });
     });
 
