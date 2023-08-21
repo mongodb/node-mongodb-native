@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import type { PeerCertificate } from 'tls';
 import { expectAssignable, expectError, expectNotType, expectType } from 'tsd';
 
