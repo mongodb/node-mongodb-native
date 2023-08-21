@@ -2,11 +2,7 @@
 
 const mock = require('../../tools/mongodb-mock/index');
 const { expect } = require('chai');
-const {
-  MongoServerSelectionError,
-  MongoCompatibilityError,
-  MongoClient
-} = require('../../mongodb');
+const { MongoServerSelectionError, MongoClient } = require('../../mongodb');
 const { isHello } = require('../../mongodb');
 
 const minCompatErrMsg = `minimum wire version ${
@@ -53,8 +49,7 @@ describe('Wire Protocol Version', () => {
         expect.fail('should fail to select server!');
       } catch (error) {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
-        expect(error.cause).to.be.instanceOf(MongoCompatibilityError);
-        expect(error.cause).to.have.property('message').that.includes(minCompatErrMsg);
+        expect(error).to.have.property('message').that.includes(minCompatErrMsg);
       }
     });
   });
@@ -72,8 +67,7 @@ describe('Wire Protocol Version', () => {
         expect.fail('should fail to select server!');
       } catch (error) {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
-        expect(error.cause).to.be.instanceOf(MongoCompatibilityError);
-        expect(error.cause).to.have.property('message').that.includes(maxCompatErrMsg);
+        expect(error).to.have.property('message').that.includes(maxCompatErrMsg);
       }
     });
   });
