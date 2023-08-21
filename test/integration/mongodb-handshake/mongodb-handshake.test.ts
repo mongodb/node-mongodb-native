@@ -37,12 +37,13 @@ describe('MongoDB Handshake', () => {
     it('should fail with an error relating to size', async function () {
       client = this.configuration.newClient({ serverSelectionTimeoutMS: 2000 });
       const error = await client.connect().catch(error => error);
+      console.log(error);
       if (this.configuration.isLoadBalanced) {
         expect(error).to.be.instanceOf(MongoServerError);
       } else {
         expect(error).to.be.instanceOf(MongoServerSelectionError);
       }
-      expect(error.cause).to.match(/client metadata document must be less/);
+      expect(error.cause ?? error).to.match(/client metadata document must be less/);
     });
   });
 
