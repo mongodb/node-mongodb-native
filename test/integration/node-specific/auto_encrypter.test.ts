@@ -3,7 +3,6 @@ import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import { dirname, resolve } from 'path';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';

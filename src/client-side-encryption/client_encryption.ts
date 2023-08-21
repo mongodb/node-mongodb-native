@@ -259,8 +259,8 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const dataKey = await stateMachine.execute<{ v: DataKey[] }>(this, context);
-    if (!dataKey || dataKey.v.length === 0) {
+    const { v: dataKeys } = await stateMachine.execute<{ v: DataKey[] }>(this, context);
+    if (dataKeys.length === 0) {
       return {};
     }
 
@@ -268,7 +268,7 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    const replacements = dataKey.v.map(
+    const replacements = dataKeys.map(
       (key: DataKey): AnyBulkWriteOperation<DataKey> => ({
         updateOne: {
           filter: { _id: key._id },

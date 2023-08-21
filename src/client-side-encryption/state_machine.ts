@@ -12,7 +12,6 @@ import {
 } from '../bson';
 import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
-import { MongoNetworkTimeoutError } from '../error';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
 import { BufferPool, MongoDBCollectionNamespace } from '../utils';
 import { type DataKey } from './client_encryption';
@@ -194,23 +193,14 @@ export class StateMachine {
               'unreachable state machine state: entered MONGOCRYPT_CTX_NEED_MONGO_MARKINGS but mongocryptdClient is undefined'
             );
           }
-          let markedCommand: Uint8Array;
-          try {
-            markedCommand = await this.markCommand(mongocryptdClient, context.ns, command);
-          } catch (err) {
-            // If we are not bypassing spawning, then we should retry once on a MongoTimeoutError (server selection error)
-            if (
-              err instanceof MongoNetworkTimeoutError &&
-              mongocryptdManager &&
-              !mongocryptdManager.bypassSpawn
-            ) {
-              await mongocryptdManager.spawn();
-              // TODO: should we be shadowing the variables here?
-              markedCommand = await this.markCommand(mongocryptdClient, context.ns, command);
-            } else {
-              throw err;
-            }
-          }
+
+          // When we are using the shared library, we don't have a mongocryptd manager.
+          const markedCommand: Uint8Array = mongocryptdManager
+            ? await mongocryptdManager.withRespawn(
+                this.markCommand.bind(this, mongocryptdClient, context.ns, command)
+              )
+            : await this.markCommand(mongocryptdClient, context.ns, command);
+
           context.addMongoOperationResponse(markedCommand);
           context.finishMongoOperation();
           break;
@@ -220,10 +210,19 @@ export class StateMachine {
           const filter = context.nextMongoOperation();
           const keys = await this.fetchKeys(keyVaultClient, keyVaultNamespace, filter);
 
-          // if (keys.length === 0) {
-          //   return { v: [] } as any;
-          // }
-          for (const key of keys) {
+          if (keys.length === 0) {
+            // This is kind of a hack.  For `rewrapManyDataKey`, we have tests that
+            // guarantee that when there are no matching keys, `rewrapManyDataKey` returns
+            // nothing.  We also have tests for auto encryption that guarantee for `encrypt`
+            // we return an error when there are no matching keys.  This error is generated in
+            // subsequent iterations of the state machine.
+            // Some apis (`encrypt`) throw if there are no filter matches and others (`rewrapManyDataKey`)
+            // do not.  We set the result manually here, and let the state machine continue.  `libmongocrypt`
+            // will inform us if we need to error by setting the state to `MONGOCRYPT_CTX_ERROR` but
+            // otherwise we'll return `{ v: [] }`.
+            result = { v: [] } as any as T;
+          }
+          for await (const key of keys) {
             context.addMongoOperationResponse(serialize(key));
           }
 
@@ -239,24 +238,15 @@ export class StateMachine {
         }
 
         case MONGOCRYPT_CTX_NEED_KMS: {
-          const promises = [];
+          const requests = Array.from(this.requests(context));
+          await Promise.all(requests);
 
-          let request;
-          while ((request = context.nextKMSRequest())) {
-            promises.push(this.kmsRequest(request));
-          }
-
-          await Promise.all(promises);
           context.finishKMSRequests();
-
           break;
         }
 
         case MONGOCRYPT_CTX_READY: {
           const finalizedContext = context.finalize();
-          // TODO: Maybe rework the logic here so that instead of doing
-          // the callback here, finalize stores the result, and then
-          // we wait to MONGOCRYPT_CTX_DONE to do the callback
           // @ts-expect-error finalize can change the state, check for error
           if (context.state === MONGOCRYPT_CTX_ERROR) {
             const message = context.status.message || 'Finalization error';
@@ -392,6 +382,16 @@ export class StateMachine {
     });
   }
 
+  *requests(context: MongoCryptContext) {
+    for (
+      let request = context.nextKMSRequest();
+      request != null;
+      request = context.nextKMSRequest()
+    ) {
+      yield this.kmsRequest(request);
+    }
+  }
+
   /**
    * Validates the provided TLS options are secure.
    *
@@ -491,7 +491,7 @@ export class StateMachine {
     client: MongoClient,
     keyVaultNamespace: string,
     filter: Uint8Array
-  ): Promise<DataKey[]> {
+  ): Promise<Array<DataKey>> {
     const { db: dbName, collection: collectionName } =
       MongoDBCollectionNamespace.fromString(keyVaultNamespace);
 

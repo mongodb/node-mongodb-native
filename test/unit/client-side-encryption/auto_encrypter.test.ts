@@ -10,7 +10,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON } from '../../mongodb';
+import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
 const bson = BSON;
@@ -53,32 +53,23 @@ describe('AutoEncrypter', function () {
       return Promise.resolve();
     });
 
-    sandbox
-      .stub(StateMachine.prototype, 'fetchCollectionInfo')
-      .callsFake((client, ns, filter, callback) => {
-        callback(null, MOCK_COLLINFO_RESPONSE);
-      });
+    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').resolves(MOCK_COLLINFO_RESPONSE);
 
-    sandbox
-      .stub(StateMachine.prototype, 'markCommand')
-      .callsFake((client, ns, command, callback) => {
-        if (ENABLE_LOG_TEST) {
-          const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
-          response.schemaRequiresEncryption = false;
+    sandbox.stub(StateMachine.prototype, 'markCommand').callsFake(() => {
+      if (ENABLE_LOG_TEST) {
+        const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
+        response.schemaRequiresEncryption = false;
 
-          ENABLE_LOG_TEST = false; // disable test after run
-          callback(null, bson.serialize(response));
-          return;
-        }
+        ENABLE_LOG_TEST = false; // disable test after run
+        return Promise.resolve(bson.serialize(response));
+      }
 
-        callback(null, MOCK_MONGOCRYPTD_RESPONSE);
-      });
-
-    sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, callback) => {
-      // mock data is already serialized, our action deals with the result of a cursor
-      const deserializedKey = bson.deserialize(MOCK_KEYDOCUMENT_RESPONSE);
-      callback(null, [deserializedKey]);
+      return Promise.resolve(MOCK_MONGOCRYPTD_RESPONSE);
     });
+
+    sandbox
+      .stub(StateMachine.prototype, 'fetchKeys')
+      .resolves([bson.deserialize(MOCK_KEYDOCUMENT_RESPONSE) as DataKey]);
   });
 
   afterEach(() => {

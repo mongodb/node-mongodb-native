@@ -53,7 +53,7 @@ describe('ClientEncryption', function () {
       });
 
       // stubbed out for AWS unit testing below
-      sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, cb) => {
+      sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter) => {
         filter = deserialize(filter);
         const keyIds = filter.$or[0]._id.$in.map(key => key.toString('hex'));
         const fileNames = keyIds.map(keyId =>
@@ -62,7 +62,7 @@ describe('ClientEncryption', function () {
         const contents = fileNames.map(filename =>
           EJSON.parse(fs.readFileSync(filename, { encoding: 'utf-8' }))
         );
-        cb(null, contents);
+        return Promise.resolve(contents);
       });
     });
 
