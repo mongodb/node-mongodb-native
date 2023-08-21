@@ -144,7 +144,7 @@ export class MongoError extends Error {
    * @public
    **/
   constructor(message: string, options?: { cause?: Error }) {
-    super(MongoError.buildErrorMessage(message), options);
+    super(message, options);
     this[kErrorLabels] = new Set();
   }
 
@@ -1036,7 +1036,9 @@ export class MongoSystemError extends MongoError {
    **/
   constructor(message: string, reason: TopologyDescription) {
     if (reason && reason.error) {
-      super(message, { cause: reason.error });
+      super(MongoError.buildErrorMessage(reason.error.message || reason.error), {
+        cause: reason.error
+      });
     } else {
       super(message);
     }
