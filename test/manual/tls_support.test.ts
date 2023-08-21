@@ -1,7 +1,12 @@
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 
-import { LEGACY_HELLO_COMMAND, MongoClient, type MongoClientOptions } from '../mongodb';
+import {
+  LEGACY_HELLO_COMMAND,
+  MongoClient,
+  type MongoClientOptions,
+  MongoServerSelectionError
+} from '../mongodb';
 
 const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
 
@@ -123,9 +128,9 @@ describe('TLS Support', function () {
       if (client) await client.close();
     });
 
-    it('throws an error', async () => {
+    it('throws a MongoServerSelectionError', async () => {
       const err = await client.connect().catch(e => e);
-      expect(err).to.be.instanceOf(Error);
+      expect(err).to.be.instanceOf(MongoServerSelectionError);
     });
   });
 
