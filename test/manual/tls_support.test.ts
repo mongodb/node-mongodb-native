@@ -106,7 +106,7 @@ describe('TLS Support', function () {
 
         context('when client has been opened and closed more than once', function () {
           it('should only read files once', async () => {
-            await client.connect();
+            await client.connect().catch(e => e);
             await client.close();
 
             const crlFileAccessTime = (await fs.stat(TLS_CRL_FILE)).atime;
