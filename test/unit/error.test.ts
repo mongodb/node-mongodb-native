@@ -90,16 +90,17 @@ describe('MongoErrors', () => {
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
+      expect(err).to.not.have.property('cause');
     });
 
-    it('should accept an Error object', () => {
+    it('should accept options and set cause property', () => {
       const errorMessage = 'A test error';
       const inputError = new Error(errorMessage);
-      const err = new MongoError(inputError);
+      const err = new MongoError('test', { cause: inputError });
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
-      expect(err.message).to.equal(errorMessage);
-      expect(err).to.have.property('cause', inputError);
+      expect(err.message).to.equal('test');
+      expect(err).to.have.property('cause').that.is.instanceOf(Error);
     });
   });
 
@@ -169,7 +170,7 @@ describe('MongoErrors', () => {
     context('when options.cause is not set', () => {
       it('attaches the cause property to the instance', () => {
         const error = new MongoMissingDependencyError('missing!', { cause: undefined });
-        expect(error).to.not.have.property('cause');
+        expect(error).to.have.property('cause').that.is.undefined;
       });
     });
   });
@@ -658,6 +659,50 @@ describe('MongoErrors', () => {
         expect(mongoError.hasErrorLabel(MongoErrorLabel.ResumableChangeStreamError)).to.be.true;
         expect(isResumableError(mongoError, 8)).to.be.false;
         expect(isResumableError(mongoError)).to.be.false;
+      });
+    });
+  });
+
+  describe('MongoError#buildErrorMessage', function () {
+    context(
+      'when passed an AggregateError with an empty message and non-empty errors array',
+      function () {
+        it('returns error messages separated by commas', function () {
+          const aggErr = new AggregateError([new Error('message 1'), new Error('message 2')], '');
+          expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal('message 1, message 2');
+        });
+      }
+    );
+    context('when passed an AggregateError with a non-empty message', function () {
+      it('returns message field', function () {
+        const aggErr = new AggregateError(
+          [new Error('message 1'), new Error('message 2')],
+          'aggErr'
+        );
+        expect(MongoError.buildErrorMessage(aggErr)).to.deep.equal(aggErr.message);
+      });
+    });
+    context(
+      'when passed an AggregateError with an empty errors array and empty message',
+      function () {
+        it('returns string instructing user to check `cause` property', function () {
+          const aggErr = new AggregateError([], '');
+          expect(MongoError.buildErrorMessage(aggErr)).to.match(
+            /Please check the `cause` property for more information./
+          );
+        });
+      }
+    );
+    context('when passed an Error that is not an AggregateError', function () {
+      it("returns the Error's message property", function () {
+        const err = new Error('error message');
+        expect(MongoError.buildErrorMessage(err)).to.deep.equal('error message');
+      });
+    });
+
+    context('when passed a string', function () {
+      it('returns the string', function () {
+        expect(MongoError.buildErrorMessage('message')).to.deep.equal('message');
       });
     });
   });

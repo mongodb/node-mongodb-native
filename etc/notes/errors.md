@@ -18,6 +18,7 @@
   - [`MongoNetworkError`](#MongoNetworkError)
   - [`MongoServerError`](#MongoServerError)
   - [`MongoSystemError`](#MongoSystemError)
+  - [`MongoCryptError`](#MongoCryptError)
 - [Test Plan](#Test-Plan)
   - [`MongoAPIError`](#MongoAPIError-1)
     - [`MongoInvalidArgumentError`](#MongoInvalidArgumentError-1)
@@ -32,8 +33,8 @@
 ## Errors
 
 All errors are derived from the `MongoError` class which should **never** be instantiated.
-There are four main error classes which stem from `MongoError`: `MongoDriverError`,
-`MongoNetworkError`, `MongoServerError`, and `MongoSystemError`.
+There are five main error classes which stem from `MongoError`: `MongoDriverError`,
+`MongoNetworkError`, `MongoServerError`, `MongoCryptError` and `MongoSystemError`.
 
 ### `MongoError`
 
@@ -41,28 +42,18 @@ The base class from which all errors in the Node driver subclass.
 `MongoError` should **never** be be directly instantiated.
 
 ```mermaid
+
 graph TD
-    MongoError --- MongoDriverError
-    MongoError --- MongoNetworkError
-    MongoError --- MongoServerError
-    MongoError --- MongoSystemError
-    MongoDriverError --- MongoAPIError
-    MongoDriverError --- MongoRuntimeError
+    MongoError:::node --- MongoDriverError
+    MongoError:::node --- MongoNetworkError
+    MongoError:::node --- MongoServerError
+    MongoError:::node --- MongoSystemError
+    MongoError:::node --- MongoCryptError
+    MongoDriverError:::node --- MongoAPIError
+    MongoDriverError:::node --- MongoRuntimeError
 
-linkStyle 0 stroke:#116149
-linkStyle 1 stroke:#116149
-linkStyle 2 stroke:#116149
-linkStyle 3 stroke:#116149
-linkStyle 4 stroke:#116149
-linkStyle 5 stroke:#116149
-
-style MongoError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoSystemError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoNetworkError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoServerError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoDriverError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoAPIError fill:#13aa52,stroke:#21313c,color:#FAFBFC
-style MongoRuntimeError fill:#13aa52,stroke:#21313c,color:#FAFBFC
+linkStyle 0,1,2,3,4,5,6 stroke:#116149
+classDef node fill:#13aa52,stroke:#21313c,color:#FAFBFC
 ```
 
 Children of `MongoError` include:
@@ -71,6 +62,7 @@ Children of `MongoError` include:
 - [`MongoNetworkError`](#MongoNetworkError)
 - [`MongoServerError`](#MongoServerError)
 - [`MongoSystemError`](#MongoSystemError)
+- [`MongoCryptError`](#MongoCryptError)
 
 ### `MongoDriverError`
 
@@ -143,6 +135,21 @@ These are errors which originate from faulty environment setup.
 
 - #### MongoServerSelectionError
   - Thrown when the driver fails to select a server to complete an operation
+
+### `MongoCryptError`
+
+These are errors thrown from the driver's client side encryption logic.
+
+- #### MongoCryptInvalidArgumentError
+  - Thrown when an invalid argument has been provided to an encryption API
+- #### MongoCryptInvalidCreateDataKeyError
+  - Thrown when the driver fails to create data keys for an encrypted collection
+- #### MongoCryptInvalidCreateEncryptedCollectionError
+  - Thrown when the driver fails to create an encrypted collection
+- #### MongoCryptInvalidCreateAzureKMSRequestError
+  - Thrown when the driver encounters an error when fetching Azure KMS credentials
+- #### MongoCryptKMSRequestNetworkTimeoutError
+  - Thrown when the HTTP request to the IDMS server times out when fetching Azure KMS credentials
 
 ## Test Plan
 
