@@ -89,8 +89,8 @@ describe('TLS Support', function () {
           client = new MongoClient(CONNECTION_STRING, {
             tls: true,
             tlsCRLFile: TLS_CRL_FILE,
-            serverSelectionTimeoutMS: 5000,
-            connectTimeoutMS: 5000
+            serverSelectionTimeoutMS: 2000,
+            connectTimeoutMS: 2000
           });
         });
 
