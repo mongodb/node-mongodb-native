@@ -810,13 +810,13 @@ export interface MongoOptions
    * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
    * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
    *
-   * ### Note on `tlsCAFile` and `tlsCertificateKeyFile`
+   * ### Note on `tlsCAFile`, `tlsCertificateKeyFile` and `tlsCRLFile`
    *
-   * The files specified by the paths passed in to the `tlsCAFile` and `tlsCertificateKeyFile` fields
-   * are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
-   * the `ca`, `cert` and `key` fields are populated, they will not be read again on subsequent calls to
+   * The files specified by the paths passed in to the `tlsCAFile`, `tlsCertificateKeyFile` and `tlsCRLFile`
+   * fields are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
+   * the `ca`, `cert`, `crl` and `key` fields are populated, they will not be read again on subsequent calls to
    * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`,
-   * `cert` and `key` fields will be undefined.
+   * `cert`, `crl` and `key` fields will be undefined.
    */
   tls: boolean;
   tlsCAFile?: string;
