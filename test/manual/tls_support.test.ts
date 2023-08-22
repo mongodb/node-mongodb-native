@@ -111,8 +111,9 @@ describe('TLS Support', function () {
 
             const crlFileAccessTime = (await fs.stat(TLS_CRL_FILE)).atime;
 
-            await client.connect();
+            const err = await client.connect().catch(e => e);
 
+            expect(err).to.be.instanceof(Error);
             expect((await fs.stat(TLS_CRL_FILE)).atime).to.deep.equal(crlFileAccessTime);
           });
         });
