@@ -263,6 +263,11 @@ export class StateMachine {
 
     if (context.state === MONGOCRYPT_CTX_ERROR || result == null) {
       const message = context.status.message;
+      if (!message) {
+        debug(
+          `unidentifiable error in MongoCrypt - received an error status from \`libmongocrypt\` but received no error message.`
+        );
+      }
       throw new MongoCryptError(
         message ??
           'unidentifiable error in MongoCrypt - received an error status from `libmongocrypt` but received no error message.'
