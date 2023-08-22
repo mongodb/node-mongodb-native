@@ -11,7 +11,7 @@ import { Msg, type WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
 
 /**
- * An event indicating the start of a given
+ * An event indicating the start of a given command
  * @public
  * @category Event
  */

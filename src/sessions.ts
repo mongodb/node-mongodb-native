@@ -444,7 +444,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * - May be called multiple times if the driver needs to attempt to retry the operations.
    *
    * Checkout a descriptive example here:
-   * @see https://www.mongodb.com/developer/quickstart/node-transactions/
+   * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
    *
    * @param fn - callback to run within a transaction
    * @param options - optional settings for the transaction

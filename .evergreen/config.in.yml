@@ -352,6 +352,13 @@ functions:
           SKIP_DEPS=${SKIP_DEPS|1} \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
 
+  "install package":
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          npm install --force ${PACKAGE}
+
   "run lint checks":
     - command: subprocess.exec
       type: test

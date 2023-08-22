@@ -58,6 +58,7 @@ describe('MongoOptions', function () {
     expect(options).to.not.have.property('tlsCertificateKeyFilePassword');
     expect(options).to.not.have.property('key');
     expect(options).to.not.have.property('ca');
+    expect(options).to.not.have.property('cert');
     expect(options).to.have.property('tlsCertificateKeyFile', filename);
     expect(options).to.have.property('tlsCAFile', filename);
     expect(options).has.property('passphrase', 'tlsCertificateKeyFilePassword');
