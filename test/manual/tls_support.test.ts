@@ -115,6 +115,7 @@ describe('TLS Support', function () {
 
             expect((await fs.stat(TLS_CRL_FILE)).atime).to.deep.equal(crlFileAccessTime);
           });
+        });
       });
     });
 
