@@ -48,36 +48,59 @@ describe('TLS Support', function () {
     });
 
     context('when tls filepaths have length > 0', () => {
-      beforeEach(async () => {
-        client = new MongoClient(CONNECTION_STRING, tlsSettings);
-      });
+      context('when connection will succeed', () => {
+        beforeEach(async () => {
+          client = new MongoClient(CONNECTION_STRING, tlsSettings);
+        });
 
-      it('should read in files async at connect time', async () => {
-        expect(client.options).property('tlsCAFile', TLS_CA_FILE);
-        expect(client.options).property('tlsCertificateKeyFile', TLS_CERT_KEY_FILE);
-        expect(client.options).not.have.property('ca');
-        expect(client.options).not.have.property('key');
-        expect(client.options).not.have.property('cert');
-
-        await client.connect();
-
-        expect(client.options).property('ca').to.exist;
-        expect(client.options).property('key').to.exist;
-        expect(client.options).property('cert').to.exist;
-      });
-
-      context('when client has been opened and closed more than once', function () {
-        it('should only read files once', async () => {
-          await client.connect();
-          await client.close();
-
-          const caFileAccessTime = (await fs.stat(TLS_CA_FILE)).atime;
-          const certKeyFileAccessTime = (await fs.stat(TLS_CERT_KEY_FILE)).atime;
+        it('should read in files async at connect time', async () => {
+          expect(client.options).property('tlsCAFile', TLS_CA_FILE);
+          expect(client.options).property('tlsCertificateKeyFile', TLS_CERT_KEY_FILE);
+          expect(client.options).not.have.property('ca');
+          expect(client.options).not.have.property('key');
+          expect(client.options).not.have.property('cert');
 
           await client.connect();
 
-          expect((await fs.stat(TLS_CA_FILE)).atime).to.deep.equal(caFileAccessTime);
-          expect((await fs.stat(TLS_CERT_KEY_FILE)).atime).to.deep.equal(certKeyFileAccessTime);
+          expect(client.options).property('ca').to.exist;
+          expect(client.options).property('key').to.exist;
+          expect(client.options).property('cert').to.exist;
+        });
+
+        context('when client has been opened and closed more than once', function () {
+          it('should only read files once', async () => {
+            await client.connect();
+            await client.close();
+
+            const caFileAccessTime = (await fs.stat(TLS_CA_FILE)).atime;
+            const certKeyFileAccessTime = (await fs.stat(TLS_CERT_KEY_FILE)).atime;
+
+            await client.connect();
+
+            expect((await fs.stat(TLS_CA_FILE)).atime).to.deep.equal(caFileAccessTime);
+            expect((await fs.stat(TLS_CERT_KEY_FILE)).atime).to.deep.equal(certKeyFileAccessTime);
+          });
+        });
+      });
+
+      context('when the connection will fail', () => {
+        beforeEach(async () => {
+          client = new MongoClient(CONNECTION_STRING, {
+            tls: true,
+            tlsCRLFile: TLS_CRL_FILE,
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 5000
+          });
+        });
+
+        it('should read in files async at connect time', async () => {
+          expect(client.options).property('tlsCRLFile', TLS_CRL_FILE);
+          expect(client.options).not.have.property('crl');
+
+          const err = await client.connect().catch(e => e);
+
+          expect(err).to.be.instanceof(Error);
+          expect(client.options).property('crl').to.exist;
         });
       });
     });
