@@ -90,16 +90,17 @@ describe('MongoErrors', () => {
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
+      expect(err).to.have.property('cause').that.is.undefined;
     });
 
-    it('should accept an Error object', () => {
+    it('should accept an Error object and set cause', () => {
       const errorMessage = 'A test error';
       const inputError = new Error(errorMessage);
-      const err = new MongoError(inputError);
+      const err = new MongoError('', { cause: inputError });
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
-      expect(err).to.not.have.property('cause');
+      expect(err).to.have.property('cause').that.is.instanceOf(Error);
     });
   });
 
