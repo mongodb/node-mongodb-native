@@ -117,6 +117,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   tlsCertificateKeyFilePassword?: string;
   /** Specifies the location of a local .pem file that contains the root certificate chain from the Certificate Authority. This file is used to validate the certificate presented by the mongod/mongos instance. */
   tlsCAFile?: string;
+  /** Specifies the location of a local CRL .pem file that contains the client revokation list. */
+  tlsCRLFile?: string;
   /** Bypasses validation of the certificates presented by the mongod/mongos instance */
   tlsAllowInvalidCertificates?: boolean;
   /** Disables hostname validation of the certificate presented by the mongod/mongos instance. */
@@ -436,6 +438,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (options.tls) {
       if (typeof options.tlsCAFile === 'string') {
         options.ca ??= await fs.readFile(options.tlsCAFile);
+      }
+      if (typeof options.tlsCRLFile === 'string') {
+        options.crl ??= await fs.readFile(options.tlsCRLFile);
       }
       if (typeof options.tlsCertificateKeyFile === 'string') {
         if (!options.key || !options.cert) {
@@ -790,7 +795,7 @@ export interface MongoOptions
    * | nodejs native option  | driver spec equivalent option name            | driver option type |
    * |:----------------------|:----------------------------------------------|:-------------------|
    * | `ca`                  | `tlsCAFile`                                   | `string`           |
-   * | `crl`                 | N/A                                           | `string`           |
+   * | `crl`                 | `tlsCRLFile`                                  | `string`           |
    * | `cert`                | `tlsCertificateKeyFile`                       | `string`           |
    * | `key`                 | `tlsCertificateKeyFile`                       | `string`           |
    * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `string`           |
@@ -805,17 +810,17 @@ export interface MongoOptions
    * to a no-op and `rejectUnauthorized` to the inverse value of `tlsAllowInvalidCertificates`. If
    * `tlsAllowInvalidCertificates` is not set, then `rejectUnauthorized` will be set to `true`.
    *
-   * ### Note on `tlsCAFile` and `tlsCertificateKeyFile`
+   * ### Note on `tlsCAFile`, `tlsCertificateKeyFile` and `tlsCRLFile`
    *
-   * The files specified by the paths passed in to the `tlsCAFile` and `tlsCertificateKeyFile` fields
-   * are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
-   * the `ca`, `cert` and `key` fields are populated, they will not be read again on subsequent calls to
+   * The files specified by the paths passed in to the `tlsCAFile`, `tlsCertificateKeyFile` and `tlsCRLFile`
+   * fields are read lazily on the first call to `MongoClient.connect`. Once these files have been read and
+   * the `ca`, `cert`, `crl` and `key` fields are populated, they will not be read again on subsequent calls to
    * `MongoClient.connect`. As a result, until the first call to `MongoClient.connect`, the `ca`,
-   * `cert` and `key` fields will be undefined.
+   * `cert`, `crl` and `key` fields will be undefined.
    */
   tls: boolean;
-
   tlsCAFile?: string;
+  tlsCRLFile?: string;
   tlsCertificateKeyFile?: string;
 
   /** @internal */
