@@ -549,19 +549,26 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const topology = this.topology;
     this.topology = undefined;
 
-    await new Promise<void>((resolve, reject) => {
-      topology.close({ force }, error => {
-        if (error) return reject(error);
-        const { encrypter } = this[kOptions];
-        if (encrypter) {
-          return encrypter.close(this, force, error => {
-            if (error) return reject(error);
-            resolve();
-          });
-        }
-        resolve();
+    // Prevent race condition during sighalt/int
+    if (toplogy) {
+      await new Promise<void>((resolve, reject) => {
+        topology.close({ force }, error => {
+          if (error) return reject(error);
+          resolve();
+        });
       });
-    });
+    }
+
+    // Attempt to close encrypter regardless of topology status
+    const { encrypter } = this[kOptions];
+    if (encrypter) {
+      await new Promise<void>((resolve, reject) => {
+        encrypter.close(this, force, error => {
+          if (error) return reject(error);
+          resolve();
+        });
+      });
+    }
   }
 
   /**
