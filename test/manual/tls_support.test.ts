@@ -43,8 +43,9 @@ describe('TLS Support', function () {
 
   context('when tls filepaths are provided', () => {
     let client: MongoClient;
+
     afterEach(async () => {
-      if (client) await client.close();
+      await client?.close();
     });
 
     context('when tls filepaths have length > 0', () => {
@@ -102,6 +103,18 @@ describe('TLS Support', function () {
           expect(err).to.be.instanceof(Error);
           expect(client.options).property('crl').to.exist;
         });
+
+        context('when client has been opened and closed more than once', function () {
+          it('should only read files once', async () => {
+            await client.connect();
+            await client.close();
+
+            const crlFileAccessTime = (await fs.stat(TLS_CRL_FILE)).atime;
+
+            await client.connect();
+
+            expect((await fs.stat(TLS_CRL_FILE)).atime).to.deep.equal(crlFileAccessTime);
+          });
       });
     });
 
