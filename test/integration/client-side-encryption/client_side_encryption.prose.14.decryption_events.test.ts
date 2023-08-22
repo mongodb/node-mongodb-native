@@ -78,9 +78,9 @@ describe('14. Decryption Events', metadata, function () {
     // Copy ``ciphertext`` into a variable named ``malformedCiphertext``. Change the
     // last byte to a different value. This will produce an invalid HMAC tag.
     const buffer = Buffer.from(cipherText.buffer);
-    const lastByte = buffer.readInt8(buffer.length - 1);
+    const lastByte = buffer.readUInt8(buffer.length - 1);
     const replacementByte = lastByte === 0 ? 1 : 0;
-    buffer.writeUint8(replacementByte, buffer.length - 1);
+    buffer.writeUInt8(replacementByte, buffer.length - 1);
     malformedCiphertext = new Binary(buffer, 6);
 
     // Create a MongoClient named ``encryptedClient`` with these ``AutoEncryptionOpts``:
