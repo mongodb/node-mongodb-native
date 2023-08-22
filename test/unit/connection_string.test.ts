@@ -438,6 +438,13 @@ describe('Connection String', function () {
     });
   });
 
+  context('when providing tlsCRLFile', function () {
+    it('sets the tlsCRLFile option', function () {
+      const options = parseOptions('mongodb://localhost/?tls=true&tlsCRLFile=path/to/crl.pem');
+      expect(options.tlsCRLFile).to.equal('path/to/crl.pem');
+    });
+  });
+
   context('when both tls and ssl options are provided', function () {
     context('when the options are provided in the URI', function () {
       context('when the options are equal', function () {

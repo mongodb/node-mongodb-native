@@ -8,18 +8,19 @@ import {
   MongoServerSelectionError
 } from '../mongodb';
 
-const REQUIRED_ENV = ['MONGODB_URI', 'SSL_KEY_FILE', 'SSL_CA_FILE'];
+const REQUIRED_ENV = ['MONGODB_URI', 'TLS_KEY_FILE', 'TLS_CA_FILE', 'TLS_CRL_FILE'];
 
 describe('TLS Support', function () {
   for (const key of REQUIRED_ENV) {
     if (process.env[key] == null) {
-      throw new Error(`skipping SSL tests, ${key} environment variable is not defined`);
+      throw new Error(`skipping TLS tests, ${key} environment variable is not defined`);
     }
   }
 
   const CONNECTION_STRING = process.env.MONGODB_URI as string;
-  const TLS_CERT_KEY_FILE = process.env.SSL_KEY_FILE as string;
-  const TLS_CA_FILE = process.env.SSL_CA_FILE as string;
+  const TLS_CERT_KEY_FILE = process.env.TLS_KEY_FILE as string;
+  const TLS_CA_FILE = process.env.TLS_CA_FILE as string;
+  const TLS_CRL_FILE = process.env.TLS_CRL_FILE as string;
   const tlsSettings = {
     tls: true,
     tlsCertificateKeyFile: TLS_CERT_KEY_FILE,
@@ -110,6 +111,29 @@ describe('TLS Support', function () {
         const err = await client.connect().catch(e => e);
 
         expect(err).to.be.instanceof(Error);
+      });
+    });
+  });
+
+  context('when providing tlsCRLFile', () => {
+    context('when the file will revoke the certificate', () => {
+      let client: MongoClient;
+      beforeEach(() => {
+        client = new MongoClient(CONNECTION_STRING, {
+          tls: true,
+          tlsCAFile: TLS_CA_FILE,
+          tlsCRLFile: TLS_CRL_FILE,
+          serverSelectionTimeoutMS: 5000,
+          connectTimeoutMS: 5000
+        });
+      });
+      afterEach(async () => {
+        await client?.close();
+      });
+
+      it('throws a MongoServerSelectionError', async () => {
+        const err = await client.connect().catch(e => e);
+        expect(err).to.be.instanceOf(MongoServerSelectionError);
       });
     });
   });
