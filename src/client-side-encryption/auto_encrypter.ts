@@ -7,7 +7,7 @@ import {
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
-import { type AnyError, MongoRuntimeError } from '../error';
+import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
 import { type Callback, MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
@@ -396,74 +396,38 @@ export class AutoEncrypter {
    *
    * This function is a no-op when bypassSpawn is set or the crypt shared library is used.
    */
-  init(callback: Callback<MongoClient>) {
+  async init(): Promise<MongoClient | void> {
     if (this._bypassMongocryptdAndCryptShared || this.cryptSharedLibVersionInfo) {
-      return callback();
+      return;
     }
     if (!this._mongocryptdManager) {
-      return callback(
-        new MongoRuntimeError(
-          'Reached impossible state: mongocryptdManager is undefined when neither bypassSpawn nor the shared lib are specified.'
-        )
+      throw new MongoRuntimeError(
+        'Reached impossible state: mongocryptdManager is undefined when neither bypassSpawn nor the shared lib are specified.'
       );
     }
     if (!this._mongocryptdClient) {
-      return callback(
-        new MongoRuntimeError(
-          'Reached impossible state: mongocryptdClient is undefined when neither bypassSpawn nor the shared lib are specified.'
-        )
+      throw new MongoRuntimeError(
+        'Reached impossible state: mongocryptdClient is undefined when neither bypassSpawn nor the shared lib are specified.'
       );
     }
-    const _callback = (err?: AnyError, res?: MongoClient) => {
-      if (
-        err &&
-        err.message &&
-        (err.message.match(/timed out after/) || err.message.match(/ENOTFOUND/))
-      ) {
-        callback(
-          new MongoRuntimeError(
-            'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
-            { cause: err }
-          )
+
+    if (!this._mongocryptdManager.bypassSpawn) {
+      await this._mongocryptdManager.spawn();
+    }
+
+    try {
+      const client = await this._mongocryptdClient.connect();
+      return client;
+    } catch (error) {
+      const { message } = error;
+      if (message && (message.match(/timed out after/) || message.match(/ENOTFOUND/))) {
+        throw new MongoRuntimeError(
+          'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
+          { cause: error }
         );
-        return;
       }
-
-      callback(err, res);
-    };
-
-    if (this._mongocryptdManager.bypassSpawn) {
-      this._mongocryptdClient.connect().then(
-        result => {
-          return _callback(undefined, result);
-        },
-        error => {
-          _callback(error, undefined);
-        }
-      );
-      return;
+      throw error;
     }
-
-    this._mongocryptdManager.spawn().then(
-      () => {
-        if (!this._mongocryptdClient) {
-          return callback(
-            new MongoRuntimeError(
-              'Reached impossible state: mongocryptdClient is undefined after spawning libmongocrypt.'
-            )
-          );
-        }
-        this._mongocryptdClient.connect().then(
-          result => {
-            return _callback(undefined, result);
-          },
-          error => {
-            _callback(error, undefined);
-          }
-        );
-      },
-      error => callback(error)
-    );
   }
 
   /**
