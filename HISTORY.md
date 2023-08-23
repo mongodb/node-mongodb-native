@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.17.1](https://github.com/mongodb/node-mongodb-native/compare/v4.17.0...v4.17.1) (2023-08-23)
+
+
+### Bug Fixes
+
+* **NODE-5573:** fix saslprep import ([#3838](https://github.com/mongodb/node-mongodb-native/issues/3838)) ([ff6c293](https://github.com/mongodb/node-mongodb-native/commit/ff6c2938b8739f0bd0b1ca6271095c5563a5a408))
+
 ## [4.17.0](https://github.com/mongodb/node-mongodb-native/compare/v4.16.0...v4.17.0) (2023-08-17)
 
 
