@@ -814,7 +814,7 @@ export interface MongoOptions
    * | nodejs native option  | driver spec compliant option name             | legacy option name | driver option type |
    * |:----------------------|:----------------------------------------------|:-------------------|:-------------------|
    * | `ca`                  | `tlsCAFile`                                   | `sslCA`            | `string`           |
-   * | `crl`                 | N/A                                           | `sslCRL`           | `string`           |
+   * | `crl`                 | `tlsCRLFile` (next major version)             | `sslCRL`           | `string`           |
    * | `cert`                | `tlsCertificateFile`, `tlsCertificateKeyFile` | `sslCert`          | `string`           |
    * | `key`                 | `tlsCertificateKeyFile`                       | `sslKey`           | `string`           |
    * | `passphrase`          | `tlsCertificateKeyFilePassword`               | `sslPass`          | `string`           |

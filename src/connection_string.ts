@@ -1108,7 +1108,7 @@ export const OPTIONS = {
   },
   sslCRL: {
     deprecated:
-      'sslCRL is deprecated and will be removed in the next major version. Please use tlsCertificateKeyFile instead.',
+      'sslCRL is deprecated and will be removed in the next major version and be replaced by tlsCRLFile in that release.',
     target: 'crl',
     transform({ values: [value] }) {
       return fs.readFileSync(String(value), { encoding: 'ascii' });
