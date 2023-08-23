@@ -137,7 +137,7 @@ export let saslprep:
 
 try {
   // Ensure you always wrap an optional require in the try block NODE-3199
-  saslprep = require('saslprep');
+  saslprep = require('@mongodb-js/saslprep');
 } catch {} // eslint-disable-line
 
 interface AWS4 {
