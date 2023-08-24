@@ -477,7 +477,11 @@ export class UnifiedTestSuiteBuilder {
 }
 
 export const alphabetically = (a: any, b: any) => {
-  const res = `${a}`.localeCompare(`${b}`);
+  const res = `${a}`.localeCompare(`${b}`, 'en-US', {
+    usage: 'sort',
+    numeric: true,
+    ignorePunctuation: false
+  });
   return res < 0 ? -1 : res > 0 ? 1 : 0;
 };
 
