@@ -191,8 +191,12 @@ describe('AutoEncrypter', function () {
       expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
 
       // The same, but with an object containing different data types as the input
-      decrypted = await mc.decrypt({ a: [null, 1, { c: new bson.Binary('foo', 1) }] });
-      expect(decrypted).to.eql({ a: [null, 1, { c: new bson.Binary('foo', 1) }] });
+      decrypted = await mc.decrypt({
+        a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
+      });
+      expect(decrypted).to.eql({
+        a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
+      });
       expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
 
       // The same, but with nested data inside the decrypted input

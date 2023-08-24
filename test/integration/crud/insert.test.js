@@ -247,7 +247,10 @@ describe('crud - insert', function () {
               test.equal(date.toString(), doc.date.toString());
               test.equal(date.getTime(), doc.date.getTime());
               test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-              test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+              test.equal(
+                motherOfAllDocuments.binary.value().toString('hex'),
+                doc.binary.value().toString('hex')
+              );
 
               test.equal(motherOfAllDocuments.int, doc.int);
               test.equal(motherOfAllDocuments.long, doc.long);
@@ -398,7 +401,10 @@ describe('crud - insert', function () {
                 test.equal(date.toString(), doc.date.toString());
                 test.equal(date.getTime(), doc.date.getTime());
                 test.equal(motherOfAllDocuments.oid.toHexString(), doc.oid.toHexString());
-                test.equal(motherOfAllDocuments.binary.value(), doc.binary.value());
+                test.equal(
+                  motherOfAllDocuments.binary.value().toString('hex'),
+                  doc.binary.value().toString('hex')
+                );
 
                 test.equal(motherOfAllDocuments.int, doc.int);
                 test.equal(motherOfAllDocuments.long, doc.long);
