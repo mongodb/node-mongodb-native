@@ -476,7 +476,7 @@ export class UnifiedTestSuiteBuilder {
   }
 }
 
-export const byStrings = (a: any, b: any) => {
+export const alphabetically = (a: any, b: any) => {
   const res = `${a}`.localeCompare(`${b}`);
   return res < 0 ? -1 : res > 0 ? 1 : 0;
 };
