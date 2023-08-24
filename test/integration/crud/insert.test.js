@@ -1488,7 +1488,6 @@ describe('crud - insert', function () {
       // in this case we are setting that node needs to be higher than 0.10.X to run
       metadata: {
         requires: {
-          topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'],
           mongodb: '>=2.8.0'
         }
       },
@@ -1496,19 +1495,20 @@ describe('crud - insert', function () {
       test: function (done) {
         var configuration = this.configuration;
         var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+
+        var document = {
+          string: 'abcdefghijkl',
+          objid: new ObjectId(Buffer.alloc(12, 1)),
+          double: new Double(1),
+          binary: new Binary(Buffer.from('hello world')),
+          minkey: new MinKey(),
+          maxkey: new MaxKey(),
+          code: new Code('function () {}', { a: 55 })
+        };
+
         client.connect(function (err, client) {
           var db = client.db(configuration.db);
           var collection = db.collection('bson_types_insert_1');
-
-          var document = {
-            string: 'abcdefghijkl',
-            objid: new ObjectId('abcdefghijkl'),
-            double: new Double(1),
-            binary: new Binary(Buffer.from('hello world')),
-            minkey: new MinKey(),
-            maxkey: new MaxKey(),
-            code: new Code('function () {}', { a: 55 })
-          };
 
           collection.insert(document, configuration.writeConcernMax(), function (err, result) {
             expect(err).to.not.exist;
@@ -1518,9 +1518,9 @@ describe('crud - insert', function () {
               expect(err).to.not.exist;
               test.equal('abcdefghijkl', doc.string.toString());
 
-              collection.findOne({ objid: new ObjectId('abcdefghijkl') }, function (err, doc) {
+              collection.findOne({ objid: new ObjectId(Buffer.alloc(12, 1)) }, function (err, doc) {
                 expect(err).to.not.exist;
-                test.equal('6162636465666768696a6b6c', doc.objid.toString());
+                test.equal('01'.repeat(12), doc.objid.toString());
 
                 collection.findOne({ double: new Double(1) }, function (err, doc) {
                   expect(err).to.not.exist;

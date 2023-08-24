@@ -19,7 +19,7 @@ describe('PkFactory', function () {
       // Custom factory (need to provide a 12 byte array);
       var CustomPKFactory = {
         createPk() {
-          return new ObjectId('aaaaaaaaaaaa');
+          return new ObjectId('a'.repeat(24));
         }
       };
 
@@ -39,7 +39,7 @@ describe('PkFactory', function () {
 
         collection.insert({ a: 1 }, { writeConcern: { w: 1 } }, function (err) {
           expect(err).to.not.exist;
-          collection.find({ _id: new ObjectId('aaaaaaaaaaaa') }).toArray(function (err, items) {
+          collection.find({ _id: new ObjectId('a'.repeat(24)) }).toArray(function (err, items) {
             expect(items.length).to.equal(1);
 
             client.close(done);
