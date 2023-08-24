@@ -3,7 +3,6 @@ import { spawnSync } from 'child_process';
 import * as fs from 'fs';
 import { dirname, resolve } from 'path';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { AutoEncrypter } from '../../../src/client-side-encryption/auto_encrypter';
@@ -54,9 +53,7 @@ describe('crypt_shared library', function () {
     await client.connect();
   });
   afterEach(async () => {
-    await promisify(cb =>
-      autoEncrypter ? autoEncrypter.teardown(true, cb) : cb(undefined, undefined)
-    )();
+    await autoEncrypter?.teardown(true);
     await client?.close();
   });
   const sandbox = sinon.createSandbox();
@@ -103,7 +100,7 @@ describe('crypt_shared library', function () {
       'should autoSpawn a mongocryptd on init by default',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
 
-      function (done) {
+      async function () {
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -117,18 +114,15 @@ describe('crypt_shared library', function () {
         const localMcdm = autoEncrypter._mongocryptdManager;
         sandbox.spy(localMcdm, 'spawn');
 
-        autoEncrypter.init(err => {
-          if (err) return done(err);
-          expect(localMcdm.spawn).to.have.been.calledOnce;
-          done();
-        });
+        await autoEncrypter.init();
+        expect(localMcdm.spawn).to.have.been.calledOnce;
       }
     );
 
     it(
       'should not attempt to kick off mongocryptd on a normal error',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-      function (done) {
+      async function () {
         let called = false;
         StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
           if (!called) {
@@ -150,24 +144,20 @@ describe('crypt_shared library', function () {
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
 
         const localMcdm = autoEncrypter._mongocryptdManager;
-        autoEncrypter.init(err => {
-          if (err) return done(err);
+        await autoEncrypter.init();
 
-          sandbox.spy(localMcdm, 'spawn');
+        sandbox.spy(localMcdm, 'spawn');
 
-          autoEncrypter.encrypt('test.test', TEST_COMMAND, err => {
-            expect(localMcdm.spawn).to.not.have.been.called;
-            expect(err).to.be.an.instanceOf(Error);
-            done();
-          });
-        });
+        const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
+        expect(localMcdm.spawn).to.not.have.been.called;
+        expect(err).to.be.an.instanceOf(Error);
       }
     );
 
     it(
       'should restore the mongocryptd and retry once if a MongoNetworkTimeoutError is experienced',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-      function (done) {
+      async function () {
         let called = false;
         StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
           if (!called) {
@@ -189,24 +179,19 @@ describe('crypt_shared library', function () {
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
 
         const localMcdm = autoEncrypter._mongocryptdManager;
-        autoEncrypter.init(err => {
-          if (err) return done(err);
+        await autoEncrypter.init();
 
-          sandbox.spy(localMcdm, 'spawn');
+        sandbox.spy(localMcdm, 'spawn');
 
-          autoEncrypter.encrypt('test.test', TEST_COMMAND, err => {
-            expect(localMcdm.spawn).to.have.been.calledOnce;
-            expect(err).to.not.exist;
-            done();
-          });
-        });
+        await autoEncrypter.encrypt('test.test', TEST_COMMAND);
+        expect(localMcdm.spawn).to.have.been.calledOnce;
       }
     );
 
     it(
       'should propagate error if MongoNetworkTimeoutError is experienced twice in a row',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-      function (done) {
+      async function () {
         let counter = 2;
         StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
           if (counter) {
@@ -228,24 +213,20 @@ describe('crypt_shared library', function () {
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
 
         const localMcdm = autoEncrypter._mongocryptdManager;
-        autoEncrypter.init(err => {
-          if (err) return done(err);
+        await autoEncrypter.init();
 
-          sandbox.spy(localMcdm, 'spawn');
+        sandbox.spy(localMcdm, 'spawn');
 
-          autoEncrypter.encrypt('test.test', TEST_COMMAND, err => {
-            expect(localMcdm.spawn).to.have.been.calledOnce;
-            expect(err).to.be.an.instanceof(MongoNetworkTimeoutError);
-            done();
-          });
-        });
+        const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
+        expect(localMcdm.spawn).to.have.been.calledOnce;
+        expect(err).to.be.an.instanceof(MongoNetworkTimeoutError);
       }
     );
 
     it(
       'should return a useful message if mongocryptd fails to autospawn',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-      function (done) {
+      async function () {
         autoEncrypter = new AutoEncrypter(client, {
           keyVaultNamespace: 'admin.datakeys',
           kmsProviders: {
@@ -258,15 +239,11 @@ describe('crypt_shared library', function () {
         });
         expect(autoEncrypter).to.have.property('cryptSharedLibVersionInfo', null);
 
-        sandbox.stub(MongocryptdManager.prototype, 'spawn').callsFake(callback => {
-          callback();
-        });
+        sandbox.stub(MongocryptdManager.prototype, 'spawn').resolves();
 
-        autoEncrypter.init(err => {
-          expect(err).to.exist;
-          expect(err).to.be.instanceOf(MongoError);
-          done();
-        });
+        const err = await autoEncrypter.init().catch(e => e);
+        expect(err).to.exist;
+        expect(err).to.be.instanceOf(MongoError);
       }
     );
   });
@@ -289,7 +266,7 @@ describe('crypt_shared library', function () {
       it(
         `should not spawn mongocryptd on startup if ${opt} is true`,
         { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-        function (done) {
+        async function () {
           autoEncrypter = new AutoEncrypter(client, encryptionOptions);
 
           const localMcdm = autoEncrypter._mongocryptdManager || {
@@ -299,11 +276,8 @@ describe('crypt_shared library', function () {
           };
           sandbox.spy(localMcdm, 'spawn');
 
-          autoEncrypter.init(err => {
-            expect(err).to.not.exist;
-            expect(localMcdm.spawn).to.have.a.callCount(0);
-            done();
-          });
+          await autoEncrypter.init();
+          expect(localMcdm.spawn).to.have.a.callCount(0);
         }
       );
     });
@@ -311,7 +285,7 @@ describe('crypt_shared library', function () {
     it(
       'should not spawn a mongocryptd or retry on a server selection error if mongocryptdBypassSpawn: true',
       { requires: { clientSideEncryption: true, predicate: cryptShared('disabled') } },
-      function (done) {
+      async function () {
         let called = false;
         const timeoutError = new MongoNetworkTimeoutError('msg');
         StateMachine.prototype.markCommand.callsFake((client, ns, filter, callback) => {
@@ -338,17 +312,12 @@ describe('crypt_shared library', function () {
         const localMcdm = autoEncrypter._mongocryptdManager;
         sandbox.spy(localMcdm, 'spawn');
 
-        autoEncrypter.init(err => {
-          expect(err).to.not.exist;
-          expect(localMcdm.spawn).to.not.have.been.called;
+        await autoEncrypter.init();
+        expect(localMcdm.spawn).to.not.have.been.called;
 
-          autoEncrypter.encrypt('test.test', TEST_COMMAND, (err, response) => {
-            expect(localMcdm.spawn).to.not.have.been.called;
-            expect(response).to.not.exist;
-            expect(err).to.equal(timeoutError);
-            done();
-          });
-        });
+        const err = await autoEncrypter.encrypt('test.test', TEST_COMMAND).catch(e => e);
+        expect(localMcdm.spawn).to.not.have.been.called;
+        expect(err).to.equal(timeoutError);
       }
     );
   });

@@ -13,7 +13,7 @@ import { type FindCursor } from '../cursor/find_cursor';
 import { type Db } from '../db';
 import { getMongoDBClientEncryption } from '../deps';
 import { type MongoClient } from '../mongo_client';
-import { type Filter } from '../mongo_types';
+import { type Filter, type WithId } from '../mongo_types';
 import { type CreateCollectionOptions } from '../operations/create_collection';
 import { type DeleteResult } from '../operations/delete';
 import { MongoDBCollectionNamespace } from '../utils';
@@ -202,7 +202,7 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const dataKey = await stateMachine.executeAsync<DataKey>(this, context);
+    const dataKey = await stateMachine.execute<DataKey>(this, context);
 
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
@@ -246,7 +246,7 @@ export class ClientEncryption {
   async rewrapManyDataKey(
     filter: Filter<DataKey>,
     options: ClientEncryptionRewrapManyDataKeyProviderOptions
-  ) {
+  ): Promise<{ bulkWriteResult?: BulkWriteResult }> {
     let keyEncryptionKeyBson = undefined;
     if (options) {
       const keyEncryptionKey = Object.assign({ provider: options.provider }, options.masterKey);
@@ -259,8 +259,8 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const dataKey = await stateMachine.executeAsync<{ v: DataKey[] }>(this, context);
-    if (!dataKey || dataKey.v.length === 0) {
+    const { v: dataKeys } = await stateMachine.execute<{ v: DataKey[] }>(this, context);
+    if (dataKeys.length === 0) {
       return {};
     }
 
@@ -268,7 +268,7 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    const replacements = dataKey.v.map(
+    const replacements = dataKeys.map(
       (key: DataKey): AnyBulkWriteOperation<DataKey> => ({
         updateOne: {
           filter: { _id: key._id },
@@ -386,7 +386,7 @@ export class ClientEncryption {
    * }
    * ```
    */
-  async getKeyByAltName(keyAltName: string) {
+  async getKeyByAltName(keyAltName: string): Promise<WithId<DataKey> | null> {
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
     );
@@ -417,7 +417,7 @@ export class ClientEncryption {
    * }
    * ```
    */
-  async addKeyAltName(_id: Binary, keyAltName: string) {
+  async addKeyAltName(_id: Binary, keyAltName: string): Promise<WithId<DataKey> | null> {
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
     );
@@ -457,7 +457,7 @@ export class ClientEncryption {
    * }
    * ```
    */
-  async removeKeyAltName(_id: Binary, keyAltName: string) {
+  async removeKeyAltName(_id: Binary, keyAltName: string): Promise<WithId<DataKey> | null> {
     const { db: dbName, collection: collectionName } = MongoDBCollectionNamespace.fromString(
       this._keyVaultNamespace
     );
@@ -640,7 +640,7 @@ export class ClientEncryption {
       tlsOptions: this._tlsOptions
     });
 
-    const { v } = await stateMachine.executeAsync<{ v: T }>(this, context);
+    const { v } = await stateMachine.execute<{ v: T }>(this, context);
 
     return v;
   }
@@ -719,7 +719,7 @@ export class ClientEncryption {
     });
     const context = this._mongoCrypt.makeExplicitEncryptionContext(valueBuffer, contextOptions);
 
-    const result = await stateMachine.executeAsync<{ v: Binary }>(this, context);
+    const result = await stateMachine.execute<{ v: Binary }>(this, context);
     return result.v;
   }
 }

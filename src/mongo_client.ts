@@ -497,8 +497,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     };
 
     if (this.autoEncrypter) {
-      const initAutoEncrypter = promisify(callback => this.autoEncrypter?.init(callback));
-      await initAutoEncrypter();
+      await this.autoEncrypter?.init();
       await topologyConnect();
       await options.encrypter.connectInternalClient();
     } else {
@@ -559,7 +558,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         if (error) return reject(error);
         const { encrypter } = this[kOptions];
         if (encrypter) {
-          return encrypter.close(this, force, error => {
+          return encrypter.closeCallback(this, force, error => {
             if (error) return reject(error);
             resolve();
           });

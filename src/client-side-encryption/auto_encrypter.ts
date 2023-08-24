@@ -7,9 +7,9 @@ import {
 import { deserialize, type Document, serialize } from '../bson';
 import { type CommandOptions, type ProxyOptions } from '../cmap/connection';
 import { getMongoDBClientEncryption } from '../deps';
-import { type AnyError, MongoRuntimeError } from '../error';
+import { MongoRuntimeError } from '../error';
 import { MongoClient, type MongoClientOptions } from '../mongo_client';
-import { type Callback, MongoDBCollectionNamespace } from '../utils';
+import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
@@ -396,133 +396,66 @@ export class AutoEncrypter {
    *
    * This function is a no-op when bypassSpawn is set or the crypt shared library is used.
    */
-  init(callback: Callback<MongoClient>) {
+  async init(): Promise<MongoClient | void> {
     if (this._bypassMongocryptdAndCryptShared || this.cryptSharedLibVersionInfo) {
-      return callback();
+      return;
     }
     if (!this._mongocryptdManager) {
-      return callback(
-        new MongoRuntimeError(
-          'Reached impossible state: mongocryptdManager is undefined when neither bypassSpawn nor the shared lib are specified.'
-        )
+      throw new MongoRuntimeError(
+        'Reached impossible state: mongocryptdManager is undefined when neither bypassSpawn nor the shared lib are specified.'
       );
     }
     if (!this._mongocryptdClient) {
-      return callback(
-        new MongoRuntimeError(
-          'Reached impossible state: mongocryptdClient is undefined when neither bypassSpawn nor the shared lib are specified.'
-        )
+      throw new MongoRuntimeError(
+        'Reached impossible state: mongocryptdClient is undefined when neither bypassSpawn nor the shared lib are specified.'
       );
     }
-    const _callback = (err?: AnyError, res?: MongoClient) => {
-      if (
-        err &&
-        err.message &&
-        (err.message.match(/timed out after/) || err.message.match(/ENOTFOUND/))
-      ) {
-        callback(
-          new MongoRuntimeError(
-            'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
-            { cause: err }
-          )
-        );
-        return;
-      }
 
-      callback(err, res);
-    };
-
-    if (this._mongocryptdManager.bypassSpawn) {
-      this._mongocryptdClient.connect().then(
-        result => {
-          return _callback(undefined, result);
-        },
-        error => {
-          _callback(error, undefined);
-        }
-      );
-      return;
+    if (!this._mongocryptdManager.bypassSpawn) {
+      await this._mongocryptdManager.spawn();
     }
 
-    this._mongocryptdManager.spawn(() => {
-      if (!this._mongocryptdClient) {
-        return callback(
-          new MongoRuntimeError(
-            'Reached impossible state: mongocryptdClient is undefined after spawning libmongocrypt.'
-          )
+    try {
+      const client = await this._mongocryptdClient.connect();
+      return client;
+    } catch (error) {
+      const { message } = error;
+      if (message && (message.match(/timed out after/) || message.match(/ENOTFOUND/))) {
+        throw new MongoRuntimeError(
+          'Unable to connect to `mongocryptd`, please make sure it is running or in your PATH for auto-spawn',
+          { cause: error }
         );
       }
-      this._mongocryptdClient.connect().then(
-        result => {
-          return _callback(undefined, result);
-        },
-        error => {
-          _callback(error, undefined);
-        }
-      );
-    });
+      throw error;
+    }
   }
 
   /**
    * Cleans up the `_mongocryptdClient`, if present.
    */
-  teardown(force: boolean, callback: Callback<void>) {
-    if (this._mongocryptdClient) {
-      this._mongocryptdClient.close(force).then(
-        result => {
-          return callback(undefined, result);
-        },
-        error => {
-          callback(error);
-        }
-      );
-    } else {
-      callback();
-    }
+  async teardown(force: boolean): Promise<void> {
+    await this._mongocryptdClient?.close(force);
   }
 
-  encrypt(ns: string, cmd: Document, callback: Callback<Document | Uint8Array>): void;
-  encrypt(
-    ns: string,
-    cmd: Document,
-    options: CommandOptions,
-    callback: Callback<Document | Uint8Array>
-  ): void;
   /**
    * Encrypt a command for a given namespace.
    */
-  encrypt(
+  async encrypt(
     ns: string,
     cmd: Document,
-    options?: CommandOptions | Callback<Document | Uint8Array>,
-    callback?: Callback<Document | Uint8Array>
-  ) {
-    callback = typeof options === 'function' ? options : callback;
-
-    if (callback == null) {
-      throw new MongoCryptInvalidArgumentError('Callback must be provided');
-    }
-
-    options = typeof options === 'function' ? {} : options;
-
-    // If `bypassAutoEncryption` has been specified, don't encrypt
+    options: CommandOptions = {}
+  ): Promise<Document | Uint8Array> {
     if (this._bypassEncryption) {
-      callback(undefined, cmd);
-      return;
+      // If `bypassAutoEncryption` has been specified, don't encrypt
+      return cmd;
     }
 
     const commandBuffer = Buffer.isBuffer(cmd) ? cmd : serialize(cmd, options);
 
-    let context;
-    try {
-      context = this._mongocrypt.makeEncryptionContext(
-        MongoDBCollectionNamespace.fromString(ns).db,
-        commandBuffer
-      );
-    } catch (err) {
-      callback(err, undefined);
-      return;
-    }
+    const context = this._mongocrypt.makeEncryptionContext(
+      MongoDBCollectionNamespace.fromString(ns).db,
+      commandBuffer
+    );
 
     context.id = this._contextCounter++;
     context.ns = ns;
@@ -534,34 +467,16 @@ export class AutoEncrypter {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
-    stateMachine.execute<Document>(this, context, callback);
+    return stateMachine.execute<Document>(this, context);
   }
 
   /**
    * Decrypt a command response
    */
-  decrypt(
-    response: Uint8Array,
-    options: CommandOptions | Callback<Document>,
-    callback?: Callback<Document>
-  ) {
-    callback = typeof options === 'function' ? options : callback;
-
-    if (callback == null) {
-      throw new MongoCryptInvalidArgumentError('Callback must be provided');
-    }
-
-    options = typeof options === 'function' ? {} : options;
-
+  async decrypt(response: Uint8Array | Document, options: CommandOptions = {}): Promise<Document> {
     const buffer = Buffer.isBuffer(response) ? response : serialize(response, options);
 
-    let context;
-    try {
-      context = this._mongocrypt.makeDecryptionContext(buffer);
-    } catch (err) {
-      callback(err, undefined);
-      return;
-    }
+    const context = this._mongocrypt.makeDecryptionContext(buffer);
 
     context.id = this._contextCounter++;
 
@@ -572,16 +487,11 @@ export class AutoEncrypter {
     });
 
     const decorateResult = this[kDecorateResult];
-    stateMachine.execute(this, context, function (error?: Error, result?: Document) {
-      // Only for testing/internal usage
-      if (!error && result && decorateResult) {
-        const error = decorateDecryptionResult(result, response);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        if (error) return callback!(error);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      callback!(error, result);
-    });
+    const result = await stateMachine.execute<Document>(this, context);
+    if (decorateResult) {
+      decorateDecryptionResult(result, response);
+    }
+    return result;
   }
 
   /**
@@ -621,14 +531,14 @@ function decorateDecryptionResult(
   decrypted: Document & { [kDecoratedKeys]?: Array<string> },
   original: Document,
   isTopLevelDecorateCall = true
-): Error | void {
+): void {
   if (isTopLevelDecorateCall) {
     // The original value could have been either a JS object or a BSON buffer
     if (Buffer.isBuffer(original)) {
       original = deserialize(original);
     }
     if (Buffer.isBuffer(decrypted)) {
-      return new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
+      throw new MongoRuntimeError('Expected result of decryption to be deserialized BSON object');
     }
   }
 
@@ -647,10 +557,10 @@ function decorateDecryptionResult(
           writable: false
         });
       }
-      // this is defined in the preceeding if-statement
+      // this is defined in the preceding if-statement
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       decrypted[kDecoratedKeys]!.push(k);
-      // Do not recurse into this decrypted value. It could be a subdocument/array,
+      // Do not recurse into this decrypted value. It could be a sub-document/array,
       // in which case there is no original value associated with its subfields.
       continue;
     }

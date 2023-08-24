@@ -1,3 +1,5 @@
+import { callbackify } from 'util';
+
 import { AutoEncrypter, type AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import { MONGO_CLIENT_EVENTS } from './constants';
 import { getMongoDBClientEncryption } from './deps';
@@ -101,19 +103,19 @@ export class Encrypter {
     }
   }
 
-  close(client: MongoClient, force: boolean, callback: Callback): void {
-    // TODO(NODE-5422): add typescript support
-    this.autoEncrypter.teardown(!!force, (e: any) => {
-      const internalClient = this[kInternalClient];
-      if (internalClient != null && client !== internalClient) {
-        internalClient.close(force).then(
-          () => callback(),
-          error => callback(error)
-        );
-        return;
-      }
-      callback(e);
-    });
+  closeCallback(client: MongoClient, force: boolean, callback: Callback<void>) {
+    callbackify(this.close.bind(this))(client, force, callback);
+  }
+
+  async close(client: MongoClient, force: boolean): Promise<void> {
+    const maybeError: Error | void = await this.autoEncrypter.teardown(!!force).catch(e => e);
+    const internalClient = this[kInternalClient];
+    if (internalClient != null && client !== internalClient) {
+      return internalClient.close(force);
+    }
+    if (maybeError) {
+      throw maybeError;
+    }
   }
 
   static checkForMongoCrypt(): void {
