@@ -19,7 +19,7 @@ jobs:
     steps:
       - shell: bash
         run: |
-          ALPHA_SEMVER_REGEXP="-alpha(\.(0|[1-9][0-9]+))?$"
+          ALPHA_SEMVER_REGEXP="-alpha(\.([0-9]|[1-9][0-9]+))?$"
 
           if ! [[ "${{ inputs.alphaVersion }}" =~ $ALPHA_SEMVER_REGEXP ]]; then
             echo "Invalid alphaVersion string"
