@@ -94,7 +94,7 @@ const spot = {
   treats: ['kibble', 'bone'],
   playTimePercent: new Decimal128('0.999999'),
 
-  binary: new Binary('', 2),
+  binary: new Binary(Buffer.from('', 'utf8'), 2),
   code: new Code(() => true),
   minKey: new MinKey(),
   maxKey: new MaxKey(),
@@ -161,7 +161,7 @@ expectNotType<Filter<PetModel>>({ bestFriend: [spot] });
 expectNotType<Filter<PetModel>>({ bestFriend: [{ name: 'Andersons' }] });
 
 // it should permit all our BSON types as query values
-expectAssignable<Filter<PetModel>>({ binary: new Binary('', 2) });
+expectAssignable<Filter<PetModel>>({ binary: new Binary(Buffer.from('abc', 'utf8'), 2) });
 expectAssignable<Filter<PetModel>>({ code: new Code(() => true) });
 expectAssignable<Filter<PetModel>>({ minKey: new MinKey() });
 expectAssignable<Filter<PetModel>>({ maxKey: new MaxKey() });

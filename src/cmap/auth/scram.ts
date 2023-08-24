@@ -138,10 +138,11 @@ async function continueScramConversation(
   const processedPassword =
     cryptoMethod === 'sha256' ? saslprep(password) : passwordDigest(username, password);
 
-  const payload = Buffer.isBuffer(response.payload)
+  const payload: Binary = Buffer.isBuffer(response.payload)
     ? new Binary(response.payload)
     : response.payload;
-  const dict = parsePayload(payload.value());
+
+  const dict = parsePayload(payload);
 
   const iterations = parseInt(dict.i, 10);
   if (iterations && iterations < 4096) {
@@ -168,9 +169,11 @@ async function continueScramConversation(
   const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
   const serverKey = HMAC(cryptoMethod, saltedPassword, 'Server Key');
   const storedKey = H(cryptoMethod, clientKey);
-  const authMessage = [clientFirstMessageBare(username, nonce), payload.value(), withoutProof].join(
-    ','
-  );
+  const authMessage = [
+    clientFirstMessageBare(username, nonce),
+    payload.toString('utf8'),
+    withoutProof
+  ].join(',');
 
   const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
   const clientProof = `p=${xor(clientKey, clientSignature)}`;
@@ -184,7 +187,7 @@ async function continueScramConversation(
   };
 
   const r = await connection.commandAsync(ns(`${db}.$cmd`), saslContinueCmd, undefined);
-  const parsedResponse = parsePayload(r.payload.value());
+  const parsedResponse = parsePayload(r.payload);
 
   if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
     throw new MongoRuntimeError('Server returned an invalid signature');
@@ -204,14 +207,14 @@ async function continueScramConversation(
   await connection.commandAsync(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
 }
 
-function parsePayload(payload: string) {
+function parsePayload(payload: Binary) {
+  const payloadStr = payload.toString('utf8');
   const dict: Document = {};
-  const parts = payload.split(',');
+  const parts = payloadStr.split(',');
   for (let i = 0; i < parts.length; i++) {
     const valueParts = parts[i].split('=');
     dict[valueParts[0]] = valueParts[1];
   }
-
   return dict;
 }
 

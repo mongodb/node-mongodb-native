@@ -122,7 +122,7 @@ class ReplSetFixture {
 function genClusterTime(time) {
   return {
     clusterTime: new BSON.Timestamp(BSON.Long.fromNumber(time, true)),
-    signature: { hash: new BSON.Binary('test'), keyId: new BSON.Long(1) }
+    signature: { hash: new BSON.Binary(Buffer.from('test', 'utf8')), keyId: new BSON.Long(1) }
   };
 }
 
