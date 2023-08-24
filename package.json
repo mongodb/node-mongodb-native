@@ -25,9 +25,9 @@
     "email": "dbx-node@mongodb.com"
   },
   "dependencies": {
-    "bson": "^5.4.0",
-    "mongodb-connection-string-url": "^2.6.0",
-    "@mongodb-js/saslprep": "^1.1.0"
+    "@mongodb-js/saslprep": "^1.1.0",
+    "bson": "^6.0.0-alpha.1",
+    "mongodb-connection-string-url": "^2.6.0"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.188.0",
@@ -97,7 +97,7 @@
     "mocha": "^10.2.0",
     "mocha-sinon": "^2.1.2",
     "mongodb-client-encryption": "6.0.0-alpha.3",
-    "mongodb-legacy": "^5.0.0",
+    "mongodb-legacy": "github:mongodb-js/nodejs-mongodb-legacy#main",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",
     "semver": "^7.5.0",
