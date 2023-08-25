@@ -163,8 +163,9 @@ describe('MONGODB-AWS', function () {
         let credentialProvider;
         let storedEnv;
         let calledArguments;
+        let shouldSkip = false;
 
-        const shouldSkip = () => {
+        const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
           credentialProvider = (() => {
             try {
@@ -177,7 +178,8 @@ describe('MONGODB-AWS', function () {
         };
 
         beforeEach(function () {
-          if (shouldSkip()) {
+          shouldSkip = envCheck();
+          if (shouldSkip) {
             this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
             return this.skip();
           }
@@ -206,7 +208,7 @@ describe('MONGODB-AWS', function () {
         });
 
         afterEach(() => {
-          if (shouldSkip()) {
+          if (shouldSkip) {
             return;
           }
           if (typeof storedEnv.AWS_STS_REGIONAL_ENDPOINTS === 'string') {
