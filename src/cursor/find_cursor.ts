@@ -1,4 +1,4 @@
-import type { Document } from '../bson';
+import { type Document, Long } from '../bson';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
 import type { ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
@@ -101,7 +101,9 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        this.close().finally(() => callback());
+        this.close().finally(() =>
+          callback(undefined, { cursor: { id: Long.ZERO, nextBatch: [] } })
+        );
         return;
       }
     }

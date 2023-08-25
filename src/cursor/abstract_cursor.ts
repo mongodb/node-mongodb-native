@@ -221,6 +221,11 @@ export abstract class AbstractCursor<
   }
 
   /** @internal */
+  get isDead() {
+    return (this[kId]?.isZero() ?? false) || this[kClosed] || this[kKilled];
+  }
+
+  /** @internal */
   get client(): MongoClient {
     return this[kClient];
   }
@@ -671,7 +676,7 @@ export abstract class AbstractCursor<
         return cleanupCursor(this, { error }, () => callback(error, undefined));
       }
 
-      if (cursorIsDead(this)) {
+      if (this.isDead) {
         return cleanupCursor(this, undefined, () => callback());
       }
 
@@ -701,96 +706,82 @@ async function next<T>(
     transform: boolean;
   }
 ): Promise<T | null> {
-  const cursorId = cursor[kId];
   if (cursor.closed) {
     return null;
   }
 
-  if (cursor[kDocuments].length !== 0) {
-    const doc = cursor[kDocuments].shift();
+  do {
+    if (cursor[kId] == null) {
+      // All cursors must operate within a session, one must be made implicitly if not explicitly provided
+      await promisify(cursor[kInit].bind(cursor))();
+    }
 
-    if (doc != null && transform && cursor[kTransform]) {
-      try {
-        return cursor[kTransform](doc);
-      } catch (error) {
-        await cleanupCursorAsync(cursor, { error, needsToEmitClosed: true }).catch(() => {
+    if (cursor[kDocuments].length !== 0) {
+      const doc = cursor[kDocuments].shift();
+
+      if (doc != null && transform && cursor[kTransform]) {
+        try {
+          return cursor[kTransform](doc);
+        } catch (error) {
           // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
           // error instead.
-        });
-        throw error;
+          await cleanupCursorAsync(cursor, { error, needsToEmitClosed: true }).catch(() => null);
+          throw error;
+        }
       }
+
+      return doc;
     }
 
-    return doc;
-  }
+    if (cursor.isDead) {
+      // if the cursor is dead, we clean it up
+      // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
+      // and we should surface the error
+      await cleanupCursorAsync(cursor, {});
+      return null;
+    }
 
-  if (cursorId == null) {
-    // All cursors must operate within a session, one must be made implicitly if not explicitly provided
-    const init = promisify(cb => cursor[kInit](cb));
-    await init();
-    return next(cursor, { blocking, transform });
-  }
+    // otherwise need to call getMore
+    const batchSize = cursor[kOptions].batchSize || 1000;
 
-  if (cursorIsDead(cursor)) {
-    // if the cursor is dead, we clean it up
-    // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
-    // and we should surface the error
-    await cleanupCursorAsync(cursor, {});
-    return null;
-  }
+    try {
+      const response = await promisify(cursor._getMore.bind(cursor))(batchSize);
 
-  // otherwise need to call getMore
-  const batchSize = cursor[kOptions].batchSize || 1000;
-  const getMore = promisify((batchSize: number, cb: Callback<Document | undefined>) =>
-    cursor._getMore(batchSize, cb)
-  );
+      if (response) {
+        const cursorId =
+          typeof response.cursor.id === 'number'
+            ? Long.fromNumber(response.cursor.id)
+            : typeof response.cursor.id === 'bigint'
+            ? Long.fromBigInt(response.cursor.id)
+            : response.cursor.id;
 
-  let response: Document | undefined;
-  try {
-    response = await getMore(batchSize);
-  } catch (error) {
-    if (error) {
-      await cleanupCursorAsync(cursor, { error }).catch(() => {
-        // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
-        // error instead.
-      });
+        cursor[kDocuments].pushMany(response.cursor.nextBatch);
+        cursor[kId] = cursorId;
+      }
+    } catch (error) {
+      // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
+      // error instead.
+      await cleanupCursorAsync(cursor, { error }).catch(() => null);
       throw error;
     }
-  }
 
-  if (response) {
-    const cursorId =
-      typeof response.cursor.id === 'number'
-        ? Long.fromNumber(response.cursor.id)
-        : typeof response.cursor.id === 'bigint'
-        ? Long.fromBigInt(response.cursor.id)
-        : response.cursor.id;
+    if (cursor.isDead) {
+      // If we successfully received a response from a cursor BUT the cursor indicates that it is exhausted,
+      // we intentionally clean up the cursor to release its session back into the pool before the cursor
+      // is iterated.  This prevents a cursor that is exhausted on the server from holding
+      // onto a session indefinitely until the AbstractCursor is iterated.
+      //
+      // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
+      // and we should surface the error
+      await cleanupCursorAsync(cursor, {});
+    }
 
-    cursor[kDocuments].pushMany(response.cursor.nextBatch);
-    cursor[kId] = cursorId;
-  }
+    if (cursor[kDocuments].length === 0 && blocking === false) {
+      return null;
+    }
+  } while (!cursor.isDead || cursor[kDocuments].length !== 0);
 
-  if (cursorIsDead(cursor)) {
-    // If we successfully received a response from a cursor BUT the cursor indicates that it is exhausted,
-    // we intentionally clean up the cursor to release its session back into the pool before the cursor
-    // is iterated.  This prevents a cursor that is exhausted on the server from holding
-    // onto a session indefinitely until the AbstractCursor is iterated.
-    //
-    // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
-    // and we should surface the error
-    await cleanupCursorAsync(cursor, {});
-  }
-
-  if (cursor[kDocuments].length === 0 && blocking === false) {
-    return null;
-  }
-
-  return next(cursor, { blocking, transform });
-}
-
-function cursorIsDead(cursor: AbstractCursor): boolean {
-  const cursorId = cursor[kId];
-  return !!cursorId && cursorId.isZero();
+  return null;
 }
 
 const cleanupCursorAsync = promisify(cleanupCursor);
