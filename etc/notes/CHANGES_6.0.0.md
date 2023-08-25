@@ -52,7 +52,7 @@ The minimum supported Node.js version is now v16.20.1. We strive to keep our min
 
 ### BSON version 6.0.0
 
-This driver version has been updated to use `bson@6.0.0`. BSON functionality re-exported from the driver is subject to the changes outlined in the [BSON V6 release notes](TODO).
+This driver version has been updated to use `bson@6.0.0`. BSON functionality re-exported from the driver is subject to the changes outlined in the [BSON V6 release notes](https://github.com/mongodb/js-bson/releases/tag/v6.0.0).
 
 ### Optional peer dependency version bumps
 
