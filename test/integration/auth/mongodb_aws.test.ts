@@ -98,7 +98,7 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: undefined,
           AWS_REGION: undefined
         },
-        outcome: null
+        calledWith: []
       },
       {
         ctx: 'when only AWS_STS_REGIONAL_ENDPOINTS is set',
@@ -107,7 +107,7 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: 'regional',
           AWS_REGION: undefined
         },
-        outcome: null
+        calledWith: []
       },
       {
         ctx: 'when only AWS_REGION is set',
@@ -116,7 +116,7 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: undefined,
           AWS_REGION: 'us-west-2'
         },
-        outcome: null
+        calledWith: []
       },
 
       {
@@ -126,7 +126,7 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: 'regional',
           AWS_REGION: 'us-west-2'
         },
-        outcome: 'us-west-2'
+        calledWith: [{ clientConfig: { region: 'us-west-2' } }]
       },
       {
         ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to regional and region is new',
@@ -135,7 +135,7 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: 'regional',
           AWS_REGION: 'sa-east-1'
         },
-        outcome: 'sa-east-1'
+        calledWith: [{ clientConfig: { region: 'sa-east-1' } }]
       },
 
       {
@@ -145,16 +145,16 @@ describe('MONGODB-AWS', function () {
           AWS_STS_REGIONAL_ENDPOINTS: 'legacy',
           AWS_REGION: 'us-west-2'
         },
-        outcome: null
+        calledWith: []
       },
       {
         ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to legacy and region is new',
-        title: 'uses the region from the environment',
+        title: 'uses the default region',
         env: {
           AWS_STS_REGIONAL_ENDPOINTS: 'legacy',
           AWS_REGION: 'sa-east-1'
         },
-        outcome: null
+        calledWith: []
       }
     ];
 
@@ -229,11 +229,7 @@ describe('MONGODB-AWS', function () {
           expect(result).to.not.be.instanceOf(MongoServerError);
           expect(result).to.be.a('number');
 
-          if (test.outcome != null) {
-            expect(calledArguments).to.deep.equal([{ clientConfig: { region: test.outcome } }]);
-          } else {
-            expect(calledArguments).to.deep.equal([]);
-          }
+          expect(calledArguments).to.deep.equal(test.calledWith);
         });
       });
     }
