@@ -157,7 +157,7 @@ This change will ensure that connection strings that contain options like `tls=t
 
 ### TLS certificate authority and certificate-key files are now read asynchronously
 
-In order to align with Node.js best practices of keeping I/O async, we have updated the `MongoClient` to store the file names provided to the existing `tlsCAFile` and `tlsCertificateKeyFile` options and only read these files the first time it connects. Prior to this change, the files were read synchronously on `MongoClient` construction.
+In order to align with Node.js best practices of keeping I/O async, we have updated the `MongoClient` to store the file names provided to the existing `tlsCAFile` and `tlsCertificateKeyFile` options, as well as the `tlsCRLFile` option, and only read these files the first time it connects. Prior to this change, the files were read synchronously on `MongoClient` construction.
 
 > [!NOTE]
 > This has no effect on driver functionality when TLS configuration files are properly specified. However, if there are any issues with the TLS configuration files (invalid file name), the error is now thrown when the `MongoClient` is connected instead of at construction time.
@@ -166,7 +166,8 @@ In order to align with Node.js best practices of keeping I/O async, we have upda
 const client = new MongoClient(CONNECTION_STRING, {
   tls: true,
   tlsCAFile: 'caFileName',
-  tlsCertificateKeyFile: 'certKeyFile'
+  tlsCertificateKeyFile: 'certKeyFile',
+  tlsCRLFile: 'crlPemFile'
 }); // Files are not read here, but file names are stored on the MongoClient
 
 await client.connect(); // Files are now read and their contents stored
@@ -175,7 +176,7 @@ await client.close();
 await client.connect(); // Since the file contents have already been cached, the files will not be read again.
 ```
 
-Take a look at our [TLS documentation](https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/tls/) for more information on the `tlsCAFile` and `tlsCertificateKeyFile` options.
+Take a look at our [TLS documentation](https://www.mongodb.com/docs/drivers/node/current/fundamentals/connection/tls/) for more information on the `tlsCAFile`, `tlsCertificateKeyFile`, and `tlsCRLFile` options.
 
 ## 🐛 Bug fixes
 
