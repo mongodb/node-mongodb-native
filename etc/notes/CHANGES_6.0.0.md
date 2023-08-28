@@ -2,8 +2,12 @@
 
 ## About
 
-The following is a detailed collection of the breaking changes in the major v6 release of the `mongodb` package for Node.js.
+The following is a detailed collection of the changes in the major v6 release of the `mongodb` package for Node.js.
 The main focus of this release was usability improvements and a streamlined API. Read on for details!
+
+> [!IMPORTANT]
+> This is a list of changes relative to v5.8.1 of the driver. ALL changes listed below are BREAKING.
+> Users migrating from an older version of the driver are advised to
 
 ## Contents
 
