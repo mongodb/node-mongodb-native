@@ -41,7 +41,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [`BulkWriteResult` deprecated properties removed](#bulkwriteresult-deprecated-properties-removed)
   - [Deprecated SSL options have been removed](#deprecated-ssl-options-have-been-removed)
   - [The deprecated `keepAlive` and `keepAliveInitialDelay` options have been removed](#the-deprecated-keepalive-and-keepaliveinitialdelay-options-have-been-removed)
-- [🗑️ Removal of "dead" code](#-removal-of-dead-code)
+- [🗑️ Removal of "dead" code](#%EF%B8%8F-removal-of-dead-code)
   - [Constructors for `MongoError` and its subclasses now clearly indicate they are meant for internal use only](#constructors-for-mongoerror-and-its-subclasses-now-clearly-indicate-they-are-meant-for-internal-use-only)
   - [`AutoEncrypter` and `MongoClient.autoEncrypter` are now internal](#autoencrypter-and-mongoclientautoencrypter-are-now-internal)
   - [`ClientEncryption.onKMSProvidersRefresh` function removed](#clientencryptiononkmsprovidersrefresh-function-removed)
