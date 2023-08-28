@@ -328,6 +328,7 @@ This cleans up some dead code in the sense that there were no `eval` command rel
 
 ## ⚠️ ALL BREAKING CHANGES
 
+- **NODE-5584:** adopt bson v6 and mongodb-client-encryption v6 ([#3845](https://github.com/mongodb/node-mongodb-native/issues/3845))
 - **NODE-5484:** mark MongoError for internal use and remove Node14 cause assignment logic ([#3800](https://github.com/mongodb/node-mongodb-native/issues/3800))
 - **NODE-4788:** use implementer Writable methods for GridFSBucketWriteStream ([#3808](https://github.com/mongodb/node-mongodb-native/issues/3808))
 - **NODE-4986:** remove callbacks from ClientEncryption encrypt, decrypt, and createDataKey ([#3797](https://github.com/mongodb/node-mongodb-native/issues/3797))
