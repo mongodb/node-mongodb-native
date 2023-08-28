@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@mongodb-js/saslprep": "^1.1.0",
-    "bson": "^6.0.0-alpha.1",
+    "bson": "^6.0.0",
     "mongodb-connection-string-url": "^2.6.0"
   },
   "peerDependencies": {
@@ -34,7 +34,7 @@
     "@mongodb-js/zstd": "^1.1.0",
     "gcp-metadata": "^5.2.0",
     "kerberos": "^2.0.1",
-    "mongodb-client-encryption": ">=6.0.0-alpha.3 <7",
+    "mongodb-client-encryption": ">=6.0.0 <7",
     "snappy": "^7.2.2",
     "socks": "^2.7.1"
   },
@@ -96,7 +96,7 @@
     "js-yaml": "^4.1.0",
     "mocha": "^10.2.0",
     "mocha-sinon": "^2.1.2",
-    "mongodb-client-encryption": "6.0.0-alpha.3",
+    "mongodb-client-encryption": "^6.0.0",
     "mongodb-legacy": "github:mongodb-js/nodejs-mongodb-legacy#main",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",

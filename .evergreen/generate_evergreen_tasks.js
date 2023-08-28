@@ -698,7 +698,7 @@ oneOffFuncAsTasks.push({
     {
       func: 'install package',
       vars: {
-        PACKAGE: 'mongodb-client-encryption@6.0.0-alpha.3'
+        PACKAGE: 'mongodb-client-encryption'
       }
     },
     {

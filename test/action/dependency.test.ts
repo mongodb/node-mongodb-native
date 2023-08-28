@@ -91,10 +91,6 @@ describe('package.json', function () {
 
       context(`when ${depName} is installed`, () => {
         beforeEach(async function () {
-          if (depName === 'mongodb-client-encryption') {
-            execSync(`npm install --no-save "${depName}"@alpha`);
-            return;
-          }
           execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
         });
 
