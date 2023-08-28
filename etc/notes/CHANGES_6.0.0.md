@@ -7,7 +7,7 @@ The main focus of this release was usability improvements and a streamlined API.
 
 > [!IMPORTANT]
 > This is a list of changes relative to v5.8.1 of the driver. ALL changes listed below are BREAKING.
-> Users migrating from an older version of the driver are advised to
+> Users migrating from an older version of the driver are advised to upgrade to at least v5.8.1 before adopting v6.
 
 ## Contents
 
