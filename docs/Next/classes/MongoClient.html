@@ -31,7 +31,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">MongoClient</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L310">src/mongo_client.ts:310</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L312">src/mongo_client.ts:312</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -83,7 +83,6 @@
 <a href="MongoClient.html#withSession" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Session</span></a>
 <a href="MongoClient.html#connect-2" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>connect</span></a>
 <a href="MongoClient.html#getEventListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a>
-<a href="MongoClient.html#getMaxListeners-2" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a>
 <a href="MongoClient.html#listenerCount-2" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a>
 <a href="MongoClient.html#on-4" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>on</span></a>
 <a href="MongoClient.html#once-4" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>once</span></a>
@@ -106,77 +105,44 @@
 <h4 class="tsd-returns-title">Returns <a href="MongoClient.html" class="tsd-signature-type tsd-kind-class">MongoClient</a></h4><aside class="tsd-sources">
 <p>Overrides <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L326">src/mongo_client.ts:326</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L328">src/mongo_client.ts:328</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejectionSymbol" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>capture<wbr/>Rejection<wbr/>Symbol</span><a href="#captureRejectionSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div>
-<div class="tsd-comment tsd-typography"><p>Value: <code>Symbol.for(&#39;nodejs.rejection&#39;)</code></p>
-<p>See how to write a custom <code>rejection handler</code>.</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Since</h4><p>v13.4.0, v12.16.0</p>
-</div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#captureRejectionSymbol">captureRejectionSymbol</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:355</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:322</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejections" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>capture<wbr/>Rejections</span><a href="#captureRejections" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejections</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a></p>
-<p>Change the default <code>captureRejections</code> option on all new <code>EventEmitter</code> objects.</p>
+<div class="tsd-comment tsd-typography"><p>Sets or gets the default captureRejection value for all emitters.</p>
 </div>
-<div class="tsd-comment tsd-typography">
-<h4>Since</h4><p>v13.4.0, v12.16.0</p>
-</div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#captureRejections">captureRejections</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:362</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:327</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="defaultMaxListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>default<wbr/>Max<wbr/>Listeners</span><a href="#defaultMaxListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-<div class="tsd-comment tsd-typography"><p>By default, a maximum of <code>10</code> listeners can be registered for any single
-event. This limit can be changed for individual <code>EventEmitter</code> instances
-using the <code>emitter.setMaxListeners(n)</code> method. To change the default
-for <em>all</em><code>EventEmitter</code> instances, the <code>events.defaultMaxListeners</code>property can be used. If this value is not a positive number, a <code>RangeError</code>is thrown.</p>
-<p>Take caution when setting the <code>events.defaultMaxListeners</code> because the
-change affects <em>all</em><code>EventEmitter</code> instances, including those created before
-the change is made. However, calling <code>emitter.setMaxListeners(n)</code> still has
-precedence over <code>events.defaultMaxListeners</code>.</p>
-<p>This is not a hard limit. The <code>EventEmitter</code> instance will allow
-more listeners to be added but will output a trace warning to stderr indicating
-that a &quot;possible EventEmitter memory leak&quot; has been detected. For any single<code>EventEmitter</code>, the <code>emitter.getMaxListeners()</code> and <code>emitter.setMaxListeners()</code>methods can be used to
-temporarily avoid this warning:</p>
-<pre><code class="language-js"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">EventEmitter</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;node:events&#39;</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">emitter</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventEmitter</span><span class="hl-1">();</span><br/><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">getMaxListeners</span><span class="hl-1">() + </span><span class="hl-8">1</span><span class="hl-1">);</span><br/><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">once</span><span class="hl-1">(</span><span class="hl-2">&#39;event&#39;</span><span class="hl-1">, () </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-3">// do stuff</span><br/><span class="hl-1">  </span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-6">Math</span><span class="hl-1">.</span><span class="hl-0">max</span><span class="hl-1">(</span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">getMaxListeners</span><span class="hl-1">() - </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-8">0</span><span class="hl-1">));</span><br/><span class="hl-1">});</span>
-</code><button>Copy</button></pre>
-<p>The <code>--trace-warnings</code> command-line flag can be used to display the
-stack trace for such warnings.</p>
-<p>The emitted warning can be inspected with <code>process.on(&#39;warning&#39;)</code> and will
-have the additional <code>emitter</code>, <code>type</code>, and <code>count</code> properties, referring to
-the event emitter instance, the event&#39;s name and the number of attached
-listeners, respectively.
-Its <code>name</code> property is set to <code>&#39;MaxListenersExceededWarning&#39;</code>.</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Since</h4><p>v0.11.2</p>
-</div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#defaultMaxListeners">defaultMaxListeners</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:399</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:328</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="errorMonitor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>error<wbr/>Monitor</span><a href="#errorMonitor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">error<wbr/>Monitor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">errorMonitor</span></div>
-<div class="tsd-comment tsd-typography"><p>This symbol shall be used to install a listener for only monitoring <code>&#39;error&#39;</code>events. Listeners installed using this symbol are called before the regular<code>&#39;error&#39;</code> listeners are called.</p>
-<p>Installing a listener using this symbol does not change the behavior once an<code>&#39;error&#39;</code> event is emitted. Therefore, the process will still crash if no
+<div class="tsd-comment tsd-typography"><p>This symbol shall be used to install a listener for only monitoring <code>&#39;error&#39;</code>
+events. Listeners installed using this symbol are called before the regular
+<code>&#39;error&#39;</code> listeners are called.</p>
+<p>Installing a listener using this symbol does not change the behavior once an
+<code>&#39;error&#39;</code> event is emitted, therefore the process will still crash if no
 regular <code>&#39;error&#39;</code> listener is installed.</p>
 </div>
-<div class="tsd-comment tsd-typography">
-<h4>Since</h4><p>v13.6.0, v12.17.0</p>
-</div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#errorMonitor">errorMonitor</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:348</li></ul></aside></section></section>
+<li>Defined in node_modules/@types/node/events.d.ts:321</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member"><a id="bsonOptions" class="tsd-anchor"></a>
@@ -186,7 +152,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/BSONSerializeOptions.html" class="tsd-signature-type tsd-kind-interface">BSONSerializeOptions</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L398">src/mongo_client.ts:398</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L400">src/mongo_client.ts:400</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="monitorCommands" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>monitor<wbr/>Commands</span><a href="#monitorCommands" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -199,7 +165,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h5><span class="tsd-kind-parameter">value</span>: <span class="tsd-signature-type">boolean</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L377">src/mongo_client.ts:377</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L379">src/mongo_client.ts:379</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="options" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>options</span><a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -210,7 +176,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4>See</h4><p>MongoOptions</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L363">src/mongo_client.ts:363</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L365">src/mongo_client.ts:365</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="readConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Concern</span><a href="#readConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -218,7 +184,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="ReadConcern.html" class="tsd-signature-type tsd-kind-class">ReadConcern</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L386">src/mongo_client.ts:386</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L388">src/mongo_client.ts:388</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="readPreference" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Preference</span><a href="#readPreference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -226,7 +192,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="ReadPreference.html" class="tsd-signature-type tsd-kind-class">ReadPreference</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L394">src/mongo_client.ts:394</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L396">src/mongo_client.ts:396</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="serverApi" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>server<wbr/>Api</span><a href="#serverApi" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -234,7 +200,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Readonly</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/ServerApi.html" class="tsd-signature-type tsd-kind-interface">ServerApi</a><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L367">src/mongo_client.ts:367</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L369">src/mongo_client.ts:369</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="writeConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>write<wbr/>Concern</span><a href="#writeConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -242,7 +208,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L390">src/mongo_client.ts:390</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L392">src/mongo_client.ts:392</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addListener" class="tsd-anchor"></a>
@@ -323,7 +289,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L507">src/mongo_client.ts:507</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L515">src/mongo_client.ts:515</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="connect" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>connect</span><a href="#connect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -336,7 +302,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4>See</h4><p>docs.mongodb.org/manual/reference/connection-string/</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L407">src/mongo_client.ts:407</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L409">src/mongo_client.ts:409</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="db" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>db</span><a href="#db" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -360,7 +326,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="Db.html" class="tsd-signature-type tsd-kind-class">Db</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L569">src/mongo_client.ts:569</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L577">src/mongo_client.ts:577</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="emit" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>emit</span><a href="#emit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -869,7 +835,7 @@ a corresponding ServerSession will be created.</p>
 MongoClient it was started from.</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L608">src/mongo_client.ts:608</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L616">src/mongo_client.ts:616</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="watch" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>watch</span><a href="#watch" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -914,7 +880,7 @@ changes to system collections, as well as the local, admin, and config databases
 </ul>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L680">src/mongo_client.ts:680</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L688">src/mongo_client.ts:688</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="withSession" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>with<wbr/>Session</span><a href="#withSession" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -939,7 +905,7 @@ The session will always be ended when the executor finishes.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L629">src/mongo_client.ts:629</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L637">src/mongo_client.ts:637</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="withSession.withSession-2"><span class="tsd-kind-call-signature">with<wbr/>Session</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">options</span>, <span class="tsd-kind-parameter">executor</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span><a href="#withSession.withSession-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <section class="tsd-panel">
@@ -956,7 +922,7 @@ The session will always be ended when the executor finishes.</p>
 <h5><span class="tsd-kind-parameter">executor</span>: <a href="../types/WithSessionCallback.html" class="tsd-signature-type tsd-kind-type-alias">WithSessionCallback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type tsd-kind-type-parameter">T</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L630">src/mongo_client.ts:630</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L638">src/mongo_client.ts:638</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="connect-2" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>connect</span><a href="#connect-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -978,7 +944,7 @@ The session will always be ended when the executor finishes.</p>
 <h4>See</h4><p><a href="https://www.mongodb.com/docs/manual/reference/connection-string/">https://www.mongodb.com/docs/manual/reference/connection-string/</a></p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L595">src/mongo_client.ts:595</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_client.ts#L603">src/mongo_client.ts:603</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="getEventListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Event<wbr/>Listeners</span><a href="#getEventListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1006,32 +972,6 @@ event target. This is useful for debugging and diagnostic purposes.</p>
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#getEventListeners">getEventListeners</a></p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:296</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="getMaxListeners-2" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Max<wbr/>Listeners</span><a href="#getMaxListeners-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="getMaxListeners-2.getMaxListeners-3"><span class="tsd-kind-call-signature">get<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">emitter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getMaxListeners-2.getMaxListeners-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Returns the currently set max amount of listeners.</p>
-<p>For <code>EventEmitter</code>s this behaves exactly the same as calling <code>.getMaxListeners</code> on
-the emitter.</p>
-<p>For <code>EventTarget</code>s this is the only way to get the max event listeners for the
-event target. If the number of event handlers on a single EventTarget exceeds
-the max set, the EventTarget will print a warning.</p>
-<pre><code class="language-js"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">getMaxListeners</span><span class="hl-1">, </span><span class="hl-6">setMaxListeners</span><span class="hl-1">, </span><span class="hl-6">EventEmitter</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;node:events&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-1">{</span><br/><span class="hl-1">  </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">ee</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventEmitter</span><span class="hl-1">();</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">ee</span><span class="hl-1">)); </span><span class="hl-3">// 10</span><br/><span class="hl-1">  </span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-8">11</span><span class="hl-1">, </span><span class="hl-6">ee</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">ee</span><span class="hl-1">)); </span><span class="hl-3">// 11</span><br/><span class="hl-1">}</span><br/><span class="hl-1">{</span><br/><span class="hl-1">  </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">et</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventTarget</span><span class="hl-1">();</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">et</span><span class="hl-1">)); </span><span class="hl-3">// 10</span><br/><span class="hl-1">  </span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-8">11</span><span class="hl-1">, </span><span class="hl-6">et</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">et</span><span class="hl-1">)); </span><span class="hl-3">// 11</span><br/><span class="hl-1">}</span>
-</code><button>Copy</button></pre>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">emitter</span>: <span class="tsd-signature-type ">EventEmitter</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">_DOMEventTarget</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
-<div class="tsd-comment tsd-typography">
-<h4>Since</h4><p>v19.9.0</p>
-</div><aside class="tsd-sources">
-<p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#getMaxListeners-2">getMaxListeners</a></p>
-<ul>
-<li>Defined in node_modules/@types/node/events.d.ts:325</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="listenerCount-2" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>listener<wbr/>Count</span><a href="#listenerCount-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1175,7 +1115,7 @@ special handling:</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="TypedEventEmitter.html">TypedEventEmitter</a>.<a href="TypedEventEmitter.html#setMaxListeners-2">setMaxListeners</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:340</li></ul></aside></li></ul></section></section></div>
+<li>Defined in node_modules/@types/node/events.d.ts:311</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -1230,7 +1170,6 @@ special handling:</p>
 <li><a href="#withSession" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Session</span></a></li>
 <li><a href="#connect-2" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>connect</span></a></li>
 <li><a href="#getEventListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a></li>
-<li><a href="#getMaxListeners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#listenerCount-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a></li>
 <li><a href="#on-4" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>on</span></a></li>
 <li><a href="#once-4" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>once</span></a></li>

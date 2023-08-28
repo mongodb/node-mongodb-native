@@ -81,16 +81,12 @@
 <li class="tsd-signature tsd-anchor-link" id="constructor.new_Binary"><span class="tsd-kind-constructor-signature">new <wbr/>Binary</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">buffer</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">subType</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.Binary.html" class="tsd-signature-type tsd-kind-class">Binary</a><a href="#constructor.new_Binary" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Create a new Binary instance.</p>
-<p>This constructor can accept a string as its first argument. In this case,
-this string will be encoded using ISO-8859-1, <strong>not</strong> using UTF-8.
-This is almost certainly not what you want. Use <code>new Binary(Buffer.from(string))</code>
-instead to convert the string to a Buffer using UTF-8 first.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">buffer</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">buffer</span>: <a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h5>
 <div class="tsd-comment tsd-typography"><p>a buffer object containing the binary data.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
@@ -103,7 +99,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:43</li></ul></aside></li></ul></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:37</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="buffer" class="tsd-anchor"></a>
@@ -226,7 +222,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#inspect">inspect</a></p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:82</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:71</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="length" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>length</span><a href="#length" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -237,7 +233,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:72</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:61</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="put" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>put</span><a href="#put" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -256,7 +252,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:49</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:43</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="read" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read</span><a href="#read" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -280,7 +276,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:63</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:57</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toJSON" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toJSON</span><a href="#toJSON" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -288,7 +284,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:73</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:62</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -301,7 +297,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type">&quot;utf8&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;utf-8&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;base64&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;hex&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:74</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:63</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toUUID" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toUUID</span><a href="#toUUID" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -309,40 +305,30 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="BSON.UUID.html" class="tsd-signature-type tsd-kind-class">UUID</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:76</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:65</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="value" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>value</span><a href="#value" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="value.value-1"><span class="tsd-kind-call-signature">value</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">asRaw</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a><a href="#value.value-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="value.value-1"><span class="tsd-kind-call-signature">value</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Uint8Array</span><a href="#value.value-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Returns the value of this binary as a string.</p>
+<div class="tsd-comment tsd-typography"><p>returns a view of the binary value as a Uint8Array</p>
 </div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">asRaw</span>: <span class="tsd-signature-type">boolean</span></h5>
-<div class="tsd-comment tsd-typography"><p>Will skip converting to a string</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h4>
-<div class="tsd-comment tsd-typography">
-<h4>Remarks</h4><p>This is handy when calling this function conditionally for some key value pairs and not others</p>
-</div><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Uint8Array</span></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:70</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:59</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="write" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>write</span><a href="#write" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
 <li class="tsd-signature tsd-anchor-link" id="write.write-1"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">sequence</span>, <span class="tsd-kind-parameter">offset</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#write.write-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Writes a buffer or string to the binary.</p>
+<div class="tsd-comment tsd-typography"><p>Writes a buffer to the binary.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">sequence</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h5>
+<h5><span class="tsd-kind-parameter">sequence</span>: <a href="../types/BSON.BinarySequence.html" class="tsd-signature-type tsd-kind-type-alias">BinarySequence</a></h5>
 <div class="tsd-comment tsd-typography"><p>a string or buffer to be written to the Binary BSON object.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
@@ -354,7 +340,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:56</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:50</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="createFromBase64" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>create<wbr/>From<wbr/>Base64</span><a href="#createFromBase64" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -372,7 +358,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <a href="BSON.Binary.html" class="tsd-signature-type tsd-kind-class">Binary</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:80</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:69</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="createFromHexString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>create<wbr/>From<wbr/>Hex<wbr/>String</span><a href="#createFromHexString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -390,7 +376,7 @@ instead to convert the string to a Buffer using UTF-8 first.</p>
 <h4 class="tsd-returns-title">Returns <a href="BSON.Binary.html" class="tsd-signature-type tsd-kind-class">Binary</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:78</li></ul></aside></li></ul></section></section></div>
+<li>Defined in node_modules/bson/bson.d.ts:67</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
