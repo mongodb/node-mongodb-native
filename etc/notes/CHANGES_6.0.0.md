@@ -22,7 +22,7 @@ The main focus of this release was usability improvements and a streamlined API.
 - [⚙️ Option parsing improvements](#%EF%B8%8F-option-parsing-improvements)
   - [`useNewUrlParser` and `useUnifiedTopology` emit deprecation warnings](#usenewurlparser-and-useunifiedtopology-emit-deprecation-warnings)
   - [Boolean options only accept 'true' or 'false' in connection strings](#boolean-options-only-accept-true-or-false-in-connection-strings)
-  - [Repeated options in connection string are no longer allowed](#repeated-options-in-connection-string-are-no-longer-allowed)
+  - [Repeated options are no longer allowed in connection strings](#repeated-options-are-no-longer-allowed-in-connection-strings)
   - [TLS certificate authority and certificate-key files are now read asynchronously](#tls-certificate-authority-and-certificate-key-files-are-now-read-asynchronously)
 - [🐛 Bug fixes](#-bug-fixes)
   - [db.command() and admin.command() unsupported options removed](#dbcommand-and-admincommand-unsupported-options-removed)
@@ -71,9 +71,9 @@ The driver uses the `socks` dependency to connect to `mongod` or `mongos` throug
 
 ### `findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultMetadata` is false by default)
 
-Previously, the default return type of this family of methods was a `ModifyResult` containing the found document and additional metadata. This additional metadata is unnecessary for the majority of use cases, so now, by default, they will return only the found document or `null`. 
+Previously, the default return type of this family of methods was a `ModifyResult` containing the found document and additional metadata. This additional metadata is unnecessary for the majority of use cases, so now, by default, they will return only the found document or `null`.
 
-The previous behavior is still available by explicitly setting `includeResultMetadata: true` in the options. 
+The previous behavior is still available by explicitly setting `includeResultMetadata: true` in the options.
 
 See the following [blog post](https://www.mongodb.com/blog/post/behavioral-changes-find-one-family-apis-node-js-driver-6-0-0) for more information.
 
@@ -149,7 +149,7 @@ const client = new MongoClient('mongodb://localhost:27017?tls=1'); // throws Mon
 const client = new MongoClient('mongodb://localhost:27017?tls=true');
 ```
 
-### Repeated options in connection string are no longer allowed
+### Repeated options are no longer allowed in connection strings
 
 In order to avoid accidental misconfiguration the driver will no longer prioritize the first instance of an option provided on the URI. Instead repeated options that are not permitted to be repeated will throw an error.
 
@@ -183,7 +183,7 @@ Take a look at our [TLS documentation](https://www.mongodb.com/docs/drivers/node
 
 These APIs allow for specifying a command BSON document directly, so the driver does not try to enumerate all possible commands that could be passed to this API in an effort to be as forward and backward compatible as possible.
 
-The `db.command()` and `admin.command()` APIs have their `options` types updated to accurately reflect options compatible on all commands that could be passed to either API. 
+The `db.command()` and `admin.command()` APIs have their `options` types updated to accurately reflect options compatible on all commands that could be passed to either API.
 
 Perhaps most notably, [`readConcern`](https://www.mongodb.com/docs/manual/reference/read-concern/) and [`writeConcern`](https://www.mongodb.com/docs/manual/reference/write-concern/) options are no longer handled by the driver. Users **must** attach these properties to the command that is passed to the `.command()` method.
 
@@ -253,7 +253,7 @@ The deprecated `addUser` APIs have been removed. The driver maintains support ac
 
 The associated options interface with this API has also been removed: `AddUserOptions`.
 
-See the [`createUser` documentation](https://www.mongodb.com/docs/manual/reference/command/createUser/) for more information. 
+See the [`createUser` documentation](https://www.mongodb.com/docs/manual/reference/command/createUser/) for more information.
 
 ```ts
 const db = client.db('admin');
