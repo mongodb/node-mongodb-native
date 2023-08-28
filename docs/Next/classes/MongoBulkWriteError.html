@@ -80,7 +80,8 @@
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="constructor.new_MongoBulkWriteError"><span class="tsd-kind-constructor-signature">new <wbr/>Mongo<wbr/>Bulk<wbr/>Write<wbr/>Error</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span>, <span class="tsd-kind-parameter">result</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="MongoBulkWriteError.html" class="tsd-signature-type tsd-kind-class">MongoBulkWriteError</a><a href="#constructor.new_MongoBulkWriteError" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Creates a new MongoBulkWriteError</p>
+<div class="tsd-comment tsd-typography"><p><strong>Do not use this constructor!</strong></p>
+<p>Meant for internal use only.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
@@ -90,10 +91,13 @@
 <li>
 <h5><span class="tsd-kind-parameter">result</span>: <a href="BulkWriteResult.html" class="tsd-signature-type tsd-kind-class">BulkWriteResult</a></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="MongoBulkWriteError.html" class="tsd-signature-type tsd-kind-class">MongoBulkWriteError</a></h4>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<h4>Remarks</h4><p>This class is only meant to be constructed within the driver. This constructor is
+not subject to semantic versioning compatibility guarantees and may change at any time.</p>
+</div><aside class="tsd-sources">
 <p>Overrides <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L602">src/bulk/common.ts:602</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L612">src/bulk/common.ts:612</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="cause" class="tsd-anchor"></a>
@@ -101,7 +105,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">cause</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type ">Error</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#cause">cause</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L135">src/error.ts:135</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L133">src/error.ts:133</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="code" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>code</span><a href="#code" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">code</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
@@ -116,7 +120,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">code<wbr/>Name</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#codeName">codeName</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L195">src/error.ts:195</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L200">src/error.ts:200</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="connectionGeneration" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>connection<wbr/>Generation</span><a href="#connectionGeneration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">connection<wbr/>Generation</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
@@ -133,7 +137,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">err<wbr/>Info</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#errInfo">errInfo</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L197">src/error.ts:197</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L202">src/error.ts:202</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="message" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>message</span><a href="#message" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">message</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
@@ -145,7 +149,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">ok</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#ok">ok</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L198">src/error.ts:198</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L203">src/error.ts:203</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="result" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>result</span><a href="#result" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">result</span><span class="tsd-signature-symbol">:</span> <a href="BulkWriteResult.html" class="tsd-signature-type tsd-kind-class">BulkWriteResult</a></div><aside class="tsd-sources">
@@ -168,7 +172,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">write<wbr/>Concern<wbr/>Error</span><span class="tsd-signature-symbol">?:</span> <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#writeConcernError">writeConcernError</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L196">src/error.ts:196</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L201">src/error.ts:201</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="writeErrors" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>write<wbr/>Errors</span><a href="#writeErrors" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">write<wbr/>Errors</span><span class="tsd-signature-symbol">:</span> <a href="../types/OneOrMore.html" class="tsd-signature-type tsd-kind-type-alias">OneOrMore</a><span class="tsd-signature-symbol">&lt;</span><a href="WriteError.html" class="tsd-signature-type tsd-kind-class">WriteError</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = []</span></div><aside class="tsd-sources">
@@ -218,7 +222,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L639">src/bulk/common.ts:639</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L649">src/bulk/common.ts:649</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="errmsg" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>errmsg</span><a href="#errmsg" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -230,7 +234,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from MongoServerError.errmsg</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L165">src/error.ts:165</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L170">src/error.ts:170</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="errorLabels" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>error<wbr/>Labels</span><a href="#errorLabels" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -239,7 +243,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from MongoServerError.errorLabels</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L183">src/error.ts:183</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L188">src/error.ts:188</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="insertedCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inserted<wbr/>Count</span><a href="#insertedCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -250,7 +254,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L627">src/bulk/common.ts:627</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L637">src/bulk/common.ts:637</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="insertedIds" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inserted<wbr/>Ids</span><a href="#insertedIds" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -264,7 +268,7 @@
 <h5><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">any</span></h5></li></ul>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L647">src/bulk/common.ts:647</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L657">src/bulk/common.ts:657</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="matchedCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>matched<wbr/>Count</span><a href="#matchedCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -275,7 +279,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L631">src/bulk/common.ts:631</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L641">src/bulk/common.ts:641</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="modifiedCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>modified<wbr/>Count</span><a href="#modifiedCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -286,7 +290,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L635">src/bulk/common.ts:635</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L645">src/bulk/common.ts:645</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="name" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -295,7 +299,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides MongoServerError.name</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L622">src/bulk/common.ts:622</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L632">src/bulk/common.ts:632</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="upsertedCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>upserted<wbr/>Count</span><a href="#upsertedCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -306,7 +310,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L643">src/bulk/common.ts:643</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L653">src/bulk/common.ts:653</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="upsertedIds" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>upserted<wbr/>Ids</span><a href="#upsertedIds" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -320,7 +324,7 @@
 <h5><span class="tsd-signature-symbol">[</span><span class="tsd-kind-parameter">key</span>: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">any</span></h5></li></ul>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L651">src/bulk/common.ts:651</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/bulk/common.ts#L661">src/bulk/common.ts:661</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addErrorLabel" class="tsd-anchor"></a>
@@ -336,7 +340,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#addErrorLabel">addErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L179">src/error.ts:179</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L184">src/error.ts:184</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="hasErrorLabel" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>has<wbr/>Error<wbr/>Label</span><a href="#hasErrorLabel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -357,7 +361,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoServerError.html">MongoServerError</a>.<a href="MongoServerError.html#hasErrorLabel">hasErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L175">src/error.ts:175</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L180">src/error.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureStackTrace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>capture<wbr/>Stack<wbr/>Trace</span><a href="#captureStackTrace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">

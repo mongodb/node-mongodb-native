@@ -27,7 +27,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <ul class="tsd-hierarchy">
 <li><span class="target">MongoKerberosError</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L366">src/error.ts:366</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L470">src/error.ts:470</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -67,15 +67,22 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="constructor.new_MongoKerberosError"><span class="tsd-kind-constructor-signature">new <wbr/>Mongo<wbr/>Kerberos<wbr/>Error</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">message</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="MongoKerberosError.html" class="tsd-signature-type tsd-kind-class">MongoKerberosError</a><a href="#constructor.new_MongoKerberosError" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p><strong>Do not use this constructor!</strong></p>
+<p>Meant for internal use only.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
 <h5><span class="tsd-kind-parameter">message</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="MongoKerberosError.html" class="tsd-signature-type tsd-kind-class">MongoKerberosError</a></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="MongoKerberosError.html" class="tsd-signature-type tsd-kind-class">MongoKerberosError</a></h4>
+<div class="tsd-comment tsd-typography">
+<h4>Remarks</h4><p>This class is only meant to be constructed within the driver. This constructor is
+not subject to semantic versioning compatibility guarantees and may change at any time.</p>
+</div><aside class="tsd-sources">
 <p>Overrides <a href="MongoRuntimeError.html">MongoRuntimeError</a>.<a href="MongoRuntimeError.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L367">src/error.ts:367</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L482">src/error.ts:482</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="cause" class="tsd-anchor"></a>
@@ -83,7 +90,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <div class="tsd-signature"><span class="tsd-kind-property">cause</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type ">Error</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoRuntimeError.html">MongoRuntimeError</a>.<a href="MongoRuntimeError.html#cause">cause</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L135">src/error.ts:135</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L133">src/error.ts:133</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="code" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>code</span><a href="#code" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">code</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
@@ -162,7 +169,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from MongoRuntimeError.errmsg</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L165">src/error.ts:165</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L170">src/error.ts:170</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="errorLabels" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>error<wbr/>Labels</span><a href="#errorLabels" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -171,7 +178,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from MongoRuntimeError.errorLabels</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L183">src/error.ts:183</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L188">src/error.ts:188</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="name" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -180,7 +187,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides MongoRuntimeError.name</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L371">src/error.ts:371</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L486">src/error.ts:486</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addErrorLabel" class="tsd-anchor"></a>
@@ -196,7 +203,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="MongoRuntimeError.html">MongoRuntimeError</a>.<a href="MongoRuntimeError.html#addErrorLabel">addErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L179">src/error.ts:179</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L184">src/error.ts:184</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="hasErrorLabel" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>has<wbr/>Error<wbr/>Label</span><a href="#hasErrorLabel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -217,7 +224,7 @@ via Kerberos, but fails to connect to the Kerberos client.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoRuntimeError.html">MongoRuntimeError</a>.<a href="MongoRuntimeError.html#hasErrorLabel">hasErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L175">src/error.ts:175</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L180">src/error.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureStackTrace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>capture<wbr/>Stack<wbr/>Trace</span><a href="#captureStackTrace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
