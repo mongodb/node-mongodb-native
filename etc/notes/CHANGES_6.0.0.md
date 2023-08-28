@@ -38,7 +38,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [Deprecated SSL options have been removed](#deprecated-ssl-options-have-been-removed)
   - [The deprecated `keepAlive` and `keepAliveInitialDelay` options have been removed](#the-deprecated-keepalive-and-keepaliveinitialdelay-options-have-been-removed)
 - [🗑️ Removal of "dead" code](#-removal-of-dead-code)
-  - [`MongoError` and its subclasses now have internal constructors](#mongoerror-and-its-subclasses-now-have-internal-constructors)
+  - [Constructors for `MongoError` and its subclasses now clearly indicate they are meant for internal use only](#constructors-for-mongoerror-and-its-subclasses-now-clearly-indicate-they-are-meant-for-internal-use-only)
   - [`AutoEncrypter` and `MongoClient.autoEncrypter` are now internal](#autoencrypter-and-mongoclientautoencrypter-are-now-internal)
   - [`ClientEncryption.onKMSProvidersRefresh` function removed](#clientencryptiononkmsprovidersrefresh-function-removed)
   - [`EvalOptions` removed](#evaloptions-removed)
@@ -297,9 +297,9 @@ TCP keep alive will always be on and now set to a value of 30000ms.
 
 The removed functionality listed in this section was either unused or not useful outside the driver internals.
 
-### `MongoError` and its subclasses now have internal constructors
+### Constructors for `MongoError` and its subclasses now clearly indicate they are meant for internal use only
 
-`MongoError` and its subclasses are not meant to be constructed by users as they are thrown within the driver on specific error conditions to allow users to react to these conditions in ways which match their use cases. The constructors for these types are subject to change outside of major versions and their documentation has been updated to reflect this.
+`MongoError` and its subclasses are not meant to be constructed by users as they are thrown within the driver on specific error conditions to allow users to react to these conditions in ways which match their use cases. The constructors for these types are now subject to change outside of major versions and their API documentation has been updated to reflect this.
 
 ### `AutoEncrypter` and `MongoClient.autoEncrypter` are now internal
 
