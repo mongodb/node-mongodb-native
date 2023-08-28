@@ -37,7 +37,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [`BulkWriteResult` deprecated properties removed](#bulkwriteresult-deprecated-properties-removed)
   - [Deprecated SSL options have been removed](#deprecated-ssl-options-have-been-removed)
   - [The deprecated `keepAlive` and `keepAliveInitialDelay` options have been removed](#the-deprecated-keepalive-and-keepaliveinitialdelay-options-have-been-removed)
-- [🪦 Removal of "dead" code](#-removal-of-dead-code)
+- [🗑️ Removal of "dead" code](#-removal-of-dead-code)
   - [`MongoError` and its subclasses now have internal constructors](#mongoerror-and-its-subclasses-now-have-internal-constructors)
   - [`AutoEncrypter` and `MongoClient.autoEncrypter` are now internal](#autoencrypter-and-mongoclientautoencrypter-are-now-internal)
   - [`ClientEncryption.onKMSProvidersRefresh` function removed](#clientencryptiononkmsprovidersrefresh-function-removed)
@@ -293,7 +293,7 @@ The following options have been removed with their supported counterparts listed
 
 TCP keep alive will always be on and now set to a value of 30000ms.
 
-## 🪦 Removal of "dead" code
+## 🗑️ Removal of "dead" code
 
 The removed functionality listed in this section was either unused or not useful outside the driver internals.
 
