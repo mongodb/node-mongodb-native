@@ -1,4 +1,6 @@
-import { type ClientSession, MongoClient, ReadConcern } from '../../mongodb';
+import { expectType } from 'tsd';
+
+import { type ClientSession, type InsertOneResult, MongoClient, ReadConcern } from '../../mongodb';
 
 // TODO(NODE-3345): Improve these tests to use expect assertions more
 
@@ -111,11 +113,7 @@ try {
 client.withSession(session => runTransactionWithRetry(updateEmployeeInfo, client, session));
 
 const col = client.db('test').collection<{ _id: string }>('col');
-const ok = await session.withTransaction(async () => {
+const insertResult = await session.withTransaction(async () => {
   return await col.insertOne({ _id: 'one' }, { session });
 });
-if (ok) {
-  console.log('success');
-} else {
-  console.log('nothing done');
-}
+expectType<InsertOneResult<{ _id: string }>>(insertResult);
