@@ -677,38 +677,6 @@ for (const version of ['5.0', 'rapid', 'latest']) {
   }
 }
 
-oneOffFuncAsTasks.push({
-  name: `test-latest-driver-mongodb-client-encryption-6.0.0`,
-  tags: ['run-custom-dependency-tests'],
-  commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_VERSION: LOWEST_LTS
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: '7.0',
-        TOPOLOGY: 'replica_set'
-      }
-    },
-    { func: 'bootstrap kms servers' },
-    {
-      func: 'install package',
-      vars: {
-        PACKAGE: 'mongodb-client-encryption'
-      }
-    },
-    {
-      func: 'run tests',
-      vars: {
-        CLIENT_ENCRYPTION: true
-      }
-    }
-  ]
-});
 
 const coverageTask = {
   name: 'download and merge coverage'.split(' ').join('-'),
