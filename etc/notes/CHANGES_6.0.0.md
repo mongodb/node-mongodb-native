@@ -13,7 +13,7 @@ The main focus of this release was usability improvements and a streamlined API.
   - [Optional peer dependency version bumps](#optional-peer-dependency-version-bumps)
   - [Allow `socks` to be installed optionally](#allow-socks-to-be-installed-optionally)
 - [☀️ API usability improvements](#%EF%B8%8F-api-usability-improvements)
-  - [`findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultsMetadata` is false by default)](#findoneandx-family-of-methods-will-now-return-only-the-found-document-or-null-by-default-includeresultsmetadata-is-false-by-default)
+  - [`findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultMetadata` is false by default)](#findoneandx-family-of-methods-will-now-return-only-the-found-document-or-null-by-default-includeresultmetadata-is-false-by-default)
   - [`session.commitTransaction()` and `session.abortTransaction()` return void](#sessioncommittransaction-and-sessionaborttransaction-return-void)
   - [`withSession` and `withTransaction` return the value returned by the provided function](#withsession-and-withtransaction-return-the-value-returned-by-the-provided-function)
   - [Driver methods throw if a session is provided from a different `MongoClient`](#driver-methods-throw-if-a-session-is-provided-from-a-different-mongoclient-)
@@ -69,7 +69,7 @@ The driver uses the `socks` dependency to connect to `mongod` or `mongos` throug
 
 ## ☀️ API usability improvements
 
-### `findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultsMetadata` is false by default)
+### `findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultMetadata` is false by default)
 
 Previously, the default return type of this family of methods was a `ModifyResult` containing the found document and additional metadata. This additional metadata is irrelevant for the majority of use cases, so now, by default, they will return only the found document or `null`. The previous behavior is still available by explicitly setting `includeResultMetadata: true` in the options. You can read more about our decision to make this change in our [blog post](https://www.mongodb.com/blog/post/behavioral-changes-find-one-family-apis-node-js-driver-6-0-0).
 
