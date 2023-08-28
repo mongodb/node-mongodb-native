@@ -71,7 +71,11 @@ The driver uses the `socks` dependency to connect to `mongod` or `mongos` throug
 
 ### `findOneAndX` family of methods will now return only the found document or `null` by default (`includeResultMetadata` is false by default)
 
-Previously, the default return type of this family of methods was a `ModifyResult` containing the found document and additional metadata. This additional metadata is irrelevant for the majority of use cases, so now, by default, they will return only the found document or `null`. The previous behavior is still available by explicitly setting `includeResultMetadata: true` in the options. You can read more about our decision to make this change in our [blog post](https://www.mongodb.com/blog/post/behavioral-changes-find-one-family-apis-node-js-driver-6-0-0).
+Previously, the default return type of this family of methods was a `ModifyResult` containing the found document and additional metadata. This additional metadata is unnecessary for the majority of use cases, so now, by default, they will return only the found document or `null`. 
+
+The previous behavior is still available by explicitly setting `includeResultMetadata: true` in the options. 
+
+See the following [blog post](https://www.mongodb.com/blog/post/behavioral-changes-find-one-family-apis-node-js-driver-6-0-0) for more information.
 
 ```ts
 // This has the same behaviour as providing `{ includeResultMetadata: false }` in the v5.7.0+ driver
@@ -93,7 +97,7 @@ await collection.findOneAndUpdate(
 
 ### `session.commitTransaction()` and `session.abortTransaction()` return void
 
-Each of these methods erroneously returned server command results that can be different depending on server version or type the driver is connected to. These methods return a promise that if resolved means the command (aborting or commiting) sucessfully completed and rejects otherwise. Viewing command responses is possible through the [command monitoring APIs](https://www.mongodb.com/docs/drivers/node/upcoming/fundamentals/monitoring/command-monitoring/) on the MongoClient.
+Each of these methods erroneously returned server command results that can be different depending on server version or type the driver is connected to. These methods return a promise that if resolved means the command (aborting or commiting) sucessfully completed and rejects otherwise. Viewing command responses is possible through the [command monitoring APIs](https://www.mongodb.com/docs/drivers/node/upcoming/fundamentals/monitoring/command-monitoring/) on the `MongoClient`.
 
 ### `withSession` and `withTransaction` return the value returned by the provided function
 
@@ -125,7 +129,7 @@ Driver v5 dropped support for callbacks in asynchronous functions in favor of re
 
 ### `MongoCryptError` is now a subclass of `MongoError`
 
-Since `MongoCryptError` made use of NodeJS 16's `Error` API, it has long supported setting the `Error.cause` field using options passed in via the constructor. Now that Node 16 is our minimum supported version, `MongoError` has been modified to make use of this API as well, allowing us to let `MongoCryptError` subclass from it directly.
+Since `MongoCryptError` made use of Node.js 16's `Error` API, it has long supported setting the `Error.cause` field using options passed in via the constructor. Now that Node.js 16 is our minimum supported version, `MongoError` has been modified to make use of this API as well, allowing us to let `MongoCryptError` subclass from it directly.
 
 ## ⚙️ Option parsing improvements
 
@@ -147,7 +151,9 @@ const client = new MongoClient('mongodb://localhost:27017?tls=true');
 
 ### Repeated options in connection string are no longer allowed
 
-In order to avoid accidental misconfiguration the driver will no longer prioritize the first instance of an option provided on the URI. Instead repeated options that are not permitted to be repeated will throw an error. This is to that connection strings that contain options like `tls=true&tls=false` are no longer ambiguous.
+In order to avoid accidental misconfiguration the driver will no longer prioritize the first instance of an option provided on the URI. Instead repeated options that are not permitted to be repeated will throw an error.
+
+This change will ensure that connection strings that contain options like `tls=true&tls=false` are no longer ambiguous.
 
 ### TLS certificate authority and certificate-key files are now read asynchronously
 
@@ -177,7 +183,9 @@ Take a look at our [TLS documentation](https://www.mongodb.com/docs/drivers/node
 
 These APIs allow for specifying a command BSON document directly, so the driver does not try to enumerate all possible commands that could be passed to this API in an effort to be as forward and backward compatible as possible.
 
-The `db.command()` and `admin.command()` APIs have their `options` types updated to accurately reflect options compatible on all commands that could be passed to either API. Perhaps most notably, [`readConcern`](https://www.mongodb.com/docs/manual/reference/read-concern/) and [`writeConcern`](https://www.mongodb.com/docs/manual/reference/write-concern/) options are no longer handled by the driver, users **must** attach these properties to the command that is passed to the `.command()` method.
+The `db.command()` and `admin.command()` APIs have their `options` types updated to accurately reflect options compatible on all commands that could be passed to either API. 
+
+Perhaps most notably, [`readConcern`](https://www.mongodb.com/docs/manual/reference/read-concern/) and [`writeConcern`](https://www.mongodb.com/docs/manual/reference/write-concern/) options are no longer handled by the driver. Users **must** attach these properties to the command that is passed to the `.command()` method.
 
 ### Removed irrelevant fields from `ConnectionPoolCreatedEvent.options`
 
@@ -207,7 +215,7 @@ The empty `readPreferenceTags` allows drivers to still select a server if the le
 
 ### Corrected `GridFSBucketWriteStream`'s `Writable` method overrides and event emission
 
-Our implementation of a writeable stream for GridFSBucketWriteStream mistakenly overrode the `write()` and `end()` methods, as well as, manually emitted `'close'`, `'drain'`, `'finish'` events. Per Node.js documentation, these methods and events are intended for the Node.js stream implementation to provide, and an author of a stream implementation is supposed to override `_write`, `_final`, and allow Node.js to manage event emitting.
+Our implementation of a writeable stream for `GridFSBucketWriteStream` mistakenly overrode the `write()` and `end()` methods, as well as, manually emitted `'close'`, `'drain'`, `'finish'` events. Per Node.js documentation, these methods and events are intended for the Node.js stream implementation to provide, and an author of a stream implementation is supposed to override `_write`, `_final`, and allow Node.js to manage event emitting.
 
 Since the API is still a `Writable` stream most usages will continue to work with no changes, the `.write()` and `.end()` methods are still available and take the same arguments. The breaking change relates to the improper manually emitted event listeners that are now handled by Node.js. **The `'finish'` and `'drain'` events will no longer receive the `GridFSFile` document as an argument** (this is the document inserted to the bucket's files collection after all chunks have been inserted). Instead, it will be available on the stream itself as a property: `gridFSFile`.
 
@@ -245,7 +253,7 @@ The deprecated `addUser` APIs have been removed. The driver maintains support ac
 
 The associated options interface with this API has also been removed: `AddUserOptions`.
 
-See `createUser` documentation: https://www.mongodb.com/docs/manual/reference/command/createUser/
+See the [`createUser` documentation](https://www.mongodb.com/docs/manual/reference/command/createUser/) for more information. 
 
 ```ts
 const db = client.db('admin');
@@ -261,13 +269,13 @@ await db.command({
 
 ### `collection.stats()` removed
 
-The `collStats` command is deprecated starting in server v6.2 so the driver is removing its bespoke helper in this major release. The `collStats` command is still available to run manually via `await db.command()`. However, the recommended migration is to use the `$collStats` aggregation stage. You can find more information here: [$collStats](https://www.mongodb.com/docs/upcoming/reference/operator/aggregation/collStats/#mongodb-pipeline-pipe.-collStats).
+The `collStats` command is deprecated starting in server v6.2 so the driver is removing its bespoke helper in this major release. The `collStats` command is still available to run manually via `await db.command()`. However, the recommended migration is to use the [`$collStats` aggregation stage](https://www.mongodb.com/docs/current/reference/operator/aggregation/collStats/).
 
 The following interfaces associated with this API have also been removed: `CollStatsOptions` and `WiredTigerData`.
 
 ### `BulkWriteResult` deprecated properties removed
 
-The following deprecated properties have been removed as they duplicated the functionality provided by the common driver spec compliant properties. The list indicates what properties provide the correct migration:
+The following deprecated properties have been removed as they duplicated those outlined in the [MongoDB CRUD specification|https://github.com/mongodb/specifications/blob/611ecb5d624708b81a4d96a16f98aa8f71fcc189/source/crud/crud.rst#write-results]. The list indicates what properties provide the correct migration:
 
 - `BulkWriteResult.nInserted` -> `BulkWriteResult.insertedCount`
 - `BulkWriteResult.nUpserted` -> `BulkWriteResult.upsertedCount`
