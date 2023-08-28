@@ -2,6 +2,72 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.0.0](https://github.com/mongodb/node-mongodb-native/compare/v5.7.0...v6.0.0) (2023-08-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **NODE-5584:** adopt bson v6 and mongodb-client-encryption v6 ([#3845](https://github.com/mongodb/node-mongodb-native/issues/3845))
+* **NODE-5484:** mark MongoError for internal use and remove Node14 cause assignment logic ([#3800](https://github.com/mongodb/node-mongodb-native/issues/3800))
+* **NODE-4788:** use implementer Writable methods for GridFSBucketWriteStream  ([#3808](https://github.com/mongodb/node-mongodb-native/issues/3808))
+* **NODE-4986:** remove callbacks from ClientEncryption encrypt, decrypt, and createDataKey ([#3797](https://github.com/mongodb/node-mongodb-native/issues/3797))
+* **NODE-5490:** bump kerberos compatibility to ^2.0.1 ([#3798](https://github.com/mongodb/node-mongodb-native/issues/3798))
+* **NODE-3568:** ensure includeResultsMetadata is false by default ([#3786](https://github.com/mongodb/node-mongodb-native/issues/3786))
+* **NODE-3989:** only accept true and false for boolean options ([#3791](https://github.com/mongodb/node-mongodb-native/issues/3791))
+* **NODE-5233:** prevent session from one client from being used on another ([#3790](https://github.com/mongodb/node-mongodb-native/issues/3790))
+* **NODE-5444:** emit deprecation warning for useNewUrlParser and useUnifiedTopology ([#3792](https://github.com/mongodb/node-mongodb-native/issues/3792))
+* **NODE-5470:** convert remaining FLE to TS and drop support for `onKMSProvidersRefresh` ([#3787](https://github.com/mongodb/node-mongodb-native/issues/3787))
+* **NODE-5508:** remove EvalOperation and EvalOptions ([#3795](https://github.com/mongodb/node-mongodb-native/issues/3795))
+* **NODE-3920:** validate options are not repeated in connection string ([#3788](https://github.com/mongodb/node-mongodb-native/issues/3788))
+* **NODE-3924:** read tls files async ([#3776](https://github.com/mongodb/node-mongodb-native/issues/3776))
+* **NODE-5430:** make AutoEncrypter and MongoClient.autoEncrypter internal ([#3789](https://github.com/mongodb/node-mongodb-native/issues/3789))
+* **NODE-4961:** remove command result from commit and abort transaction APIs ([#3784](https://github.com/mongodb/node-mongodb-native/issues/3784))
+* **NODE-2014:** return executor result from withSession and withTransaction ([#3783](https://github.com/mongodb/node-mongodb-native/issues/3783))
+* **NODE-5409:** allow socks to be installed optionally ([#3782](https://github.com/mongodb/node-mongodb-native/issues/3782))
+* **NODE-4796:** remove addUser and collection.stats APIs ([#3781](https://github.com/mongodb/node-mongodb-native/issues/3781))
+* **NODE-4936:** remove unsupported options from db.command and admin.command ([#3775](https://github.com/mongodb/node-mongodb-native/issues/3775))
+* **NODE-5228:** remove unneeded fields from ConnectionPoolCreatedEvent.options ([#3772](https://github.com/mongodb/node-mongodb-native/issues/3772))
+* **NODE-5190:** remove deprecated keep alive options ([#3771](https://github.com/mongodb/node-mongodb-native/issues/3771))
+* **NODE-5186:** remove duplicate BulkWriteResult accessors ([#3766](https://github.com/mongodb/node-mongodb-native/issues/3766))
+* **NODE-5376:** remove deprecated ssl options ([#3755](https://github.com/mongodb/node-mongodb-native/issues/3755))
+* **NODE-5415:** bump minimum Node.js version to v16.20.1 ([#3760](https://github.com/mongodb/node-mongodb-native/issues/3760))
+
+### Features
+
+* **NODE-2014:** return executor result from withSession and withTransaction ([#3783](https://github.com/mongodb/node-mongodb-native/issues/3783)) ([65aa288](https://github.com/mongodb/node-mongodb-native/commit/65aa288a28a9e8859f4fd75f176961ef3d9747f0))
+* **NODE-3568:** ensure includeResultsMetadata is false by default ([#3786](https://github.com/mongodb/node-mongodb-native/issues/3786)) ([fee8d3e](https://github.com/mongodb/node-mongodb-native/commit/fee8d3e094846222035962c75a207e14b70325c7))
+* **NODE-3920:** validate options are not repeated in connection string ([#3788](https://github.com/mongodb/node-mongodb-native/issues/3788)) ([11631a2](https://github.com/mongodb/node-mongodb-native/commit/11631a2b63e7102602ce2b2e452fd61ee5a46d05))
+* **NODE-3924:** read tls files async ([#3776](https://github.com/mongodb/node-mongodb-native/issues/3776)) ([68adaf1](https://github.com/mongodb/node-mongodb-native/commit/68adaf1e5d5ee8cf8f0468380d7a7b3113facc07))
+* **NODE-3989:** only accept true and false for boolean options ([#3791](https://github.com/mongodb/node-mongodb-native/issues/3791)) ([e2e36cc](https://github.com/mongodb/node-mongodb-native/commit/e2e36ccbb30de217d7ca2014d8591b574360d557))
+* **NODE-4796:** remove addUser and collection.stats APIs ([#3781](https://github.com/mongodb/node-mongodb-native/issues/3781)) ([e79ac9d](https://github.com/mongodb/node-mongodb-native/commit/e79ac9da9fce35e1ea9b26fc4a97a79826a6a687))
+* **NODE-4961:** remove command result from commit and abort transaction APIs ([#3784](https://github.com/mongodb/node-mongodb-native/issues/3784)) ([71c5936](https://github.com/mongodb/node-mongodb-native/commit/71c593685735a08d5d7503120464a7c23ba20a46))
+* **NODE-4986:** remove callbacks from ClientEncryption encrypt, decrypt, and createDataKey ([#3797](https://github.com/mongodb/node-mongodb-native/issues/3797)) ([51a573f](https://github.com/mongodb/node-mongodb-native/commit/51a573fe99506b81c7ab808898eb9eb63f58f600))
+* **NODE-5186:** remove duplicate BulkWriteResult accessors ([#3766](https://github.com/mongodb/node-mongodb-native/issues/3766)) ([8693987](https://github.com/mongodb/node-mongodb-native/commit/8693987b66dff745c8421ac9cdc29dc772b1f675))
+* **NODE-5190:** remove deprecated keep alive options ([#3771](https://github.com/mongodb/node-mongodb-native/issues/3771)) ([7ade907](https://github.com/mongodb/node-mongodb-native/commit/7ade9079fa78538069604a5b42ad13ffbb80af46))
+* **NODE-5233:** prevent session from one client from being used on another ([#3790](https://github.com/mongodb/node-mongodb-native/issues/3790)) ([9268b35](https://github.com/mongodb/node-mongodb-native/commit/9268b35d5ba0736ff38e691024d89f1ac6c28515))
+* **NODE-5376:** remove deprecated ssl options ([#3755](https://github.com/mongodb/node-mongodb-native/issues/3755)) ([ee56c8e](https://github.com/mongodb/node-mongodb-native/commit/ee56c8eebf22b2f90885513e699d209c63379846))
+* **NODE-5396:** add `mongodb-js/saslprep` as a required dependency ([#3815](https://github.com/mongodb/node-mongodb-native/issues/3815)) ([bd031fc](https://github.com/mongodb/node-mongodb-native/commit/bd031fc26bdbae7ac8a73cccc06e11da7160d656))
+* **NODE-5409:** allow socks to be installed optionally ([#3782](https://github.com/mongodb/node-mongodb-native/issues/3782)) ([787bdbf](https://github.com/mongodb/node-mongodb-native/commit/787bdbf3f7bd974aca1347de427e973217c90009))
+* **NODE-5415:** bump minimum Node.js version to v16.20.1 ([#3760](https://github.com/mongodb/node-mongodb-native/issues/3760)) ([de158b2](https://github.com/mongodb/node-mongodb-native/commit/de158b245d809e6600c178303a033997d4181ade))
+* **NODE-5430:** make AutoEncrypter and MongoClient.autoEncrypter internal ([#3789](https://github.com/mongodb/node-mongodb-native/issues/3789)) ([b16ef9e](https://github.com/mongodb/node-mongodb-native/commit/b16ef9ed2cbb141c1c8c071ed0d51bc0993dc423))
+* **NODE-5444:** emit deprecation warning for useNewUrlParser and useUnifiedTopology ([#3792](https://github.com/mongodb/node-mongodb-native/issues/3792)) ([c08060d](https://github.com/mongodb/node-mongodb-native/commit/c08060d074dfe6f222feb360589ac52f9fa90b6d))
+* **NODE-5470:** convert remaining FLE to TS and drop support for `onKMSProvidersRefresh` ([#3787](https://github.com/mongodb/node-mongodb-native/issues/3787)) ([844aa52](https://github.com/mongodb/node-mongodb-native/commit/844aa52640baf69c0b6dacdb3d11add4ca24d8f2))
+* **NODE-5484:** mark MongoError for internal use and remove Node14 cause assignment logic ([#3800](https://github.com/mongodb/node-mongodb-native/issues/3800)) ([a17b0af](https://github.com/mongodb/node-mongodb-native/commit/a17b0af1a2ae112b7e96da86a8761d5c15d616cf))
+* **NODE-5490:** bump kerberos compatibility to ^2.0.1 ([#3798](https://github.com/mongodb/node-mongodb-native/issues/3798)) ([1044be1](https://github.com/mongodb/node-mongodb-native/commit/1044be14ca69ea4c367bf79735894deadf166d6e))
+* **NODE-5508:** remove EvalOperation and EvalOptions ([#3795](https://github.com/mongodb/node-mongodb-native/issues/3795)) ([225cb81](https://github.com/mongodb/node-mongodb-native/commit/225cb8184295c6ad934571c2a0cb7ef6bcf8af50))
+* **NODE-5566:** add ability to provide CRL file via tlsCRLFile ([#3834](https://github.com/mongodb/node-mongodb-native/issues/3834)) ([33c86c9](https://github.com/mongodb/node-mongodb-native/commit/33c86c923e0ccfcb61f670c31efd145542bd4980))
+* **NODE-5584:** adopt bson v6 and mongodb-client-encryption v6 ([#3845](https://github.com/mongodb/node-mongodb-native/issues/3845)) ([7bef363](https://github.com/mongodb/node-mongodb-native/commit/7bef3632da73f20431952b99a0d11e9aac001c12))
+
+
+### Bug Fixes
+
+* **NODE-4788:** use implementer Writable methods for GridFSBucketWriteStream  ([#3808](https://github.com/mongodb/node-mongodb-native/issues/3808)) ([7955610](https://github.com/mongodb/node-mongodb-native/commit/7955610c67eb500af683866aed631d06521345cc))
+* **NODE-4936:** remove unsupported options from db.command and admin.command ([#3775](https://github.com/mongodb/node-mongodb-native/issues/3775)) ([52cd649](https://github.com/mongodb/node-mongodb-native/commit/52cd649caf2e64aef6d3984c5f2d24af03db4c51))
+* **NODE-5228:** remove unneeded fields from ConnectionPoolCreatedEvent.options ([#3772](https://github.com/mongodb/node-mongodb-native/issues/3772)) ([7a91714](https://github.com/mongodb/node-mongodb-native/commit/7a9171411e6afeb68d8611e15f49b872648dbc9c))
+* **NODE-5412:** drop aws sdk version to match node18 runtime ([#3809](https://github.com/mongodb/node-mongodb-native/issues/3809)) ([1e96e49](https://github.com/mongodb/node-mongodb-native/commit/1e96e49b607791d1c1517e65cf88f51821898b0b))
+* **NODE-5548:** ensure that tlsCertificateKeyFile maps to cert and key ([#3819](https://github.com/mongodb/node-mongodb-native/issues/3819)) ([a0955bd](https://github.com/mongodb/node-mongodb-native/commit/a0955bdf935113abbb28d7c7011abc04027be2b0))
+* **NODE-5592:** withTransaction return type ([#3846](https://github.com/mongodb/node-mongodb-native/issues/3846)) ([05d2725](https://github.com/mongodb/node-mongodb-native/commit/05d2725bf179e4c35ff3735856313bca062c77a8))
+
 ## [5.7.0](https://github.com/mongodb/node-mongodb-native/compare/v5.6.0...v5.7.0) (2023-07-06)
 
 
