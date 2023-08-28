@@ -20,7 +20,6 @@ function setup_fle() {
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
   . "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 
-  npm i mongodb-client-encryption@alpha
   export KMIP_TLS_CA_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/ca.pem"
   export KMIP_TLS_CERT_FILE="${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem"
   export TEST_CSFLE=true
