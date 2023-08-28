@@ -453,7 +453,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   async withTransaction<T = any>(
     fn: WithTransactionCallback<T>,
     options?: TransactionOptions
-  ): Promise<Document | undefined> {
+  ): Promise<T | undefined> {
     const startTime = now();
     return attemptTransaction(this, startTime, fn, options);
   }
