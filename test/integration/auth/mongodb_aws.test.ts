@@ -3,7 +3,7 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, type MongoClient, MongoServerError } from '../../mongodb';
+import { MongoAWSError, type MongoClient, MongoDBAWS, MongoServerError } from '../../mongodb';
 
 describe('MONGODB-AWS', function () {
   let client: MongoClient;
@@ -87,5 +87,153 @@ describe('MONGODB-AWS', function () {
       // instead of the 10s-12s range previously.
       expect(timeTaken).to.be.below(12000);
     });
+  });
+
+  describe('when using AssumeRoleWithWebIdentity', () => {
+    const tests = [
+      {
+        ctx: 'when no AWS region settings are set',
+        title: 'uses the default region',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: undefined,
+          AWS_REGION: undefined
+        },
+        calledWith: []
+      },
+      {
+        ctx: 'when only AWS_STS_REGIONAL_ENDPOINTS is set',
+        title: 'uses the default region',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: 'regional',
+          AWS_REGION: undefined
+        },
+        calledWith: []
+      },
+      {
+        ctx: 'when only AWS_REGION is set',
+        title: 'uses the default region',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: undefined,
+          AWS_REGION: 'us-west-2'
+        },
+        calledWith: []
+      },
+
+      {
+        ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to regional and region is legacy',
+        title: 'uses the region from the environment',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: 'regional',
+          AWS_REGION: 'us-west-2'
+        },
+        calledWith: [{ clientConfig: { region: 'us-west-2' } }]
+      },
+      {
+        ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to regional and region is new',
+        title: 'uses the region from the environment',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: 'regional',
+          AWS_REGION: 'sa-east-1'
+        },
+        calledWith: [{ clientConfig: { region: 'sa-east-1' } }]
+      },
+
+      {
+        ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to legacy and region is legacy',
+        title: 'uses the region from the environment',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: 'legacy',
+          AWS_REGION: 'us-west-2'
+        },
+        calledWith: []
+      },
+      {
+        ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to legacy and region is new',
+        title: 'uses the default region',
+        env: {
+          AWS_STS_REGIONAL_ENDPOINTS: 'legacy',
+          AWS_REGION: 'sa-east-1'
+        },
+        calledWith: []
+      }
+    ];
+
+    for (const test of tests) {
+      context(test.ctx, () => {
+        let credentialProvider;
+        let storedEnv;
+        let calledArguments;
+        let shouldSkip = false;
+
+        const envCheck = () => {
+          const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
+          credentialProvider = (() => {
+            try {
+              return require('@aws-sdk/credential-providers');
+            } catch {
+              return null;
+            }
+          })();
+          return AWS_WEB_IDENTITY_TOKEN_FILE.length === 0 || credentialProvider == null;
+        };
+
+        beforeEach(function () {
+          shouldSkip = envCheck();
+          if (shouldSkip) {
+            this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
+            return this.skip();
+          }
+
+          client = this.configuration.newClient(process.env.MONGODB_URI);
+
+          storedEnv = process.env;
+          if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
+            delete process.env.AWS_STS_REGIONAL_ENDPOINTS;
+          } else {
+            process.env.AWS_STS_REGIONAL_ENDPOINTS = test.env.AWS_STS_REGIONAL_ENDPOINTS;
+          }
+          if (test.env.AWS_REGION === undefined) {
+            delete process.env.AWS_REGION;
+          } else {
+            process.env.AWS_REGION = test.env.AWS_REGION;
+          }
+
+          calledArguments = [];
+          MongoDBAWS.credentialProvider = {
+            fromNodeProviderChain(...args) {
+              calledArguments = args;
+              return credentialProvider.fromNodeProviderChain(...args);
+            }
+          };
+        });
+
+        afterEach(() => {
+          if (shouldSkip) {
+            return;
+          }
+          if (typeof storedEnv.AWS_STS_REGIONAL_ENDPOINTS === 'string') {
+            process.env.AWS_STS_REGIONAL_ENDPOINTS = storedEnv.AWS_STS_REGIONAL_ENDPOINTS;
+          }
+          if (typeof storedEnv.AWS_STS_REGIONAL_ENDPOINTS === 'string') {
+            process.env.AWS_REGION = storedEnv.AWS_REGION;
+          }
+          MongoDBAWS.credentialProvider = credentialProvider;
+          calledArguments = [];
+        });
+
+        it(test.title, async function () {
+          const result = await client
+            .db('aws')
+            .collection('aws_test')
+            .estimatedDocumentCount()
+            .catch(error => error);
+
+          expect(result).to.not.be.instanceOf(MongoServerError);
+          expect(result).to.be.a('number');
+
+          expect(calledArguments).to.deep.equal(test.calledWith);
+        });
+      });
+    }
   });
 });

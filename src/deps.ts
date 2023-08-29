@@ -76,7 +76,23 @@ export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissin
   }
 }
 
+/**
+ * @internal
+ * Copy of the AwsCredentialIdentityProvider interface from [`smithy/types`](https://socket.dev/npm/package/\@smithy/types/files/1.1.1/dist-types/identity/awsCredentialIdentity.d.ts),
+ * the return type of the aws-sdk's `fromNodeProviderChain().provider()`.
+ */
+export interface AWSCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken: string;
+  expiration?: Date;
+}
+
 type CredentialProvider = {
+  fromNodeProviderChain(
+    this: void,
+    options: { clientConfig: { region: string } }
+  ): () => Promise<AWSCredentials>;
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
 };
 

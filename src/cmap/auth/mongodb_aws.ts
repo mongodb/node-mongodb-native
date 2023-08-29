@@ -1,4 +1,5 @@
 import * as crypto from 'crypto';
+import * as process from 'process';
 import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
@@ -15,6 +16,28 @@ import { type AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 
+/**
+ * The following regions use the global AWS STS endpoint, sts.amazonaws.com, by default
+ * https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html
+ */
+const LEGACY_REGIONS = new Set([
+  'ap-northeast-1',
+  'ap-south-1',
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'aws-global',
+  'ca-central-1',
+  'eu-central-1',
+  'eu-north-1',
+  'eu-west-1',
+  'eu-west-2',
+  'eu-west-3',
+  'sa-east-1',
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2'
+]);
 const ASCII_N = 110;
 const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
@@ -34,6 +57,7 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
+  static credentialProvider: ReturnType<typeof getAwsCredentialProvider> | null = null;
   randomBytesAsync: (size: number) => Promise<Buffer>;
 
   constructor() {
@@ -157,14 +181,6 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
-/* @internal */
-export interface AWSCredentials {
-  accessKeyId?: string;
-  secretAccessKey?: string;
-  sessionToken?: string;
-  expiration?: Date;
-}
-
 async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
@@ -182,11 +198,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
   }
 
-  const credentialProvider = getAwsCredentialProvider();
+  MongoDBAWS.credentialProvider ??= getAwsCredentialProvider();
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if ('kModuleError' in credentialProvider) {
+  if ('kModuleError' in MongoDBAWS.credentialProvider) {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
@@ -217,6 +233,32 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
 
     return makeMongoCredentialsFromAWSTemp(creds);
   } else {
+    let { AWS_STS_REGIONAL_ENDPOINTS = '', AWS_REGION = '' } = process.env;
+    AWS_STS_REGIONAL_ENDPOINTS = AWS_STS_REGIONAL_ENDPOINTS.toLowerCase();
+    AWS_REGION = AWS_REGION.toLowerCase();
+
+    /** The option setting should work only for users who have explicit settings in their environment, the driver should not encode "defaults" */
+    const awsRegionSettingsExist =
+      AWS_REGION.length !== 0 && AWS_STS_REGIONAL_ENDPOINTS.length !== 0;
+
+    /**
+     * If AWS_STS_REGIONAL_ENDPOINTS is set to regional, users are opting into the new behavior of respecting the region settings
+     *
+     * If AWS_STS_REGIONAL_ENDPOINTS is set to legacy, then "old" regions need to keep using the global setting.
+     * Technically the SDK gets this wrong, it reaches out to 'sts.us-east-1.amazonaws.com' when it should be 'sts.amazonaws.com'.
+     * That is not our bug to fix here. We leave that up to the SDK.
+     */
+    const useRegionalSts =
+      AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
+      (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
+
+    const provider =
+      awsRegionSettingsExist && useRegionalSts
+        ? MongoDBAWS.credentialProvider.fromNodeProviderChain({
+            clientConfig: { region: AWS_REGION }
+          })
+        : MongoDBAWS.credentialProvider.fromNodeProviderChain();
+
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):
@@ -227,8 +269,6 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
      * - Shared credentials and config ini files
      * - The EC2/ECS Instance Metadata Service
      */
-    const { fromNodeProviderChain } = credentialProvider;
-    const provider = fromNodeProviderChain();
     try {
       const creds = await provider();
       return makeMongoCredentialsFromAWSTemp({
