@@ -25,11 +25,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="tsd-signature-type ">Writable</span>
 <ul class="tsd-hierarchy">
-<li><span class="target">GridFSBucketWriteStream</span></li></ul></li></ul></section>
-<section class="tsd-panel">
-<h4>Implements</h4>
-<ul class="tsd-hierarchy">
-<li><span class="tsd-signature-type ">WritableStream</span></li></ul></section><aside class="tsd-sources">
+<li><span class="target">GridFSBucketWriteStream</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L41">src/gridfs/upload.ts:41</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -49,6 +45,7 @@
 <a href="GridFSBucketWriteStream.html#errored" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>errored</span></a>
 <a href="GridFSBucketWriteStream.html#filename" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>filename</span></a>
 <a href="GridFSBucketWriteStream.html#files" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>files</span></a>
+<a href="GridFSBucketWriteStream.html#gridFSFile" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>gridFSFile</span></a>
 <a href="GridFSBucketWriteStream.html#id" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>id</span></a>
 <a href="GridFSBucketWriteStream.html#length" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>length</span></a>
 <a href="GridFSBucketWriteStream.html#n" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>n</span></a>
@@ -64,9 +61,6 @@
 <a href="GridFSBucketWriteStream.html#writableNeedDrain" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>writable<wbr/>Need<wbr/>Drain</span></a>
 <a href="GridFSBucketWriteStream.html#writableObjectMode" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>writable<wbr/>Object<wbr/>Mode</span></a>
 <a href="GridFSBucketWriteStream.html#writeConcern" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>write<wbr/>Concern?</span></a>
-<a href="GridFSBucketWriteStream.html#CLOSE" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>CLOSE</span></a>
-<a href="GridFSBucketWriteStream.html#ERROR" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>ERROR</span></a>
-<a href="GridFSBucketWriteStream.html#FINISH" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>FINISH</span></a>
 <a href="GridFSBucketWriteStream.html#captureRejectionSymbol" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejection<wbr/>Symbol</span></a>
 <a href="GridFSBucketWriteStream.html#captureRejections" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejections</span></a>
 <a href="GridFSBucketWriteStream.html#defaultMaxListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>default<wbr/>Max<wbr/>Listeners</span></a>
@@ -74,17 +68,14 @@
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="GridFSBucketWriteStream.html#_construct" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>_construct?</span></a>
-<a href="GridFSBucketWriteStream.html#_destroy" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_destroy</span></a>
-<a href="GridFSBucketWriteStream.html#_final" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_final</span></a>
-<a href="GridFSBucketWriteStream.html#_write" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_write</span></a>
+<div class="tsd-index-list"><a href="GridFSBucketWriteStream.html#_destroy" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>_destroy</span></a>
 <a href="GridFSBucketWriteStream.html#_writev" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_writev?</span></a>
 <a href="GridFSBucketWriteStream.html#abort" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>abort</span></a>
 <a href="GridFSBucketWriteStream.html#addListener" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a>
 <a href="GridFSBucketWriteStream.html#cork" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>cork</span></a>
 <a href="GridFSBucketWriteStream.html#destroy" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>destroy</span></a>
 <a href="GridFSBucketWriteStream.html#emit" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>emit</span></a>
-<a href="GridFSBucketWriteStream.html#end" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a>
+<a href="GridFSBucketWriteStream.html#end" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a>
 <a href="GridFSBucketWriteStream.html#eventNames" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>event<wbr/>Names</span></a>
 <a href="GridFSBucketWriteStream.html#getMaxListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a>
 <a href="GridFSBucketWriteStream.html#listenerCount" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a>
@@ -101,7 +92,7 @@
 <a href="GridFSBucketWriteStream.html#setDefaultEncoding" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Default<wbr/>Encoding</span></a>
 <a href="GridFSBucketWriteStream.html#setMaxListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a>
 <a href="GridFSBucketWriteStream.html#uncork" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>uncork</span></a>
-<a href="GridFSBucketWriteStream.html#write" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>write</span></a>
+<a href="GridFSBucketWriteStream.html#write" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>write</span></a>
 <a href="GridFSBucketWriteStream.html#fromWeb" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>Web</span></a>
 <a href="GridFSBucketWriteStream.html#getEventListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a>
 <a href="GridFSBucketWriteStream.html#listenerCount-2" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a>
@@ -119,19 +110,28 @@
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L42">src/gridfs/upload.ts:42</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="bufToStore" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>buf<wbr/>To<wbr/>Store</span><a href="#bufToStore" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">buf<wbr/>To<wbr/>Store</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Buffer</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">buf<wbr/>To<wbr/>Store</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Buffer</span></div>
+<div class="tsd-comment tsd-typography"><p>Space used to store a chunk currently being inserted</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L50">src/gridfs/upload.ts:50</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L58">src/gridfs/upload.ts:58</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="chunkSizeBytes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>chunk<wbr/>Size<wbr/>Bytes</span><a href="#chunkSizeBytes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">chunk<wbr/>Size<wbr/>Bytes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">chunk<wbr/>Size<wbr/>Bytes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>The number of bytes that each chunk will be limited to</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L49">src/gridfs/upload.ts:49</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L56">src/gridfs/upload.ts:56</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="chunks" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>chunks</span><a href="#chunks" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">chunks</span><span class="tsd-signature-symbol">:</span> <a href="Collection.html" class="tsd-signature-type tsd-kind-class">Collection</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GridFSChunk.html" class="tsd-signature-type tsd-kind-interface">GridFSChunk</a><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">chunks</span><span class="tsd-signature-symbol">:</span> <a href="Collection.html" class="tsd-signature-type tsd-kind-class">Collection</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GridFSChunk.html" class="tsd-signature-type tsd-kind-interface">GridFSChunk</a><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>A Collection instance where the file&#39;s chunks are stored</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L43">src/gridfs/upload.ts:43</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L44">src/gridfs/upload.ts:44</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="closed" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>closed</span><a href="#closed" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">closed</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -156,9 +156,12 @@
 <li>Defined in node_modules/@types/node/stream.d.ts:579</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="done" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>done</span><a href="#done" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">done</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">done</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Indicates the stream is finished uploading</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L47">src/gridfs/upload.ts:47</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L52">src/gridfs/upload.ts:52</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="errored" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>errored</span><a href="#errored" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">errored</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></div>
@@ -172,55 +175,104 @@
 <li>Defined in node_modules/@types/node/stream.d.ts:589</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="filename" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>filename</span><a href="#filename" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">filename</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L44">src/gridfs/upload.ts:44</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="files" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>files</span><a href="#files" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">files</span><span class="tsd-signature-symbol">:</span> <a href="Collection.html" class="tsd-signature-type tsd-kind-class">Collection</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol">&gt;</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L45">src/gridfs/upload.ts:45</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="id" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">:</span> <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">filename</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>The name of the file</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L48">src/gridfs/upload.ts:48</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="length" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>length</span><a href="#length" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">length</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L51">src/gridfs/upload.ts:51</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="n" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>n</span><a href="#n" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">n</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L52">src/gridfs/upload.ts:52</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="options" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>options</span><a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">options</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/GridFSBucketWriteStreamOptions.html" class="tsd-signature-type tsd-kind-interface">GridFSBucketWriteStreamOptions</a></div><aside class="tsd-sources">
+<section class="tsd-panel tsd-member"><a id="files" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>files</span><a href="#files" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">files</span><span class="tsd-signature-symbol">:</span> <a href="Collection.html" class="tsd-signature-type tsd-kind-class">Collection</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol">&gt;</span></div>
+<div class="tsd-comment tsd-typography"><p>A Collection instance where the file&#39;s GridFSFile document is stored</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L46">src/gridfs/upload.ts:46</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="gridFSFile" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>gridFSFile</span><a href="#gridFSFile" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">gridFSFile</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol"> = null</span></div>
+<div class="tsd-comment tsd-typography"><p>The document containing information about the inserted file.
+This property is defined <em>after</em> the finish event has been emitted.
+It will remain <code>null</code> if an error occurs.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<h4>Example</h4><pre><code class="language-ts"><span class="hl-6">fs</span><span class="hl-1">.</span><span class="hl-0">createReadStream</span><span class="hl-1">(</span><span class="hl-2">&#39;file.txt&#39;</span><span class="hl-1">)</span><br/><span class="hl-1">  .</span><span class="hl-0">pipe</span><span class="hl-1">(</span><span class="hl-6">bucket</span><span class="hl-1">.</span><span class="hl-0">openUploadStream</span><span class="hl-1">(</span><span class="hl-2">&#39;file.txt&#39;</span><span class="hl-1">))</span><br/><span class="hl-1">  .</span><span class="hl-0">on</span><span class="hl-1">(</span><span class="hl-2">&#39;finish&#39;</span><span class="hl-1">, </span><span class="hl-4">function</span><span class="hl-1"> () {</span><br/><span class="hl-1">    </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-4">this</span><span class="hl-1">.</span><span class="hl-6">gridFSFile</span><span class="hl-1">)</span><br/><span class="hl-1">  })</span>
+</code><button>Copy</button></pre>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L92">src/gridfs/upload.ts:92</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="id" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">:</span> <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></div>
+<div class="tsd-comment tsd-typography"><p>The ObjectId used for the <code>_id</code> field on the GridFSFile document</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L54">src/gridfs/upload.ts:54</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="length" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>length</span><a href="#length" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">length</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Accumulates the number of bytes inserted as the stream uploads chunks</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L60">src/gridfs/upload.ts:60</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="n" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>n</span><a href="#n" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">n</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Accumulates the number of chunks inserted as the stream uploads file contents</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L62">src/gridfs/upload.ts:62</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="options" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>options</span><a href="#options" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">options</span><span class="tsd-signature-symbol">:</span> <a href="../interfaces/GridFSBucketWriteStreamOptions.html" class="tsd-signature-type tsd-kind-interface">GridFSBucketWriteStreamOptions</a></div>
+<div class="tsd-comment tsd-typography"><p>Options controlling the metadata inserted along with the file</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L50">src/gridfs/upload.ts:50</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="pos" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>pos</span><a href="#pos" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">pos</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">pos</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Tracks the current offset into the buffered bytes being uploaded</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L53">src/gridfs/upload.ts:53</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L64">src/gridfs/upload.ts:64</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="state" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>state</span><a href="#state" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">state</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">aborted</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">errored</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">outstandingRequests</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span><br/><span>    </span><span class="tsd-kind-property">streamEnd</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span></div>
+<div class="tsd-comment tsd-typography"><p>Contains a number of properties indicating the current state of the stream</p>
+</div>
 <div class="tsd-type-declaration">
 <h4>Type declaration</h4>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">aborted</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5></li>
+<h5><span class="tsd-kind-property">aborted</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5>
+<div class="tsd-comment tsd-typography"><p>If set the stream was intentionally aborted</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">errored</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5></li>
+<h5><span class="tsd-kind-property">errored</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5>
+<div class="tsd-comment tsd-typography"><p>If set an error occurred during insertion</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">outstanding<wbr/>Requests</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5></li>
+<h5><span class="tsd-kind-property">outstanding<wbr/>Requests</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>Indicates the number of chunks that still need to be inserted to exhaust the current buffered data</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li>
 <li class="tsd-parameter">
-<h5><span class="tsd-kind-property">stream<wbr/>End</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5></li></ul></div><aside class="tsd-sources">
+<h5><span class="tsd-kind-property">stream<wbr/>End</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></h5>
+<div class="tsd-comment tsd-typography"><p>If set the stream has ended</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L54">src/gridfs/upload.ts:54</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L66">src/gridfs/upload.ts:66</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="writable" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>writable</span><a href="#writable" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">writable</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
@@ -230,7 +282,6 @@ the stream has not been destroyed, errored, or ended.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v11.4.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.writable</p>
 <p>Inherited from Writable.writable</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:540</li></ul></aside></section>
@@ -317,32 +368,12 @@ the status of the <code>highWaterMark</code>.</p>
 <li>Defined in node_modules/@types/node/stream.d.ts:568</li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="writeConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>write<wbr/>Concern</span><a href="#writeConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">write<wbr/>Concern</span><span class="tsd-signature-symbol">?:</span> <a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L60">src/gridfs/upload.ts:60</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="CLOSE" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>CLOSE</span><a href="#CLOSE" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">CLOSE</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;close&quot;</span><span class="tsd-signature-symbol"> = &#39;close&#39;</span></div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L63">src/gridfs/upload.ts:63</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="ERROR" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>ERROR</span><a href="#ERROR" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">ERROR</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;error&quot;</span><span class="tsd-signature-symbol"> = &#39;error&#39;</span></div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L65">src/gridfs/upload.ts:65</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="FINISH" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>FINISH</span><a href="#FINISH" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">FINISH</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;finish&quot;</span><span class="tsd-signature-symbol"> = &#39;finish&#39;</span></div>
-<div class="tsd-comment tsd-typography"><p><code>end()</code> was called and the write stream successfully wrote the file metadata and all the chunks to MongoDB.</p>
+<div class="tsd-signature"><span class="tsd-kind-property">write<wbr/>Concern</span><span class="tsd-signature-symbol">?:</span> <a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></div>
+<div class="tsd-comment tsd-typography"><p>The write concern setting to be used with every insert operation</p>
 </div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L70">src/gridfs/upload.ts:70</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L77">src/gridfs/upload.ts:77</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejectionSymbol" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>capture<wbr/>Rejection<wbr/>Symbol</span><a href="#captureRejectionSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div><aside class="tsd-sources">
@@ -380,31 +411,6 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li>Defined in node_modules/@types/node/events.d.ts:321</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
-<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_construct" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>_construct</span><a href="#_construct" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="_construct._construct-1"><span class="tsd-kind-call-signature">_construct</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#_construct._construct-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
-<ul class="tsd-parameters">
-<li class="tsd-parameter-signature">
-<ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from Writable._construct</p>
-<ul>
-<li>Defined in node_modules/@types/node/stream.d.ts:604</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_destroy" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>_destroy</span><a href="#_destroy" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -432,60 +438,6 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <p>Inherited from Writable._destroy</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:605</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_final" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>_final</span><a href="#_final" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="_final._final-1"><span class="tsd-kind-call-signature">_final</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#_final._final-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
-<ul class="tsd-parameters">
-<li class="tsd-parameter-signature">
-<ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from Writable._final</p>
-<ul>
-<li>Defined in node_modules/@types/node/stream.d.ts:606</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_write" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>_write</span><a href="#_write" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="_write._write-1"><span class="tsd-kind-call-signature">_write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#_write._write-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type ">BufferEncoding</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
-<ul class="tsd-parameters">
-<li class="tsd-parameter-signature">
-<ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
-<p>Inherited from Writable._write</p>
-<ul>
-<li>Defined in node_modules/@types/node/stream.d.ts:596</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_writev" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>_writev</span><a href="#_writev" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -524,7 +476,7 @@ and deletes all chunks that have already been written.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L148">src/gridfs/upload.ts:148</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L181">src/gridfs/upload.ts:181</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="addListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Listener</span><a href="#addListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -556,7 +508,6 @@ The defined events on documents including:</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:772</li></ul></aside></li>
@@ -576,7 +527,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:773</li></ul></aside></li>
@@ -601,7 +551,6 @@ The defined events on documents including:</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:774</li></ul></aside></li>
@@ -621,7 +570,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:775</li></ul></aside></li>
@@ -646,7 +594,6 @@ The defined events on documents including:</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:776</li></ul></aside></li>
@@ -671,7 +618,6 @@ The defined events on documents including:</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:777</li></ul></aside></li>
@@ -696,7 +642,6 @@ The defined events on documents including:</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.addListener</p>
 <p>Inherited from Writable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:778</li></ul></aside></li></ul></section>
@@ -764,7 +709,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;close&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:779</li></ul></aside></li>
@@ -776,7 +720,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;drain&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:780</li></ul></aside></li>
@@ -790,7 +733,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:781</li></ul></aside></li>
@@ -802,7 +744,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;finish&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:782</li></ul></aside></li>
@@ -816,7 +757,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:783</li></ul></aside></li>
@@ -830,7 +770,6 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:784</li></ul></aside></li>
@@ -844,93 +783,80 @@ but instead implement <code>writable._destroy()</code>.</p>
 <li>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.emit</p>
 <p>Inherited from Writable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:785</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="end" class="tsd-anchor"></a>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="end" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>end</span><a href="#end" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="end.end-1"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="end.end-1"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">cb</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Tells the stream that no more data will be coming in. The stream will
-persist the remaining data to MongoDB, write the files document, and
-then emit a &#39;finish&#39; event.</p>
+<div class="tsd-comment tsd-typography"><p>Calling the <code>writable.end()</code> method signals that no more data will be written
+to the <code>Writable</code>. The optional <code>chunk</code> and <code>encoding</code> arguments allow one
+final additional chunk of data to be written immediately before closing the
+stream.</p>
+<p>Calling the <a href="GridFSBucketWriteStream.html#write" class="tsd-kind-method">write</a> method after calling <a href="GridFSBucketWriteStream.html#end" class="tsd-kind-method">end</a> will raise an error.</p>
+<pre><code class="language-js"><span class="hl-3">// Write &#39;hello, &#39; and then end with &#39;world!&#39;.</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">fs</span><span class="hl-1"> = </span><span class="hl-0">require</span><span class="hl-1">(</span><span class="hl-2">&#39;node:fs&#39;</span><span class="hl-1">);</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">file</span><span class="hl-1"> = </span><span class="hl-6">fs</span><span class="hl-1">.</span><span class="hl-0">createWriteStream</span><span class="hl-1">(</span><span class="hl-2">&#39;example.txt&#39;</span><span class="hl-1">);</span><br/><span class="hl-6">file</span><span class="hl-1">.</span><span class="hl-0">write</span><span class="hl-1">(</span><span class="hl-2">&#39;hello, &#39;</span><span class="hl-1">);</span><br/><span class="hl-6">file</span><span class="hl-1">.</span><span class="hl-0">end</span><span class="hl-1">(</span><span class="hl-2">&#39;world!&#39;</span><span class="hl-1">);</span><br/><span class="hl-3">// Writing more now is not allowed!</span>
+</code><button>Copy</button></pre>
 </div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">cb</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v0.9.4</p>
+</div><aside class="tsd-sources">
+<p>Inherited from Writable.end</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L172">src/gridfs/upload.ts:172</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="end.end-2"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li>Defined in node_modules/@types/node/stream.d.ts:693</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="end.end-2"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">cb</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type ">Buffer</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">cb</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+<li class="tsd-description">
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
+<p>Inherited from Writable.end</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L173">src/gridfs/upload.ts:173</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="end.end-3"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li>Defined in node_modules/@types/node/stream.d.ts:694</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="end.end-3"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span>, <span class="tsd-kind-parameter">cb</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">callback</span>: <a href="../types/Callback.html" class="tsd-signature-type tsd-kind-type-alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L174">src/gridfs/upload.ts:174</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="end.end-4"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type ">BufferEncoding</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">cb</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type ">Buffer</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <a href="../types/Callback.html" class="tsd-signature-type tsd-kind-type-alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
+<p>Inherited from Writable.end</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L175">src/gridfs/upload.ts:175</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="end.end-5"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type ">Buffer</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type ">BufferEncoding</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L176">src/gridfs/upload.ts:176</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="end.end-6"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a><a href="#end.end-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type ">Buffer</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BufferEncoding</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <a href="../types/Callback.html" class="tsd-signature-type tsd-kind-type-alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/GridFSFile.html" class="tsd-signature-type tsd-kind-interface">GridFSFile</a><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.end</p>
-<p>Overrides Writable.end</p>
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L177">src/gridfs/upload.ts:177</a></li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/stream.d.ts:695</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="eventNames" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>event<wbr/>Names</span><a href="#eventNames" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -945,7 +871,6 @@ listeners. The values in the array are strings or <code>Symbol</code>s.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v6.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.eventNames</p>
 <p>Inherited from Writable.eventNames</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:673</li></ul></aside></li></ul></section>
@@ -961,7 +886,6 @@ set by <code>emitter.setMaxListeners(n)</code> or defaults to <a href="GridFSBuc
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v1.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.getMaxListeners</p>
 <p>Inherited from Writable.getMaxListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:525</li></ul></aside></li></ul></section>
@@ -991,7 +915,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v3.2.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.listenerCount</p>
 <p>Inherited from Writable.listenerCount</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:619</li></ul></aside></li></ul></section>
@@ -1013,7 +936,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.1.26</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.listeners</p>
 <p>Inherited from Writable.listeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:538</li></ul></aside></li></ul></section>
@@ -1046,7 +968,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v10.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.off</p>
 <p>Inherited from Writable.off</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:498</li></ul></aside></li></ul></section>
@@ -1069,7 +990,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:786</li></ul></aside></li>
@@ -1089,7 +1009,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:787</li></ul></aside></li>
@@ -1114,7 +1033,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:788</li></ul></aside></li>
@@ -1134,7 +1052,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:789</li></ul></aside></li>
@@ -1159,7 +1076,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:790</li></ul></aside></li>
@@ -1184,7 +1100,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:791</li></ul></aside></li>
@@ -1209,7 +1124,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.on</p>
 <p>Inherited from Writable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:792</li></ul></aside></li></ul></section>
@@ -1232,7 +1146,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:793</li></ul></aside></li>
@@ -1252,7 +1165,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:794</li></ul></aside></li>
@@ -1277,7 +1189,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:795</li></ul></aside></li>
@@ -1297,7 +1208,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:796</li></ul></aside></li>
@@ -1322,7 +1232,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:797</li></ul></aside></li>
@@ -1347,7 +1256,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:798</li></ul></aside></li>
@@ -1372,7 +1280,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.once</p>
 <p>Inherited from Writable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:799</li></ul></aside></li></ul></section>
@@ -1419,7 +1326,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:800</li></ul></aside></li>
@@ -1439,7 +1345,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:801</li></ul></aside></li>
@@ -1464,7 +1369,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:802</li></ul></aside></li>
@@ -1484,7 +1388,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:803</li></ul></aside></li>
@@ -1509,7 +1412,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:804</li></ul></aside></li>
@@ -1534,7 +1436,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:805</li></ul></aside></li>
@@ -1559,7 +1460,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependListener</p>
 <p>Inherited from Writable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:806</li></ul></aside></li></ul></section>
@@ -1582,7 +1482,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:807</li></ul></aside></li>
@@ -1602,7 +1501,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:808</li></ul></aside></li>
@@ -1627,7 +1525,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:809</li></ul></aside></li>
@@ -1647,7 +1544,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:810</li></ul></aside></li>
@@ -1672,7 +1568,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:811</li></ul></aside></li>
@@ -1697,7 +1592,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:812</li></ul></aside></li>
@@ -1722,7 +1616,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.prependOnceListener</p>
 <p>Inherited from Writable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:813</li></ul></aside></li></ul></section>
@@ -1745,7 +1638,6 @@ including any wrappers (such as those created by <code>.once()</code>).</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v9.4.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.rawListeners</p>
 <p>Inherited from Writable.rawListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:569</li></ul></aside></li></ul></section>
@@ -1769,7 +1661,6 @@ component or module (e.g. sockets or file streams).</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.1.26</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeAllListeners</p>
 <p>Inherited from Writable.removeAllListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:509</li></ul></aside></li></ul></section>
@@ -1792,7 +1683,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:814</li></ul></aside></li>
@@ -1812,7 +1702,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:815</li></ul></aside></li>
@@ -1837,7 +1726,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:816</li></ul></aside></li>
@@ -1857,7 +1745,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:817</li></ul></aside></li>
@@ -1882,7 +1769,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:818</li></ul></aside></li>
@@ -1907,7 +1793,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><span class="tsd-kind-parameter">src</span>: <span class="tsd-signature-type ">Readable</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:819</li></ul></aside></li>
@@ -1932,7 +1817,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketWriteStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketWriteStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.removeListener</p>
 <p>Inherited from Writable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:820</li></ul></aside></li></ul></section>
@@ -1978,7 +1862,6 @@ modified for this specific <code>EventEmitter</code> instance. The value can be 
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.3.5</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.setMaxListeners</p>
 <p>Inherited from Writable.setMaxListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:519</li></ul></aside></li></ul></section>
@@ -2007,72 +1890,101 @@ data.</p>
 <p>Inherited from Writable.uncork</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:744</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="write" class="tsd-anchor"></a>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="write" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>write</span><a href="#write" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="write.write-1"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="write.write-1"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Write a buffer to the stream.</p>
+<div class="tsd-comment tsd-typography"><p>The <code>writable.write()</code> method writes some data to the stream, and calls the
+supplied <code>callback</code> once the data has been fully handled. If an error
+occurs, the <code>callback</code> will be called with the error as its
+first argument. The <code>callback</code> is called asynchronously and before <code>&#39;error&#39;</code> is
+emitted.</p>
+<p>The return value is <code>true</code> if the internal buffer is less than the<code>highWaterMark</code> configured when the stream was created after admitting <code>chunk</code>.
+If <code>false</code> is returned, further attempts to write data to the stream should
+stop until the <code>&#39;drain&#39;</code> event is emitted.</p>
+<p>While a stream is not draining, calls to <code>write()</code> will buffer <code>chunk</code>, and
+return false. Once all currently buffered chunks are drained (accepted for
+delivery by the operating system), the <code>&#39;drain&#39;</code> event will be emitted.
+Once <code>write()</code> returns false, do not write more chunks
+until the <code>&#39;drain&#39;</code> event is emitted. While calling <code>write()</code> on a stream that
+is not draining is allowed, Node.js will buffer all written chunks until
+maximum memory usage occurs, at which point it will abort unconditionally.
+Even before it aborts, high memory usage will cause poor garbage collector
+performance and high RSS (which is not typically released back to the system,
+even after the memory is no longer required). Since TCP sockets may never
+drain if the remote peer does not read the data, writing a socket that is
+not draining may lead to a remotely exploitable vulnerability.</p>
+<p>Writing data while the stream is not draining is particularly
+problematic for a <code>Transform</code>, because the <code>Transform</code> streams are paused
+by default until they are piped or a <code>&#39;data&#39;</code> or <code>&#39;readable&#39;</code> event handler
+is added.</p>
+<p>If the data to be written can be generated or fetched on demand, it is
+recommended to encapsulate the logic into a <code>Readable</code> and use <a href="GridFSBucketReadStream.html#pipe" class="tsd-kind-method">pipe</a>. However, if calling <code>write()</code> is preferred, it is
+possible to respect backpressure and avoid memory issues using the <code>&#39;drain&#39;</code> event:</p>
+<pre><code class="language-js"><span class="hl-4">function</span><span class="hl-1"> </span><span class="hl-0">write</span><span class="hl-1">(</span><span class="hl-6">data</span><span class="hl-1">, </span><span class="hl-6">cb</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-7">if</span><span class="hl-1"> (!</span><span class="hl-6">stream</span><span class="hl-1">.</span><span class="hl-0">write</span><span class="hl-1">(</span><span class="hl-6">data</span><span class="hl-1">)) {</span><br/><span class="hl-1">    </span><span class="hl-6">stream</span><span class="hl-1">.</span><span class="hl-0">once</span><span class="hl-1">(</span><span class="hl-2">&#39;drain&#39;</span><span class="hl-1">, </span><span class="hl-6">cb</span><span class="hl-1">);</span><br/><span class="hl-1">  } </span><span class="hl-7">else</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">process</span><span class="hl-1">.</span><span class="hl-0">nextTick</span><span class="hl-1">(</span><span class="hl-6">cb</span><span class="hl-1">);</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">}</span><br/><br/><span class="hl-3">// Wait for cb to be called before doing any other write.</span><br/><span class="hl-0">write</span><span class="hl-1">(</span><span class="hl-2">&#39;hello&#39;</span><span class="hl-1">, () </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-2">&#39;Write completed, do more writes now.&#39;</span><span class="hl-1">);</span><br/><span class="hl-1">});</span>
+</code><button>Copy</button></pre>
+<p>A <code>Writable</code> stream in object mode will always ignore the <code>encoding</code> argument.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span></h5>
-<div class="tsd-comment tsd-typography"><p>Buffer to write</p>
+<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5>
+<div class="tsd-comment tsd-typography"><p>Optional data to write. For streams not operating in object mode, <code>chunk</code> must be a string, <code>Buffer</code> or <code>Uint8Array</code>. For object mode streams, <code>chunk</code> may be any
+JavaScript value other than <code>null</code>.</p>
 </div>
-<div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><p>False if this write required flushing a chunk to MongoDB. True otherwise.</p>
+<div class="tsd-comment tsd-typography"></div></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<div class="tsd-comment tsd-typography"><p>Callback for when this chunk of data is flushed.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><p><code>false</code> if the stream wishes for the calling code to wait for the <code>&#39;drain&#39;</code> event to be emitted before continuing to write additional data; otherwise <code>true</code>.</p>
 
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.write</p>
-<p>Overrides Writable.write</p>
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v0.9.4</p>
+</div><aside class="tsd-sources">
+<p>Inherited from Writable.write</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L126">src/gridfs/upload.ts:126</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="write.write-2"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li>Defined in node_modules/@types/node/stream.d.ts:663</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="write.write-2"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span></h5></li>
+<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li>
 <li>
-<h5><span class="tsd-kind-parameter">callback</span>: <a href="../types/Callback.html" class="tsd-signature-type tsd-kind-type-alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.write</p>
-<p>Overrides Writable.write</p>
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L127">src/gridfs/upload.ts:127</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="write.write-3"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type ">BufferEncoding</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">callback</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BufferEncoding</span></h5></li></ul></div>
+<h5><span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Error</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.write</p>
-<p>Overrides Writable.write</p>
+<p>Inherited from Writable.write</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L128">src/gridfs/upload.ts:128</a></li></ul></aside></li>
-<li class="tsd-signature tsd-anchor-link" id="write.write-4"><span class="tsd-kind-call-signature">write</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">chunk</span>, <span class="tsd-kind-parameter">encoding</span>, <span class="tsd-kind-parameter">callback</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><a href="#write.write-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Buffer</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">encoding</span>: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">BufferEncoding</span></h5></li>
-<li>
-<h5><span class="tsd-kind-parameter">callback</span>: <a href="../types/Callback.html" class="tsd-signature-type tsd-kind-type-alias">Callback</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.WritableStream.write</p>
-<p>Overrides Writable.write</p>
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/upload.ts#L129">src/gridfs/upload.ts:129</a></li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/stream.d.ts:664</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="fromWeb" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>from<wbr/>Web</span><a href="#fromWeb" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -2313,6 +2225,7 @@ special handling:</p>
 <li><a href="#errored" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>errored</span></a></li>
 <li><a href="#filename" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>filename</span></a></li>
 <li><a href="#files" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>files</span></a></li>
+<li><a href="#gridFSFile" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>gridFSFile</span></a></li>
 <li><a href="#id" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>id</span></a></li>
 <li><a href="#length" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>length</span></a></li>
 <li><a href="#n" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>n</span></a></li>
@@ -2328,24 +2241,18 @@ special handling:</p>
 <li><a href="#writableNeedDrain" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>writable<wbr/>Need<wbr/>Drain</span></a></li>
 <li><a href="#writableObjectMode" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>writable<wbr/>Object<wbr/>Mode</span></a></li>
 <li><a href="#writeConcern" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>write<wbr/>Concern</span></a></li>
-<li><a href="#CLOSE" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>CLOSE</span></a></li>
-<li><a href="#ERROR" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>ERROR</span></a></li>
-<li><a href="#FINISH" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>FINISH</span></a></li>
 <li><a href="#captureRejectionSymbol" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejection<wbr/>Symbol</span></a></li>
 <li><a href="#captureRejections" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejections</span></a></li>
 <li><a href="#defaultMaxListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>default<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#errorMonitor" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>error<wbr/>Monitor</span></a></li>
-<li><a href="#_construct" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_construct</span></a></li>
 <li><a href="#_destroy" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_destroy</span></a></li>
-<li><a href="#_final" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_final</span></a></li>
-<li><a href="#_write" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_write</span></a></li>
 <li><a href="#_writev" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>_writev</span></a></li>
 <li><a href="#abort" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>abort</span></a></li>
 <li><a href="#addListener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a></li>
 <li><a href="#cork" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>cork</span></a></li>
 <li><a href="#destroy" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>destroy</span></a></li>
 <li><a href="#emit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>emit</span></a></li>
-<li><a href="#end" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a></li>
+<li><a href="#end" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a></li>
 <li><a href="#eventNames" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>event<wbr/>Names</span></a></li>
 <li><a href="#getMaxListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#listenerCount" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a></li>
@@ -2362,7 +2269,7 @@ special handling:</p>
 <li><a href="#setDefaultEncoding" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Default<wbr/>Encoding</span></a></li>
 <li><a href="#setMaxListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>set<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#uncork" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>uncork</span></a></li>
-<li><a href="#write" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>write</span></a></li>
+<li><a href="#write" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>write</span></a></li>
 <li><a href="#fromWeb" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>Web</span></a></li>
 <li><a href="#getEventListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a></li>
 <li><a href="#listenerCount-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a></li>
@@ -2388,6 +2295,7 @@ special handling:</p>
 <li><a href="../modules.html#MinKey"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Min<wbr/>Key</span></a></li>
 <li><a href="../modules.html#ObjectId"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Object<wbr/>Id</span></a></li>
 <li><a href="../modules.html#Timestamp"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Timestamp</span></a></li>
+<li><a href="../modules.html#UUID"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>UUID</span></a></li>
 <li><a href="../modules.html#deserialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>deserialize</span></a></li>
 <li><a href="../modules.html#serialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>serialize</span></a></li>
 <li><a href="../modules/BSON.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>BSON</span></a></li>
@@ -2399,6 +2307,7 @@ special handling:</p>
 <li><a href="BulkWriteResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Bulk<wbr/>Write<wbr/>Result</span></a></li>
 <li><a href="CancellationToken.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Cancellation<wbr/>Token</span></a></li>
 <li><a href="ChangeStream.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Change<wbr/>Stream</span></a></li>
+<li><a href="ClientEncryption.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Encryption</span></a></li>
 <li><a href="ClientSession.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Session</span></a></li>
 <li><a href="Collection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Collection</span></a></li>
 <li><a href="CommandFailedEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Command<wbr/>Failed<wbr/>Event</span></a></li>
@@ -2435,6 +2344,12 @@ special handling:</p>
 <li><a href="MongoClient.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Client</span></a></li>
 <li><a href="MongoCompatibilityError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Compatibility<wbr/>Error</span></a></li>
 <li><a href="MongoCredentials.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Credentials</span></a></li>
+<li><a href="MongoCryptAzureKMSRequestError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>AzureKMSRequest<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateDataKeyError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateEncryptedCollectionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Encrypted<wbr/>Collection<wbr/>Error</span></a></li>
+<li><a href="MongoCryptError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Error</span></a></li>
+<li><a href="MongoCryptInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
+<li><a href="MongoCryptKMSRequestNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>CryptKMSRequest<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="MongoCursorExhaustedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>Exhausted<wbr/>Error</span></a></li>
 <li><a href="MongoCursorInUseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>In<wbr/>Use<wbr/>Error</span></a></li>
 <li><a href="MongoDBCollectionNamespace.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoDBCollection<wbr/>Namespace</span></a></li>
@@ -2487,15 +2402,14 @@ special handling:</p>
 <li><a href="WriteConcern.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern</span></a></li>
 <li><a href="WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
-<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AddUserOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>User<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/Auth.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth</span></a></li>
 <li><a href="../interfaces/AuthMechanismProperties.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth<wbr/>Mechanism<wbr/>Properties</span></a></li>
-<li><a href="../interfaces/AutoEncrypter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encrypter</span></a></li>
 <li><a href="../interfaces/AutoEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AutoEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AzureEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Azure<wbr/>Encryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BSONSerializeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>BSONSerialize<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BulkWriteOperationError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Operation<wbr/>Error</span></a></li>
 <li><a href="../interfaces/BulkWriteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Options</span></a></li>
@@ -2519,15 +2433,19 @@ special handling:</p>
 <li><a href="../interfaces/ChangeStreamReplaceDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Replace<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamReshardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Reshard<wbr/>Collection<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamShardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Shard<wbr/>Collection<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ChangeStreamSplitEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Split<wbr/>Event</span></a></li>
 <li><a href="../interfaces/ChangeStreamUpdateDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Update<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ClientEncryptionCreateDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionEncryptOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Encrypt<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Result</span></a></li>
 <li><a href="../interfaces/ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="../interfaces/ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="../interfaces/ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/CollStats.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats</span></a></li>
-<li><a href="../interfaces/CollStatsOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollectionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Info</span></a></li>
 <li><a href="../interfaces/CollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Options</span></a></li>
@@ -2540,6 +2458,7 @@ special handling:</p>
 <li><a href="../interfaces/CreateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CreateIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CursorStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cursor<wbr/>Stream<wbr/>Options</span></a></li>
+<li><a href="../interfaces/DataKey.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Data<wbr/>Key</span></a></li>
 <li><a href="../interfaces/DbOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DbStatsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DeleteManyModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delete<wbr/>Many<wbr/>Model</span></a></li>
@@ -2552,13 +2471,13 @@ special handling:</p>
 <li><a href="../interfaces/EndSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>End<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ErrorDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Error<wbr/>Description</span></a></li>
 <li><a href="../interfaces/EstimatedDocumentCountOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Estimated<wbr/>Document<wbr/>Count<wbr/>Options</span></a></li>
-<li><a href="../interfaces/EvalOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Eval<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ExplainOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Explain<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/FindOneAndDeleteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Delete<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndUpdateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Update<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>Options</span></a></li>
+<li><a href="../interfaces/GCPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GCPEncryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptionsWithRevision.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options<wbr/>With<wbr/>Revision</span></a></li>
@@ -2574,6 +2493,7 @@ special handling:</p>
 <li><a href="../interfaces/InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="../interfaces/InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="../interfaces/KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="../interfaces/ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
@@ -2588,6 +2508,7 @@ special handling:</p>
 <li><a href="../interfaces/OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="../interfaces/ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
+<li><a href="../interfaces/RangeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Range<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceFromOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>From<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceLikeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Like<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Options</span></a></li>
@@ -2595,7 +2516,6 @@ special handling:</p>
 <li><a href="../interfaces/ReplaceOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/ReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ResumeOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Resume<wbr/>Options</span></a></li>
-<li><a href="../interfaces/RoleSpecification.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Role<wbr/>Specification</span></a></li>
 <li><a href="../interfaces/RootFilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Root<wbr/>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/SearchIndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Search<wbr/>Index<wbr/>Description</span></a></li>
 <li><a href="../interfaces/SelectServerOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Select<wbr/>Server<wbr/>Options</span></a></li>
@@ -2612,7 +2532,6 @@ special handling:</p>
 <li><a href="../interfaces/UpdateResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Result</span></a></li>
 <li><a href="../interfaces/UpdateStatement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Statement</span></a></li>
 <li><a href="../interfaces/ValidateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Validate<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/WiredTigerData.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wired<wbr/>Tiger<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernErrorData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Error<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Options</span></a></li>
 <li><a href="../interfaces/WriteConcernSettings.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Settings</span></a></li>
@@ -2625,13 +2544,17 @@ special handling:</p>
 <li><a href="../types/ArrayElement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Element</span></a></li>
 <li><a href="../types/ArrayOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Operator</span></a></li>
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
+<li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
+<li><a href="../types/CSFLEKMSTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>CSFLEKMSTls<wbr/>Options</span></a></li>
 <li><a href="../types/Callback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Callback</span></a></li>
 <li><a href="../types/ChangeStreamDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Document</span></a></li>
 <li><a href="../types/ChangeStreamEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Events</span></a></li>
+<li><a href="../types/ClientEncryptionDataKeyProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Data<wbr/>Key<wbr/>Provider</span></a></li>
+<li><a href="../types/ClientEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
 <li><a href="../types/ClientSessionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Session<wbr/>Events</span></a></li>
 <li><a href="../types/CommonEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Common<wbr/>Events</span></a></li>
 <li><a href="../types/Compressor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor</span></a></li>

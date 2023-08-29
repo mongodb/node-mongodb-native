@@ -25,11 +25,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="tsd-signature-type ">Readable</span>
 <ul class="tsd-hierarchy">
-<li><span class="target">GridFSBucketReadStream</span></li></ul></li></ul></section>
-<section class="tsd-panel">
-<h4>Implements</h4>
-<ul class="tsd-hierarchy">
-<li><span class="tsd-signature-type ">ReadableStream</span></li></ul></section><aside class="tsd-sources">
+<li><span class="target">GridFSBucketReadStream</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L81">src/gridfs/download.ts:81</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
@@ -51,10 +47,6 @@
 <a href="GridFSBucketReadStream.html#readableHighWaterMark" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>High<wbr/>Water<wbr/>Mark</span></a>
 <a href="GridFSBucketReadStream.html#readableLength" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>Length</span></a>
 <a href="GridFSBucketReadStream.html#readableObjectMode" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>Object<wbr/>Mode</span></a>
-<a href="GridFSBucketReadStream.html#CLOSE" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>CLOSE</span></a>
-<a href="GridFSBucketReadStream.html#DATA" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>DATA</span></a>
-<a href="GridFSBucketReadStream.html#END" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>END</span></a>
-<a href="GridFSBucketReadStream.html#ERROR" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>ERROR</span></a>
 <a href="GridFSBucketReadStream.html#FILE" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>FILE</span></a>
 <a href="GridFSBucketReadStream.html#captureRejectionSymbol" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejection<wbr/>Symbol</span></a>
 <a href="GridFSBucketReadStream.html#captureRejections" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejections</span></a>
@@ -70,7 +62,7 @@
 <a href="GridFSBucketReadStream.html#addListener" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a>
 <a href="GridFSBucketReadStream.html#destroy" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>destroy</span></a>
 <a href="GridFSBucketReadStream.html#emit" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>emit</span></a>
-<a href="GridFSBucketReadStream.html#end-1" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a>
+<a href="GridFSBucketReadStream.html#end" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a>
 <a href="GridFSBucketReadStream.html#eventNames" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>event<wbr/>Names</span></a>
 <a href="GridFSBucketReadStream.html#getMaxListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a>
 <a href="GridFSBucketReadStream.html#isPaused" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Paused</span></a>
@@ -149,7 +141,6 @@ the stream has not been destroyed or emitted <code>&#39;error&#39;</code> or <co
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v11.4.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.readable</p>
 <p>Inherited from Readable.readable</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:85</li></ul></aside></section>
@@ -244,42 +235,6 @@ the status of the <code>highWaterMark</code>.</p>
 <p>Inherited from Readable.readableObjectMode</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:124</li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="CLOSE" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>CLOSE</span><a href="#CLOSE" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">CLOSE</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;close&quot;</span><span class="tsd-signature-symbol"> = ...</span></div>
-<div class="tsd-comment tsd-typography"><p>Fired when the stream is exhausted and the underlying cursor is killed</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L109">src/gridfs/download.ts:109</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="DATA" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>DATA</span><a href="#DATA" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">DATA</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;data&quot;</span><span class="tsd-signature-symbol"> = ...</span></div>
-<div class="tsd-comment tsd-typography"><p>Emitted when a chunk of data is available to be consumed.</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L99">src/gridfs/download.ts:99</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="END" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>END</span><a href="#END" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">END</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;end&quot;</span><span class="tsd-signature-symbol"> = ...</span></div>
-<div class="tsd-comment tsd-typography"><p>Fired when the stream is exhausted (no more data events).</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L104">src/gridfs/download.ts:104</a></li></ul></aside></section>
-<section class="tsd-panel tsd-member"><a id="ERROR" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>ERROR</span><a href="#ERROR" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">ERROR</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;error&quot;</span><span class="tsd-signature-symbol"> = ...</span></div>
-<div class="tsd-comment tsd-typography"><p>An error occurred</p>
-</div>
-<div class="tsd-comment tsd-typography">
-<h4>Event</h4></div><aside class="tsd-sources">
-<ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L89">src/gridfs/download.ts:89</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="FILE" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>FILE</span><a href="#FILE" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">FILE</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;file&quot;</span><span class="tsd-signature-symbol"> = ...</span></div>
@@ -288,7 +243,7 @@ the status of the <code>highWaterMark</code>.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Event</h4></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L94">src/gridfs/download.ts:94</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L89">src/gridfs/download.ts:89</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejectionSymbol" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>capture<wbr/>Rejection<wbr/>Symbol</span><a href="#captureRejectionSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div><aside class="tsd-sources">
@@ -332,7 +287,6 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <li class="tsd-signature tsd-anchor-link" id="_asyncIterator_._asyncIterator_-1"><span class="tsd-kind-call-signature">[async<wbr/>Iterator]</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><a href="#_asyncIterator_._asyncIterator_-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">AsyncIterableIterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.[asyncIterator]</p>
 <p>Inherited from Readable.[asyncIterator]</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:503</li></ul></aside></li></ul></section>
@@ -400,7 +354,7 @@ the &#39;close&#39; event once the cursor is successfully killed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L186">src/gridfs/download.ts:186</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L166">src/gridfs/download.ts:166</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="addListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Listener</span><a href="#addListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -433,7 +387,6 @@ The defined events on documents including:</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:447</li></ul></aside></li>
@@ -458,7 +411,6 @@ The defined events on documents including:</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:448</li></ul></aside></li>
@@ -478,7 +430,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:449</li></ul></aside></li>
@@ -503,7 +454,6 @@ The defined events on documents including:</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:450</li></ul></aside></li>
@@ -523,7 +473,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:451</li></ul></aside></li>
@@ -543,7 +492,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:452</li></ul></aside></li>
@@ -563,7 +511,6 @@ The defined events on documents including:</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:453</li></ul></aside></li>
@@ -588,7 +535,6 @@ The defined events on documents including:</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.addListener</p>
 <p>Inherited from Readable.addListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:454</li></ul></aside></li></ul></section>
@@ -629,7 +575,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;close&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:455</li></ul></aside></li>
@@ -643,7 +588,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:456</li></ul></aside></li>
@@ -655,7 +599,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;end&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:457</li></ul></aside></li>
@@ -669,7 +612,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:458</li></ul></aside></li>
@@ -681,7 +623,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;pause&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:459</li></ul></aside></li>
@@ -693,7 +634,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;readable&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:460</li></ul></aside></li>
@@ -705,7 +645,6 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">&quot;resume&quot;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:461</li></ul></aside></li>
@@ -719,14 +658,13 @@ further errors except from <code>_destroy()</code> may be emitted as <code>&#39;
 <li>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.emit</p>
 <p>Inherited from Readable.emit</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:462</li></ul></aside></li></ul></section>
-<section class="tsd-panel tsd-member"><a id="end-1" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><span>end</span><a href="#end-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<section class="tsd-panel tsd-member"><a id="end" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>end</span><a href="#end" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="end-1.end-2"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">end</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a><a href="#end-1.end-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="end.end-1"><span class="tsd-kind-call-signature">end</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">end</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a><a href="#end.end-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Sets the 0-based offset in bytes to start streaming from. Throws
 an error if this stream has entered flowing mode
@@ -743,7 +681,7 @@ an error if this stream has entered flowing mode
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L175">src/gridfs/download.ts:175</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L155">src/gridfs/download.ts:155</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="eventNames" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>event<wbr/>Names</span><a href="#eventNames" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -758,7 +696,6 @@ listeners. The values in the array are strings or <code>Symbol</code>s.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v6.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.eventNames</p>
 <p>Inherited from Readable.eventNames</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:673</li></ul></aside></li></ul></section>
@@ -774,7 +711,6 @@ set by <code>emitter.setMaxListeners(n)</code> or defaults to <a href="GridFSBuc
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v1.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.getMaxListeners</p>
 <p>Inherited from Readable.getMaxListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:525</li></ul></aside></li></ul></section>
@@ -793,7 +729,6 @@ use this method directly.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.11.14</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.isPaused</p>
 <p>Inherited from Readable.isPaused</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:302</li></ul></aside></li></ul></section>
@@ -823,7 +758,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v3.2.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.listenerCount</p>
 <p>Inherited from Readable.listenerCount</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:619</li></ul></aside></li></ul></section>
@@ -845,7 +779,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.1.26</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.listeners</p>
 <p>Inherited from Readable.listeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:538</li></ul></aside></li></ul></section>
@@ -878,7 +811,6 @@ in the list of the listeners of the event.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v10.0.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.off</p>
 <p>Inherited from Readable.off</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:498</li></ul></aside></li></ul></section>
@@ -901,7 +833,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:463</li></ul></aside></li>
@@ -926,7 +857,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:464</li></ul></aside></li>
@@ -946,7 +876,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:465</li></ul></aside></li>
@@ -971,7 +900,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:466</li></ul></aside></li>
@@ -991,7 +919,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:467</li></ul></aside></li>
@@ -1011,7 +938,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:468</li></ul></aside></li>
@@ -1031,7 +957,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:469</li></ul></aside></li>
@@ -1056,7 +981,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.on</p>
 <p>Inherited from Readable.on</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:470</li></ul></aside></li></ul></section>
@@ -1079,7 +1003,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:471</li></ul></aside></li>
@@ -1104,7 +1027,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:472</li></ul></aside></li>
@@ -1124,7 +1046,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:473</li></ul></aside></li>
@@ -1149,7 +1070,6 @@ in the list of the listeners of the event.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:474</li></ul></aside></li>
@@ -1169,7 +1089,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:475</li></ul></aside></li>
@@ -1189,7 +1108,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:476</li></ul></aside></li>
@@ -1209,7 +1127,6 @@ in the list of the listeners of the event.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:477</li></ul></aside></li>
@@ -1234,7 +1151,6 @@ in the list of the listeners of the event.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.once</p>
 <p>Inherited from Readable.once</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:478</li></ul></aside></li></ul></section>
@@ -1254,7 +1170,6 @@ becomes available will remain in the internal buffer.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.pause</p>
 <p>Inherited from Readable.pause</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:266</li></ul></aside></li></ul></section>
@@ -1279,7 +1194,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-property">end</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type tsd-kind-type-parameter">T</span></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.pipe</p>
 <p>Inherited from Readable.pipe</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:26</li></ul></aside></li></ul></section>
@@ -1302,7 +1216,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:479</li></ul></aside></li>
@@ -1327,7 +1240,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:480</li></ul></aside></li>
@@ -1347,7 +1259,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:481</li></ul></aside></li>
@@ -1372,7 +1283,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:482</li></ul></aside></li>
@@ -1392,7 +1302,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:483</li></ul></aside></li>
@@ -1412,7 +1321,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:484</li></ul></aside></li>
@@ -1432,7 +1340,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:485</li></ul></aside></li>
@@ -1457,7 +1364,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependListener</p>
 <p>Inherited from Readable.prependListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:486</li></ul></aside></li></ul></section>
@@ -1480,7 +1386,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:487</li></ul></aside></li>
@@ -1505,7 +1410,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:488</li></ul></aside></li>
@@ -1525,7 +1429,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:489</li></ul></aside></li>
@@ -1550,7 +1453,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:490</li></ul></aside></li>
@@ -1570,7 +1472,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:491</li></ul></aside></li>
@@ -1590,7 +1491,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:492</li></ul></aside></li>
@@ -1610,7 +1510,6 @@ becomes available will remain in the internal buffer.</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:493</li></ul></aside></li>
@@ -1635,7 +1534,6 @@ becomes available will remain in the internal buffer.</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.prependOnceListener</p>
 <p>Inherited from Readable.prependOnceListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:494</li></ul></aside></li></ul></section>
@@ -1674,7 +1572,6 @@ including any wrappers (such as those created by <code>.once()</code>).</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v9.4.0</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.rawListeners</p>
 <p>Inherited from Readable.rawListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:569</li></ul></aside></li></ul></section>
@@ -1729,7 +1626,6 @@ been emitted will return <code>null</code>. No runtime error will be raised.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.read</p>
 <p>Inherited from Readable.read</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:219</li></ul></aside></li></ul></section>
@@ -1753,7 +1649,6 @@ component or module (e.g. sockets or file streams).</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.1.26</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeAllListeners</p>
 <p>Inherited from Readable.removeAllListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:509</li></ul></aside></li></ul></section>
@@ -1776,7 +1671,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:495</li></ul></aside></li>
@@ -1801,7 +1695,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><span class="tsd-kind-parameter">chunk</span>: <span class="tsd-signature-type">any</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:496</li></ul></aside></li>
@@ -1821,7 +1714,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:497</li></ul></aside></li>
@@ -1846,7 +1738,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><span class="tsd-kind-parameter">err</span>: <span class="tsd-signature-type ">Error</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:498</li></ul></aside></li>
@@ -1866,7 +1757,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:499</li></ul></aside></li>
@@ -1886,7 +1776,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:500</li></ul></aside></li>
@@ -1906,7 +1795,6 @@ component or module (e.g. sockets or file streams).</p>
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:501</li></ul></aside></li>
@@ -1931,7 +1819,6 @@ component or module (e.g. sockets or file streams).</p>
 <h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.removeListener</p>
 <p>Inherited from Readable.removeListener</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:502</li></ul></aside></li></ul></section>
@@ -1952,7 +1839,6 @@ stream without actually processing any of that data:</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.resume</p>
 <p>Inherited from Readable.resume</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:285</li></ul></aside></li></ul></section>
@@ -1985,7 +1871,6 @@ pulled from the stream as <code>Buffer</code> objects.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.setEncoding</p>
 <p>Inherited from Readable.setEncoding</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:244</li></ul></aside></li></ul></section>
@@ -2009,7 +1894,6 @@ modified for this specific <code>EventEmitter</code> instance. The value can be 
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.3.5</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.setMaxListeners</p>
 <p>Inherited from Readable.setMaxListeners</p>
 <ul>
 <li>Defined in node_modules/@types/node/events.d.ts:519</li></ul></aside></li></ul></section>
@@ -2033,7 +1917,7 @@ an error if this stream has entered flowing mode
 <h4 class="tsd-returns-title">Returns <a href="GridFSBucketReadStream.html" class="tsd-signature-type tsd-kind-class">GridFSBucketReadStream</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L162">src/gridfs/download.ts:162</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/gridfs/download.ts#L142">src/gridfs/download.ts:142</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="unpipe" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>unpipe</span><a href="#unpipe" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -2059,7 +1943,6 @@ the method does nothing.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.unpipe</p>
 <p>Inherited from Readable.unpipe</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:329</li></ul></aside></li></ul></section>
@@ -2108,7 +1991,6 @@ streams, <code>chunk</code> may be any JavaScript value.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.11</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.unshift</p>
 <p>Inherited from Readable.unshift</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:395</li></ul></aside></li></ul></section>
@@ -2140,7 +2022,6 @@ libraries.</p>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v0.9.4</p>
 </div><aside class="tsd-sources">
-<p>Implementation of NodeJS.ReadableStream.wrap</p>
 <p>Inherited from Readable.wrap</p>
 <ul>
 <li>Defined in node_modules/@types/node/stream.d.ts:421</li></ul></aside></li></ul></section>
@@ -2176,7 +2057,7 @@ libraries.</p>
 <li>
 <h5><span class="tsd-kind-parameter">readableStream</span>: <span class="tsd-signature-type ">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5></li>
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-type ">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">ReadableOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;objectMode&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;highWaterMark&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;encoding&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;signal&quot;</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-type ">Pick</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type ">ReadableOptions</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">&quot;objectMode&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;highWaterMark&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;signal&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;encoding&quot;</span><span class="tsd-signature-symbol">&gt;</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Readable</span></h4>
 <div class="tsd-comment tsd-typography">
 <h4>Since</h4><p>v17.0.0</p>
@@ -2424,10 +2305,6 @@ special handling:</p>
 <li><a href="#readableHighWaterMark" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>High<wbr/>Water<wbr/>Mark</span></a></li>
 <li><a href="#readableLength" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>Length</span></a></li>
 <li><a href="#readableObjectMode" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>readable<wbr/>Object<wbr/>Mode</span></a></li>
-<li><a href="#CLOSE" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>CLOSE</span></a></li>
-<li><a href="#DATA" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>DATA</span></a></li>
-<li><a href="#END" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>END</span></a></li>
-<li><a href="#ERROR" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>ERROR</span></a></li>
 <li><a href="#FILE" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>FILE</span></a></li>
 <li><a href="#captureRejectionSymbol" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejection<wbr/>Symbol</span></a></li>
 <li><a href="#captureRejections" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>capture<wbr/>Rejections</span></a></li>
@@ -2440,7 +2317,7 @@ special handling:</p>
 <li><a href="#addListener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a></li>
 <li><a href="#destroy" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>destroy</span></a></li>
 <li><a href="#emit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>emit</span></a></li>
-<li><a href="#end-1" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a></li>
+<li><a href="#end" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>end</span></a></li>
 <li><a href="#eventNames" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>event<wbr/>Names</span></a></li>
 <li><a href="#getMaxListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#isPaused" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>is<wbr/>Paused</span></a></li>
@@ -2492,6 +2369,7 @@ special handling:</p>
 <li><a href="../modules.html#MinKey"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Min<wbr/>Key</span></a></li>
 <li><a href="../modules.html#ObjectId"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Object<wbr/>Id</span></a></li>
 <li><a href="../modules.html#Timestamp"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Timestamp</span></a></li>
+<li><a href="../modules.html#UUID"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>UUID</span></a></li>
 <li><a href="../modules.html#deserialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>deserialize</span></a></li>
 <li><a href="../modules.html#serialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>serialize</span></a></li>
 <li><a href="../modules/BSON.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>BSON</span></a></li>
@@ -2503,6 +2381,7 @@ special handling:</p>
 <li><a href="BulkWriteResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Bulk<wbr/>Write<wbr/>Result</span></a></li>
 <li><a href="CancellationToken.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Cancellation<wbr/>Token</span></a></li>
 <li><a href="ChangeStream.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Change<wbr/>Stream</span></a></li>
+<li><a href="ClientEncryption.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Encryption</span></a></li>
 <li><a href="ClientSession.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Session</span></a></li>
 <li><a href="Collection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Collection</span></a></li>
 <li><a href="CommandFailedEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Command<wbr/>Failed<wbr/>Event</span></a></li>
@@ -2539,6 +2418,12 @@ special handling:</p>
 <li><a href="MongoClient.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Client</span></a></li>
 <li><a href="MongoCompatibilityError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Compatibility<wbr/>Error</span></a></li>
 <li><a href="MongoCredentials.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Credentials</span></a></li>
+<li><a href="MongoCryptAzureKMSRequestError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>AzureKMSRequest<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateDataKeyError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateEncryptedCollectionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Encrypted<wbr/>Collection<wbr/>Error</span></a></li>
+<li><a href="MongoCryptError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Error</span></a></li>
+<li><a href="MongoCryptInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
+<li><a href="MongoCryptKMSRequestNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>CryptKMSRequest<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="MongoCursorExhaustedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>Exhausted<wbr/>Error</span></a></li>
 <li><a href="MongoCursorInUseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>In<wbr/>Use<wbr/>Error</span></a></li>
 <li><a href="MongoDBCollectionNamespace.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoDBCollection<wbr/>Namespace</span></a></li>
@@ -2591,15 +2476,14 @@ special handling:</p>
 <li><a href="WriteConcern.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern</span></a></li>
 <li><a href="WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
-<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AddUserOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>User<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/Auth.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth</span></a></li>
 <li><a href="../interfaces/AuthMechanismProperties.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth<wbr/>Mechanism<wbr/>Properties</span></a></li>
-<li><a href="../interfaces/AutoEncrypter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encrypter</span></a></li>
 <li><a href="../interfaces/AutoEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AutoEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AzureEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Azure<wbr/>Encryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BSONSerializeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>BSONSerialize<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BulkWriteOperationError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Operation<wbr/>Error</span></a></li>
 <li><a href="../interfaces/BulkWriteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Options</span></a></li>
@@ -2623,15 +2507,19 @@ special handling:</p>
 <li><a href="../interfaces/ChangeStreamReplaceDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Replace<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamReshardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Reshard<wbr/>Collection<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamShardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Shard<wbr/>Collection<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ChangeStreamSplitEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Split<wbr/>Event</span></a></li>
 <li><a href="../interfaces/ChangeStreamUpdateDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Update<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ClientEncryptionCreateDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionEncryptOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Encrypt<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Result</span></a></li>
 <li><a href="../interfaces/ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="../interfaces/ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="../interfaces/ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/CollStats.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats</span></a></li>
-<li><a href="../interfaces/CollStatsOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollectionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Info</span></a></li>
 <li><a href="../interfaces/CollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Options</span></a></li>
@@ -2644,6 +2532,7 @@ special handling:</p>
 <li><a href="../interfaces/CreateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CreateIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CursorStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cursor<wbr/>Stream<wbr/>Options</span></a></li>
+<li><a href="../interfaces/DataKey.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Data<wbr/>Key</span></a></li>
 <li><a href="../interfaces/DbOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DbStatsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DeleteManyModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delete<wbr/>Many<wbr/>Model</span></a></li>
@@ -2656,13 +2545,13 @@ special handling:</p>
 <li><a href="../interfaces/EndSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>End<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ErrorDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Error<wbr/>Description</span></a></li>
 <li><a href="../interfaces/EstimatedDocumentCountOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Estimated<wbr/>Document<wbr/>Count<wbr/>Options</span></a></li>
-<li><a href="../interfaces/EvalOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Eval<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ExplainOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Explain<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/FindOneAndDeleteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Delete<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndUpdateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Update<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>Options</span></a></li>
+<li><a href="../interfaces/GCPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GCPEncryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptionsWithRevision.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options<wbr/>With<wbr/>Revision</span></a></li>
@@ -2678,6 +2567,7 @@ special handling:</p>
 <li><a href="../interfaces/InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="../interfaces/InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="../interfaces/KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="../interfaces/ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
@@ -2692,6 +2582,7 @@ special handling:</p>
 <li><a href="../interfaces/OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="../interfaces/ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
+<li><a href="../interfaces/RangeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Range<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceFromOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>From<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceLikeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Like<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Options</span></a></li>
@@ -2699,7 +2590,6 @@ special handling:</p>
 <li><a href="../interfaces/ReplaceOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/ReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ResumeOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Resume<wbr/>Options</span></a></li>
-<li><a href="../interfaces/RoleSpecification.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Role<wbr/>Specification</span></a></li>
 <li><a href="../interfaces/RootFilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Root<wbr/>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/SearchIndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Search<wbr/>Index<wbr/>Description</span></a></li>
 <li><a href="../interfaces/SelectServerOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Select<wbr/>Server<wbr/>Options</span></a></li>
@@ -2716,7 +2606,6 @@ special handling:</p>
 <li><a href="../interfaces/UpdateResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Result</span></a></li>
 <li><a href="../interfaces/UpdateStatement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Statement</span></a></li>
 <li><a href="../interfaces/ValidateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Validate<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/WiredTigerData.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wired<wbr/>Tiger<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernErrorData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Error<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Options</span></a></li>
 <li><a href="../interfaces/WriteConcernSettings.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Settings</span></a></li>
@@ -2729,13 +2618,17 @@ special handling:</p>
 <li><a href="../types/ArrayElement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Element</span></a></li>
 <li><a href="../types/ArrayOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Operator</span></a></li>
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
+<li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
+<li><a href="../types/CSFLEKMSTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>CSFLEKMSTls<wbr/>Options</span></a></li>
 <li><a href="../types/Callback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Callback</span></a></li>
 <li><a href="../types/ChangeStreamDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Document</span></a></li>
 <li><a href="../types/ChangeStreamEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Events</span></a></li>
+<li><a href="../types/ClientEncryptionDataKeyProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Data<wbr/>Key<wbr/>Provider</span></a></li>
+<li><a href="../types/ClientEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
 <li><a href="../types/ClientSessionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Session<wbr/>Events</span></a></li>
 <li><a href="../types/CommonEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Common<wbr/>Events</span></a></li>
 <li><a href="../types/Compressor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor</span></a></li>

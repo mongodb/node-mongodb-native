@@ -1095,6 +1095,9 @@ export const OPTIONS = {
   tlsCAFile: {
     type: 'string'
   },
+  tlsCRLFile: {
+    type: 'string'
+  },
   tlsCertificateKeyFile: {
     type: 'string'
   },

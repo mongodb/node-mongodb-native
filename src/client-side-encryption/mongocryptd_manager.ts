@@ -1,6 +1,6 @@
 import type { ChildProcess } from 'child_process';
 
-import { type Callback } from '../utils';
+import { MongoNetworkTimeoutError } from '../error';
 import { type AutoEncryptionExtraOptions } from './auto_encrypter';
 
 /**
@@ -42,7 +42,7 @@ export class MongocryptdManager {
    * Will check to see if a mongocryptd is up. If it is not up, it will attempt
    * to spawn a mongocryptd in a detached process, and then wait for it to be up.
    */
-  spawn(callback: Callback<void>) {
+  async spawn(): Promise<void> {
     const cmdName = this.spawnPath || 'mongocryptd';
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -73,7 +73,24 @@ export class MongocryptdManager {
 
     // unref child to remove handle from event loop
     this._child.unref();
+  }
 
-    process.nextTick(callback);
+  /**
+   * @returns the result of `fn` or rejects with an error.
+   */
+  async withRespawn<T>(fn: () => Promise<T>): ReturnType<typeof fn> {
+    try {
+      const result = await fn();
+      return result;
+    } catch (err) {
+      // If we are not bypassing spawning, then we should retry once on a MongoTimeoutError (server selection error)
+      const shouldSpawn = err instanceof MongoNetworkTimeoutError && !this.bypassSpawn;
+      if (!shouldSpawn) {
+        throw err;
+      }
+    }
+    await this.spawn();
+    const result = await fn();
+    return result;
   }
 }

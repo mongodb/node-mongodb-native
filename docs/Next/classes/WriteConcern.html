@@ -27,7 +27,7 @@ requested from MongoDB for write operations.</p>
 <ul class="tsd-hierarchy">
 <li><span class="target">WriteConcern</span></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L37">src/write_concern.ts:37</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L58">src/write_concern.ts:58</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -39,21 +39,24 @@ requested from MongoDB for write operations.</p>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Properties</h3>
-<div class="tsd-index-list"><a href="WriteConcern.html#fsync" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-1024"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)"></path></g></svg><span>fsync?</span></a>
-<a href="WriteConcern.html#j" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>j?</span></a>
+<div class="tsd-index-list"><a href="WriteConcern.html#fsync" class="tsd-index-link deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-1024"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)"></path></g></svg><span>fsync?</span></a>
+<a href="WriteConcern.html#j" class="tsd-index-link deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>j?</span></a>
+<a href="WriteConcern.html#journal" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>journal?</span></a>
 <a href="WriteConcern.html#w" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>w?</span></a>
-<a href="WriteConcern.html#wtimeout" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>wtimeout?</span></a>
+<a href="WriteConcern.html#wtimeout" class="tsd-index-link deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>wtimeout?</span></a>
+<a href="WriteConcern.html#wtimeoutMS" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>wtimeoutMS?</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
-<div class="tsd-index-list"><a href="WriteConcern.html#fromOptions" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>from<wbr/>Options</span></a>
+<div class="tsd-index-list"><a href="WriteConcern.html#apply" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>apply</span></a>
+<a href="WriteConcern.html#fromOptions" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>Options</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
 <section class="tsd-panel tsd-member"><a id="constructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
 <ul class="tsd-signatures">
-<li class="tsd-signature tsd-anchor-link" id="constructor.new_WriteConcern"><span class="tsd-kind-constructor-signature">new <wbr/>Write<wbr/>Concern</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">w</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">wtimeout</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">j</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">fsync</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a><a href="#constructor.new_WriteConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_WriteConcern"><span class="tsd-kind-constructor-signature">new <wbr/>Write<wbr/>Concern</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">w</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">wtimeoutMS</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">journal</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">fsync</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a><a href="#constructor.new_WriteConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>Constructs a WriteConcern from the write concern properties.</p>
 </div>
@@ -66,60 +69,100 @@ requested from MongoDB for write operations.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">wtimeout</span>: <span class="tsd-signature-type">number</span></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">wtimeoutMS</span>: <span class="tsd-signature-type">number</span></h5>
 <div class="tsd-comment tsd-typography"><p>specify a time limit to prevent write operations from blocking indefinitely</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
 <li>
-<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">j</span>: <span class="tsd-signature-type">boolean</span></h5>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">journal</span>: <span class="tsd-signature-type">boolean</span></h5>
 <div class="tsd-comment tsd-typography"><p>request acknowledgment that the write operation has been written to the on-disk journal</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
 <li>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">fsync</span>: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">1</span></h5>
-<div class="tsd-comment tsd-typography"><p>equivalent to the j option</p>
+<div class="tsd-comment tsd-typography"><p>equivalent to the j option. Is deprecated and will be removed in the next major version.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L54">src/write_concern.ts:54</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L88">src/write_concern.ts:88</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member"><a id="fsync" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>fsync</span><a href="#fsync" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span class="deprecated">fsync</span><a href="#fsync" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">fsync</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">1</span></div>
-<div class="tsd-comment tsd-typography"><p>equivalent to the j option</p>
+<div class="tsd-comment tsd-typography"><p>Equivalent to the j option.</p>
 </div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<h4>Deprecated</h4><p>Will be removed in the next major version. Please use journal.</p>
+</div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L45">src/write_concern.ts:45</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L79">src/write_concern.ts:79</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="j" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>j</span><a href="#j" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span class="deprecated">j</span><a href="#j" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">j</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>request acknowledgment that the write operation has been written to the on-disk journal</p>
+<div class="tsd-comment tsd-typography"><p>Request acknowledgment that the write operation has been written to the on-disk journal.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<h4>Deprecated</h4><p>Will be removed in the next major version. Please use journal.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L74">src/write_concern.ts:74</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="journal" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>journal</span><a href="#journal" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">journal</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Request acknowledgment that the write operation has been written to the on-disk journal</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L43">src/write_concern.ts:43</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L62">src/write_concern.ts:62</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="w" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>w</span><a href="#w" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>w</span><a href="#w" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">w</span><span class="tsd-signature-symbol">?:</span> <a href="../types/W.html" class="tsd-signature-type tsd-kind-type-alias">W</a></div>
-<div class="tsd-comment tsd-typography"><p>request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags.</p>
+<div class="tsd-comment tsd-typography"><p>Request acknowledgment that the write operation has propagated to a specified number of mongod instances or to mongod instances with specified tags.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L39">src/write_concern.ts:39</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L60">src/write_concern.ts:60</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="wtimeout" class="tsd-anchor"></a>
-<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>wtimeout</span><a href="#wtimeout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span class="deprecated">wtimeout</span><a href="#wtimeout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">wtimeout</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
-<div class="tsd-comment tsd-typography"><p>specify a time limit to prevent write operations from blocking indefinitely</p>
+<div class="tsd-comment tsd-typography"><p>Specify a time limit to prevent write operations from blocking indefinitely.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<h4>Deprecated</h4><p>Will be removed in the next major version. Please use wtimeoutMS.</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L69">src/write_concern.ts:69</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="wtimeoutMS" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>wtimeoutMS</span><a href="#wtimeoutMS" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">wtimeoutMS</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Specify a time limit to prevent write operations from blocking indefinitely</p>
 </div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L41">src/write_concern.ts:41</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L64">src/write_concern.ts:64</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
+<section class="tsd-panel tsd-member"><a id="apply" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>apply</span><a href="#apply" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures">
+<li class="tsd-signature tsd-anchor-link" id="apply.apply-1"><span class="tsd-kind-call-signature">apply</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">command</span>, <span class="tsd-kind-parameter">writeConcern</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><a href="#apply.apply-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Apply a write concern to a command document. Will modify and return the command.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">command</span>: <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">writeConcern</span>: <a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L110">src/write_concern.ts:110</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="fromOptions" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>from<wbr/>Options</span><a href="#fromOptions" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -137,7 +180,7 @@ requested from MongoDB for write operations.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="WriteConcern.html" class="tsd-signature-type tsd-kind-class">WriteConcern</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L74">src/write_concern.ts:74</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/write_concern.ts#L121">src/write_concern.ts:121</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -160,8 +203,11 @@ requested from MongoDB for write operations.</p>
 <li><a href="#constructor" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-512"></use></svg><span>constructor</span></a></li>
 <li><a href="#fsync" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>fsync</span></a></li>
 <li><a href="#j" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>j</span></a></li>
+<li><a href="#journal" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>journal</span></a></li>
 <li><a href="#w" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>w</span></a></li>
 <li><a href="#wtimeout" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>wtimeout</span></a></li>
+<li><a href="#wtimeoutMS" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>wtimeoutMS</span></a></li>
+<li><a href="#apply" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>apply</span></a></li>
 <li><a href="#fromOptions" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>Options</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>mongodb</span></a>
@@ -181,6 +227,7 @@ requested from MongoDB for write operations.</p>
 <li><a href="../modules.html#MinKey"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Min<wbr/>Key</span></a></li>
 <li><a href="../modules.html#ObjectId"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Object<wbr/>Id</span></a></li>
 <li><a href="../modules.html#Timestamp"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>Timestamp</span></a></li>
+<li><a href="../modules.html#UUID"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>UUID</span></a></li>
 <li><a href="../modules.html#deserialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>deserialize</span></a></li>
 <li><a href="../modules.html#serialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>serialize</span></a></li>
 <li><a href="../modules/BSON.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>BSON</span></a></li>
@@ -192,6 +239,7 @@ requested from MongoDB for write operations.</p>
 <li><a href="BulkWriteResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Bulk<wbr/>Write<wbr/>Result</span></a></li>
 <li><a href="CancellationToken.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Cancellation<wbr/>Token</span></a></li>
 <li><a href="ChangeStream.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Change<wbr/>Stream</span></a></li>
+<li><a href="ClientEncryption.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Encryption</span></a></li>
 <li><a href="ClientSession.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Client<wbr/>Session</span></a></li>
 <li><a href="Collection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Collection</span></a></li>
 <li><a href="CommandFailedEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Command<wbr/>Failed<wbr/>Event</span></a></li>
@@ -228,6 +276,12 @@ requested from MongoDB for write operations.</p>
 <li><a href="MongoClient.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Client</span></a></li>
 <li><a href="MongoCompatibilityError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Compatibility<wbr/>Error</span></a></li>
 <li><a href="MongoCredentials.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Credentials</span></a></li>
+<li><a href="MongoCryptAzureKMSRequestError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>AzureKMSRequest<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateDataKeyError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Error</span></a></li>
+<li><a href="MongoCryptCreateEncryptedCollectionError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Create<wbr/>Encrypted<wbr/>Collection<wbr/>Error</span></a></li>
+<li><a href="MongoCryptError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Error</span></a></li>
+<li><a href="MongoCryptInvalidArgumentError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Crypt<wbr/>Invalid<wbr/>Argument<wbr/>Error</span></a></li>
+<li><a href="MongoCryptKMSRequestNetworkTimeoutError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>CryptKMSRequest<wbr/>Network<wbr/>Timeout<wbr/>Error</span></a></li>
 <li><a href="MongoCursorExhaustedError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>Exhausted<wbr/>Error</span></a></li>
 <li><a href="MongoCursorInUseError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Mongo<wbr/>Cursor<wbr/>In<wbr/>Use<wbr/>Error</span></a></li>
 <li><a href="MongoDBCollectionNamespace.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>MongoDBCollection<wbr/>Namespace</span></a></li>
@@ -280,15 +334,14 @@ requested from MongoDB for write operations.</p>
 <li><a href="WriteConcern.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern</span></a></li>
 <li><a href="WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
-<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AddUserOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Add<wbr/>User<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/Auth.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth</span></a></li>
 <li><a href="../interfaces/AuthMechanismProperties.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auth<wbr/>Mechanism<wbr/>Properties</span></a></li>
-<li><a href="../interfaces/AutoEncrypter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encrypter</span></a></li>
 <li><a href="../interfaces/AutoEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Options</span></a></li>
-<li><a href="../interfaces/AutoEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Auto<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AzureEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Azure<wbr/>Encryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BSONSerializeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>BSONSerialize<wbr/>Options</span></a></li>
 <li><a href="../interfaces/BulkWriteOperationError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Operation<wbr/>Error</span></a></li>
 <li><a href="../interfaces/BulkWriteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Bulk<wbr/>Write<wbr/>Options</span></a></li>
@@ -312,15 +365,19 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/ChangeStreamReplaceDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Replace<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamReshardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Reshard<wbr/>Collection<wbr/>Document</span></a></li>
 <li><a href="../interfaces/ChangeStreamShardCollectionDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Shard<wbr/>Collection<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ChangeStreamSplitEvent.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Split<wbr/>Event</span></a></li>
 <li><a href="../interfaces/ChangeStreamUpdateDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Change<wbr/>Stream<wbr/>Update<wbr/>Document</span></a></li>
+<li><a href="../interfaces/ClientEncryptionCreateDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Create<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionEncryptOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Encrypt<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyProviderOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Provider<wbr/>Options</span></a></li>
+<li><a href="../interfaces/ClientEncryptionRewrapManyDataKeyResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Encryption<wbr/>Rewrap<wbr/>Many<wbr/>Data<wbr/>Key<wbr/>Result</span></a></li>
 <li><a href="../interfaces/ClientMetadata.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata</span></a></li>
 <li><a href="../interfaces/ClientMetadataOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Metadata<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClientSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Client<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CloseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Close<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ClusterTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cluster<wbr/>Time</span></a></li>
 <li><a href="../interfaces/ClusteredCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Clustered<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/CollStats.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats</span></a></li>
-<li><a href="../interfaces/CollStatsOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Coll<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CollectionInfo.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Info</span></a></li>
 <li><a href="../interfaces/CollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Collection<wbr/>Options</span></a></li>
@@ -333,6 +390,7 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/CreateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Collection<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CreateIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Create<wbr/>Indexes<wbr/>Options</span></a></li>
 <li><a href="../interfaces/CursorStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Cursor<wbr/>Stream<wbr/>Options</span></a></li>
+<li><a href="../interfaces/DataKey.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Data<wbr/>Key</span></a></li>
 <li><a href="../interfaces/DbOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DbStatsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Db<wbr/>Stats<wbr/>Options</span></a></li>
 <li><a href="../interfaces/DeleteManyModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Delete<wbr/>Many<wbr/>Model</span></a></li>
@@ -345,13 +403,13 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/EndSessionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>End<wbr/>Session<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ErrorDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Error<wbr/>Description</span></a></li>
 <li><a href="../interfaces/EstimatedDocumentCountOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Estimated<wbr/>Document<wbr/>Count<wbr/>Options</span></a></li>
-<li><a href="../interfaces/EvalOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Eval<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ExplainOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Explain<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/FindOneAndDeleteOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Delete<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOneAndUpdateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>One<wbr/>And<wbr/>Update<wbr/>Options</span></a></li>
 <li><a href="../interfaces/FindOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Find<wbr/>Options</span></a></li>
+<li><a href="../interfaces/GCPEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GCPEncryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options</span></a></li>
 <li><a href="../interfaces/GridFSBucketReadStreamOptionsWithRevision.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>GridFSBucket<wbr/>Read<wbr/>Stream<wbr/>Options<wbr/>With<wbr/>Revision</span></a></li>
@@ -367,6 +425,7 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/InsertOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/InsertOneOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Options</span></a></li>
 <li><a href="../interfaces/InsertOneResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Insert<wbr/>One<wbr/>Result</span></a></li>
+<li><a href="../interfaces/KMSProviders.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>KMSProviders</span></a></li>
 <li><a href="../interfaces/ListCollectionsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Collections<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ListDatabasesResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>List<wbr/>Databases<wbr/>Result</span></a></li>
@@ -381,6 +440,7 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/OperationOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Operation<wbr/>Options</span></a></li>
 <li><a href="../interfaces/PkFactory.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Pk<wbr/>Factory</span></a></li>
 <li><a href="../interfaces/ProxyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Proxy<wbr/>Options</span></a></li>
+<li><a href="../interfaces/RangeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Range<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceFromOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>From<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceLikeOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Like<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ReadPreferenceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Read<wbr/>Preference<wbr/>Options</span></a></li>
@@ -388,7 +448,6 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/ReplaceOneModel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>One<wbr/>Model</span></a></li>
 <li><a href="../interfaces/ReplaceOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Replace<wbr/>Options</span></a></li>
 <li><a href="../interfaces/ResumeOptions.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Resume<wbr/>Options</span></a></li>
-<li><a href="../interfaces/RoleSpecification.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Role<wbr/>Specification</span></a></li>
 <li><a href="../interfaces/RootFilterOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Root<wbr/>Filter<wbr/>Operators</span></a></li>
 <li><a href="../interfaces/SearchIndexDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Search<wbr/>Index<wbr/>Description</span></a></li>
 <li><a href="../interfaces/SelectServerOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Select<wbr/>Server<wbr/>Options</span></a></li>
@@ -405,7 +464,6 @@ requested from MongoDB for write operations.</p>
 <li><a href="../interfaces/UpdateResult.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Result</span></a></li>
 <li><a href="../interfaces/UpdateStatement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Update<wbr/>Statement</span></a></li>
 <li><a href="../interfaces/ValidateCollectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Validate<wbr/>Collection<wbr/>Options</span></a></li>
-<li><a href="../interfaces/WiredTigerData.html" class="deprecated"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Wired<wbr/>Tiger<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernErrorData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Error<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Options</span></a></li>
 <li><a href="../interfaces/WriteConcernSettings.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Settings</span></a></li>
@@ -418,13 +476,17 @@ requested from MongoDB for write operations.</p>
 <li><a href="../types/ArrayElement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Element</span></a></li>
 <li><a href="../types/ArrayOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Operator</span></a></li>
 <li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
+<li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
 <li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
 <li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
 <li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
+<li><a href="../types/CSFLEKMSTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>CSFLEKMSTls<wbr/>Options</span></a></li>
 <li><a href="../types/Callback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Callback</span></a></li>
 <li><a href="../types/ChangeStreamDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Document</span></a></li>
 <li><a href="../types/ChangeStreamEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Events</span></a></li>
+<li><a href="../types/ClientEncryptionDataKeyProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Data<wbr/>Key<wbr/>Provider</span></a></li>
+<li><a href="../types/ClientEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
 <li><a href="../types/ClientSessionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Session<wbr/>Events</span></a></li>
 <li><a href="../types/CommonEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Common<wbr/>Events</span></a></li>
 <li><a href="../types/Compressor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor</span></a></li>

@@ -598,32 +598,37 @@ export class CryptoConnection extends Connection {
       ? cmd.indexes.map((index: { key: Map<string, number> }) => index.key)
       : null;
 
-    autoEncrypter.encrypt(ns.toString(), cmd, options, (err, encrypted) => {
-      if (err || encrypted == null) {
-        callback(err, null);
-        return;
-      }
-
-      // Replace the saved values
-      if (sort != null && (cmd.find || cmd.findAndModify)) {
-        encrypted.sort = sort;
-      }
-      if (indexKeys != null && cmd.createIndexes) {
-        for (const [offset, index] of indexKeys.entries()) {
-          // @ts-expect-error `encrypted` is a generic "command", but we've narrowed for only `createIndexes` commands here
-          encrypted.indexes[offset].key = index;
+    autoEncrypter.encrypt(ns.toString(), cmd, options).then(
+      encrypted => {
+        // Replace the saved values
+        if (sort != null && (cmd.find || cmd.findAndModify)) {
+          encrypted.sort = sort;
         }
-      }
-
-      super.command(ns, encrypted, options, (err, response) => {
-        if (err || response == null) {
-          callback(err, response);
-          return;
+        if (indexKeys != null && cmd.createIndexes) {
+          for (const [offset, index] of indexKeys.entries()) {
+            // @ts-expect-error `encrypted` is a generic "command", but we've narrowed for only `createIndexes` commands here
+            encrypted.indexes[offset].key = index;
+          }
         }
 
-        autoEncrypter.decrypt(response, options, callback);
-      });
-    });
+        super.command(ns, encrypted, options, (err, response) => {
+          if (err || response == null) {
+            callback(err, response);
+            return;
+          }
+
+          autoEncrypter.decrypt(response, options).then(
+            res => callback(undefined, res),
+            err => callback(err)
+          );
+        });
+      },
+      err => {
+        if (err) {
+          callback(err, null);
+        }
+      }
+    );
   }
 }
 

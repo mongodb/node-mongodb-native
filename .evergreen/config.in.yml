@@ -636,8 +636,6 @@ functions:
           export PROJECT_DIRECTORY="$(pwd)"
           export NODE_LTS_VERSION=${NODE_LTS_VERSION}
           export DRIVERS_TOOLS="${DRIVERS_TOOLS}"
-          export SSL_CA_FILE="${SSL_CA_FILE}"
-          export SSL_KEY_FILE="${SSL_KEY_FILE}"
           export MONGODB_URI="${MONGODB_URI}"
 
           bash ${PROJECT_DIRECTORY}/.evergreen/run-tls-tests.sh

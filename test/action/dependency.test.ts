@@ -6,9 +6,12 @@ import { expect } from 'chai';
 
 import { dependencies, peerDependencies, peerDependenciesMeta } from '../../package.json';
 import { setDifference } from '../mongodb';
-import { itInNodeProcess } from '../tools/utils';
+import { alphabetically, itInNodeProcess, sorted } from '../tools/utils';
 
-const EXPECTED_DEPENDENCIES = ['bson', 'mongodb-connection-string-url', '@mongodb-js/saslprep'];
+const EXPECTED_DEPENDENCIES = sorted(
+  ['@mongodb-js/saslprep', 'bson', 'mongodb-connection-string-url'],
+  alphabetically
+);
 const EXPECTED_PEER_DEPENDENCIES = [
   '@aws-sdk/credential-providers',
   '@mongodb-js/zstd',
@@ -22,7 +25,9 @@ const EXPECTED_PEER_DEPENDENCIES = [
 describe('package.json', function () {
   describe('dependencies', function () {
     it('only contains the expected dependencies', function () {
-      expect(Object.keys(dependencies)).to.deep.equal(EXPECTED_DEPENDENCIES);
+      expect(sorted(Object.keys(dependencies), alphabetically)).to.deep.equal(
+        EXPECTED_DEPENDENCIES
+      );
     });
   });
 
@@ -86,10 +91,6 @@ describe('package.json', function () {
 
       context(`when ${depName} is installed`, () => {
         beforeEach(async function () {
-          if (depName === 'mongodb-client-encryption') {
-            execSync(`npm install --no-save "${depName}"@alpha`);
-            return;
-          }
           execSync(`npm install --no-save "${depName}"@"${depMajor}"`);
         });
 

@@ -10,7 +10,7 @@ import { MongocryptdManager } from '../../../src/client-side-encryption/mongocry
 import { StateMachine } from '../../../src/client-side-encryption/state_machine';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { MongoClient } from '../../../src/mongo_client';
-import { BSON } from '../../mongodb';
+import { BSON, type DataKey } from '../../mongodb';
 import * as requirements from './requirements.helper';
 
 const bson = BSON;
@@ -53,32 +53,23 @@ describe('AutoEncrypter', function () {
       return Promise.resolve();
     });
 
-    sandbox
-      .stub(StateMachine.prototype, 'fetchCollectionInfo')
-      .callsFake((client, ns, filter, callback) => {
-        callback(null, MOCK_COLLINFO_RESPONSE);
-      });
+    sandbox.stub(StateMachine.prototype, 'fetchCollectionInfo').resolves(MOCK_COLLINFO_RESPONSE);
 
-    sandbox
-      .stub(StateMachine.prototype, 'markCommand')
-      .callsFake((client, ns, command, callback) => {
-        if (ENABLE_LOG_TEST) {
-          const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
-          response.schemaRequiresEncryption = false;
+    sandbox.stub(StateMachine.prototype, 'markCommand').callsFake(() => {
+      if (ENABLE_LOG_TEST) {
+        const response = bson.deserialize(MOCK_MONGOCRYPTD_RESPONSE);
+        response.schemaRequiresEncryption = false;
 
-          ENABLE_LOG_TEST = false; // disable test after run
-          callback(null, bson.serialize(response));
-          return;
-        }
+        ENABLE_LOG_TEST = false; // disable test after run
+        return Promise.resolve(bson.serialize(response));
+      }
 
-        callback(null, MOCK_MONGOCRYPTD_RESPONSE);
-      });
-
-    sandbox.stub(StateMachine.prototype, 'fetchKeys').callsFake((client, ns, filter, callback) => {
-      // mock data is already serialized, our action deals with the result of a cursor
-      const deserializedKey = bson.deserialize(MOCK_KEYDOCUMENT_RESPONSE);
-      callback(null, [deserializedKey]);
+      return Promise.resolve(MOCK_MONGOCRYPTD_RESPONSE);
     });
+
+    sandbox
+      .stub(StateMachine.prototype, 'fetchKeys')
+      .resolves([bson.deserialize(MOCK_KEYDOCUMENT_RESPONSE) as DataKey]);
   });
 
   afterEach(() => {
@@ -135,7 +126,7 @@ describe('AutoEncrypter', function () {
     });
   });
 
-  it('should support `bypassAutoEncryption`', function (done) {
+  it('should support `bypassAutoEncryption`', async function () {
     const client = new MockClient();
     const autoEncrypter = new AutoEncrypter(client, {
       bypassAutoEncryption: true,
@@ -151,15 +142,12 @@ describe('AutoEncrypter', function () {
       }
     });
 
-    autoEncrypter.encrypt('test.test', { test: 'command' }, (err, encrypted) => {
-      expect(err).to.not.exist;
-      expect(encrypted).to.eql({ test: 'command' });
-      done();
-    });
+    const encrypted = await autoEncrypter.encrypt('test.test', { test: 'command' });
+    expect(encrypted).to.eql({ test: 'command' });
   });
 
   describe('state machine', function () {
-    it('should decrypt mock data', function (done) {
+    it('should decrypt mock data', async function () {
       const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
       const client = new MockClient() as MongoClient;
       const mc = new AutoEncrypter(client, {
@@ -173,16 +161,13 @@ describe('AutoEncrypter', function () {
           local: { key: Buffer.alloc(96) }
         }
       });
-      mc.decrypt(input, (err, decrypted) => {
-        if (err) return done(err);
-        expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-        expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-        expect(decrypted.filter).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-        done();
-      });
+      const decrypted = await mc.decrypt(input);
+      expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
+      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.filter).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
     });
 
-    it('should decrypt mock data and mark decrypted items if enabled for testing', function (done) {
+    it('should decrypt mock data and mark decrypted items if enabled for testing', async function () {
       const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
       const nestedInput = readExtendedJsonToBuffer(
         `${__dirname}/data/encrypted-document-nested.json`
@@ -200,30 +185,27 @@ describe('AutoEncrypter', function () {
         }
       });
       mc[Symbol.for('@@mdb.decorateDecryptionResult')] = true;
-      mc.decrypt(input, (err, decrypted) => {
-        if (err) return done(err);
-        expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-        expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-        expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
+      let decrypted = await mc.decrypt(input);
+      expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
+      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.filter[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['ssn']);
 
-        // The same, but with an object containing different data types as the input
-        mc.decrypt({ a: [null, 1, { c: new bson.Binary('foo', 1) }] }, (err, decrypted) => {
-          if (err) return done(err);
-          expect(decrypted).to.eql({ a: [null, 1, { c: new bson.Binary('foo', 1) }] });
-          expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-
-          // The same, but with nested data inside the decrypted input
-          mc.decrypt(nestedInput, (err, decrypted) => {
-            if (err) return done(err);
-            expect(decrypted).to.eql({ nested: { x: { y: 1234 } } });
-            expect(decrypted[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['nested']);
-            expect(decrypted.nested).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-            expect(decrypted.nested.x).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-            expect(decrypted.nested.x.y).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
-            done();
-          });
-        });
+      // The same, but with an object containing different data types as the input
+      decrypted = await mc.decrypt({
+        a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
       });
+      expect(decrypted).to.eql({
+        a: [null, 1, { c: new bson.Binary(Buffer.from('foo', 'utf8'), 1) }]
+      });
+      expect(decrypted).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+
+      // The same, but with nested data inside the decrypted input
+      decrypted = await mc.decrypt(nestedInput);
+      expect(decrypted).to.eql({ nested: { x: { y: 1234 } } });
+      expect(decrypted[Symbol.for('@@mdb.decryptedKeys')]).to.eql(['nested']);
+      expect(decrypted.nested).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.nested.x).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
+      expect(decrypted.nested.x.y).to.not.have.property(Symbol.for('@@mdb.decryptedKeys'));
     });
 
     context('when the aws sdk is installed', function () {
@@ -247,7 +229,7 @@ describe('AutoEncrypter', function () {
         process.env.AWS_SECRET_ACCESS_KEY = originalSecretAccessKey;
       });
 
-      it('should decrypt mock data with KMS credentials from the environment', function (done) {
+      it('should decrypt mock data with KMS credentials from the environment', async function () {
         const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
@@ -260,11 +242,8 @@ describe('AutoEncrypter', function () {
             aws: {}
           }
         });
-        mc.decrypt(input, (err, decrypted) => {
-          if (err) return done(err);
-          expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
-          done();
-        });
+        const decrypted = await mc.decrypt(input);
+        expect(decrypted).to.eql({ filter: { find: 'test', ssn: '457-55-5462' } });
       });
     });
 
@@ -289,7 +268,7 @@ describe('AutoEncrypter', function () {
         process.env.AWS_SECRET_ACCESS_KEY = originalSecretAccessKey;
       });
 
-      it('errors without the optional sdk credential provider', function (done) {
+      it('errors without the optional sdk credential provider', async function () {
         const input = readExtendedJsonToBuffer(`${__dirname}/data/encrypted-document.json`);
         const client = new MockClient();
         const mc = new AutoEncrypter(client, {
@@ -302,16 +281,14 @@ describe('AutoEncrypter', function () {
             aws: {}
           }
         });
-        mc.decrypt(input, err => {
-          expect(err.message).to.equal(
-            'client not configured with KMS provider necessary to decrypt'
-          );
-          done();
-        });
+        const error = await mc.decrypt(input).catch(e => e);
+        expect(error.message).to.equal(
+          'client not configured with KMS provider necessary to decrypt'
+        );
       });
     });
 
-    it('should encrypt mock data', function (done) {
+    it('should encrypt mock data', async function () {
       const client = new MockClient();
       const mc = new AutoEncrypter(client, {
         keyVaultNamespace: 'admin.datakeys',
@@ -325,31 +302,28 @@ describe('AutoEncrypter', function () {
         }
       });
 
-      mc.encrypt('test.test', TEST_COMMAND, (err, encrypted) => {
-        if (err) return done(err);
-        const expected = EJSON.parse(
-          JSON.stringify({
-            find: 'test',
-            filter: {
-              ssn: {
-                $binary: {
-                  base64:
-                    'AWFhYWFhYWFhYWFhYWFhYWECRTOW9yZzNDn5dGwuqsrJQNLtgMEKaujhs9aRWRp+7Yo3JK8N8jC8P0Xjll6C1CwLsE/iP5wjOMhVv1KMMyOCSCrHorXRsb2IKPtzl2lKTqQ=',
-                  subType: '6'
-                }
+      const encrypted = await mc.encrypt('test.test', TEST_COMMAND);
+      const expected = EJSON.parse(
+        JSON.stringify({
+          find: 'test',
+          filter: {
+            ssn: {
+              $binary: {
+                base64:
+                  'AWFhYWFhYWFhYWFhYWFhYWECRTOW9yZzNDn5dGwuqsrJQNLtgMEKaujhs9aRWRp+7Yo3JK8N8jC8P0Xjll6C1CwLsE/iP5wjOMhVv1KMMyOCSCrHorXRsb2IKPtzl2lKTqQ=',
+                subType: '6'
               }
             }
-          })
-        );
+          }
+        })
+      );
 
-        expect(encrypted).to.containSubset(expected);
-        done();
-      });
+      expect(encrypted).to.containSubset(expected);
     });
   });
 
   describe('logging', function () {
-    it('should allow registration of a log handler', function (done) {
+    it('should allow registration of a log handler', async function () {
       ENABLE_LOG_TEST = true;
 
       let loggerCalled = false;
@@ -370,20 +344,17 @@ describe('AutoEncrypter', function () {
         }
       });
 
-      mc.encrypt('test.test', TEST_COMMAND, (err, encrypted) => {
-        if (err) return done(err);
-        const expected = EJSON.parse(
-          JSON.stringify({
-            find: 'test',
-            filter: {
-              ssn: '457-55-5462'
-            }
-          })
-        );
+      const encrypted = await mc.encrypt('test.test', TEST_COMMAND);
+      const expected = EJSON.parse(
+        JSON.stringify({
+          find: 'test',
+          filter: {
+            ssn: '457-55-5462'
+          }
+        })
+      );
 
-        expect(encrypted).to.containSubset(expected);
-        done();
-      });
+      expect(encrypted).to.containSubset(expected);
     });
   });
 

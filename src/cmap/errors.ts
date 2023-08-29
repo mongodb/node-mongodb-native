@@ -9,6 +9,17 @@ export class PoolClosedError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool) {
     super('Attempted to check out a connection from closed connection pool');
     this.address = pool.address;
@@ -27,11 +38,22 @@ export class PoolClearedError extends MongoNetworkError {
   /** The address of the connection pool */
   address: string;
 
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool, message?: string) {
     const errorMessage = message
       ? message
       : `Connection pool for ${pool.address} was cleared because another operation failed with: "${pool.serverError?.message}"`;
-    super(errorMessage);
+    super(errorMessage, pool.serverError ? { cause: pool.serverError } : undefined);
     this.address = pool.address;
 
     this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
@@ -47,6 +69,17 @@ export class PoolClearedError extends MongoNetworkError {
  * @category Error
  */
 export class PoolClearedOnNetworkError extends PoolClearedError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
   constructor(pool: ConnectionPool) {
     super(pool, `Connection to ${pool.address} interrupted due to server monitor timeout`);
   }
@@ -64,6 +97,17 @@ export class WaitQueueTimeoutError extends MongoDriverError {
   /** The address of the connection pool */
   address: string;
 
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
   constructor(message: string, address: string) {
     super(message);
     this.address = address;

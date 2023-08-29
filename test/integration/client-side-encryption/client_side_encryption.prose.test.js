@@ -1171,9 +1171,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
           .insertOne({ encrypted: 'test' })
           .catch(e => e);
 
-        expect(insertError)
-          .to.be.instanceOf(Error)
-          .to.have.property('name', 'MongoServerSelectionError');
+        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
         expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
@@ -1181,8 +1179,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
             /ECONNREFUSED/.test(error.message) ||
             !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
         );
-
-        expect(insertError).to.be.instanceOf(MongoServerSelectionError);
       });
     });
 
@@ -1264,16 +1260,14 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         const error = await client.connect().catch(e => e);
 
         // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
-        expect(
-          error,
-          'Error MUST be a MongoServerSelectionError error that contains ECONNREFUSED information'
-        )
-          .to.be.instanceOf(MongoServerSelectionError)
-          .that.satisfies(
-            error =>
-              /ECONNREFUSED/.test(error.message) ||
-              !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
-          );
+        expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
+          MongoServerSelectionError
+        );
+        expect(error, 'Error MUST contain ECONNREFUSED information').to.satisfy(
+          error =>
+            /ECONNREFUSED/.test(error.message) ||
+            !!error.cause?.cause?.errors?.every(e => e.code === 'ECONNREFUSED')
+        );
       });
     });
 

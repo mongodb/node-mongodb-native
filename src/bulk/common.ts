@@ -598,7 +598,17 @@ export class MongoBulkWriteError extends MongoServerError {
   writeErrors: OneOrMore<WriteError> = [];
   err?: WriteConcernError;
 
-  /** Creates a new MongoBulkWriteError */
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
   constructor(
     error:
       | { message: string; code: number; writeErrors?: WriteError[] }

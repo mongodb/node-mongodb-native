@@ -220,7 +220,9 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
     );
 
-    const error = !(err instanceof MongoError) ? new MongoError(err) : err;
+    const error = !(err instanceof MongoError)
+      ? new MongoError(MongoError.buildErrorMessage(err), { cause: err })
+      : err;
     error.addErrorLabel(MongoErrorLabel.ResetPool);
     if (error instanceof MongoNetworkTimeoutError) {
       error.addErrorLabel(MongoErrorLabel.InterruptInUseConnections);
