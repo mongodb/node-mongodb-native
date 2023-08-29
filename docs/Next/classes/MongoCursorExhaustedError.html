@@ -26,7 +26,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">MongoCursorExhaustedError</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L540">src/error.ts:540</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L754">src/error.ts:754</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -66,15 +66,22 @@
 <ul class="tsd-signatures">
 <li class="tsd-signature tsd-anchor-link" id="constructor.new_MongoCursorExhaustedError"><span class="tsd-kind-constructor-signature">new <wbr/>Mongo<wbr/>Cursor<wbr/>Exhausted<wbr/>Error</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">message</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="MongoCursorExhaustedError.html" class="tsd-signature-type tsd-kind-class">MongoCursorExhaustedError</a><a href="#constructor.new_MongoCursorExhaustedError" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p><strong>Do not use this constructor!</strong></p>
+<p>Meant for internal use only.</p>
+</div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">message</span>: <span class="tsd-signature-type">string</span></h5></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a href="MongoCursorExhaustedError.html" class="tsd-signature-type tsd-kind-class">MongoCursorExhaustedError</a></h4><aside class="tsd-sources">
+<h4 class="tsd-returns-title">Returns <a href="MongoCursorExhaustedError.html" class="tsd-signature-type tsd-kind-class">MongoCursorExhaustedError</a></h4>
+<div class="tsd-comment tsd-typography">
+<h4>Remarks</h4><p>This class is only meant to be constructed within the driver. This constructor is
+not subject to semantic versioning compatibility guarantees and may change at any time.</p>
+</div><aside class="tsd-sources">
 <p>Overrides <a href="MongoAPIError.html">MongoAPIError</a>.<a href="MongoAPIError.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L541">src/error.ts:541</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L766">src/error.ts:766</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="cause" class="tsd-anchor"></a>
@@ -82,7 +89,7 @@
 <div class="tsd-signature"><span class="tsd-kind-property">cause</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type ">Error</span></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoAPIError.html">MongoAPIError</a>.<a href="MongoAPIError.html#cause">cause</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L135">src/error.ts:135</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L133">src/error.ts:133</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="code" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>code</span><a href="#code" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">code</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
@@ -161,7 +168,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from MongoAPIError.errmsg</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L165">src/error.ts:165</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L170">src/error.ts:170</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="errorLabels" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>error<wbr/>Labels</span><a href="#errorLabels" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -170,7 +177,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from MongoAPIError.errorLabels</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L183">src/error.ts:183</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L188">src/error.ts:188</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member"><a id="name" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>name</span><a href="#name" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures">
@@ -179,7 +186,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><aside class="tsd-sources">
 <p>Overrides MongoAPIError.name</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L545">src/error.ts:545</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L770">src/error.ts:770</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addErrorLabel" class="tsd-anchor"></a>
@@ -195,7 +202,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="MongoAPIError.html">MongoAPIError</a>.<a href="MongoAPIError.html#addErrorLabel">addErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L179">src/error.ts:179</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L184">src/error.ts:184</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="hasErrorLabel" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>has<wbr/>Error<wbr/>Label</span><a href="#hasErrorLabel" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -216,7 +223,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="MongoAPIError.html">MongoAPIError</a>.<a href="MongoAPIError.html#hasErrorLabel">hasErrorLabel</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L175">src/error.ts:175</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/error.ts#L180">src/error.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureStackTrace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>capture<wbr/>Stack<wbr/>Trace</span><a href="#captureStackTrace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">

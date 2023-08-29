@@ -2,7 +2,7 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 
-**Upgrading to version 5? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md)!**
+**Upgrading to version 6? Take a look at our [upgrade guide here](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)!**
 
 ## Quick Links
 
@@ -16,7 +16,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js.
 | MongoDB Developer Center | [www.mongodb.com/developer](https://www.mongodb.com/developer/languages/javascript/)                                                  |
 | Stack Overflow           | [stackoverflow.com](https://stackoverflow.com/search?q=%28%5Btypescript%5D+or+%5Bjavascript%5D+or+%5Bnode.js%5D%29+and+%5Bmongodb%5D) |
 | Source Code              | [github.com/mongodb/node-mongodb-native](https://github.com/mongodb/node-mongodb-native)                                              |
-| Upgrade to v5            | [etc/notes/CHANGES_5.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_5.0.0.md)                     |
+| Upgrade to v6            | [etc/notes/CHANGES_6.0.0.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/CHANGES_6.0.0.md)                     |
 | Contributing             | [CONTRIBUTING.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/CONTRIBUTING.md)                                           |
 | Changelog                | [HISTORY.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/HISTORY.md)                                                     |
 
