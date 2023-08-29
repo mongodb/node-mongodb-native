@@ -86,6 +86,10 @@ export interface AWSCredentials {
 }
 
 type CredentialProvider = {
+  fromNodeProviderChain(
+    this: void,
+    options: { clientConfig: { region: string } }
+  ): () => Promise<AWSCredentials>;
   fromNodeProviderChain(this: void): () => Promise<AWSCredentials>;
 };
 
