@@ -1,0 +1,373 @@
+import { expect } from 'chai';
+import { satisfies } from 'semver';
+import * as sinon from 'sinon';
+
+import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
+
+function makeConnectionString(config, username, password) {
+  return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;
+}
+
+describe('Authentication Spec Prose Tests', function () {
+  beforeEach(function () {
+    // todo(NODE-5631): fix tests to run in load balancer mode.
+    if (
+      process.env.AUTH === 'noauth' ||
+      process.env.LOAD_BALANCER ||
+      !satisfies(this.configuration.version, '>=3.7.3')
+    ) {
+      this.currentTest.skipReason =
+        'Skipping SCRAM tests when auth is disabled, load balanced mode, or server < 3.7.3.';
+      this.currentTest.skip();
+    }
+  });
+
+  describe('SCRAM-SHA-256 and mechanism negotiation', () => {
+    describe('Steps 1-3', function () {
+      const userMap = {
+        sha1: {
+          description: 'user with SCRAM-SHA-1',
+          username: 'sha1',
+          password: 'sha1',
+          mechanisms: ['SCRAM-SHA-1']
+        },
+        sha256: {
+          description: 'user with SCRAM-SHA-256',
+          username: 'sha256',
+          password: 'sha256',
+          mechanisms: ['SCRAM-SHA-256']
+        },
+        both: {
+          description: 'user with SCRAM-SHA-1 and SCRAM-SHA-256',
+          username: 'both',
+          password: 'both',
+          mechanisms: ['SCRAM-SHA-1', 'SCRAM-SHA-256']
+        }
+      };
+      const users = Object.keys(userMap).map(name => userMap[name]);
+      let utilClient: MongoClient;
+
+      /**
+       * Step 1
+       * Create three test users, one with only SHA-1, one with only SHA-256 and one with
+       * both. For example:
+       * db.runCommand(\{createUser: 'sha1', pwd: 'sha1', roles: ['root'], mechanisms: ['SCRAM-SHA-1']\})
+       * db.runCommand(\{createUser: 'sha256', pwd: 'sha256', roles: ['root'], mechanisms: ['SCRAM-SHA-256']\})
+       * db.runCommand(\{createUser: 'both', pwd: 'both', roles: ['root'], mechanisms: ['SCRAM-SHA-1', 'SCRAM-SHA-256']\})
+       */
+      beforeEach(async function () {
+        utilClient = this.configuration.newClient();
+
+        const createUserCommands = users.map(user => ({
+          createUser: user.username,
+          pwd: user.password,
+          roles: ['root'],
+          mechanisms: user.mechanisms
+        }));
+
+        await Promise.all(createUserCommands.map(cmd => utilClient.db('admin').command(cmd)));
+      });
+
+      afterEach(async function () {
+        await Promise.all(users.map(user => utilClient.db('admin').removeUser(user.username)));
+        await utilClient?.close();
+      });
+
+      /**
+       * Step 2
+       * For each test user, verify that you can connect and run a command requiring
+       * authentication for the following cases:
+       *   - Explicitly specifying each mechanism the user supports.
+       *   - Specifying no mechanism and relying on mechanism negotiation.
+       */
+      for (const user of users) {
+        for (const mechanism of user.mechanisms) {
+          it(`authenticates ${user.description} when explicitly specifying ${mechanism}`, {
+            metadata: { requires: { mongodb: '>=3.7.3' } },
+            test: async function () {
+              const options = {
+                auth: {
+                  username: user.username,
+                  password: user.password
+                },
+                authMechanism: mechanism,
+                authSource: 'admin'
+              };
+
+              const client = this.configuration.newClient({}, options);
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
+              await client.close();
+            }
+          });
+
+          it(`authenticates ${user.description} when explicitly specifying ${mechanism} in url`, {
+            metadata: { requires: { mongodb: '>=3.7.3' } },
+            test: async function () {
+              const username = encodeURIComponent(user.username);
+              const password = encodeURIComponent(user.password);
+
+              const url = `${makeConnectionString(
+                this.configuration,
+                username,
+                password
+              )}authMechanism=${mechanism}`;
+
+              const client = this.configuration.newClient(url);
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
+              await client.close();
+            }
+          });
+        }
+
+        it(`authenticates ${user.description} using mechanism negotiaton`, {
+          metadata: { requires: { mongodb: '>=3.7.3' } },
+          test: async function () {
+            const options = {
+              auth: {
+                username: user.username,
+                password: user.password
+              },
+              authSource: 'admin'
+            };
+
+            const client = this.configuration.newClient({}, options);
+            const stats = await client.db('test').stats();
+            expect(stats).to.exist;
+            await client.close();
+          }
+        });
+
+        it(`authenticates ${user.description} using mechanism negotiaton and url`, {
+          metadata: { requires: { mongodb: '>=3.7.3' } },
+          test: async function () {
+            const username = encodeURIComponent(user.username);
+            const password = encodeURIComponent(user.password);
+            const url = makeConnectionString(this.configuration, username, password);
+
+            const client = this.configuration.newClient(url);
+            const stats = await client.db('test').stats();
+            expect(stats).to.exist;
+            await client.close();
+          }
+        });
+      }
+
+      /**
+       * Step 2
+       * For a test user supporting both SCRAM-SHA-1 and SCRAM-SHA-256, drivers should verify
+       * that negotation selects SCRAM-SHA-256. This may require monkey patching, manual log
+       * analysis, etc.
+       * todo(NODE-5629): Test passes locally but will fail on CI runs.
+       */
+      it.skip('selects SCRAM-SHA-256 for a user that supports both auth mechanisms', {
+        metadata: { requires: { mongodb: '>=3.7.3' } },
+        test: async function () {
+          const options = {
+            auth: {
+              username: userMap.both.username,
+              password: userMap.both.password
+            },
+            authSource: this.configuration.db
+          };
+
+          const spy = sinon.spy(ScramSHA256.prototype, 'auth');
+
+          const client = this.configuration.newClient({}, options);
+          const stats = await client.db('test').stats();
+          expect(stats).to.exist;
+          expect(spy.called).to.equal(true);
+          sinon.restore();
+          await client.close();
+        }
+      });
+
+      /**
+       * Step 3
+       * For test users that support only one mechanism, verify that explictly specifying
+       * the other mechanism fails.
+       */
+      it('fails to connect if incorrect auth mechanism is explicitly specified', {
+        metadata: { requires: { mongodb: '>=3.7.3' } },
+        test: async function () {
+          const options = {
+            auth: {
+              username: userMap.sha256.username,
+              password: userMap.sha256.password
+            },
+            authSource: 'admin',
+            authMechanism: 'SCRAM-SHA-1'
+          };
+
+          const client = this.configuration.newClient({}, options);
+          const error = await client
+            .db('test')
+            .stats()
+            .catch(e => e);
+          expect(error.message).to.match(/Authentication failed|SCRAM/);
+          await client.close();
+        }
+      });
+
+      /*
+       * Step 3
+       * For a non-existent username, verify that not specifying a mechanism when
+       * connecting fails with the same error type that would occur with a correct
+       * username but incorrect password or mechanism.  (Because negotiation with a
+       * non-existent user name at one point during server development caused a
+       * handshake error, we want to verify this is seen by users as similar to other
+       * authentication errors, not as a network or database command error on the ``hello``
+       * or legacy hello commands themselves.)
+       */
+      it('fails for a nonexistent username with same error type as bad password', {
+        metadata: { requires: { mongodb: '>=3.7.3' } },
+        test: async function () {
+          const noUsernameOptions = {
+            auth: {
+              username: 'roth',
+              password: 'pencil'
+            },
+            authSource: 'admin'
+          };
+
+          const badPasswordOptions = {
+            auth: {
+              username: 'both',
+              password: 'pencil'
+            },
+            authSource: 'admin'
+          };
+
+          const noUserClient = this.configuration.newClient({}, noUsernameOptions);
+          const badPasswordClient = this.configuration.newClient({}, badPasswordOptions);
+          const noUserError = await noUserClient
+            .db('test')
+            .stats()
+            .catch(e => e);
+          const badPasswordError = await badPasswordClient
+            .db('test')
+            .stats()
+            .catch(e => e);
+          expect(noUserError).to.match(/Authentication failed/);
+          expect(badPasswordError).to.match(/Authentication failed/);
+          await noUserClient.close();
+          await badPasswordClient.close();
+        }
+      });
+
+      it('should send speculativeAuthenticate on initial handshake on MongoDB 4.4+', {
+        metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
+        test: async function () {
+          const options = {
+            auth: {
+              username: userMap.both.username,
+              password: userMap.both.password
+            },
+            authSource: 'admin'
+          };
+
+          const commandSpy = sinon.spy(Connection.prototype, 'command');
+          const client = this.configuration.newClient({}, options);
+          await client.connect();
+          const calls = commandSpy
+            .getCalls()
+            .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
+            .filter(
+              c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
+            );
+
+          expect(calls).to.have.length(1);
+          const handshakeDoc = calls[0].args[1];
+          expect(handshakeDoc).to.have.property('speculativeAuthenticate');
+          sinon.restore();
+          await client.close();
+        }
+      });
+    });
+
+    // todo(NODE-5621): fix the issue with unicode characters.
+    describe.skip('Step 4', function () {
+      /**
+       * Step 4
+       * To test SASLprep behavior, create two users:
+       * username: "IX", password "IX"
+       * username: "u2168" (ROMAN NUMERAL NINE), password "u2163" (ROMAN NUMERAL FOUR)
+       * To create the users, use the exact bytes for username and password without SASLprep or other normalization and specify SCRAM-SHA-256 credentials:
+       * db.runCommand(\{createUser: 'IX', pwd: 'IX', roles: ['root'], mechanisms: ['SCRAM-SHA-256']\})
+       * db.runCommand(\{createUser: 'u2168', pwd: 'u2163', roles: ['root'], mechanisms: ['SCRAM-SHA-256']\})
+       * For each user, verify that the driver can authenticate with the password in both SASLprep normalized and non-normalized forms:
+       * User "IX": use password forms "IX" and "Iu00ADX"
+       * User "u2168": use password forms "IV" and "Iu00ADV"
+       * As a URI, those have to be UTF-8 encoded and URL-escaped, e.g.:
+       * mongodb://IX:IX\@mongodb.example.com/admin
+       * mongodb://IX:I%C2%ADX\@mongodb.example.com/admin
+       * mongodb://%E2%85%A8:IV\@mongodb.example.com/admin
+       * mongodb://%E2%85%A8:I%C2%ADV\@mongodb.example.com/admin
+       */
+      let utilClient;
+      const users = [
+        {
+          username: 'IX',
+          password: 'IX',
+          mechanisms: ['SCRAM-SHA-256']
+        },
+        {
+          username: '\u2168',
+          password: '\u2163',
+          mechanisms: ['SCRAM-SHA-256']
+        }
+      ];
+
+      before(async function () {
+        utilClient = this.configuration.newClient();
+        const db = utilClient.db('admin');
+
+        const createUserCommands = users.map(user => ({
+          createUser: user.username,
+          pwd: user.password,
+          roles: ['root'],
+          mechanisms: user.mechanisms
+        }));
+
+        await Promise.all(createUserCommands.map(cmd => db.command(cmd)));
+      });
+
+      after(async function () {
+        const db = utilClient.db('admin');
+        await Promise.all(users.map(user => db.removeUser(user.username)));
+        await utilClient?.close();
+      });
+
+      [
+        { username: 'IX', password: 'IX' },
+        { username: 'IX', password: 'I\u00ADX' },
+        { username: '\u2168', password: 'IV' },
+        { username: '\u2168', password: 'I\u00ADV' }
+      ].forEach(({ username, password }) => {
+        it(`logs in with username "${username}" and password "${password}"`, {
+          metadata: {
+            requires: {
+              mongodb: '>=3.7.3'
+            }
+          },
+          test: async function () {
+            const options = {
+              auth: { username, password },
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+
+            const client = this.configuration.newClient(options);
+            try {
+              const stats = await client.db('admin').stats();
+              expect(stats).to.exist;
+            } finally {
+              await client.close();
+            }
+          }
+        });
+      });
+    });
+  });
+});
