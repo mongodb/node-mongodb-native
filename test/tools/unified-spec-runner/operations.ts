@@ -395,10 +395,12 @@ operations.set('loop', async ({ entities, operation, client, testConfig }) => {
     controller.abort('Process received SIGINT, aborting operation loop.');
   });
   const args = operation.arguments!;
-  const storeIterationsAsEntity = args.storeIterationsAsEntity;
-  const storeSuccessesAsEntity = args.storeSuccessesAsEntity;
-  const storeErrorsAsEntity = args.storeErrorsAsEntity;
-  const storeFailuresAsEntity = args.storeFailuresAsEntity;
+  const {
+    storeIterationsAsEntity,
+    storeSuccessesAsEntity,
+    storeErrorsAsEntity,
+    storeFailuresAsEntity
+  } = args;
 
   if (storeErrorsAsEntity) {
     entities.set(storeErrorsAsEntity, []);
