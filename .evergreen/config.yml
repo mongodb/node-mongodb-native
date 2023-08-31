@@ -3490,6 +3490,7 @@ task_groups:
           add_expansions_to_env: true
           env:
             MONGODB_VERSION: '7.0'
+            TASK_ID: ${task_id}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
@@ -3501,6 +3502,8 @@ task_groups:
           working_dir: src
           binary: bash
           add_expansions_to_env: true
+          env:
+            TASK_ID: ${task_id}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
     setup_group_can_fail_task: true
@@ -3517,6 +3520,7 @@ task_groups:
           add_expansions_to_env: true
           env:
             MONGODB_VERSION: '7.0'
+            TASK_ID: ${task_id}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/setup-atlas-cluster.sh
       - command: expansions.update
@@ -3528,6 +3532,8 @@ task_groups:
           working_dir: src
           binary: bash
           add_expansions_to_env: true
+          env:
+            TASK_ID: ${task_id}
           args:
             - ${DRIVERS_TOOLS}/.evergreen/atlas/teardown-atlas-cluster.sh
     setup_group_can_fail_task: true
