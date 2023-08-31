@@ -376,3 +376,18 @@ export class AtlasTestConfiguration extends TestConfiguration {
     return process.env.MONGODB_URI!;
   }
 }
+
+/**
+ * Test configuration specific to Astrolabe testing.
+ */
+export class AstrolabeTestConfiguration extends TestConfiguration {
+  override newClient(): MongoClient {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return new MongoClient(process.env.DRIVERS_ATLAS_TESTING_URI!);
+  }
+
+  override url(): string {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return process.env.DRIVERS_ATLAS_TESTING_URI!;
+  }
+}

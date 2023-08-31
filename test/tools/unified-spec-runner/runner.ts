@@ -5,6 +5,7 @@ import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 import type { MongoClient } from '../../mongodb';
 import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
 import { ejson } from '../utils';
+import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
 import { compareLogs, matchesEvents } from './match';
 import { executeOperationAndCheck } from './operations';
@@ -255,6 +256,11 @@ async function runUnifiedTest(
     }
   } finally {
     await utilClient.close();
+    // For astrolabe testing we need to write the entities to files.
+    if (process.env.WORKLOAD_SPECIFICATION) {
+      const writer = new AstrolabeResultsWriter(entities!);
+      await writer.write();
+    }
     await entities?.cleanup();
   }
 }

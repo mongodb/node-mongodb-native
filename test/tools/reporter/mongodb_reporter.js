@@ -103,7 +103,7 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
       catchErr(test => this.testEnd(test))
     );
 
-    process.on('SIGINT', () => this.end(true));
+    process.prependListener('SIGINT', () => this.end(true));
   }
 
   start() {}
@@ -183,7 +183,11 @@ class MongoDBMochaReporter extends mocha.reporters.Spec {
     } catch (error) {
       console.error(chalk.red(`Failed to output xunit report! ${error}`));
     } finally {
-      if (ctrlC) process.exit(1);
+      // Dont exit the process on Astrolabe testing, let it interrupt and
+      // finish naturally.
+      if (!process.env.WORKLOAD_SPECIFICATION) {
+        if (ctrlC) process.exit(1);
+      }
     }
   }
 

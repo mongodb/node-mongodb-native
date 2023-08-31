@@ -139,6 +139,7 @@ export interface ClientEntity {
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
   observeSensitiveCommands?: boolean;
+  storeEventsAsEntities?: StoreEventsAsEntity[];
 }
 export interface DatabaseEntity {
   id: string;
@@ -307,6 +308,10 @@ export interface ExpectedSdamEvent {
       type?: string;
     };
   };
+}
+export interface StoreEventsAsEntity {
+  id: string;
+  events: string[];
 }
 export interface ExpectedError {
   isError?: true;

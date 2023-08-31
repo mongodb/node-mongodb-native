@@ -5,6 +5,7 @@ import { EventEmitter } from 'events';
 import {
   AbstractCursor,
   ChangeStream,
+  ClientEncryption,
   ClientSession,
   Collection,
   type CommandFailedEvent,
@@ -37,13 +38,9 @@ import {
 } from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
 import type { TestConfiguration } from '../runner/config';
+import { EntityEventRegistry } from './entity_event_registry';
 import { trace } from './runner';
-import type {
-  ClientEncryption,
-  ClientEntity,
-  EntityDescription,
-  ExpectedLogMessage
-} from './schema';
+import type { ClientEntity, EntityDescription, ExpectedLogMessage } from './schema';
 import {
   createClientEncryption,
   makeConnectionString,
@@ -357,9 +354,10 @@ export type Entity =
   | AbstractCursor
   | UnifiedChangeStream
   | GridFSBucket
+  | Document
   | ClientEncryption
   | TopologyDescription // From recordTopologyDescription operation
-  | Document; // Results from operations
+  | number;
 
 export type EntityCtor =
   | typeof UnifiedMongoClient
@@ -370,7 +368,7 @@ export type EntityCtor =
   | typeof AbstractCursor
   | typeof GridFSBucket
   | typeof UnifiedThread
-  | ClientEncryption;
+  | typeof ClientEncryption;
 
 export type EntityTypeId =
   | 'client'
@@ -381,17 +379,25 @@ export type EntityTypeId =
   | 'thread'
   | 'cursor'
   | 'stream'
-  | 'clientEncryption';
+  | 'clientEncryption'
+  | 'errors'
+  | 'failures'
+  | 'events'
+  | 'iterations'
+  | 'successes';
 
 const ENTITY_CTORS = new Map<EntityTypeId, EntityCtor>();
 ENTITY_CTORS.set('client', UnifiedMongoClient);
 ENTITY_CTORS.set('db', Db);
+ENTITY_CTORS.set('clientEncryption', ClientEncryption);
 ENTITY_CTORS.set('collection', Collection);
 ENTITY_CTORS.set('session', ClientSession);
 ENTITY_CTORS.set('bucket', GridFSBucket);
 ENTITY_CTORS.set('thread', UnifiedThread);
 ENTITY_CTORS.set('cursor', AbstractCursor);
 ENTITY_CTORS.set('stream', ChangeStream);
+
+const NO_INSTANCE_CHECK = ['errors', 'failures', 'events', 'successes', 'iterations'];
 
 export class EntitiesMap<E = Entity> extends Map<string, E> {
   failPoints: FailPointMap;
@@ -435,6 +441,11 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
   getEntity(type: 'thread', key: string, assertExists?: boolean): UnifiedThread;
   getEntity(type: 'cursor', key: string, assertExists?: boolean): AbstractCursor;
   getEntity(type: 'stream', key: string, assertExists?: boolean): UnifiedChangeStream;
+  getEntity(type: 'iterations', key: string, assertExists?: boolean): number;
+  getEntity(type: 'successes', key: string, assertExists?: boolean): number;
+  getEntity(type: 'errors', key: string, assertExists?: boolean): Document[];
+  getEntity(type: 'failures', key: string, assertExists?: boolean): Document[];
+  getEntity(type: 'events', key: string, assertExists?: boolean): Document[];
   getEntity(type: 'clientEncryption', key: string, assertExists?: boolean): ClientEncryption;
   getEntity(type: EntityTypeId, key: string, assertExists = true): Entity | undefined {
     const entity = this.get(key);
@@ -442,8 +453,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
       if (assertExists) throw new Error(`Entity '${key}' does not exist`);
       return;
     }
-    if (type === 'clientEncryption') {
-      // we do not have instanceof checking here since csfle might not be installed
+    if (NO_INSTANCE_CHECK.includes(type)) {
+      // Skip constructor checks for interfaces.
       return entity;
     }
     const ctor = ENTITY_CTORS.get(type);
@@ -499,6 +510,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           entity.client.uriOptions
         );
         const client = new UnifiedMongoClient(uri, entity.client);
+        new EntityEventRegistry(client, entity.client, map).register();
         try {
           await client.connect();
         } catch (error) {

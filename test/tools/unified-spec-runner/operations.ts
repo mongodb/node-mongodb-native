@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { once, Writable } from 'node:stream';
 
-import { expect } from 'chai';
+import { AssertionError, expect } from 'chai';
 
 import {
   AbstractCursor,
@@ -12,6 +12,7 @@ import {
   type Document,
   type GridFSFile,
   type MongoClient,
+  MongoError,
   type ObjectId,
   ReadConcern,
   ReadPreference,
@@ -342,13 +343,22 @@ operations.set('failPoint', async ({ entities, operation }) => {
 operations.set('insertOne', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { document, ...opts } = operation.arguments!;
-  return collection.insertOne(document, opts);
+  // Looping exposes the fact that we can generate _ids for inserted
+  // documents and we don't want the original operation to get modified
+  // and use the same _id for each insert.
+  return collection.insertOne({ ...document }, opts);
 });
 
 operations.set('insertMany', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   const { documents, ...opts } = operation.arguments!;
-  return collection.insertMany(documents, opts);
+  // Looping exposes the fact that we can generate _ids for inserted
+  // documents and we don't want the original operation to get modified
+  // and use the same _id for each insert.
+  const clonedDocuments = documents.map(doc => {
+    return { ...doc };
+  });
+  return collection.insertMany(clonedDocuments, opts);
 });
 
 operations.set('iterateUntilDocumentOrError', async ({ entities, operation }) => {
@@ -375,6 +385,79 @@ operations.set('listDatabases', async ({ entities, operation }) => {
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   return collection.listIndexes(operation.arguments!).toArray();
+});
+
+operations.set('loop', async ({ entities, operation, client, testConfig }) => {
+  const controller = new AbortController();
+  // We always want the process to exit on SIGINT last, so all other
+  // SIGINT events listeners must be prepended.
+  process.prependListener('SIGINT', () => {
+    controller.abort('Process received SIGINT, aborting operation loop.');
+  });
+  const args = operation.arguments!;
+  const {
+    storeIterationsAsEntity,
+    storeSuccessesAsEntity,
+    storeErrorsAsEntity,
+    storeFailuresAsEntity
+  } = args;
+
+  if (storeErrorsAsEntity) {
+    entities.set(storeErrorsAsEntity, []);
+  }
+  if (storeFailuresAsEntity) {
+    entities.set(storeFailuresAsEntity, []);
+  }
+
+  let iterations = 0;
+  let successes = 0;
+  while (!controller.signal.aborted) {
+    if (storeIterationsAsEntity) {
+      entities.set(storeIterationsAsEntity, iterations++);
+    }
+    for (const op of args.operations) {
+      try {
+        await executeOperationAndCheck(op, entities, client, testConfig);
+        if (storeSuccessesAsEntity) {
+          entities.set(storeSuccessesAsEntity, successes++);
+        }
+      } catch (error) {
+        // From the unified spec:
+        // If neither storeErrorsAsEntity nor storeFailuresAsEntity are specified,
+        // the loop MUST terminate and raise the error/failure (i.e. the error/failure
+        // will interrupt the test).
+        if (!storeErrorsAsEntity && !storeFailuresAsEntity) {
+          entities.set('errors', [
+            {
+              error: 'Neither storeErrorsAsEntity or storeFailuresAsEntity specified',
+              time: Date.now()
+            }
+          ]);
+          controller.abort('Neither storeErrorsAsEntity or storeFailuresAsEntity specified');
+          return;
+        }
+
+        // From the unified spec format specification for the loop operation:
+        // A failure is when the result or outcome of an operation executed by the test
+        // runner differs from its expected outcome. For example, an expectResult assertion
+        // failing to match a BSON document or an expectError assertion failing to match
+        // an error message would be considered a failure.
+        // An error is any other type of error raised by the test runner. For example, an
+        // unsupported operation or inability to resolve an entity name would be considered
+        // an error.
+        if (storeFailuresAsEntity && error instanceof AssertionError) {
+          entities
+            .getEntity('failures', storeFailuresAsEntity)
+            .push({ error: error.message, time: Date.now() });
+        } else if (storeErrorsAsEntity && !(error instanceof MongoError)) {
+          // Checking not a MongoError ensures it's coming from the test runner.
+          entities
+            .getEntity('errors', storeErrorsAsEntity)
+            .push({ error: error.message, time: Date.now() });
+        }
+      }
+    }
+  }
 });
 
 operations.set('replaceOne', async ({ entities, operation }) => {

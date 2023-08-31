@@ -7,7 +7,7 @@ require('source-map-support').install({
 const path = require('path');
 const fs = require('fs');
 const { MongoClient } = require('../../../mongodb');
-const { TestConfiguration } = require('../config');
+const { AstrolabeTestConfiguration, TestConfiguration } = require('../config');
 const { getEnvironmentalOptions } = require('../../utils');
 const mock = require('../../mongodb-mock/index');
 const { inspect } = require('util');
@@ -105,6 +105,10 @@ const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedT
 };
 
 const testConfigBeforeHook = async function () {
+  if (process.env.DRIVERS_ATLAS_TESTING_URI) {
+    this.configuration = new AstrolabeTestConfiguration(process.env.DRIVERS_ATLAS_TESTING_URI, {});
+    return;
+  }
   // TODO(NODE-5035): Implement OIDC support. Creating the MongoClient will fail
   // with "MongoInvalidArgumentError: AuthMechanism 'MONGODB-OIDC' not supported"
   // as is expected until that ticket goes in. Then this condition gets removed.
