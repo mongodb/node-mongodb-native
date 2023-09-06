@@ -2,7 +2,9 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-16}
-NODE_LOWEST_LTS=18
+# npm version can be defined in the environment for cases where we need to install
+# a version lower than latest to support EOL Node versions.
+NPM_VERSION=${NPM_VERSION:-latest}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
@@ -96,12 +98,7 @@ else
 fi
 
 if [[ $operating_system != "win" ]]; then
-  # Update npm to latest when we can
-  if [[ $NODE_LTS_VERSION -lt $NODE_LOWEST_LTS ]]; then
-    npm install --global npm@9
-  else
-    npm install --global npm@latest
-  fi
+  npm install --global npm@$NPM_VERSION
   hash -r
 fi
 
