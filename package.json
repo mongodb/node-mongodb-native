@@ -100,7 +100,7 @@
     "mongodb-legacy": "^6.0.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",
-    "semver": "^7.5.0",
+    "semver": "^7.5.4",
     "sinon": "^15.0.4",
     "sinon-chai": "^3.7.0",
     "snappy": "^7.2.2",
