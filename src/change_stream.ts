@@ -3,6 +3,7 @@ import type { Readable } from 'stream';
 import type { Binary, Document, Timestamp } from './bson';
 import { Collection } from './collection';
 import { CHANGE, CLOSE, END, ERROR, INIT, MORE, RESPONSE, RESUME_TOKEN_CHANGED } from './constants';
+import { Context } from './csot';
 import type { AbstractCursorEvents, CursorStreamOptions } from './cursor/abstract_cursor';
 import { ChangeStreamCursor, type ChangeStreamCursorOptions } from './cursor/change_stream_cursor';
 import { Db } from './db';
@@ -934,7 +935,8 @@ export class ChangeStream<
       this.cursor.close().catch(() => null);
 
       const topology = getTopology(this.parent);
-      topology.selectServer(this.cursor.readPreference, {}, serverSelectionError => {
+      const context = new Context(this.options as any);
+      topology.selectServer(this.cursor.readPreference, { context }, serverSelectionError => {
         if (serverSelectionError) return this._closeEmitterModeWithError(changeStreamError);
         this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
       });
@@ -962,7 +964,9 @@ export class ChangeStream<
     await this.cursor.close().catch(() => null);
     const topology = getTopology(this.parent);
     try {
-      await topology.selectServerAsync(this.cursor.readPreference, {});
+      const context = new Context(this.options as any);
+
+      await topology.selectServerAsync(this.cursor.readPreference, { context });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
     } catch {
       // if the topology can't reconnect, close the stream

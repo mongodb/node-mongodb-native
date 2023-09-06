@@ -1,4 +1,4 @@
-import { clearTimeout, setTimeout } from 'timers';
+import { clearTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
@@ -22,6 +22,7 @@ import {
   TOPOLOGY_DESCRIPTION_CHANGED,
   TOPOLOGY_OPENING
 } from '../constants';
+import { Context, type CustomTimeoutController } from '../csot';
 import {
   MongoCompatibilityError,
   type MongoDriverError,
@@ -34,7 +35,6 @@ import {
 import type { MongoClient, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
-import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -96,6 +96,7 @@ export interface ServerSelectionRequest {
   callback: ServerSelectionCallback;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
+  controller?: CustomTimeoutController;
 }
 
 /** @internal */
@@ -156,9 +157,7 @@ export interface ConnectOptions {
 /** @public */
 export interface SelectServerOptions {
   readPreference?: ReadPreferenceLike;
-  /** How long to block for server selection before throwing an error */
-  serverSelectionTimeoutMS?: number;
-  session?: ClientSession;
+  context: Context;
 }
 
 /** @public */
@@ -437,35 +436,40 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       callback ? callback(error) : this.emit(Topology.ERROR, error);
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
-    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
-      if (err) {
-        return this.close({ force: false }, () => exitWithError(err));
+    const context = new Context(this.s.options as any);
+    this.selectServer(
+      readPreferenceServerSelector(readPreference),
+      { ...options, context },
+      (err, server) => {
+        if (err) {
+          return this.close({ force: false }, () => exitWithError(err));
+        }
+
+        // TODO: NODE-2471
+        const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+        if (!skipPingOnConnect && server && this.s.credentials) {
+          server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
+            if (err) {
+              return exitWithError(err);
+            }
+
+            stateTransition(this, STATE_CONNECTED);
+            this.emit(Topology.OPEN, this);
+            this.emit(Topology.CONNECT, this);
+
+            callback?.(undefined, this);
+          });
+
+          return;
+        }
+
+        stateTransition(this, STATE_CONNECTED);
+        this.emit(Topology.OPEN, this);
+        this.emit(Topology.CONNECT, this);
+
+        callback?.(undefined, this);
       }
-
-      // TODO: NODE-2471
-      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
-      if (!skipPingOnConnect && server && this.s.credentials) {
-        server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
-          if (err) {
-            return exitWithError(err);
-          }
-
-          stateTransition(this, STATE_CONNECTED);
-          this.emit(Topology.OPEN, this);
-          this.emit(Topology.CONNECT, this);
-
-          callback?.(undefined, this);
-        });
-
-        return;
-      }
-
-      stateTransition(this, STATE_CONNECTED);
-      this.emit(Topology.OPEN, this);
-      this.emit(Topology.CONNECT, this);
-
-      callback?.(undefined, this);
-    });
+    );
   }
 
   /** Close this topology */
@@ -545,7 +549,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     );
 
     const isSharded = this.description.type === TopologyType.Sharded;
-    const session = options.session;
+    const session = options.context.session;
     const transaction = session && session.transaction;
 
     if (isSharded && transaction && transaction.server) {
@@ -559,19 +563,18 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       callback
     };
 
-    const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
-    if (serverSelectionTimeoutMS) {
-      waitQueueMember.timer = setTimeout(() => {
-        waitQueueMember[kCancelled] = true;
-        waitQueueMember.timer = undefined;
-        const timeoutError = new MongoServerSelectionError(
-          `Server selection timed out after ${serverSelectionTimeoutMS} ms`,
-          this.description
-        );
+    waitQueueMember.controller =
+      options.context.timeoutController.timeoutSignalFor('server selection');
+    waitQueueMember.controller?.signal?.addEventListener('abort', () => {
+      waitQueueMember[kCancelled] = true;
+      waitQueueMember.timer = undefined;
+      const timeoutError = new MongoServerSelectionError(
+        `Server selection timed out after ${options.context.timeoutController.serverSelectionTimeoutMS} ms`,
+        this.description
+      );
 
-        waitQueueMember.callback(timeoutError);
-      }, serverSelectionTimeoutMS);
-    }
+      waitQueueMember.callback(timeoutError);
+    });
 
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
@@ -878,9 +881,11 @@ function processWaitQueue(topology: Topology) {
         ? serverSelector(topology.description, serverDescriptions)
         : serverDescriptions;
     } catch (e) {
-      if (waitQueueMember.timer) {
-        clearTimeout(waitQueueMember.timer);
-      }
+      // if (waitQueueMember.timer) {
+      //   clearTimeout(waitQueueMember.timer);
+      // }
+
+      waitQueueMember.controller?.clear();
 
       waitQueueMember.callback(e);
       continue;
@@ -910,6 +915,7 @@ function processWaitQueue(topology: Topology) {
           topology.description
         )
       );
+      waitQueueMember.controller?.clear();
       return;
     }
     const transaction = waitQueueMember.transaction;
@@ -917,9 +923,11 @@ function processWaitQueue(topology: Topology) {
       transaction.pinServer(selectedServer);
     }
 
-    if (waitQueueMember.timer) {
-      clearTimeout(waitQueueMember.timer);
-    }
+    // if (waitQueueMember.timer) {
+    //   clearTimeout(waitQueueMember.timer);
+    // }
+
+    waitQueueMember.controller?.clear();
 
     waitQueueMember.callback(undefined, selectedServer);
   }

@@ -1,4 +1,5 @@
 import type { BSONSerializeOptions, Document } from '../bson';
+import { type Context } from '../csot';
 import { MongoInvalidArgumentError } from '../error';
 import { Explain, type ExplainOptions } from '../explain';
 import { ReadConcern } from '../read_concern';
@@ -55,6 +56,9 @@ export interface CommandOperationOptions
   dbName?: string;
   authdb?: string;
   noResponse?: boolean;
+
+  /** @internal */
+  context?: Context;
 }
 
 /** @internal */

@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { Context } from '../csot';
 import {
   isRetryableReadError,
   isRetryableWriteError,
@@ -83,7 +84,11 @@ export function executeOperation<
 async function executeOperationAsync<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult> {
+>(
+  client: MongoClient,
+  operation: T,
+  context = Context.create(operation.options)
+): Promise<TResult> {
   if (!(operation instanceof AbstractOperation)) {
     // TODO(NODE-3483): Extend MongoRuntimeError
     throw new MongoRuntimeError('This method requires a valid operation instance');
@@ -123,6 +128,8 @@ async function executeOperationAsync<
     throw new MongoInvalidArgumentError('ClientSession must be from the same MongoClient');
   }
 
+  context.session = session;
+
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
@@ -151,7 +158,7 @@ async function executeOperationAsync<
     selector = readPreference;
   }
 
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, { context });
 
   if (session == null) {
     // No session also means it is not retryable, early exit
@@ -190,11 +197,15 @@ async function executeOperationAsync<
     return await operation.execute(server, session);
   } catch (operationError) {
     if (willRetry && operationError instanceof MongoError) {
-      return await retryOperation(operation, operationError, {
-        session,
-        topology,
-        selector
-      });
+      return await retryOperation(
+        operation,
+        operationError,
+        {
+          topology,
+          selector
+        },
+        context
+      );
     }
     throw operationError;
   } finally {
@@ -206,7 +217,6 @@ async function executeOperationAsync<
 
 /** @internal */
 type RetryOptions = {
-  session: ClientSession;
   topology: Topology;
   selector: ReadPreference | ServerSelector;
 };
@@ -217,8 +227,10 @@ async function retryOperation<
 >(
   operation: T,
   originalError: MongoError,
-  { session, topology, selector }: RetryOptions
+  { topology, selector }: RetryOptions,
+  context: Context
 ): Promise<TResult> {
+  const { session } = context;
   const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
   const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
 
@@ -240,7 +252,7 @@ async function retryOperation<
 
   if (
     originalError instanceof MongoNetworkError &&
-    session.isPinned &&
+    session?.isPinned &&
     !session.inTransaction() &&
     operation.hasAspect(Aspect.CURSOR_CREATING)
   ) {
@@ -251,7 +263,7 @@ async function retryOperation<
   }
 
   // select a new server, and attempt to retry the operation
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, { context });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
     throw new MongoUnexpectedServerResponseError(

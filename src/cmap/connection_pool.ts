@@ -15,6 +15,7 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from '../constants';
+import { type CustomTimeoutController, TimeoutController } from '../csot';
 import {
   type AnyError,
   MONGODB_ERROR_CODES,
@@ -103,6 +104,7 @@ export interface WaitQueueMember {
   callback: Callback<Connection>;
   timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
+  controller?: CustomTimeoutController;
 }
 
 /** @internal */
@@ -357,26 +359,46 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     );
 
     const waitQueueMember: WaitQueueMember = { callback };
-    const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
-    if (waitQueueTimeoutMS) {
-      waitQueueMember.timer = setTimeout(() => {
-        waitQueueMember[kCancelled] = true;
-        waitQueueMember.timer = undefined;
+    const factory = TimeoutController.create(this.options);
+    waitQueueMember.controller = factory.timeoutSignalFor('connection checkout');
 
-        this.emitAndLog(
-          ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-          new ConnectionCheckOutFailedEvent(this, 'timeout')
-        );
-        waitQueueMember.callback(
-          new WaitQueueTimeoutError(
-            this.loadBalanced
-              ? this.waitQueueErrorMetrics()
-              : 'Timed out while checking out a connection from connection pool',
-            this.address
-          )
-        );
-      }, waitQueueTimeoutMS);
-    }
+    waitQueueMember.controller?.signal.addEventListener('abort', () => {
+      waitQueueMember[kCancelled] = true;
+      waitQueueMember.timer = undefined;
+
+      this.emitAndLog(
+        ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+        new ConnectionCheckOutFailedEvent(this, 'timeout')
+      );
+      waitQueueMember.callback(
+        new WaitQueueTimeoutError(
+          this.loadBalanced
+            ? this.waitQueueErrorMetrics()
+            : 'Timed out while checking out a connection from connection pool',
+          this.address
+        )
+      );
+    });
+    // const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
+    // if (waitQueueTimeoutMS) {
+    //   waitQueueMember.timer = setTimeout(() => {
+    //     waitQueueMember[kCancelled] = true;
+    //     waitQueueMember.timer = undefined;
+
+    //     this.emitAndLog(
+    //       ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+    //       new ConnectionCheckOutFailedEvent(this, 'timeout')
+    //     );
+    //     waitQueueMember.callback(
+    //       new WaitQueueTimeoutError(
+    //         this.loadBalanced
+    //           ? this.waitQueueErrorMetrics()
+    //           : 'Timed out while checking out a connection from connection pool',
+    //         this.address
+    //       )
+    //     );
+    //   }, waitQueueTimeoutMS);
+    // }
 
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
@@ -831,9 +853,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, error)
         );
-        if (waitQueueMember.timer) {
-          clearTimeout(waitQueueMember.timer);
-        }
+        waitQueueMember.controller?.clear();
         this[kWaitQueue].shift();
         waitQueueMember.callback(error);
         continue;
@@ -854,9 +874,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection)
         );
-        if (waitQueueMember.timer) {
-          clearTimeout(waitQueueMember.timer);
-        }
+        waitQueueMember.controller?.clear();
 
         this[kWaitQueue].shift();
         waitQueueMember.callback(undefined, connection);
@@ -893,9 +911,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             );
           }
 
-          if (waitQueueMember.timer) {
-            clearTimeout(waitQueueMember.timer);
-          }
+          waitQueueMember.controller?.clear();
           waitQueueMember.callback(err, connection);
         }
         process.nextTick(() => this.processWaitQueue());
