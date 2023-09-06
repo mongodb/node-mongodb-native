@@ -80,18 +80,6 @@ export class LegacyTimeoutController extends TimeoutController {
   }
 }
 
-function cacheValue() {
-  let value: any = { triggered: false };
-  return function (target: any, key: any) {
-    if (value.triggered) {
-      return value.value;
-    }
-
-    value = { triggered: true, value: target[key] };
-    return value.value;
-  };
-}
-
 export class CSOTTimeoutController extends TimeoutController {
   get hasTimedOut(): boolean {
     return this.remainingTimeoutMS < 0;
