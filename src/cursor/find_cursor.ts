@@ -9,7 +9,7 @@ import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
-import { type Callback, emitWarningOnce, mergeOptions, type MongoDBNamespace } from '../utils';
+import { emitWarningOnce, mergeOptions, type MongoDBNamespace } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @internal */
@@ -68,31 +68,29 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
+  async _initialize(session: ClientSession): Promise<ExecutionResult> {
     const findOperation = new FindOperation(undefined, this.namespace, this[kFilter], {
       ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
       ...this.cursorOptions,
       session
     });
 
-    executeOperation(this.client, findOperation, (err, response) => {
-      if (err || response == null) return callback(err);
+    const response = await executeOperation(this.client, findOperation);
 
-      // TODO: We only need this for legacy queries that do not support `limit`, maybe
-      //       the value should only be saved in those cases.
-      if (response.cursor) {
-        this[kNumReturned] = response.cursor.firstBatch.length;
-      } else {
-        this[kNumReturned] = response.documents ? response.documents.length : 0;
-      }
+    // TODO: We only need this for legacy queries that do not support `limit`, maybe
+    //       the value should only be saved in those cases.
+    if (response.cursor) {
+      this[kNumReturned] = response.cursor.firstBatch.length;
+    } else {
+      this[kNumReturned] = response.documents ? response.documents.length : 0;
+    }
 
-      // TODO: NODE-2882
-      callback(undefined, { server: findOperation.server, session, response });
-    });
+    // TODO: NODE-2882
+    return { server: findOperation.server, session, response };
   }
 
   /** @internal */
-  override _getMore(batchSize: number, callback: Callback<Document>): void {
+  override async getMore(batchSize: number): Promise<Document | null> {
     // NOTE: this is to support client provided limits in pre-command servers
     const numReturned = this[kNumReturned];
     if (numReturned) {
@@ -101,23 +99,18 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        this.close().finally(() =>
-          callback(undefined, { cursor: { id: Long.ZERO, nextBatch: [] } })
-        );
-        return;
+        await this.close().catch(() => null);
+        return { cursor: { id: Long.ZERO, nextBatch: [] } };
       }
     }
 
-    super._getMore(batchSize, (err, response) => {
-      if (err) return callback(err);
+    const response = await super.getMore(batchSize);
+    // TODO: wrap this in some logic to prevent it from happening if we don't need this support
+    if (response) {
+      this[kNumReturned] = this[kNumReturned] + response.cursor.nextBatch.length;
+    }
 
-      // TODO: wrap this in some logic to prevent it from happening if we don't need this support
-      if (response) {
-        this[kNumReturned] = this[kNumReturned] + response.cursor.nextBatch.length;
-      }
-
-      callback(undefined, response);
-    });
+    return response;
   }
 
   /**

@@ -5,7 +5,7 @@ import { AggregateOperation, type AggregateOptions } from '../operations/aggrega
 import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
 import type { Sort } from '../sort';
-import type { Callback, MongoDBNamespace } from '../utils';
+import type { MongoDBNamespace } from '../utils';
 import { mergeOptions } from '../utils';
 import type { AbstractCursorOptions } from './abstract_cursor';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
@@ -61,19 +61,17 @@ export class AggregationCursor<TSchema = any> extends AbstractCursor<TSchema> {
   }
 
   /** @internal */
-  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
+  async _initialize(session: ClientSession): Promise<ExecutionResult> {
     const aggregateOperation = new AggregateOperation(this.namespace, this[kPipeline], {
       ...this[kOptions],
       ...this.cursorOptions,
       session
     });
 
-    executeOperation(this.client, aggregateOperation, (err, response) => {
-      if (err || response == null) return callback(err);
+    const response = await executeOperation(this.client, aggregateOperation);
 
-      // TODO: NODE-2882
-      callback(undefined, { server: aggregateOperation.server, session, response });
-    });
+    // TODO: NODE-2882
+    return { server: aggregateOperation.server, session, response };
   }
 
   /** Execute the explain for the cursor */
