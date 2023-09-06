@@ -64,7 +64,7 @@
   "devDependencies": {
     "@iarna/toml": "^2.2.5",
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@microsoft/api-extractor": "^7.35.1",
+    "@microsoft/api-extractor": "^7.36.4",
     "@microsoft/tsdoc-config": "^0.16.2",
     "@mongodb-js/zstd": "^1.1.0",
     "@octokit/core": "^4.2.1",
