@@ -96,7 +96,7 @@ fi
 
 if [[ $operating_system != "win" ]]; then
   # Update npm to latest when we can
-  npm install --global npm@latest
+  npm install --global npm@9.0
   hash -r
 fi
 
