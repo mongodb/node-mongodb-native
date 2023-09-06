@@ -663,9 +663,11 @@ export abstract class AbstractCursor<
         this[kDocuments].push(state.response as TODO_NODE_3286);
       }
 
-      // the cursor is now initialized, even if an error occurred or it is dead
+      // the cursor is now initialized, even if it is dead
       this[kInitialized] = true;
     } catch (error) {
+      // the cursor is now initialized, even if an error occurred
+      this[kInitialized] = true;
       await cleanupCursor(this, { error });
       throw error;
     }
