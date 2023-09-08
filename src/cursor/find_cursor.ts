@@ -77,13 +77,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     const response = await executeOperation(this.client, findOperation);
 
-    // TODO: We only need this for legacy queries that do not support `limit`, maybe
-    //       the value should only be saved in those cases.
-    if (response.cursor) {
-      this[kNumReturned] = response.cursor.firstBatch.length;
-    } else {
-      this[kNumReturned] = response.documents ? response.documents.length : 0;
-    }
+    this[kNumReturned] = response.cursor.firstBatch.length;
 
     // TODO: NODE-2882
     return { server: findOperation.server, session, response };
@@ -91,7 +85,6 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** @internal */
   override async getMore(batchSize: number): Promise<Document | null> {
-    // NOTE: this is to support client provided limits in pre-command servers
     const numReturned = this[kNumReturned];
     if (numReturned) {
       const limit = this[kBuiltOptions].limit;
@@ -99,6 +92,14 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
+        // this is an optimization for the special case of a limit for a find command to avoid an
+        // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
+        // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
+        // produces results for the find command.  Once a batch is filled up, it is returned and only
+        // on the subsequent getMore will the query framework consider the limit, determine the cursor
+        // is exhausted and return a cursorId of zero.
+        // instead, if we determine there are no more documents to request from the server, we preemptively
+        // close the cursor
         await this.close().catch(() => null);
         return { cursor: { id: Long.ZERO, nextBatch: [] } };
       }
