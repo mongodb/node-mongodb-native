@@ -87,6 +87,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
   override async getMore(batchSize: number): Promise<Document | null> {
     const numReturned = this[kNumReturned];
     if (numReturned) {
+      // TODO(DRIVERS-1448): Remove logic to enforce `limit` in the driver
       const limit = this[kBuiltOptions].limit;
       batchSize =
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
