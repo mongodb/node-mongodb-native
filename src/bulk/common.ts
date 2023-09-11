@@ -392,6 +392,16 @@ export function mergeBatchResults(
     return;
   }
 
+  function createInsertedIdsHash(insertedIds: string | any[], hash: { [x: string]: any; }) {
+    for(let i = 0; i < insertedIds.length; i++) {
+      hash[insertedIds[i]._id] = i;
+    }
+    return hash;
+  } 
+
+  let insertedIdsHash = Object();
+  let errorsExist = false;
+
   // Do we have a top level error stop processing and return
   if (result.ok === 0 && bulkResult.ok === 1) {
     bulkResult.ok = 0;
@@ -404,7 +414,13 @@ export function mergeBatchResults(
       op: batch.operations[0]
     };
 
+    if (!errorsExist) {
+      errorsExist = true;
+      insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
+    }
     bulkResult.writeErrors.push(new WriteError(writeError));
+    const idxToDelete = insertedIdsHash[writeError.op._id];
+    bulkResult.insertedIds.splice(idxToDelete, 1);
     return;
   } else if (result.ok === 0 && bulkResult.ok === 0) {
     return;
@@ -464,12 +480,26 @@ export function mergeBatchResults(
         op: batch.operations[result.writeErrors[i].index]
       };
 
+      if (!errorsExist) {
+        errorsExist = true;
+        insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
+      }
       bulkResult.writeErrors.push(new WriteError(writeError));
+      if (writeError.op._id in insertedIdsHash){
+        const idxToDelete = insertedIdsHash[writeError.op._id];
+        bulkResult.insertedIds.splice(idxToDelete, 1);
+      }
     }
   }
 
   if (result.writeConcernError) {
     bulkResult.writeConcernErrors.push(new WriteConcernError(result.writeConcernError));
+    if (!errorsExist) {
+      errorsExist = true;
+      insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
+      const idxToDelete = insertedIdsHash[result.writeConcernError.op._id];
+      bulkResult.insertedIds.splice(idxToDelete, 1);
+    }
   }
 }
 
