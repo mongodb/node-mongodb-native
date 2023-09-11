@@ -78,7 +78,6 @@ describe('CRUD API explain option', function () {
     const test = this.currentTest;
     if (
       test?.fullTitle().includes('aggregate') &&
-      !test?.fullTitle().includes('false') &&
       gte(this.configuration.version, '7.1.0') &&
       this.currentTest
     ) {
