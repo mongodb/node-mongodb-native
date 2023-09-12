@@ -241,14 +241,9 @@ operations.set('createChangeStream', async ({ entities, operation }) => {
 
   const { pipeline, ...args } = operation.arguments!;
   const changeStream = watchable.watch(pipeline, args);
-
-  return new Promise((resolve, reject) => {
-    const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
-    changeStream.cursor[init](err => {
-      if (err) return reject(err);
-      resolve(changeStream);
-    });
-  });
+  const kInit = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+  await changeStream.cursor[kInit]();
+  return changeStream;
 });
 
 operations.set('createCollection', async ({ entities, operation }) => {
