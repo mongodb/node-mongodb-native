@@ -10,11 +10,11 @@ import {
   confirm,
   customSemverCompare,
   getCommandLineArguments,
-  JsonVersionSchema,
+  type JsonVersionSchema,
   LATEST_TAG,
   log,
-  TomlVersionSchema,
-  VersionSchema
+  type TomlVersionSchema,
+  type VersionSchema
 } from './utils';
 
 const exec = promisify(execCb);
@@ -106,6 +106,9 @@ async function main() {
   await buildDocs(newVersion);
 
   log('Generating new static site...');
+
+  await exec(`git checkout main ${RELEASES_TOML_FILE}`);
+  await exec(`git checkout main ${RELEASES_JSON_FILE}`);
 
   const tomlVersions = parse(
     await readFile(RELEASES_TOML_FILE, { encoding: 'utf8' })
