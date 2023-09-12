@@ -509,7 +509,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS} NPM_VERSION=${NPM_VERSION}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
 
   "install aws-credential-providers":
@@ -1143,6 +1143,7 @@ tasks:
       - func: install dependencies
         vars:
           NODE_LTS_VERSION: v18.16.0
+          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: v6.0-perf
@@ -1156,6 +1157,8 @@ tasks:
   - name: "test-gcpkms-task"
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       # Upload node driver to a GCP instance
       - command: subprocess.exec
         type: setup
@@ -1191,6 +1194,8 @@ tasks:
     # It is expected to fail to obtain GCE credentials.
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1209,6 +1214,8 @@ tasks:
   - name: "test-azurekms-task"
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       - command: subprocess.exec
         type: setup
         params:
@@ -1230,6 +1237,8 @@ tasks:
   - name: "test-azurekms-fail-task"
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1247,6 +1256,8 @@ tasks:
   - name: "oidc-auth-test-azure-latest"
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       - command: subprocess.exec
         params:
           working_dir: src
@@ -1262,6 +1273,8 @@ tasks:
   - name: "test-aws-lambda-deployed"
     commands:
       - func: "install dependencies"
+        vars:
+          NPM_VERSION: 9
       - command: ec2.assume_role
         params:
           role_arn: ${LAMBDA_AWS_ROLE_ARN}
