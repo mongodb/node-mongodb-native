@@ -1,6 +1,6 @@
 import { type Document, Long } from '../bson';
 import { MongoInvalidArgumentError, MongoTailableCursorError } from '../error';
-import { Explain, type ExplainVerbosityLike } from '../explain';
+import { type ExplainVerbosityLike } from '../explain';
 import type { MongoClient } from '../mongo_client';
 import type { CollationOptions } from '../operations/command';
 import { CountOperation, type CountOptions } from '../operations/count';
@@ -77,9 +77,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
     const response = await executeOperation(this.client, findOperation);
 
-    if (!Explain.fromOptions(this[kBuiltOptions])) {
-      this[kNumReturned] = response.cursor.firstBatch.length;
-    }
+    // the response is not a cursor when `explain` is enabled
+    this[kNumReturned] = response.cursor?.firstBatch?.length;
 
     // TODO: NODE-2882
     return { server: findOperation.server, session, response };
