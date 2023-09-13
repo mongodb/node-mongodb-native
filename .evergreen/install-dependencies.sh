@@ -3,8 +3,9 @@ set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-12}
 # npm version can be defined in the environment for cases where we need to install
-# a version lower than latest to support EOL Node versions.
-NPM_VERSION=${NPM_VERSION:-latest}
+# a later version. We default to 8 when not defined since the default node version
+# is 12.
+NPM_VERSION=${NPM_VERSION:-8}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
