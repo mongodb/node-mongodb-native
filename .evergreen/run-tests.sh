@@ -52,7 +52,7 @@ else
   source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
 fi
 
-npm install --force mongodb-client-encryption@2.9.0
+npm install mongodb-client-encryption
 npm install @mongodb-js/zstd
 npm install snappy
 
