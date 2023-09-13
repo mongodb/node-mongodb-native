@@ -5,7 +5,6 @@ import { gte, lt } from 'semver';
 import * as sinon from 'sinon';
 import { PassThrough } from 'stream';
 import { setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import {
   AbstractCursor,
@@ -34,9 +33,9 @@ import {
 import { delay, filterForCommands } from '../shared';
 
 const initIteratorMode = async (cs: ChangeStream) => {
-  const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+  const kInit = getSymbolFrom(AbstractCursor.prototype, 'kInit');
   const initEvent = once(cs.cursor, 'init');
-  await promisify(cs.cursor[init].bind(cs.cursor))();
+  await cs.cursor[kInit]();
   await initEvent;
   return;
 };
@@ -1981,14 +1980,12 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
 
-            const mock = sinon
-              .stub(changeStream.cursor, '_getMore')
-              .callsFake((_batchSize, callback) => {
-                mock.restore();
-                const error = new MongoServerError({ message: message });
-                error.code = code;
-                callback(error);
-              });
+            const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
+              mock.restore();
+              const error = new MongoServerError({ message: message });
+              error.code = code;
+              throw error;
+            });
 
             await collection.insertOne({ name: 'bailey' });
 
@@ -2147,14 +2144,12 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
 
-            const mock = sinon
-              .stub(changeStream.cursor, '_getMore')
-              .callsFake((_batchSize, callback) => {
-                mock.restore();
-                const error = new MongoServerError({ message: message });
-                error.code = code;
-                callback(error);
-              });
+            const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
+              mock.restore();
+              const error = new MongoServerError({ message: message });
+              error.code = code;
+              throw error;
+            });
 
             await collection.insertOne({ name: 'bailey' });
 
@@ -2320,14 +2315,12 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ name: 'bailey' });
             await changeStream.next();
 
-            const mock = sinon
-              .stub(changeStream.cursor, '_getMore')
-              .callsFake((_batchSize, callback) => {
-                mock.restore();
-                const error = new MongoServerError({ message: message });
-                error.code = code;
-                callback(error);
-              });
+            const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
+              mock.restore();
+              const error = new MongoServerError({ message: message });
+              error.code = code;
+              throw error;
+            });
 
             try {
               // tryNext is not blocking and on sharded clusters we don't have control of when
@@ -2464,14 +2457,12 @@ describe('ChangeStream resumability', function () {
             await collection.insertOne({ city: 'New York City' });
             await changeStreamIterator.next();
 
-            const mock = sinon
-              .stub(changeStream.cursor, '_getMore')
-              .callsFake((_batchSize, callback) => {
-                mock.restore();
-                const error = new MongoServerError({ message });
-                error.code = code;
-                callback(error);
-              });
+            const mock = sinon.stub(changeStream.cursor, 'getMore').callsFake(async _batchSize => {
+              mock.restore();
+              const error = new MongoServerError({ message });
+              error.code = code;
+              throw error;
+            });
 
             const docs = [{ city: 'Seattle' }, { city: 'Boston' }];
             await collection.insertMany(docs);

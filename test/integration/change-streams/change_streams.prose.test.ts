@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import {
   AbstractCursor,
@@ -73,9 +72,9 @@ function triggerResumableError(
 }
 
 const initIteratorMode = async (cs: ChangeStream) => {
-  const init = getSymbolFrom(AbstractCursor.prototype, 'kInit');
+  const kInit = getSymbolFrom(AbstractCursor.prototype, 'kInit');
   const initEvent = once(cs.cursor, 'init');
-  await promisify(cs.cursor[init].bind(cs.cursor))();
+  await cs.cursor[kInit]();
   await initEvent;
   return;
 };

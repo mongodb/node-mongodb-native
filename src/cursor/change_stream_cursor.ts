@@ -13,7 +13,7 @@ import { AggregateOperation } from '../operations/aggregate';
 import type { CollationOptions } from '../operations/command';
 import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import type { ClientSession } from '../sessions';
-import { type Callback, maxWireVersion, type MongoDBNamespace } from '../utils';
+import { maxWireVersion, type MongoDBNamespace } from '../utils';
 import { AbstractCursor, type AbstractCursorOptions } from './abstract_cursor';
 
 /** @internal */
@@ -139,56 +139,47 @@ export class ChangeStreamCursor<
     });
   }
 
-  _initialize(session: ClientSession, callback: Callback<ExecutionResult>): void {
+  async _initialize(session: ClientSession): Promise<ExecutionResult> {
     const aggregateOperation = new AggregateOperation(this.namespace, this.pipeline, {
       ...this.cursorOptions,
       ...this.options,
       session
     });
 
-    executeOperation<TODO_NODE_3286, ChangeStreamAggregateRawResult<TChange>>(
-      session.client,
-      aggregateOperation,
-      (err, response) => {
-        if (err || response == null) {
-          return callback(err);
-        }
+    const response = await executeOperation<
+      TODO_NODE_3286,
+      ChangeStreamAggregateRawResult<TChange>
+    >(session.client, aggregateOperation);
 
-        const server = aggregateOperation.server;
-        this.maxWireVersion = maxWireVersion(server);
+    const server = aggregateOperation.server;
+    this.maxWireVersion = maxWireVersion(server);
 
-        if (
-          this.startAtOperationTime == null &&
-          this.resumeAfter == null &&
-          this.startAfter == null &&
-          this.maxWireVersion >= 7
-        ) {
-          this.startAtOperationTime = response.operationTime;
-        }
+    if (
+      this.startAtOperationTime == null &&
+      this.resumeAfter == null &&
+      this.startAfter == null &&
+      this.maxWireVersion >= 7
+    ) {
+      this.startAtOperationTime = response.operationTime;
+    }
 
-        this._processBatch(response);
+    this._processBatch(response);
 
-        this.emit(INIT, response);
-        this.emit(RESPONSE);
+    this.emit(INIT, response);
+    this.emit(RESPONSE);
 
-        // TODO: NODE-2882
-        callback(undefined, { server, session, response });
-      }
-    );
+    // TODO: NODE-2882
+    return { server, session, response };
   }
 
-  override _getMore(batchSize: number, callback: Callback): void {
-    super._getMore(batchSize, (err, response) => {
-      if (err) {
-        return callback(err);
-      }
+  override async getMore(batchSize: number): Promise<Document | null> {
+    const response = await super.getMore(batchSize);
 
-      this.maxWireVersion = maxWireVersion(this.server);
-      this._processBatch(response as TODO_NODE_3286 as ChangeStreamAggregateRawResult<TChange>);
+    this.maxWireVersion = maxWireVersion(this.server);
+    this._processBatch(response as ChangeStreamAggregateRawResult<TChange>);
 
-      this.emit(ChangeStream.MORE, response);
-      this.emit(ChangeStream.RESPONSE);
-      callback(err, response);
-    });
+    this.emit(ChangeStream.MORE, response);
+    this.emit(ChangeStream.RESPONSE);
+    return response;
   }
 }
