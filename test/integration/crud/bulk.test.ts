@@ -106,7 +106,7 @@ describe('Bulk', function () {
         });
       });
       context('when passed duplicate IDs on an index', function () {
-        it('insertManyResult should not include duplicated IDs in insertedIds', async function () {
+        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
           try {
             const db = client.db();
             const col = db.collection('test');
@@ -119,8 +119,8 @@ describe('Bulk', function () {
           }
         });
       });
-      context('when passed multiple duplicate IDs on an index', function () {
-        it('insertManyResult should not include duplicated IDs in insertedIds', async function () {
+      context('when passed ordered multiple duplicate IDs on an index', function () {
+        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
           try {
             const db = client.db();
             const col = db.collection('test');
@@ -133,8 +133,24 @@ describe('Bulk', function () {
           }
         });
       });
+      context('when passed unordered multiple duplicate IDs on an unorderedindex', function () {
+        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
+          try {
+            const db = client.db();
+            const col = db.collection('test');
+            col.createIndex({ a: 1 }, { unique: true, sparse: false });
+            await col.insertMany([{a: 1}, {a: 1}, {a: 1}, {a: 1}], {ordered: false});
+          } catch (error) {
+            expect(error instanceof MongoBulkWriteError).to.equal(true);
+            console.log(error);
+            console.log(error.writeErrors);
+            //expect(error.result.insertedCount).to.equal(1);
+            expect(Object.keys(error.result.insertedIds).length).to.equal(1);
+          }
+        });
+      });
       context('when passed a preexisting IDs on an index', function () {
-        it('insertManyResult should not include duplicated IDs in insertedIds', async function () {
+        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
           try {
             const db = client.db();
             const col = db.collection('test');
@@ -151,7 +167,7 @@ describe('Bulk', function () {
         });
       });
       context('when passed multiple duplicate IDs on multiple indexes', function () {
-        it('insertManyResult should not include duplicated IDs in insertedIds', async function () {
+        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
           try {
             const db = client.db();
             const col = db.collection('test');

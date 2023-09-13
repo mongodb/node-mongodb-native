@@ -29,6 +29,7 @@ import {
   resolveOptions
 } from '../utils';
 import { WriteConcern } from '../write_concern';
+import { write } from 'fs';
 
 /** @internal */
 const kServerError = Symbol('serverError');
@@ -197,7 +198,7 @@ export class BulkWriteResult {
    * Create a new BulkWriteResult instance
    * @internal
    */
-  constructor(bulkResult: BulkResult) {
+  constructor(bulkResult: BulkResult, isOrdered: boolean) {
     this.result = bulkResult;
     this.insertedCount = this.result.nInserted ?? 0;
     this.matchedCount = this.result.nMatched ?? 0;
@@ -206,6 +207,21 @@ export class BulkWriteResult {
     this.upsertedCount = this.result.upserted.length ?? 0;
     this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
     this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
+    if (isOrdered && this.result.writeErrors.length != 0) {
+       const errIdx = this.result.writeErrors[0].index;
+       for (const index in this.insertedIds) {
+          if (Number(index) >= errIdx) {
+            delete this.insertedIds[index];
+          }   
+       }
+    } else if (!isOrdered && this.result.writeErrors.length != 0) {
+        for(const index in this.result.writeErrors) {
+          if (index in this.insertedIds) {
+            delete this.insertedIds[index];
+          }
+        }
+    } 
+
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
@@ -392,16 +408,6 @@ export function mergeBatchResults(
     return;
   }
 
-  function createInsertedIdsHash(insertedIds: string | any[], hash: { [x: string]: any; }) {
-    for(let i = 0; i < insertedIds.length; i++) {
-      hash[insertedIds[i]._id] = i;
-    }
-    return hash;
-  } 
-
-  let insertedIdsHash = Object();
-  let errorsExist = false;
-
   // Do we have a top level error stop processing and return
   if (result.ok === 0 && bulkResult.ok === 1) {
     bulkResult.ok = 0;
@@ -414,13 +420,7 @@ export function mergeBatchResults(
       op: batch.operations[0]
     };
 
-    if (!errorsExist) {
-      errorsExist = true;
-      insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
-    }
     bulkResult.writeErrors.push(new WriteError(writeError));
-    const idxToDelete = insertedIdsHash[writeError.op._id];
-    bulkResult.insertedIds.splice(idxToDelete, 1);
     return;
   } else if (result.ok === 0 && bulkResult.ok === 0) {
     return;
@@ -440,7 +440,7 @@ export function mergeBatchResults(
 
   // We have an array of upserted values, we need to rewrite the indexes
   if (Array.isArray(result.upserted)) {
-    nUpserted = result.upserted.length;
+    nUpserted = result.length;
 
     for (let i = 0; i < result.upserted.length; i++) {
       bulkResult.upserted.push({
@@ -480,26 +480,12 @@ export function mergeBatchResults(
         op: batch.operations[result.writeErrors[i].index]
       };
 
-      if (!errorsExist) {
-        errorsExist = true;
-        insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
-      }
       bulkResult.writeErrors.push(new WriteError(writeError));
-      if (writeError.op._id in insertedIdsHash){
-        const idxToDelete = insertedIdsHash[writeError.op._id];
-        bulkResult.insertedIds.splice(idxToDelete, 1);
-      }
     }
   }
 
   if (result.writeConcernError) {
     bulkResult.writeConcernErrors.push(new WriteConcernError(result.writeConcernError));
-    if (!errorsExist) {
-      errorsExist = true;
-      insertedIdsHash = createInsertedIdsHash(bulkResult.insertedIds, insertedIdsHash);
-      const idxToDelete = insertedIdsHash[result.writeConcernError.op._id];
-      bulkResult.insertedIds.splice(idxToDelete, 1);
-    }
   }
 }
 
@@ -509,7 +495,7 @@ function executeCommands(
   callback: Callback<BulkWriteResult>
 ) {
   if (bulkOperation.s.batches.length === 0) {
-    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult));
+    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered));
   }
 
   const batch = bulkOperation.s.batches.shift() as Batch;
@@ -518,17 +504,17 @@ function executeCommands(
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
       return callback(
-        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult))
+        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered))
       );
     }
 
     if (err instanceof MongoWriteConcernError) {
-      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, err, callback);
+      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, bulkOperation.isOrdered, err, callback);
     }
 
     // Merge the results together
     mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
-    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
+    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
     if (bulkOperation.handleWriteError(callback, writeResult)) return;
 
     // Execute the next command in line
@@ -602,6 +588,7 @@ function executeCommands(
 function handleMongoWriteConcernError(
   batch: Batch,
   bulkResult: BulkResult,
+  isOrdered: boolean,
   err: MongoWriteConcernError,
   callback: Callback<BulkWriteResult>
 ) {
@@ -613,7 +600,7 @@ function handleMongoWriteConcernError(
         message: err.result?.writeConcernError.errmsg,
         code: err.result?.writeConcernError.result
       },
-      new BulkWriteResult(bulkResult)
+      new BulkWriteResult(bulkResult, isOrdered)
     )
   );
 }
