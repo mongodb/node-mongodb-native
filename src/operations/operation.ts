@@ -17,6 +17,7 @@ export const Aspect = {
 /** @public */
 export type Hint = string | Document;
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface OperationConstructor extends Function {
   aspects?: Set<symbol>;
 }

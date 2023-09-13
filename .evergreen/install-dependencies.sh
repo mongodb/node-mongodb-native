@@ -98,6 +98,7 @@ else
 fi
 
 if [[ $operating_system != "win" ]]; then
+  # Update npm to latest when we can
   npm install --global npm@$NPM_VERSION
   hash -r
 fi
@@ -106,3 +107,5 @@ echo "npm location: $(which npm)"
 echo "npm version: $(npm -v)"
 
 npm install "${NPM_OPTIONS}"
+
+npm ls
