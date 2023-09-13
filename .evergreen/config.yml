@@ -1002,8 +1002,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1017,8 +1015,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1032,8 +1028,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -1047,8 +1041,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -1062,8 +1054,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -1077,8 +1067,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -1092,8 +1080,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -1107,8 +1093,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -1122,8 +1106,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -1137,8 +1119,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1152,8 +1132,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1167,8 +1145,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -1182,8 +1158,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1197,8 +1171,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1212,8 +1184,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -1227,8 +1197,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -1242,8 +1210,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -1257,8 +1223,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -1272,8 +1236,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -1287,8 +1249,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -1302,8 +1262,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -1317,8 +1275,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -1332,8 +1288,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -1347,8 +1301,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -1362,8 +1314,6 @@ tasks:
       - server
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -1377,8 +1327,6 @@ tasks:
       - replica_set
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -1392,8 +1340,6 @@ tasks:
       - sharded_cluster
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -2650,8 +2596,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2666,8 +2610,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2682,8 +2624,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: latest
@@ -2698,8 +2638,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2714,8 +2652,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2730,8 +2666,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -2746,8 +2680,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -2762,8 +2694,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -2778,8 +2708,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '7.0'
@@ -2794,8 +2722,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -2810,8 +2736,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -2826,8 +2750,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '6.0'
@@ -2842,8 +2764,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2858,8 +2778,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2874,8 +2792,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '5.0'
@@ -2890,8 +2806,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2906,8 +2820,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2922,8 +2834,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.4'
@@ -2938,8 +2848,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -2954,8 +2862,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -2970,8 +2876,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.2'
@@ -2986,8 +2890,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -3002,8 +2904,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -3018,8 +2918,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '4.0'
@@ -3034,8 +2932,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -3050,8 +2946,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -3066,8 +2960,6 @@ tasks:
       - noauth
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: '3.6'
@@ -3081,8 +2973,6 @@ tasks:
       - lambda
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid
@@ -3094,8 +2984,6 @@ tasks:
       - lambda
     commands:
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
         vars:
           VERSION: rapid

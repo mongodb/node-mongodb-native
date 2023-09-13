@@ -49,12 +49,7 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      {
-        func: 'install dependencies',
-        vars: {
-          NPM_VERSION: 9
-        }
-      },
+      { func: 'install dependencies' },
       {
         func: 'bootstrap mongo-orchestration',
         vars: {
@@ -254,12 +249,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-example',
   tags: ['latest', 'lambda'],
   commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NPM_VERSION: 9
-      }
-    },
+    { func: 'install dependencies' },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
@@ -276,12 +266,7 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
   tags: ['latest', 'lambda'],
   commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NPM_VERSION: 9
-      }
-    },
+    { func: 'install dependencies' },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
