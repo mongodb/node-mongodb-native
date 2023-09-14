@@ -17,7 +17,7 @@ tag = "6.0"
 
 [[versions]]
 version = "5.9 Driver"
-status = "latest"
+status = "supported"
 api = "./5.9"
 usesMongoDBManual = true
 tag = "5.9"
