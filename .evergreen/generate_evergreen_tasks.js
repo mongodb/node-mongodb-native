@@ -388,12 +388,21 @@ for (const {
     return !isAWSTask && !isSkippedTaskOnWindows;
   });
 
+  function npmVersion(nodeVersion) {
+    switch (nodeVersion) {
+      case 16:
+      case 14: return 9;
+      case 12: return 8;
+      default: return 'latest';
+    }
+  }
+
   for (const NODE_LTS_VERSION of testedNodeVersions) {
     const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION };
+    const expansions = { NODE_LTS_VERSION, NPM_VERSION: npmVersion(NODE_LTS_VERSION) };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
@@ -447,7 +456,8 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 8
           }
         },
         { func: 'run unit tests' }
@@ -460,7 +470,8 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 8
           }
         },
         { func: 'run lint checks' }
@@ -481,7 +492,8 @@ function* makeTypescriptTasks() {
           {
             func: 'install dependencies',
             vars: {
-              NODE_LTS_VERSION: LOWEST_LTS
+              NODE_LTS_VERSION: LOWEST_LTS,
+              NPM_VERSION: 8
             }
           },
           {
@@ -559,7 +571,8 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: UBUNTU_OS,
   expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS,
+    NPM_VERSION: 8
   },
   tasks: AWS_AUTH_TASKS
 });
@@ -574,6 +587,7 @@ const oneOffFuncs = [
     func: 'run bson-ext test',
     vars: {
       NODE_LTS_VERSION: LOWEST_LTS,
+      NPM_VERSION: 8,
       TEST_NPM_SCRIPT: 'check:test'
     }
   },
@@ -582,6 +596,7 @@ const oneOffFuncs = [
     func: 'run bson-ext test',
     vars: {
       NODE_LTS_VERSION: LOWEST_LTS,
+      NPM_VERSION: 8,
       TEST_NPM_SCRIPT: 'check:unit'
     }
   }
@@ -594,7 +609,8 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_VERSION: LOWEST_LTS
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 8
       }
     },
     {
@@ -620,7 +636,8 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 8
           }
         },
         {
@@ -669,7 +686,8 @@ BUILD_VARIANTS.push({
   display_name: 'Serverless Test',
   run_on: DEFAULT_OS,
   expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS,
+    NPM_VERSION: 8
   },
   tasks: ['serverless_task_group']
 });

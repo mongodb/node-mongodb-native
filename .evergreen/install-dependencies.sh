@@ -2,6 +2,10 @@
 set -o errexit  # Exit the script with error if any of the commands fail
 
 NODE_LTS_VERSION=${NODE_LTS_VERSION:-12}
+# npm version can be defined in the environment for cases where we need to install
+# a later version. We default to 8 when not defined since the default node version
+# is 12.
+NPM_VERSION=${NPM_VERSION:-8}
 
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
 
@@ -93,10 +97,8 @@ else
   mv "${NODE_ARTIFACTS_PATH}/${node_directory}" "${NODE_ARTIFACTS_PATH}/nodejs"
 fi
 
-# Cannot upgrade npm version for node 12
-if [[ $operating_system != "win" ]] && [[ $NODE_LTS_VERSION != 12 ]]; then
-  # Update npm to latest when we can
-  npm install --global npm@latest
+if [[ $operating_system != "win" ]]; then
+  npm install --global npm@$NPM_VERSION
   hash -r
 fi
 
