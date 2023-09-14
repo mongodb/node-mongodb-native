@@ -173,6 +173,23 @@ functions:
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
 
+  "run lambda tests oidc":
+    - command: ec2.assume_role
+      params:
+        role_arn: ${LAMBDA_AWS_ROLE_ARN}
+        duration_seconds: 3600
+    - command: subprocess.exec
+      params:
+        working_dir: src
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-deployed-lambda-aws-tests.sh
+        env:
+          AWS_WEB_IDENTITY_TOKEN_FILE: test_user1
+          TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
+          AWS_REGION: us-east-1
+
   "run tests":
     - command: shell.exec
       type: test

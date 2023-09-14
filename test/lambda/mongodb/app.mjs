@@ -1,4 +1,6 @@
-import { MongoClient } from 'mongodb';
+import { globalEmitter, MongoClient } from 'mongodb';
+
+const initStart = Date.now();
 
 // Creates the client that is cached for all requests, subscribes to
 // relevant events, and forces the connection pool to get populated.
@@ -6,75 +8,58 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
   monitorCommands: true
 });
 
-let openConnections = 0;
-let heartbeatCount = 0;
-let totalHeartbeatDuration = 0;
-let totalCommands = 0;
-let totalCommandDuration = 0;
+const metrics = {
+  mechanism: 'MONGODB-OIDC',
+  srvLookup: 0,
+  txtLookup: 0,
+  connectionEstablishment: 0,
+  initialHandshake: 0,
+  saslStartClient: 0,
+  saslStart: 0,
+  saslContinueClient: 0,
+  saslContinue: 0,
+  initDuration: 0,
+  duration: 0
+};
 
-mongoClient.on('commandStarted', (event) => {
-  console.log('commandStarted', event);
+globalEmitter.on('srvLookup', time => {
+  metrics.srvLookup = time;
 });
 
-mongoClient.on('commandSucceeded', (event) => {
-  totalCommands++;
-  totalCommandDuration += event.duration;
-  console.log('commandSucceeded', event);
+globalEmitter.on('txtLookup', time => {
+  metrics.txtLookup = time;
 });
 
-mongoClient.on('commandFailed', (event) => {
-  totalCommands++;
-  totalCommandDuration += event.duration;
-  console.log('commandFailed', event);
+globalEmitter.on('connectionEstablishment', time => {
+  metrics.connectionEstablishment = time;
 });
 
-mongoClient.on('serverHeartbeatStarted', (event) => {
-  console.log('serverHeartbeatStarted', event);
+globalEmitter.on('initialHandshake', time => {
+  metrics.initialHandshake = time;
 });
 
-mongoClient.on('serverHeartbeatSucceeded', (event) => {
-  heartbeatCount++;
-  totalHeartbeatDuration += event.duration;
-  console.log('serverHeartbeatSucceeded', event);
+globalEmitter.on('saslStartClient', time => {
+  metrics.saslStartClient = time;
 });
 
-mongoClient.on('serverHeartbeatFailed', (event) => {
-  heartbeatCount++;
-  totalHeartbeatDuration += event.duration;
-  console.log('serverHeartbeatFailed', event);
+globalEmitter.on('saslStart', time => {
+  metrics.saslStart = time;
 });
 
-mongoClient.on('connectionCreated', (event) => {
-  openConnections++;
-  console.log('connectionCreated', event);
+globalEmitter.on('saslContinueClient', time => {
+  metrics.saslContinueClient = time;
 });
 
-mongoClient.on('connectionClosed', (event) => {
-  openConnections--;
-  console.log('connectionClosed', event);
+globalEmitter.on('saslContinue', time => {
+  metrics.saslContinue = time;
 });
 
 // Populate the connection pool.
 await mongoClient.connect();
+const db = mongoClient.db('test');
+const collection = db.collection('lambdaMetrics');
 
-// Create the response to send back.
-function createResponse() {
-  return {
-    averageCommandDuration: totalCommandDuration / totalCommands,
-    averageHeartbeatDuration: totalHeartbeatDuration / heartbeatCount,
-    openConnections: openConnections,
-    heartbeatCount: heartbeatCount
-  };
-}
-
-// Reset the numbers.
-function reset() {
-  openConnections = 0;
-  heartbeatCount = 0;
-  totalHeartbeatDuration = 0;
-  totalCommands = 0;
-  totalCommandDuration = 0;
-}
+metrics.initDuration = Date.now() - initStart;
 
 /**
  * The handler function itself performs an insert/delete and returns the
@@ -83,17 +68,18 @@ function reset() {
  * @param {Object} event - API Gateway Lambda Proxy Input Format
  * @returns {Object} object - API Gateway Lambda Proxy Output Format
  */
-export const lambdaHandler = async (event) => {
-  const db = mongoClient.db('lambdaTest');
-  const collection = db.collection('test');
-  const { insertedId } = await collection.insertOne({ n: 1 });
-  await collection.deleteOne({ _id: insertedId });
-  // Create the response and then reset the numbers.
-  const response = JSON.stringify(createResponse());
-  reset();
+export const lambdaHandler = async () => {
+  const funcStart = Date.now();
+  await collection.find().toArray();
+  metrics.duration = Date.now() - funcStart;
+  globalEmitter.removeAllListeners();
 
+  const metricsClient = new MongoClient(process.env.LAMBDA_METRICS_URI);
+  await metricsClient.db('metrics').collection('metrics').insertOne(metrics);
+  await metricsClient.close();
+  // Create the response and then reset the numbers.
   return {
     statusCode: 200,
-    body: response
+    body: JSON.stringify(metrics)
   };
 };

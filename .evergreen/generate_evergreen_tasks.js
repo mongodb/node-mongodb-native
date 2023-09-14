@@ -214,6 +214,15 @@ TASKS.push(
       ]
     },
     {
+      name: 'test-lambda-oidc',
+      tags: ['lambda', 'oidc'],
+      commands: [
+        { func: 'install dependencies' },
+        { func: 'bootstrap oidc' },
+        { func: 'run lambda tests oidc' }
+      ]
+    },
+    {
       name: 'test-socks5',
       tags: [],
       commands: [

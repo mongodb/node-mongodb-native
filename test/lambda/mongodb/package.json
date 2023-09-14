@@ -5,6 +5,6 @@
   "main": "app.mjs",
   "license": "MIT",
   "dependencies": {
-    "mongodb": "^5.0.1"
+    "mongodb": "durran/node-mongodb-native#lambda-metrics"
   }
 }
