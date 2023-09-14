@@ -220,8 +220,14 @@ export class BulkWriteResult {
             delete this.insertedIds[index];
           }
         }
-    } 
-
+    }
+    
+    // must edit this bc insertedIds is a member function of the BWR
+    for (let i = this.result.insertedIds.length-1; i >= 0; i--) {
+      if (!(i in this.insertedIds)) {
+        this.result.insertedIds.splice(i, 1);
+      }
+    }
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
@@ -440,7 +446,7 @@ export function mergeBatchResults(
 
   // We have an array of upserted values, we need to rewrite the indexes
   if (Array.isArray(result.upserted)) {
-    nUpserted = result.length;
+    nUpserted = result.upserted.length;
 
     for (let i = 0; i < result.upserted.length; i++) {
       bulkResult.upserted.push({

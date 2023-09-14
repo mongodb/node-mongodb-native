@@ -32,7 +32,6 @@ describe('Bulk', function () {
       .createCollection('test')
       .catch(() => null); // make ns exist
   });
- 
   afterEach(async function () {
     const cleanup = this.configuration.newClient();
     await cleanup
@@ -105,84 +104,72 @@ describe('Bulk', function () {
           }
         });
       });
-      context('when passed duplicate IDs on an index', function () {
-        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            col.createIndex({ a: 1 }, { unique: true, sparse: false });
-            await col.insertMany([{a: 1}, {a: 1}]);
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            //expect(error.result.insertedCount).to.equal(1);
-            expect(Object.keys(error.result.insertedIds).length).to.equal(1);
+    });
+  });
+
+  describe('BulkWriteResult', function () {
+    describe('insertedIds', function () {
+      describe('#insertMany()', function () {
+        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+          async function insertManyTryInvalidIds(input, isOrdered, indices) {
+            try {
+              const db = client.db();
+              const col = db.collection('test');
+              for (const index in indices) {
+                col.createIndex(index, { unique: true, sparse: false });
+              }
+              await col.insertMany(input, {ordered: isOrdered});
+              expect(false); // no error -> test fails
+            } catch (error) {
+              expect(error instanceof MongoBulkWriteError).to.equal(true);
+              expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+            } 
           }
+          it.only('when passed 1 duplicate ID on an index', async function () {
+            await insertManyTryInvalidIds([{a:1}, {a:1}], true, [{a:1}]);
+          });
+          it.only('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
+            await insertManyTryInvalidIds([{a:1},{b:2}, {a:1}, {a:1}, {c:3}], true, [{a:1}]);
+          });
+          it.only('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
+            await insertManyTryInvalidIds([{a:1},{b:2}, {a:1}, {a:1}, {c:3}], false, [{a:1}]);
+          });
         });
       });
-      context('when passed ordered multiple duplicate IDs on an index', function () {
-        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            col.createIndex({ a: 1 }, { unique: true, sparse: false });
-            await col.insertMany([{a: 1}, {a: 1}, {a: 1}, {a: 1}]);
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            //expect(error.result.insertedCount).to.equal(1);
-            expect(Object.keys(error.result.insertedIds).length).to.equal(1);
+      describe('#bulkWrite()', function () {
+        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+          async function bulkWriteTryInvalidIds(input, isOrdered, indices) {
+            try {
+              const db = client.db();
+              const col = db.collection('test');
+              for (const index in indices) {
+                col.createIndex(index, { unique: true, sparse: false });
+              }
+              await col.bulkWrite(input, {ordered: isOrdered});
+              expect(false);  // no error -> test fails
+            } catch (error) {
+              expect(error instanceof MongoBulkWriteError).to.equal(true);
+              expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+            } 
           }
-        });
-      });
-      context('when passed unordered multiple duplicate IDs on an unorderedindex', function () {
-        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            col.createIndex({ a: 1 }, { unique: true, sparse: false });
-            await col.insertMany([{a: 1}, {a: 1}, {a: 1}, {a: 1}], {ordered: false});
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            console.log(error);
-            console.log(error.writeErrors);
-            //expect(error.result.insertedCount).to.equal(1);
-            expect(Object.keys(error.result.insertedIds).length).to.equal(1);
-          }
-        });
-      });
-      context('when passed a preexisting IDs on an index', function () {
-        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            col.createIndex({ a: 1 }, { unique: true, sparse: false });
-            const result = await col.insertMany([{a: 1}]);
-            expect(result.insertedCount).to.equal(1);
-            expect(Object.keys(result.insertedIds).length).to.equal(1);
-            await col.insertMany([{a: 1}]);
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            expect(error.result.insertedCount).to.equal(0);
-            expect(Object.keys(error.result.insertedIds).length).to.equal(0);
-          }
-        });
-      });
-      context('when passed multiple duplicate IDs on multiple indexes', function () {
-        it.only('insertManyResult should not include duplicated IDs in insertedIds', async function () {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            col.createIndex({ a: 1 }, { unique: true, sparse: false });
-            col.createIndex({ b: 1 }, { unique: true, sparse: false });
-            await col.insertMany([{a: 1}, {a: 1}, {b: 1}, {b: 1}]);
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            //expect(error.result.insertedCount).to.equal(1);
-            expect(Object.keys(error.result.insertedIds).length).to.equal(1);
-          }
+          it.only('when passed 1 duplicate ID on an index', async function () {
+            await bulkWriteTryInvalidIds([{insertOne: {a:1}}, {insertOne: {a:1}}], true, [{a:1}]);
+          });
+          it.only('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
+            await bulkWriteTryInvalidIds(
+              [{insertOne: {a:1}}, {insertOne: {a:1}}, {insertOne: {a:1}}, {insertOne: {a:1}}], 
+              true, [{a:1}]
+            );
+          });
+          it.only('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
+            await bulkWriteTryInvalidIds(
+              [{insertOne: {a:1}}, {insertOne: {a:1}}, {insertOne: {a:1}}, {insertOne: {a:1}}],
+              false, [{a:1}]
+            );
+          });
         });
       });
     });
-    
   });
 
   it('Should correctly execute unordered bulk operation', async function () {
