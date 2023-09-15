@@ -29,7 +29,6 @@ import {
   resolveOptions
 } from '../utils';
 import { WriteConcern } from '../write_concern';
-import { write } from 'fs';
 
 /** @internal */
 const kServerError = Symbol('serverError');
@@ -207,25 +206,19 @@ export class BulkWriteResult {
     this.upsertedCount = this.result.upserted.length ?? 0;
     this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
     this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
-    if (isOrdered && this.result.writeErrors.length != 0) {
-       const errIdx = this.result.writeErrors[0].index;
-       for (const index in this.insertedIds) {
-          if (Number(index) >= errIdx) {
-            delete this.insertedIds[index];
-          }   
-       }
-    } else if (!isOrdered && this.result.writeErrors.length != 0) {
-        for(const index in this.result.writeErrors) {
-          if (index in this.insertedIds) {
-            delete this.insertedIds[index];
-          }
+    if (isOrdered && this.result.writeErrors.length !== 0) {
+      const errIdx = this.result.writeErrors[0].index;
+      for (const index in this.insertedIds) {
+        if (Number(index) >= errIdx) {
+          delete this.insertedIds[index];
         }
-    }
-    
-    // must edit this bc insertedIds is a member function of the BWR
-    for (let i = this.result.insertedIds.length-1; i >= 0; i--) {
-      if (!(i in this.insertedIds)) {
-        this.result.insertedIds.splice(i, 1);
+      }
+    } else if (!isOrdered && this.result.writeErrors.length !== 0) {
+      for (let i = 0; i < this.result.writeErrors.length; i++) {
+        const index = this.result.writeErrors[i].index;
+        if (index in this.insertedIds) {
+          delete this.insertedIds[index];
+        }
       }
     }
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
@@ -501,7 +494,10 @@ function executeCommands(
   callback: Callback<BulkWriteResult>
 ) {
   if (bulkOperation.s.batches.length === 0) {
-    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered));
+    return callback(
+      undefined,
+      new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
+    );
   }
 
   const batch = bulkOperation.s.batches.shift() as Batch;
@@ -510,12 +506,21 @@ function executeCommands(
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
       return callback(
-        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered))
+        new MongoBulkWriteError(
+          err,
+          new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
+        )
       );
     }
 
     if (err instanceof MongoWriteConcernError) {
-      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, bulkOperation.isOrdered, err, callback);
+      return handleMongoWriteConcernError(
+        batch,
+        bulkOperation.s.bulkResult,
+        bulkOperation.isOrdered,
+        err,
+        callback
+      );
     }
 
     // Merge the results together
