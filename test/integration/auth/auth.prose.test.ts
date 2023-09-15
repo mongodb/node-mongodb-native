@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 
 import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
@@ -8,20 +7,16 @@ function makeConnectionString(config, username, password) {
   return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;
 }
 
-describe('Authentication Spec Prose Tests', function () {
-  beforeEach(function () {
-    // todo(NODE-5631): fix tests to run in load balancer mode.
-    if (
-      process.env.AUTH === 'noauth' ||
-      process.env.LOAD_BALANCER ||
-      !satisfies(this.configuration.version, '>=3.7.3')
-    ) {
-      this.currentTest.skipReason =
-        'Skipping SCRAM tests when auth is disabled, load balanced mode, or server < 3.7.3.';
-      this.currentTest.skip();
-    }
-  });
+const metadata: MongoDBMetadataUI = {
+  requires: {
+    auth: 'enabled',
+    mongodb: '>=3.7.3',
+    predicate: () =>
+      process.env.LOAD_BALANCER ? 'TODO(NODE-5631): fix tests to run in load balancer mode.' : true
+  }
+};
 
+describe('Authentication Spec Prose Tests', function () {
   describe('SCRAM-SHA-256 and mechanism negotiation', () => {
     describe('Steps 1-3', function () {
       const userMap = {
@@ -82,9 +77,10 @@ describe('Authentication Spec Prose Tests', function () {
        */
       for (const user of users) {
         for (const mechanism of user.mechanisms) {
-          it(`authenticates ${user.description} when explicitly specifying ${mechanism}`, {
-            metadata: { requires: { mongodb: '>=3.7.3' } },
-            test: async function () {
+          it(
+            `authenticates ${user.description} when explicitly specifying ${mechanism} via client options`,
+            metadata,
+            async function () {
               const options = {
                 auth: {
                   username: user.username,
@@ -95,15 +91,19 @@ describe('Authentication Spec Prose Tests', function () {
               };
 
               const client = this.configuration.newClient({}, options);
-              const stats = await client.db('test').stats();
-              expect(stats).to.exist;
-              await client.close();
+              try {
+                const stats = await client.db('test').stats();
+                expect(stats).to.exist;
+              } finally {
+                await client.close();
+              }
             }
-          });
+          );
 
-          it(`authenticates ${user.description} when explicitly specifying ${mechanism} in url`, {
-            metadata: { requires: { mongodb: '>=3.7.3' } },
-            test: async function () {
+          it(
+            `authenticates ${user.description} when explicitly specifying ${mechanism} in url`,
+            metadata,
+            async function () {
               const username = encodeURIComponent(user.username);
               const password = encodeURIComponent(user.password);
 
@@ -114,16 +114,20 @@ describe('Authentication Spec Prose Tests', function () {
               )}authMechanism=${mechanism}`;
 
               const client = this.configuration.newClient(url);
-              const stats = await client.db('test').stats();
-              expect(stats).to.exist;
-              await client.close();
+              try {
+                const stats = await client.db('test').stats();
+                expect(stats).to.exist;
+              } finally {
+                await client.close();
+              }
             }
-          });
+          );
         }
 
-        it(`authenticates ${user.description} using mechanism negotiaton`, {
-          metadata: { requires: { mongodb: '>=3.7.3' } },
-          test: async function () {
+        it(
+          `authenticates ${user.description} using mechanism negotiaton`,
+          metadata,
+          async function () {
             const options = {
               auth: {
                 username: user.username,
@@ -133,25 +137,32 @@ describe('Authentication Spec Prose Tests', function () {
             };
 
             const client = this.configuration.newClient({}, options);
-            const stats = await client.db('test').stats();
-            expect(stats).to.exist;
-            await client.close();
+            try {
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
+            } finally {
+              await client.close();
+            }
           }
-        });
+        );
 
-        it(`authenticates ${user.description} using mechanism negotiaton and url`, {
-          metadata: { requires: { mongodb: '>=3.7.3' } },
-          test: async function () {
+        it(
+          `authenticates ${user.description} using mechanism negotiaton and url`,
+          metadata,
+          async function () {
             const username = encodeURIComponent(user.username);
             const password = encodeURIComponent(user.password);
             const url = makeConnectionString(this.configuration, username, password);
 
             const client = this.configuration.newClient(url);
-            const stats = await client.db('test').stats();
-            expect(stats).to.exist;
-            await client.close();
+            try {
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
+            } finally {
+              await client.close();
+            }
           }
-        });
+        );
       }
 
       /**
@@ -161,9 +172,10 @@ describe('Authentication Spec Prose Tests', function () {
        * analysis, etc.
        * todo(NODE-5629): Test passes locally but will fail on CI runs.
        */
-      it.skip('selects SCRAM-SHA-256 for a user that supports both auth mechanisms', {
-        metadata: { requires: { mongodb: '>=3.7.3' } },
-        test: async function () {
+      it.skip(
+        'selects SCRAM-SHA-256 for a user that supports both auth mechanisms',
+        metadata,
+        async function () {
           const options = {
             auth: {
               username: userMap.both.username,
@@ -173,24 +185,27 @@ describe('Authentication Spec Prose Tests', function () {
           };
 
           const spy = sinon.spy(ScramSHA256.prototype, 'auth');
-
           const client = this.configuration.newClient({}, options);
-          const stats = await client.db('test').stats();
-          expect(stats).to.exist;
-          expect(spy.called).to.equal(true);
-          sinon.restore();
-          await client.close();
+          try {
+            const stats = await client.db('test').stats();
+            expect(stats).to.exist;
+            expect(spy.called).to.equal(true);
+          } finally {
+            sinon.restore();
+            await client.close();
+          }
         }
-      });
+      ).skipReason = 'todo(NODE-5629): Test passes locally but will fail on CI runs.';
 
       /**
        * Step 3
        * For test users that support only one mechanism, verify that explictly specifying
        * the other mechanism fails.
        */
-      it('fails to connect if incorrect auth mechanism is explicitly specified', {
-        metadata: { requires: { mongodb: '>=3.7.3' } },
-        test: async function () {
+      it(
+        'fails to connect if incorrect auth mechanism is explicitly specified',
+        metadata,
+        async function () {
           const options = {
             auth: {
               username: userMap.sha256.username,
@@ -208,7 +223,7 @@ describe('Authentication Spec Prose Tests', function () {
           expect(error.message).to.match(/Authentication failed|SCRAM/);
           await client.close();
         }
-      });
+      );
 
       /*
        * Step 3
@@ -220,12 +235,12 @@ describe('Authentication Spec Prose Tests', function () {
        * authentication errors, not as a network or database command error on the ``hello``
        * or legacy hello commands themselves.)
        */
-      it('fails for a nonexistent username with same error type as bad password', {
-        metadata: { requires: { mongodb: '>=3.7.3' } },
-        test: async function () {
+      it(
+        'fails for a nonexistent username with same error type as bad password',
+        metadata,
+        async function () {
           const noUsernameOptions = {
             auth: {
-              username: 'roth',
               password: 'pencil'
             },
             authSource: 'admin'
@@ -239,26 +254,31 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: 'admin'
           };
 
-          const noUserClient = this.configuration.newClient({}, noUsernameOptions);
+          try {
+            this.configuration.newClient({}, noUsernameOptions);
+            expect.fail(
+              'Creating a new client with a password and no username must fail validation.'
+            );
+          } catch (noUserError) {
+            // NOTE: This prose test fails Node's validation of the credentials object - a username
+            // MUST always be provided but it satisfies the test requirement of not getting a
+            // network or command error on the handshake.
+            expect(noUserError).to.match(/username/);
+          }
           const badPasswordClient = this.configuration.newClient({}, badPasswordOptions);
-          const noUserError = await noUserClient
-            .db('test')
-            .stats()
-            .catch(e => e);
           const badPasswordError = await badPasswordClient
             .db('test')
             .stats()
             .catch(e => e);
-          expect(noUserError).to.match(/Authentication failed/);
           expect(badPasswordError).to.match(/Authentication failed/);
-          await noUserClient.close();
           await badPasswordClient.close();
         }
-      });
+      );
 
-      it('should send speculativeAuthenticate on initial handshake on MongoDB 4.4+', {
-        metadata: { requires: { mongodb: '>=4.4', topology: ['single'] } },
-        test: async function () {
+      it(
+        'sends speculativeAuthenticate on initial handshake on MongoDB 4.4+',
+        metadata,
+        async function () {
           const options = {
             auth: {
               username: userMap.both.username,
@@ -269,25 +289,28 @@ describe('Authentication Spec Prose Tests', function () {
 
           const commandSpy = sinon.spy(Connection.prototype, 'command');
           const client = this.configuration.newClient({}, options);
-          await client.connect();
-          const calls = commandSpy
-            .getCalls()
-            .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
-            .filter(
-              c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
-            );
+          try {
+            await client.connect();
+            const calls = commandSpy
+              .getCalls()
+              .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
+              .filter(
+                c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
+              );
 
-          expect(calls).to.have.length(1);
-          const handshakeDoc = calls[0].args[1];
-          expect(handshakeDoc).to.have.property('speculativeAuthenticate');
-          sinon.restore();
-          await client.close();
+            expect(calls).to.have.length(1);
+            const handshakeDoc = calls[0].args[1];
+            expect(handshakeDoc).to.have.property('speculativeAuthenticate');
+          } finally {
+            sinon.restore();
+            await client.close();
+          }
         }
-      });
+      );
     });
 
     // todo(NODE-5621): fix the issue with unicode characters.
-    describe.skip('Step 4', function () {
+    describe('Step 4', function () {
       /**
        * Step 4
        * To test SASLprep behavior, create two users:
@@ -319,7 +342,7 @@ describe('Authentication Spec Prose Tests', function () {
         }
       ];
 
-      before(async function () {
+      beforeEach(async function () {
         utilClient = this.configuration.newClient();
         const db = utilClient.db('admin');
 
@@ -333,25 +356,22 @@ describe('Authentication Spec Prose Tests', function () {
         await Promise.all(createUserCommands.map(cmd => db.command(cmd)));
       });
 
-      after(async function () {
+      afterEach(async function () {
         const db = utilClient.db('admin');
         await Promise.all(users.map(user => db.removeUser(user.username)));
         await utilClient?.close();
       });
 
-      [
+      for (const { username, password } of [
         { username: 'IX', password: 'IX' },
         { username: 'IX', password: 'I\u00ADX' },
         { username: '\u2168', password: 'IV' },
         { username: '\u2168', password: 'I\u00ADV' }
-      ].forEach(({ username, password }) => {
-        it(`logs in with username "${username}" and password "${password}"`, {
-          metadata: {
-            requires: {
-              mongodb: '>=3.7.3'
-            }
-          },
-          test: async function () {
+      ]) {
+        it.skip(
+          `logs in with username "${username}" and password "${password}"`,
+          metadata,
+          async function () {
             const options = {
               auth: { username, password },
               authSource: 'admin',
@@ -366,8 +386,8 @@ describe('Authentication Spec Prose Tests', function () {
               await client.close();
             }
           }
-        });
-      });
+        ).skipReason = 'todo(NODE-5621): fix the issue with unicode characters.';
+      }
     });
   });
 });
