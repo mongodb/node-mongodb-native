@@ -1,5 +1,6 @@
 'use strict';
 
+const { AsyncLocalStorage } = require('async_hooks');
 const { ConnectionPool } = require('../../mongodb');
 const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
@@ -145,6 +146,33 @@ describe('Connection Pool', function () {
         setImmediate(() => expect(pool).property('waitQueueSize').to.equal(0));
         done();
       });
+    });
+  });
+
+  it('should propagate context on checkout callbacks', function (done) {
+    mockMongod.setMessageHandler(request => {
+      const doc = request.document;
+      if (isHello(doc)) {
+        request.reply(mock.HELLO);
+      }
+    });
+
+    const storage = new AsyncLocalStorage();
+    const context = { id: Math.random() };
+    const pool = new ConnectionPool(stubServer, {
+      maxPoolSize: 1,
+      waitQueueTimeoutMS: 200,
+      hostAddress: mockMongod.hostAddress()
+    });
+
+    pool.ready();
+    storage.enterWith(context);
+
+    pool.checkOut((err, conn) => {
+      expect(err).to.not.exist;
+      expect(conn).to.exist;
+      expect(storage.getStore()).to.eq(context);
+      done();
     });
   });
 
