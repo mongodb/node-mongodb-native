@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.0](https://github.com/mongodb/node-mongodb-native/compare/v6.0.0...v6.1.0) (2023-09-14)
+
+
+### Features
+
+* **NODE-5634:** bump bson version to ^6.1.0 ([#3866](https://github.com/mongodb/node-mongodb-native/issues/3866)) ([c6edabb](https://github.com/mongodb/node-mongodb-native/commit/c6edabb8fa4c6f8d80b028a96eacd26975460f8a))
+
+
+### Bug Fixes
+
+* **NODE-5551:** set AWS region from environment variable for STSClient ([#3831](https://github.com/mongodb/node-mongodb-native/issues/3831)) ([e9a5079](https://github.com/mongodb/node-mongodb-native/commit/e9a50793143c53f5f70a720e17cf6683f56f7229))
+* **NODE-5588:** recursive calls to next cause memory leak ([#3841](https://github.com/mongodb/node-mongodb-native/issues/3841)) ([9a8fdb2](https://github.com/mongodb/node-mongodb-native/commit/9a8fdb22853a7a84dfa8b8e87a6b5d808ae00b6e))
+
 ## [6.0.0](https://github.com/mongodb/node-mongodb-native/compare/v5.7.0...v6.0.0) (2023-08-28)
 
 

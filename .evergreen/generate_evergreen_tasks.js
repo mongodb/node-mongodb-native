@@ -50,7 +50,12 @@ function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
-      { func: 'install dependencies' },
+      {
+        func: 'install dependencies',
+        vars: {
+          NPM_VERSION: 9
+        }
+      },
       {
         func: 'bootstrap mongo-orchestration',
         vars: {
@@ -290,7 +295,12 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-example',
   tags: ['latest', 'lambda'],
   commands: [
-    { func: 'install dependencies' },
+    {
+      func: 'install dependencies',
+      vars: {
+        NPM_VERSION: 9
+      }
+    },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
@@ -307,7 +317,12 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
   tags: ['latest', 'lambda'],
   commands: [
-    { func: 'install dependencies' },
+    {
+      func: 'install dependencies',
+      vars: {
+        NPM_VERSION: 9
+      }
+    },
     {
       func: 'bootstrap mongo-orchestration',
       vars: {
@@ -430,7 +445,7 @@ for (const {
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
-    const expansions = { NODE_LTS_VERSION };
+    const expansions = { NODE_LTS_VERSION, NPM_VERSION: NODE_LTS_VERSION === 16 ? 9 : 'latest' };
     const taskNames = tasks.map(({ name }) => name);
 
     if (clientEncryption) {
@@ -496,7 +511,8 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
     expansions: {
       CLIENT_ENCRYPTION: true,
       RUN_WITH_MONGOCRYPTD: true,
-      NODE_LTS_VERSION: LOWEST_LTS
+      NODE_LTS_VERSION: LOWEST_LTS,
+      NPM_VERSION: 9
     },
     tasks:
       MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
@@ -524,7 +540,8 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 9
           }
         },
         { func: 'run unit tests' }
@@ -537,7 +554,8 @@ SINGLETON_TASKS.push(
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 9
           }
         },
         { func: 'run lint checks' }
@@ -559,7 +577,8 @@ function* makeTypescriptTasks() {
           {
             func: 'install dependencies',
             vars: {
-              NODE_LTS_VERSION: LOWEST_LTS
+              NODE_LTS_VERSION: LOWEST_LTS,
+              NPM_VERSION: 9
             }
           },
           {
@@ -579,7 +598,8 @@ function* makeTypescriptTasks() {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 9
           }
         },
         {
@@ -598,7 +618,8 @@ function* makeTypescriptTasks() {
       {
         func: 'install dependencies',
         vars: {
-          NODE_LTS_VERSION: LOWEST_LTS
+          NODE_LTS_VERSION: LOWEST_LTS,
+          NPM_VERSION: 9
         }
       },
       { func: 'run typescript next' }
@@ -637,7 +658,8 @@ BUILD_VARIANTS.push({
   display_name: 'MONGODB-AWS Auth test',
   run_on: UBUNTU_OS,
   expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS,
+    NPM_VERSION: 9
   },
   tasks: AWS_AUTH_TASKS
 });
@@ -655,7 +677,8 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         {
           func: 'install dependencies',
           vars: {
-            NODE_LTS_VERSION: LOWEST_LTS
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 9
           }
         },
         {
@@ -684,7 +707,8 @@ oneOffFuncAsTasks.push({
     {
       func: 'install dependencies',
       vars: {
-        NODE_LTS_VERSION: LOWEST_LTS
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 9
       }
     },
     {
@@ -737,7 +761,8 @@ BUILD_VARIANTS.push({
   display_name: 'Serverless Test',
   run_on: DEFAULT_OS,
   expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS
+    NODE_LTS_VERSION: LOWEST_LTS,
+    NPM_VERSION: 9
   },
   tasks: ['serverless_task_group']
 });

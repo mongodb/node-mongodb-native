@@ -7,7 +7,6 @@ import {
   type ListCollectionsOptions
 } from '../operations/list_collections';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
@@ -35,18 +34,16 @@ export class ListCollectionsCursor<
   }
 
   /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+  async _initialize(session: ClientSession | undefined): Promise<ExecutionResult> {
     const operation = new ListCollectionsOperation(this.parent, this.filter, {
       ...this.cursorOptions,
       ...this.options,
       session
     });
 
-    executeOperation(this.parent.client, operation, (err, response) => {
-      if (err || response == null) return callback(err);
+    const response = await executeOperation(this.parent.client, operation);
 
-      // TODO: NODE-2882
-      callback(undefined, { server: operation.server, session, response });
-    });
+    // TODO: NODE-2882
+    return { server: operation.server, session, response };
   }
 }

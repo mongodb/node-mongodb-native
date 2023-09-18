@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { once } from 'events';
+import { gte } from 'semver';
 
 import {
   type Collection,
@@ -46,7 +47,9 @@ describe('CRUD API explain option', function () {
     },
     {
       name: 'findOne',
-      op: async (explain: boolean | string) => await collection.findOne({ a: 1 }, { explain })
+      op: async (explain: boolean | string) => {
+        return await collection.findOne({ a: 1 }, { explain });
+      }
     },
     { name: 'find', op: (explain: boolean | string) => collection.find({ a: 1 }).explain(explain) },
     {
@@ -73,6 +76,17 @@ describe('CRUD API explain option', function () {
     collection = db.collection('test');
     await collection.insertOne({ a: 1 });
     commandStartedPromise = once(client, 'commandStarted');
+
+    const test = this.currentTest;
+    if (
+      test?.fullTitle().includes('aggregate') &&
+      gte(this.configuration.version, '7.1.0') &&
+      this.currentTest
+    ) {
+      this.currentTest.skipReason =
+        'TODO(NODE-5617): aggregate explain tests failing on latest servers';
+      this.skip();
+    }
   });
 
   afterEach(async function () {
