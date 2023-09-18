@@ -7,7 +7,7 @@ import { RunCommandOperation } from '../operations/run_command';
 import type { ReadConcernLike } from '../read_concern';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { type Callback, ns } from '../utils';
+import { ns } from '../utils';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
@@ -102,32 +102,25 @@ export class RunCommandCursor extends AbstractCursor {
   }
 
   /** @internal */
-  protected _initialize(session: ClientSession, callback: Callback<ExecutionResult>) {
+  protected async _initialize(session: ClientSession): Promise<ExecutionResult> {
     const operation = new RunCommandOperation<RunCursorCommandResponse>(this.db, this.command, {
       ...this.cursorOptions,
       session: session,
       readPreference: this.cursorOptions.readPreference
     });
-    executeOperation(this.client, operation).then(
-      response => {
-        if (response.cursor == null) {
-          callback(
-            new MongoUnexpectedServerResponseError('Expected server to respond with cursor')
-          );
-          return;
-        }
-        callback(undefined, {
-          server: operation.server,
-          session,
-          response
-        });
-      },
-      err => callback(err)
-    );
+    const response = await executeOperation(this.client, operation);
+    if (response.cursor == null) {
+      throw new MongoUnexpectedServerResponseError('Expected server to respond with cursor');
+    }
+    return {
+      server: operation.server,
+      session,
+      response
+    };
   }
 
   /** @internal */
-  override _getMore(_batchSize: number, callback: Callback<Document>) {
+  override async getMore(_batchSize: number): Promise<Document> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this.namespace, this.id!, this.server!, {
       ...this.cursorOptions,
@@ -135,6 +128,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.getMoreOptions
     });
 
-    executeOperation(this.client, getMoreOperation, callback);
+    return executeOperation(this.client, getMoreOperation);
   }
 }
