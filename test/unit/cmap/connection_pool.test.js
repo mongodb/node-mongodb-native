@@ -172,6 +172,7 @@ describe('Connection Pool', function () {
       expect(err).to.not.exist;
       expect(conn).to.exist;
       expect(storage.getStore()).to.eq(context);
+      storage.exit();
       done();
     });
   });
