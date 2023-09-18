@@ -1,3 +1,4 @@
+import { AsyncResource } from 'async_hooks';
 import { clearTimeout, setTimeout } from 'timers';
 
 import type { ObjectId } from '../bson';
@@ -356,7 +357,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    const waitQueueMember: WaitQueueMember = { callback };
+    const callbackWithContext = AsyncResource.bind(callback);
+
+    const waitQueueMember: WaitQueueMember = { callback: callbackWithContext };
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
     if (waitQueueTimeoutMS) {
       waitQueueMember.timer = setTimeout(() => {
