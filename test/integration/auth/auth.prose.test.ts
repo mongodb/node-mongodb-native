@@ -203,7 +203,7 @@ describe('Authentication Spec Prose Tests', function () {
        * the other mechanism fails.
        */
       it(
-        'fails to connect if incorrect auth mechanism is explicitly specified',
+        'fails to connect if incorrect auth mechanism (SCRAM-SHA-1) is explicitly specified',
         metadata,
         async function () {
           const options = {
@@ -213,6 +213,29 @@ describe('Authentication Spec Prose Tests', function () {
             },
             authSource: 'admin',
             authMechanism: 'SCRAM-SHA-1'
+          };
+
+          const client = this.configuration.newClient({}, options);
+          const error = await client
+            .db('test')
+            .stats()
+            .catch(e => e);
+          expect(error.message).to.match(/Authentication failed|SCRAM/);
+          await client.close();
+        }
+      );
+
+      it(
+        'fails to connect if incorrect auth mechanism (SCRAM-SHA-256) is explicitly specified',
+        metadata,
+        async function () {
+          const options = {
+            auth: {
+              username: userMap.sha1.username,
+              password: userMap.sha1.password
+            },
+            authSource: 'admin',
+            authMechanism: 'SCRAM-SHA-256'
           };
 
           const client = this.configuration.newClient({}, options);
@@ -276,7 +299,7 @@ describe('Authentication Spec Prose Tests', function () {
       );
 
       it(
-        'sends speculativeAuthenticate on initial handshake on MongoDB 4.4+',
+        'sends speculativeAuthenticate on initial handshake on MongoDB',
         metadata,
         async function () {
           const options = {
