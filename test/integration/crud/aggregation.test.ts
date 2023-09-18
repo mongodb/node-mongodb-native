@@ -270,66 +270,70 @@ describe('Aggregation', function () {
     });
   });
 
-  it('should correctly return a cursor and call explain', function (done) {
-    const client = this.configuration.newClient({ maxPoolSize: 1 }),
-      databaseName = this.configuration.db;
+  it(
+    'should correctly return a cursor and call explain',
+    { requires: { mongodb: '<7.1.0' } },
+    function (done) {
+      const client = this.configuration.newClient({ maxPoolSize: 1 }),
+        databaseName = this.configuration.db;
 
-    const db = client.db(databaseName);
-    // Some docs for insertion
-    const docs = [
-      {
-        title: 'this is my title',
-        author: 'bob',
-        posted: new Date(),
-        pageViews: 5,
-        tags: ['fun', 'good', 'fun'],
-        other: { foo: 5 },
-        comments: [
-          { author: 'joe', text: 'this is cool' },
-          { author: 'sam', text: 'this is bad' }
-        ]
-      }
-    ];
-
-    // Create a collection
-    const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
-    // Insert the docs
-    collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
-      expect(result).to.exist;
-      expect(err).to.not.exist;
-
-      // Execute aggregate, notice the pipeline is expressed as an Array
-      const cursor = collection.aggregate(
-        [
-          {
-            $project: {
-              author: 1,
-              tags: 1
-            }
-          },
-          { $unwind: '$tags' },
-          {
-            $group: {
-              _id: { tags: '$tags' },
-              authors: { $addToSet: '$author' }
-            }
-          }
-        ],
+      const db = client.db(databaseName);
+      // Some docs for insertion
+      const docs = [
         {
-          cursor: { batchSize: 100 }
+          title: 'this is my title',
+          author: 'bob',
+          posted: new Date(),
+          pageViews: 5,
+          tags: ['fun', 'good', 'fun'],
+          other: { foo: 5 },
+          comments: [
+            { author: 'joe', text: 'this is cool' },
+            { author: 'sam', text: 'this is bad' }
+          ]
         }
-      );
+      ];
 
-      // Iterate over all the items in the cursor
-      cursor.explain(function (err, result) {
+      // Create a collection
+      const collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
+      // Insert the docs
+      collection.insertMany(docs, { writeConcern: { w: 1 } }, function (err, result) {
+        expect(result).to.exist;
         expect(err).to.not.exist;
-        expect(result.stages).to.have.lengthOf.at.least(1);
-        expect(result.stages[0]).to.have.property('$cursor');
 
-        client.close(done);
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        const cursor = collection.aggregate(
+          [
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            }
+          ],
+          {
+            cursor: { batchSize: 100 }
+          }
+        );
+
+        // Iterate over all the items in the cursor
+        cursor.explain(function (err, result) {
+          expect(err).to.not.exist;
+          expect(result.stages).to.have.lengthOf.at.least(1);
+          expect(result.stages[0]).to.have.property('$cursor');
+
+          client.close(done);
+        });
       });
-    });
-  });
+    }
+  ).skipReason = 'TODO(NODE-5617): aggregate explain tests failing on latest servers';
 
   it('should correctly return a cursor with batchSize 1 and call next', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),

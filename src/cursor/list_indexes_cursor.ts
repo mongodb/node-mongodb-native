@@ -2,7 +2,6 @@ import type { Collection } from '../collection';
 import { executeOperation, type ExecutionResult } from '../operations/execute_operation';
 import { ListIndexesOperation, type ListIndexesOptions } from '../operations/indexes';
 import type { ClientSession } from '../sessions';
-import type { Callback } from '../utils';
 import { AbstractCursor } from './abstract_cursor';
 
 /** @public */
@@ -24,18 +23,16 @@ export class ListIndexesCursor extends AbstractCursor {
   }
 
   /** @internal */
-  _initialize(session: ClientSession | undefined, callback: Callback<ExecutionResult>): void {
+  async _initialize(session: ClientSession | undefined): Promise<ExecutionResult> {
     const operation = new ListIndexesOperation(this.parent, {
       ...this.cursorOptions,
       ...this.options,
       session
     });
 
-    executeOperation(this.parent.client, operation, (err, response) => {
-      if (err || response == null) return callback(err);
+    const response = await executeOperation(this.parent.client, operation);
 
-      // TODO: NODE-2882
-      callback(undefined, { server: operation.server, session, response });
-    });
+    // TODO: NODE-2882
+    return { server: operation.server, session, response };
   }
 }
