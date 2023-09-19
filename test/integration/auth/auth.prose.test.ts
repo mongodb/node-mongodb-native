@@ -41,6 +41,7 @@ describe('Authentication Spec Prose Tests', function () {
       };
       const users = Object.keys(userMap).map(name => userMap[name]);
       let utilClient: MongoClient;
+      let client: MongoClient;
 
       /**
        * Step 1
@@ -66,6 +67,8 @@ describe('Authentication Spec Prose Tests', function () {
       afterEach(async function () {
         await Promise.all(users.map(user => utilClient.db('admin').removeUser(user.username)));
         await utilClient?.close();
+        await client?.close();
+        sinon.restore();
       });
 
       /**
@@ -90,13 +93,9 @@ describe('Authentication Spec Prose Tests', function () {
                 authSource: 'admin'
               };
 
-              const client = this.configuration.newClient({}, options);
-              try {
-                const stats = await client.db('test').stats();
-                expect(stats).to.exist;
-              } finally {
-                await client.close();
-              }
+              client = this.configuration.newClient({}, options);
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
             }
           );
 
@@ -113,13 +112,9 @@ describe('Authentication Spec Prose Tests', function () {
                 password
               )}authMechanism=${mechanism}`;
 
-              const client = this.configuration.newClient(url);
-              try {
-                const stats = await client.db('test').stats();
-                expect(stats).to.exist;
-              } finally {
-                await client.close();
-              }
+              client = this.configuration.newClient(url);
+              const stats = await client.db('test').stats();
+              expect(stats).to.exist;
             }
           );
         }
@@ -136,13 +131,9 @@ describe('Authentication Spec Prose Tests', function () {
               authSource: 'admin'
             };
 
-            const client = this.configuration.newClient({}, options);
-            try {
-              const stats = await client.db('test').stats();
-              expect(stats).to.exist;
-            } finally {
-              await client.close();
-            }
+            client = this.configuration.newClient({}, options);
+            const stats = await client.db('test').stats();
+            expect(stats).to.exist;
           }
         );
 
@@ -154,13 +145,9 @@ describe('Authentication Spec Prose Tests', function () {
             const password = encodeURIComponent(user.password);
             const url = makeConnectionString(this.configuration, username, password);
 
-            const client = this.configuration.newClient(url);
-            try {
-              const stats = await client.db('test').stats();
-              expect(stats).to.exist;
-            } finally {
-              await client.close();
-            }
+            client = this.configuration.newClient(url);
+            const stats = await client.db('test').stats();
+            expect(stats).to.exist;
           }
         );
       }
@@ -184,16 +171,11 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: this.configuration.db
           };
 
+          client = this.configuration.newClient({}, options);
           const spy = sinon.spy(ScramSHA256.prototype, 'auth');
-          const client = this.configuration.newClient({}, options);
-          try {
-            const stats = await client.db('test').stats();
-            expect(stats).to.exist;
-            expect(spy.called).to.equal(true);
-          } finally {
-            sinon.restore();
-            await client.close();
-          }
+          const stats = await client.db('test').stats();
+          expect(stats).to.exist;
+          expect(spy.called).to.equal(true);
         }
       ).skipReason = 'todo(NODE-5629): Test passes locally but will fail on CI runs.';
 
@@ -215,13 +197,12 @@ describe('Authentication Spec Prose Tests', function () {
             authMechanism: 'SCRAM-SHA-1'
           };
 
-          const client = this.configuration.newClient({}, options);
+          client = this.configuration.newClient({}, options);
           const error = await client
             .db('test')
             .stats()
             .catch(e => e);
           expect(error.message).to.match(/Authentication failed|SCRAM/);
-          await client.close();
         }
       );
 
@@ -238,13 +219,12 @@ describe('Authentication Spec Prose Tests', function () {
             authMechanism: 'SCRAM-SHA-256'
           };
 
-          const client = this.configuration.newClient({}, options);
+          client = this.configuration.newClient({}, options);
           const error = await client
             .db('test')
             .stats()
             .catch(e => e);
           expect(error.message).to.match(/Authentication failed|SCRAM/);
-          await client.close();
         }
       );
 
@@ -310,24 +290,19 @@ describe('Authentication Spec Prose Tests', function () {
             authSource: 'admin'
           };
 
+          client = this.configuration.newClient({}, options);
           const commandSpy = sinon.spy(Connection.prototype, 'command');
-          const client = this.configuration.newClient({}, options);
-          try {
-            await client.connect();
-            const calls = commandSpy
-              .getCalls()
-              .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
-              .filter(
-                c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
-              );
+          await client.connect();
+          const calls = commandSpy
+            .getCalls()
+            .filter(c => c.thisValue.id !== '<monitor>') // ignore all monitor connections
+            .filter(
+              c => c.args[1][process.env.MONGODB_API_VERSION ? 'hello' : LEGACY_HELLO_COMMAND]
+            );
 
-            expect(calls).to.have.length(1);
-            const handshakeDoc = calls[0].args[1];
-            expect(handshakeDoc).to.have.property('speculativeAuthenticate');
-          } finally {
-            sinon.restore();
-            await client.close();
-          }
+          expect(calls).to.have.length(1);
+          const handshakeDoc = calls[0].args[1];
+          expect(handshakeDoc).to.have.property('speculativeAuthenticate');
         }
       );
     });
@@ -351,7 +326,8 @@ describe('Authentication Spec Prose Tests', function () {
        * mongodb://%E2%85%A8:IV\@mongodb.example.com/admin
        * mongodb://%E2%85%A8:I%C2%ADV\@mongodb.example.com/admin
        */
-      let utilClient;
+      let utilClient: MongoClient;
+      let client: MongoClient;
       const users = [
         {
           username: 'IX',
@@ -401,13 +377,9 @@ describe('Authentication Spec Prose Tests', function () {
               authMechanism: 'SCRAM-SHA-256'
             };
 
-            const client = this.configuration.newClient(options);
-            try {
-              const stats = await client.db('admin').stats();
-              expect(stats).to.exist;
-            } finally {
-              await client.close();
-            }
+            client = this.configuration.newClient(options);
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
           }
         ).skipReason = 'todo(NODE-5621): fix the issue with unicode characters.';
       }
