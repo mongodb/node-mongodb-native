@@ -260,7 +260,7 @@ describe('Authentication Spec Prose Tests', function () {
           try {
             this.configuration.newClient({}, noUsernameOptions);
             expect.fail(
-              'Creating a new client with a password and no username must fail validation.'
+              'Creating a new client with a password and no user must fail validation.'
             );
           } catch (noUserError) {
             // NOTE: This prose test fails Node's validation of the credentials object - a username
