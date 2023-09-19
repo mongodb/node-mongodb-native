@@ -1,0 +1,310 @@
+[
+  {
+    "info": {
+      "test_name": "bsonBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 140.52417226554647
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "singleBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "multiBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "parallelBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "readBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "writeBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "driverBench",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "flatBsonEncoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 260.71208900472527
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "flatBsonDecoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 156.25152628578442
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "deepBsonEncoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 69.99060684144914
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "deepBsonDecoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 55.274365384731276
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "fullBsonEncoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 162.8871034980788
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "fullBsonDecoding",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 138.0293425785101
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "runCommand",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": 0.24716086815600843
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "findOne",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "smallDocInsertOne",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "largeDocInsertOne",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "findManyAndEmptyCursor",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "smallDocBulkInsert",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "largeDocBulkInsert",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "gridFsUpload",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  },
+  {
+    "info": {
+      "test_name": "gridFsDownload",
+      "tags": [
+        "js-bson"
+      ]
+    },
+    "metrics": [
+      {
+        "name": "megabytes_per_second",
+        "value": null
+      }
+    ]
+  }
+]

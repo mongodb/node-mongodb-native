@@ -104,95 +104,123 @@ describe('Bulk', function () {
           }
         });
       });
-    });
-  });
-
-  describe('BulkWriteResult', function () {
-    describe('insertedIds', function () {
-      describe('#insertMany()', function () {
-        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-          async function insertManyTryInvalidIds(input, isOrdered, indices) {
-            try {
-              const db = client.db();
-              const col = db.collection('test');
-              for (const index in indices) {
-                col.createIndex(index, { unique: true, sparse: false });
-              }
-              await col.insertMany(input, { ordered: isOrdered });
-              expect(false); // no error -> test fails
-            } catch (error) {
-              expect(error instanceof MongoBulkWriteError).to.equal(true);
-              expect(error.result.insertedCount).to.equal(
-                Object.keys(error.result.insertedIds).length
-              );
+      context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+        async function insertManyTryInvalidIds(input, isOrdered, indices, expectedInsertedIds) {
+          try {
+            const db = client.db();
+            const col = db.collection('test');
+            for (let i = 0; i < indices.length; i++) {
+              await col.createIndex(indices[i], { unique: true, sparse: false });
+            }
+            await col.insertMany(input, { ordered: isOrdered });
+            expect(false); // no error -> test fails
+          } catch (error) {
+            expect(error instanceof MongoBulkWriteError).to.equal(true);
+            expect(error.result.insertedCount).to.equal(
+              Object.keys(error.result.insertedIds).length
+            );
+            for (const id in expectedInsertedIds) {
+              expect(error.result.insertedIds[id]).to.equal(expectedInsertedIds[id]);
             }
           }
-          it('when passed 1 duplicate ID on an index', async function () {
-            await insertManyTryInvalidIds([{ a: 1 }, { a: 1 }], true, [{ a: 1 }]);
-          });
-          it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-            await insertManyTryInvalidIds(
-              [{ a: 1 }, { b: 2 }, { a: 1 }, { a: 1 }, { c: 3 }],
-              true,
-              [{ a: 1 }]
-            );
-          });
-          it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-            await insertManyTryInvalidIds(
-              [{ a: 1 }, { b: 2 }, { a: 1 }, { a: 1 }, { c: 3 }],
-              false,
-              [{ a: 1 }]
-            );
-          });
+        }
+        it('when passed 1 duplicate ID on an index', async function () {
+          await insertManyTryInvalidIds(
+            [
+              { _id: 0, a: 1 },
+              { _id: 1, a: 1 }
+            ],
+            true,
+            [{ a: 1 }],
+            { 0: 0 }
+          );
+        });
+        it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
+          await insertManyTryInvalidIds(
+            [
+              { _id: 0, a: 1 },
+              { _id: 1, b: 2 },
+              { _id: 2, a: 1 },
+              { _id: 3, a: 1 },
+              { _id: 4, c: 3 }
+            ],
+            true,
+            [{ a: 1 }],
+            { 0: 0, 1: 1 }
+          );
+        });
+        it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
+          // since this unordered InsertMany operation is run on a transaction, the operation will stop after the first error
+          await insertManyTryInvalidIds(
+            [
+              { _id: 0, a: 1 },
+              { _id: 1, b: 2 },
+              { _id: 2, a: 1 },
+              { _id: 3, a: 1 },
+              { _id: 4, c: 3 }
+            ],
+            false,
+            [{ a: 1 }],
+            { 0: 0, 1: 1 }
+          );
         });
       });
-      describe('#bulkWrite()', function () {
-        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-          async function bulkWriteTryInvalidIds(input, isOrdered, indices) {
-            try {
-              const db = client.db();
-              const col = db.collection('test');
-              for (const index in indices) {
-                col.createIndex(index, { unique: true, sparse: false });
-              }
-              await col.bulkWrite(input, { ordered: isOrdered });
-              expect(false);
-            } catch (error) {
-              expect(error instanceof MongoBulkWriteError).to.equal(true);
-              expect(error.result.insertedCount).to.equal(
-                Object.keys(error.result.insertedIds).length
-              );
+    });
+    describe('#bulkWrite()', function () {
+      context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+        async function bulkWriteTryInvalidIds(input, isOrdered, indices, expectedInsertedIds) {
+          try {
+            const db = client.db();
+            const col = db.collection('test');
+            for (let i = 0; i < indices.length; i++) {
+              await col.createIndex(indices[i], { unique: true, sparse: false });
+            }
+            await col.bulkWrite(input, { ordered: isOrdered });
+            expect(false);
+          } catch (error) {
+            expect(error instanceof MongoBulkWriteError).to.equal(true);
+            expect(error.result.insertedCount).to.equal(
+              Object.keys(error.result.insertedIds).length
+            );
+            for (const id in expectedInsertedIds) {
+              expect(error.result.insertedIds[id]).to.equal(expectedInsertedIds[id]);
             }
           }
-          it('when passed 1 duplicate ID on an index', async function () {
-            await bulkWriteTryInvalidIds([{ insertOne: { a: 1 } }, { insertOne: { a: 1 } }], true, [
-              { a: 1 }
-            ]);
-          });
-          it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-            await bulkWriteTryInvalidIds(
-              [
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } }
-              ],
-              true,
-              [{ a: 1 }]
-            );
-          });
-          it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-            await bulkWriteTryInvalidIds(
-              [
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } }
-              ],
-              false,
-              [{ a: 1 }]
-            );
-          });
+        }
+        it('when passed 1 duplicate ID on an index', async function () {
+          await bulkWriteTryInvalidIds(
+            [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
+            true,
+            [{ a: 1 }],
+            { 0: 0 }
+          );
+        });
+        it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
+          // since this unordered BulkWrite operation is run on a transaction, the operation will stop after the first error
+          await bulkWriteTryInvalidIds(
+            [
+              { insertOne: { _id: 0, a: 1 } },
+              { insertOne: { _id: 1, a: 1 } },
+              { insertOne: { _id: 2, a: 1 } },
+              { insertOne: { _id: 3, b: 2 } }
+            ],
+            true,
+            [{ a: 1 }],
+            { 0: 0 }
+          );
+        });
+        it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
+          await bulkWriteTryInvalidIds(
+            [
+              { insertOne: { _id: 0, a: 1 } },
+              { insertOne: { _id: 1, a: 1 } },
+              { insertOne: { _id: 2, a: 1 } },
+              { insertOne: { _id: 3, b: 2 } }
+            ],
+            false,
+            [{ a: 1 }],
+            { 0: 0 }
+          );
         });
       });
     });

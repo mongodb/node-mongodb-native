@@ -205,28 +205,30 @@ export class BulkWriteResult {
     this.deletedCount = this.result.nRemoved ?? 0;
     this.upsertedCount = this.result.upserted.length ?? 0;
     this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
-    this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
-    if (isOrdered && this.result.writeErrors.length !== 0) {
-      const errIdx = this.result.writeErrors[0].index;
-      for (const index in this.insertedIds) {
-        if (Number(index) >= errIdx) {
-          delete this.insertedIds[index];
-        }
-      }
-    } else if (!isOrdered && this.result.writeErrors.length !== 0) {
-      for (let i = 0; i < this.result.writeErrors.length; i++) {
-        const index = this.result.writeErrors[i].index;
-        if (index in this.insertedIds) {
-          delete this.insertedIds[index];
-        }
-      }
-    }
+    this.insertedIds = BulkWriteResult.generateIdMap(
+      this.getCleanedInsertedIds(bulkResult, isOrdered)
+    );
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
 
   /** Evaluates to true if the bulk operation correctly executes */
   get ok(): number {
     return this.result.ok;
+  }
+
+  /** Returns document_ids that were actually inserted
+   * @internal
+   */
+  getCleanedInsertedIds(bulkResult: BulkResult, isOrdered: boolean) {
+    if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
+
+    if (isOrdered) {
+      return bulkResult.insertedIds.slice(0, bulkResult.writeErrors[0].index);
+    }
+
+    return bulkResult.insertedIds.filter(
+      ({ index }) => !bulkResult.writeErrors.some(writeError => index === writeError.index)
+    );
   }
 
   /** Returns the upserted id at the given index */
