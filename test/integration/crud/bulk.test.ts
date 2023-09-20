@@ -105,7 +105,12 @@ describe('Bulk', function () {
         });
       });
       context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-        async function insertManyTryInvalidIds(input, isOrdered, indices, expectedInsertedIds) {
+        async function assertFailsWithDuplicateFields(
+          input,
+          isOrdered,
+          indices,
+          expectedInsertedIds
+        ) {
           try {
             const db = client.db();
             const col = db.collection('test');
@@ -113,19 +118,17 @@ describe('Bulk', function () {
               await col.createIndex(indices[i], { unique: true, sparse: false });
             }
             await col.insertMany(input, { ordered: isOrdered });
-            expect(false); // no error -> test fails
+            expect.fail('a MongoBulkWriteError must be thrown when write errors are encountered');
           } catch (error) {
             expect(error instanceof MongoBulkWriteError).to.equal(true);
             expect(error.result.insertedCount).to.equal(
               Object.keys(error.result.insertedIds).length
             );
-            for (const id in expectedInsertedIds) {
-              expect(error.result.insertedIds[id]).to.equal(expectedInsertedIds[id]);
-            }
+            expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
           }
         }
         it('when passed 1 duplicate ID on an index', async function () {
-          await insertManyTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [
               { _id: 0, a: 1 },
               { _id: 1, a: 1 }
@@ -136,39 +139,42 @@ describe('Bulk', function () {
           );
         });
         it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-          await insertManyTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [
               { _id: 0, a: 1 },
-              { _id: 1, b: 2 },
+              { _id: 1, a: 1 },
               { _id: 2, a: 1 },
-              { _id: 3, a: 1 },
-              { _id: 4, c: 3 }
+              { _id: 3, b: 2 }
             ],
             true,
             [{ a: 1 }],
-            { 0: 0, 1: 1 }
+            { 0: 0 }
           );
         });
         it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
           // since this unordered InsertMany operation is run on a transaction, the operation will stop after the first error
-          await insertManyTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [
               { _id: 0, a: 1 },
-              { _id: 1, b: 2 },
+              { _id: 1, a: 1 },
               { _id: 2, a: 1 },
-              { _id: 3, a: 1 },
-              { _id: 4, c: 3 }
+              { _id: 3, b: 2 }
             ],
             false,
             [{ a: 1 }],
-            { 0: 0, 1: 1 }
+            { 0: 0, 3: 3 }
           );
         });
       });
     });
     describe('#bulkWrite()', function () {
       context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-        async function bulkWriteTryInvalidIds(input, isOrdered, indices, expectedInsertedIds) {
+        async function assertFailsWithDuplicateFields(
+          input,
+          isOrdered,
+          indices,
+          expectedInsertedIds
+        ) {
           try {
             const db = client.db();
             const col = db.collection('test');
@@ -176,19 +182,17 @@ describe('Bulk', function () {
               await col.createIndex(indices[i], { unique: true, sparse: false });
             }
             await col.bulkWrite(input, { ordered: isOrdered });
-            expect(false);
+            expect.fail('a MongoBulkWriteError must be thrown when write errors are encountered');
           } catch (error) {
             expect(error instanceof MongoBulkWriteError).to.equal(true);
             expect(error.result.insertedCount).to.equal(
               Object.keys(error.result.insertedIds).length
             );
-            for (const id in expectedInsertedIds) {
-              expect(error.result.insertedIds[id]).to.equal(expectedInsertedIds[id]);
-            }
+            expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
           }
         }
         it('when passed 1 duplicate ID on an index', async function () {
-          await bulkWriteTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
             true,
             [{ a: 1 }],
@@ -197,7 +201,7 @@ describe('Bulk', function () {
         });
         it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
           // since this unordered BulkWrite operation is run on a transaction, the operation will stop after the first error
-          await bulkWriteTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [
               { insertOne: { _id: 0, a: 1 } },
               { insertOne: { _id: 1, a: 1 } },
@@ -210,7 +214,7 @@ describe('Bulk', function () {
           );
         });
         it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-          await bulkWriteTryInvalidIds(
+          await assertFailsWithDuplicateFields(
             [
               { insertOne: { _id: 0, a: 1 } },
               { insertOne: { _id: 1, a: 1 } },
@@ -219,7 +223,7 @@ describe('Bulk', function () {
             ],
             false,
             [{ a: 1 }],
-            { 0: 0 }
+            { 0: 0, 3: 3 }
           );
         });
       });
