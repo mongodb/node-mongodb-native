@@ -152,7 +152,6 @@ describe('Bulk', function () {
           );
         });
         it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-          // since this unordered InsertMany operation is run on a transaction, the operation will stop after the first error
           await assertFailsWithDuplicateFields(
             [
               { _id: 0, a: 1 },
@@ -200,7 +199,6 @@ describe('Bulk', function () {
           );
         });
         it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-          // since this unordered BulkWrite operation is run on a transaction, the operation will stop after the first error
           await assertFailsWithDuplicateFields(
             [
               { insertOne: { _id: 0, a: 1 } },
