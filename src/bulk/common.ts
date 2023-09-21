@@ -206,7 +206,7 @@ export class BulkWriteResult {
     this.upsertedCount = this.result.upserted.length ?? 0;
     this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
     this.insertedIds = BulkWriteResult.generateIdMap(
-      this.getCleanedInsertedIds(bulkResult, isOrdered)
+      this.getSuccessfullyInsertedIds(bulkResult, isOrdered)
     );
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
   }
@@ -219,7 +219,7 @@ export class BulkWriteResult {
   /** Returns document_ids that were actually inserted
    * @internal
    */
-  getCleanedInsertedIds(bulkResult: BulkResult, isOrdered: boolean) {
+  getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
     if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
 
     if (isOrdered) {
