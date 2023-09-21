@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, isHello, type MongoClient } from '../../mongodb';
+import { Collection, type Db, isHello, type MongoClient, MongoServerError } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -93,6 +93,16 @@ describe('Collection', function () {
         collection.insertOne({ 'hel.lo': 0 }, { checkKeys: false }),
         collection.drop()
       ]);
+    });
+
+    it('should fail on server due to illegal collection name', async function () {
+      try {
+        const illegalCollection = await db.createCollection('a\x00b');
+        await illegalCollection.insertOne({ a: 1 });
+        expect.fail('a MongoServerError was expected due to illegal collection name');
+      } catch (error) {
+        expect(error instanceof MongoServerError);
+      }
     });
 
     it('should correctly count on non-existent collection', function (done) {

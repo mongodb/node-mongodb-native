@@ -1,5 +1,7 @@
 'use strict';
 
+import { MongoServerError } from 'mongodb-legacy';
+
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
 const { MongoClient } = require('../../mongodb');
@@ -7,6 +9,30 @@ const { MongoClient } = require('../../mongodb');
 describe('Db', function () {
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  context('when given illegal db name', function () {
+    let client;
+    let db;
+
+    beforeEach(function () {
+      client = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      db = undefined;
+      await client.close();
+    });
+
+    it('should throw error on server only', async function () {
+      try {
+        db = client.db('a\x00b');
+        await db.createCollection('spider');
+        expect.fail('a MongoServerError was expected due to illegal db name');
+      } catch (error) {
+        expect(error instanceof MongoServerError);
+      }
+    });
   });
 
   it('shouldCorrectlyHandleFailedConnection', {
