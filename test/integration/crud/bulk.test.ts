@@ -104,7 +104,7 @@ describe('Bulk', function () {
           }
         });
       });
-      context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+      context('when inserting duplicate values', function () {
         async function assertFailsWithDuplicateFields(
           input,
           isOrdered,
@@ -127,47 +127,51 @@ describe('Bulk', function () {
             expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
           }
         }
-        it('when passed 1 duplicate ID on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [
-              { _id: 0, a: 1 },
-              { _id: 1, a: 1 }
-            ],
-            true,
-            [{ a: 1 }],
-            { 0: 0 }
-          );
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 }
+              ],
+              true,
+              [{ a: 1 }],
+              { 0: 0 }
+            );
+          });
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
+              true,
+              [{ a: 1 }],
+              { 0: 0 }
+            );
+          });
         });
-        it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [
-              { _id: 0, a: 1 },
-              { _id: 1, a: 1 },
-              { _id: 2, a: 1 },
-              { _id: 3, b: 2 }
-            ],
-            true,
-            [{ a: 1 }],
-            { 0: 0 }
-          );
-        });
-        it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [
-              { _id: 0, a: 1 },
-              { _id: 1, a: 1 },
-              { _id: 2, a: 1 },
-              { _id: 3, b: 2 }
-            ],
-            false,
-            [{ a: 1 }],
-            { 0: 0, 3: 3 }
-          );
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
+              false,
+              [{ a: 1 }],
+              { 0: 0, 3: 3 }
+            );
+          });
         });
       });
     });
     describe('#bulkWrite()', function () {
-      context('BulkWriteResult should not include invalid insert in insertedIds', function () {
+      context('when inserting duplicate values', function () {
         async function assertFailsWithDuplicateFields(
           input,
           isOrdered,
@@ -190,39 +194,43 @@ describe('Bulk', function () {
             expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
           }
         }
-        it('when passed 1 duplicate ID on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
-            true,
-            [{ a: 1 }],
-            { 0: 0 }
-          );
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
+              true,
+              [{ a: 1 }],
+              { 0: 0 }
+            );
+          });
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
+              ],
+              true,
+              [{ a: 1 }],
+              { 0: 0 }
+            );
+          });
         });
-        it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [
-              { insertOne: { _id: 0, a: 1 } },
-              { insertOne: { _id: 1, a: 1 } },
-              { insertOne: { _id: 2, a: 1 } },
-              { insertOne: { _id: 3, b: 2 } }
-            ],
-            true,
-            [{ a: 1 }],
-            { 0: 0 }
-          );
-        });
-        it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-          await assertFailsWithDuplicateFields(
-            [
-              { insertOne: { _id: 0, a: 1 } },
-              { insertOne: { _id: 1, a: 1 } },
-              { insertOne: { _id: 2, a: 1 } },
-              { insertOne: { _id: 3, b: 2 } }
-            ],
-            false,
-            [{ a: 1 }],
-            { 0: 0, 3: 3 }
-          );
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate insertsr', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
+              ],
+              false,
+              [{ a: 1 }],
+              { 0: 0, 3: 3 }
+            );
+          });
         });
       });
     });
