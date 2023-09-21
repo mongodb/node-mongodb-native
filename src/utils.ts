@@ -79,39 +79,6 @@ export function hostMatchesWildcards(host: string, wildcards: string[]): boolean
 }
 
 /**
- * Throws if collectionName is not a valid mongodb collection namespace.
- * @internal
- */
-export function checkCollectionName(collectionName: string): void {
-  if ('string' !== typeof collectionName) {
-    throw new MongoInvalidArgumentError('Collection name must be a String');
-  }
-
-  if (!collectionName || collectionName.indexOf('..') !== -1) {
-    throw new MongoInvalidArgumentError('Collection names cannot be empty');
-  }
-
-  if (
-    collectionName.indexOf('$') !== -1 &&
-    collectionName.match(/((^\$cmd)|(oplog\.\$main))/) == null
-  ) {
-    // TODO(NODE-3483): Use MongoNamespace static method
-    throw new MongoInvalidArgumentError("Collection names must not contain '$'");
-  }
-
-  if (collectionName.match(/^\.|\.$/) != null) {
-    // TODO(NODE-3483): Use MongoNamespace static method
-    throw new MongoInvalidArgumentError("Collection names must not start or end with '.'");
-  }
-
-  // Validate that we are not passing 0x00 in the collection name
-  if (collectionName.indexOf('\x00') !== -1) {
-    // TODO(NODE-3483): Use MongoNamespace static method
-    throw new MongoInvalidArgumentError('Collection names cannot contain a null character');
-  }
-}
-
-/**
  * Ensure Hint field is in a shape we expect:
  * - object of index names mapping to 1 or -1
  * - just an index name

@@ -2,36 +2,11 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { Db, MongoClient } = require('../../mongodb');
+const { MongoClient } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {
     return setupDatabase(this.configuration);
-  });
-
-  it('shouldCorrectlyHandleIllegalDbNames', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: done => {
-      const client = { bsonOptions: {} };
-      expect(() => new Db(client, 5)).to.throw('Database name must be a string');
-      expect(() => new Db(client, '')).to.throw('Database name cannot be the empty string');
-      expect(() => new Db(client, 'te$t')).to.throw(
-        "database names cannot contain the character '$'"
-      );
-      expect(() => new Db(client, '.test', function () {})).to.throw(
-        "database names cannot contain the character '.'"
-      );
-      expect(() => new Db(client, '\\test', function () {})).to.throw(
-        "database names cannot contain the character '\\'"
-      );
-      expect(() => new Db(client, 'test test', function () {})).to.throw(
-        "database names cannot contain the character ' '"
-      );
-      done();
-    }
   });
 
   it('shouldCorrectlyHandleFailedConnection', {

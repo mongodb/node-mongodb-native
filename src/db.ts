@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoAPIError, MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
@@ -145,9 +145,6 @@ export class Db {
 
     // Filter the options
     options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
-
-    // Ensure we have a valid db name
-    validateDatabaseName(databaseName);
 
     // Internal state of the db object
     this.s = {
@@ -517,21 +514,5 @@ export class Db {
    */
   runCursorCommand(command: Document, options?: RunCursorCommandOptions): RunCommandCursor {
     return new RunCommandCursor(this, command, options);
-  }
-}
-
-// TODO(NODE-3484): Refactor into MongoDBNamespace
-// Validate the database name
-function validateDatabaseName(databaseName: string) {
-  if (typeof databaseName !== 'string')
-    throw new MongoInvalidArgumentError('Database name must be a string');
-  if (databaseName.length === 0)
-    throw new MongoInvalidArgumentError('Database name cannot be the empty string');
-  if (databaseName === '$external') return;
-
-  const invalidChars = [' ', '.', '$', '/', '\\'];
-  for (let i = 0; i < invalidChars.length; i++) {
-    if (databaseName.indexOf(invalidChars[i]) !== -1)
-      throw new MongoAPIError(`database names cannot contain the character '${invalidChars[i]}'`);
   }
 }

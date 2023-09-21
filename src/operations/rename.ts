@@ -2,7 +2,7 @@ import type { Document } from '../bson';
 import { Collection } from '../collection';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import { checkCollectionName, MongoDBNamespace } from '../utils';
+import { MongoDBNamespace } from '../utils';
 import { CommandOperation, type CommandOperationOptions } from './command';
 import { Aspect, defineAspects } from './operation';
 
@@ -21,7 +21,6 @@ export class RenameOperation extends CommandOperation<Document> {
     public newName: string,
     public override options: RenameOptions
   ) {
-    checkCollectionName(newName);
     super(collection, options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }

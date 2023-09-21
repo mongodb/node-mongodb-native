@@ -95,20 +95,6 @@ describe('Collection', function () {
       ]);
     });
 
-    it('should fail due to illegal listCollections', function (done) {
-      expect(() => db.collection(5)).to.throw('Collection name must be a String');
-      expect(() => db.collection('')).to.throw('Collection names cannot be empty');
-      expect(() => db.collection('te$t')).to.throw("Collection names must not contain '$'");
-      expect(() => db.collection('.test')).to.throw(
-        "Collection names must not start or end with '.'"
-      );
-      expect(() => db.collection('test.')).to.throw(
-        "Collection names must not start or end with '.'"
-      );
-      expect(() => db.collection('test..t')).to.throw('Collection names cannot be empty');
-      done();
-    });
-
     it('should correctly count on non-existent collection', function (done) {
       const collection = db.collection('test_multiple_insert_2');
       collection.countDocuments((err, count) => {
