@@ -29,7 +29,7 @@ deploy_lambda_function ()
     --stack-name "${FUNCTION_NAME}" \
     --capabilities CAPABILITY_IAM \
     --resolve-s3 \
-    --parameter-overrides "MongoDbUri=${AWS_LAMBDA_SCRAM1_URI} LambdaMetricsUri=${LAMBDA_METRICS_URI} Mechanism=${MECHANISM}" \
+    --parameter-overrides "MongoDbUri=${AWS_LAMBDA_SCRAM256_URI} LambdaMetricsUri=${LAMBDA_METRICS_URI} Mechanism=${MECHANISM}" \
     --region ${AWS_REGION}
 }
 

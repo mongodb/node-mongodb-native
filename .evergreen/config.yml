@@ -158,7 +158,7 @@ functions:
         env:
           TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
           AWS_REGION: us-east-1
-          MECHANISM: SCRAM-SHA-1
+          MECHANISM: SCRAM-SHA-256
   run tests:
     - command: shell.exec
       type: test
