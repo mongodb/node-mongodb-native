@@ -4,15 +4,15 @@ Description: >
   Node driver lambda function test
 
 Parameters:
-  MongoDbOidcUri:
+  MongoDbUri:
     Type: String
     Description: The MongoDB connection string.
-  AwsWebIdentityTokenFile:
-    Type: String
-    Description: The path to the token file.
   LambdaMetricsUri:
     Type: String
     Description: The metrics cluster URI.
+  Mechanism:
+    Type: String
+    Description: The auth mechanism.
 
 Globals:
   Function:
@@ -27,9 +27,9 @@ Resources:
       Runtime: nodejs18.x
       Environment:
         Variables:
-          MONGODB_URI: !Ref MongoDbOidcUri
-          AWS_WEB_IDENTITY_TOKEN_FILE: !Ref AwsWebIdentityTokenFile
+          MONGODB_URI: !Ref MongoDbUri
           LAMBDA_METRICS_URI: !Ref LambdaMetricsUri
+          MECHANISM: !Ref Mechanism
       Architectures:
       - x86_64
       Events:

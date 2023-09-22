@@ -214,12 +214,11 @@ TASKS.push(
       ]
     },
     {
-      name: 'test-lambda-oidc',
-      tags: ['lambda', 'oidc'],
+      name: 'test-lambda-scram-sha-1',
+      tags: ['lambda', 'scram'],
       commands: [
         { func: 'install dependencies' },
-        { func: 'bootstrap oidc' },
-        { func: 'run lambda tests oidc' }
+        { func: 'run lambda tests scram sha 1' }
       ]
     },
     {

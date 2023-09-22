@@ -173,7 +173,7 @@ functions:
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
 
-  "run lambda tests oidc":
+  "run lambda tests scram sha 1":
     - command: ec2.assume_role
       params:
         role_arn: ${LAMBDA_AWS_ROLE_ARN}
@@ -186,9 +186,9 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-deployed-lambda-aws-tests.sh
         env:
-          AWS_WEB_IDENTITY_TOKEN_FILE: test_user1
           TEST_LAMBDA_DIRECTORY: ${PROJECT_DIRECTORY}/test/lambda
           AWS_REGION: us-east-1
+          MECHANISM: SCRAM-SHA-1
 
   "run tests":
     - command: shell.exec

@@ -9,7 +9,7 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
 });
 
 const metrics = {
-  mechanism: 'MONGODB-OIDC',
+  mechanism: process.env.MECHANISM,
   srvLookup: 0,
   txtLookup: 0,
   connectionEstablishment: 0,

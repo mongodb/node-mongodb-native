@@ -29,7 +29,7 @@ deploy_lambda_function ()
     --stack-name "${FUNCTION_NAME}" \
     --capabilities CAPABILITY_IAM \
     --resolve-s3 \
-    --parameter-overrides "MongoDbOidcUri=${AWS_LAMBDA_OIDC_MONGODB_URI} AwsWebIdentityTokenFile=${AWS_WEB_IDENTITY_TOKEN_FILE} LambdaMetricsUri=${LAMBDA_METRICS_URI}" \
+    --parameter-overrides "MongoDbUri=${AWS_LAMBDA_SCRAM1_URI} LambdaMetricsUri=${LAMBDA_METRICS_URI} Mechanism=${MECHANISM}" \
     --region ${AWS_REGION}
 }
 
@@ -60,9 +60,6 @@ cleanup ()
 trap cleanup EXIT SIGHUP
 
 cd "${TEST_LAMBDA_DIRECTORY}"
-
-# Copy the token file to the lambda directory to get deployed.
-cp /tmp/tokens/test_user1 mongodb/test_user1
 
 sam build
 
