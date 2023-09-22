@@ -91,6 +91,7 @@ describe('Bulk', function () {
           }
         });
       });
+
       context('when passed a valid document list', function () {
         it('insertMany should not throw a MongoInvalidArgument error when called with a valid operation', async function () {
           try {
@@ -104,29 +105,23 @@ describe('Bulk', function () {
           }
         });
       });
+
       context('when inserting duplicate values', function () {
-        async function assertFailsWithDuplicateFields(
-          input,
-          isOrdered,
-          indices,
-          expectedInsertedIds
-        ) {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            for (let i = 0; i < indices.length; i++) {
-              await col.createIndex(indices[i], { unique: true, sparse: false });
-            }
-            await col.insertMany(input, { ordered: isOrdered });
-            expect.fail('a MongoBulkWriteError must be thrown when write errors are encountered');
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            expect(error.result.insertedCount).to.equal(
-              Object.keys(error.result.insertedIds).length
-            );
-            expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
-          }
+        let col;
+
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.insertMany(input, { ordered: isOrdered }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
         }
+
         context('when the insert is ordered', function () {
           it('contains the correct insertedIds on one duplicate insert', async function () {
             await assertFailsWithDuplicateFields(
@@ -135,10 +130,10 @@ describe('Bulk', function () {
                 { _id: 1, a: 1 }
               ],
               true,
-              [{ a: 1 }],
               { 0: 0 }
             );
           });
+
           it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
               [
@@ -148,11 +143,11 @@ describe('Bulk', function () {
                 { _id: 3, b: 2 }
               ],
               true,
-              [{ a: 1 }],
               { 0: 0 }
             );
           });
         });
+
         context('when the insert is unordered', function () {
           it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
@@ -163,46 +158,39 @@ describe('Bulk', function () {
                 { _id: 3, b: 2 }
               ],
               false,
-              [{ a: 1 }],
               { 0: 0, 3: 3 }
             );
           });
         });
       });
     });
+
     describe('#bulkWrite()', function () {
       context('when inserting duplicate values', function () {
-        async function assertFailsWithDuplicateFields(
-          input,
-          isOrdered,
-          indices,
-          expectedInsertedIds
-        ) {
-          try {
-            const db = client.db();
-            const col = db.collection('test');
-            for (let i = 0; i < indices.length; i++) {
-              await col.createIndex(indices[i], { unique: true, sparse: false });
-            }
-            await col.bulkWrite(input, { ordered: isOrdered });
-            expect.fail('a MongoBulkWriteError must be thrown when write errors are encountered');
-          } catch (error) {
-            expect(error instanceof MongoBulkWriteError).to.equal(true);
-            expect(error.result.insertedCount).to.equal(
-              Object.keys(error.result.insertedIds).length
-            );
-            expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
-          }
+        let col;
+
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.bulkWrite(input, { ordered: isOrdered }).catch(error => error);
+          expect(error instanceof MongoBulkWriteError).to.equal(true);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
         }
+
         context('when the insert is ordered', function () {
           it('contains the correct insertedIds on one duplicate insert', async function () {
             await assertFailsWithDuplicateFields(
               [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
               true,
-              [{ a: 1 }],
               { 0: 0 }
             );
           });
+
           it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
               [
@@ -212,13 +200,13 @@ describe('Bulk', function () {
                 { insertOne: { _id: 3, b: 2 } }
               ],
               true,
-              [{ a: 1 }],
               { 0: 0 }
             );
           });
         });
+
         context('when the insert is unordered', function () {
-          it('contains the correct insertedIds on multiple duplicate insertsr', async function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
               [
                 { insertOne: { _id: 0, a: 1 } },
@@ -227,7 +215,6 @@ describe('Bulk', function () {
                 { insertOne: { _id: 3, b: 2 } }
               ],
               false,
-              [{ a: 1 }],
               { 0: 0, 3: 3 }
             );
           });
