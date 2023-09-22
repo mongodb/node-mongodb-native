@@ -38,14 +38,6 @@ describe('Collection', function () {
       expect(collections[1]).to.be.instanceOf(Collection);
     });
 
-    it.only('should name check right', async function () {
-      // Create two collections
-      await db.createCollection('test.spiderman.');
-      const collections = await db.collections();
-      expect(collections[0].collectionName).to.equal('test.spiderman.');
-      expect(collections[0]).to.be.instanceOf(Collection);
-    });
-
     it('should correctly retrieve listCollections', function (done) {
       db.createCollection('test_collection_names', err => {
         expect(err).to.not.exist;
