@@ -1,7 +1,5 @@
 'use strict';
 
-import { MongoServerError } from 'mongodb-legacy';
-
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
 const { MongoClient } = require('../../mongodb');
@@ -25,13 +23,11 @@ describe('Db', function () {
     });
 
     it('should throw error on server only', async function () {
-      try {
-        db = client.db('a\x00b');
-        await db.createCollection('spider');
-        expect.fail('a MongoServerError was expected due to illegal db name');
-      } catch (error) {
-        expect(error instanceof MongoServerError);
-      }
+      db = client.db('a\x00b');
+      const error = await db.createCollection('spider').catch(error => error);
+      expect(error['name']).to.equal('MongoServerError');
+      expect(error['code']).to.equal(73);
+      expect(error['codeName']).to.equal('InvalidNamespace');
     });
   });
 

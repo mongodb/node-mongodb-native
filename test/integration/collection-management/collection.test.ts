@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, isHello, type MongoClient, MongoServerError } from '../../mongodb';
+import { Collection, type Db, isHello, type MongoClient } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -95,14 +95,14 @@ describe('Collection', function () {
       ]);
     });
 
-    it('should fail on server due to illegal collection name', async function () {
-      try {
-        const illegalCollection = await db.createCollection('a\x00b');
-        await illegalCollection.insertOne({ a: 1 });
-        expect.fail('a MongoServerError was expected due to illegal collection name');
-      } catch (error) {
-        expect(error instanceof MongoServerError);
-      }
+    it('fails on server due to invalid namespace', async function () {
+      const error = await db
+        .collection('a\x00b')
+        .insertOne({ a: 1 })
+        .catch(error => error);
+      expect(error['name']).to.equal('MongoServerError');
+      expect(error['code']).to.equal(73);
+      expect(error['codeName']).to.equal('InvalidNamespace');
     });
 
     it('should correctly count on non-existent collection', function (done) {

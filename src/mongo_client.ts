@@ -308,6 +308,7 @@ const kOptions = Symbol('options');
  * client.db().collection('pets');
  * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
+ * // Db namespace validation occurs at operation time
  */
 export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */

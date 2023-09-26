@@ -138,6 +138,7 @@ export class Db {
    *
    * @param client - The MongoClient for the database.
    * @param databaseName - The name of the database this instance represents.
+   * databaseName validation occurs at operation time
    * @param options - Optional settings for Db construction
    */
   constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
@@ -214,6 +215,8 @@ export class Db {
   /**
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
+   *
+   * Collection namespace validation occurs at operation time
    *
    * @param name - The name of the collection to create
    * @param options - Optional settings for the command
