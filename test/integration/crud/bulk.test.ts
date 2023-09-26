@@ -177,7 +177,7 @@ describe('Bulk', function () {
 
         async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
           const error = await col.bulkWrite(input, { ordered: isOrdered }).catch(error => error);
-          expect(error instanceof MongoBulkWriteError).to.equal(true);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
           expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
           expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
         }

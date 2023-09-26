@@ -216,10 +216,11 @@ export class BulkWriteResult {
     return this.result.ok;
   }
 
-  /** Returns document_ids that were actually inserted
+  /**
+   * Returns document_ids that were actually inserted
    * @internal
    */
-  getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
+  private getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
     if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
 
     if (isOrdered) {
