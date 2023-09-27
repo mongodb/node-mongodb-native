@@ -21,8 +21,8 @@ elif [[ $1 == "sharded_cluster" ]]; then
     echo "mongodb://bob:pwd123@localhost:51000,localhost:51001"
 elif [[ $1 == "server" ]]; then
     mkdir -p $SINGLE_DIR
-    mlaunch init --dir $SINGLE_DIR --ipv6 --auth --username "aditi.khare" --password "HIpolymer7!" --single --setParameter enableTestCommands=1
-    echo "mongodb://aditi.khare:HIpolymer7!@localhost:27017"
+    mlaunch init --dir $SINGLE_DIR --ipv6 --auth --username "bob" --password "pwd123" --single --setParameter enableTestCommands=1
+    echo "mongodb://bob:pwd123@localhost:27017"
 else
     echo "unsupported topology: $1"
 fi
