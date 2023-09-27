@@ -105,7 +105,7 @@ describe('Bulk', function () {
           }
         });
       });
-      
+
       context('when inserting duplicate values', function () {
         let col;
 
@@ -133,7 +133,7 @@ describe('Bulk', function () {
               { 0: 0 }
             );
           });
-      
+
           it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
               [
@@ -147,7 +147,7 @@ describe('Bulk', function () {
             );
           });
         });
-      
+
         context('when the insert is unordered', function () {
           it('contains the correct insertedIds on multiple duplicate inserts', async function () {
             await assertFailsWithDuplicateFields(
@@ -164,7 +164,7 @@ describe('Bulk', function () {
         });
       });
     });
-      
+
     describe('#bulkWrite()', function () {
       context('when inserting duplicate values', function () {
         let col;

@@ -213,17 +213,17 @@ export class BulkWriteResult {
    * Returns document_ids that were actually inserted
    * @internal
    */
-    private getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
-      if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
-  
-      if (isOrdered) {
-        return bulkResult.insertedIds.slice(0, bulkResult.writeErrors[0].index);
-      }
-  
-      return bulkResult.insertedIds.filter(
-        ({ index }) => !bulkResult.writeErrors.some(writeError => index === writeError.index)
-      );
-    }  
+  private getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
+    if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
+
+    if (isOrdered) {
+      return bulkResult.insertedIds.slice(0, bulkResult.writeErrors[0].index);
+    }
+
+    return bulkResult.insertedIds.filter(
+      ({ index }) => !bulkResult.writeErrors.some(writeError => index === writeError.index)
+    );
+  }
 
   /** Evaluates to true if the bulk operation correctly executes */
   get ok(): number {
