@@ -105,93 +105,117 @@ describe('Bulk', function () {
           }
         });
       });
-    });
-  });
+      
+      context('when inserting duplicate values', function () {
+        let col;
 
-  describe('BulkWriteResult', function () {
-    describe('insertedIds', function () {
-      describe('#insertMany()', function () {
-        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-          async function insertManyTryInvalidIds(input, isOrdered, indices) {
-            try {
-              const db = client.db();
-              const col = db.collection('test');
-              for (const index in indices) {
-                col.createIndex(index, { unique: true, sparse: false });
-              }
-              await col.insertMany(input, { ordered: isOrdered });
-              expect(false); // no error -> test fails
-            } catch (error) {
-              expect(error instanceof MongoBulkWriteError).to.equal(true);
-              expect(error.result.insertedCount).to.equal(
-                Object.keys(error.result.insertedIds).length
-              );
-            }
-          }
-          it('when passed 1 duplicate ID on an index', async function () {
-            await insertManyTryInvalidIds([{ a: 1 }, { a: 1 }], true, [{ a: 1 }]);
-          });
-          it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-            await insertManyTryInvalidIds(
-              [{ a: 1 }, { b: 2 }, { a: 1 }, { a: 1 }, { c: 3 }],
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.insertMany(input, { ordered: isOrdered }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
+        }
+
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 }
+              ],
               true,
-              [{ a: 1 }]
+              { 0: 0 }
             );
           });
-          it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-            await insertManyTryInvalidIds(
-              [{ a: 1 }, { b: 2 }, { a: 1 }, { a: 1 }, { c: 3 }],
+      
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
+              true,
+              { 0: 0 }
+            );
+          });
+        });
+      
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
               false,
-              [{ a: 1 }]
+              { 0: 0, 3: 3 }
             );
           });
         });
       });
-      describe('#bulkWrite()', function () {
-        context('BulkWriteResult should not include invalid insert in insertedIds', function () {
-          async function bulkWriteTryInvalidIds(input, isOrdered, indices) {
-            try {
-              const db = client.db();
-              const col = db.collection('test');
-              for (const index in indices) {
-                col.createIndex(index, { unique: true, sparse: false });
-              }
-              await col.bulkWrite(input, { ordered: isOrdered });
-              expect(false);
-            } catch (error) {
-              expect(error instanceof MongoBulkWriteError).to.equal(true);
-              expect(error.result.insertedCount).to.equal(
-                Object.keys(error.result.insertedIds).length
-              );
-            }
-          }
-          it('when passed 1 duplicate ID on an index', async function () {
-            await bulkWriteTryInvalidIds([{ insertOne: { a: 1 } }, { insertOne: { a: 1 } }], true, [
-              { a: 1 }
-            ]);
-          });
-          it('when, on an ordered insert, passed multiple duplicate IDs on an index', async function () {
-            await bulkWriteTryInvalidIds(
-              [
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } }
-              ],
+    });
+      
+    describe('#bulkWrite()', function () {
+      context('when inserting duplicate values', function () {
+        let col;
+
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.bulkWrite(input, { ordered: isOrdered }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
+        }
+
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
               true,
-              [{ a: 1 }]
+              { 0: 0 }
             );
           });
-          it('when, on an unordered insert, passed multiple duplicate IDs on an index', async function () {
-            await bulkWriteTryInvalidIds(
+
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
               [
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } },
-                { insertOne: { a: 1 } }
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
+              ],
+              true,
+              { 0: 0 }
+            );
+          });
+        });
+
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
               ],
               false,
-              [{ a: 1 }]
+              { 0: 0, 3: 3 }
             );
           });
         });
