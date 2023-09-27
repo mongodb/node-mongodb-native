@@ -308,7 +308,6 @@ const kOptions = Symbol('options');
  * client.db().collection('pets');
  * await client.insertOne({ name: 'spot', kind: 'dog' });
  * ```
- * // Db namespace validation occurs at operation time
  */
 export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
@@ -571,6 +570,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
   /**
    * Create a new Db instance sharing the current socket connections.
+   *
+   * Db name validation occurs at operation time
    *
    * @param dbName - The name of the database we want to use. If not provided, use database name from connection string.
    * @param options - Optional settings for Db construction

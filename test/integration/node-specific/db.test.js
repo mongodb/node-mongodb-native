@@ -2,7 +2,7 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { MongoClient } = require('../../mongodb');
+const { MongoClient, MongoServerError } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {
@@ -25,9 +25,9 @@ describe('Db', function () {
     it('should throw error on server only', async function () {
       db = client.db('a\x00b');
       const error = await db.createCollection('spider').catch(error => error);
-      expect(error['name']).to.equal('MongoServerError');
-      expect(error['code']).to.equal(73);
-      expect(error['codeName']).to.equal('InvalidNamespace');
+      expect(error).to.be.instanceOf(MongoServerError);
+      expect(error).to.have.property('code', 73);
+      expect(error).to.have.property('codeName', 'InvalidNamespace');
     });
   });
 
