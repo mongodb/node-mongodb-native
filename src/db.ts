@@ -217,7 +217,7 @@ export class Db {
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
    *
-   * Collection namespace validation is performed server-side once an collection operation is attempted.
+   * Collection namespace validation is performed server-side.
    *
    * @param name - The name of the collection to create
    * @param options - Optional settings for the command
