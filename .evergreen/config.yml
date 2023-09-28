@@ -450,14 +450,14 @@ functions:
             chmod +x $i
           done
   install dependencies:
-    - command: shell.exec
+    - command: subprocess.exec
       type: setup
       params:
         working_dir: src
-        script: |
-          ${PREPARE_SHELL}
-          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS} NPM_VERSION=${NPM_VERSION}\
-            bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+        binary: bash
+        add_expansions_to_env: true
+        args:
+          - .evergreen/install-dependencies.sh
   install aws-credential-providers:
     - command: shell.exec
       type: setup
@@ -1076,24 +1076,35 @@ tasks:
       - performance
     exec_timeout_secs: 3600
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NODE_LTS_VERSION
+              value: v18.16.0
+            - key: NPM_VERSION
+              value: '9'
+            - key: VERSION
+              value: v6.0-perf
+            - key: TOPOLOGY
+              value: server
+            - key: AUTH
+              value: noauth
       - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: v18.16.0
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: v6.0-perf
-          TOPOLOGY: server
-          AUTH: noauth
       - func: run spec driver benchmarks
       - command: perf.send
         params:
           file: src/results.json
   - name: test-gcpkms-task
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - command: subprocess.exec
         type: setup
         params:
@@ -1122,14 +1133,20 @@ tasks:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
   - name: test-gcpkms-fail-task
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
+            - key: VERSION
+              value: latest
+            - key: TOPOLOGY
+              value: server
+            - key: AUTH
+              value: noauth
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-          AUTH: noauth
       - command: subprocess.exec
         type: test
         params:
@@ -1140,9 +1157,13 @@ tasks:
             - src/.evergreen/run-gcp-kms-tests.sh
   - name: test-azurekms-task
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - command: subprocess.exec
         type: setup
         params:
@@ -1162,14 +1183,20 @@ tasks:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/run-command.sh
   - name: test-azurekms-fail-task
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
+            - key: VERSION
+              value: latest
+            - key: TOPOLOGY
+              value: server
+            - key: AUTH
+              value: noauth
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: server
-          AUTH: noauth
       - command: subprocess.exec
         type: test
         params:
@@ -1180,9 +1207,13 @@ tasks:
             - src/.evergreen/run-azure-kms-tests.sh
   - name: oidc-auth-test-azure-latest
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - command: subprocess.exec
         params:
           working_dir: src
@@ -1196,9 +1227,13 @@ tasks:
             - .evergreen/run-oidc-tests-azure.sh
   - name: test-aws-lambda-deployed
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NPM_VERSION
+              value: '9'
       - func: install dependencies
-        vars:
-          NPM_VERSION: 9
       - command: ec2.assume_role
         params:
           role_arn: ${LAMBDA_AWS_ROLE_ARN}
@@ -1215,9 +1250,13 @@ tasks:
             AWS_REGION: us-east-1
   - name: test-search-index-helpers
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - key: NODE_LTS_VERSION
+              value: '20'
       - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 20
       - command: subprocess.exec
         params:
           working_dir: src
