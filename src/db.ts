@@ -149,7 +149,7 @@ export class Db {
     options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
 
     // Ensure there are no dots in database name
-    if (typeof databaseName === 'string' && databaseName.indexOf('.') !== -1) {
+    if (typeof databaseName === 'string' && databaseName.includes('.')) {
       throw new MongoAPIError(`database names cannot contain the character '.'`);
     }
 
