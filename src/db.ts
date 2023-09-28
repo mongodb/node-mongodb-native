@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoInvalidArgumentError } from './error';
+import { MongoAPIError, MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
@@ -136,7 +136,7 @@ export class Db {
   /**
    * Creates a new Db instance.
    *
-   * Database name validation occurs at operation time.
+   * Db name cannot contain a dot, the server may apply more restrictions when an operation is run.
    *
    * @param client - The MongoClient for the database.
    * @param databaseName - The name of the database this instance represents.
@@ -147,6 +147,11 @@ export class Db {
 
     // Filter the options
     options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
+
+    // Ensure there are no dots in database name
+    if (typeof databaseName === 'string' && databaseName.indexOf('.') !== -1) {
+      throw new MongoAPIError(`database names cannot contain the character '.'`);
+    }
 
     // Internal state of the db object
     this.s = {
@@ -295,7 +300,7 @@ export class Db {
   /**
    * Returns a reference to a MongoDB Collection. If it does not exist it will be created implicitly.
    *
-   * Collection namespace validation occurs at operation time.
+   * Collection namespace validation is performed server-side.
    *
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance

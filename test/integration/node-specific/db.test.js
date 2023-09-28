@@ -2,7 +2,7 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { MongoClient, MongoServerError } = require('../../mongodb');
+const { MongoAPIError, MongoClient, MongoServerError } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {
@@ -22,12 +22,24 @@ describe('Db', function () {
       await client.close();
     });
 
-    it('should throw error on server only', async function () {
-      db = client.db('a\x00b');
-      const error = await db.createCollection('spider').catch(error => error);
-      expect(error).to.be.instanceOf(MongoServerError);
-      expect(error).to.have.property('code', 73);
-      expect(error).to.have.property('codeName', 'InvalidNamespace');
+    context('containing no dot characters', function () {
+      it('should throw error on server only', async function () {
+        db = client.db('a\x00b');
+        const error = await db.createCollection('spider').catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error).to.have.property('code', 73);
+        expect(error).to.have.property('codeName', 'InvalidNamespace');
+      });
+    });
+
+    context('containing a dot character', function () {
+      it('should throw MongoAPIError', function () {
+        try {
+          client.db('a.b');
+        } catch (error) {
+          expect(error).to.be.instanceOf(MongoAPIError);
+        }
+      });
     });
   });
 
