@@ -38,7 +38,7 @@ functions:
           is_patch: ${is_patch}
           project: ${project}
         args:
-        - .evergreen/prepare-shell.sh
+          - .evergreen/prepare-shell.sh
 
     # Load the expansion file to make an evergreen variable with the current unique version
     - command: expansions.update
@@ -448,7 +448,6 @@ functions:
         args:
           - "${PROJECT_DIRECTORY}/.evergreen/run-mongosh-scope-test.sh"
 
-
   "reset aws instance profile":
     - command: shell.exec
       params:
@@ -616,16 +615,16 @@ functions:
           bash ${PROJECT_DIRECTORY}/.evergreen/run-ldap-tests.sh
 
   "run data lake tests":
-      - command: shell.exec
-        type: test
-        params:
-          working_dir: src
-          script: |
-            export PROJECT_DIRECTORY="$(pwd)"
-            export MONGODB_URI='mongodb://mhuser:pencil@localhost'
-            export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: |
+          export PROJECT_DIRECTORY="$(pwd)"
+          export MONGODB_URI='mongodb://mhuser:pencil@localhost'
+          export NODE_LTS_VERSION='${NODE_LTS_VERSION}'
 
-            bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
+          bash ${PROJECT_DIRECTORY}/.evergreen/run-data-lake-tests.sh
 
   "run tls tests":
     - command: shell.exec
@@ -1060,7 +1059,7 @@ functions:
       params:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
-        local_file:  src/coverage/coverage-final.json
+        local_file: src/coverage/coverage-final.json
         optional: true
         # Upload the coverage report for all tasks in a single build to the same directory.
         # TODO NODE-4707 - change upload directory to ${UPLOAD_BUCKET}
@@ -1107,7 +1106,7 @@ functions:
       params:
         aws_key: ${aws_key}
         aws_secret: ${aws_secret}
-        local_file:  src/coverage-report/index.html
+        local_file: src/coverage-report/index.html
         remote_file: mongo-node-driver/${revision}/${version_id}/coverage/index.html
         bucket: mciuploads
         permissions: public-read
@@ -1188,7 +1187,6 @@ tasks:
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
 
-
   - name: "test-gcpkms-fail-task"
     # test-gcpkms-fail-task runs in a non-GCE environment.
     # It is expected to fail to obtain GCE credentials.
@@ -1209,7 +1207,6 @@ tasks:
             EXPECTED_GCPKMS_OUTCOME: "failure"
           args:
             - src/.evergreen/run-gcp-kms-tests.sh
-
 
   - name: "test-azurekms-task"
     commands:
@@ -1268,7 +1265,7 @@ tasks:
             AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
             PROVIDER_NAME: azure
           args:
-          - .evergreen/run-oidc-tests-azure.sh
+            - .evergreen/run-oidc-tests-azure.sh
 
   - name: "test-aws-lambda-deployed"
     commands:
@@ -1408,31 +1405,31 @@ task_groups:
 
   - name: testazureoidc_task_group
     setup_group:
-    - func: fetch source
-    - command: shell.exec
-      params:
-        shell: bash
-        script: |-
-          set -o errexit
-          ${PREPARE_SHELL}
-          export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
-          export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
-          export AZUREOIDC_SECRET="${testazureoidc_secret}"
-          export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
-          export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
-          export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
-          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
+            export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
+            export AZUREOIDC_SECRET="${testazureoidc_secret}"
+            export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
+            export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
+            export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
     teardown_group:
-    - command: shell.exec
-      params:
-        shell: bash
-        script: |-
-          ${PREPARE_SHELL}
-          $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
     setup_group_can_fail_task: true
     setup_group_timeout_secs: 1800
     tasks:
-    - oidc-auth-test-azure-latest
+      - oidc-auth-test-azure-latest
 
   - name: test_atlas_task_group
     setup_group:
@@ -1503,7 +1500,7 @@ post:
   - func: "cleanup"
 
 ignore:
-  - '*.md'
+  - "*.md"
 buildvariants:
   - name: performance-tests
     display_name: Performance Test
