@@ -2,7 +2,7 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { MongoAPIError, MongoClient, MongoServerError } = require('../../mongodb');
+const { MongoClient, MongoInvalidArgumentError, MongoServerError } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {
@@ -33,11 +33,11 @@ describe('Db', function () {
     });
 
     context('containing a dot character', function () {
-      it('should throw MongoAPIError', function () {
+      it('should throw MongoInvalidArgumentError', function () {
         try {
           client.db('a.b');
         } catch (error) {
-          expect(error).to.be.instanceOf(MongoAPIError);
+          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
         }
       });
     });

@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoAPIError, MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
@@ -150,7 +150,7 @@ export class Db {
 
     // Ensure there are no dots in database name
     if (typeof databaseName === 'string' && databaseName.includes('.')) {
-      throw new MongoAPIError(`database names cannot contain the character '.'`);
+      throw new MongoInvalidArgumentError(`database names cannot contain the character '.'`);
     }
 
     // Internal state of the db object
