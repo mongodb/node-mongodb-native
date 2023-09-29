@@ -571,8 +571,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /**
    * Create a new Db instance sharing the current socket connections.
    *
-   * Db name validation occurs at operation time
-   *
    * @param dbName - The name of the database we want to use. If not provided, use database name from connection string.
    * @param options - Optional settings for Db construction
    */
