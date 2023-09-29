@@ -195,7 +195,7 @@ export class BulkWriteResult {
    * Create a new BulkWriteResult instance
    * @internal
    */
-  constructor(bulkResult: BulkResult) {
+  constructor(bulkResult: BulkResult, isOrdered: boolean) {
     this.result = bulkResult;
     this.insertedCount = this.result.nInserted ?? 0;
     this.matchedCount = this.result.nMatched ?? 0;
@@ -203,8 +203,26 @@ export class BulkWriteResult {
     this.deletedCount = this.result.nRemoved ?? 0;
     this.upsertedCount = this.result.upserted.length ?? 0;
     this.upsertedIds = BulkWriteResult.generateIdMap(this.result.upserted);
-    this.insertedIds = BulkWriteResult.generateIdMap(this.result.insertedIds);
+    this.insertedIds = BulkWriteResult.generateIdMap(
+      this.getSuccessfullyInsertedIds(bulkResult, isOrdered)
+    );
     Object.defineProperty(this, 'result', { value: this.result, enumerable: false });
+  }
+
+  /**
+   * Returns document_ids that were actually inserted
+   * @internal
+   */
+  private getSuccessfullyInsertedIds(bulkResult: BulkResult, isOrdered: boolean): Document[] {
+    if (bulkResult.writeErrors.length === 0) return bulkResult.insertedIds;
+
+    if (isOrdered) {
+      return bulkResult.insertedIds.slice(0, bulkResult.writeErrors[0].index);
+    }
+
+    return bulkResult.insertedIds.filter(
+      ({ index }) => !bulkResult.writeErrors.some(writeError => index === writeError.index)
+    );
   }
 
   /** Evaluates to true if the bulk operation correctly executes */
@@ -533,7 +551,10 @@ function executeCommands(
   callback: Callback<BulkWriteResult>
 ) {
   if (bulkOperation.s.batches.length === 0) {
-    return callback(undefined, new BulkWriteResult(bulkOperation.s.bulkResult));
+    return callback(
+      undefined,
+      new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
+    );
   }
 
   const batch = bulkOperation.s.batches.shift() as Batch;
@@ -542,17 +563,26 @@ function executeCommands(
     // Error is a driver related error not a bulk op error, return early
     if (err && 'message' in err && !(err instanceof MongoWriteConcernError)) {
       return callback(
-        new MongoBulkWriteError(err, new BulkWriteResult(bulkOperation.s.bulkResult))
+        new MongoBulkWriteError(
+          err,
+          new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered)
+        )
       );
     }
 
     if (err instanceof MongoWriteConcernError) {
-      return handleMongoWriteConcernError(batch, bulkOperation.s.bulkResult, err, callback);
+      return handleMongoWriteConcernError(
+        batch,
+        bulkOperation.s.bulkResult,
+        bulkOperation.isOrdered,
+        err,
+        callback
+      );
     }
 
     // Merge the results together
     mergeBatchResults(batch, bulkOperation.s.bulkResult, err, result);
-    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult);
+    const writeResult = new BulkWriteResult(bulkOperation.s.bulkResult, bulkOperation.isOrdered);
     if (bulkOperation.handleWriteError(callback, writeResult)) return;
 
     // Execute the next command in line
@@ -626,6 +656,7 @@ function executeCommands(
 function handleMongoWriteConcernError(
   batch: Batch,
   bulkResult: BulkResult,
+  isOrdered: boolean,
   err: MongoWriteConcernError,
   callback: Callback<BulkWriteResult>
 ) {
@@ -637,7 +668,7 @@ function handleMongoWriteConcernError(
         message: err.result?.writeConcernError.errmsg,
         code: err.result?.writeConcernError.result
       },
-      new BulkWriteResult(bulkResult)
+      new BulkWriteResult(bulkResult, isOrdered)
     )
   );
 }

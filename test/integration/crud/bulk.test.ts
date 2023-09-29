@@ -5,6 +5,7 @@ import {
   type Collection,
   Long,
   MongoBatchReExecutionError,
+  MongoBulkWriteError,
   type MongoClient,
   MongoDriverError,
   MongoInvalidArgumentError
@@ -102,6 +103,121 @@ describe('Bulk', function () {
           } catch (error) {
             expect(error).not.to.exist;
           }
+        });
+      });
+
+      context('when inserting duplicate values', function () {
+        let col;
+
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.insertMany(input, { ordered: isOrdered }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
+        }
+
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 }
+              ],
+              true,
+              { 0: 0 }
+            );
+          });
+
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
+              true,
+              { 0: 0 }
+            );
+          });
+        });
+
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { _id: 0, a: 1 },
+                { _id: 1, a: 1 },
+                { _id: 2, a: 1 },
+                { _id: 3, b: 2 }
+              ],
+              false,
+              { 0: 0, 3: 3 }
+            );
+          });
+        });
+      });
+    });
+
+    describe('#bulkWrite()', function () {
+      context('when inserting duplicate values', function () {
+        let col;
+
+        beforeEach(async function () {
+          const db = client.db();
+          col = db.collection('test');
+          await col.createIndex([{ a: 1 }], { unique: true, sparse: false });
+        });
+
+        async function assertFailsWithDuplicateFields(input, isOrdered, expectedInsertedIds) {
+          const error = await col.bulkWrite(input, { ordered: isOrdered }).catch(error => error);
+          expect(error).to.be.instanceOf(MongoBulkWriteError);
+          expect(error.result.insertedCount).to.equal(Object.keys(error.result.insertedIds).length);
+          expect(error.result.insertedIds).to.deep.equal(expectedInsertedIds);
+        }
+
+        context('when the insert is ordered', function () {
+          it('contains the correct insertedIds on one duplicate insert', async function () {
+            await assertFailsWithDuplicateFields(
+              [{ insertOne: { _id: 0, a: 1 } }, { insertOne: { _id: 1, a: 1 } }],
+              true,
+              { 0: 0 }
+            );
+          });
+
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
+              ],
+              true,
+              { 0: 0 }
+            );
+          });
+        });
+
+        context('when the insert is unordered', function () {
+          it('contains the correct insertedIds on multiple duplicate inserts', async function () {
+            await assertFailsWithDuplicateFields(
+              [
+                { insertOne: { _id: 0, a: 1 } },
+                { insertOne: { _id: 1, a: 1 } },
+                { insertOne: { _id: 2, a: 1 } },
+                { insertOne: { _id: 3, b: 2 } }
+              ],
+              false,
+              { 0: 0, 3: 3 }
+            );
+          });
         });
       });
     });
