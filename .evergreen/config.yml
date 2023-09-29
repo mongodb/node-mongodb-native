@@ -1718,6 +1718,7 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: server}
             - {key: REQUIRE_API_VERSION, value: '1'}
+            - {key: MONGODB_API_VERSION, value: '1'}
             - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration

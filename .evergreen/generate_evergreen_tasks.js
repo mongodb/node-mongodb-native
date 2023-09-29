@@ -100,6 +100,7 @@ BASE_TASKS.push({
       VERSION: 'latest',
       TOPOLOGY: 'server',
       REQUIRE_API_VERSION: '1',
+      MONGODB_API_VERSION: '1',
       AUTH: 'auth'
     }),
     { func: 'install dependencies' },
