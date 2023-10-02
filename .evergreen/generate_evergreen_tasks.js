@@ -51,7 +51,10 @@ const WINDOWS_SKIP_TAGS = new Set([
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
-/** Accepts {key: value} -> returns {key, value}[] */
+/**
+ * @param {Record<string, any>} expansions - keys become expansion names and values are stringified and become expansion value.
+ * @returns {{command: 'expansions.update'; type: 'setup'; params: { updates: Array<{key: string, value: string}> } }}
+ */
 function updateExpansions(expansions) {
   const updates = Object.entries(expansions).map(([key, value]) => ({ key, value: `${value}` }));
   return {
