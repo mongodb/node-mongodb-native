@@ -7,7 +7,7 @@ import {
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import { Msg, type WriteProtocolMessageType } from './commands';
+import { Msg, type Query, type WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
 
 /**
@@ -49,7 +49,7 @@ export class CommandStartedEvent {
     this.connectionId = connectionId;
     this.serviceId = serviceId;
     this.requestId = command.requestId;
-    this.databaseName = databaseName(command);
+    this.databaseName = command.databaseName;
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
   }
@@ -181,9 +181,8 @@ const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMM
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: WriteProtocolMessageType) => command.ns;
-const databaseName = (command: WriteProtocolMessageType) => command.ns.split('.')[0];
-const collectionName = (command: WriteProtocolMessageType) => command.ns.split('.')[1];
+const namespace = (command: Query) => command.ns;
+const collectionName = (command: Query) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ||
   (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)

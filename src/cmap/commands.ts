@@ -3,7 +3,6 @@ import * as BSON from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
 import { ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { databaseNamespace } from '../utils';
 import type { CommandOptions } from './connection';
 import { OP_MSG, OP_QUERY } from './wire_protocol/constants';
 
@@ -75,10 +74,13 @@ export class Query {
   partial: boolean;
   documentsReturnedIn?: string;
 
-  constructor(ns: string, query: Document, options: OpQueryOptions) {
+  constructor(public databaseName: string, query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
-    if (ns == null) throw new MongoRuntimeError('Namespace must be specified for query');
+    const ns = `${databaseName}.$cmd`;
+    if (typeof databaseName !== 'string') {
+      throw new MongoRuntimeError('Database name must be a string for a query');
+    }
     // TODO(NODE-3483): Replace with MongoCommandError
     if (query == null) throw new MongoRuntimeError('A query document must be specified for query');
 
@@ -473,7 +475,6 @@ export interface OpMsgOptions {
 
 /** @internal */
 export class Msg {
-  ns: string;
   command: Document;
   options: OpQueryOptions;
   requestId: number;
@@ -485,15 +486,14 @@ export class Msg {
   moreToCome: boolean;
   exhaustAllowed: boolean;
 
-  constructor(ns: string, command: Document, options: OpQueryOptions) {
+  constructor(public databaseName: string, command: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     if (command == null)
       throw new MongoInvalidArgumentError('Query document must be specified for query');
 
     // Basic options
-    this.ns = ns;
     this.command = command;
-    this.command.$db = databaseNamespace(ns);
+    this.command.$db = databaseName;
 
     if (options.readPreference && options.readPreference.mode !== ReadPreference.PRIMARY) {
       this.command.$readPreference = options.readPreference.toJSON();

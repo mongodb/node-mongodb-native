@@ -22,7 +22,7 @@ describe('Db', function () {
       await client.close();
     });
 
-    context('containing no dot characters', function () {
+    context('of type string, containing no dot characters', function () {
       it('should throw error on server only', async function () {
         db = client.db('a\x00b');
         const error = await db.createCollection('spider').catch(error => error);
@@ -32,13 +32,15 @@ describe('Db', function () {
       });
     });
 
-    context('containing a dot character', function () {
+    context('of type string, containing a dot character', function () {
       it('should throw MongoInvalidArgumentError', function () {
-        try {
-          client.db('a.b');
-        } catch (error) {
-          expect(error).to.be.instanceOf(MongoInvalidArgumentError);
-        }
+        expect(() => client.db('a.b')).to.throw(MongoInvalidArgumentError);
+      });
+    });
+
+    context('of type non-string type', function () {
+      it('should not throw client-side', function () {
+        expect(() => client.db(5)).to.not.throw();
       });
     });
   });

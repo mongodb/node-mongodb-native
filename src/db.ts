@@ -150,7 +150,7 @@ export class Db {
 
     // Ensure there are no dots in database name
     if (typeof databaseName === 'string' && databaseName.includes('.')) {
-      throw new MongoInvalidArgumentError(`database names cannot contain the character '.'`);
+      throw new MongoInvalidArgumentError(`Database names cannot contain the character '.'`);
     }
 
     // Internal state of the db object
