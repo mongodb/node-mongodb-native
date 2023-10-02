@@ -353,11 +353,6 @@ export function maybeCallback<T>(
   return;
 }
 
-/** @internal */
-export function databaseNamespace(ns: string): string {
-  return ns.split('.')[0];
-}
-
 /**
  * Synchronously Generate a UUIDv4
  * @internal
