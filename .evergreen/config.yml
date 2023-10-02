@@ -3168,12 +3168,13 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '7.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: PACKAGE, value: mongodb-client-encryption@6.0.0}
             - {key: CLIENT_ENCRYPTION, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: install package
+        vars:
+          PACKAGE: mongodb-client-encryption@6.0.0
       - func: run tests
   - name: test-latest-server-noauth
     tags:

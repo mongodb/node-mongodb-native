@@ -636,13 +636,17 @@ oneOffFuncAsTasks.push({
       NPM_VERSION: 9,
       VERSION: '7.0',
       TOPOLOGY: 'replica_set',
-      PACKAGE: 'mongodb-client-encryption@6.0.0',
       CLIENT_ENCRYPTION: true
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
     { func: 'bootstrap kms servers' },
-    { func: 'install package' },
+    {
+      func: 'install package',
+      vars: {
+        PACKAGE: 'mongodb-client-encryption@6.0.0'
+      }
+    },
     { func: 'run tests' }
   ]
 });
