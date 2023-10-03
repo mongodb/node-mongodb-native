@@ -6,9 +6,9 @@ const { expect } = require('chai');
 
 describe('Command Monitoring Events - unit/cmap', function () {
   const commands = [
-    new Query('admin.$cmd', { a: { b: 10 }, $query: { b: 10 } }, {}),
+    new Query('admin', { a: { b: 10 }, $query: { b: 10 } }, {}),
     new Query('hello', { a: { b: 10 }, $query: { b: 10 } }, {}),
-    new Msg('admin.$cmd', { b: { c: 20 } }, {}),
+    new Msg('admin', { b: { c: 20 } }, {}),
     new Msg('hello', { b: { c: 20 } }, {}),
     { ns: 'admin.$cmd', query: { $query: { a: 16 } } },
     { ns: 'hello there', f1: { h: { a: 52, b: { c: 10, d: [1, 2, 3, 5] } } } }
@@ -48,9 +48,8 @@ describe('Command Monitoring Events - unit/cmap', function () {
 
     it('should wrap a basic query option', function () {
       const db = 'test1';
-      const coll = 'testingQuery';
       const query = new Query(
-        `${db}.${coll}`,
+        `${db}`,
         {
           testCmd: 1,
           fizz: 'buzz',
@@ -69,9 +68,8 @@ describe('Command Monitoring Events - unit/cmap', function () {
 
     it('should upconvert a Query wrapping a command into the corresponding command', function () {
       const db = 'admin';
-      const coll = '$cmd';
       const query = new Query(
-        `${db}.${coll}`,
+        `${db}`,
         {
           $query: {
             testCmd: 1,
@@ -91,35 +89,6 @@ describe('Command Monitoring Events - unit/cmap', function () {
       expect(startEvent).to.have.property('requestId', query.requestId);
       expect(startEvent).to.have.property('connectionId').that.is.a('string');
       expect(startEvent).to.have.property('command').that.deep.equals(query.query.$query);
-    });
-
-    it('should upconvert a Query wrapping a query into a find command', function () {
-      const db = 'test5';
-      const coll = 'testingFindCommand';
-      const query = new Query(
-        `${db}.${coll}`,
-        {
-          $query: {
-            testCmd: 1,
-            fizz: 'buzz',
-            star: 'trek'
-          }
-        },
-        {}
-      );
-
-      const startEvent = new CommandStartedEvent(conn, query);
-
-      expect(startEvent).to.have.property('commandName', 'find');
-      expect(startEvent).to.have.property('databaseName', db);
-      expect(startEvent).to.have.property('requestId', query.requestId);
-      expect(startEvent).to.have.property('connectionId').that.is.a('string');
-      expect(startEvent).to.have.property('command').that.deep.equals({
-        find: coll,
-        filter: query.query.$query,
-        batchSize: 0,
-        skip: 0
-      });
     });
   });
 });
