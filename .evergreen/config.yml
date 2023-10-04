@@ -2985,19 +2985,25 @@ tasks:
     tags:
       - unit-tests
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '18'}
+            - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 18
-          NPM_VERSION: 9
       - func: run unit tests
   - name: run-unit-tests-node-20
     tags:
       - unit-tests
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: NPM_VERSION, value: latest}
       - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 20
-          NPM_VERSION: latest
       - func: run unit tests
   - name: run-lint-checks
     tags:
