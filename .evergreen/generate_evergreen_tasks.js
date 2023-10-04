@@ -489,24 +489,30 @@ BUILD_VARIANTS.push({
   tasks: ['test-rapid-server']
 });
 
-// singleton build variant for linting
-SINGLETON_TASKS.push(
-  ...[
-    {
-      name: 'run-unit-tests',
-      tags: ['run-unit-tests'],
+const unitTestTasks = Array.from((function* () {
+  for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
+    yield {
+      name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
+      tags: ['unit-tests'],
       commands: [
         updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9
+          NODE_LTS_VERSION,
+          NPM_VERSION
         }),
         { func: 'install dependencies' },
         { func: 'run unit tests' }
       ]
-    },
+    }
+  }
+})())
+
+// singleton build variant for linting
+SINGLETON_TASKS.push(
+  ...[
+    ...unitTestTasks,
     {
       name: 'run-lint-checks',
-      tags: ['run-lint-checks'],
+      tags: ['lint-checks'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
@@ -526,7 +532,7 @@ function* makeTypescriptTasks() {
     if (TS_VERSION !== '4.1.6' && TS_VERSION !== 'next') {
       yield {
         name: `compile-driver-typescript-${TS_VERSION}`,
-        tags: [`compile-driver-typescript-${TS_VERSION}`],
+        tags: [`compile-driver-typescript-${TS_VERSION}`, 'typescript-compilation'],
         commands: [
           updateExpansions({
             NODE_LTS_VERSION: LOWEST_LTS,
@@ -541,7 +547,7 @@ function* makeTypescriptTasks() {
 
     yield {
       name: `check-types-typescript-${TS_VERSION}`,
-      tags: [`check-types-typescript-${TS_VERSION}`],
+      tags: [`check-types-typescript-${TS_VERSION}`, 'typescript-compilation'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
@@ -555,7 +561,7 @@ function* makeTypescriptTasks() {
   }
   return {
     name: 'run-typescript-next',
-    tags: ['run-typescript-next'],
+    tags: ['run-typescript-next', 'typescript-compilation'],
     commands: [
       updateExpansions({
         NODE_LTS_VERSION: LOWEST_LTS,
@@ -572,9 +578,9 @@ BUILD_VARIANTS.push({
   display_name: 'lint',
   run_on: DEFAULT_OS,
   tasks: [
-    'run-unit-tests',
-    'run-lint-checks',
-    ...Array.from(makeTypescriptTasks()).map(({ name }) => name)
+    '.unit-tests',
+    '.lint-checks',
+    '.typescript-compilation'
   ]
 });
 

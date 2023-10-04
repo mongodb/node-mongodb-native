@@ -2969,9 +2969,9 @@ tasks:
       - func: add aws auth variables to file
       - func: setup aws env
       - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: run-unit-tests
+  - name: run-unit-tests-node-16
     tags:
-      - run-unit-tests
+      - unit-tests
     commands:
       - command: expansions.update
         type: setup
@@ -2981,9 +2981,33 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: run unit tests
+  - name: run-unit-tests-node-18
+    tags:
+      - unit-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '18'}
+            - {key: NPM_VERSION, value: latest}
+      - func: install dependencies
+      - func: run unit tests
+  - name: run-unit-tests-node-20
+    tags:
+      - unit-tests
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: NPM_VERSION, value: latest}
+      - func: install dependencies
+      - func: run unit tests
   - name: run-lint-checks
     tags:
-      - run-lint-checks
+      - lint-checks
     commands:
       - command: expansions.update
         type: setup
@@ -2996,6 +3020,7 @@ tasks:
   - name: check-types-typescript-next
     tags:
       - check-types-typescript-next
+      - typescript-compilation
     commands:
       - command: expansions.update
         type: setup
@@ -3009,6 +3034,7 @@ tasks:
   - name: compile-driver-typescript-current
     tags:
       - compile-driver-typescript-current
+      - typescript-compilation
     commands:
       - command: expansions.update
         type: setup
@@ -3022,6 +3048,7 @@ tasks:
   - name: check-types-typescript-current
     tags:
       - check-types-typescript-current
+      - typescript-compilation
     commands:
       - command: expansions.update
         type: setup
@@ -3035,6 +3062,7 @@ tasks:
   - name: check-types-typescript-4.1.6
     tags:
       - check-types-typescript-4.1.6
+      - typescript-compilation
     commands:
       - command: expansions.update
         type: setup
@@ -4479,12 +4507,9 @@ buildvariants:
     display_name: lint
     run_on: rhel80-large
     tasks:
-      - run-unit-tests
-      - run-lint-checks
-      - check-types-typescript-next
-      - compile-driver-typescript-current
-      - check-types-typescript-current
-      - check-types-typescript-4.1.6
+      - .unit-tests
+      - .lint-checks
+      - .typescript-compilation
   - name: generate-combined-coverage
     display_name: Generate Combined Coverage
     run_on: rhel80-large

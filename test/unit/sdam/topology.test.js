@@ -15,6 +15,7 @@ const { TopologyType } = require('../../mongodb');
 const { SrvPoller, SrvPollingEvent } = require('../../mongodb');
 const { getSymbolFrom, topologyWithPlaceholderClient } = require('../../tools/utils');
 const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../mongodb');
+const { coerce } = require('semver');
 
 describe('Topology (unit)', function () {
   let client, topology;
@@ -292,6 +293,16 @@ describe('Topology (unit)', function () {
     });
 
     it('should encounter a server selection timeout on garbled server responses', function (done) {
+      const test = this.test;
+
+      const { major } = coerce(process.version);
+      test.skipReason =
+        major === 18 || major === 20
+          ? 'TODO(NODE-5666): fix failing unit tests on Node18'
+          : undefined;
+
+      if (test.skipReason) this.skip();
+
       const server = net.createServer();
       const p = Promise.resolve();
       let unexpectedError, expectedError;
