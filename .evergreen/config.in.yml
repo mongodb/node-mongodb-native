@@ -514,6 +514,7 @@ functions:
       params:
         silent: true
         working_dir: "src"
+        add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
           cat <<EOT > prepare_client_encryption.sh
@@ -528,6 +529,7 @@ functions:
       type: test
       params:
         working_dir: "src"
+        add_expansions_to_env: true
         script: |
           ${PREPARE_SHELL}
 
