@@ -643,7 +643,7 @@ SINGLETON_TASKS.push({
   tags: [],
   commands: [
     updateExpansions({
-      NODE_LTS_NAME: LATEST_LTS,
+      NODE_LTS_VERSION: LATEST_LTS,
       VERSION: 'latest',
       TOPOLOGY: 'replica_set'
     }),

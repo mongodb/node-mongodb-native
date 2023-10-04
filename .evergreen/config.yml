@@ -3006,7 +3006,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_NAME, value: '20'}
+            - {key: NODE_LTS_VERSION, value: '20'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
