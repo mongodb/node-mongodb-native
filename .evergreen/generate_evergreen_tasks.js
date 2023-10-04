@@ -837,6 +837,6 @@ fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
 fs.writeFileSync(
   `${__dirname}/config.yml`,
-  yaml.dump(fileData, { lineWidth: 120, noRefs: true }),
+  yaml.dump(fileData, { lineWidth: 120, noRefs: true, flowLevel: 7, condenseFlow: false }),
   'utf8'
 );
