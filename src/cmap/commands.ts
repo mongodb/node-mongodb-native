@@ -54,7 +54,6 @@ export interface OpQueryOptions extends CommandOptions {
 /** @internal */
 export class Query {
   ns: string;
-  query: Document;
   numberToSkip: number;
   numberToReturn: number;
   returnFieldSelector?: Document;
@@ -74,7 +73,7 @@ export class Query {
   partial: boolean;
   documentsReturnedIn?: string;
 
-  constructor(public databaseName: string, query: Document, options: OpQueryOptions) {
+  constructor(public databaseName: string, public query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
     // TODO(NODE-3483): Replace with MongoCommandError
     const ns = `${databaseName}.$cmd`;
@@ -92,7 +91,6 @@ export class Query {
 
     // Basic options
     this.ns = ns;
-    this.query = query;
 
     // Additional options
     this.numberToSkip = options.numberToSkip || 0;
@@ -475,8 +473,6 @@ export interface OpMsgOptions {
 
 /** @internal */
 export class Msg {
-  command: Document;
-  options: OpQueryOptions;
   requestId: number;
   serializeFunctions: boolean;
   ignoreUndefined: boolean;
@@ -486,13 +482,16 @@ export class Msg {
   moreToCome: boolean;
   exhaustAllowed: boolean;
 
-  constructor(public databaseName: string, command: Document, options: OpQueryOptions) {
+  constructor(
+    public databaseName: string,
+    public command: Document,
+    public options: OpQueryOptions
+  ) {
     // Basic options needed to be passed in
     if (command == null)
       throw new MongoInvalidArgumentError('Query document must be specified for query');
 
     // Basic options
-    this.command = command;
     this.command.$db = databaseName;
 
     if (options.readPreference && options.readPreference.mode !== ReadPreference.PRIMARY) {
