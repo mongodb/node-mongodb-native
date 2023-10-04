@@ -1,7 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const semver = require('semver');
-const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
   MONGODB_VERSIONS,
@@ -40,7 +39,13 @@ const OPERATING_SYSTEMS = [
 }));
 
 // TODO: NODE-3060: enable skipped tests on windows except oidc (not supported)
-const WINDOWS_SKIP_TAGS = new Set(['atlas-connect', 'auth', 'load_balancer', 'socks5-csfle', 'oidc']);
+const WINDOWS_SKIP_TAGS = new Set([
+  'atlas-connect',
+  'auth',
+  'load_balancer',
+  'socks5-csfle',
+  'oidc'
+]);
 
 const TASKS = [];
 const SINGLETON_TASKS = [];
@@ -444,7 +449,9 @@ for (const {
   for (const NODE_LTS_VERSION of testedNodeVersions) {
     if (NODE_LTS_VERSION === 14 && os.match(/^windows/)) continue;
 
-    const nodeLTSCodeName = versions.find(({ versionNumber }) => versionNumber === NODE_LTS_VERSION).codeName;
+    const nodeLTSCodeName = versions.find(
+      ({ versionNumber }) => versionNumber === NODE_LTS_VERSION
+    ).codeName;
     const nodeLtsDisplayName = `Node${NODE_LTS_VERSION}`;
     const name = `${osName}-${NODE_LTS_VERSION >= 20 ? nodeLtsDisplayName : nodeLTSCodeName}`;
     const display_name = `${osDisplayName} ${nodeLtsDisplayName}`;
@@ -476,33 +483,33 @@ for (const {
 }
 
 // Running CSFLE tests with mongocryptd
-const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS
-  .filter(mongoVersion => ['latest', 'rapid'].includes(mongoVersion)
-    || semver.gte(`${mongoVersion}.0`, '4.2.0'))
-  .map((mongoVersion) => {
-    return {
-      name: `test-${mongoVersion}-csfle-mongocryptd`,
-      tags: [mongoVersion, 'sharded_cluster'],
-      commands: [
-        { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: mongoVersion,
-            TOPOLOGY: 'sharded_cluster',
-            AUTH: 'auth'
-          }
-        },
-        { func: 'bootstrap kms servers' },
-        {
-          func: 'run tests',
-          vars: {
-            TEST_NPM_SCRIPT: 'check:csfle'
-          }
+const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
+  mongoVersion =>
+    ['latest', 'rapid'].includes(mongoVersion) || semver.gte(`${mongoVersion}.0`, '4.2.0')
+).map(mongoVersion => {
+  return {
+    name: `test-${mongoVersion}-csfle-mongocryptd`,
+    tags: [mongoVersion, 'sharded_cluster'],
+    commands: [
+      { func: 'install dependencies' },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: mongoVersion,
+          TOPOLOGY: 'sharded_cluster',
+          AUTH: 'auth'
         }
-      ]
-    }
-  });
+      },
+      { func: 'bootstrap kms servers' },
+      {
+        func: 'run tests',
+        vars: {
+          TEST_NPM_SCRIPT: 'check:csfle'
+        }
+      }
+    ]
+  };
+});
 
 for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
   const name = `rhel8-node${nodeVersion}-test-csfle-mongocryptd`;
@@ -517,8 +524,7 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
       NODE_LTS_VERSION: LOWEST_LTS,
       NPM_VERSION: 9
     },
-    tasks:
-      MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
+    tasks: MONGOCRYPTD_CSFLE_TASKS.map(task => task.name)
   });
 }
 
@@ -733,7 +739,7 @@ SINGLETON_TASKS.push({
     },
     { func: 'run search index management tests' }
   ]
-})
+});
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
@@ -807,13 +813,11 @@ BUILD_VARIANTS.push({
   display_name: 'Search Index Management Helpers Tests',
   run_on: DEFAULT_OS,
   tasks: ['test-search-index-helpers']
-})
+});
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
 for (const variant of BUILD_VARIANTS.filter(
-  variant =>
-    variant.expansions &&
-    [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
+  variant => variant.expansions && [16, 18, 20].includes(variant.expansions.NODE_LTS_VERSION)
 )) {
   variant.tasks = variant.tasks.filter(
     name => !['test-zstd-compression', 'test-snappy-compression'].includes(name)
