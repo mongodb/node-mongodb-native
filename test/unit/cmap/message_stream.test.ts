@@ -139,7 +139,7 @@ describe('MessageStream', function () {
       const messageStream = new MessageStream();
       messageStream.pipe(writeableStream);
 
-      const command = new Msg('admin.$cmd', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
+      const command = new Msg('admin', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, {
         started: 0,
         command: true,

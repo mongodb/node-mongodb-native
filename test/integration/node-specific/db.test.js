@@ -2,36 +2,47 @@
 
 const { setupDatabase, assert: test } = require(`../shared`);
 const { expect } = require('chai');
-const { Db, MongoClient } = require('../../mongodb');
+const { MongoClient, MongoInvalidArgumentError, MongoServerError } = require('../../mongodb');
 
 describe('Db', function () {
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  it('shouldCorrectlyHandleIllegalDbNames', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
+  context('when given illegal db name', function () {
+    let client;
+    let db;
 
-    test: done => {
-      const client = { bsonOptions: {} };
-      expect(() => new Db(client, 5)).to.throw('Database name must be a string');
-      expect(() => new Db(client, '')).to.throw('Database name cannot be the empty string');
-      expect(() => new Db(client, 'te$t')).to.throw(
-        "database names cannot contain the character '$'"
-      );
-      expect(() => new Db(client, '.test', function () {})).to.throw(
-        "database names cannot contain the character '.'"
-      );
-      expect(() => new Db(client, '\\test', function () {})).to.throw(
-        "database names cannot contain the character '\\'"
-      );
-      expect(() => new Db(client, 'test test', function () {})).to.throw(
-        "database names cannot contain the character ' '"
-      );
-      done();
-    }
+    beforeEach(function () {
+      client = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      db = undefined;
+      await client.close();
+    });
+
+    context('of type string, containing no dot characters', function () {
+      it('should throw error on server only', async function () {
+        db = client.db('a\x00b');
+        const error = await db.createCollection('spider').catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error).to.have.property('code', 73);
+        expect(error).to.have.property('codeName', 'InvalidNamespace');
+      });
+    });
+
+    context('of type string, containing a dot character', function () {
+      it('should throw MongoInvalidArgumentError', function () {
+        expect(() => client.db('a.b')).to.throw(MongoInvalidArgumentError);
+      });
+    });
+
+    context('of type non-string type', function () {
+      it('should not throw client-side', function () {
+        expect(() => client.db(5)).to.not.throw();
+      });
+    });
   });
 
   it('shouldCorrectlyHandleFailedConnection', {

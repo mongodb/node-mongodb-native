@@ -90,7 +90,6 @@ import {
 import { ReadConcern, type ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceLike } from './read_preference';
 import {
-  checkCollectionName,
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
   normalizeHintField,
@@ -164,8 +163,6 @@ export class Collection<TSchema extends Document = Document> {
    * @internal
    */
   constructor(db: Db, name: string, options?: CollectionOptions) {
-    checkCollectionName(name);
-
     // Internal state
     this.s = {
       db,

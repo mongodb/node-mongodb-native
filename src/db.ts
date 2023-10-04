@@ -6,7 +6,7 @@ import * as CONSTANTS from './constants';
 import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
-import { MongoAPIError, MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
@@ -134,11 +134,13 @@ export class Db {
   public static SYSTEM_JS_COLLECTION = CONSTANTS.SYSTEM_JS_COLLECTION;
 
   /**
-   * Creates a new Db instance
+   * Creates a new Db instance.
+   *
+   * Db name cannot contain a dot, the server may apply more restrictions when an operation is run.
    *
    * @param client - The MongoClient for the database.
    * @param databaseName - The name of the database this instance represents.
-   * @param options - Optional settings for Db construction
+   * @param options - Optional settings for Db construction.
    */
   constructor(client: MongoClient, databaseName: string, options?: DbOptions) {
     options = options ?? {};
@@ -146,8 +148,10 @@ export class Db {
     // Filter the options
     options = filterOptions(options, DB_OPTIONS_ALLOW_LIST);
 
-    // Ensure we have a valid db name
-    validateDatabaseName(databaseName);
+    // Ensure there are no dots in database name
+    if (typeof databaseName === 'string' && databaseName.includes('.')) {
+      throw new MongoInvalidArgumentError(`Database names cannot contain the character '.'`);
+    }
 
     // Internal state of the db object
     this.s = {
@@ -217,6 +221,8 @@ export class Db {
   /**
    * Create a new collection on a server with the specified options. Use this to create capped collections.
    * More information about command options available at https://www.mongodb.com/docs/manual/reference/command/create/
+   *
+   * Collection namespace validation is performed server-side.
    *
    * @param name - The name of the collection to create
    * @param options - Optional settings for the command
@@ -293,6 +299,8 @@ export class Db {
 
   /**
    * Returns a reference to a MongoDB Collection. If it does not exist it will be created implicitly.
+   *
+   * Collection namespace validation is performed server-side.
    *
    * @param name - the collection name we wish to access.
    * @returns return the new Collection instance
@@ -517,21 +525,5 @@ export class Db {
    */
   runCursorCommand(command: Document, options?: RunCursorCommandOptions): RunCommandCursor {
     return new RunCommandCursor(this, command, options);
-  }
-}
-
-// TODO(NODE-3484): Refactor into MongoDBNamespace
-// Validate the database name
-function validateDatabaseName(databaseName: string) {
-  if (typeof databaseName !== 'string')
-    throw new MongoInvalidArgumentError('Database name must be a string');
-  if (databaseName.length === 0)
-    throw new MongoInvalidArgumentError('Database name cannot be the empty string');
-  if (databaseName === '$external') return;
-
-  const invalidChars = [' ', '.', '$', '/', '\\'];
-  for (let i = 0; i < invalidChars.length; i++) {
-    if (databaseName.indexOf(invalidChars[i]) !== -1)
-      throw new MongoAPIError(`database names cannot contain the character '${invalidChars[i]}'`);
   }
 }

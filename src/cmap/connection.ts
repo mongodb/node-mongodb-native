@@ -539,10 +539,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       options
     );
 
-    const cmdNs = `${ns.db}.$cmd`;
     const message = shouldUseOpMsg
-      ? new Msg(cmdNs, cmd, commandOptions)
-      : new Query(cmdNs, cmd, commandOptions);
+      ? new Msg(ns.db, cmd, commandOptions)
+      : new Query(ns.db, cmd, commandOptions);
 
     try {
       write(this, message, commandOptions, callback);

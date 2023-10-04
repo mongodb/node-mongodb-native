@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { Collection, type Db, isHello, type MongoClient } from '../../mongodb';
+import { Collection, type Db, isHello, type MongoClient, MongoServerError } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { setupDatabase } from '../shared';
 
@@ -95,18 +95,14 @@ describe('Collection', function () {
       ]);
     });
 
-    it('should fail due to illegal listCollections', function (done) {
-      expect(() => db.collection(5)).to.throw('Collection name must be a String');
-      expect(() => db.collection('')).to.throw('Collection names cannot be empty');
-      expect(() => db.collection('te$t')).to.throw("Collection names must not contain '$'");
-      expect(() => db.collection('.test')).to.throw(
-        "Collection names must not start or end with '.'"
-      );
-      expect(() => db.collection('test.')).to.throw(
-        "Collection names must not start or end with '.'"
-      );
-      expect(() => db.collection('test..t')).to.throw('Collection names cannot be empty');
-      done();
+    it('fails on server due to invalid namespace', async function () {
+      const error = await db
+        .collection('a\x00b')
+        .insertOne({ a: 1 })
+        .catch(error => error);
+      expect(error).to.be.instanceOf(MongoServerError);
+      expect(error).to.have.property('code', 73);
+      expect(error).to.have.property('codeName', 'InvalidNamespace');
     });
 
     it('should correctly count on non-existent collection', function (done) {
