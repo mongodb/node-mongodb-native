@@ -15,6 +15,7 @@ describe('Connection String spec tests', function () {
   const suites = loadSpecTests('connection-string');
 
   beforeEach(function () {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
     const { major } = coerce(process.version);
@@ -24,7 +25,7 @@ describe('Connection String spec tests', function () {
     ];
     test.skipReason =
       major === 20 && skippedTests.includes(test.title)
-        ? 'TODO(NODE-xxxx): fix failing unit tests on Node18'
+        ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
 
     if (test.skipReason) this.skip();

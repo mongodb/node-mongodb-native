@@ -46,12 +46,13 @@ interface ShardedClusterMocks {
 // TODO(NODE-3773): Implement tests 6-9
 describe('Polling Srv Records for Mongos Discovery', () => {
   beforeEach(function () {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
     const { major } = coerce(process.version);
     test.skipReason =
       major === 18 || major === 20
-        ? 'TODO(NODE-xxxx): fix failing unit tests on Node18'
+        ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
 
     if (test.skipReason) this.skip();
