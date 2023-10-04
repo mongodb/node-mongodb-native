@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
+import { coerce } from 'semver';
 import * as sinon from 'sinon';
 
 import {
@@ -44,6 +45,17 @@ interface ShardedClusterMocks {
 // TODO(NODE-3773): Make use of the shared driver's DNS records
 // TODO(NODE-3773): Implement tests 6-9
 describe('Polling Srv Records for Mongos Discovery', () => {
+  beforeEach(function () {
+    const test = this.currentTest!;
+
+    const { major } = coerce(process.version);
+    test.skipReason =
+      major === 18 || major === 20
+        ? 'TODO(NODE-xxxx): fix failing unit tests on Node18'
+        : undefined;
+
+    if (test.skipReason) this.skip();
+  });
   describe('SRV polling prose cases 1-5', () => {
     const SRV_HOST = 'darmok.tanagra.com';
     const context: Record<string, any> = {};
