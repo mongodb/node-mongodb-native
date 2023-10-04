@@ -298,7 +298,7 @@ describe('Topology (unit)', function () {
       const { major } = coerce(process.version);
       test.skipReason =
         major === 18 || major === 20
-          ? 'TODO(NODE-xxxx): fix failing unit tests on Node18'
+          ? 'TODO(NODE-5666): fix failing unit tests on Node18'
           : undefined;
 
       if (test.skipReason) this.skip();
