@@ -653,13 +653,6 @@ BUILD_VARIANTS.push({
   tasks: ['download-and-merge-coverage']
 });
 
-BUILD_VARIANTS.push({
-  name: 'mongosh_integration_tests',
-  display_name: 'mongosh integration tests',
-  run_on: UBUNTU_OS,
-  tasks: mongoshTasks.map(({ name }) => name)
-});
-
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
   name: 'ubuntu1804-test-mongodb-aws',
@@ -838,8 +831,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS)
-  .concat(mongoshTasks);
+  .concat(MONGOCRYPTD_CSFLE_TASKS);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
