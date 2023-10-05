@@ -44,19 +44,34 @@ const SKIPPED_WINDOWS_NODE_VERSIONS = new Set([12]);
 const TASKS = [];
 const SINGLETON_TASKS = [];
 
+/**
+ * @param {Record<string, any>} expansions - keys become expansion names and values are stringified and become expansion value.
+ * @returns {{command: 'expansions.update'; type: 'setup'; params: { updates: Array<{key: string, value: string}> } }}
+ */
+function updateExpansions(expansions) {
+  const updates = Object.entries(expansions).map(([key, value]) => ({ key, value: `${value}` }));
+  return {
+    command: 'expansions.update',
+    type: 'setup',
+    params: { updates }
+  };
+}
+
+
 function makeTask({ mongoVersion, topology, tags = [], auth = 'auth' }) {
   return {
     name: `test-${mongoVersion}-${topology}${auth === 'noauth' ? '-noauth' : ''}`,
     tags: [mongoVersion, topology, ...tags],
     commands: [
+      updateExpansions({
+        VERSION: mongoVersion,
+        TOPOLOGY: topology,
+        AUTH: auth
+      }),
       { func: 'install dependencies' },
       {
         func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION: mongoVersion,
-          TOPOLOGY: topology,
-          AUTH: auth
-        }
+
       },
       { func: 'bootstrap kms servers' },
       { func: 'run tests' }
@@ -85,23 +100,17 @@ BASE_TASKS.push({
   name: `test-latest-server-v1-api`,
   tags: ['latest', 'server', 'v1-api'],
   commands: [
+    updateExpansions({
+      VERSION: 'latest',
+      TOPOLOGY: 'server',
+      REQUIRE_API_VERSION: '1',
+      AUTH: 'auth',
+      MONGODB_API_VERSION: '1'
+    }),
     { func: 'install dependencies' },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'latest',
-        TOPOLOGY: 'server',
-        REQUIRE_API_VERSION: '1',
-        AUTH: 'auth'
-      }
-    },
+    { func: 'bootstrap mongo-orchestration' },
     { func: 'bootstrap kms servers' },
-    {
-      func: 'run tests',
-      vars: {
-        MONGODB_API_VERSION: '1'
-      }
-    }
+    { func: 'run tests' }
   ]
 });
 
@@ -125,16 +134,14 @@ TASKS.push(
       name: 'test-5.0-load-balanced',
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
+        updateExpansions({
+          VERSION: '5.0',
+          TOPOLOGY: 'sharded_cluster',
+          AUTH: 'auth',
+          LOAD_BALANCER: 'true'
+        }),
         { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: '5.0',
-            TOPOLOGY: 'sharded_cluster',
-            AUTH: 'auth',
-            LOAD_BALANCER: 'true'
-          }
-        },
+        { func: 'bootstrap mongo-orchestration' },
         { func: 'start-load-balancer' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
@@ -144,16 +151,14 @@ TASKS.push(
       name: 'test-6.0-load-balanced',
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
+        updateExpansions({
+          VERSION: '6.0',
+          TOPOLOGY: 'sharded_cluster',
+          AUTH: 'auth',
+          LOAD_BALANCER: 'true'
+        }),
         { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: '6.0',
-            TOPOLOGY: 'sharded_cluster',
-            AUTH: 'auth',
-            LOAD_BALANCER: 'true'
-          }
-        },
+        { func: 'bootstrap mongo-orchestration' },
         { func: 'start-load-balancer' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
@@ -163,16 +168,14 @@ TASKS.push(
       name: 'test-latest-load-balanced',
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
+        updateExpansions({
+          VERSION: 'latest',
+          TOPOLOGY: 'sharded_cluster',
+          AUTH: 'auth',
+          LOAD_BALANCER: 'true'
+        }),
         { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: 'latest',
-            TOPOLOGY: 'sharded_cluster',
-            AUTH: 'auth',
-            LOAD_BALANCER: 'true'
-          }
-        },
+        { func: 'bootstrap mongo-orchestration' },
         { func: 'start-load-balancer' },
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
@@ -192,14 +195,12 @@ TASKS.push(
       name: 'test-socks5',
       tags: [],
       commands: [
+        updateExpansions({
+          VERSION: 'latest',
+          TOPOLOGY: 'replica_set'
+        }),
         { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: 'latest',
-            TOPOLOGY: 'replica_set'
-          }
-        },
+        { func: 'bootstrap mongo-orchestration' },
         { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
@@ -208,16 +209,15 @@ TASKS.push(
       name: 'test-socks5-tls',
       tags: [],
       commands: [
+        updateExpansions({
+          SSL: 'ssl',
+          VERSION: 'latest',
+          TOPOLOGY: 'replica_set',
+          SSL: 'ssl'
+        }),
         { func: 'install dependencies' },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            SSL: 'ssl',
-            VERSION: 'latest',
-            TOPOLOGY: 'replica_set'
-          }
-        },
-        { func: 'run socks5 tests', vars: { SSL: 'ssl' } }
+        { func: 'bootstrap mongo-orchestration' },
+        { func: 'run socks5 tests' }
       ]
     }
   ]
@@ -228,16 +228,14 @@ for (const compressor of ['zstd', 'snappy']) {
     name: `test-${compressor}-compression`,
     tags: ['latest', compressor],
     commands: [
+      updateExpansions({
+        VERSION: 'latest',
+        TOPOLOGY: 'replica_set',
+        AUTH: 'auth',
+        COMPRESSOR: compressor
+      }),
       { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set',
-          AUTH: 'auth',
-          COMPRESSOR: compressor
-        }
-      },
+      { func: 'bootstrap mongo-orchestration' },
       { func: 'run-compression-tests' }
     ]
   });
@@ -249,14 +247,12 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-example',
   tags: ['latest', 'lambda'],
   commands: [
+    updateExpansions({
+      VERSION: 'rapid',
+      TOPOLOGY: 'server'
+    }),
     { func: 'install dependencies' },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'rapid',
-        TOPOLOGY: 'server'
-      }
-    },
+    { func: 'bootstrap mongo-orchestration' },
     { func: 'run lambda handler example tests' }
   ]
 });
@@ -266,16 +262,14 @@ AWS_LAMBDA_HANDLER_TASKS.push({
   name: 'test-lambda-aws-auth-example',
   tags: ['latest', 'lambda'],
   commands: [
+    updateExpansions({
+      VERSION: 'rapid',
+      AUTH: 'auth',
+      ORCHESTRATION_FILE: 'auth-aws.json',
+      TOPOLOGY: 'server'
+    }),
     { func: 'install dependencies' },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: 'rapid',
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }
-    },
+    { func: 'bootstrap mongo-orchestration' },
     { func: 'add aws auth variables to file' },
     { func: 'setup aws env' },
     { func: 'run lambda handler example tests with aws auth' }
@@ -287,17 +281,15 @@ for (const VERSION of TLS_VERSIONS) {
     name: `test-tls-support-${VERSION}`,
     tags: ['tls-support'],
     commands: [
+      updateExpansions({
+        VERSION,
+        SSL: 'ssl',
+        TOPOLOGY: 'server'
+        // TODO: NODE-3891 - fix tests broken when AUTH enabled
+        // AUTH: 'auth'
+      }),
       { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION,
-          SSL: 'ssl',
-          TOPOLOGY: 'server'
-          // TODO: NODE-3891 - fix tests broken when AUTH enabled
-          // AUTH: 'auth'
-        }
-      },
+      { func: 'bootstrap mongo-orchestration' },
       { func: 'run tls tests' }
     ]
   });
@@ -321,16 +313,14 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
   const awsTasks = awsFuncs.map(fn => ({
     name: name(fn.func),
     commands: [
+      updateExpansions({
+        VERSION: VERSION,
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }),
       { func: 'install dependencies' },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION: VERSION,
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-aws.json',
-          TOPOLOGY: 'server'
-        }
-      },
+      { func: 'bootstrap mongo-orchestration' },
       { func: 'add aws auth variables to file' },
       { func: 'setup aws env' },
       { ...fn }
@@ -340,21 +330,15 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
   const awsNoOptionalTasks = awsFuncs.map(fn => ({
     name: `${name(fn.func)}-no-optional`,
     commands: [
-      {
-        func: 'install dependencies',
-        vars: {
-          NPM_OPTIONS: '--no-optional'
-        }
-      },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION: VERSION,
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-aws.json',
-          TOPOLOGY: 'server'
-        }
-      },
+      updateExpansions({
+        NPM_OPTIONS: '--no-optional',
+        VERSION: VERSION,
+        AUTH: 'auth',
+        ORCHESTRATION_FILE: 'auth-aws.json',
+        TOPOLOGY: 'server'
+      }),
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
       { func: 'add aws auth variables to file' },
       { func: 'setup aws env' },
       { ...fn }
@@ -452,13 +436,11 @@ SINGLETON_TASKS.push(
       name: 'run-unit-tests',
       tags: ['run-unit-tests'],
       commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_VERSION: LOWEST_LTS,
-            NPM_VERSION: 8
-          }
-        },
+        updateExpansions({
+          NODE_LTS_VERSION: LOWEST_LTS,
+          NPM_VERSION: 8
+        }),
+        { func: 'install dependencies' },
         { func: 'run unit tests' }
       ]
     },
@@ -466,13 +448,11 @@ SINGLETON_TASKS.push(
       name: 'run-lint-checks',
       tags: ['run-lint-checks'],
       commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_VERSION: LOWEST_LTS,
-            NPM_VERSION: 8
-          }
-        },
+        updateExpansions({
+          NODE_LTS_VERSION: LOWEST_LTS,
+          NPM_VERSION: 8
+        }),
+        { func: 'install dependencies' },
         { func: 'run lint checks' }
       ]
     },
@@ -488,19 +468,13 @@ function* makeTypescriptTasks() {
         name: `compile-driver-typescript-${TS_VERSION}`,
         tags: [`compile-driver-typescript-${TS_VERSION}`],
         commands: [
-          {
-            func: 'install dependencies',
-            vars: {
-              NODE_LTS_VERSION: LOWEST_LTS,
-              NPM_VERSION: 8
-            }
-          },
-          {
-            func: 'compile driver',
-            vars: {
-              TS_VERSION
-            }
-          }
+          updateExpansions({
+            NODE_LTS_VERSION: LOWEST_LTS,
+            NPM_VERSION: 8,
+            TS_VERSION
+          }),
+          { func: 'install dependencies' },
+          { func: 'compile driver' }
         ]
       };
     }
@@ -509,18 +483,12 @@ function* makeTypescriptTasks() {
       name: `check-types-typescript-${TS_VERSION}`,
       tags: [`check-types-typescript-${TS_VERSION}`],
       commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_VERSION: LATEST_LTS
-          }
-        },
-        {
-          func: 'check types',
-          vars: {
-            TS_VERSION
-          }
-        }
+        updateExpansions({
+          NODE_LTS_VERSION: LATEST_LTS,
+          TS_VERSION
+        }),
+        { func: 'install dependencies' },
+        { func: 'check types' }
       ]
     };
   }
@@ -528,12 +496,10 @@ function* makeTypescriptTasks() {
     name: 'run-typescript-next',
     tags: ['run-typescript-next'],
     commands: [
-      {
-        func: 'install dependencies',
-        vars: {
-          NODE_LTS_VERSION: LATEST_LTS
-        }
-      },
+      updateExpansions({
+        NODE_LTS_VERSION: LATEST_LTS
+      }),
+      { func: 'install dependencies' },
       { func: 'run typescript next' }
     ]
   };
@@ -579,23 +545,20 @@ BUILD_VARIANTS.push({
 const oneOffFuncs = [
   {
     name: 'run-custom-snappy-tests',
-    func: 'run custom snappy tests'
+    func: 'run custom snappy tests',
+    expansions: {}
   },
   {
     name: 'run-bson-ext-integration',
     func: 'run bson-ext test',
-    vars: {
-      NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 8,
+    expansions: {
       TEST_NPM_SCRIPT: 'check:test'
     }
   },
   {
     name: 'run-bson-ext-unit',
     func: 'run bson-ext test',
-    vars: {
-      NODE_LTS_VERSION: LOWEST_LTS,
-      NPM_VERSION: 8,
+    expansions: {
       TEST_NPM_SCRIPT: 'check:unit'
     }
   }
@@ -605,21 +568,16 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   name: oneOffFunc.name,
   tags: ['run-custom-dependency-tests'],
   commands: [
-    {
-      func: 'install dependencies',
-      vars: {
-        NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 8
-      }
-    },
-    {
-      func: 'bootstrap mongo-orchestration',
-      vars: {
-        VERSION: '5.0',
-        TOPOLOGY: 'server',
-        AUTH: 'auth'
-      }
-    },
+    updateExpansions({
+      ...oneOffFunc.expansions,
+      NODE_LTS_VERSION: LOWEST_LTS,
+      NPM_VERSION: 8,
+      VERSION: '5.0',
+      TOPOLOGY: 'server',
+      AUTH: 'auth'
+    }),
+    { func: 'install dependencies' },
+    { func: 'bootstrap mongo-orchestration' },
     oneOffFunc
   ]
 }));
@@ -629,27 +587,18 @@ for (const version of ['5.0', 'rapid', 'latest']) {
     name: `run-custom-csfle-tests-${version}-pinned-commit`,
     tags: ['run-custom-dependency-tests'],
     commands: [
-      {
-        func: 'install dependencies',
-        vars: {
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 8
-        }
-      },
-      {
-        func: 'bootstrap mongo-orchestration',
-        vars: {
-          VERSION: version,
-          TOPOLOGY: 'replica_set'
-        }
-      },
+      updateExpansions({
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 8,
+        VERSION: version,
+        TOPOLOGY: 'replica_set',
+        CSFLE_GIT_REF: '5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0'
+
+      }),
+      {        func: 'install dependencies' },
+      {func: 'bootstrap mongo-orchestration'},
       { func: 'bootstrap kms servers' },
-      {
-        func: 'run custom csfle tests',
-        vars: {
-          CSFLE_GIT_REF: '5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0'
-        }
-      }
+      { func: 'run custom csfle tests' }
     ]
   });
 }
