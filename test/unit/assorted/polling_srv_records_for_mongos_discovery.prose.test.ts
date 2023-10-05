@@ -3,13 +3,13 @@ import * as dns from 'dns';
 import * as sinon from 'sinon';
 
 import {
+  type SrvPollerOptions,
+  type TopologyOptions,
   HostAddress,
   isHello,
   MongoClient,
   SrvPoller,
-  type SrvPollerOptions,
   SrvPollingEvent,
-  type TopologyOptions,
   TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
