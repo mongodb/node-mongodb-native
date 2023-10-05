@@ -39,7 +39,7 @@ async function terminateOpenTransactions(client: MongoClient) {
  * @param skipFilter - a function that returns null if the test should be run,
  *                     or a skip reason if the test should be skipped
  */
-async function runUnifiedTest(
+export async function runUnifiedTest(
   ctx: Mocha.Context,
   unifiedSuite: uni.UnifiedSuite,
   test: uni.Test,

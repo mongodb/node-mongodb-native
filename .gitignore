@@ -40,6 +40,9 @@ manual_tests/
 docs/build
 docs/Makefile
 
+mo-expansion.sh
+utr/
+
 # xunit test output for CI
 xunit.xml
 

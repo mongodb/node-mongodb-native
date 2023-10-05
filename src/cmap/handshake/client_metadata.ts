@@ -5,8 +5,7 @@ import { BSON, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const NODE_DRIVER_VERSION = require('../../../package.json').version;
+const NODE_DRIVER_VERSION = 'BROKEN IN DENO';
 
 /**
  * @public
