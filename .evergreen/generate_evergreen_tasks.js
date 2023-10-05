@@ -564,12 +564,12 @@ const oneOffFuncs = [
   }
 ];
 
-const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
-  name: oneOffFunc.name,
+const oneOffFuncAsTasks = oneOffFuncs.map(({ name, expansions, func }) => ({
+  name,
   tags: ['run-custom-dependency-tests'],
   commands: [
     updateExpansions({
-      ...oneOffFunc.expansions,
+      ...expansions,
       NODE_LTS_VERSION: LOWEST_LTS,
       NPM_VERSION: 8,
       VERSION: '5.0',
@@ -578,7 +578,7 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
     }),
     { func: 'install dependencies' },
     { func: 'bootstrap mongo-orchestration' },
-    oneOffFunc
+    { func }
   ]
 }));
 

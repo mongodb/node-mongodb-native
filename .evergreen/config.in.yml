@@ -1049,7 +1049,7 @@ tasks:
         type: setup
         params:
           updates:
-            - {key: NODE_LTS_VERSION, value: 18 }
+            - {key: NODE_LTS_VERSION, value: '18' }
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid }
             - {key: TOPOLOGY, value: server}

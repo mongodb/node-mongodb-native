@@ -988,7 +988,7 @@ tasks:
         params:
           updates:
             - key: NODE_LTS_VERSION
-              value: 18
+              value: '18'
             - key: NPM_VERSION
               value: '9'
             - key: VERSION
@@ -3183,9 +3183,7 @@ tasks:
               value: auth
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - name: run-custom-snappy-tests
-        func: run custom snappy tests
-        expansions: {}
+      - func: run custom snappy tests
   - name: run-bson-ext-integration
     tags:
       - run-custom-dependency-tests
@@ -3208,10 +3206,7 @@ tasks:
               value: auth
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - name: run-bson-ext-integration
-        func: run bson-ext test
-        expansions:
-          TEST_NPM_SCRIPT: check:test
+      - func: run bson-ext test
   - name: run-bson-ext-unit
     tags:
       - run-custom-dependency-tests
@@ -3234,10 +3229,7 @@ tasks:
               value: auth
       - func: install dependencies
       - func: bootstrap mongo-orchestration
-      - name: run-bson-ext-unit
-        func: run bson-ext test
-        expansions:
-          TEST_NPM_SCRIPT: check:unit
+      - func: run bson-ext test
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
       - run-custom-dependency-tests
