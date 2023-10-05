@@ -2736,22 +2736,6 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
-  - name: run-custom-csfle-tests-5.0-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 14
-          NPM_VERSION: 9
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: '5.0'
-          TOPOLOGY: replica_set
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-        vars:
-          CSFLE_GIT_REF: master
   - name: run-custom-csfle-tests-rapid-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -2768,22 +2752,6 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
-  - name: run-custom-csfle-tests-rapid-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 14
-          NPM_VERSION: 9
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: replica_set
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-        vars:
-          CSFLE_GIT_REF: master
   - name: run-custom-csfle-tests-latest-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -2800,22 +2768,6 @@ tasks:
       - func: run custom csfle tests
         vars:
           CSFLE_GIT_REF: c56c70340093070b1ef5c8a28190187eea21a6e9
-  - name: run-custom-csfle-tests-latest-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 14
-          NPM_VERSION: 9
-      - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: latest
-          TOPOLOGY: replica_set
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-        vars:
-          CSFLE_GIT_REF: master
   - name: test-latest-server-noauth
     tags:
       - latest
@@ -4178,11 +4130,8 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - run-custom-csfle-tests-5.0-pinned-commit
-      - run-custom-csfle-tests-5.0-master
       - run-custom-csfle-tests-rapid-pinned-commit
-      - run-custom-csfle-tests-rapid-master
       - run-custom-csfle-tests-latest-pinned-commit
-      - run-custom-csfle-tests-latest-master
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large
