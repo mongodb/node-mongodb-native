@@ -3069,23 +3069,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-5.0-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '14'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
   - name: run-custom-csfle-tests-rapid-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -3103,23 +3086,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: run-custom-csfle-tests-rapid-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '14'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
   - name: run-custom-csfle-tests-latest-pinned-commit
     tags:
       - run-custom-dependency-tests
@@ -3133,23 +3099,6 @@ tasks:
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
             - {key: CSFLE_GIT_REF, value: c56c70340093070b1ef5c8a28190187eea21a6e9}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run custom csfle tests
-  - name: run-custom-csfle-tests-latest-master
-    tags:
-      - run-custom-dependency-tests
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '14'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: master}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -4483,11 +4432,8 @@ buildvariants:
     run_on: rhel80-large
     tasks:
       - run-custom-csfle-tests-5.0-pinned-commit
-      - run-custom-csfle-tests-5.0-master
       - run-custom-csfle-tests-rapid-pinned-commit
-      - run-custom-csfle-tests-rapid-master
       - run-custom-csfle-tests-latest-pinned-commit
-      - run-custom-csfle-tests-latest-master
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large

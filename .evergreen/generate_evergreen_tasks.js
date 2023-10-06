@@ -611,28 +611,24 @@ BUILD_VARIANTS.push({
 
 const oneOffFuncAsTasks = [];
 
-const FLE_PINNED_COMMIT = 'c56c70340093070b1ef5c8a28190187eea21a6e9';
-
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
-    oneOffFuncAsTasks.push({
-      name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
-      tags: ['run-custom-dependency-tests'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
-          VERSION: version,
-          TOPOLOGY: 'replica_set',
-          CSFLE_GIT_REF: ref
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
-        { func: 'run custom csfle tests' }
-      ]
-    });
-  }
+  oneOffFuncAsTasks.push({
+    name: `run-custom-csfle-tests-${version}-pinned-commit`,
+    tags: ['run-custom-dependency-tests'],
+    commands: [
+      updateExpansions({
+        NODE_LTS_VERSION: LOWEST_LTS,
+        NPM_VERSION: 9,
+        VERSION: version,
+        TOPOLOGY: 'replica_set',
+        CSFLE_GIT_REF: 'c56c70340093070b1ef5c8a28190187eea21a6e9'
+      }),
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
+      { func: 'bootstrap kms servers' },
+      { func: 'run custom csfle tests' }
+    ]
+  });
 }
 
 const coverageTask = {
