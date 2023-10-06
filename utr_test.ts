@@ -26,6 +26,7 @@ const specTests = [
   ...load(path.join('test', 'spec', 'transactions', 'unified')),
   ...load(path.join('test', 'spec', 'retryable-reads', 'unified')),
   ...load(path.join('test', 'spec', 'retryable-writes', 'unified')),
+  ...load(path.join('test', 'spec', 'change-streams', 'unified')),
   ...load(path.join('test', 'spec', 'change-streams', 'unified'))
 ];
 
