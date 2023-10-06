@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 
 import {
+  Binary,
+  BSON,
   type CommandFailedEvent,
   type CommandSucceededEvent,
   type MongoClient,
-  Binary,
-  BSON,
   MongoNetworkError
 } from '../../mongodb';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
