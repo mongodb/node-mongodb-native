@@ -987,14 +987,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '18'
-            - key: NPM_VERSION
-              value: '9'
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: server
+            - {key: NODE_LTS_VERSION, value: '18'}
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run spec driver benchmarks
@@ -1010,12 +1006,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1029,12 +1022,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1048,12 +1038,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1067,12 +1054,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1086,12 +1070,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1105,12 +1086,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1124,12 +1102,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1143,12 +1118,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1162,12 +1134,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1181,12 +1150,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1200,12 +1166,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1219,12 +1182,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1238,12 +1198,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1257,12 +1214,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1276,12 +1230,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1295,12 +1246,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1314,12 +1262,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1333,12 +1278,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1352,12 +1294,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1371,12 +1310,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1390,12 +1326,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1409,12 +1342,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1428,12 +1358,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1447,12 +1374,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1466,12 +1390,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1485,12 +1406,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1504,12 +1422,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1524,16 +1439,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: server
-            - key: REQUIRE_API_VERSION
-              value: '1'
-            - key: AUTH
-              value: auth
-            - key: MONGODB_API_VERSION
-              value: '1'
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: REQUIRE_API_VERSION, value: '1'}
+            - {key: AUTH, value: auth}
+            - {key: MONGODB_API_VERSION, value: '1'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1559,14 +1469,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
-            - key: LOAD_BALANCER
-              value: 'true'
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: start-load-balancer
@@ -1582,14 +1488,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
-            - key: LOAD_BALANCER
-              value: 'true'
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: start-load-balancer
@@ -1605,14 +1507,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: auth
-            - key: LOAD_BALANCER
-              value: 'true'
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: start-load-balancer
@@ -1639,10 +1537,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1654,12 +1550,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: SSL
-              value: ssl
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
+            - {key: SSL, value: ssl}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run socks5 tests
@@ -1672,14 +1565,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
-            - key: COMPRESSOR
-              value: zstd
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: COMPRESSOR, value: zstd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
@@ -1692,14 +1581,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: auth
-            - key: COMPRESSOR
-              value: snappy
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: auth}
+            - {key: COMPRESSOR, value: snappy}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run-compression-tests
@@ -1711,12 +1596,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: SSL
-              value: ssl
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1728,12 +1610,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: SSL
-              value: ssl
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1745,12 +1624,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: SSL
-              value: ssl
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1762,12 +1638,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: SSL
-              value: ssl
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1779,12 +1652,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: SSL
-              value: ssl
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.2'}
+            - {key: SSL, value: ssl}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run tls tests
@@ -1794,14 +1664,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1813,14 +1679,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1832,14 +1694,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1851,14 +1709,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1870,14 +1724,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1889,14 +1739,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1908,14 +1754,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1927,14 +1769,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1946,16 +1784,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1967,16 +1800,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -1988,16 +1816,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2009,16 +1832,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2030,16 +1848,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2051,16 +1864,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2072,16 +1880,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2093,16 +1896,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: latest
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: latest}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2114,14 +1912,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2133,14 +1927,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2152,14 +1942,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2171,14 +1957,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2190,14 +1972,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2209,14 +1987,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2228,14 +2002,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2247,14 +2017,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2266,16 +2032,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2287,16 +2048,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2308,16 +2064,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2329,16 +2080,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2350,16 +2096,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2371,16 +2112,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2392,16 +2128,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2413,16 +2144,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '6.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '6.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2434,14 +2160,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2453,14 +2175,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2472,14 +2190,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2491,14 +2205,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2510,14 +2220,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2529,14 +2235,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2548,14 +2250,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2567,14 +2265,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2586,16 +2280,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2607,16 +2296,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2628,16 +2312,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2649,16 +2328,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2670,16 +2344,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2691,16 +2360,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2712,16 +2376,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2733,16 +2392,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '5.0'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '5.0'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2754,14 +2408,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2773,14 +2423,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2792,14 +2438,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2811,14 +2453,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2830,14 +2468,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2849,14 +2483,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2868,14 +2498,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2887,14 +2513,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2906,16 +2528,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2927,16 +2544,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2948,16 +2560,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2969,16 +2576,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -2990,16 +2592,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -3011,16 +2608,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -3032,16 +2624,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -3053,16 +2640,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NPM_OPTIONS
-              value: '--no-optional'
-            - key: VERSION
-              value: '4.4'
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: NPM_OPTIONS, value: '--no-optional'}
+            - {key: VERSION, value: '4.4'}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
@@ -3076,10 +2658,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
       - func: install dependencies
       - func: run unit tests
   - name: run-lint-checks
@@ -3090,10 +2670,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
       - func: install dependencies
       - func: run lint checks
   - name: check-types-typescript-next
@@ -3104,10 +2682,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '20'
-            - key: TS_VERSION
-              value: next
+            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: TS_VERSION, value: next}
       - func: install dependencies
       - func: check types
   - name: compile-driver-typescript-current
@@ -3118,12 +2694,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: TS_VERSION
-              value: current
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: TS_VERSION, value: current}
       - func: install dependencies
       - func: compile driver
   - name: check-types-typescript-current
@@ -3134,10 +2707,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '20'
-            - key: TS_VERSION
-              value: current
+            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: TS_VERSION, value: current}
       - func: install dependencies
       - func: check types
   - name: check-types-typescript-4.1.6
@@ -3148,10 +2719,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '20'
-            - key: TS_VERSION
-              value: 4.1.6
+            - {key: NODE_LTS_VERSION, value: '20'}
+            - {key: TS_VERSION, value: 4.1.6}
       - func: install dependencies
       - func: check types
   - name: download-and-merge-coverage
@@ -3171,16 +2740,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run custom snappy tests
@@ -3192,18 +2756,12 @@ tasks:
         type: setup
         params:
           updates:
-            - key: TEST_NPM_SCRIPT
-              value: check:test
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: TEST_NPM_SCRIPT, value: check:test}
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run bson-ext test
@@ -3215,18 +2773,12 @@ tasks:
         type: setup
         params:
           updates:
-            - key: TEST_NPM_SCRIPT
-              value: check:unit
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: auth
+            - {key: TEST_NPM_SCRIPT, value: check:unit}
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: auth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run bson-ext test
@@ -3238,16 +2790,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: CSFLE_GIT_REF
-              value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: CSFLE_GIT_REF, value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3260,16 +2807,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: replica_set
-            - key: CSFLE_GIT_REF
-              value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: CSFLE_GIT_REF, value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3282,16 +2824,11 @@ tasks:
         type: setup
         params:
           updates:
-            - key: NODE_LTS_VERSION
-              value: '12'
-            - key: NPM_VERSION
-              value: '8'
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
-            - key: CSFLE_GIT_REF
-              value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0
+            - {key: NODE_LTS_VERSION, value: '12'}
+            - {key: NPM_VERSION, value: '8'}
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: CSFLE_GIT_REF, value: 5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3306,12 +2843,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3326,12 +2860,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3346,12 +2877,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: latest
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: latest}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3366,12 +2894,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3386,12 +2911,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3406,12 +2928,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3426,12 +2945,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3446,12 +2962,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3466,12 +2979,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '7.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3486,12 +2996,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3506,12 +3013,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3526,12 +3030,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '6.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '6.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3546,12 +3047,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3566,12 +3064,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3586,12 +3081,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '5.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '5.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3606,12 +3098,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3626,12 +3115,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3646,12 +3132,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.4'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.4'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3666,12 +3149,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3686,12 +3166,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3706,12 +3183,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.2'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.2'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3726,12 +3200,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3746,12 +3217,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3766,12 +3234,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '4.0'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '4.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3786,12 +3251,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: server
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: server}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3806,12 +3268,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: replica_set
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: replica_set}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3826,12 +3285,9 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: '3.6'
-            - key: TOPOLOGY
-              value: sharded_cluster
-            - key: AUTH
-              value: noauth
+            - {key: VERSION, value: '3.6'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: noauth}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -3845,10 +3301,8 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: run lambda handler example tests
@@ -3861,14 +3315,10 @@ tasks:
         type: setup
         params:
           updates:
-            - key: VERSION
-              value: rapid
-            - key: AUTH
-              value: auth
-            - key: ORCHESTRATION_FILE
-              value: auth-aws.json
-            - key: TOPOLOGY
-              value: server
+            - {key: VERSION, value: rapid}
+            - {key: AUTH, value: auth}
+            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
