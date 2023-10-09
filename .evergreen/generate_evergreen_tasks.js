@@ -647,7 +647,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
       {
         func: 'run custom csfle tests',
         vars: {
-          CSFLE_GIT_REF: 'c56c70340093070b1ef5c8a28190187eea21a6e9'
+          CSFLE_GIT_REF: '5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0'
         }
       }
     ]
