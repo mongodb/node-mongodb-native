@@ -212,8 +212,7 @@ TASKS.push(
         updateExpansions({
           SSL: 'ssl',
           VERSION: 'latest',
-          TOPOLOGY: 'replica_set',
-          SSL: 'ssl'
+          TOPOLOGY: 'replica_set'
         }),
         { func: 'install dependencies' },
         { func: 'bootstrap mongo-orchestration' },
@@ -545,8 +544,7 @@ BUILD_VARIANTS.push({
 const oneOffFuncs = [
   {
     name: 'run-custom-snappy-tests',
-    func: 'run custom snappy tests',
-    expansions: {}
+    func: 'run custom snappy tests'
   },
   {
     name: 'run-bson-ext-integration',
@@ -595,8 +593,8 @@ for (const version of ['5.0', 'rapid', 'latest']) {
         CSFLE_GIT_REF: '5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0'
 
       }),
-      {        func: 'install dependencies' },
-      {func: 'bootstrap mongo-orchestration'},
+      { func: 'install dependencies' },
+      { func: 'bootstrap mongo-orchestration' },
       { func: 'bootstrap kms servers' },
       { func: 'run custom csfle tests' }
     ]
