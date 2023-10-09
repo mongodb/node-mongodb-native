@@ -50,9 +50,10 @@ else
   echo "adding temporary AWS credentials to environment"
   # CSFLE_AWS_TEMP_ACCESS_KEY_ID, CSFLE_AWS_TEMP_SECRET_ACCESS_KEY, CSFLE_AWS_TEMP_SESSION_TOKEN
   source "$DRIVERS_TOOLS"/.evergreen/csfle/set-temp-creds.sh
+
+  npm install "mongodb-client-encryption@2.x"
 fi
 
-npm install mongodb-client-encryption
 npm install @mongodb-js/zstd
 npm install snappy
 

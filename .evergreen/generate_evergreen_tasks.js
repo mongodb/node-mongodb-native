@@ -435,9 +435,8 @@ for (const {
 
 BUILD_VARIANTS.push({
   name: MACOS_OS,
-  display_name: `MacOS 11 Node${
-    versions.find(version => version.versionNumber === LATEST_LTS).versionNumber
-  }`,
+  display_name: `MacOS 11 Node${versions.find(version => version.versionNumber === LATEST_LTS).versionNumber
+    }`,
   run_on: MACOS_OS,
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
@@ -625,38 +624,34 @@ const oneOffFuncAsTasks = oneOffFuncs.map(oneOffFunc => ({
   ]
 }));
 
-const FLE_PINNED_COMMIT = 'c56c70340093070b1ef5c8a28190187eea21a6e9';
-
 for (const version of ['5.0', 'rapid', 'latest']) {
-  for (const ref of [FLE_PINNED_COMMIT, 'master']) {
-    oneOffFuncAsTasks.push({
-      name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
-      tags: ['run-custom-dependency-tests'],
-      commands: [
-        {
-          func: 'install dependencies',
-          vars: {
-            NODE_LTS_VERSION: LOWEST_LTS,
-            NPM_VERSION: 8
-          }
-        },
-        {
-          func: 'bootstrap mongo-orchestration',
-          vars: {
-            VERSION: version,
-            TOPOLOGY: 'replica_set'
-          }
-        },
-        { func: 'bootstrap kms servers' },
-        {
-          func: 'run custom csfle tests',
-          vars: {
-            CSFLE_GIT_REF: ref
-          }
+  oneOffFuncAsTasks.push({
+    name: `run-custom-csfle-tests-${version}-pinned-commit`,
+    tags: ['run-custom-dependency-tests'],
+    commands: [
+      {
+        func: 'install dependencies',
+        vars: {
+          NODE_LTS_VERSION: LOWEST_LTS,
+          NPM_VERSION: 8
         }
-      ]
-    });
-  }
+      },
+      {
+        func: 'bootstrap mongo-orchestration',
+        vars: {
+          VERSION: version,
+          TOPOLOGY: 'replica_set'
+        }
+      },
+      { func: 'bootstrap kms servers' },
+      {
+        func: 'run custom csfle tests',
+        vars: {
+          CSFLE_GIT_REF: '5e922eb1302f1efbf4e8ddeb5f2ef113fd58ced0'
+        }
+      }
+    ]
+  });
 }
 
 const coverageTask = {
