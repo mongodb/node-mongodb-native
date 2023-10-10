@@ -191,7 +191,7 @@ export function createStdioLogger(stream: {
  */
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
-  { mongodbLogPath }: { mongodbLogPath?: string | Writable | MongoDBLogWritable }
+  { mongodbLogPath }: MongoLoggerMongoClientOptions
 ): MongoDBLogWritable {
   if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
     return createStdioLogger(process.stderr);

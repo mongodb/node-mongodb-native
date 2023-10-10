@@ -1224,8 +1224,11 @@ export const OPTIONS = {
       'useUnifiedTopology has no effect since Node.js Driver version 4.0.0 and will be removed in the next major version'
   } as OptionDescriptor,
   // MongoLogger
-  // TODO(NODE-4849): Tighten the type of mongodbLogPath
-  mongodbLogPath: { type: 'any' }
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongoLoggerClientOptions: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
