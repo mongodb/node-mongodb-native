@@ -1045,15 +1045,16 @@ tasks:
       - performance
     exec_timeout_secs: 3600
     commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: NODE_LTS_VERSION, value: '18' }
+            - {key: NPM_VERSION, value: '9'}
+            - {key: VERSION, value: rapid }
+            - {key: TOPOLOGY, value: server}
       - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 18
-          NPM_VERSION: 9
       - func: bootstrap mongo-orchestration
-        vars:
-          VERSION: rapid
-          TOPOLOGY: server
-          AUTH: noauth
       - func: run spec driver benchmarks
       - command: perf.send
         params:
