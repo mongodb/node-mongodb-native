@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { setTimeout } from 'timers/promises';
 
 import {
   BufferPool,
