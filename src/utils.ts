@@ -1259,7 +1259,7 @@ export async function request(
 /**
  * A custom AbortController that aborts after a specified timeout.
  *
- * If `timeout` is undefined or 0, the abort controller never aborts.
+ * If `timeout` is undefined or \<=0, the abort controller never aborts.
  *
  * This class provides two benefits over the built-in AbortSignal.timeout() method.
  * - This class provides a mechanism for cancelling the timeout
@@ -1269,10 +1269,8 @@ export async function request(
  */
 export class TimeoutController extends AbortController {
   constructor(
-    timeoutMS?: number,
-    private timeoutId = timeoutMS && timeoutMS > 0
-      ? setTimeout(() => this.abort(), timeoutMS)
-      : null
+    timeout?: number,
+    private timeoutId = timeout && timeout > 0 ? setTimeout(() => this.abort(), timeout) : null
   ) {
     super();
   }
