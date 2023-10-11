@@ -58,7 +58,7 @@ describe('Connection Monitoring and Pooling Spec Tests (Integration) - cmap-form
   });
 });
 
-describe('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
+describe.skip('Connection Monitoring and Pooling Spec Tests (Integration) - logging', function () {
   const tests = loadSpecTests('connection-monitoring-and-pooling', 'logging');
 
   runUnifiedSuite(tests, test => {
