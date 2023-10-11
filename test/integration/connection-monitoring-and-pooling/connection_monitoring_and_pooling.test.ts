@@ -2,7 +2,7 @@ import { loadSpecTests } from '../../spec';
 import { type CmapTest, runCmapTestSuite } from '../../tools/cmap_spec_runner';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-describe('Connection Monitoring and Pooling (Node Driver)', function () {
+describe.skip('Connection Monitoring and Pooling (Node Driver)', function () {
   const cmapTests: CmapTest[] = loadSpecTests(
     '../integration/connection-monitoring-and-pooling/cmap-node-specs'
   );

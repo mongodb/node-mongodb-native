@@ -190,7 +190,8 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.enableMongoLogger')]: true,
       [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       ...getEnvironmentalOptions(),
-      ...(description.serverApi ? { serverApi: description.serverApi } : {})
+      ...(description.serverApi ? { serverApi: description.serverApi } : {}),
+      mongoLoggerClientOptions: { mongodbLogPath: logCollector }
     } as any);
     this.logCollector = logCollector;
 
