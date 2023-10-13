@@ -362,7 +362,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       callback,
       timeoutController: new TimeoutController(waitQueueTimeoutMS)
     };
-    waitQueueMember.timeoutController.signal.onabort = () => {
+    waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
       waitQueueMember[kCancelled] = true;
       waitQueueMember.timeoutController.clear();
 
@@ -378,7 +378,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           this.address
         )
       );
-    };
+    });
 
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());

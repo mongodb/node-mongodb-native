@@ -1269,14 +1269,16 @@ export async function request(
  */
 export class TimeoutController extends AbortController {
   constructor(
-    timeout?: number,
-    private timeoutId = timeout && timeout > 0 ? setTimeout(() => this.abort(), timeout) : null
+    timeout = 0,
+    private timeoutId = timeout > 0 ? setTimeout(() => this.abort(), timeout) : null
   ) {
     super();
   }
 
   clear() {
-    this.timeoutId && clearTimeout(this.timeoutId);
+    if (this.timeoutId != null) {
+      clearTimeout(this.timeoutId);
+    }
     this.timeoutId = null;
   }
 }

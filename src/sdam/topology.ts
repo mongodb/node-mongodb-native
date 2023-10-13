@@ -560,7 +560,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS)
     };
 
-    waitQueueMember.timeoutController.signal.onabort = () => {
+    waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
       waitQueueMember[kCancelled] = true;
       waitQueueMember.timeoutController.clear();
       const timeoutError = new MongoServerSelectionError(
@@ -569,7 +569,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
 
       waitQueueMember.callback(timeoutError);
-    };
+    });
 
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
