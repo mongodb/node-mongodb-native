@@ -529,7 +529,7 @@ export function parseOptions(
       ...mongoOptions[Symbol.for('@@mdb.internalLoggerConfig')]
     };
     loggerClientOptions = {
-      mongodbLogPath: mongoOptions.mongoLoggerClientOptions.mongodbLogPath
+      mongodbLogPath: mongoOptions.mongodbLogPath
     };
   }
   mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
