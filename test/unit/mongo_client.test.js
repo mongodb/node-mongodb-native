@@ -1,4 +1,6 @@
-'use strict';
+import { inspect } from 'util';
+
+('use strict');
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -811,6 +813,62 @@ describe('MongoOptions', function () {
     it('assigns the parsed options to the mongoLoggerOptions option', function () {
       const client = new MongoClient('mongodb://localhost:27017');
       expect(client.options).to.have.property('mongoLoggerOptions').to.equal(expectedLoggingObject);
+    });
+  });
+
+  context('when mongodbLogPath is in options', function () {
+    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+
+    let stderrStub;
+    let stdoutStub;
+
+    before(() => {
+      stdoutStub = sinon.stub(process.stdout);
+      stderrStub = sinon.stub(process.stderr);
+    });
+
+    after(() => {
+      sinon.restore();
+    });
+
+    it('when option is `stderr`, it is accessible through mongoLogger.logDestination', function () {
+      const client = new MongoClient('mongodb://a/', {
+        [loggerFeatureFlag]: true,
+        mongodbLogPath: 'stderr'
+      });
+      const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+    });
+
+    it('when option is a Writable stream, it is accessible through mongoLogger.logDestination', function () {
+      const writable = new Writable();
+      const client = new MongoClient('mongodb://a/', {
+        [loggerFeatureFlag]: true,
+        mongodbLogPath: writable
+      });
+      expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
+    });
+
+    it('when option is `stdout`, it is accessible through mongoLogger.logDestination', function () {
+      const client = new MongoClient('mongodb://a/', {
+        [loggerFeatureFlag]: true,
+        mongodbLogPath: 'stdout'
+      });
+      const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+    });
+
+    it('when option is invalid, it defaults to stderr', function () {
+      const invalidOption = 'stdnothing';
+      const client = new MongoClient('mongodb://a/', {
+        [loggerFeatureFlag]: true,
+        mongodbLogPath: invalidOption
+      });
+      const log = { t: new Date(), c: 'constructorInvalidOption', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
     });
   });
 });

@@ -529,7 +529,7 @@ export function parseOptions(
       ...mongoOptions[Symbol.for('@@mdb.internalLoggerConfig')]
     };
     loggerClientOptions = {
-      mongodbLogPath: mongoOptions.mongoLoggerClientOptions.mongodbLogPath
+      mongodbLogPath: mongoOptions.mongodbLogPath
     };
   }
   mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
@@ -1228,7 +1228,7 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongoLoggerClientOptions: { type: 'any' }
+  mongodbLogPath: { type: 'any' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(

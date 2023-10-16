@@ -4,12 +4,14 @@ import * as process from 'node:process';
 import { expect } from 'chai';
 import * as dns from 'dns';
 import * as sinon from 'sinon';
+import { inspect } from 'util';
 
 import {
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
   AuthMechanism,
   DEFAULT_ALLOWED_HOSTS,
   FEATURE_FLAGS,
+  type Log,
   MongoAPIError,
   MongoClient,
   MongoCredentials,
@@ -830,6 +832,49 @@ describe('Connection String', function () {
       expect(warning)
         .to.have.property('message')
         .that.matches(/useUnifiedTopology has no effect/);
+    });
+  });
+
+  describe('when mongodbLogPath is in options', function () {
+    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+
+    let stderrStub;
+    let stdoutStub;
+
+    before(() => {
+      stdoutStub = sinon.stub(process.stdout);
+      stderrStub = sinon.stub(process.stderr);
+    });
+
+    after(() => {
+      sinon.restore();
+    });
+
+    it('when option is `stderr`, it is accessible through mongoLogger.logDestination', function () {
+      const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
+        [loggerFeatureFlag]: true
+      });
+      const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+    });
+
+    it('when option is `stdout`, it is accessible through mongoLogger.logDestination', function () {
+      const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
+        [loggerFeatureFlag]: true
+      });
+      const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+    });
+
+    it('when option is invalid, it defaults to stderr', function () {
+      const client = new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', {
+        [loggerFeatureFlag]: true
+      });
+      const log: Log = { t: new Date(), c: 'ConnectionStringInvalidOption', s: 'error' };
+      client.options.mongoLoggerOptions.logDestination.write(log);
+      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
     });
   });
 });
