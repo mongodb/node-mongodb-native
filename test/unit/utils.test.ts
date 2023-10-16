@@ -1143,7 +1143,7 @@ describe('driver utils', function () {
 
         beforeEach(function () {
           timeoutController = new TimeoutController(3000);
-          timeoutController.signal.onabort = spy;
+          timeoutController.signal.addEventListener('abort', spy);
         });
 
         afterEach(function () {
@@ -1156,11 +1156,11 @@ describe('driver utils', function () {
         });
 
         it('times out after `timeout` milliseconds', () => {
-          expect(spy.called, 'spy was called after creation').to.be.false;
+          expect(spy, 'spy was called after creation').not.to.have.been.called;
           clock.tick(2999);
-          expect(spy.called, 'spy was called before 3000ms has expired').to.be.false;
+          expect(spy, 'spy was called before 3000ms has expired').not.to.have.been.called;
           clock.tick(1);
-          expect(spy.called, 'spy was not called after 3000ms').to.be.true;
+          expect(spy, 'spy was not called after 3000ms').to.have.been.called;
         });
       });
     });
