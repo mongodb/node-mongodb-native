@@ -132,10 +132,13 @@ export class TopologyClosedEvent {
 export class ServerHeartbeatStartedEvent {
   /** The connection id for the command */
   connectionId: string;
+  /** Is true when using the streaming protocol. */
+  awaited: boolean;
 
   /** @internal */
-  constructor(connectionId: string) {
+  constructor(connectionId: string, awaited: boolean) {
     this.connectionId = connectionId;
+    this.awaited = awaited;
   }
 }
 

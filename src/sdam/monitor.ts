@@ -209,7 +209,12 @@ function resetMonitorState(monitor: Monitor) {
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
-  monitor.emit(Server.SERVER_HEARTBEAT_STARTED, new ServerHeartbeatStartedEvent(monitor.address));
+  const topologyVersion = monitor[kServer].description.topologyVersion;
+  const isAwaitable = topologyVersion != null;
+  monitor.emit(
+    Server.SERVER_HEARTBEAT_STARTED,
+    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable && topologyVersion != null)
+  );
 
   function failureHandler(err: Error) {
     monitor[kConnection]?.destroy({ force: true });
@@ -237,8 +242,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     const { serverApi, helloOk } = connection;
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
     const maxAwaitTimeMS = monitor.options.heartbeatFrequencyMS;
-    const topologyVersion = monitor[kServer].description.topologyVersion;
-    const isAwaitable = topologyVersion != null;
 
     const cmd = {
       [serverApi?.version || helloOk ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
@@ -288,7 +291,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       if (isAwaitable && hello.topologyVersion) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
-          new ServerHeartbeatStartedEvent(monitor.address)
+          new ServerHeartbeatStartedEvent(monitor.address, true)
         );
         start = now();
       } else {
