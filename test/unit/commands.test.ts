@@ -1,4 +1,4 @@
-import { BSONError } from 'bson';
+import { BSONError, deserialize } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -58,7 +58,7 @@ describe('BinMsg BSON utf8 validation', () => {
     // this is a sanity check to make sure nothing unexpected is happening in the deserialize method itself
 
     const options = { validation: { utf8: { writeErrors: false } as const } };
-    const deserializerCall = () => BSON.deserialize(invalidUtf8ErrorMsgDeserializeInput, options);
+    const deserializerCall = () => deserialize(invalidUtf8ErrorMsgDeserializeInput, options);
     expect(deserializerCall()).to.deep.equals(invalidUtf8InWriteErrorsJSON);
   });
 

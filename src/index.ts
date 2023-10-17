@@ -136,7 +136,6 @@ export {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
-export { decompressResponse } from './cmap/wire_protocol/compression';
 export {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
