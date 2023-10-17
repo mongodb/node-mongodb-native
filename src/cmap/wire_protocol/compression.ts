@@ -136,7 +136,12 @@ function loadZstd() {
 
 const MESSAGE_HEADER_SIZE = 16;
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Compresses an OP_MSG or OP_QUERY message, if compression is configured.  This method
+ * also serializes the command to BSON.
+ */
 export async function compressCommand(
   command: WriteProtocolMessageType,
   description: OperationDescription
@@ -152,7 +157,13 @@ export async function compressCommand(
   return Buffer.concat(data);
 }
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Decompresses an OP_MSG or OP_QUERY response from the server, if compression is configured.
+ *
+ * This method does not parse the response's BSON.
+ */
 export async function decompressResponse(
   message: Buffer
 ): Promise<OpMsgResponse | OpQueryResponse> {
