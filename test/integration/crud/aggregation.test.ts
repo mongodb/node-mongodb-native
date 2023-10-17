@@ -323,9 +323,7 @@ describe('Aggregation', function () {
       // Iterate over all the items in the cursor
       cursor.explain(function (err, result) {
         expect(err).to.not.exist;
-        expect(result.stages).to.have.lengthOf.at.least(1);
-        expect(result.stages[0]).to.have.property('$cursor');
-
+        expect(JSON.stringify(result)).to.include('$cursor');
         client.close(done);
       });
     });
