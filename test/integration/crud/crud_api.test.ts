@@ -1,7 +1,14 @@
 import { expect } from 'chai';
 import { on } from 'events';
+import * as sinon from 'sinon';
 
-import { type MongoClient, MongoError, ObjectId, ReturnDocument } from '../../mongodb';
+import {
+  AbstractCursor,
+  type MongoClient,
+  MongoError,
+  ObjectId,
+  ReturnDocument
+} from '../../mongodb';
 import { assert as test } from '../shared';
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
@@ -31,6 +38,8 @@ describe('CRUD API', function () {
   });
 
   afterEach(async function () {
+    sinon.restore();
+
     await client?.close();
     client = null;
 
@@ -59,6 +68,12 @@ describe('CRUD API', function () {
 
     await collection.drop();
     await client.close();
+  });
+
+  it('findOne calls cursor.close()', async function () {
+    const spy = sinon.spy(AbstractCursor.prototype, 'close');
+    await client.db().collection('t').findOne({});
+    expect(spy).to.be.calledOnce;
   });
 
   context('when creating a cursor with find', () => {
