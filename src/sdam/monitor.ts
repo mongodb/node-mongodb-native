@@ -213,7 +213,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   const isAwaitable = topologyVersion != null;
   monitor.emit(
     Server.SERVER_HEARTBEAT_STARTED,
-    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable && topologyVersion != null)
+    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
 
   function failureHandler(err: Error) {
@@ -222,7 +222,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     monitor.emit(
       Server.SERVER_HEARTBEAT_FAILED,
-      new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err)
+      new ServerHeartbeatFailedEvent(
+        monitor.address,
+        calculateDurationInMs(start),
+        err,
+        isAwaitable
+      )
     );
 
     const error = !(err instanceof MongoError)
@@ -281,14 +286,15 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       const duration =
         isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);
 
+      const awaited = isAwaitable && hello.topologyVersion != null;
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello)
+        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, awaited)
       );
 
       // if we are using the streaming protocol then we immediately issue another `started`
       // event, otherwise the "check" is complete and return to the main monitor loop
-      if (isAwaitable && hello.topologyVersion) {
+      if (awaited) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address, true)
@@ -327,7 +333,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       monitor[kConnection] = conn;
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, calculateDurationInMs(start), conn.hello)
+        new ServerHeartbeatSucceededEvent(
+          monitor.address,
+          calculateDurationInMs(start),
+          conn.hello,
+          false
+        )
       );
 
       callback(undefined, conn.hello);

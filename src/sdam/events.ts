@@ -154,12 +154,15 @@ export class ServerHeartbeatSucceededEvent {
   duration: number;
   /** The command reply */
   reply: Document;
+  /** Is true when using the streaming protocol. */
+  awaited: boolean;
 
   /** @internal */
-  constructor(connectionId: string, duration: number, reply: Document | null) {
+  constructor(connectionId: string, duration: number, reply: Document | null, awaited: boolean) {
     this.connectionId = connectionId;
     this.duration = duration;
     this.reply = reply ?? {};
+    this.awaited = awaited;
   }
 }
 
@@ -175,11 +178,14 @@ export class ServerHeartbeatFailedEvent {
   duration: number;
   /** The command failure */
   failure: Error;
+  /** Is true when using the streaming protocol. */
+  awaited: boolean;
 
   /** @internal */
-  constructor(connectionId: string, duration: number, failure: Error) {
+  constructor(connectionId: string, duration: number, failure: Error, awaited: boolean) {
     this.connectionId = connectionId;
     this.duration = duration;
     this.failure = failure;
+    this.awaited = awaited;
   }
 }
