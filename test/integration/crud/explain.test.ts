@@ -101,15 +101,7 @@ describe('CRUD API explain option', function () {
         it(`sets command verbosity to ${explainValue} and includes ${explainValueToExpectation(explainValue)} in the return response`, async function () {
           const response = await op.op(explainValue).catch(error => error);
           const commandStartedEvent = await commandStartedPromise;
-          let explainDocument;
-          if (name === 'aggregate' && explainValue !== 'invalid') {
-            // value changes depending on server version
-            explainDocument =
-              response[0].stages?.[0]?.$cursor ?? response[0]?.stages ?? response[0];
-          } else {
-            explainDocument = response;
-          }
-          const explainJson = JSON.stringify(explainDocument);
+          const explainJson = JSON.stringify(response);
           switch (explainValue) {
             case true:
             case 'allPlansExecution':
