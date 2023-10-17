@@ -719,7 +719,11 @@ export class OpMsgResponse {
 const MESSAGE_HEADER_SIZE = 16;
 const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compressorID
 
-/** @internal */
+/**
+ * @internal
+ *
+ * An OP_COMPRESSED request wraps either an OP_QUERY or OP_MSG message.
+ */
 export class OpCompressedRequest {
   constructor(
     private command: WriteProtocolMessageType,

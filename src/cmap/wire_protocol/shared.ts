@@ -6,7 +6,7 @@ import type { Server } from '../../sdam/server';
 import type { ServerDescription } from '../../sdam/server_description';
 import type { Topology } from '../../sdam/topology';
 import { TopologyDescription } from '../../sdam/topology_description';
-import type { Connection, ModernConnection } from '../connection';
+import type { Connection } from '../connection';
 
 export interface ReadPreferenceOption {
   readPreference?: ReadPreferenceLike;
@@ -33,9 +33,7 @@ export function getReadPreference(options?: ReadPreferenceOption): ReadPreferenc
   return readPreference;
 }
 
-export function isSharded(
-  topologyOrServer?: Topology | Server | Connection | ModernConnection
-): boolean {
+export function isSharded(topologyOrServer?: Topology | Server | Connection): boolean {
   if (topologyOrServer == null) {
     return false;
   }

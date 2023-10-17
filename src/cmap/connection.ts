@@ -17,7 +17,6 @@ import {
 } from '../constants';
 import {
   MongoCompatibilityError,
-  MongoDecompressionError,
   MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
@@ -49,7 +48,6 @@ import {
   CommandSucceededEvent
 } from './command_monitoring_events';
 import {
-  type MessageHeader,
   OpCompressedRequest,
   OpMsgRequest,
   type OpMsgResponse,
@@ -61,8 +59,7 @@ import type { Stream } from './connect';
 import type { ClientMetadata } from './handshake/client_metadata';
 import { MessageStream, type OperationDescription } from './message_stream';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
-import { decompress, decompressResponse } from './wire_protocol/compression';
-import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
+import { decompressResponse } from './wire_protocol/compression';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -1166,6 +1163,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     if (
+      // @ts-expect-error ModernConnections cannot be passed as connections
       isSharded(this) &&
       !this.supportsOpMsg &&
       readPreference &&
@@ -1202,8 +1200,20 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
 const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
 
-/** @internal */
-export async function* bufferMessages(connection: ModernConnection): AsyncGenerator<Buffer> {
+/**
+ * @internal
+ *
+ * This helper reads chucks of data out of a socket and buffers them until it has received a
+ * full wire protocol message.
+ *
+ * By itself, produces an infinite async generator of wire protocol messages and consumers must end
+ * the stream by calling `return` on the generator.
+ *
+ * Note that `for-await` loops call `return` automatically when the loop is exited.
+ */
+export async function* readWireProtocolMessages(
+  connection: ModernConnection
+): AsyncGenerator<Buffer> {
   const bufferPool = new BufferPool();
   const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
   for await (const [chunk] of on(connection.socket, 'data')) {
@@ -1232,7 +1242,12 @@ export async function* bufferMessages(connection: ModernConnection): AsyncGenera
   }
 }
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Writes an OP_MSG or OP_QUERY request to the socket, optionally compressing the command. This method
+ * waits until the socket's buffer has emptied (the Nodejs socket `drain` event has fired).
+ */
 export async function writeCommand(
   connection: ModernConnection,
   command: WriteProtocolMessageType,
@@ -1251,11 +1266,19 @@ export async function writeCommand(
   await drained;
 }
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Returns an async generator that yields full wire protocol messages from the underlying socket.  This function
+ * yields messages until `moreToCome` is false or not present in a response, or the caller cancels the request
+ * by calling `return` on the generator.
+ *
+ * Note that `for-await` loops call `return` automatically when the loop is exited.
+ */
 export async function* readMany(
   connection: ModernConnection
 ): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-  for await (const message of bufferMessages(connection)) {
+  for await (const message of readWireProtocolMessages(connection)) {
     const response = await decompressResponse(message);
     yield response;
 
@@ -1265,7 +1288,11 @@ export async function* readMany(
   }
 }
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Reads a single wire protocol message out of a connection.
+ */
 export async function read(connection: ModernConnection): Promise<OpMsgResponse | OpQueryResponse> {
   for await (const value of readMany(connection)) {
     return value;
