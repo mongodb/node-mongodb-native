@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { on, once } from 'events';
 import { Readable, Writable } from 'stream';
 
-import { LEGACY_HELLO_COMMAND, MessageStream, Msg } from '../../mongodb';
+import { LEGACY_HELLO_COMMAND, MessageStream, OpMsgRequest } from '../../mongodb';
 import { bufferToStream, generateOpMsgBuffer } from '../../tools/utils';
 
 describe('MessageStream', function () {
@@ -139,7 +139,7 @@ describe('MessageStream', function () {
       const messageStream = new MessageStream();
       messageStream.pipe(writeableStream);
 
-      const command = new Msg('admin', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
+      const command = new OpMsgRequest('admin', { [LEGACY_HELLO_COMMAND]: 1 }, { requestId: 3 });
       messageStream.writeCommand(command, {
         started: 0,
         command: true,

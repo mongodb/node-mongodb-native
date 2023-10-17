@@ -136,6 +136,7 @@ export {
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
+export { decompressResponse } from './cmap/wire_protocol/compression';
 export {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
@@ -250,14 +251,15 @@ export type {
   OIDCRequestFunction
 } from './cmap/auth/mongodb_oidc';
 export type {
-  BinMsg,
   MessageHeader,
-  Msg,
+  OpCompressedRequest,
   OpMsgOptions,
+  OpMsgRequest,
+  OpMsgResponse,
   OpQueryOptions,
+  OpQueryRequest,
+  OpQueryResponse,
   OpResponseOptions,
-  Query,
-  Response,
   WriteProtocolMessageType
 } from './cmap/commands';
 export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
@@ -267,7 +269,11 @@ export type {
   ConnectionEvents,
   ConnectionOptions,
   DestroyOptions,
-  ProxyOptions
+  ModernConnection,
+  ProxyOptions,
+  read,
+  readMany,
+  writeCommand
 } from './cmap/connection';
 export type {
   CloseOptions,
