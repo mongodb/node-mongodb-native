@@ -3,7 +3,6 @@ import { on } from 'events';
 import * as sinon from 'sinon';
 
 import {
-  AbstractCursor,
   Collection,
   CommandFailedEvent,
   CommandSucceededEvent,
