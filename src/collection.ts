@@ -493,7 +493,10 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: FindOptions = {}
   ): Promise<WithId<TSchema> | null> {
-    return this.find(filter, options).limit(-1).batchSize(1).next();
+    const cursor = this.find(filter, options).limit(-1).batchSize(1);
+    const res = await cursor.next();
+    await cursor.close();
+    return res;
   }
 
   /**
