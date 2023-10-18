@@ -117,7 +117,7 @@ describe('CRUD API', function () {
           if (this.currentTest) {
             this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
           }
-          return this.currentTest?.skip();
+          return this.skip();
         }
 
         const failPoint: FailPoint = {
@@ -132,7 +132,11 @@ describe('CRUD API', function () {
         await client.db().admin().command(failPoint);
       });
 
-      afterEach(async () => {
+      afterEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          return;
+        }
+
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'off',
