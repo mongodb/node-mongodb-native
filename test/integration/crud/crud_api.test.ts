@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { on } from 'events';
+import * as semver from 'semver';
 import * as sinon from 'sinon';
 
 import {
@@ -111,7 +112,14 @@ describe('CRUD API', function () {
     });
 
     describe('when the find operation fails', () => {
-      beforeEach(async () => {
+      beforeEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          if (this.currentTest) {
+            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
+          }
+          return this.currentTest?.skip();
+        }
+
         const failPoint: FailPoint = {
           configureFailPoint: 'failCommand',
           mode: 'alwaysOn',
