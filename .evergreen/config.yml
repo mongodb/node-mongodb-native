@@ -3812,8 +3812,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
-        vars:
-          TEST_NPM_SCRIPT: check:csfle
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -4157,7 +4155,6 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -4208,7 +4205,6 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
-      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
