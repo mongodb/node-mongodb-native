@@ -850,31 +850,37 @@ describe('Connection String', function () {
       sinon.restore();
     });
 
-    it('when option is `stderr`, it is accessible through mongoLogger.logDestination', function () {
-      const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
-        [loggerFeatureFlag]: true
+    context('when option is `stderr`', function () {
+      it('it is accessible through mongoLogger.logDestination', function () {
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stderr', {
+          [loggerFeatureFlag]: true
+        });
+        const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
+        client.options.mongoLoggerOptions.logDestination.write(log);
+        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
       });
-      const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
-      client.options.mongoLoggerOptions.logDestination.write(log);
-      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
     });
 
-    it('when option is `stdout`, it is accessible through mongoLogger.logDestination', function () {
-      const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
-        [loggerFeatureFlag]: true
+    context('when option is `stdout`', function () {
+      it('it is accessible through mongoLogger.logDestination', function () {
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdout', {
+          [loggerFeatureFlag]: true
+        });
+        const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
+        client.options.mongoLoggerOptions.logDestination.write(log);
+        expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
       });
-      const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
-      client.options.mongoLoggerOptions.logDestination.write(log);
-      expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
     });
 
-    it('when option is invalid, it defaults to stderr', function () {
-      const client = new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', {
-        [loggerFeatureFlag]: true
+    context('when option is invalid', function () {
+      it('it defaults to stderr', function () {
+        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', {
+          [loggerFeatureFlag]: true
+        });
+        const log: Log = { t: new Date(), c: 'ConnectionStringInvalidOption', s: 'error' };
+        client.options.mongoLoggerOptions.logDestination.write(log);
+        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
       });
-      const log: Log = { t: new Date(), c: 'ConnectionStringInvalidOption', s: 'error' };
-      client.options.mongoLoggerOptions.logDestination.write(log);
-      expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
     });
   });
 });
