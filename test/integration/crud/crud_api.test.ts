@@ -75,7 +75,7 @@ describe('CRUD API', function () {
     await client.close();
   });
 
-  describe.only('findOne()', () => {
+  describe('findOne()', () => {
     let client: MongoClient;
     let events;
     let collection: Collection<{ _id: number }>;
