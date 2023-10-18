@@ -488,22 +488,24 @@ BUILD_VARIANTS.push({
   tasks: ['test-rapid-server']
 });
 
-const unitTestTasks = Array.from((function* () {
-  for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
-    yield {
-      name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
-      tags: ['unit-tests'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION,
-          NPM_VERSION
-        }),
-        { func: 'install dependencies' },
-        { func: 'run unit tests' }
-      ]
+const unitTestTasks = Array.from(
+  (function* () {
+    for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
+      yield {
+        name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
+        tags: ['unit-tests'],
+        commands: [
+          updateExpansions({
+            NODE_LTS_VERSION,
+            NPM_VERSION
+          }),
+          { func: 'install dependencies' },
+          { func: 'run unit tests' }
+        ]
+      };
     }
-  }
-})())
+  })()
+);
 
 // singleton build variant for linting
 SINGLETON_TASKS.push(
@@ -576,11 +578,7 @@ BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: [
-    '.unit-tests',
-    '.lint-checks',
-    '.typescript-compilation'
-  ]
+  tasks: ['.unit-tests', '.lint-checks', '.typescript-compilation']
 });
 
 BUILD_VARIANTS.push({
