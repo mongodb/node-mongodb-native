@@ -1,7 +1,19 @@
 import { expect } from 'chai';
 import { on } from 'events';
+import * as semver from 'semver';
+import * as sinon from 'sinon';
 
-import { type MongoClient, MongoError, ObjectId, ReturnDocument } from '../../mongodb';
+import {
+  Collection,
+  CommandFailedEvent,
+  CommandSucceededEvent,
+  type MongoClient,
+  MongoError,
+  MongoServerError,
+  ObjectId,
+  ReturnDocument
+} from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
 import { assert as test } from '../shared';
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
@@ -31,6 +43,8 @@ describe('CRUD API', function () {
   });
 
   afterEach(async function () {
+    sinon.restore();
+
     await client?.close();
     client = null;
 
@@ -59,6 +73,87 @@ describe('CRUD API', function () {
 
     await collection.drop();
     await client.close();
+  });
+
+  describe('findOne()', () => {
+    let client: MongoClient;
+    let events;
+    let collection: Collection<{ _id: number }>;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({ monitorCommands: true });
+      events = [];
+      client.on('commandSucceeded', commandSucceeded =>
+        commandSucceeded.commandName === 'find' ? events.push(commandSucceeded) : null
+      );
+      client.on('commandFailed', commandFailed =>
+        commandFailed.commandName === 'find' ? events.push(commandFailed) : null
+      );
+
+      collection = client.db('findOne').collection('findOne');
+      await collection.drop().catch(() => null);
+      await collection.insertMany([{ _id: 1 }, { _id: 2 }]);
+    });
+
+    afterEach(async () => {
+      await collection.drop().catch(() => null);
+      await client.close();
+    });
+
+    describe('when the operation succeeds', () => {
+      it('the cursor for findOne is closed', async function () {
+        const spy = sinon.spy(Collection.prototype, 'find');
+        const result = await collection.findOne({});
+        expect(result).to.deep.equal({ _id: 1 });
+        expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+      });
+    });
+
+    describe('when the find operation fails', () => {
+      beforeEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          if (this.currentTest) {
+            this.currentTest.skipReason = `Cannot run fail points on server version: ${this.configuration.version}`;
+          }
+          return this.skip();
+        }
+
+        const failPoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: 'alwaysOn',
+          data: {
+            failCommands: ['find'],
+            // 1 == InternalError, but this value not important to the test
+            errorCode: 1
+          }
+        };
+        await client.db().admin().command(failPoint);
+      });
+
+      afterEach(async function () {
+        if (semver.lt(this.configuration.version, '4.2.0')) {
+          return;
+        }
+
+        const failPoint: FailPoint = {
+          configureFailPoint: 'failCommand',
+          mode: 'off',
+          data: { failCommands: ['find'] }
+        };
+        await client.db().admin().command(failPoint);
+      });
+
+      it('the cursor for findOne is closed', async function () {
+        const spy = sinon.spy(Collection.prototype, 'find');
+        const error = await collection.findOne({}).catch(error => error);
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
+        expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
+      });
+    });
   });
 
   context('when creating a cursor with find', () => {
