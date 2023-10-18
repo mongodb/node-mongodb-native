@@ -75,7 +75,7 @@ describe('CRUD API', function () {
     await client.close();
   });
 
-  describe('findOne()', () => {
+  describe.only('findOne()', () => {
     let client: MongoClient;
     let events;
     let collection: Collection<{ _id: number }>;
@@ -107,6 +107,7 @@ describe('CRUD API', function () {
         expect(result).to.deep.equal({ _id: 1 });
         expect(events.at(0)).to.be.instanceOf(CommandSucceededEvent);
         expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
       });
     });
 
@@ -139,6 +140,7 @@ describe('CRUD API', function () {
         expect(error).to.be.instanceOf(MongoServerError);
         expect(events.at(0)).to.be.instanceOf(CommandFailedEvent);
         expect(spy.returnValues.at(0)).to.have.property('closed', true);
+        expect(spy.returnValues.at(0)).to.have.nested.property('session.hasEnded', true);
       });
     });
   });
