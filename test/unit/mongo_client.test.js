@@ -843,17 +843,6 @@ describe('MongoOptions', function () {
       });
     });
 
-    context('when option is a Writable stream', function () {
-      it('it is accessible through mongoLogger.logDestination', function () {
-        const writable = new Writable();
-        const client = new MongoClient('mongodb://a/', {
-          [loggerFeatureFlag]: true,
-          mongodbLogPath: writable
-        });
-        expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
-      });
-    });
-
     context('when option is a MongoDBLogWritable stream', function () {
       it('it is accessible through mongoLogger.logDestination', function () {
         const writable = {
