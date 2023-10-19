@@ -33,6 +33,9 @@ import {
   ReadPreference,
   SENSITIVE_COMMANDS,
   type ServerDescriptionChangedEvent,
+  type ServerHeartbeatFailedEvent,
+  type ServerHeartbeatStartedEvent,
+  type ServerHeartbeatSucceededEvent,
   type TopologyDescription,
   WriteConcern
 } from '../../mongodb';
@@ -97,7 +100,11 @@ export type CmapEvent =
   | ConnectionCheckedOutEvent
   | ConnectionCheckedInEvent
   | ConnectionPoolClearedEvent;
-export type SdamEvent = ServerDescriptionChangedEvent;
+export type SdamEvent =
+  | ServerDescriptionChangedEvent
+  | ServerHeartbeatStartedEvent
+  | ServerHeartbeatFailedEvent
+  | ServerHeartbeatSucceededEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
@@ -126,7 +133,12 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedOut'
     | 'connectionCheckedIn'
   )[];
-  observedSdamEvents: 'serverDescriptionChangedEvent'[];
+  observedSdamEvents: (
+    | 'serverDescriptionChangedEvent'
+    | 'serverHeartbeatStartedEvent'
+    | 'serverHeartbeatFailedEvent'
+    | 'serverHeartbeatSucceededEvent'
+  )[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
 
@@ -151,7 +163,10 @@ export class UnifiedMongoClient extends MongoClient {
   } as const;
 
   static SDAM_EVENT_NAME_LOOKUP = {
-    serverDescriptionChangedEvent: 'serverDescriptionChanged'
+    serverDescriptionChangedEvent: 'serverDescriptionChanged',
+    serverHeartbeatStartedEvent: 'serverHeartbeatStarted',
+    serverHeartbeatFailedEvent: 'serverHeartbeatFailed',
+    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded'
   } as const;
 
   static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {

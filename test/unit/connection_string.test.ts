@@ -27,6 +27,43 @@ import {
 } from '../mongodb';
 
 describe('Connection String', function () {
+  context('when serverMonitoringMode is set', function () {
+    context('when it is valid', function () {
+      context('when set in the connection string', function () {
+        it('sets the mode', function () {
+          const options = parseOptions('mongodb://localhost:27017/?serverMonitoringMode=poll');
+          expect(options.serverMonitoringMode).to.equal('poll');
+        });
+      });
+
+      context('when set in the options', function () {
+        it('sets the mode', function () {
+          const options = parseOptions('mongodb://localhost:27017', {
+            serverMonitoringMode: 'poll'
+          });
+          expect(options.serverMonitoringMode).to.equal('poll');
+        });
+      });
+    });
+
+    context('when it is not valid', function () {
+      context('when set in the connection string', function () {
+        it('throws a parse error', function () {
+          expect(() =>
+            parseOptions('mongodb://localhost:27017/?serverMonitoringMode=invalid')
+          ).to.throw(MongoParseError, /serverMonitoringMode/);
+        });
+      });
+    });
+  });
+
+  context('when serverMonitoringMode is not set', function () {
+    it('defaults to auto', function () {
+      const options = parseOptions('mongodb://localhost:27017');
+      expect(options.serverMonitoringMode).to.equal('auto');
+    });
+  });
+
   it('should not support auth passed with user', function () {
     const optionsWithUser = {
       authMechanism: 'SCRAM-SHA-1',

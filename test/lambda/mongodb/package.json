@@ -5,6 +5,6 @@
   "main": "app.mjs",
   "license": "MIT",
   "dependencies": {
-    "mongodb": "^5.0.1"
+    "mongodb": "mongodb/node-mongodb-native#NODE-5197-server-monitoring-mode"
   }
 }

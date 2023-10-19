@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { type Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
 import { Connection, type ConnectionOptions } from '../cmap/connection';
+import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
@@ -44,6 +45,11 @@ function isInCloseState(monitor: Monitor) {
   return monitor.s.state === STATE_CLOSED || monitor.s.state === STATE_CLOSING;
 }
 
+/** @public */
+export const ServerMonitoringModes = ['auto', 'poll', 'stream'];
+/** @public */
+export type ServerMonitoringMode = (typeof ServerMonitoringModes)[number];
+
 /** @internal */
 export interface MonitorPrivate {
   state: string;
@@ -55,6 +61,7 @@ export interface MonitorOptions
   connectTimeoutMS: number;
   heartbeatFrequencyMS: number;
   minHeartbeatFrequencyMS: number;
+  serverMonitoringMode: ServerMonitoringMode;
 }
 
 /** @public */
@@ -73,9 +80,16 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   s: MonitorPrivate;
   address: string;
   options: Readonly<
-    Pick<MonitorOptions, 'connectTimeoutMS' | 'heartbeatFrequencyMS' | 'minHeartbeatFrequencyMS'>
+    Pick<
+      MonitorOptions,
+      | 'connectTimeoutMS'
+      | 'heartbeatFrequencyMS'
+      | 'minHeartbeatFrequencyMS'
+      | 'serverMonitoringMode'
+    >
   >;
   connectOptions: ConnectionOptions;
+  isRunningInFaasEnv: boolean;
   [kServer]: Server;
   [kConnection]?: Connection;
   [kCancellationToken]: CancellationToken;
@@ -103,8 +117,11 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.options = Object.freeze({
       connectTimeoutMS: options.connectTimeoutMS ?? 10000,
       heartbeatFrequencyMS: options.heartbeatFrequencyMS ?? 10000,
-      minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500
+      minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500,
+      serverMonitoringMode: options.serverMonitoringMode
     });
+    console.log(getFAASEnv());
+    this.isRunningInFaasEnv = getFAASEnv() != null;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -207,10 +224,26 @@ function resetMonitorState(monitor: Monitor) {
   monitor[kConnection] = undefined;
 }
 
+function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion | null): boolean {
+  // If we have no topology version we always poll no matter
+  // what the user provided.
+  if (topologyVersion == null) return false;
+
+  const serverMonitoringMode = monitor.options.serverMonitoringMode;
+  if (serverMonitoringMode === 'poll') return false;
+  if (serverMonitoringMode === 'stream') return true;
+
+  // If we are in auto mode, we need to figure out if we're in a FaaS
+  // environment or not and choose the appropriate mode.
+  if (monitor.isRunningInFaasEnv) return false;
+  return true;
+}
+
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
   const topologyVersion = monitor[kServer].description.topologyVersion;
-  const isAwaitable = topologyVersion != null;
+  console.log('checkServer', topologyVersion);
+  const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
   monitor.emit(
     Server.SERVER_HEARTBEAT_STARTED,
     new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
@@ -286,7 +319,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       const duration =
         isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);
 
-      const awaited = isAwaitable && hello.topologyVersion != null;
+      console.log('command', topologyVersion, hello.topologyVersion, hello);
+      const awaited = useStreamingProtocol(monitor, hello.topologyVersion);
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, awaited)
@@ -370,7 +404,8 @@ function monitorServer(monitor: Monitor) {
       }
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
-      if (hello && hello.topologyVersion) {
+      console.log('checkServerCallback', hello?.topologyVersion);
+      if (useStreamingProtocol(monitor, hello?.topologyVersion)) {
         setTimeout(() => {
           if (!isInCloseState(monitor)) {
             monitor[kMonitorId]?.wake();

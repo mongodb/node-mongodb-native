@@ -65,6 +65,7 @@ import {
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
 } from './events';
+import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
@@ -143,6 +144,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   directConnection: boolean;
   loadBalanced: boolean;
   metadata: ClientMetadata;
+  serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;
   [featureFlag: symbol]: any;
