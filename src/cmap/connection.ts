@@ -1251,7 +1251,7 @@ export async function* readWireProtocolMessages(
 export async function writeCommand(
   connection: ModernConnection,
   command: WriteProtocolMessageType,
-  options: OperationDescription
+  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
 ): Promise<void> {
   const drained = once(connection.socket, 'drain');
   const finalCommand =
