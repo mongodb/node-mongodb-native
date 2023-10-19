@@ -364,6 +364,52 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return true;
       }
     };
+    this.checkForNonGenuineHosts();
+  }
+
+  /** @internal */
+  private checkForNonGenuineHosts() {
+    if (this.mongoLogger && this.mongoLogger.logDestination) {
+      const documentDBHostnames = this[kOptions].hosts.filter(
+        (hostAddress: HostAddress) =>
+          hostAddress.host &&
+          (hostAddress.host.endsWith('.docdb.amazonaws.com') ||
+            hostAddress.host.endsWith('.docdb-elastic.amazonaws.com'))
+      );
+
+      const srvHostIsDocumentDB =
+        this[kOptions].srvHost &&
+        (this[kOptions].srvHost.endsWith('.docdb.amazonaws.com') ||
+          this[kOptions].srvHost.endsWith('.docdb-elastic.amazonaws.com'));
+
+      if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
+        this.mongoLogger.logDestination.write({
+          t: new Date(),
+          c: 'topology',
+          s: 'info',
+          message:
+            'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb'
+        });
+      }
+
+      const cosmosDBHostnames = this[kOptions].hosts.filter(
+        (hostAddress: HostAddress) =>
+          hostAddress.host && hostAddress.host.endsWith('.cosmos.azure.com')
+      );
+
+      const srvHostIsCosmosDB =
+        this[kOptions].srvHost && this[kOptions].srvHost.endsWith('.cosmos.azure.com');
+
+      if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
+        this.mongoLogger.logDestination.write({
+          t: new Date(),
+          c: 'topology',
+          s: 'info',
+          message:
+            'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb'
+        });
+      }
+    }
   }
 
   /** @see MongoOptions */

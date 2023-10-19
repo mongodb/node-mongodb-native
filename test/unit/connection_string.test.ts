@@ -883,4 +883,48 @@ describe('Connection String', function () {
       });
     });
   });
+
+  describe('non-genuine hosts', () => {
+    const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    const docDBmsg =
+      'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
+    const cosmosDBmsg =
+      'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb';
+    const test_cases = [
+      ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
+      ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],
+      ['SRV example uri', 'mongodb+srv://a.example.com/', ''],
+      ['SRV default uri', 'mongodb+srv://a.mongodb.net/', ''],
+      ['non-SRV cosmosDB uri', 'mongodb://a.mongo.cosmos.azure.com:19555/', cosmosDBmsg],
+      ['non-SRV documentDB uri', 'mongodb://a.docdb.amazonaws.com:27017/', docDBmsg],
+      ['non-SRV documentDB uri ', 'mongodb://a.docdb-elastic.amazonaws.com:27017/', docDBmsg],
+      ['SRV cosmosDB uri', 'mongodb+srv://a.mongo.cosmos.azure.com/', cosmosDBmsg],
+      ['SRV documentDB uri', 'mongodb+srv://a.docdb.amazonaws.com/', docDBmsg],
+      ['SRV documentDB uri 2', 'mongodb+srv://a.docdb-elastic.amazonaws.com/', docDBmsg]
+    ];
+
+    context('when logging is turned on', () => {
+      for (const [name, uri, message] of test_cases) {
+        it(`${name} triggers ${message.length === 0 ? 'no' : 'correct info'} msg`, () => {
+          const stream = {
+            buffer: [],
+            write(log) {
+              this.buffer.push(log);
+            }
+          };
+          new MongoClient(uri, {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: stream
+          });
+
+          if (message.length > 0) {
+            expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.have.property('message', message);
+          } else {
+            expect(stream.buffer).to.have.lengthOf(0);
+          }
+        });
+      }
+    });
+  });
 });
