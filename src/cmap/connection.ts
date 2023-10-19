@@ -810,8 +810,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kClusterTime]: Document | null;
 
-  bufferPool: BufferPool;
-
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
   /** @event */
@@ -875,8 +873,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     // hook the message stream up to the passed in stream
     this.socket.pipe(this[kMessageStream]);
     this[kMessageStream].pipe(this.socket);
-
-    this.bufferPool = new BufferPool();
   }
 
   get description(): StreamDescription {
