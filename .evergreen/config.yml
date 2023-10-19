@@ -4155,6 +4155,7 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
@@ -4205,6 +4206,7 @@ buildvariants:
       - test-auth-ldap
       - test-auth-oidc
       - test-socks5
+      - test-socks5-csfle
       - test-socks5-tls
       - test-tls-support-latest
       - test-tls-support-6.0
