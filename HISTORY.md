@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.2.0](https://github.com/mongodb/node-mongodb-native/compare/v6.1.0...v6.2.0) (2023-10-19)
+
+
+### Features
+
+* **NODE-5613:** add `awaited` field to SDAM heartbeat events ([#3895](https://github.com/mongodb/node-mongodb-native/issues/3895)) ([b50aadc](https://github.com/mongodb/node-mongodb-native/commit/b50aadca7e5e471283ebaccff5b98c099c57fa55))
+* update bson to 6.2.0 ([#3898](https://github.com/mongodb/node-mongodb-native/issues/3898)) ([32b7176](https://github.com/mongodb/node-mongodb-native/commit/32b7176af6af4d6bd455200da64d0fde07ce0806))
+
+
+### Bug Fixes
+
+* **NODE-5496:** remove client-side collection and database name check validation ([#3873](https://github.com/mongodb/node-mongodb-native/issues/3873)) ([98550c6](https://github.com/mongodb/node-mongodb-native/commit/98550c6ad5b7c268707d3e9e2367ca56f71298ad))
+* **NODE-5628:** bulkWriteResult.insertedIds does not filter out _ids that are not actually inserted ([#3867](https://github.com/mongodb/node-mongodb-native/issues/3867)) ([09f2a67](https://github.com/mongodb/node-mongodb-native/commit/09f2a6796b4f1ecec4880678e19375a07e446949))
+* **NODE-5706:** make findOne() close implicit session to avoid memory leak ([#3897](https://github.com/mongodb/node-mongodb-native/issues/3897)) ([995d138](https://github.com/mongodb/node-mongodb-native/commit/995d13805d4d4e35eac41c2264979dd84b1e4dd3))
+
 ## [6.1.0](https://github.com/mongodb/node-mongodb-native/compare/v6.0.0...v6.1.0) (2023-09-14)
 
 
