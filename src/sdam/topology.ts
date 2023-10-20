@@ -1,4 +1,3 @@
-import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
@@ -43,7 +42,8 @@ import {
   List,
   makeStateMachine,
   ns,
-  shuffle
+  shuffle,
+  TimeoutController
 } from '../utils';
 import {
   _advanceClusterTime,
@@ -94,8 +94,8 @@ export interface ServerSelectionRequest {
   serverSelector: ServerSelector;
   transaction?: Transaction;
   callback: ServerSelectionCallback;
-  timer?: NodeJS.Timeout;
   [kCancelled]?: boolean;
+  timeoutController: TimeoutController;
 }
 
 /** @internal */
@@ -556,22 +556,20 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       transaction,
-      callback
+      callback,
+      timeoutController: new TimeoutController(options.serverSelectionTimeoutMS)
     };
 
-    const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS;
-    if (serverSelectionTimeoutMS) {
-      waitQueueMember.timer = setTimeout(() => {
-        waitQueueMember[kCancelled] = true;
-        waitQueueMember.timer = undefined;
-        const timeoutError = new MongoServerSelectionError(
-          `Server selection timed out after ${serverSelectionTimeoutMS} ms`,
-          this.description
-        );
+    waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
+      waitQueueMember[kCancelled] = true;
+      waitQueueMember.timeoutController.clear();
+      const timeoutError = new MongoServerSelectionError(
+        `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
+        this.description
+      );
 
-        waitQueueMember.callback(timeoutError);
-      }, serverSelectionTimeoutMS);
-    }
+      waitQueueMember.callback(timeoutError);
+    });
 
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
@@ -842,9 +840,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
       continue;
     }
 
-    if (waitQueueMember.timer) {
-      clearTimeout(waitQueueMember.timer);
-    }
+    waitQueueMember.timeoutController.clear();
 
     if (!waitQueueMember[kCancelled]) {
       waitQueueMember.callback(err);
@@ -878,9 +874,7 @@ function processWaitQueue(topology: Topology) {
         ? serverSelector(topology.description, serverDescriptions)
         : serverDescriptions;
     } catch (e) {
-      if (waitQueueMember.timer) {
-        clearTimeout(waitQueueMember.timer);
-      }
+      waitQueueMember.timeoutController.clear();
 
       waitQueueMember.callback(e);
       continue;
@@ -917,9 +911,7 @@ function processWaitQueue(topology: Topology) {
       transaction.pinServer(selectedServer);
     }
 
-    if (waitQueueMember.timer) {
-      clearTimeout(waitQueueMember.timer);
-    }
+    waitQueueMember.timeoutController.clear();
 
     waitQueueMember.callback(undefined, selectedServer);
   }

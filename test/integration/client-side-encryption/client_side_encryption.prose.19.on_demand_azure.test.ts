@@ -15,8 +15,8 @@ const metadata: MongoDBMetadataUI = {
 
 const dataKeyOptions = {
   masterKey: {
-    keyVaultEndpoint: 'https://keyvault-drivers-2411.vault.azure.net/keys/',
-    keyName: 'KEY-NAME'
+    keyVaultEndpoint: 'https://drivers-2411-keyvault.vault.azure.net/',
+    keyName: 'drivers-2411-keyname'
   }
 };
 

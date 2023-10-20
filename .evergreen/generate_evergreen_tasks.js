@@ -1,7 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const semver = require('semver');
-const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
   MONGODB_VERSIONS,
@@ -489,22 +488,24 @@ BUILD_VARIANTS.push({
   tasks: ['test-rapid-server']
 });
 
-const unitTestTasks = Array.from((function* () {
-  for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
-    yield {
-      name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
-      tags: ['unit-tests'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION,
-          NPM_VERSION
-        }),
-        { func: 'install dependencies' },
-        { func: 'run unit tests' }
-      ]
+const unitTestTasks = Array.from(
+  (function* () {
+    for (const { versionNumber: NODE_LTS_VERSION, npmVersion: NPM_VERSION } of versions) {
+      yield {
+        name: `run-unit-tests-node-${NODE_LTS_VERSION}`,
+        tags: ['unit-tests'],
+        commands: [
+          updateExpansions({
+            NODE_LTS_VERSION,
+            NPM_VERSION
+          }),
+          { func: 'install dependencies' },
+          { func: 'run unit tests' }
+        ]
+      };
     }
-  }
-})())
+  })()
+);
 
 // singleton build variant for linting
 SINGLETON_TASKS.push(
@@ -577,11 +578,7 @@ BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: [
-    '.unit-tests',
-    '.lint-checks',
-    '.typescript-compilation'
-  ]
+  tasks: ['.unit-tests', '.lint-checks', '.typescript-compilation']
 });
 
 BUILD_VARIANTS.push({
@@ -589,13 +586,6 @@ BUILD_VARIANTS.push({
   display_name: 'Generate Combined Coverage',
   run_on: DEFAULT_OS,
   tasks: ['download-and-merge-coverage']
-});
-
-BUILD_VARIANTS.push({
-  name: 'mongosh_integration_tests',
-  display_name: 'mongosh integration tests',
-  run_on: UBUNTU_OS,
-  tasks: mongoshTasks.map(({ name }) => name)
 });
 
 // special case for MONGODB-AWS authentication
@@ -770,8 +760,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(SINGLETON_TASKS)
   .concat(AUTH_DISABLED_TASKS)
   .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS)
-  .concat(mongoshTasks);
+  .concat(MONGOCRYPTD_CSFLE_TASKS);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 
