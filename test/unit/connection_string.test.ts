@@ -841,12 +841,12 @@ describe('Connection String', function () {
     let stderrStub;
     let stdoutStub;
 
-    before(() => {
+    beforeEach(() => {
       stdoutStub = sinon.stub(process.stdout);
       stderrStub = sinon.stub(process.stderr);
     });
 
-    after(() => {
+    afterEach(() => {
       sinon.restore();
     });
 

@@ -1,6 +1,7 @@
+('use strict');
+
 import { inspect } from 'util';
 
-('use strict');
 const os = require('os');
 const fs = require('fs');
 const { expect } = require('chai');
@@ -822,12 +823,12 @@ describe('MongoOptions', function () {
     let stderrStub;
     let stdoutStub;
 
-    before(() => {
+    beforeEach(() => {
       stdoutStub = sinon.stub(process.stdout);
       stderrStub = sinon.stub(process.stderr);
     });
 
-    after(() => {
+    afterEach(() => {
       sinon.restore();
     });
 
