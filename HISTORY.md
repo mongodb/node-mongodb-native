@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.9.1](https://github.com/mongodb/node-mongodb-native/compare/v5.9.0...v5.9.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* **NODE-5627:** BulkWriteResult.insertedIds includes ids that were not inserted ([#3870](https://github.com/mongodb/node-mongodb-native/issues/3870)) ([d766ae2](https://github.com/mongodb/node-mongodb-native/commit/d766ae22f3cfc6679ee3f7c068ebb8596beb4331))
+* **NODE-5691:** make findOne() close implicit session to avoid memory leak ([#3889](https://github.com/mongodb/node-mongodb-native/issues/3889)) ([0d6c9cd](https://github.com/mongodb/node-mongodb-native/commit/0d6c9cde3badadc915821aa1f83d16f34dc29ee0))
+
 ## [5.9.0](https://github.com/mongodb/node-mongodb-native/compare/v5.8.1...v5.9.0) (2023-09-14)
 
 
