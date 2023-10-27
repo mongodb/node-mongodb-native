@@ -116,7 +116,8 @@ describe('class MongoLogger', function () {
         ['MONGODB_LOG_COMMAND', 'command'],
         ['MONGODB_LOG_TOPOLOGY', 'topology'],
         ['MONGODB_LOG_SERVER_SELECTION', 'serverSelection'],
-        ['MONGODB_LOG_CONNECTION', 'connection']
+        ['MONGODB_LOG_CONNECTION', 'connection'],
+        ['MONGODB_LOG_CLIENT', 'client']
       ]);
 
       function* makeValidOptions(): Generator<[string, string]> {

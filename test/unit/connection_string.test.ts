@@ -885,6 +885,14 @@ describe('Connection String', function () {
   });
 
   describe('non-genuine hosts', () => {
+    beforeEach(() => {
+      process.env.MONGODB_LOG_CLIENT = 'info';
+    });
+
+    afterEach(() => {
+      process.env.MONGODB_LOG_CLIENT = undefined;
+    });
+
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
     const docDBmsg =
       'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
@@ -895,12 +903,13 @@ describe('Connection String', function () {
       ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],
       ['SRV example uri', 'mongodb+srv://a.example.com/', ''],
       ['SRV default uri', 'mongodb+srv://a.mongodb.net/', ''],
-      ['non-SRV cosmosDB uri', 'mongodb://a.mongo.cosmos.azure.com:19555/', cosmosDBmsg],
-      ['non-SRV documentDB uri', 'mongodb://a.docdb.amazonaws.com:27017/', docDBmsg],
-      ['non-SRV documentDB uri ', 'mongodb://a.docdb-elastic.amazonaws.com:27017/', docDBmsg],
-      ['SRV cosmosDB uri', 'mongodb+srv://a.mongo.cosmos.azure.com/', cosmosDBmsg],
-      ['SRV documentDB uri', 'mongodb+srv://a.docdb.amazonaws.com/', docDBmsg],
-      ['SRV documentDB uri 2', 'mongodb+srv://a.docdb-elastic.amazonaws.com/', docDBmsg]
+      // ensure case insensitity
+      ['non-SRV cosmosDB uri', 'mongodb://a.mongo.COSmos.aZure.com:19555/', cosmosDBmsg],
+      ['non-SRV documentDB uri', 'mongodb://a.docDB.AmazonAws.com:27017/', docDBmsg],
+      ['non-SRV documentDB uri ', 'mongodb://a.docdB-eLasTic.amazonaws.com:27017/', docDBmsg],
+      ['SRV cosmosDB uri', 'mongodb+srv://a.mongo.COSmos.aZure.com/', cosmosDBmsg],
+      ['SRV documentDB uri', 'mongodb+srv://a.docDB.AmazonAws.com/', docDBmsg],
+      ['SRV documentDB uri 2', 'mongodb+srv://a.docdB-eLastic.amazonaws.com/', docDBmsg]
     ];
 
     context('when logging is turned on', () => {
@@ -919,6 +928,7 @@ describe('Connection String', function () {
 
           if (message.length > 0) {
             expect(stream.buffer).to.have.lengthOf(1);
+            expect(stream.buffer[0]).to.have.property('c', 'client');
             expect(stream.buffer[0]).to.have.property('message', message);
           } else {
             expect(stream.buffer).to.have.lengthOf(0);
