@@ -638,12 +638,20 @@ export function hasSessionSupport(conn: Connection): boolean {
 }
 
 function supportsOpMsg(conn: Connection) {
-  const description = conn.description;
-  if (description == null) {
+  const { description, serverApi, loadBalanced } = conn;
+
+  if (description == null || description.__nodejs_mock_server__) {
     return false;
   }
 
-  return maxWireVersion(conn) >= 6 && !description.__nodejs_mock_server__;
+  // Handshake spec requires us to use hello command + OP_MSG for the
+  // initial handshake in load balanced or versioned api mode.
+  if (serverApi || loadBalanced) {
+    return true;
+  }
+
+  // Use OP_MSG for all future commands.
+  return maxWireVersion(conn) >= 6;
 }
 
 function streamIdentifier(stream: Stream, options: ConnectionOptions): string {

@@ -219,7 +219,20 @@ describe('Connect Tests', function () {
       });
     });
 
-    context('when serverApi is not present', () => {
+    context('when loadBalanced is true', () => {
+      const options = { loadBalanced: true };
+      const authContext = {
+        connection: {},
+        options
+      };
+
+      it('sets the hello parameter to 1', async () => {
+        const handshakeDocument = await prepareHandshakeDocument(authContext);
+        expect(handshakeDocument).to.have.property('hello', 1);
+      });
+    });
+
+    context('when serverApi and loadBalanced are not present', () => {
       const options = {};
       const authContext = {
         connection: {},
