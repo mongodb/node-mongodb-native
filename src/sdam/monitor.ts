@@ -120,7 +120,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       minHeartbeatFrequencyMS: options.minHeartbeatFrequencyMS ?? 500,
       serverMonitoringMode: options.serverMonitoringMode
     });
-    console.log(getFAASEnv());
     this.isRunningInFaasEnv = getFAASEnv() != null;
 
     const cancellationToken = this[kCancellationToken];
@@ -242,25 +241,19 @@ function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
   const topologyVersion = monitor[kServer].description.topologyVersion;
-  console.log('checkServer', topologyVersion);
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
   monitor.emit(
     Server.SERVER_HEARTBEAT_STARTED,
     new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
 
-  function failureHandler(err: Error) {
+  function failureHandler(err: Error, awaited: boolean) {
     monitor[kConnection]?.destroy({ force: true });
     monitor[kConnection] = undefined;
 
     monitor.emit(
       Server.SERVER_HEARTBEAT_FAILED,
-      new ServerHeartbeatFailedEvent(
-        monitor.address,
-        calculateDurationInMs(start),
-        err,
-        isAwaitable
-      )
+      new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err, awaited)
     );
 
     const error = !(err instanceof MongoError)
@@ -307,7 +300,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
       if (err) {
-        return failureHandler(err);
+        return failureHandler(err, isAwaitable);
       }
 
       if (!('isWritablePrimary' in hello)) {
@@ -319,16 +312,12 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       const duration =
         isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);
 
-      console.log('command', topologyVersion, hello.topologyVersion, hello);
-      const awaited = useStreamingProtocol(monitor, hello.topologyVersion);
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, awaited)
+        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
       );
 
-      // if we are using the streaming protocol then we immediately issue another `started`
-      // event, otherwise the "check" is complete and return to the main monitor loop
-      if (awaited) {
+      if (isAwaitable) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
           new ServerHeartbeatStartedEvent(monitor.address, true)
@@ -350,7 +339,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     if (err) {
       monitor[kConnection] = undefined;
 
-      failureHandler(err);
+      failureHandler(err, false);
       return;
     }
 
@@ -371,7 +360,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
           monitor.address,
           calculateDurationInMs(start),
           conn.hello,
-          false
+          useStreamingProtocol(monitor, conn.hello?.topologyVersion)
         )
       );
 
@@ -404,7 +393,6 @@ function monitorServer(monitor: Monitor) {
       }
 
       // if the check indicates streaming is supported, immediately reschedule monitoring
-      console.log('checkServerCallback', hello?.topologyVersion);
       if (useStreamingProtocol(monitor, hello?.topologyVersion)) {
         setTimeout(() => {
           if (!isInCloseState(monitor)) {
