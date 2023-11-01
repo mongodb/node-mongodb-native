@@ -219,20 +219,7 @@ describe('Connect Tests', function () {
       });
     });
 
-    context('when loadBalanced is true', () => {
-      const options = { loadBalanced: true };
-      const authContext = {
-        connection: {},
-        options
-      };
-
-      it('sets the hello parameter to 1', async () => {
-        const handshakeDocument = await prepareHandshakeDocument(authContext);
-        expect(handshakeDocument).to.have.property('hello', 1);
-      });
-    });
-
-    context('when serverApi and loadBalanced are not present', () => {
+    context('when serverApi is not present', () => {
       const options = {};
       const authContext = {
         connection: {},
@@ -255,6 +242,7 @@ describe('Connect Tests', function () {
           };
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.to.have.property('loadBalanced');
+          expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
         });
       });
 
@@ -269,6 +257,7 @@ describe('Connect Tests', function () {
           };
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.to.have.property('loadBalanced');
+          expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
         });
       });
 
@@ -283,6 +272,7 @@ describe('Connect Tests', function () {
           };
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).to.have.property('loadBalanced', true);
+          expect(handshakeDocument).to.have.property('hello', 1);
         });
       });
     });
