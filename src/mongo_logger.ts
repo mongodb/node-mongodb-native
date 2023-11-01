@@ -126,10 +126,22 @@ export interface MongoLoggerEnvOptions {
   MONGODB_LOG_PATH?: string;
 }
 
+export interface MongoDBLogConfigurable {
+  logCommand?: SeverityLevel;
+  logTopology?: SeverityLevel;
+  logConnection?: SeverityLevel;
+  logServerSelection?: SeverityLevel;
+  logClient?: SeverityLevel;
+  logAll?: SeverityLevel;
+  logMaxDocumentLength?: string;
+}
+
 /** @internal */
 export interface MongoLoggerMongoClientOptions {
   /** Destination for log messages */
   mongodbLogPath?: 'stdout' | 'stderr' | MongoDBLogWritable;
+  mongodbLogConfigurable?: MongoDBLogConfigurable;
+  mongodblogMaxDocumentLength?: string;
 }
 
 /** @internal */

@@ -21,7 +21,12 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import { type MongoDBLogWritable, MongoLogger, type MongoLoggerOptions } from './mongo_logger';
+import {
+  type MongoDBLogConfigurable,
+  type MongoDBLogWritable,
+  MongoLogger,
+  type MongoLoggerOptions
+} from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
@@ -878,4 +883,6 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  mongoLogConfigurable?: MongoDBLogConfigurable;
+  mongodbLogMaxDocumentLength?: string;
 }
