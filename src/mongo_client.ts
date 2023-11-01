@@ -879,11 +879,22 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongoLoggerOptions: MongoLoggerOptions;
+
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-  mongoLogConfigurable?: MongoDBLogConfigurable;
+
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
   mongodbLogMaxDocumentLength?: string;
 }
