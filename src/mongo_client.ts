@@ -884,4 +884,6 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  mongoLogConfigurable?: MongoDBLogConfigurable;
+  mongodbLogMaxDocumentLength?: string;
 }
