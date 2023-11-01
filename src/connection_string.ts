@@ -531,7 +531,7 @@ export function parseOptions(
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
-      mongodbLogConfigurable: mongoOptions.mongodbLogConfigurable,
+      mongodbLogComponentSeverities: mongoOptions.LogComponentSeverities,
       mongodblogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     };
   }
