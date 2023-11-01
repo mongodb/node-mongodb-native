@@ -372,6 +372,19 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this.checkForNonGenuineHosts();
   }
 
+  DOCUMENT_DB_CHECK = /(\.docdb\.amazonaws\.com$)|(\.docdb-elastic\.amazonaws\.com$)/;
+  COSMOS_DB_CHECK = /\.cosmos\.azure\.com$/;
+
+  static DOCUMENT_DB_MSG =
+    'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
+  static COSMOS_DB_MSG =
+    'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb';
+
+  /** @internal */
+  private isHostMatch(match: RegExp, host?: string): boolean {
+    return host && match.test(host.toLowerCase()) ? true : false;
+  }
+
   /** @internal */
   private checkForNonGenuineHosts() {
     const documentDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
