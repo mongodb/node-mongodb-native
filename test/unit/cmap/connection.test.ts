@@ -19,7 +19,8 @@ import {
   MongoNetworkTimeoutError,
   MongoRuntimeError,
   ns,
-  type OperationDescription
+  type OperationDescription,
+  supportsOpMsg
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
@@ -892,6 +893,93 @@ describe('new Connection()', function () {
         expect(hasSessionSupport(connection)).to.be.false;
       });
     });
+  });
+
+  describe('supportsOpMsg', function () {
+    let connection;
+
+    context('serverApi versioning is requested', function () {
+      beforeEach(function () {
+        connection = {
+          serverApi: { version: '1' }
+        };
+      });
+
+      it('returns true', function () {
+        expect(supportsOpMsg(connection, {})).to.be.true;
+      });
+    });
+
+    context('loadBalanced option is true', function () {
+      beforeEach(function () {
+        connection = {};
+      });
+
+      it('returns true', function () {
+        expect(supportsOpMsg(connection, { loadBalanced: true })).to.be.true;
+      });
+    });
+
+    context(
+      'serverApi and loadBalanced are not requested, the first message has not been sent',
+      function () {
+        beforeEach(function () {
+          connection = {};
+        });
+
+        it('returns false', function () {
+          expect(supportsOpMsg(connection, {})).to.be.false;
+        });
+      }
+    );
+
+    context(
+      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion matches the compatibile version',
+      function () {
+        beforeEach(function () {
+          connection = {
+            description: new InputStream(),
+            hello: { maxWireVersion: 6 }
+          };
+        });
+
+        it('returns true', function () {
+          expect(supportsOpMsg(connection, {})).to.be.true;
+        });
+      }
+    );
+
+    context(
+      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion is above the compatibile version',
+      function () {
+        beforeEach(function () {
+          connection = {
+            description: new InputStream(),
+            hello: { maxWireVersion: 7 }
+          };
+        });
+
+        it('returns true', function () {
+          expect(supportsOpMsg(connection, {})).to.be.true;
+        });
+      }
+    );
+
+    context(
+      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion is not compatibile',
+      function () {
+        beforeEach(function () {
+          connection = {
+            description: new InputStream(),
+            hello: { maxWireVersion: 5 }
+          };
+        });
+
+        it('returns false', function () {
+          expect(supportsOpMsg(connection, {})).to.be.false;
+        });
+      }
+    );
   });
 
   describe('destroy()', () => {
