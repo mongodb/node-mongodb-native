@@ -894,10 +894,8 @@ describe('Connection String', function () {
     });
 
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    const docDBmsg =
-      'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
-    const cosmosDBmsg =
-      'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb';
+    const docDBmsg = MongoClient.DOCUMENT_DB_MSG;
+    const cosmosDBmsg = MongoClient.COSMOS_DB_MSG;
     const test_cases = [
       ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
       ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],

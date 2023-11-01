@@ -367,42 +367,40 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     this.checkForNonGenuineHosts();
   }
 
+  DOCUMENT_DB_CHECK = /(\.docdb\.amazonaws\.com$)|(\.docdb-elastic\.amazonaws\.com$)/;
+  COSMOS_DB_CHECK = /\.cosmos\.azure\.com$/;
+
+  static DOCUMENT_DB_MSG =
+    'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
+  static COSMOS_DB_MSG =
+    'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb';
+
+  /** @internal */
+  private isHostMatch(match: RegExp, host?: string): boolean {
+    return host && match.test(host.toLowerCase()) ? true : false;
+  }
+
   /** @internal */
   private checkForNonGenuineHosts() {
     if (this.mongoLogger && this.mongoLogger.logDestination) {
-      const documentDBHostnames = this[kOptions].hosts.filter(
-        (hostAddress: HostAddress) =>
-          hostAddress.host &&
-          (hostAddress.host.toLowerCase().endsWith('.docdb.amazonaws.com') ||
-            hostAddress.host.toLowerCase().endsWith('.docdb-elastic.amazonaws.com'))
+      const documentDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+        this.isHostMatch(this.DOCUMENT_DB_CHECK, hostAddress.host)
       );
 
-      const srvHostIsDocumentDB =
-        this[kOptions].srvHost &&
-        (this[kOptions].srvHost.toLowerCase().endsWith('.docdb.amazonaws.com') ||
-          this[kOptions].srvHost.toLowerCase().endsWith('.docdb-elastic.amazonaws.com'));
+      const srvHostIsDocumentDB = this.isHostMatch(this.DOCUMENT_DB_CHECK, this[kOptions].srvHost);
 
       if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
-        this.mongoLogger.info(
-          'client',
-          'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb'
-        );
+        this.mongoLogger.info('client', MongoClient.DOCUMENT_DB_MSG);
       }
 
-      const cosmosDBHostnames = this[kOptions].hosts.filter(
-        (hostAddress: HostAddress) =>
-          hostAddress.host && hostAddress.host.toLowerCase().endsWith('.cosmos.azure.com')
+      const cosmosDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+        this.isHostMatch(this.COSMOS_DB_CHECK, hostAddress.host)
       );
 
-      const srvHostIsCosmosDB =
-        this[kOptions].srvHost &&
-        this[kOptions].srvHost.toLowerCase().endsWith('.cosmos.azure.com');
+      const srvHostIsCosmosDB = this.isHostMatch(this.COSMOS_DB_CHECK, this[kOptions].srvHost);
 
       if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
-        this.mongoLogger.info(
-          'client',
-          'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb'
-        );
+        this.mongoLogger.info('client', MongoClient.COSMOS_DB_MSG);
       }
     }
   }
