@@ -19,8 +19,7 @@ import {
   MongoNetworkTimeoutError,
   MongoRuntimeError,
   ns,
-  type OperationDescription,
-  supportsOpMsg
+  type OperationDescription
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
@@ -893,78 +892,6 @@ describe('new Connection()', function () {
         expect(hasSessionSupport(connection)).to.be.false;
       });
     });
-  });
-
-  describe('.supportsOpMsg', function () {
-    let connection;
-
-    context('loadBalanced option is true', function () {
-      beforeEach(function () {
-        connection = {};
-      });
-
-      it('returns true', function () {
-        expect(supportsOpMsg(connection, { loadBalanced: true })).to.be.true;
-      });
-    });
-
-    context('loadBalanced is not requested and this is the first message', function () {
-      beforeEach(function () {
-        connection = {}; // The first message, therefore no description.
-      });
-
-      it('returns false', function () {
-        expect(supportsOpMsg(connection, {})).to.be.false;
-      });
-    });
-
-    context(
-      'the first message has been sent and maxWireVersion matches the compatible version',
-      function () {
-        beforeEach(function () {
-          connection = {
-            description: new InputStream(),
-            hello: { maxWireVersion: 6 }
-          };
-        });
-
-        it('returns true', function () {
-          expect(supportsOpMsg(connection, {})).to.be.true;
-        });
-      }
-    );
-
-    context(
-      'the first message has been sent and maxWireVersion is above the compatible version',
-      function () {
-        beforeEach(function () {
-          connection = {
-            description: new InputStream(),
-            hello: { maxWireVersion: 7 }
-          };
-        });
-
-        it('returns true', function () {
-          expect(supportsOpMsg(connection, {})).to.be.true;
-        });
-      }
-    );
-
-    context(
-      'the first message has been sent and maxWireVersion is below the compatible version',
-      function () {
-        beforeEach(function () {
-          connection = {
-            description: new InputStream(),
-            hello: { maxWireVersion: 5 }
-          };
-        });
-
-        it('returns false', function () {
-          expect(supportsOpMsg(connection, {})).to.be.false;
-        });
-      }
-    );
   });
 
   describe('destroy()', () => {

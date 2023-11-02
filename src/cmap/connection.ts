@@ -487,7 +487,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
-    const shouldUseOpMsg = supportsOpMsg(this, { loadBalanced: cmd.loadBalanced });
+    const shouldUseOpMsg = supportsOpMsg(this);
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
@@ -637,17 +637,8 @@ export function hasSessionSupport(conn: Connection): boolean {
   return description.logicalSessionTimeoutMinutes != null;
 }
 
-/** @internal */
-export function supportsOpMsg(conn: Connection, options: { loadBalanced?: boolean }) {
-  // If loadBalanced is true, then we MUST send the initial hello command using OP_MSG.
-  // Since this is the first message and hello/legacy hello hasn't been sent yet,
-  // conn.description will be null and we can't rely on the server check to determine if
-  // the server supports OP_MSG.
+function supportsOpMsg(conn: Connection) {
   const description = conn.description;
-  if (options.loadBalanced === true && description == null) {
-    return true;
-  }
-
   if (description == null) {
     return false;
   }

@@ -6,7 +6,8 @@ import {
   Connection,
   LEGACY_HELLO_COMMAND,
   MongoServerError,
-  MongoServerSelectionError
+  MongoServerSelectionError,
+  Msg
 } from '../../mongodb';
 
 describe('MongoDB Handshake', () => {
@@ -60,6 +61,24 @@ describe('MongoDB Handshake', () => {
       expect(spy.called).to.be.true;
       const handshakeDoc = spy.getCall(0).args[1];
       expect(handshakeDoc).to.have.property('compression').to.deep.equal(['snappy']);
+    });
+  });
+
+  context('when load-balanced', function () {
+    let spy: Sinon.SinonSpy;
+    before(() => {
+      spy = sinon.spy(Msg.prototype, 'makeDocumentSegment');
+    });
+
+    after(() => sinon.restore());
+
+    it('should send the hello command as OP_MSG', {
+      metadata: { requires: { topology: 'load-balanced' } },
+      test: async function () {
+        client = this.configuration.newClient({ loadBalanced: true });
+        await client.connect();
+        expect(spy.called).to.be.true;
+      }
     });
   });
 });
