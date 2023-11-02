@@ -377,20 +377,16 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const documentDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
       isHostMatch(DOCUMENT_DB_CHECK, hostAddress.host)
     );
-
     const srvHostIsDocumentDB = isHostMatch(DOCUMENT_DB_CHECK, this[kOptions].srvHost);
-
-    if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
-      this.mongoLogger.info('client', DOCUMENT_DB_MSG);
-    }
 
     const cosmosDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
       isHostMatch(COSMOS_DB_CHECK, hostAddress.host)
     );
-
     const srvHostIsCosmosDB = isHostMatch(COSMOS_DB_CHECK, this[kOptions].srvHost);
 
-    if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
+    if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
+      this.mongoLogger.info('client', DOCUMENT_DB_MSG);
+    } else if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
       this.mongoLogger.info('client', COSMOS_DB_MSG);
     }
   }
