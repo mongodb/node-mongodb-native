@@ -13,12 +13,8 @@ const { ReadPreference } = require('../mongodb');
 const { MongoCredentials } = require('../mongodb');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb');
 const { MongoLogger } = require('../mongodb');
-const {
-  SeverityLevel,
-  MongoLoggableComponent,
-  MongoLoggerEnvOptions
-  // eslint-disable-next-line no-restricted-modules
-} = require('../../src/mongo_logger');
+// eslint-disable-next-line no-restricted-modules
+const { SeverityLevel, MongoLoggableComponent } = require('../../src/mongo_logger');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 
@@ -846,7 +842,9 @@ describe('MongoOptions', function () {
           });
           const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
           client.options.mongoLoggerOptions.logDestination.write(log);
-          expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+          expect(stderrStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
         });
       });
 
@@ -874,7 +872,9 @@ describe('MongoOptions', function () {
           });
           const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
           client.options.mongoLoggerOptions.logDestination.write(log);
-          expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+          expect(stdoutStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
         });
       });
 
@@ -893,7 +893,7 @@ describe('MongoOptions', function () {
         });
       });
     });
-    describe.only('component severities', function () {
+    describe('component severities', function () {
       const components = Object.values(MongoLoggableComponent);
       const env_component_names = [
         'MONGODB_LOG_COMMAND',
@@ -912,24 +912,23 @@ describe('MongoOptions', function () {
                   [components[i]]: severityLevel
                 }
               });
-              expect(client.options.mongoLoggerOptions.componentSeverities[components[i]]).to.equal(
-                severityLevel
-              );
+              for (const [curComponent, curSeverity] of Object.entries(
+                client.options.mongoLoggerOptions.componentSeverities
+              )) {
+                if (curComponent === components[i]) {
+                  expect(curSeverity).to.equal(severityLevel);
+                } else {
+                  expect(curSeverity).to.equal(SeverityLevel.OFF);
+                }
+              }
             }
           });
         }
       });
       context('when both client and environment option is provided', function () {
         for (let i = 0; i < components.length; i++) {
-          beforeEach(function () {
+          it(`it stores severity level for ${components[i]} component correctly (client options have precedence)`, function () {
             process.env[env_component_names[i]] = 'emergency';
-          });
-
-          afterEach(function () {
-            process.env[env_component_names[i]] = undefined;
-          });
-
-          it(`it stores severity levels for ${components[i]} component correctly (client options have precedence)`, function () {
             for (const severityLevel of Object.values(SeverityLevel)) {
               const client = new MongoClient('mongodb://a/', {
                 [loggerFeatureFlag]: true,
@@ -937,12 +936,45 @@ describe('MongoOptions', function () {
                   [components[i]]: severityLevel
                 }
               });
-              expect(client.options.mongoLoggerOptions.componentSeverities[components[i]]).to.equal(
-                severityLevel
-              );
+              for (const [curComponent, curSeverity] of Object.entries(
+                client.options.mongoLoggerOptions.componentSeverities
+              )) {
+                if (curComponent === components[i]) {
+                  expect(curSeverity).to.equal(severityLevel);
+                } else {
+                  expect(curSeverity).to.equal(SeverityLevel.OFF);
+                }
+              }
+              process.env[env_component_names[i]] = undefined;
             }
           });
-        };
+        }
+      });
+      context('when default is provided', function () {
+        it('unspecified components have default value, while specified components retain value', function () {
+          for (let i = 0; i < components.length; i++) {
+            for (const severityLevel of Object.values(SeverityLevel)) {
+              for (const severityLevel2 of Object.values(SeverityLevel)) {
+                const client = new MongoClient('mongodb://a/', {
+                  [loggerFeatureFlag]: true,
+                  mongodbLogComponentSeverities: {
+                    [components[i]]: severityLevel,
+                    default: severityLevel2
+                  }
+                });
+                for (const [curComponent, curSeverity] of Object.entries(
+                  client.options.mongoLoggerOptions.componentSeverities
+                )) {
+                  if (curComponent === components[i]) {
+                    expect(curSeverity).to.equal(severityLevel);
+                  } else {
+                    expect(curSeverity).to.equal(severityLevel2);
+                  }
+                }
+              }
+            }
+          }
+        });
       });
     });
   });
