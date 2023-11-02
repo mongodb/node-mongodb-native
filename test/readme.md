@@ -284,14 +284,33 @@ The following steps will walk you through how to start and test a load balancer.
     ```
 
     Create two mongoses running on ports 27017 and 27018:
-    `mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter featureFlagLoadBalancer=true --setParameter loadBalancerPort=27050`
-    `mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter featureFlagLoadBalancer=true --setParameter loadBalancerPort=27051`.
+    `mongos --configdb test/localhost:27217 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter --setParameter loadBalancerPort=27050`
+    `mongos --configdb test/localhost:27217 --port 27018 --bind_ip localhost --setParameter enableTestCommands=1 --setParameter --setParameter loadBalancerPort=27051`.
 
     Initiate cluster on mongos in shell:
     ```shell
     mongosh "mongodb://localhost:27017" --eval "sh.addShard('testing/localhost:27218,localhost:27219,localhost:27220')"
     mongosh "mongodb://localhost:27017" --eval "sh.enableSharding('test')"
     ```
+1. An alternative way to the fully manual cluster setup is to use `mlaunch`:
+   Initialize the sharded cluster via `mlaunch` in a new empty directory:
+   ```shell
+   mlaunch init --dir data --ipv6 --replicaset --nodes 2 --port 51000 --name testing --setParameter enableTestCommands=1 --sharded 1 --mongos 2
+   ```
+
+   `mlaunch` will then start up the sharded cluster. Once it finishes, stop the cluster:
+   ```shell
+   mlaunch stop
+   ```
+
+   When `mlaunch` has stopped the cluster, navigate to the `data` directory and edit the `.mlaunch_startup` file:
+   - Add `--setParameter \"loadBalancerPort=27050\"` to the first mongos configuration at the bottom of the file.
+   - Add `--setParameter \"loadBalancerPort=27051\"` to the second mongos configuration at the bottom of the file.
+
+   Navigate back up to the root directory where `mlaunch` was initialized and restart:
+   ```shell
+   mlaunch start
+   ```
 
 1. Create an environment variable named `MONGODB_URI` that stores the URI of the sharded cluster you just created. For example: `export MONGODB_URI="mongodb://host1,host2/"`
 1. Install the HAProxy load balancer. For those on macOS, you can install HAProxy with `brew install haproxy`.
