@@ -15,6 +15,7 @@ const {
   WINDOWS_OS,
   MACOS_OS,
   UBUNTU_OS,
+  UBUNTU_20_OS,
   DEBIAN_OS
 } = require('./ci_matrix_constants');
 
@@ -531,12 +532,11 @@ BUILD_VARIANTS.push({
 
 // special case for MONGODB-AWS authentication
 BUILD_VARIANTS.push({
-  name: 'ubuntu1804-test-mongodb-aws',
+  name: 'ubuntu2004-test-mongodb-aws',
   display_name: 'MONGODB-AWS Auth test',
-  run_on: UBUNTU_OS,
+  run_on: UBUNTU_20_OS,
   expansions: {
-    NODE_LTS_VERSION: LOWEST_LTS,
-    NPM_VERSION: 8
+    NODE_LTS_VERSION: LATEST_LTS
   },
   tasks: AWS_AUTH_TASKS
 });
