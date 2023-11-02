@@ -93,7 +93,7 @@ describe('MongoDB Handshake', () => {
     it('should send the legacy hello command as OP_QUERY', {
       metadata: { requires: { topology: '!load-balanced', mongodb: '<6.0.x' } },
       test: async function () {
-        client = this.configuration.newClient({ loadBalanced: true });
+        client = this.configuration.newClient();
         await client.connect();
         expect(spy.called).to.be.false;
       }
