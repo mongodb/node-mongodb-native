@@ -19,7 +19,8 @@ import {
   MongoRuntimeError,
   MongoServerError,
   MongoTransactionError,
-  MongoWriteConcernError
+  MongoWriteConcernError,
+  isRetryableWriteError
 } from './error';
 import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
@@ -731,7 +732,7 @@ function endTransaction(
     session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
     if (error instanceof MongoError) {
       if (
-        error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
+        isRetryableWriteError(error) ||
         error instanceof MongoWriteConcernError ||
         isMaxTimeMSExpiredError(error)
       ) {
