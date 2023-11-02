@@ -81,4 +81,22 @@ describe('MongoDB Handshake', () => {
       }
     });
   });
+
+  context('when not load-balanced', function () {
+    let spy: Sinon.SinonSpy;
+    before(() => {
+      spy = sinon.spy(Msg.prototype, 'makeDocumentSegment');
+    });
+
+    after(() => sinon.restore());
+
+    it('should send the legacy hello command as OP_QUERY', {
+      metadata: { requires: { topology: '!load-balanced', mongodb: '<6.0.x' } },
+      test: async function () {
+        client = this.configuration.newClient({ loadBalanced: true });
+        await client.connect();
+        expect(spy.called).to.be.false;
+      }
+    });
+  });
 });
