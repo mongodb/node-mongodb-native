@@ -639,19 +639,15 @@ export function hasSessionSupport(conn: Connection): boolean {
 
 /** @internal */
 export function supportsOpMsg(conn: Connection, options: { loadBalanced?: boolean }) {
-  // If server API versioning has been requested or loadBalanced is true,
-  // then we MUST send the initial hello command using OP_MSG.
+  // If loadBalanced is true, then we MUST send the initial hello command using OP_MSG.
   // Since this is the first message and hello/legacy hello hasn't been sent yet,
   // conn.description will be null and we can't rely on the server check to determine if
   // the server supports OP_MSG.
-  if (conn.serverApi?.version || options.loadBalanced === true) {
+  const description = conn.description;
+  if (options.loadBalanced === true && description == null) {
     return true;
   }
 
-  // If server API versioning and loadBalanced are not requested,
-  // we MUST use legacy hello for the first message of the initial handshake with the OP_QUERY protocol
-  // before switching to OP_MSG if the maxWireVersion indicates compatibility.
-  const description = conn.description;
   if (description == null) {
     return false;
   }

@@ -898,18 +898,6 @@ describe('new Connection()', function () {
   describe('supportsOpMsg', function () {
     let connection;
 
-    context('serverApi versioning is requested', function () {
-      beforeEach(function () {
-        connection = {
-          serverApi: { version: '1' }
-        };
-      });
-
-      it('returns true', function () {
-        expect(supportsOpMsg(connection, {})).to.be.true;
-      });
-    });
-
     context('loadBalanced option is true', function () {
       beforeEach(function () {
         connection = {};
