@@ -348,6 +348,7 @@ export type {
 } from './mongo_client';
 export type {
   Log,
+  LogComponentSeveritiesClientOptions,
   LogConvertible,
   Loggable,
   LoggableEvent,
