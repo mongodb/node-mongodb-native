@@ -895,7 +895,7 @@ describe('new Connection()', function () {
     });
   });
 
-  describe('supportsOpMsg', function () {
+  describe('.supportsOpMsg', function () {
     let connection;
 
     context('loadBalanced option is true', function () {
