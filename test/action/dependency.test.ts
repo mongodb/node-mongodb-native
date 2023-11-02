@@ -126,7 +126,8 @@ describe('package.json', function () {
     'mongodb-connection-string-url',
     'whatwg-url',
     'webidl-conversions',
-    'tr46'
+    'tr46',
+    'punycode'
   ];
 
   describe('mongodb imports', () => {
