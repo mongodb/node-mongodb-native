@@ -908,21 +908,18 @@ describe('new Connection()', function () {
       });
     });
 
-    context(
-      'serverApi and loadBalanced are not requested, the first message has not been sent',
-      function () {
-        beforeEach(function () {
-          connection = {};
-        });
+    context('loadBalanced is not requested and this is the first message', function () {
+      beforeEach(function () {
+        connection = {}; // The first message, therefore no description.
+      });
 
-        it('returns false', function () {
-          expect(supportsOpMsg(connection, {})).to.be.false;
-        });
-      }
-    );
+      it('returns false', function () {
+        expect(supportsOpMsg(connection, {})).to.be.false;
+      });
+    });
 
     context(
-      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion matches the compatibile version',
+      'the first message has been sent and maxWireVersion matches the compatible version',
       function () {
         beforeEach(function () {
           connection = {
@@ -938,7 +935,7 @@ describe('new Connection()', function () {
     );
 
     context(
-      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion is above the compatibile version',
+      'the first message has been sent and maxWireVersion is above the compatible version',
       function () {
         beforeEach(function () {
           connection = {
@@ -954,7 +951,7 @@ describe('new Connection()', function () {
     );
 
     context(
-      'serverApi and loadBalanced are not requested, the first message has been sent already, maxWireVersion is not compatibile',
+      'the first message has been sent and maxWireVersion is below the compatible version',
       function () {
         beforeEach(function () {
           connection = {
