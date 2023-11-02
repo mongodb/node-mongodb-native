@@ -267,6 +267,16 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogMaxDocumentLength?: string;
 
   /** @internal */
   [featureFlag: symbol]: any;

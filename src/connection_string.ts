@@ -531,7 +531,7 @@ export function parseOptions(
     };
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
-      mongodbLogComponentSeverities: mongoOptions.LogComponentSeverities,
+      mongodbLogComponentSeverities: mongoOptions.mongodbLogComponentSeverities,
       mongodblogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     };
   }
@@ -1231,7 +1231,17 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogPath: { type: 'any' }
+  mongodbLogPath: { type: 'any' },
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogComponentSeverities: { type: 'any' },
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogMaxDocumentLength: { type: 'string' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
