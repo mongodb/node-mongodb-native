@@ -9,7 +9,9 @@ import { inspect } from 'util';
 import {
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
   AuthMechanism,
+  COSMOS_DB_MSG,
   DEFAULT_ALLOWED_HOSTS,
+  DOCUMENT_DB_MSG,
   FEATURE_FLAGS,
   type Log,
   MongoAPIError,
@@ -894,20 +896,22 @@ describe('Connection String', function () {
     });
 
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    const docDBmsg = MongoClient.DOCUMENT_DB_MSG;
-    const cosmosDBmsg = MongoClient.COSMOS_DB_MSG;
     const test_cases = [
       ['non-SRV example uri', 'mongodb://a.example.com:27017,b.example.com:27017/', ''],
       ['non-SRV default uri', 'mongodb://a.mongodb.net:27017', ''],
       ['SRV example uri', 'mongodb+srv://a.example.com/', ''],
       ['SRV default uri', 'mongodb+srv://a.mongodb.net/', ''],
       // ensure case insensitity
-      ['non-SRV cosmosDB uri', 'mongodb://a.mongo.COSmos.aZure.com:19555/', cosmosDBmsg],
-      ['non-SRV documentDB uri', 'mongodb://a.docDB.AmazonAws.com:27017/', docDBmsg],
-      ['non-SRV documentDB uri ', 'mongodb://a.docdB-eLasTic.amazonaws.com:27017/', docDBmsg],
-      ['SRV cosmosDB uri', 'mongodb+srv://a.mongo.COSmos.aZure.com/', cosmosDBmsg],
-      ['SRV documentDB uri', 'mongodb+srv://a.docDB.AmazonAws.com/', docDBmsg],
-      ['SRV documentDB uri 2', 'mongodb+srv://a.docdB-eLastic.amazonaws.com/', docDBmsg]
+      ['non-SRV cosmosDB uri', 'mongodb://a.mongo.COSmos.aZure.com:19555/', COSMOS_DB_MSG],
+      ['non-SRV documentDB uri', 'mongodb://a.docDB.AmazonAws.com:27017/', DOCUMENT_DB_MSG],
+      [
+        'non-SRV documentDB uri ',
+        'mongodb://a.docdB-eLasTic.amazonaws.com:27017/',
+        DOCUMENT_DB_MSG
+      ],
+      ['SRV cosmosDB uri', 'mongodb+srv://a.mongo.COSmos.aZure.com/', COSMOS_DB_MSG],
+      ['SRV documentDB uri', 'mongodb+srv://a.docDB.AmazonAws.com/', DOCUMENT_DB_MSG],
+      ['SRV documentDB uri 2', 'mongodb+srv://a.docdB-eLastic.amazonaws.com/', DOCUMENT_DB_MSG]
     ];
 
     context('when logging is turned on', () => {
