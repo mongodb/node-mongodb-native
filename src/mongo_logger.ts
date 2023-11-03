@@ -98,7 +98,8 @@ export const MongoLoggableComponent = Object.freeze({
   COMMAND: 'command',
   TOPOLOGY: 'topology',
   SERVER_SELECTION: 'serverSelection',
-  CONNECTION: 'connection'
+  CONNECTION: 'connection',
+  CLIENT: 'client'
 } as const);
 
 /** @internal */
@@ -115,6 +116,8 @@ export interface MongoLoggerEnvOptions {
   MONGODB_LOG_SERVER_SELECTION?: string;
   /** Severity level for CMAP */
   MONGODB_LOG_CONNECTION?: string;
+  /** Severity level for client */
+  MONGODB_LOG_CLIENT?: string;
   /** Default severity level to be if any of the above are unset */
   MONGODB_LOG_ALL?: string;
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
@@ -140,6 +143,8 @@ export interface MongoLoggerOptions {
     serverSelection: SeverityLevel;
     /** Severity level for connection component */
     connection: SeverityLevel;
+    /** Severity level for client component */
+    client: SeverityLevel;
     /** Default severity level to be used if any of the above are unset */
     default: SeverityLevel;
   };
@@ -528,6 +533,7 @@ export class MongoLogger {
           parseSeverityFromString(combinedOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
         connection:
           parseSeverityFromString(combinedOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
+        client: parseSeverityFromString(combinedOptions.MONGODB_LOG_CLIENT) ?? defaultSeverity,
         default: defaultSeverity
       },
       maxDocumentLength:
