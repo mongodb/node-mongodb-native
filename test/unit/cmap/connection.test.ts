@@ -18,8 +18,10 @@ import {
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
+  Msg,
   ns,
-  type OperationDescription
+  type OperationDescription,
+  Query
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
