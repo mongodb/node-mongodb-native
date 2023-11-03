@@ -33,8 +33,13 @@ import type { SrvPoller } from './sdam/srv_polling';
 import { Topology, type TopologyEvents } from './sdam/topology';
 import { ClientSession, type ClientSessionOptions, ServerSessionPool } from './sessions';
 import {
+  COSMOS_DB_CHECK,
+  COSMOS_DB_MSG,
+  DOCUMENT_DB_CHECK,
+  DOCUMENT_DB_MSG,
   type HostAddress,
   hostMatchesWildcards,
+  isHostMatch,
   type MongoDBNamespace,
   ns,
   resolveOptions
@@ -364,6 +369,26 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
         return true;
       }
     };
+    this.checkForNonGenuineHosts();
+  }
+
+  /** @internal */
+  private checkForNonGenuineHosts() {
+    const documentDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+      isHostMatch(DOCUMENT_DB_CHECK, hostAddress.host)
+    );
+    const srvHostIsDocumentDB = isHostMatch(DOCUMENT_DB_CHECK, this[kOptions].srvHost);
+
+    const cosmosDBHostnames = this[kOptions].hosts.filter((hostAddress: HostAddress) =>
+      isHostMatch(COSMOS_DB_CHECK, hostAddress.host)
+    );
+    const srvHostIsCosmosDB = isHostMatch(COSMOS_DB_CHECK, this[kOptions].srvHost);
+
+    if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
+      this.mongoLogger.info('client', DOCUMENT_DB_MSG);
+    } else if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
+      this.mongoLogger.info('client', COSMOS_DB_MSG);
+    }
   }
 
   /** @see MongoOptions */

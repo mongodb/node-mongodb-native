@@ -1282,3 +1282,20 @@ export class TimeoutController extends AbortController {
     this.timeoutId = null;
   }
 }
+
+/** @internal */
+export const DOCUMENT_DB_CHECK = /(\.docdb\.amazonaws\.com$)|(\.docdb-elastic\.amazonaws\.com$)/;
+/** @internal */
+export const COSMOS_DB_CHECK = /\.cosmos\.azure\.com$/;
+
+/** @internal */
+export const DOCUMENT_DB_MSG =
+  'You appear to be connected to a DocumentDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/documentdb';
+/** @internal */
+export const COSMOS_DB_MSG =
+  'You appear to be connected to a CosmosDB cluster. For more information regarding feature compatibility and support please visit https://www.mongodb.com/supportability/cosmosdb';
+
+/** @internal */
+export function isHostMatch(match: RegExp, host?: string): boolean {
+  return host && match.test(host.toLowerCase()) ? true : false;
+}
