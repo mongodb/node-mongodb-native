@@ -14,7 +14,7 @@ import {
   hasSessionSupport,
   type HostAddress,
   isHello,
-  type MessageStream,
+  MessageStream,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
