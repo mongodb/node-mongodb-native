@@ -902,7 +902,7 @@ describe('MongoOptions', function () {
         'MONGODB_LOG_CONNECTION',
         'MONGODB_LOG_CLIENT'
       ];
-      context('when only client option is provided for', function () {
+      context('when only client option is provided', function () {
         for (let i = 0; i < components.length; i++) {
           it(`it stores severity levels for ${components[i]} component correctly`, function () {
             for (const severityLevel of Object.values(SeverityLevel)) {
