@@ -532,7 +532,7 @@ export function parseOptions(
     loggerClientOptions = {
       mongodbLogPath: mongoOptions.mongodbLogPath,
       mongodbLogComponentSeverities: mongoOptions.mongodbLogComponentSeverities,
-      mongodblogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
+      mongodbLogMaxDocumentLength: mongoOptions.mongodbLogMaxDocumentLength
     };
   }
   mongoOptions.mongoLoggerOptions = MongoLogger.resolveOptions(
