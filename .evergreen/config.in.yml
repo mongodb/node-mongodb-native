@@ -616,6 +616,7 @@ functions:
               "iam_auth_ecs_account_arn": "arn:aws:iam::557821124784:user/authtest_fargate_user",
               "iam_auth_ecs_cluster": "${iam_auth_ecs_cluster}",
               "iam_auth_ecs_task_definition": "${iam_auth_ecs_task_definition_ubuntu2004}",
+              "iam_auth_ecs_task_definition_focal": "${iam_auth_ecs_task_definition_ubuntu2004}",
               "iam_auth_ecs_subnet_a": "${iam_auth_ecs_subnet_a}",
               "iam_auth_ecs_subnet_b": "${iam_auth_ecs_subnet_b}",
               "iam_auth_ecs_security_group": "${iam_auth_ecs_security_group}",
