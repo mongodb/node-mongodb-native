@@ -589,7 +589,7 @@ export class MongoLogger {
         default: defaultSeverity
       },
       maxDocumentLength:
-        parseUnsignedInteger(combinedOptions.mongodbLogMaxDocumentLength) ??
+        combinedOptions.mongodbLogMaxDocumentLength ??
         parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ??
         1000,
       logDestination: combinedOptions.mongodbLogPath
