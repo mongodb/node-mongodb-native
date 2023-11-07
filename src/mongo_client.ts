@@ -276,7 +276,7 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogMaxDocumentLength?: string;
+  mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
   [featureFlag: symbol]: any;

@@ -959,7 +959,7 @@ describe('MongoOptions', function () {
                   [loggerFeatureFlag]: true,
                   mongodbLogComponentSeverities: {
                     [components[i]]: severityLevel,
-                    default: severityLevel2
+                    default: defaultSeverityLevel
                   }
                 });
                 for (const [curComponent, curSeverity] of Object.entries(
@@ -977,12 +977,12 @@ describe('MongoOptions', function () {
         });
       });
     });
-    context.only('when mongodbLogMaxDocumentLength is in options', function () {
+    context('when mongodbLogMaxDocumentLength is in options', function () {
       context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
         it('it stores value for maxDocumentLength correctly', function () {
           const client = new MongoClient('mongodb://a/', {
             [loggerFeatureFlag]: true,
-            mongodbLogMaxDocumentLength: '290'
+            mongodbLogMaxDocumentLength: 290
           });
           expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
         });
@@ -992,7 +992,7 @@ describe('MongoOptions', function () {
           process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
           const client = new MongoClient('mongodb://a/', {
             [loggerFeatureFlag]: true,
-            mongodbLogMaxDocumentLength: '290'
+            mongodbLogMaxDocumentLength: 290
           });
           expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;

@@ -149,7 +149,7 @@ export interface MongoLoggerMongoClientOptions {
   /** Severity levels for logger components */
   mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
-  mongodbLogMaxDocumentLength?: string;
+  mongodbLogMaxDocumentLength?: number;
 }
 
 /** @internal */
