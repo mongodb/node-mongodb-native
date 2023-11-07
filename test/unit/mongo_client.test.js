@@ -986,6 +986,15 @@ describe('MongoOptions', function () {
           });
           expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
         });
+        it('it throws error for negative input', function () {
+          expect(
+            () =>
+              new MongoClient('mongodb://a/', {
+                [loggerFeatureFlag]: true,
+                mongodbLogMaxDocumentLength: -290
+              })
+          ).to.throw(MongoParseError);
+        });
       });
       context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
         it('it stores value for maxDocumentLength correctly (client option value takes precedence)', function () {

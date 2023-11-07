@@ -1241,7 +1241,7 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogMaxDocumentLength: { type: 'int' }
+  mongodbLogMaxDocumentLength: { type: 'uint' }
 } as Record<keyof MongoClientOptions, OptionDescriptor>;
 
 export const DEFAULT_OPTIONS = new CaseInsensitiveMap(
