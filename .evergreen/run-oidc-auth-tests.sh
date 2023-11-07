@@ -18,12 +18,14 @@ if [ "$ENVIRONMENT" = "azure" ]; then
     exit 1
   fi
 
-  set +x
-  MONGODB_URI="mongodb://${AZUREOIDC_USERNAME}@127.0.0.1:27017/?authMechanism=MONGODB-OIDC"
+  set +x # don't leak credentials
+  export UTIL_CLIENT_USER=$AZUREOIDC_USERNAME
+  export UTIL_CLIENT_PASSWORD="pwd123"
+  MONGODB_URI="${MONGODB_URI}/?authMechanism=MONGODB-OIDC"
   MONGODB_URI="${MONGODB_URI}&authMechanismProperties=ENVIRONMENT:azure"
-  export MONGODB_URI="${MONGODB_URI},TOKEN_AUDIENCE:api%3A%2F%2F${AZUREOIDC_CLIENTID}"
+  MONGODB_URI="${MONGODB_URI},TOKEN_AUDIENCE:api%3A%2F%2F${AZUREOIDC_CLIENTID}"
+  export MONGODB_URI="${MONGODB_URI},TOKEN_CLIENT_ID:${AZUREOIDC_TOKENCLIENT}"
   set -x
-  npm run check:oidc-azure
 elif [ "$ENVIRONMENT" = "gcp" ]; then
   if [ -z "${GCPOIDC_AUDIENCE}" ]; then
     echo "Must specify an GCPOIDC_AUDIENCE"
@@ -34,21 +36,25 @@ elif [ "$ENVIRONMENT" = "gcp" ]; then
     exit 1
   fi
 
-  set +x
+  set +x # don't leak credentials
+  export UTIL_CLIENT_USER=$GCPOIDC_ATLAS_USER
+  export UTIL_CLIENT_PASSWORD=$GCPOIDC_ATLAS_PASSWORD
+  export UTIL_CLIENT_URI=$GCPOIDC_ATLAS_URI;
   MONGODB_URI="${GCPOIDC_ATLAS_URI}/?authMechanism=MONGODB-OIDC"
   MONGODB_URI="${MONGODB_URI}&authMechanismProperties=ENVIRONMENT:gcp"
   export MONGODB_URI="${MONGODB_URI},TOKEN_AUDIENCE:${GCPOIDC_AUDIENCE}"
   set -x
-  npm run check:oidc-gcp
 else
-  echo $OIDC_ATLAS_URI_SINGLE
-  echo $OIDC_ATLAS_URI_MULTI
-  export MONGODB_URI_SINGLE=${OIDC_ATLAS_URI_SINGLE}
-  export MONGODB_URI_MULTI=${OIDC_ATLAS_URI_MULTI}
-
   if [ -z "${OIDC_TOKEN_DIR}" ]; then
     echo "Must specify OIDC_TOKEN_DIR"
     exit 1
   fi
-  npm run check:oidc
+
+  set +x # don't leak credentials
+  export UTIL_CLIENT_USER="bob"
+  export UTIL_CLIENT_PASSWORD="pwd123"
+  export MONGODB_URI="${MONGODB_URI}/test?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:aws"
+  set -x
 fi
+
+npm run check:oidc-auth

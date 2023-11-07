@@ -118,8 +118,8 @@ export type SdamEvent =
   | ServerClosedEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
-function getClient(address) {
-  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
+function getClient(address, isSrv?: boolean) {
+  return new MongoClient(`mongodb${isSrv ? '+srv' : ''}://${address}`, getEnvironmentalOptions());
 }
 
 export class UnifiedMongoClient extends MongoClient {
@@ -350,6 +350,13 @@ export class UnifiedMongoClient extends MongoClient {
 }
 
 export class FailPointMap extends Map<string, Document> {
+  isSrv: boolean;
+
+  constructor(isSrv: boolean) {
+    super();
+    this.isSrv = isSrv;
+  }
+
   async enableFailPoint(
     addressOrClient: string | HostAddress | UnifiedMongoClient,
     failPoint: Document
@@ -362,7 +369,8 @@ export class FailPointMap extends Map<string, Document> {
     } else {
       // create a new client
       address = addressOrClient.toString();
-      client = getClient(address);
+      console.log('address', address);
+      client = getClient(address, this.isSrv);
       try {
         await client.connect();
       } catch (error) {
@@ -391,7 +399,8 @@ export class FailPointMap extends Map<string, Document> {
         if (process.env.SERVERLESS || process.env.LOAD_BALANCER) {
           hostAddress += '?loadBalanced=true';
         }
-        const client = getClient(hostAddress);
+        console.log('address', hostAddress);
+        const client = getClient(hostAddress, this.isSrv);
         try {
           await client.connect();
         } catch (error) {
@@ -463,9 +472,9 @@ const NO_INSTANCE_CHECK = ['errors', 'failures', 'events', 'successes', 'iterati
 export class EntitiesMap<E = Entity> extends Map<string, E> {
   failPoints: FailPointMap;
 
-  constructor(entries?: readonly (readonly [string, E])[] | null) {
+  constructor(isSrv: boolean, entries?: readonly (readonly [string, E])[] | null) {
     super(entries);
-    this.failPoints = new FailPointMap();
+    this.failPoints = new FailPointMap(isSrv);
   }
 
   mapOf(type: 'client'): EntitiesMap<UnifiedMongoClient>;
@@ -561,7 +570,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     entities?: EntityDescription[],
     entityMap?: EntitiesMap
   ): Promise<EntitiesMap> {
-    const map = entityMap ?? new EntitiesMap();
+    const map = entityMap ?? new EntitiesMap(config.isSrv);
     for (const entity of entities ?? []) {
       if ('client' in entity) {
         const useMultipleMongoses =

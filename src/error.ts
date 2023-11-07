@@ -558,6 +558,34 @@ export class MongoAzureError extends MongoRuntimeError {
 }
 
 /**
+ * A error generated when the user attempts to authenticate
+ * via GCP, but fails.
+ *
+ * @public
+ * @category Error
+ */
+export class MongoGCPError extends MongoRuntimeError {
+  /**
+   * **Do not use this constructor!**
+   *
+   * Meant for internal use only.
+   *
+   * @remarks
+   * This class is only meant to be constructed within the driver. This constructor is
+   * not subject to semantic versioning compatibility guarantees and may change at any time.
+   *
+   * @public
+   **/
+  constructor(message: string) {
+    super(message);
+  }
+
+  override get name(): string {
+    return 'MongoGCPError';
+  }
+}
+
+/**
  * An error generated when a ChangeStream operation fails to execute.
  *
  * @public
