@@ -1,15 +1,24 @@
 ---
-description: reauthenticate_without_retry
-schemaVersion: '1.13'
+description: "OIDC authentication without retry"
+schemaVersion: "1.18"
 runOnRequirements:
-- minServerVersion: '6.3'
+- minServerVersion: "7.0"
   auth: true
+  authMechanism: "MONGODB-OIDC"
 createEntities:
+- client:
+    id: authClient
 - client:
     id: client0
     uriOptions:
-      retryReads: false
-      retryWrites: false
+      authMechanism: "MONGODB-OIDC"
+      # The $$placeholder document should be replaced by auth mechanism
+      # properties that enable OIDC auth on the target cloud platform. For
+      # example, when running the test on AWS, replace the $$placeholder
+      # document with {"ENVIRONMENT": "aws"}.
+      authMechanismProperties: { $$placeholder: 1 }
+      retryReads: true
+      retryWrites: true
     observeEvents:
     - commandStartedEvent
     - commandSucceededEvent
@@ -17,31 +26,18 @@ createEntities:
 - database:
     id: database0
     client: client0
-    databaseName: db
+    databaseName: test
 - collection:
     id: collection0
     database: database0
     collectionName: collName
 initialData:
 - collectionName: collName
-  databaseName: db
+  databaseName: test
   documents: []
 tests:
-- description: Read command should reauthenticate when receive ReauthenticationRequired
-    error code and retryReads=false
+- description: A simple find operation should succeed
   operations:
-  - name: failPoint
-    object: testRunner
-    arguments:
-      client: client0
-      failPoint:
-        configureFailPoint: failCommand
-        mode:
-          times: 1
-        data:
-          failCommands:
-          - find
-          errorCode: 391
   - name: find
     arguments:
       filter: {}
@@ -54,16 +50,10 @@ tests:
         command:
           find: collName
           filter: {}
-    - commandFailedEvent:
-        commandName: find
-    - commandStartedEvent:
-        command:
-          find: collName
-          filter: {}
     - commandSucceededEvent:
         commandName: find
 - description: Write command should reauthenticate when receive ReauthenticationRequired
-    error code and retryWrites=false
+    error code and retryWrites=true
   operations:
   - name: failPoint
     object: testRunner

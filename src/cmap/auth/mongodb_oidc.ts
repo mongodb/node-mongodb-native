@@ -5,9 +5,12 @@ import type { HandshakeDocument } from '../connect';
 import type { Connection } from '../connection';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
-import { AwsServiceWorkflow } from './mongodb_oidc/aws_service_workflow';
-import { AzureServiceWorkflow } from './mongodb_oidc/azure_service_workflow';
-import { CallbackWorkflow } from './mongodb_oidc/callback_workflow';
+import { AutomatedCallbackWorkflow } from './mongodb_oidc/automated_callback_workflow';
+import { AzureMachineWorkflow } from './mongodb_oidc/azure_machine_workflow';
+import { GCPMachineWorkflow } from './mongodb_oidc/gcp_machine_workflow';
+import { HumanCallbackWorkflow } from './mongodb_oidc/human_callback_workflow';
+import type { TokenCache } from './mongodb_oidc/token_cache';
+import { TokenMachineWorkflow } from './mongodb_oidc/token_machine_workflow';
 
 /** Error when credentials are missing. */
 const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
@@ -16,7 +19,7 @@ const MISSING_CREDENTIALS_ERROR = 'AuthContext must provide credentials.';
  * @public
  * @experimental
  */
-export interface IdPServerInfo {
+export interface IdPInfo {
   issuer: string;
   clientId: string;
   requestScopes?: string[];
@@ -36,32 +39,30 @@ export interface IdPServerResponse {
  * @public
  * @experimental
  */
-export interface OIDCCallbackContext {
+export interface OIDCResponse {
+  accessToken: string;
+  expiresInSeconds?: number;
   refreshToken?: string;
-  timeoutSeconds?: number;
-  timeoutContext?: AbortSignal;
-  version: number;
 }
 
 /**
  * @public
  * @experimental
  */
-export type OIDCRequestFunction = (
-  info: IdPServerInfo,
-  context: OIDCCallbackContext
-) => Promise<IdPServerResponse>;
+export interface OIDCCallbackParams {
+  timeoutContext: AbortSignal;
+  version: number;
+  idpInfo?: IdPInfo;
+  refreshToken?: string;
+}
 
 /**
  * @public
  * @experimental
  */
-export type OIDCRefreshFunction = (
-  info: IdPServerInfo,
-  context: OIDCCallbackContext
-) => Promise<IdPServerResponse>;
+export type OIDCCallbackFunction = (params: OIDCCallbackParams) => Promise<OIDCResponse>;
 
-type ProviderName = 'aws' | 'azure' | 'callback';
+type ProviderName = 'test' | 'azure' | 'gcp' | 'automated_callback' | 'human_callback';
 
 export interface Workflow {
   /**
@@ -71,8 +72,17 @@ export interface Workflow {
   execute(
     connection: Connection,
     credentials: MongoCredentials,
-    reauthenticating: boolean,
+    cache?: TokenCache,
     response?: Document
+  ): Promise<Document>;
+
+  /**
+   * Each workflow should specify the correct custom behaviour for reauthentication.
+   */
+  reauthenticate(
+    connection: Connection,
+    credentials: MongoCredentials,
+    cache?: TokenCache
   ): Promise<Document>;
 
   /**
@@ -83,20 +93,25 @@ export interface Workflow {
 
 /** @internal */
 export const OIDC_WORKFLOWS: Map<ProviderName, Workflow> = new Map();
-OIDC_WORKFLOWS.set('callback', new CallbackWorkflow());
-OIDC_WORKFLOWS.set('aws', new AwsServiceWorkflow());
-OIDC_WORKFLOWS.set('azure', new AzureServiceWorkflow());
+OIDC_WORKFLOWS.set('automated_callback', new AutomatedCallbackWorkflow());
+OIDC_WORKFLOWS.set('human_callback', new HumanCallbackWorkflow());
+OIDC_WORKFLOWS.set('test', new TokenMachineWorkflow());
+OIDC_WORKFLOWS.set('azure', new AzureMachineWorkflow());
+OIDC_WORKFLOWS.set('gcp', new GCPMachineWorkflow());
 
 /**
  * OIDC auth provider.
  * @experimental
  */
 export class MongoDBOIDC extends AuthProvider {
+  cache?: TokenCache;
+
   /**
    * Instantiate the auth provider.
    */
-  constructor() {
+  constructor(cache?: TokenCache) {
     super();
+    this.cache = cache;
   }
 
   /**
@@ -106,7 +121,11 @@ export class MongoDBOIDC extends AuthProvider {
     const { connection, reauthenticating, response } = authContext;
     const credentials = getCredentials(authContext);
     const workflow = getWorkflow(credentials);
-    await workflow.execute(connection, credentials, reauthenticating, response);
+    if (reauthenticating) {
+      await workflow.reauthenticate(connection, credentials, this.cache);
+    } else {
+      await workflow.execute(connection, credentials, this.cache, response);
+    }
   }
 
   /**
@@ -138,11 +157,16 @@ function getCredentials(authContext: AuthContext): MongoCredentials {
  * Gets either a device workflow or callback workflow.
  */
 function getWorkflow(credentials: MongoCredentials): Workflow {
-  const providerName = credentials.mechanismProperties.PROVIDER_NAME;
-  const workflow = OIDC_WORKFLOWS.get(providerName || 'callback');
+  let workflow;
+  if (credentials.mechanismProperties.OIDC_HUMAN_CALLBACK) {
+    workflow = OIDC_WORKFLOWS.get('human_callback');
+  } else {
+    const providerName = credentials.mechanismProperties.ENVIRONMENT;
+    workflow = OIDC_WORKFLOWS.get(providerName || 'automated_callback');
+  }
   if (!workflow) {
     throw new MongoInvalidArgumentError(
-      `Could not load workflow for provider ${credentials.mechanismProperties.PROVIDER_NAME}`
+      `Could not load workflow for provider ${credentials.mechanismProperties.ENVIRONMENT}`
     );
   }
   return workflow;

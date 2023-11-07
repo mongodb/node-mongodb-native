@@ -52,6 +52,7 @@ export {
   MongoDriverError,
   MongoError,
   MongoExpiredSessionError,
+  MongoGCPError,
   MongoGridFSChunkError,
   MongoGridFSStreamError,
   MongoInvalidArgumentError,
@@ -99,6 +100,7 @@ export {
 export { BatchType } from './bulk/common';
 export { AutoEncryptionLoggerLevel } from './client-side-encryption/auto_encrypter';
 export { GSSAPICanonicalizationValue } from './cmap/auth/gssapi';
+export { TokenCache, TokenEntry } from './cmap/auth/mongodb_oidc/token_cache';
 export { AuthMechanism } from './cmap/auth/providers';
 export { Compressor } from './cmap/wire_protocol/compression';
 export { CURSOR_FLAGS } from './cursor/abstract_cursor';
@@ -250,11 +252,11 @@ export type {
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
 export type {
-  IdPServerInfo,
+  IdPInfo,
   IdPServerResponse,
-  OIDCCallbackContext,
-  OIDCRefreshFunction,
-  OIDCRequestFunction
+  OIDCCallbackFunction,
+  OIDCCallbackParams,
+  OIDCResponse
 } from './cmap/auth/mongodb_oidc';
 export type {
   MessageHeader,

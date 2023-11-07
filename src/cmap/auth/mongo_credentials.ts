@@ -8,7 +8,7 @@ import {
   MongoMissingCredentialsError
 } from '../../error';
 import { GSSAPICanonicalizationValue } from './gssapi';
-import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
+import type { OIDCCallbackFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -32,12 +32,17 @@ function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-const ALLOWED_PROVIDER_NAMES: AuthMechanismProperties['PROVIDER_NAME'][] = ['aws', 'azure'];
+const ALLOWED_ENVIRONMENT_NAMES: AuthMechanismProperties['ENVIRONMENT'][] = [
+  'test',
+  'azure',
+  'gcp'
+];
 const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
 
 /** @internal */
 export const DEFAULT_ALLOWED_HOSTS = [
   '*.mongodb.net',
+  '*.mongodb-qa.net',
   '*.mongodb-dev.net',
   '*.mongodbgov.net',
   'localhost',
@@ -46,8 +51,8 @@ export const DEFAULT_ALLOWED_HOSTS = [
 ];
 
 /** Error for when the token audience is missing in the environment. */
-const TOKEN_AUDIENCE_MISSING_ERROR =
-  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
+const TOKEN_RESOURCE_MISSING_ERROR =
+  'TOKEN_RESOURCE must be set in the auth mechanism properties when ENVIRONMENT is azure or gcp.';
 
 /** @public */
 export interface AuthMechanismProperties extends Document {
@@ -57,15 +62,17 @@ export interface AuthMechanismProperties extends Document {
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
   /** @experimental */
-  REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
+  OIDC_CALLBACK?: OIDCCallbackFunction;
   /** @experimental */
-  REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
+  OIDC_HUMAN_CALLBACK?: OIDCCallbackFunction;
   /** @experimental */
-  PROVIDER_NAME?: 'aws' | 'azure';
+  ENVIRONMENT?: 'test' | 'azure' | 'gcp';
   /** @experimental */
   ALLOWED_HOSTS?: string[];
   /** @experimental */
-  TOKEN_AUDIENCE?: string;
+  TOKEN_RESOURCE?: string;
+  /** @experimental */
+  TOKEN_CLIENT_ID?: string;
 }
 
 /** @public */
@@ -179,45 +186,42 @@ export class MongoCredentials {
     }
 
     if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username && this.mechanismProperties.PROVIDER_NAME) {
+      if (
+        this.username &&
+        this.mechanismProperties.ENVIRONMENT &&
+        this.mechanismProperties.ENVIRONMENT !== 'azure'
+      ) {
         throw new MongoInvalidArgumentError(
-          `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
+          `username and ENVIRONMENT '${this.mechanismProperties.ENVIRONMENT}' may not be used together for mechanism '${this.mechanism}'.`
         );
       }
 
       if (
-        this.mechanismProperties.PROVIDER_NAME === 'azure' &&
-        !this.mechanismProperties.TOKEN_AUDIENCE
+        (this.mechanismProperties.ENVIRONMENT === 'azure' ||
+          this.mechanismProperties.ENVIRONMENT === 'gcp') &&
+        !this.mechanismProperties.TOKEN_RESOURCE
       ) {
-        throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
+        throw new MongoAzureError(TOKEN_RESOURCE_MISSING_ERROR);
       }
 
       if (
-        this.mechanismProperties.PROVIDER_NAME &&
-        !ALLOWED_PROVIDER_NAMES.includes(this.mechanismProperties.PROVIDER_NAME)
+        this.mechanismProperties.ENVIRONMENT &&
+        !ALLOWED_ENVIRONMENT_NAMES.includes(this.mechanismProperties.ENVIRONMENT)
       ) {
         throw new MongoInvalidArgumentError(
-          `Currently only a PROVIDER_NAME in ${ALLOWED_PROVIDER_NAMES.join(
+          `Currently only a ENVIRONMENT in ${ALLOWED_ENVIRONMENT_NAMES.join(
             ','
           )} is supported for mechanism '${this.mechanism}'.`
         );
       }
 
       if (
-        this.mechanismProperties.REFRESH_TOKEN_CALLBACK &&
-        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
+        !this.mechanismProperties.ENVIRONMENT &&
+        !this.mechanismProperties.OIDC_CALLBACK &&
+        !this.mechanismProperties.OIDC_HUMAN_CALLBACK
       ) {
         throw new MongoInvalidArgumentError(
-          `A REQUEST_TOKEN_CALLBACK must be provided when using a REFRESH_TOKEN_CALLBACK for mechanism '${this.mechanism}'`
-        );
-      }
-
-      if (
-        !this.mechanismProperties.PROVIDER_NAME &&
-        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
-      ) {
-        throw new MongoInvalidArgumentError(
-          `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
+          `Either a ENVIRONMENT, OIDC_CALLBACK, or OIDC_HUMAN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
         );
       }
 

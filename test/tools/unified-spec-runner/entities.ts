@@ -118,8 +118,8 @@ export type SdamEvent =
   | ServerClosedEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
-function getClient(address) {
-  return new MongoClient(`mongodb://${address}`, getEnvironmentalOptions());
+function getClient(address, isSrv?: boolean) {
+  return new MongoClient(`mongodb${isSrv ? '+srv' : ''}://${address}`, getEnvironmentalOptions());
 }
 
 export class UnifiedMongoClient extends MongoClient {
@@ -350,6 +350,13 @@ export class UnifiedMongoClient extends MongoClient {
 }
 
 export class FailPointMap extends Map<string, Document> {
+  isSrv: boolean;
+
+  constructor(isSrv: boolean) {
+    super();
+    this.isSrv = isSrv;
+  }
+
   async enableFailPoint(
     addressOrClient: string | HostAddress | UnifiedMongoClient,
     failPoint: Document
@@ -362,7 +369,8 @@ export class FailPointMap extends Map<string, Document> {
     } else {
       // create a new client
       address = addressOrClient.toString();
-      client = getClient(address);
+      console.log('address', address);
+      client = getClient(address, this.isSrv);
       try {
         await client.connect();
       } catch (error) {
@@ -391,7 +399,7 @@ export class FailPointMap extends Map<string, Document> {
         if (process.env.SERVERLESS || process.env.LOAD_BALANCER) {
           hostAddress += '?loadBalanced=true';
         }
-        const client = getClient(hostAddress);
+        const client = getClient(hostAddress, this.isSrv);
         try {
           await client.connect();
         } catch (error) {
@@ -462,10 +470,12 @@ const NO_INSTANCE_CHECK = ['errors', 'failures', 'events', 'successes', 'iterati
 
 export class EntitiesMap<E = Entity> extends Map<string, E> {
   failPoints: FailPointMap;
+  isSrv: boolean;
 
-  constructor(entries?: readonly (readonly [string, E])[] | null) {
+  constructor(isSrv: boolean, entries?: readonly (readonly [string, E])[] | null) {
     super(entries);
-    this.failPoints = new FailPointMap();
+    this.isSrv = isSrv;
+    this.failPoints = new FailPointMap(isSrv);
   }
 
   mapOf(type: 'client'): EntitiesMap<UnifiedMongoClient>;
@@ -481,7 +491,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     if (!ctor) {
       throw new Error(`Unknown type ${type}`);
     }
-    return new EntitiesMap(Array.from(this.entries()).filter(([, e]) => e instanceof ctor));
+    return new EntitiesMap(
+      this.isSrv,
+      Array.from(this.entries()).filter(([, e]) => e instanceof ctor)
+    );
   }
 
   getChangeStreamOrCursor(key: string): UnifiedChangeStream | AbstractCursor {
@@ -561,24 +574,32 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
     entities?: EntityDescription[],
     entityMap?: EntitiesMap
   ): Promise<EntitiesMap> {
-    const map = entityMap ?? new EntitiesMap();
+    const map = entityMap ?? new EntitiesMap(config.isSrv);
     for (const entity of entities ?? []) {
       if ('client' in entity) {
         const useMultipleMongoses =
           (config.topologyType === 'LoadBalanced' || config.topologyType === 'Sharded') &&
           entity.client.useMultipleMongoses;
-        const uri = makeConnectionString(
-          config.url({ useMultipleMongoses }),
-          entity.client.uriOptions
-        );
+        console.log('client', process.env.MONGODB_URI, process.env.MONGODB_URI_SINGLE);
+        let uri: string;
+        // For OIDC we need to ensure we use MONGODB_URI_SINGLE for the MongoClient.
+        if (process.env.MONGODB_URI_SINGLE?.includes('MONGODB-OIDC')) {
+          uri = makeConnectionString(process.env.MONGODB_URI_SINGLE, entity.client.uriOptions);
+        } else {
+          uri = makeConnectionString(config.url({ useMultipleMongoses }), entity.client.uriOptions);
+        }
         const client = new UnifiedMongoClient(uri, entity.client);
+        console.log(entity.client, uri);
         new EntityEventRegistry(client, entity.client, map).register();
         try {
+          console.log('connecting');
           await client.connect();
         } catch (error) {
+          console.log('error', error);
           console.error(ejson`failed to connect entity ${entity}`);
           throw error;
         }
+        console.log('setting client', entity.client.id, client);
         map.set(entity.client.id, client);
       } else if ('database' in entity) {
         const client = map.getEntity('client', entity.database.client);

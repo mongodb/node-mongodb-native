@@ -100,6 +100,13 @@ export async function topologySatisfies(
       if (!ok && skipReason == null) {
         skipReason = `requires auth but auth is not enabled`;
       }
+      if (
+        r.authMechanism &&
+        !config.parameters.authenticationMechanisms.includes(r.authMechanism)
+      ) {
+        ok &&= false;
+        skipReason = `requires ${r.authMechanism} to be supported by the server`;
+      }
     } else if (r.auth === false) {
       ok &&= process.env.AUTH === 'noauth' || process.env.AUTH == null;
       if (!ok && skipReason == null) skipReason = `requires no auth but auth is enabled`;
@@ -203,7 +210,27 @@ export function makeConnectionString(
 ): string {
   const connectionString = new ConnectionString(uri);
   for (const [name, value] of Object.entries(uriOptions ?? {})) {
-    connectionString.searchParams.set(name, String(value));
+    // If name is authMechanismProperties and value is { $$placeholder: 1 }
+    // Then look at the environment for the proper value to set.
+    if (name === 'authMechanismProperties' && '$$placeholder' in (value as any)) {
+      // if (process.env.AWS_WEB_IDENTITY_TOKEN_FILE) {
+      //   connectionString.searchParams.set(name, 'ENVIRONMENT:aws');
+      // }
+      // if (process.env.GCPOIDC_AUDIENCE) {
+      //   connectionString.searchParams.set(
+      //     name,
+      //     `ENVIRONMENT:gcp,TOKEN_RESOURCE:${process.env.GCPOIDC_AUDIENCE}`
+      //   );
+      // }
+      // if (process.env.AZUREOIDC_CLIENTID) {
+      //   connectionString.searchParams.set(
+      //     name,
+      //     `ENVIRONMENT:azure,TOKEN_RESOURCE:${process.env.AZUREOIDC_CLIENTID}`
+      //   );
+      // }
+    } else {
+      connectionString.searchParams.set(name, String(value));
+    }
   }
   return connectionString.toString();
 }

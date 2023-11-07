@@ -73,6 +73,14 @@ async function runUnifiedTest(
   if (ctx.configuration.isLoadBalanced) {
     // The util client can always point at the single mongos LB frontend.
     utilClient = ctx.configuration.newClient(ctx.configuration.singleMongosLoadBalancerUri);
+  } else if (process.env.UTIL_CLIENT_USER && process.env.UTIL_CLIENT_PASSWORD) {
+    // For OIDC tests the MONGODB_URI is the base admin URI that the util client will use.
+    utilClient = ctx.configuration.newClient(process.env.MONGODB_URI, {
+      auth: {
+        username: process.env.UTIL_CLIENT_USER,
+        password: process.env.UTIL_CLIENT_PASSWORD
+      }
+    });
   } else {
     utilClient = ctx.configuration.newClient();
   }
@@ -212,9 +220,11 @@ async function runUnifiedTest(
     // If any event listeners were enabled on any client entities,
     // the test runner MUST now disable those event listeners.
     for (const [id, client] of entities.mapOf('client')) {
+      console.log('id, client', id, client);
       client.stopCapturingEvents();
       clientList.set(id, client);
     }
+    console.log('clientList', clientList);
 
     if (test.expectEvents) {
       for (const expectedEventsForClient of test.expectEvents) {

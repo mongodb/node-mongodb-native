@@ -18,7 +18,7 @@ describe('class MongoDBOIDC', () => {
             {},
             new MongoCredentials({
               mechanism: 'MONGODB-OIDC',
-              mechanismProperties: { PROVIDER_NAME: 'iLoveJavaScript' }
+              mechanismProperties: { ENVIRONMENT: 'iLoveJavaScript' }
             }),
             {}
           )
@@ -37,7 +37,7 @@ describe('class MongoDBOIDC', () => {
             {},
             new MongoCredentials({
               mechanism: 'MONGODB-OIDC',
-              mechanismProperties: { PROVIDER_NAME: 'iLoveJavaScript' }
+              mechanismProperties: { ENVIRONMENT: 'iLoveJavaScript' }
             }),
             {}
           )
