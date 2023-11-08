@@ -127,9 +127,29 @@ export interface MongoLoggerEnvOptions {
 }
 
 /** @internal */
+export interface LogComponentSeveritiesClientOptions {
+  /** Optional severity level for command component */
+  command?: SeverityLevel;
+  /** Optional severity level for topology component */
+  topology?: SeverityLevel;
+  /** Optionsl severity level for server selection component */
+  serverSelection?: SeverityLevel;
+  /** Optional severity level for connection component */
+  connection?: SeverityLevel;
+  /** Optional severity level for client component */
+  client?: SeverityLevel;
+  /** Optional default severity level to be used if any of the above are unset */
+  default?: SeverityLevel;
+}
+
+/** @internal */
 export interface MongoLoggerMongoClientOptions {
   /** Destination for log messages */
   mongodbLogPath?: 'stdout' | 'stderr' | MongoDBLogWritable;
+  /** Severity levels for logger components */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
+  mongodbLogMaxDocumentLength?: number;
 }
 
 /** @internal */
@@ -148,7 +168,6 @@ export interface MongoLoggerOptions {
     /** Default severity level to be used if any of the above are unset */
     default: SeverityLevel;
   };
-
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
@@ -217,6 +236,18 @@ function resolveLogPath(
   }
 
   return createStdioLogger(process.stderr);
+}
+
+function resolveSeverityConfiguration(
+  clientOption: string | undefined,
+  environmentOption: string | undefined,
+  defaultSeverity: SeverityLevel
+): SeverityLevel {
+  return (
+    parseSeverityFromString(clientOption) ??
+    parseSeverityFromString(environmentOption) ??
+    defaultSeverity
+  );
 }
 
 /** @internal */
@@ -522,22 +553,45 @@ export class MongoLogger {
       ...clientOptions,
       mongodbLogPath: resolveLogPath(envOptions, clientOptions)
     };
-    const defaultSeverity =
-      parseSeverityFromString(combinedOptions.MONGODB_LOG_ALL) ?? SeverityLevel.OFF;
+    const defaultSeverity = resolveSeverityConfiguration(
+      combinedOptions.mongodbLogComponentSeverities?.default,
+      combinedOptions.MONGODB_LOG_ALL,
+      SeverityLevel.OFF
+    );
 
     return {
       componentSeverities: {
-        command: parseSeverityFromString(combinedOptions.MONGODB_LOG_COMMAND) ?? defaultSeverity,
-        topology: parseSeverityFromString(combinedOptions.MONGODB_LOG_TOPOLOGY) ?? defaultSeverity,
-        serverSelection:
-          parseSeverityFromString(combinedOptions.MONGODB_LOG_SERVER_SELECTION) ?? defaultSeverity,
-        connection:
-          parseSeverityFromString(combinedOptions.MONGODB_LOG_CONNECTION) ?? defaultSeverity,
-        client: parseSeverityFromString(combinedOptions.MONGODB_LOG_CLIENT) ?? defaultSeverity,
+        command: resolveSeverityConfiguration(
+          combinedOptions.mongodbLogComponentSeverities?.command,
+          combinedOptions.MONGODB_LOG_COMMAND,
+          defaultSeverity
+        ),
+        topology: resolveSeverityConfiguration(
+          combinedOptions.mongodbLogComponentSeverities?.topology,
+          combinedOptions.MONGODB_LOG_TOPOLOGY,
+          defaultSeverity
+        ),
+        serverSelection: resolveSeverityConfiguration(
+          combinedOptions.mongodbLogComponentSeverities?.serverSelection,
+          combinedOptions.MONGODB_LOG_SERVER_SELECTION,
+          defaultSeverity
+        ),
+        connection: resolveSeverityConfiguration(
+          combinedOptions.mongodbLogComponentSeverities?.connection,
+          combinedOptions.MONGODB_LOG_CONNECTION,
+          defaultSeverity
+        ),
+        client: resolveSeverityConfiguration(
+          combinedOptions.mongodbLogComponentSeverities?.client,
+          combinedOptions.MONGODB_LOG_CLIENT,
+          defaultSeverity
+        ),
         default: defaultSeverity
       },
       maxDocumentLength:
-        parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ?? 1000,
+        combinedOptions.mongodbLogMaxDocumentLength ??
+        parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ??
+        1000,
       logDestination: combinedOptions.mongodbLogPath
     };
   }
