@@ -214,7 +214,7 @@ export async function prepareHandshakeDocument(
   const { serverApi } = authContext.connection;
 
   const handshakeDoc: HandshakeDocument = {
-    [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
+    [serverApi?.version || options.loadBalanced === true ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
     helloOk: true,
     client: options.metadata,
     compression: compressors
