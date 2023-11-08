@@ -85,13 +85,15 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/build-mongohouse-local.sh
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/pull-mongohouse-image.sh
     - command: shell.exec
       params:
         background: true
         script: |
           ${PREPARE_SHELL}
-          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-image.sh
+          sleep 1
+          docker ps
 
   "bootstrap kms servers":
     - command: subprocess.exec
@@ -1087,6 +1089,13 @@ functions:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
 
 tasks:
+  - name: 'test-atlas-data-lake'
+    tags: ["datalake", "mongohouse"]
+    commands:
+      - func: 'install dependencies'
+      - func: 'bootstrap mongohoused'
+      - func: 'run data lake tests'
+
   - name: "test-serverless"
     tags: ["serverless"]
     commands:
