@@ -13,6 +13,8 @@ const { ReadPreference } = require('../mongodb');
 const { MongoCredentials } = require('../mongodb');
 const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb');
 const { MongoLogger } = require('../mongodb');
+// eslint-disable-next-line no-restricted-modules
+const { SeverityLevel, MongoLoggableComponent } = require('../../src/mongo_logger');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 
@@ -817,71 +819,193 @@ describe('MongoOptions', function () {
     });
   });
 
-  context('when mongodbLogPath is in options', function () {
+  describe('logging client options', function () {
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+    context('when mongodbLogPath is in options', function () {
+      let stderrStub;
+      let stdoutStub;
 
-    let stderrStub;
-    let stdoutStub;
+      beforeEach(() => {
+        stdoutStub = sinon.stub(process.stdout);
+        stderrStub = sinon.stub(process.stderr);
+      });
 
-    beforeEach(() => {
-      stdoutStub = sinon.stub(process.stdout);
-      stderrStub = sinon.stub(process.stderr);
-    });
+      afterEach(() => {
+        sinon.restore();
+      });
 
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    context('when option is `stderr`', function () {
-      it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/', {
-          [loggerFeatureFlag]: true,
-          mongodbLogPath: 'stderr'
+      context('when option is `stderr`', function () {
+        it('it is accessible through mongoLogger.logDestination', function () {
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: 'stderr'
+          });
+          const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
+          client.options.mongoLoggerOptions.logDestination.write(log);
+          expect(stderrStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
         });
-        const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
-        client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+      });
+
+      context('when option is a MongoDBLogWritable stream', function () {
+        it('it is accessible through mongoLogger.logDestination', function () {
+          const writable = {
+            buffer: [],
+            write(log) {
+              this.buffer.push(log);
+            }
+          };
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: writable
+          });
+          expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
+        });
+      });
+
+      context('when option is `stdout`', function () {
+        it('it is accessible through mongoLogger.logDestination', function () {
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: 'stdout'
+          });
+          const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
+          client.options.mongoLoggerOptions.logDestination.write(log);
+          expect(stdoutStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
+        });
+      });
+
+      context('when option is invalid', function () {
+        it('it defaults to stderr', function () {
+          const invalidOption = 'stdnothing';
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: invalidOption
+          });
+          const log = { t: new Date(), c: 'constructorInvalidOption', s: 'error' };
+          client.options.mongoLoggerOptions.logDestination.write(log);
+          expect(stderrStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
+        });
       });
     });
-
-    context('when option is a MongoDBLogWritable stream', function () {
-      it('it is accessible through mongoLogger.logDestination', function () {
-        const writable = {
-          buffer: [],
-          write(log) {
-            this.buffer.push(log);
+    describe('component severities', function () {
+      const components = Object.values(MongoLoggableComponent);
+      const env_component_names = [
+        'MONGODB_LOG_COMMAND',
+        'MONGODB_LOG_TOPOLOGY',
+        'MONGODB_LOG_SERVER_SELECTION',
+        'MONGODB_LOG_CONNECTION',
+        'MONGODB_LOG_CLIENT'
+      ];
+      context('when only client option is provided', function () {
+        for (let i = 0; i < components.length; i++) {
+          it(`it stores severity levels for ${components[i]} component correctly`, function () {
+            for (const severityLevel of Object.values(SeverityLevel)) {
+              const client = new MongoClient('mongodb://a/', {
+                [loggerFeatureFlag]: true,
+                mongodbLogComponentSeverities: {
+                  [components[i]]: severityLevel
+                }
+              });
+              for (const [curComponent, curSeverity] of Object.entries(
+                client.options.mongoLoggerOptions.componentSeverities
+              )) {
+                if (curComponent === components[i]) {
+                  expect(curSeverity).to.equal(severityLevel);
+                } else {
+                  expect(curSeverity).to.equal(SeverityLevel.OFF);
+                }
+              }
+            }
+          });
+        }
+      });
+      context('when both client and environment option are provided', function () {
+        for (let i = 0; i < components.length; i++) {
+          it(`it stores severity level for ${components[i]} component correctly (client options have precedence)`, function () {
+            process.env[env_component_names[i]] = 'emergency';
+            for (const severityLevel of Object.values(SeverityLevel)) {
+              const client = new MongoClient('mongodb://a/', {
+                [loggerFeatureFlag]: true,
+                mongodbLogComponentSeverities: {
+                  [components[i]]: severityLevel
+                }
+              });
+              for (const [curComponent, curSeverity] of Object.entries(
+                client.options.mongoLoggerOptions.componentSeverities
+              )) {
+                if (curComponent === components[i]) {
+                  expect(curSeverity).to.equal(severityLevel);
+                } else {
+                  expect(curSeverity).to.equal(SeverityLevel.OFF);
+                }
+              }
+              process.env[env_component_names[i]] = undefined;
+            }
+          });
+        }
+      });
+      context('when default is provided', function () {
+        it('unspecified components have default value, while specified components retain value', function () {
+          for (let i = 0; i < components.length; i++) {
+            for (const severityLevel of Object.values(SeverityLevel)) {
+              for (const defaultSeverityLevel of Object.values(SeverityLevel)) {
+                const client = new MongoClient('mongodb://a/', {
+                  [loggerFeatureFlag]: true,
+                  mongodbLogComponentSeverities: {
+                    [components[i]]: severityLevel,
+                    default: defaultSeverityLevel
+                  }
+                });
+                for (const [curComponent, curSeverity] of Object.entries(
+                  client.options.mongoLoggerOptions.componentSeverities
+                )) {
+                  if (curComponent === components[i]) {
+                    expect(curSeverity).to.equal(severityLevel);
+                  } else {
+                    expect(curSeverity).to.equal(defaultSeverityLevel);
+                  }
+                }
+              }
+            }
           }
-        };
-        const client = new MongoClient('mongodb://a/', {
-          [loggerFeatureFlag]: true,
-          mongodbLogPath: writable
         });
-        expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
       });
     });
-
-    context('when option is `stdout`', function () {
-      it('it is accessible through mongoLogger.logDestination', function () {
-        const client = new MongoClient('mongodb://a/', {
-          [loggerFeatureFlag]: true,
-          mongodbLogPath: 'stdout'
+    context('when mongodbLogMaxDocumentLength is in options', function () {
+      context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+        it('it stores value for maxDocumentLength correctly', function () {
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogMaxDocumentLength: 290
+          });
+          expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
         });
-        const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
-        client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+        it('it throws error for negative input', function () {
+          expect(
+            () =>
+              new MongoClient('mongodb://a/', {
+                [loggerFeatureFlag]: true,
+                mongodbLogMaxDocumentLength: -290
+              })
+          ).to.throw(MongoParseError);
+        });
       });
-    });
-
-    context('when option is invalid', function () {
-      it('it defaults to stderr', function () {
-        const invalidOption = 'stdnothing';
-        const client = new MongoClient('mongodb://a/', {
-          [loggerFeatureFlag]: true,
-          mongodbLogPath: invalidOption
+      context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+        it('it stores value for maxDocumentLength correctly (client option value takes precedence)', function () {
+          process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogMaxDocumentLength: 290
+          });
+          expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
+          process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
         });
-        const log = { t: new Date(), c: 'constructorInvalidOption', s: 'error' };
-        client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
       });
     });
   });
