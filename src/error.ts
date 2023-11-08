@@ -1163,7 +1163,7 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
 
   if (error instanceof MongoError) {
     if (
-      (maxWireVersion >= 9 || error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) &&
+      (maxWireVersion >= 9 || isRetryableWriteError(error)) &&
       !error.hasErrorLabel(MongoErrorLabel.HandshakeError)
     ) {
       // If we already have the error label no need to add it again. 4.4+ servers add the label.

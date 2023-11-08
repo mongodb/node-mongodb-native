@@ -8,6 +8,7 @@ import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
 import {
   type AnyError,
+  isRetryableWriteError,
   MongoAPIError,
   MongoCompatibilityError,
   MONGODB_ERROR_CODES,
@@ -731,7 +732,7 @@ function endTransaction(
     session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
     if (error instanceof MongoError) {
       if (
-        error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
+        isRetryableWriteError(error) ||
         error instanceof MongoWriteConcernError ||
         isMaxTimeMSExpiredError(error)
       ) {
@@ -767,7 +768,7 @@ function endTransaction(
         session.unpin();
       }
 
-      if (error instanceof MongoError && error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) {
+      if (error instanceof MongoError && isRetryableWriteError(error)) {
         // SPEC-1185: apply majority write concern when retrying commitTransaction
         if (command.commitTransaction) {
           // per txns spec, must unpin session in this case
