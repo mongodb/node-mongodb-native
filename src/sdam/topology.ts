@@ -904,7 +904,6 @@ function processWaitQueue(topology: Topology) {
         : serverDescriptions;
     } catch (e) {
       waitQueueMember.timeoutController.clear();
-
       waitQueueMember.callback(e);
       continue;
     }
