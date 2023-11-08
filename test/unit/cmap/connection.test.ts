@@ -20,7 +20,9 @@ import {
   MongoRuntimeError,
   ns,
   type OperationDescription,
-  OpMsgResponse
+  OpMsgRequest,
+  OpMsgResponse,
+  OpQueryRequest
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
@@ -1078,7 +1080,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof Msg).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
     });
   });
 
@@ -1130,7 +1132,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof Query).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
     });
   });
 });
