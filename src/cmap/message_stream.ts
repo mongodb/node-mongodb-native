@@ -5,19 +5,13 @@ import { MongoDecompressionError, MongoParseError } from '../error';
 import type { ClientSession } from '../sessions';
 import { BufferPool, type Callback } from '../utils';
 import {
-  BinMsg,
   type MessageHeader,
-  Msg,
-  Response,
+  OpCompressedRequest,
+  OpMsgResponse,
+  OpQueryResponse,
   type WriteProtocolMessageType
 } from './commands';
-import {
-  compress,
-  Compressor,
-  type CompressorName,
-  decompress,
-  uncompressibleCommands
-} from './wire_protocol/compression';
+import { compress, Compressor, type CompressorName, decompress } from './wire_protocol/compression';
 import { OP_COMPRESSED, OP_MSG } from './wire_protocol/constants';
 
 const MESSAGE_HEADER_SIZE = 16;
@@ -85,7 +79,7 @@ export class MessageStream extends Duplex {
     operationDescription: OperationDescription
   ): void {
     const agreedCompressor = operationDescription.agreedCompressor ?? 'none';
-    if (agreedCompressor === 'none' || !canCompress(command)) {
+    if (agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)) {
       const data = command.toBin();
       this.push(Array.isArray(data) ? Buffer.concat(data) : data);
       return;
@@ -126,14 +120,6 @@ export class MessageStream extends Duplex {
       }
     );
   }
-}
-
-// Return whether a command contains an uncompressible command term
-// Will return true if command contains no uncompressible command terms
-function canCompress(command: WriteProtocolMessageType) {
-  const commandDoc = command instanceof Msg ? command.command : command.query;
-  const commandName = Object.keys(commandDoc)[0];
-  return !uncompressibleCommands.has(commandName);
 }
 
 function processIncomingData(stream: MessageStream, callback: Callback<Buffer>): void {
@@ -179,7 +165,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
     return false;
   };
 
-  let ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
+  let ResponseType = messageHeader.opCode === OP_MSG ? OpMsgResponse : OpQueryResponse;
   if (messageHeader.opCode !== OP_COMPRESSED) {
     const messageBody = message.subarray(MESSAGE_HEADER_SIZE);
 
@@ -205,7 +191,7 @@ function processIncomingData(stream: MessageStream, callback: Callback<Buffer>):
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);
 
   // recalculate based on wrapped opcode
-  ResponseType = messageHeader.opCode === OP_MSG ? BinMsg : Response;
+  ResponseType = messageHeader.opCode === OP_MSG ? OpMsgResponse : OpQueryResponse;
   decompress(compressorID, compressedBuffer).then(
     messageBody => {
       if (messageBody.length !== messageHeader.length) {

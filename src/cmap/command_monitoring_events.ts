@@ -7,7 +7,7 @@ import {
   LEGACY_HELLO_COMMAND_CAMEL_CASE
 } from '../constants';
 import { calculateDurationInMs, deepCopy } from '../utils';
-import { Msg, type Query, type WriteProtocolMessageType } from './commands';
+import { OpMsgRequest, type OpQueryRequest, type WriteProtocolMessageType } from './commands';
 import type { Connection } from './connection';
 
 /**
@@ -181,8 +181,8 @@ const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMM
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
-const namespace = (command: Query) => command.ns;
-const collectionName = (command: Query) => command.ns.split('.')[1];
+const namespace = (command: OpQueryRequest) => command.ns;
+const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
 const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
   SENSITIVE_COMMANDS.has(commandName) ||
   (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
@@ -220,7 +220,7 @@ const OP_QUERY_KEYS = [
 
 /** Extract the actual command from the query, possibly up-converting if it's a legacy format */
 function extractCommand(command: WriteProtocolMessageType): Document {
-  if (command instanceof Msg) {
+  if (command instanceof OpMsgRequest) {
     return deepCopy(command.command);
   }
 
@@ -283,7 +283,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
     return reply;
   }
 
-  if (command instanceof Msg) {
+  if (command instanceof OpMsgRequest) {
     return deepCopy(reply.result ? reply.result : reply);
   }
 
