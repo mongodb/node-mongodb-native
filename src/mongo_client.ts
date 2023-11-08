@@ -21,7 +21,12 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
-import { type MongoDBLogWritable, MongoLogger, type MongoLoggerOptions } from './mongo_logger';
+import {
+  type LogComponentSeveritiesClientOptions,
+  type MongoDBLogWritable,
+  MongoLogger,
+  type MongoLoggerOptions
+} from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
@@ -262,6 +267,16 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
+  /**
+   * @internal
+   * TODO: NODE-5671 - remove internal flag
+   */
+  mongodbLogMaxDocumentLength?: number;
 
   /** @internal */
   [featureFlag: symbol]: any;
