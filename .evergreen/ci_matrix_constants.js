@@ -16,7 +16,8 @@ const DEFAULT_OS = 'rhel80-large';
 const WINDOWS_OS = 'windows-vsCurrent-large';
 const MACOS_OS = 'macos-1100';
 const UBUNTU_OS = 'ubuntu1804-large';
-const UBUNTU_20_OS = 'ubuntu2004-small'
+const UBUNTU_20_OS = 'ubuntu2004-small';
+const UBUNTU_22_OS = 'ubuntu2204-large';
 const DEBIAN_OS = 'debian11-small';
 
 module.exports = {
@@ -33,5 +34,6 @@ module.exports = {
   MACOS_OS,
   UBUNTU_OS,
   UBUNTU_20_OS,
+  UBUNTU_22_OS,
   DEBIAN_OS
 };

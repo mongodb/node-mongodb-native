@@ -16,7 +16,8 @@ const {
   MACOS_OS,
   UBUNTU_OS,
   UBUNTU_20_OS,
-  DEBIAN_OS
+  DEBIAN_OS,
+  UBUNTU_22_OS
 } = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
@@ -119,14 +120,6 @@ TASKS.push(
       name: 'test-atlas-connectivity',
       tags: ['atlas-connect'],
       commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
-    },
-    {
-      name: 'test-atlas-data-lake',
-      commands: [
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongohoused' },
-        { func: 'run data lake tests' }
-      ]
     },
     {
       name: 'test-5.0-load-balanced',
@@ -597,6 +590,16 @@ BUILD_VARIANTS.push({
     NODE_LTS_VERSION: LATEST_LTS
   },
   tasks: AWS_AUTH_TASKS
+});
+
+BUILD_VARIANTS.push({
+  name: 'ubuntu2204-test-atlas-data-lake',
+  display_name: 'Atlas Data Lake Tests',
+  run_on: UBUNTU_22_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  tasks: ['test-atlas-data-lake']
 });
 
 const oneOffFuncAsTasks = [];
