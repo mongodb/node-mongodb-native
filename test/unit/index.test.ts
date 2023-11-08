@@ -3,7 +3,7 @@ import { expect } from 'chai';
 // Exception to the import from mongodb rule we're unit testing our public API
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as mongodb from '../../src/index';
-import { alphabetically, sorted } from '../tools/utils';
+import { setDifference } from '../mongodb';
 
 /**
  * TS-NODE Adds these keys but they are undefined, they are not present when you import from lib
@@ -133,10 +133,12 @@ const EXPECTED_EXPORTS = [
 ];
 
 describe('mongodb entrypoint', () => {
-  it('should export all and only the expected keys in expected_exports', () => {
-    expect(sorted(Object.keys(mongodb), alphabetically)).to.deep.equal(
-      sorted(EXPECTED_EXPORTS, alphabetically)
-    );
+  it('exports all the expected keys', () => {
+    expect(setDifference(EXPECTED_EXPORTS, Object.keys(mongodb))).to.be.empty;
+  });
+
+  it('exports only the expected keys', () => {
+    expect(setDifference(Object.keys(mongodb), EXPECTED_EXPORTS)).to.be.empty;
   });
 
   it('should export keys added by ts-node as undefined', () => {

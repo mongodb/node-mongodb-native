@@ -7,21 +7,22 @@ import { setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {
-  BinMsg,
   type ClientMetadata,
   connect,
   Connection,
   hasSessionSupport,
   type HostAddress,
   isHello,
+  type MessageHeader,
   MessageStream,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
-  Msg,
   ns,
   type OperationDescription,
-  Query
+  OpMsgRequest,
+  OpMsgResponse,
+  OpQueryRequest
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { generateOpMsgBuffer, getSymbolFrom } from '../../tools/utils';
@@ -311,7 +312,7 @@ describe('new Connection()', function () {
           };
           const msgBody = msg.subarray(16);
 
-          const message = new BinMsg(msg, msgHeader, msgBody);
+          const message = new OpMsgResponse(msg, msgHeader, msgBody);
           connection.onMessage(message);
         });
 
@@ -351,7 +352,7 @@ describe('new Connection()', function () {
           };
           const msgBody = msg.subarray(16);
 
-          const message = new BinMsg(msg, msgHeader, msgBody);
+          const message = new OpMsgResponse(msg, msgHeader, msgBody);
           connection.onMessage(message);
         });
 
@@ -381,7 +382,7 @@ describe('new Connection()', function () {
           };
           const msgBody = msg.subarray(16);
 
-          const message = new BinMsg(msg, msgHeader, msgBody);
+          const message = new OpMsgResponse(msg, msgHeader, msgBody);
           expect(() => {
             connection.onMessage(message);
           }).to.not.throw();
@@ -426,7 +427,7 @@ describe('new Connection()', function () {
           };
           const msgBody = msg.subarray(16);
 
-          const message = new BinMsg(msg, msgHeader, msgBody);
+          const message = new OpMsgResponse(msg, msgHeader, msgBody);
           connection.onMessage(message);
         });
 
@@ -507,7 +508,7 @@ describe('new Connection()', function () {
         };
         const msgBody = msg.subarray(16);
         msgBody.writeInt32LE(0, 0); // OPTS_MORE_TO_COME
-        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        connection.onMessage(new OpMsgResponse(msg, msgHeader, msgBody));
         // timeout is still reset
         expect(connection.stream).to.have.property('timeout', 0);
       });
@@ -524,7 +525,7 @@ describe('new Connection()', function () {
         const msgBody = msg.subarray(16);
         msgBody.writeInt32LE(2, 0); // OPTS_MORE_TO_COME
         connection[getSymbolFrom(connection, 'queue')].set(0, { cb: () => null });
-        connection.onMessage(new BinMsg(msg, msgHeader, msgBody));
+        connection.onMessage(new OpMsgResponse(msg, msgHeader, msgBody));
         // timeout is still set
         expect(connection.stream).to.have.property('timeout', 1);
       });
@@ -1079,7 +1080,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof Msg).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
     });
   });
 
@@ -1131,7 +1132,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof Query).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
     });
   });
 });

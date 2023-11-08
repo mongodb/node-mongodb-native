@@ -1,15 +1,15 @@
 'use strict';
 
-const { Msg, Query } = require('../../mongodb');
+const { OpQueryRequest, OpMsgRequest } = require('../../mongodb');
 const { CommandStartedEvent } = require('../../mongodb');
 const { expect } = require('chai');
 
 describe('Command Monitoring Events - unit/cmap', function () {
   const commands = [
-    new Query('admin', { a: { b: 10 }, $query: { b: 10 } }, {}),
-    new Query('hello', { a: { b: 10 }, $query: { b: 10 } }, {}),
-    new Msg('admin', { b: { c: 20 } }, {}),
-    new Msg('hello', { b: { c: 20 } }, {}),
+    new OpQueryRequest('admin', { a: { b: 10 }, $query: { b: 10 } }, {}),
+    new OpQueryRequest('hello', { a: { b: 10 }, $query: { b: 10 } }, {}),
+    new OpMsgRequest('admin', { b: { c: 20 } }, {}),
+    new OpMsgRequest('hello', { b: { c: 20 } }, {}),
     { ns: 'admin.$cmd', query: { $query: { a: 16 } } },
     { ns: 'hello there', f1: { h: { a: 52, b: { c: 10, d: [1, 2, 3, 5] } } } }
   ];
@@ -17,7 +17,7 @@ describe('Command Monitoring Events - unit/cmap', function () {
   for (const command of commands) {
     it(`should make a deep copy of object of type: ${command.constructor.name}`, () => {
       const ev = new CommandStartedEvent({ id: 'someId', address: 'someHost' }, command);
-      if (command instanceof Query) {
+      if (command instanceof OpQueryRequest) {
         if (command.ns === 'admin.$cmd') {
           expect(ev.command !== command.query.$query).to.equal(true);
           for (const k in command.query.$query) {
@@ -29,7 +29,7 @@ describe('Command Monitoring Events - unit/cmap', function () {
             expect(ev.command.filter[k]).to.deep.equal(command.query.$query[k]);
           }
         }
-      } else if (command instanceof Msg) {
+      } else if (command instanceof OpMsgRequest) {
         expect(ev.command !== command.command).to.equal(true);
         expect(ev.command).to.deep.equal(command.command);
       } else if (typeof command === 'object') {
@@ -48,7 +48,7 @@ describe('Command Monitoring Events - unit/cmap', function () {
 
     it('should wrap a basic query option', function () {
       const db = 'test1';
-      const query = new Query(
+      const query = new OpQueryRequest(
         `${db}`,
         {
           testCmd: 1,
@@ -68,7 +68,7 @@ describe('Command Monitoring Events - unit/cmap', function () {
 
     it('should upconvert a Query wrapping a command into the corresponding command', function () {
       const db = 'admin';
-      const query = new Query(
+      const query = new OpQueryRequest(
         `${db}`,
         {
           $query: {
