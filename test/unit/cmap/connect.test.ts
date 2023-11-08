@@ -234,42 +234,68 @@ describe('Connect Tests', function () {
 
     context('loadBalanced option', () => {
       context('when loadBalanced is not set as an option', () => {
+        const authContext = {
+          connection: {},
+          options: {}
+        };
+
         it('does not set loadBalanced on the handshake document', async () => {
-          const options = {};
-          const authContext = {
-            connection: {},
-            options
-          };
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.to.have.property('loadBalanced');
+        });
+
+        it('does not set hello on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).not.to.have.property('hello');
+        });
+
+        it('sets LEGACY_HELLO_COMMAND on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
         });
       });
 
       context('when loadBalanced is set to false', () => {
+        const authContext = {
+          connection: {},
+          options: { loadBalanced: false }
+        };
+
         it('does not set loadBalanced on the handshake document', async () => {
-          const options = {
-            loadBalanced: false
-          };
-          const authContext = {
-            connection: {},
-            options
-          };
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument).not.to.have.property('loadBalanced');
+        });
+
+        it('does not set hello on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).not.to.have.property('hello');
+        });
+
+        it('sets LEGACY_HELLO_COMMAND on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).to.have.property(LEGACY_HELLO_COMMAND, 1);
         });
       });
 
       context('when loadBalanced is set to true', () => {
-        it('does set loadBalanced on the handshake document', async () => {
-          const options = {
-            loadBalanced: true
-          };
-          const authContext = {
-            connection: {},
-            options
-          };
+        const authContext = {
+          connection: {},
+          options: { loadBalanced: true }
+        };
+
+        it('sets loadBalanced on the handshake document', async () => {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
-          expect(handshakeDocument).to.have.property('loadBalanced', true);
+          expect(handshakeDocument).to.have.property('loadBalanced');
+        });
+
+        it('sets hello on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).to.have.property('hello');
+        });
+
+        it('does not set LEGACY_HELLO_COMMAND on the handshake document', async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument).not.have.property(LEGACY_HELLO_COMMAND, 1);
         });
       });
     });
