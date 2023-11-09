@@ -15,6 +15,7 @@ const {
   WINDOWS_OS,
   MACOS_OS,
   UBUNTU_OS,
+  UBUNTU_22_OS,
   DEBIAN_OS
 } = require('./ci_matrix_constants');
 
@@ -121,14 +122,6 @@ TASKS.push(
       name: 'test-atlas-connectivity',
       tags: ['atlas-connect'],
       commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
-    },
-    {
-      name: 'test-atlas-data-lake',
-      commands: [
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongohoused' },
-        { func: 'run data lake tests' }
-      ]
     },
     {
       name: 'test-5.0-load-balanced',
@@ -620,6 +613,16 @@ BUILD_VARIANTS.push({
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
   tasks: oneOffFuncAsTasks.map(({ name }) => name)
+});
+
+BUILD_VARIANTS.push({
+  name: 'ubuntu2204-test-atlas-data-lake',
+  display_name: 'Atlas Data Lake Tests',
+  run_on: UBUNTU_22_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS
+  },
+  tasks: ['test-atlas-data-lake']
 });
 
 // special case for serverless testing
