@@ -92,6 +92,7 @@ export const MongoErrorLabel = Object.freeze({
   ResumableChangeStreamError: 'ResumableChangeStreamError',
   HandshakeError: 'HandshakeError',
   ResetPool: 'ResetPool',
+  PoolRequstedRetry: 'PoolRequstedRetry',
   InterruptInUseConnections: 'InterruptInUseConnections',
   NoWritesPerformed: 'NoWritesPerformed'
 } as const);
@@ -1162,7 +1163,7 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
 
   if (error instanceof MongoError) {
     if (
-      (maxWireVersion >= 9 || error.hasErrorLabel(MongoErrorLabel.RetryableWriteError)) &&
+      (maxWireVersion >= 9 || isRetryableWriteError(error)) &&
       !error.hasErrorLabel(MongoErrorLabel.HandshakeError)
     ) {
       // If we already have the error label no need to add it again. 4.4+ servers add the label.
@@ -1194,7 +1195,10 @@ export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): 
 }
 
 export function isRetryableWriteError(error: MongoError): boolean {
-  return error.hasErrorLabel(MongoErrorLabel.RetryableWriteError);
+  return (
+    error.hasErrorLabel(MongoErrorLabel.RetryableWriteError) ||
+    error.hasErrorLabel(MongoErrorLabel.PoolRequstedRetry)
+  );
 }
 
 /** Determines whether an error is something the driver should attempt to retry */
