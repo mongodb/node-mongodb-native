@@ -225,7 +225,8 @@ function resetMonitorState(monitor: Monitor) {
 
 function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion | null): boolean {
   // If we have no topology version we always poll no matter
-  // what the user provided.
+  // what the user provided, since the server does not support
+  // the streaming protocol.
   if (topologyVersion == null) return false;
 
   const serverMonitoringMode = monitor.options.serverMonitoringMode;
@@ -317,6 +318,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
       );
 
+      // If we are using the streaming protocol then we immediately issue another 'started'
+      // event, otherwise the "check" is complete and return to the main monitor loop.
       if (isAwaitable) {
         monitor.emit(
           Server.SERVER_HEARTBEAT_STARTED,
