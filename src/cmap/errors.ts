@@ -56,7 +56,7 @@ export class PoolClearedError extends MongoNetworkError {
     super(errorMessage, pool.serverError ? { cause: pool.serverError } : undefined);
     this.address = pool.address;
 
-    this.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+    this.addErrorLabel(MongoErrorLabel.PoolRequstedRetry);
   }
 
   override get name(): string {

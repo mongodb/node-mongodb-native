@@ -1,0 +1,49 @@
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import {
+  type Collection,
+  type MongoClient,
+  MongoWriteConcernError,
+  PoolClearedError,
+  Server
+} from '../../mongodb';
+
+describe('Non Server Retryable Writes', function () {
+  let client: MongoClient;
+  let collection: Collection<{ _id: 1 }>;
+
+  beforeEach(async function () {
+    client = this.configuration.newClient({ monitorCommands: true, retryWrites: true });
+    await client
+      .db()
+      .collection('retryReturnsOriginal')
+      .drop()
+      .catch(() => null);
+    collection = client.db().collection('retryReturnsOriginal');
+  });
+
+  afterEach(async function () {
+    sinon.restore();
+    await client.close();
+  });
+
+  it(
+    'returns the original error with a PoolRequstedRetry label after encountering a WriteConcernError',
+    { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
+    async () => {
+      const serverCommandStub = sinon.stub(Server.prototype, 'command');
+      serverCommandStub.onCall(0).yieldsRight(new PoolClearedError('error'));
+      serverCommandStub
+        .onCall(1)
+        .yieldsRight(
+          new MongoWriteConcernError({ errorLabels: ['NoWritesPerformed'], errorCode: 10107 }, {})
+        );
+
+      const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);
+      sinon.restore();
+
+      expect(insertResult.errorLabels).to.be.deep.equal(['PoolRequstedRetry']);
+    }
+  );
+});
