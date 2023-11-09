@@ -1,3 +1,7 @@
+import { nextTick } from 'node:process';
+import { setTimeout } from 'node:timers/promises';
+import { promisify } from 'node:util';
+
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
@@ -937,6 +941,21 @@ describe('driver utils', function () {
         expect(result).to.equal(superPromiseSuccess);
         expect(await result).to.equal(2);
       });
+    });
+
+    it('suppresses errors when `callback` throws an error', async () => {
+      const superPromiseRejection = Promise.reject(new Error('fail'));
+      const unhandledRejections = [];
+      process.on('unhandledRejection', unhandledRejections.push.bind(unhandledRejections));
+      maybeCallback(
+        () => superPromiseRejection,
+        () => {
+          throw new Error('second error thrown from the callback');
+        }
+      );
+      // // arbitrary delay to let any asynchronous processing occur
+      await setTimeout(5);
+      expect(unhandledRejections).to.have.lengthOf(0);
     });
   });
 

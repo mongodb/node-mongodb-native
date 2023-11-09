@@ -347,10 +347,17 @@ export function maybeCallback<T>(
     return promise;
   }
 
-  promise.then(
-    result => callback(undefined, result),
-    error => callback(error)
-  );
+  promise
+    .then(
+      result => callback(undefined, result),
+      error => callback(error)
+    )
+    .catch(() => {
+      // in the case that `callback` throws, another promise rejection will be thrown.  we don't really have
+      // many options here - we can't call the callback again with the second error so we just swallow it.
+      // In the long-term, we should refactor the two remaining usages of `maybeCallback` to
+      // be async functions and we and remove this helper.
+    });
   return;
 }
 
