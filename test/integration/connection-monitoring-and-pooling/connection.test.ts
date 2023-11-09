@@ -43,8 +43,7 @@ describe('Connection', function () {
           expect(err).to.not.exist;
           this.defer(_done => conn.destroy(_done));
 
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
-            expect(err).to.not.exist;
+          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined).then(hello => {
             expect(hello).to.exist;
             expect(hello.ok).to.equal(1);
             done();
@@ -72,7 +71,7 @@ describe('Connection', function () {
           conn.on('commandSucceeded', event => events.push(event));
           conn.on('commandFailed', event => events.push(event));
 
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
+          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined).then(hello => {
             expect(err).to.not.exist;
             expect(hello).to.exist;
             expect(hello.ok).to.equal(1);

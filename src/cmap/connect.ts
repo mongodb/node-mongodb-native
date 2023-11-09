@@ -30,7 +30,8 @@ import {
   type CommandOptions,
   Connection,
   type ConnectionOptions,
-  CryptoConnection
+  CryptoConnection,
+  ModernConnection
 } from './connection';
 import type { ClientMetadata } from './handshake/client_metadata';
 import {
@@ -61,15 +62,15 @@ export function connect(options: ConnectionOptions, callback: Callback<Connectio
       return callback(err);
     }
 
-    let ConnectionType = options.connectionType ?? Connection;
+    let ConnectionType = options.id === '<monitor>' ? Connection : ModernConnection; // options.connectionType ?? Connection;
     if (options.autoEncrypter) {
-      ConnectionType = CryptoConnection;
+      ConnectionType = CryptoConnection as any;
     }
 
     const connection = new ConnectionType(socket, options);
 
-    performInitialHandshake(connection, options).then(
-      () => callback(undefined, connection),
+    performInitialHandshake(connection as any, options).then(
+      () => callback(undefined, connection as any),
       error => {
         connection.destroy({ force: false });
         callback(error);

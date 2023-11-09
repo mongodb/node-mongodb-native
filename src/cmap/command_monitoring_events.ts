@@ -34,7 +34,14 @@ export class CommandStartedEvent {
    * @param pool - the pool that originated the command
    * @param command - the command
    */
-  constructor(connection: Connection, command: WriteProtocolMessageType) {
+  constructor(
+    connection: {
+      id?: string | number;
+      address: string;
+      serviceId?: ObjectId;
+    },
+    command: WriteProtocolMessageType
+  ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
@@ -86,7 +93,11 @@ export class CommandSucceededEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    connection: Connection,
+    connection: {
+      id?: string | number;
+      address: string;
+      serviceId?: ObjectId;
+    },
     command: WriteProtocolMessageType,
     reply: Document | undefined,
     started: number
@@ -136,7 +147,11 @@ export class CommandFailedEvent {
    * @param started - a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(
-    connection: Connection,
+    connection: {
+      id?: string | number;
+      address: string;
+      serviceId?: ObjectId;
+    },
     command: WriteProtocolMessageType,
     error: Error | Document,
     started: number
@@ -302,7 +317,11 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   return deepCopy(reply.result ? reply.result : reply);
 }
 
-function extractConnectionDetails(connection: Connection) {
+function extractConnectionDetails(connection: {
+  id?: string | number;
+  address: string;
+  serviceId?: ObjectId;
+}) {
   let connectionId;
   if ('id' in connection) {
     connectionId = connection.id;

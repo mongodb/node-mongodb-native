@@ -371,15 +371,14 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           }
           return cb(err);
         }
+        const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+          this.decrementOperationCount();
+          cb(error, response);
+        });
 
-        conn.command(
-          ns,
-          cmd,
-          finalOptions,
-          makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-            this.decrementOperationCount();
-            cb(error, response);
-          })
+        conn.commandAsync(ns, cmd, finalOptions).then(
+          result => handler(undefined, result),
+          error => handler(error)
         );
       },
       callback

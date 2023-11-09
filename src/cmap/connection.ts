@@ -1,5 +1,4 @@
-import { once } from 'events';
-import { on } from 'stream';
+import { on } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -23,12 +22,14 @@ import {
   MongoParseError,
   MongoRuntimeError,
   MongoServerError,
+  MongoUnexpectedServerResponseError,
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
+import { TimeoutController } from '../utils';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -802,8 +803,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kQueue]: Map<number, OperationDescription>;
   /** @internal */
-  [kMessageStream]: MessageStream;
-  /** @internal */
   socket: Stream;
   /** @internal */
   [kHello]: Document | null;
@@ -830,14 +829,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions | undefined,
-        callback: Callback
-      ) => this.command(ns, cmd, options, callback as any)
-    );
+    // TODO remove:
+    this.commandAsync = this.command.bind(this);
 
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
@@ -854,25 +847,11 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     // setup parser stream and message handling
     this[kQueue] = new Map();
-    this[kMessageStream] = new MessageStream({
-      ...options,
-      maxBsonMessageSize: this.hello?.maxBsonMessageSize
-    });
     this.socket = stream;
 
     this[kDelayedTimeoutId] = null;
 
-    this[kMessageStream].on('message', message => this.onMessage(message));
-    this[kMessageStream].on('error', error => this.onError(error));
     this.socket.on('close', () => this.onClose());
-    this.socket.on('timeout', () => this.onTimeout());
-    this.socket.on('error', () => {
-      /* ignore errors, listen to `close` instead */
-    });
-
-    // hook the message stream up to the passed in stream
-    this.socket.pipe(this[kMessageStream]);
-    this[kMessageStream].pipe(this.socket);
   }
 
   get description(): StreamDescription {
@@ -890,15 +869,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
-  }
-
-  // Set the whether the message stream is for a monitoring connection.
-  set isMonitoringConnection(value: boolean) {
-    this[kMessageStream].isMonitoringConnection = value;
-  }
-
-  get isMonitoringConnection(): boolean {
-    return this[kMessageStream].isMonitoringConnection;
   }
 
   get serviceId(): ObjectId | undefined {
@@ -976,7 +946,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.emit('message', message);
     let operationDescription = this[kQueue].get(message.responseTo);
 
-    if (!operationDescription && this.isMonitoringConnection) {
+    if (!operationDescription) {
       // This is how we recover when the initial hello's requestId is not
       // the responseTo when hello responses have been skipped:
 
@@ -1095,11 +1065,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       this.emit(Connection.CLOSE);
     };
 
-    this.socket.removeAllListeners();
-    this[kMessageStream].removeAllListeners();
-
-    this[kMessageStream].destroy();
-
     if (force) {
       this.socket.destroy();
       completeCleanup();
@@ -1116,12 +1081,56 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  command(
+  errorMonitor() {
+    this.socket.removeAllListeners('close');
+
+    let reject: (reason?: Error) => void;
+    let resolve: () => void = () => null;
+    const p = new Promise<void>((resolvePromise, rejectPromise) => {
+      resolve = resolvePromise;
+      reject = rejectPromise;
+    });
+
+    const controller = new TimeoutController(this.socketTimeoutMS);
+    const onTimeout = () => {
+      controller.clear();
+      const beforeHandshake = this.hello == null;
+      const message = `connection ${this.id} to ${this.address} timed out`;
+      const error = new MongoNetworkTimeoutError(message, { beforeHandshake });
+      this.cleanup(true);
+      reject(error);
+    };
+    controller.signal.addEventListener('abort', onTimeout, { once: true });
+
+    const onError = (error: Error) => {
+      this.cleanup(true);
+      reject(error);
+    };
+    this.socket.once('error', onError);
+
+    const onClose = () => {
+      this.cleanup(true);
+      const message = `connection ${this.id} to ${this.address} closed`;
+      reject(new MongoNetworkError(message));
+    };
+    this.socket.once('close', onClose);
+
+    return [
+      p.finally(() => {
+        controller.clear();
+        this.socket.removeAllListeners('error');
+        this.socket.removeAllListeners('close');
+        this.socket.on('close', () => this.onClose());
+      }),
+      resolve
+    ] as const;
+  }
+
+  async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions | undefined,
-    callback: Callback
-  ): void {
+    options: CommandOptions = {}
+  ): Promise<Document> {
     let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
@@ -1147,10 +1156,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
       const err = applySession(session, cmd, options);
       if (err) {
-        return callback(err);
+        throw err;
       }
     } else if (session?.explicit) {
-      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
+      throw new MongoCompatibilityError('Current topology does not support sessions');
     }
 
     // if we have a known cluster time, gossip it
@@ -1171,26 +1180,115 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       };
     }
 
-    const commandOptions: Document = Object.assign(
-      {
-        numberToSkip: 0,
-        numberToReturn: -1,
-        checkKeys: false,
-        // This value is not overridable
-        secondaryOk: readPreference.secondaryOk()
-      },
-      options
-    );
+    const commandOptions: Document = {
+      numberToSkip: 0,
+      numberToReturn: -1,
+      checkKeys: false,
+      // This value is not overridable
+      secondaryOk: readPreference.secondaryOk(),
+      ...options
+    };
 
     const message = this.supportsOpMsg
       ? new OpMsgRequest(ns.db, cmd, commandOptions)
       : new OpQueryRequest(ns.db, cmd, commandOptions);
 
-    try {
-      write(this as any as Connection, message, commandOptions, callback);
-    } catch (err) {
-      callback(err);
+    let started = 0;
+    if (this.monitorCommands) {
+      started = now();
+      this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, message));
     }
+
+    const [willError, resolveErrorHandling] = this.errorMonitor();
+
+    const writeOptions = {
+      agreedCompressor: commandOptions.agreedCompressor ?? 'none',
+      zlibCompressionLevel: commandOptions.zlibCompressionLevel ?? 0
+    };
+
+    try {
+      await Promise.race([writeCommand(this, message, writeOptions), willError]);
+    } catch (error) {
+      if (this.monitorCommands) {
+        this.emit(Connection.COMMAND_FAILED, new CommandFailedEvent(this, message, error, started));
+      }
+      throw error;
+    }
+
+    if (options.noResponse) {
+      this.emit(
+        Connection.COMMAND_SUCCEEDED,
+        new CommandSucceededEvent(this, message, undefined, started)
+      );
+      return { ok: 1 };
+    }
+
+    let response = null;
+    try {
+      response = await Promise.race([read(this), willError]);
+      resolveErrorHandling();
+    } catch (error) {
+      if (this.monitorCommands) {
+        this.emit(Connection.COMMAND_FAILED, new CommandFailedEvent(this, message, error, started));
+      }
+      throw error;
+    }
+
+    if (response == null) {
+      const error = new MongoUnexpectedServerResponseError(
+        'Response was nullish should be a document'
+      );
+      if (this.monitorCommands) {
+        this.emit(Connection.COMMAND_FAILED, new CommandFailedEvent(this, message, error, started));
+      }
+      throw error;
+    }
+
+    try {
+      response.parse(options);
+    } catch (error) {
+      if (this.monitorCommands) {
+        this.emit(Connection.COMMAND_FAILED, new CommandFailedEvent(this, message, error, started));
+      }
+      throw error;
+    }
+
+    const document = response.documents[0];
+
+    if (options.session != null) {
+      updateSessionFromResponse(options.session, document);
+    }
+
+    if (!Buffer.isBuffer(document)) {
+      if (document.$clusterTime) {
+        this[kClusterTime] = document.$clusterTime;
+        this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+      }
+
+      if (document.ok === 1) {
+        this.emit(
+          Connection.COMMAND_SUCCEEDED,
+          new CommandSucceededEvent(this, message, document, started)
+        );
+      }
+
+      if (document.writeConcernError) {
+        throw new MongoWriteConcernError(document.writeConcernError, document);
+      }
+
+      if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+        const error = new MongoServerError(document);
+        if (this.monitorCommands) {
+          this.emit(
+            Connection.COMMAND_FAILED,
+            new CommandFailedEvent(this, message, error, started)
+          );
+        }
+        throw error;
+      }
+    }
+
+    return document;
   }
 }
 
@@ -1249,17 +1347,15 @@ export async function writeCommand(
   command: WriteProtocolMessageType,
   options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
 ): Promise<void> {
-  const drained = once(connection.socket, 'drain');
   const finalCommand =
-    options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
+    (options.agreedCompressor ?? 'none') === 'none' || !OpCompressedRequest.canCompress(command)
       ? command
       : new OpCompressedRequest(command, {
           agreedCompressor: options.agreedCompressor ?? 'none',
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
   const buffer = Buffer.concat(await finalCommand.toBin());
-  connection.socket.push(buffer);
-  await drained;
+  await promisify(connection.socket.write.bind(connection.socket))(buffer);
 }
 
 /**

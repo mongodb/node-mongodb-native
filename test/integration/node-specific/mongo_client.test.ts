@@ -707,7 +707,7 @@ describe('class MongoClient', function () {
       expect(startedEvents).to.have.lengthOf(1);
       expect(startedEvents[0]).to.have.property('commandName', 'endSessions');
       expect(endEvents).to.have.lengthOf(1);
-      expect(endEvents[0]).to.have.property('reply', undefined); // noReponse: true
+      expect(endEvents[0]).to.have.property('reply', undefined); // noResponse: true
     });
 
     context('when server selection would return no servers', () => {
