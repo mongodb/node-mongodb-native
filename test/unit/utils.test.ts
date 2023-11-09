@@ -1,6 +1,4 @@
-import { nextTick } from 'node:process';
 import { setTimeout } from 'node:timers/promises';
-import { promisify } from 'node:util';
 
 import { expect } from 'chai';
 import * as sinon from 'sinon';
