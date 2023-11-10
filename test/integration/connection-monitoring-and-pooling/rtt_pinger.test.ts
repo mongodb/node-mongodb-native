@@ -8,6 +8,15 @@ import { sleep } from '../../tools/utils';
 describe('class RTTPinger', () => {
   afterEach(() => sinon.restore());
 
+  beforeEach(async function () {
+    if (semver.gte('4.4.0', this.configuration.version)) {
+      if (this.currentTest)
+        this.currentTest.skipReason =
+          'Test requires streaming monitoring, needs to be on MongoDB 4.4+';
+      return this.skip();
+    }
+  });
+
   context('when serverApi is enabled', () => {
     let serverApiClient: MongoClient;
     beforeEach(async function () {
@@ -38,7 +47,7 @@ describe('class RTTPinger', () => {
 
       await sleep(11); // rttPinger connection creation
 
-      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection!, 'command'));
+      const spies = rttPingers.map(rtt => rtt.connection && sinon.spy(rtt.connection, 'command'));
 
       await sleep(11); // allow for another ping after spies have been made
 
@@ -71,9 +80,9 @@ describe('class RTTPinger', () => {
       await sleep(11); // rttPinger connection creation
 
       for (const rtt of rttPingers)
-        sinon.stub(rtt.connection!, 'command').yieldsRight(new Error('any'));
+        rtt.connection && sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any'));
 
-      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection!, 'destroy'));
+      const spies = rttPingers.map(rtt => rtt.connection && sinon.spy(rtt.connection, 'destroy'));
 
       await sleep(11); // allow for another ping after spies have been made
 
