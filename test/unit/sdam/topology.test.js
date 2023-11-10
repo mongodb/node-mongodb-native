@@ -355,9 +355,8 @@ describe('Topology (unit)', function () {
       afterEach(() => {
         // The srv event starts a monitor that we need to clean up
         for (const [, server] of topology.s.servers) {
-          const kMonitor = getSymbolFrom(server, 'monitor');
-          const kMonitorId = getSymbolFrom(server[kMonitor], 'monitorId');
-          server[kMonitor][kMonitorId].stop();
+          const kMonitorId = getSymbolFrom(server.monitor, 'monitorId');
+          server.monitor[kMonitorId].stop();
         }
       });
 

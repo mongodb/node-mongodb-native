@@ -2,8 +2,31 @@ import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 
-import { type MongoClient } from '../../mongodb';
+import { type Connection, type MongoClient, type RTTPinger } from '../../mongodb';
 import { sleep } from '../../tools/utils';
+
+/**
+ * RTTPinger creation depends on getting a response to the monitor's initial hello
+ * and that hello containing a topologyVersion.
+ * Subsequently the rttPinger creates its connection asynchronously
+ *
+ * I just went with a sleepy loop, until we have what we need, One could also use SDAM events in a clever way perhaps?
+ */
+async function getRTTPingers(client: MongoClient) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const rttPingers = Array.from(client.topology?.s.servers.values() ?? [], s => {
+      if (s.monitor?.rttPinger?.connection != null) return s.monitor?.rttPinger;
+      else null;
+    }).filter(rtt => rtt != null);
+
+    if (rttPingers.length !== 0) {
+      return rttPingers as (Omit<RTTPinger, 'connection'> & { connection: Connection })[];
+    }
+
+    await sleep(5);
+  }
+}
 
 describe('class RTTPinger', () => {
   afterEach(() => sinon.restore());
@@ -43,16 +66,9 @@ describe('class RTTPinger', () => {
 
     it('measures rtt with a hello command', async function () {
       await serverApiClient.connect();
-      await sleep(1001); // rttPinger creation
+      const rttPingers = await getRTTPingers(serverApiClient);
 
-      const rttPingers = Array.from(serverApiClient.topology?.s.servers.values() ?? [], s => {
-        if (s.monitor?.rttPinger) return s.monitor?.rttPinger;
-        else expect.fail('expected rttPinger to be defined');
-      });
-
-      await sleep(11); // rttPinger connection creation
-
-      const spies = rttPingers.map(rtt => rtt.connection && sinon.spy(rtt.connection, 'command'));
+      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));
 
       await sleep(11); // allow for another ping after spies have been made
 
@@ -75,19 +91,12 @@ describe('class RTTPinger', () => {
 
     it('destroys the connection', async function () {
       await client.connect();
-      await sleep(1001); // rttPinger creation
+      const rttPingers = await getRTTPingers(client);
 
-      const rttPingers = Array.from(client.topology?.s.servers.values() ?? [], s => {
-        if (s.monitor?.rttPinger) return s.monitor?.rttPinger;
-        else expect.fail('expected rttPinger to be defined');
-      });
-
-      await sleep(11); // rttPinger connection creation
-
-      for (const rtt of rttPingers)
-        rtt.connection && sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any'));
-
-      const spies = rttPingers.map(rtt => rtt.connection && sinon.spy(rtt.connection, 'destroy'));
+      for (const rtt of rttPingers) {
+        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any'));
+      }
+      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'destroy'));
 
       await sleep(11); // allow for another ping after spies have been made
 
