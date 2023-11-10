@@ -51,13 +51,15 @@ functions:
       params:
         script: |
           ${PREPARE_SHELL}
-          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/build-mongohouse-local.sh
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/pull-mongohouse-image.sh
     - command: shell.exec
       params:
         background: true
         script: |
           ${PREPARE_SHELL}
-          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-local.sh
+          DRIVERS_TOOLS="${DRIVERS_TOOLS}" bash ${DRIVERS_TOOLS}/.evergreen/atlas_data_lake/run-mongohouse-image.sh
+          sleep 1
+          docker ps
   bootstrap kms servers:
     - command: subprocess.exec
       params:
@@ -970,6 +972,14 @@ functions:
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
 tasks:
+  - name: test-atlas-data-lake
+    tags:
+      - datalake
+      - mongohouse
+    commands:
+      - func: install dependencies
+      - func: bootstrap mongohoused
+      - func: run data lake tests
   - name: test-serverless
     tags:
       - serverless
@@ -1454,11 +1464,6 @@ tasks:
     commands:
       - func: install dependencies
       - func: run atlas tests
-  - name: test-atlas-data-lake
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongohoused
-      - func: run data lake tests
   - name: test-5.0-load-balanced
     tags:
       - latest
@@ -3515,7 +3520,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3567,7 +3571,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3619,7 +3622,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3669,7 +3671,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3718,7 +3719,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3768,7 +3768,6 @@ buildvariants:
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
       - test-atlas-connectivity
-      - test-atlas-data-lake
       - test-5.0-load-balanced
       - test-6.0-load-balanced
       - test-latest-load-balanced
@@ -3814,7 +3813,6 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
-      - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
       - test-zstd-compression
@@ -3859,7 +3857,6 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
-      - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
@@ -3902,7 +3899,6 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
-      - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
       - test-tls-support-latest
@@ -3945,7 +3941,6 @@ buildvariants:
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
       - test-latest-server-v1-api
-      - test-atlas-data-lake
       - test-socks5
       - test-socks5-tls
       - test-zstd-compression
@@ -4073,6 +4068,13 @@ buildvariants:
       - run-custom-csfle-tests-5.0-pinned-commit
       - run-custom-csfle-tests-rapid-pinned-commit
       - run-custom-csfle-tests-latest-pinned-commit
+  - name: ubuntu2204-test-atlas-data-lake
+    display_name: Atlas Data Lake Tests
+    run_on: ubuntu2204-large
+    expansions:
+      NODE_LTS_VERSION: 20
+    tasks:
+      - test-atlas-data-lake
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large
