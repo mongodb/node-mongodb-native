@@ -9,6 +9,11 @@ describe('class RTTPinger', () => {
   afterEach(() => sinon.restore());
 
   beforeEach(async function () {
+    if (this.configuration.isLoadBalanced) {
+      if (this.currentTest)
+        this.currentTest.skipReason = 'No monitoring in LB mode, test not relevant';
+      return this.skip();
+    }
     if (semver.gte('4.4.0', this.configuration.version)) {
       if (this.currentTest)
         this.currentTest.skipReason =
