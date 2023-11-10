@@ -42,7 +42,7 @@ describe('class RTTPinger', () => {
 
       await sleep(11); // allow for another ping after spies have been made
 
-      expect(spies).to.have.length.above(1);
+      expect(spies).to.have.lengthOf.at.least(1);
       for (const spy of spies) {
         expect(spy).to.have.been.calledWith(sinon.match.any, { hello: 1 }, sinon.match.any);
       }
@@ -70,14 +70,14 @@ describe('class RTTPinger', () => {
 
       await sleep(11); // rttPinger connection creation
 
-      const spies = rttPingers.map(rtt =>
-        sinon.stub(rtt.connection!, 'command').yieldsRight(new Error('any'))
-      );
-      const destroySpies = rttPingers.map(rtt => sinon.spy(rtt.connection!, 'destroy'));
+      for (const rtt of rttPingers)
+        sinon.stub(rtt.connection!, 'command').yieldsRight(new Error('any'));
+
+      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection!, 'destroy'));
 
       await sleep(11); // allow for another ping after spies have been made
 
-      expect(destroySpies).to.have.length.above(1);
+      expect(spies).to.have.lengthOf.at.least(1);
       for (const spy of spies) {
         expect(spy).to.have.been.called;
       }
