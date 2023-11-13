@@ -2,7 +2,12 @@ import { expect } from 'chai';
 import * as semver from 'semver';
 import * as sinon from 'sinon';
 
-import { type Connection, type MongoClient, type RTTPinger } from '../../mongodb';
+import {
+  type Connection,
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  type RTTPinger
+} from '../../mongodb';
 import { sleep } from '../../tools/utils';
 
 /**
@@ -78,6 +83,41 @@ describe('class RTTPinger', () => {
       expect(spies).to.have.lengthOf.at.least(1);
       for (const spy of spies) {
         expect(spy).to.have.been.calledWith(sinon.match.any, { hello: 1 }, sinon.match.any);
+      }
+    });
+  });
+
+  context.only('when serverApi is not enabled and connected to a pre-hello server', () => {
+    let client: MongoClient;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
+    });
+
+    afterEach(async () => {
+      await client?.close();
+    });
+
+    it('measures rtt with a LEGACY_HELLO_COMMAND command', async function () {
+      await client.connect();
+      const rttPingers = await getRTTPingers(client);
+
+      // Fake pre-hello server.
+      // Hello was back-ported to feature versions of the server so we would need to pin
+      // versions prior to 4.4.2, 4.2.10, 4.0.21, and 3.6.21 to integration test
+      for (const rtt of rttPingers) rtt.connection.helloOk = false;
+
+      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));
+
+      await sleep(11); // allow for another ping after spies have been made
+
+      expect(spies).to.have.lengthOf.at.least(1);
+      for (const spy of spies) {
+        expect(spy).to.have.been.calledWith(
+          sinon.match.any,
+          { [LEGACY_HELLO_COMMAND]: 1 },
+          sinon.match.any
+        );
       }
     });
   });
