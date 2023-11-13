@@ -91,6 +91,12 @@ describe('class RTTPinger', () => {
     let client: MongoClient;
 
     beforeEach(async function () {
+      if (!this.currentTest) return;
+      if (this.configuration.serverApi) {
+        this.currentTest.skipReason = 'Test requires serverApi to NOT be enabled';
+        return this.skip();
+      }
+
       client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
     });
 
