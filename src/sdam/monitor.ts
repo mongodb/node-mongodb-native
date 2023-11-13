@@ -26,8 +26,6 @@ const kConnection = Symbol('connection');
 /** @internal */
 const kCancellationToken = Symbol('cancellationToken');
 /** @internal */
-const kRTTPinger = Symbol('rttPinger');
-/** @internal */
 const kRoundTripTime = Symbol('roundTripTime');
 
 const STATE_IDLE = 'idle';
@@ -81,7 +79,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kCancellationToken]: CancellationToken;
   /** @internal */
   [kMonitorId]?: MonitorInterval;
-  [kRTTPinger]?: RTTPinger;
+  rttPinger?: RTTPinger;
 
   get connection(): Connection | undefined {
     return this[kConnection];
@@ -197,8 +195,8 @@ function resetMonitorState(monitor: Monitor) {
   monitor[kMonitorId]?.stop();
   monitor[kMonitorId] = undefined;
 
-  monitor[kRTTPinger]?.close();
-  monitor[kRTTPinger] = undefined;
+  monitor.rttPinger?.close();
+  monitor.rttPinger = undefined;
 
   monitor[kCancellationToken].emit('cancel');
 
@@ -251,8 +249,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         }
       : { socketTimeoutMS: connectTimeoutMS };
 
-    if (isAwaitable && monitor[kRTTPinger] == null) {
-      monitor[kRTTPinger] = new RTTPinger(
+    if (isAwaitable && monitor.rttPinger == null) {
+      monitor.rttPinger = new RTTPinger(
         monitor[kCancellationToken],
         Object.assign(
           { heartbeatFrequencyMS: monitor.options.heartbeatFrequencyMS },
@@ -271,9 +269,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
       }
 
-      const rttPinger = monitor[kRTTPinger];
       const duration =
-        isAwaitable && rttPinger ? rttPinger.roundTripTime : calculateDurationInMs(start);
+        isAwaitable && monitor.rttPinger
+          ? monitor.rttPinger.roundTripTime
+          : calculateDurationInMs(start);
 
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
@@ -289,8 +288,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         );
         start = now();
       } else {
-        monitor[kRTTPinger]?.close();
-        monitor[kRTTPinger] = undefined;
+        monitor.rttPinger?.close();
+        monitor.rttPinger = undefined;
 
         callback(undefined, hello);
       }
@@ -383,7 +382,7 @@ export interface RTTPingerOptions extends ConnectionOptions {
 /** @internal */
 export class RTTPinger {
   /** @internal */
-  [kConnection]?: Connection;
+  connection?: Connection;
   /** @internal */
   [kCancellationToken]: CancellationToken;
   /** @internal */
@@ -393,7 +392,7 @@ export class RTTPinger {
   closed: boolean;
 
   constructor(cancellationToken: CancellationToken, options: RTTPingerOptions) {
-    this[kConnection] = undefined;
+    this.connection = undefined;
     this[kCancellationToken] = cancellationToken;
     this[kRoundTripTime] = 0;
     this.closed = false;
@@ -410,8 +409,8 @@ export class RTTPinger {
     this.closed = true;
     clearTimeout(this[kMonitorId]);
 
-    this[kConnection]?.destroy({ force: true });
-    this[kConnection] = undefined;
+    this.connection?.destroy({ force: true });
+    this.connection = undefined;
   }
 }
 
@@ -430,8 +429,8 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
       return;
     }
 
-    if (rttPinger[kConnection] == null) {
-      rttPinger[kConnection] = conn;
+    if (rttPinger.connection == null) {
+      rttPinger.connection = conn;
     }
 
     rttPinger[kRoundTripTime] = calculateDurationInMs(start);
@@ -441,11 +440,11 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     );
   }
 
-  const connection = rttPinger[kConnection];
+  const connection = rttPinger.connection;
   if (connection == null) {
     connect(options, (err, conn) => {
       if (err) {
-        rttPinger[kConnection] = undefined;
+        rttPinger.connection = undefined;
         rttPinger[kRoundTripTime] = 0;
         return;
       }
@@ -456,9 +455,12 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     return;
   }
 
-  connection.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, err => {
+  const commandName =
+    connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
+  connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined, err => {
     if (err) {
-      rttPinger[kConnection] = undefined;
+      rttPinger.connection?.destroy({ force: true });
+      rttPinger.connection = undefined;
       rttPinger[kRoundTripTime] = 0;
       return;
     }
