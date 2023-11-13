@@ -6,22 +6,24 @@ import { type Connection, type MongoClient, type RTTPinger } from '../../mongodb
 import { sleep } from '../../tools/utils';
 
 /**
- * RTTPinger creation depends on getting a response to the monitor's initial hello
- * and that hello containing a topologyVersion.
- * Subsequently the rttPinger creates its connection asynchronously
+ * RTTPingers are only created after getting a hello from the server that defines topologyVersion
+ * Each monitor is reaching out to a different node and rttPinger's are created async as a result.
  *
- * I just went with a sleepy loop, until we have what we need, One could also use SDAM events in a clever way perhaps?
+ * This function checks for rttPingers and sleeps if none are found.
  */
 async function getRTTPingers(client: MongoClient) {
+  type RTTPingerConnection = Omit<RTTPinger, 'connection'> & { connection: Connection };
+  const pingers = (rtt => rtt?.connection != null) as (r?: RTTPinger) => r is RTTPingerConnection;
+
+  if (!client.topology) expect.fail('Must provide a connected client');
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const rttPingers = Array.from(client.topology?.s.servers.values() ?? [], s => {
-      if (s.monitor?.rttPinger?.connection != null) return s.monitor?.rttPinger;
-      else null;
-    }).filter(rtt => rtt != null);
+    const servers = client.topology.s.servers.values();
+    const rttPingers = Array.from(servers, s => s.monitor?.rttPinger).filter(pingers);
 
     if (rttPingers.length !== 0) {
-      return rttPingers as (Omit<RTTPinger, 'connection'> & { connection: Connection })[];
+      return rttPingers;
     }
 
     await sleep(5);
@@ -32,25 +34,26 @@ describe('class RTTPinger', () => {
   afterEach(() => sinon.restore());
 
   beforeEach(async function () {
+    if (!this.currentTest) return;
     if (this.configuration.isLoadBalanced) {
-      if (this.currentTest)
-        this.currentTest.skipReason = 'No monitoring in LB mode, test not relevant';
+      this.currentTest.skipReason = 'No monitoring in LB mode, test not relevant';
       return this.skip();
     }
     if (semver.gte('4.4.0', this.configuration.version)) {
-      if (this.currentTest)
-        this.currentTest.skipReason =
-          'Test requires streaming monitoring, needs to be on MongoDB 4.4+';
+      this.currentTest.skipReason =
+        'Test requires streaming monitoring, needs to be on MongoDB 4.4+';
       return this.skip();
     }
   });
 
   context('when serverApi is enabled', () => {
     let serverApiClient: MongoClient;
+
     beforeEach(async function () {
+      if (!this.currentTest) return;
+
       if (semver.gte('5.0.0', this.configuration.version)) {
-        if (this.currentTest)
-          this.currentTest.skipReason = 'Test requires serverApi, needs to be on MongoDB 5.0+';
+        this.currentTest.skipReason = 'Test requires serverApi, needs to be on MongoDB 5.0+';
         return this.skip();
       }
 
