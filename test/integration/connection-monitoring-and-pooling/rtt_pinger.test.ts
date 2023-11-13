@@ -87,7 +87,7 @@ describe('class RTTPinger', () => {
     });
   });
 
-  context.only('when serverApi is not enabled and connected to a pre-hello server', () => {
+  context('when serverApi is not enabled and connected to a pre-hello server', () => {
     let client: MongoClient;
 
     beforeEach(async function () {
@@ -122,7 +122,7 @@ describe('class RTTPinger', () => {
     });
   });
 
-  context('when rtt hello receives an error', () => {
+  context(`when the RTTPinger's hello command receives any error`, () => {
     let client: MongoClient;
     beforeEach(async function () {
       client = this.configuration.newClient({}, { heartbeatFrequencyMS: 10 });
@@ -132,12 +132,12 @@ describe('class RTTPinger', () => {
       await client?.close();
     });
 
-    it('destroys the connection', async function () {
+    it('destroys the connection with force=true', async function () {
       await client.connect();
       const rttPingers = await getRTTPingers(client);
 
       for (const rtt of rttPingers) {
-        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any'));
+        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('non MongoError'));
       }
       const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'destroy'));
 
@@ -145,7 +145,7 @@ describe('class RTTPinger', () => {
 
       expect(spies).to.have.lengthOf.at.least(1);
       for (const spy of spies) {
-        expect(spy).to.have.been.called;
+        expect(spy).to.have.been.calledWithExactly({ force: true });
       }
     });
   });
