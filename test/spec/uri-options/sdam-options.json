@@ -1,0 +1,46 @@
+{
+  "tests": [
+    {
+      "description": "serverMonitoringMode=auto",
+      "uri": "mongodb://example.com/?serverMonitoringMode=auto",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "serverMonitoringMode": "auto"
+      }
+    },
+    {
+      "description": "serverMonitoringMode=stream",
+      "uri": "mongodb://example.com/?serverMonitoringMode=stream",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "serverMonitoringMode": "stream"
+      }
+    },
+    {
+      "description": "serverMonitoringMode=poll",
+      "uri": "mongodb://example.com/?serverMonitoringMode=poll",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "serverMonitoringMode": "poll"
+      }
+    },
+    {
+      "description": "invalid serverMonitoringMode",
+      "uri": "mongodb://example.com/?serverMonitoringMode=invalid",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    }
+  ]
+}

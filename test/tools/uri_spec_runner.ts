@@ -354,6 +354,7 @@ export function executeUriValidationTest(
       case 'localThresholdMS':
       case 'maxIdleTimeMS':
       case 'serverSelectionTimeoutMS':
+      case 'serverMonitoringMode':
       case 'socketTimeoutMS':
       case 'retryWrites':
       case 'directConnection':
