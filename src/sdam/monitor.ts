@@ -46,9 +46,14 @@ function isInCloseState(monitor: Monitor) {
 }
 
 /** @public */
-export const ServerMonitoringModes = ['auto', 'poll', 'stream'];
+export const ServerMonitoringMode = Object.freeze({
+  auto: 'auto',
+  poll: 'poll',
+  stream: 'stream'
+} as const);
+
 /** @public */
-export type ServerMonitoringMode = (typeof ServerMonitoringModes)[number];
+export type ServerMonitoringMode = (typeof ServerMonitoringMode)[keyof typeof ServerMonitoringMode];
 
 /** @internal */
 export interface MonitorPrivate {
@@ -230,8 +235,8 @@ function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion
   if (topologyVersion == null) return false;
 
   const serverMonitoringMode = monitor.options.serverMonitoringMode;
-  if (serverMonitoringMode === 'poll') return false;
-  if (serverMonitoringMode === 'stream') return true;
+  if (serverMonitoringMode === ServerMonitoringMode.poll) return false;
+  if (serverMonitoringMode === ServerMonitoringMode.stream) return true;
 
   // If we are in auto mode, we need to figure out if we're in a FaaS
   // environment or not and choose the appropriate mode.

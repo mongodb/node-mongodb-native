@@ -29,7 +29,7 @@ import {
 } from './mongo_logger';
 import { ReadConcern, type ReadConcernLevel } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
-import { ServerMonitoringModes } from './sdam/monitor';
+import { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import {
   DEFAULT_PK_FACTORY,
@@ -1059,7 +1059,7 @@ export const OPTIONS = {
   serverMonitoringMode: {
     default: 'auto',
     transform({ values: [value] }) {
-      if (!ServerMonitoringModes.includes(value as string)) {
+      if (!Object.values(ServerMonitoringMode).includes(value as any)) {
         throw new MongoParseError(
           'serverMonitoringMode must be one of `auto`, `poll`, or `stream`'
         );
