@@ -149,7 +149,7 @@ export interface MongoLoggerMongoClientOptions {
   /** Severity levels for logger components */
   mongodbLogComponentSeverities?: LogComponentSeveritiesClientOptions;
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
-  mongodblogMaxDocumentLength?: string;
+  mongodbLogMaxDocumentLength?: number;
 }
 
 /** @internal */
@@ -168,7 +168,6 @@ export interface MongoLoggerOptions {
     /** Default severity level to be used if any of the above are unset */
     default: SeverityLevel;
   };
-
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
@@ -590,7 +589,7 @@ export class MongoLogger {
         default: defaultSeverity
       },
       maxDocumentLength:
-        parseUnsignedInteger(combinedOptions.mongodblogMaxDocumentLength) ??
+        combinedOptions.mongodbLogMaxDocumentLength ??
         parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ??
         1000,
       logDestination: combinedOptions.mongodbLogPath

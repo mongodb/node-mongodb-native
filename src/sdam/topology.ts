@@ -70,6 +70,8 @@ import { compareTopologyVersion, ServerDescription } from './server_description'
 import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
 import { SrvPoller, type SrvPollingEvent } from './srv_polling';
 import { TopologyDescription } from './topology_description';
+import { LogConvertible } from '../mongo_logger';
+
 
 // Global state
 let globalTopologyCounter = 0;
@@ -520,6 +522,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     callback: Callback<Server>
   ): void {
     let serverSelector;
+    this.client.mongoLogger.debug('topology', {
+      selector: 'selector',
+      operationId: 100,
+      operation: 'op',
+      topologyDescription: 'topDesc'
+    });
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
         serverSelector = readPreferenceServerSelector(ReadPreference.fromString(selector));
