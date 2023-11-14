@@ -308,6 +308,15 @@ export interface ExpectedSdamEvent {
       type?: string;
     };
   };
+  serverHeartbeatStartedEvent?: {
+    awaited?: boolean;
+  };
+  serverHeartbeatFailedEvent?: {
+    awaited?: boolean;
+  };
+  serverHeartbeatSucceededEvent?: {
+    awaited?: boolean;
+  };
 }
 export interface StoreEventsAsEntity {
   id: string;

@@ -26,7 +26,10 @@ import {
   MongoServerError,
   ObjectId,
   type OneOrMore,
-  ServerDescriptionChangedEvent
+  ServerDescriptionChangedEvent,
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerHeartbeatSucceededEvent
 } from '../../mongodb';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
@@ -535,6 +538,27 @@ function compareEvents(
             expectedDescription[nestedKey]
           );
         }
+      }
+      return;
+    } else if (expectedEvent.serverHeartbeatStartedEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerHeartbeatStartedEvent);
+      const expectedSdamEvent = expectedEvent.serverHeartbeatStartedEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.serverHeartbeatFailedEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerHeartbeatFailedEvent);
+      const expectedSdamEvent = expectedEvent.serverHeartbeatFailedEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.serverHeartbeatSucceededEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerHeartbeatSucceededEvent);
+      const expectedSdamEvent = expectedEvent.serverHeartbeatSucceededEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
       return;
     } else {

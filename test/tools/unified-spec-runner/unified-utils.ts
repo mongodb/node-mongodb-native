@@ -15,7 +15,7 @@ import {
   type MongoClient
 } from '../../mongodb';
 import { shouldRunServerlessTest } from '../../tools/utils';
-import { type CmapEvent, type CommandEvent, type EntitiesMap } from './entities';
+import type { CmapEvent, CommandEvent, EntitiesMap, SdamEvent } from './entities';
 import { matchesEvents } from './match';
 import type {
   ClientEncryptionEntity,
@@ -209,7 +209,7 @@ export function getMatchingEventCount(event, client, entities): number {
     try {
       matchesEvents(
         { events: [event] } as ExpectedEventsForClient,
-        [capturedEvent] as CommandEvent[] | CmapEvent[],
+        [capturedEvent] as CommandEvent[] | CmapEvent[] | SdamEvent[],
         entities
       );
       return true;

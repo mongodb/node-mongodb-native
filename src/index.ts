@@ -489,7 +489,8 @@ export type {
   MonitorOptions,
   MonitorPrivate,
   RTTPinger,
-  RTTPingerOptions
+  RTTPingerOptions,
+  ServerMonitoringMode
 } from './sdam/monitor';
 export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
 export type {

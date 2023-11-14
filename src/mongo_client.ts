@@ -32,6 +32,7 @@ import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
 import type { ReadConcern, ReadConcernLevel, ReadConcernLike } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
+import type { ServerMonitoringMode } from './sdam/monitor';
 import type { TagSet } from './sdam/server_description';
 import { readPreferenceServerSelector } from './sdam/server_selection';
 import type { SrvPoller } from './sdam/srv_polling';
@@ -257,6 +258,8 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   proxyUsername?: string;
   /** Configures a Socks5 proxy password when the proxy in proxyHost requires username/password authentication. */
   proxyPassword?: string;
+  /** Instructs the driver monitors to use a specific monitoring mode */
+  serverMonitoringMode?: ServerMonitoringMode;
 
   /** @internal */
   srvPoller?: SrvPoller;
@@ -816,6 +819,7 @@ export interface MongoOptions
   proxyPort?: number;
   proxyUsername?: string;
   proxyPassword?: string;
+  serverMonitoringMode: ServerMonitoringMode;
 
   /** @internal */
   connectionType?: typeof Connection;

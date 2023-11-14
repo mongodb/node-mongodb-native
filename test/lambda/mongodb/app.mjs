@@ -1,3 +1,5 @@
+import * as assert from 'node:assert/strict';
+
 import { MongoClient } from 'mongodb';
 
 // Creates the client that is cached for all requests, subscribes to
@@ -30,18 +32,21 @@ mongoClient.on('commandFailed', (event) => {
 
 mongoClient.on('serverHeartbeatStarted', (event) => {
   console.log('serverHeartbeatStarted', event);
+  assert.strictEqual(event.awaited, false);
 });
 
 mongoClient.on('serverHeartbeatSucceeded', (event) => {
   heartbeatCount++;
   totalHeartbeatDuration += event.duration;
   console.log('serverHeartbeatSucceeded', event);
+  assert.strictEqual(event.awaited, false);
 });
 
 mongoClient.on('serverHeartbeatFailed', (event) => {
   heartbeatCount++;
   totalHeartbeatDuration += event.duration;
   console.log('serverHeartbeatFailed', event);
+  assert.strictEqual(event.awaited, false);
 });
 
 mongoClient.on('connectionCreated', (event) => {

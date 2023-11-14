@@ -1,0 +1,449 @@
+{
+  "description": "serverMonitoringMode",
+  "schemaVersion": "1.17",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "single",
+        "sharded",
+        "sharded-replicaset"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "tests": [
+    {
+      "description": "connect with serverMonitoringMode=auto >=4.4",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "uriOptions": {
+                    "serverMonitoringMode": "auto"
+                  },
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverHeartbeatStartedEvent",
+                    "serverHeartbeatSucceededEvent",
+                    "serverHeartbeatFailedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "db",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverHeartbeatStartedEvent": {}
+            },
+            "count": 2
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatSucceededEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "connect with serverMonitoringMode=auto <4.4",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "uriOptions": {
+                    "serverMonitoringMode": "auto",
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverHeartbeatStartedEvent",
+                    "serverHeartbeatSucceededEvent",
+                    "serverHeartbeatFailedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "db",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverHeartbeatStartedEvent": {}
+            },
+            "count": 2
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatSucceededEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "connect with serverMonitoringMode=stream >=4.4",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.4.0"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "uriOptions": {
+                    "serverMonitoringMode": "stream"
+                  },
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverHeartbeatStartedEvent",
+                    "serverHeartbeatSucceededEvent",
+                    "serverHeartbeatFailedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "db",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverHeartbeatStartedEvent": {}
+            },
+            "count": 2
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatSucceededEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "connect with serverMonitoringMode=stream <4.4",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "4.2.99"
+        }
+      ],
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "uriOptions": {
+                    "serverMonitoringMode": "stream",
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverHeartbeatStartedEvent",
+                    "serverHeartbeatSucceededEvent",
+                    "serverHeartbeatFailedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "db",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverHeartbeatStartedEvent": {}
+            },
+            "count": 2
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatSucceededEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "connect with serverMonitoringMode=poll",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "uriOptions": {
+                    "serverMonitoringMode": "poll",
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverHeartbeatStartedEvent",
+                    "serverHeartbeatSucceededEvent",
+                    "serverHeartbeatFailedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "db",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "db",
+          "arguments": {
+            "commandName": "ping",
+            "command": {
+              "ping": 1
+            }
+          },
+          "expectResult": {
+            "ok": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverHeartbeatStartedEvent": {}
+            },
+            "count": 2
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatSucceededEvent": {
+                "awaited": false
+              }
+            },
+            {
+              "serverHeartbeatStartedEvent": {
+                "awaited": false
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
