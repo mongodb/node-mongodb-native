@@ -87,7 +87,7 @@ describe('class RTTPinger', () => {
     });
   });
 
-  context('when serverApi is not enabled and connected to a pre-hello server', () => {
+  context('when serverApi is disabled', () => {
     let client: MongoClient;
 
     beforeEach(async function () {
@@ -104,27 +104,48 @@ describe('class RTTPinger', () => {
       await client?.close();
     });
 
-    it('measures rtt with a LEGACY_HELLO_COMMAND command', async function () {
-      await client.connect();
-      const rttPingers = await getRTTPingers(client);
+    context('connected to a pre-hello server', () => {
+      it('measures rtt with a LEGACY_HELLO_COMMAND command', async function () {
+        await client.connect();
+        const rttPingers = await getRTTPingers(client);
 
-      // Fake pre-hello server.
-      // Hello was back-ported to feature versions of the server so we would need to pin
-      // versions prior to 4.4.2, 4.2.10, 4.0.21, and 3.6.21 to integration test
-      for (const rtt of rttPingers) rtt.connection.helloOk = false;
+        // Fake pre-hello server.
+        // Hello was back-ported to feature versions of the server so we would need to pin
+        // versions prior to 4.4.2, 4.2.10, 4.0.21, and 3.6.21 to integration test
+        for (const rtt of rttPingers) rtt.connection.helloOk = false;
 
-      const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));
+        const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));
 
-      await sleep(11); // allow for another ping after spies have been made
+        await sleep(11); // allow for another ping after spies have been made
 
-      expect(spies).to.have.lengthOf.at.least(1);
-      for (const spy of spies) {
-        expect(spy).to.have.been.calledWith(
-          sinon.match.any,
-          { [LEGACY_HELLO_COMMAND]: 1 },
-          sinon.match.any
-        );
-      }
+        expect(spies).to.have.lengthOf.at.least(1);
+        for (const spy of spies) {
+          expect(spy).to.have.been.calledWith(
+            sinon.match.any,
+            { [LEGACY_HELLO_COMMAND]: 1 },
+            sinon.match.any
+          );
+        }
+      });
+    });
+
+    context('connected to a helloOk server', () => {
+      it('measures rtt with a hello command', async function () {
+        await client.connect();
+        const rttPingers = await getRTTPingers(client);
+
+        const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'command'));
+
+        // We should always be connected to helloOk servers
+        for (const rtt of rttPingers) expect(rtt.connection).to.have.property('helloOk', true);
+
+        await sleep(11); // allow for another ping after spies have been made
+
+        expect(spies).to.have.lengthOf.at.least(1);
+        for (const spy of spies) {
+          expect(spy).to.have.been.calledWith(sinon.match.any, { hello: 1 }, sinon.match.any);
+        }
+      });
     });
   });
 
@@ -143,7 +164,7 @@ describe('class RTTPinger', () => {
       const rttPingers = await getRTTPingers(client);
 
       for (const rtt of rttPingers) {
-        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('non MongoError'));
+        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any error'));
       }
       const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'destroy'));
 
