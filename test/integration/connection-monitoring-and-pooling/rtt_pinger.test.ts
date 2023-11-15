@@ -35,7 +35,7 @@ async function getRTTPingers(client: MongoClient) {
   }
 }
 
-describe.only('class RTTPinger', () => {
+describe('class RTTPinger', () => {
   afterEach(() => sinon.restore());
 
   beforeEach(async function () {
