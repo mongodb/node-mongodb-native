@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.3.0](https://github.com/mongodb/node-mongodb-native/compare/v6.2.0...v6.3.0) (2023-11-15)
+
+
+### Features
+
+* **NODE-3881:** require hello command + OP_MSG when 'loadBalanced=True' ([#3907](https://github.com/mongodb/node-mongodb-native/issues/3907)) ([fd58eec](https://github.com/mongodb/node-mongodb-native/commit/fd58eec441d99493aff5c62bcc170c469efa679b))
+* **NODE-4849:** Add Typescript support for log path in client options ([#3886](https://github.com/mongodb/node-mongodb-native/issues/3886)) ([f495abb](https://github.com/mongodb/node-mongodb-native/commit/f495abb0e25755e867b311a19c8cd35a4c606aa4))
+* **NODE-4878:** Add remaining log configurable client options ([#3908](https://github.com/mongodb/node-mongodb-native/issues/3908)) ([54adc9f](https://github.com/mongodb/node-mongodb-native/commit/54adc9f65b5924ffa9730a9adf0a8162a284277e))
+* **NODE-5197:** add server monitoring mode ([#3899](https://github.com/mongodb/node-mongodb-native/issues/3899)) ([ae4c94a](https://github.com/mongodb/node-mongodb-native/commit/ae4c94a1ac8bd402c047263e39a55d65488cc2a3))
+* **NODE-5452:** Logging Cosmos Document DB Info Message ([#3902](https://github.com/mongodb/node-mongodb-native/issues/3902)) ([bb5fa43](https://github.com/mongodb/node-mongodb-native/commit/bb5fa43ce58f11d4961f1feaa0d6e58ef6bd8378))
+* **NODE-5590:** deprecate GridFS fields ([#3905](https://github.com/mongodb/node-mongodb-native/issues/3905)) ([d2225da](https://github.com/mongodb/node-mongodb-native/commit/d2225da322d9367a9216e554e7fe927fb1cd08aa))
+
+
+### Bug Fixes
+
+* **NODE-4863:** do not use RetryableWriteError for non-server errors ([#3914](https://github.com/mongodb/node-mongodb-native/issues/3914)) ([08c9fb4](https://github.com/mongodb/node-mongodb-native/commit/08c9fb4386736fad4a8df0174025e71971c1b6ff))
+* **NODE-5709:** bump mongodb-connection-string-url to 3.0.0 ([#3909](https://github.com/mongodb/node-mongodb-native/issues/3909)) ([1c3dc02](https://github.com/mongodb/node-mongodb-native/commit/1c3dc0259c0758f3b16de3a696d2c40df32f8ad7))
+* **NODE-5749:** RTTPinger always sends legacy hello ([#3921](https://github.com/mongodb/node-mongodb-native/issues/3921)) ([ebbfb8a](https://github.com/mongodb/node-mongodb-native/commit/ebbfb8a0ba0a17fafa39f777a9546d0351ff66e2))
+
 ## [6.2.0](https://github.com/mongodb/node-mongodb-native/compare/v6.1.0...v6.2.0) (2023-10-19)
 
 
