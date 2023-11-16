@@ -1162,7 +1162,6 @@ export async function writeCommand(
   command: WriteProtocolMessageType,
   options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
 ): Promise<void> {
-  const drained = once(connection.socket, 'drain');
   const finalCommand =
     options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
       ? command
@@ -1171,8 +1170,7 @@ export async function writeCommand(
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
   const buffer = Buffer.concat(await finalCommand.toBin());
-  connection.socket.push(buffer);
-  await drained;
+  await promisify(connection.socket.write.bind(connection.socket))(buffer);
 }
 
 /**
