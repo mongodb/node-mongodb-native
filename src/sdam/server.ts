@@ -72,9 +72,6 @@ const stateTransition = makeStateMachine({
   [STATE_CLOSING]: [STATE_CLOSING, STATE_CLOSED]
 });
 
-/** @internal */
-const kMonitor = Symbol('monitor');
-
 /** @public */
 export type ServerOptions = Omit<ConnectionPoolOptions, 'id' | 'generation' | 'hostAddress'> &
   MonitorOptions;
@@ -118,7 +115,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   s: ServerPrivate;
   serverApi?: ServerApi;
   hello?: Document;
-  [kMonitor]: Monitor | null;
+  monitor: Monitor | null;
 
   /** @event */
   static readonly SERVER_HEARTBEAT_STARTED = SERVER_HEARTBEAT_STARTED;
@@ -164,22 +161,21 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     });
 
     if (this.loadBalanced) {
-      this[kMonitor] = null;
+      this.monitor = null;
       // monitoring is disabled in load balancing mode
       return;
     }
 
     // create the monitor
     // TODO(NODE-4144): Remove new variable for type narrowing
-    const monitor = new Monitor(this, this.s.options);
-    this[kMonitor] = monitor;
+    this.monitor = new Monitor(this, this.s.options);
 
     for (const event of HEARTBEAT_EVENTS) {
-      monitor.on(event, (e: any) => this.emit(event, e));
+      this.monitor.on(event, (e: any) => this.emit(event, e));
     }
 
-    monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
-    monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
+    this.monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+    this.monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {
@@ -235,7 +231,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     // a load balancer. It never transitions out of this state and
     // has no monitor.
     if (!this.loadBalanced) {
-      this[kMonitor]?.connect();
+      this.monitor?.connect();
     } else {
       stateTransition(this, STATE_CONNECTED);
       this.emit(Server.CONNECT, this);
@@ -258,7 +254,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     stateTransition(this, STATE_CLOSING);
 
     if (!this.loadBalanced) {
-      this[kMonitor]?.close();
+      this.monitor?.close();
     }
 
     this.s.pool.close(options, err => {
@@ -276,7 +272,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   requestCheck(): void {
     if (!this.loadBalanced) {
-      this[kMonitor]?.requestCheck();
+      this.monitor?.requestCheck();
     }
   }
 
@@ -437,7 +433,7 @@ function markServerUnknown(server: Server, error?: MongoServerError) {
   }
 
   if (error instanceof MongoNetworkError && !(error instanceof MongoNetworkTimeoutError)) {
-    server[kMonitor]?.reset();
+    server.monitor?.reset();
   }
 
   server.emit(
