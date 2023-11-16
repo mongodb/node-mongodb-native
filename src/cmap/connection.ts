@@ -907,19 +907,19 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onError(error: Error) {
-    this.cleanup(true, error);
+    this.cleanup(error);
   }
 
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
-    this.cleanup(true, new MongoNetworkError(message));
+    this.cleanup(new MongoNetworkError(message));
   }
 
   onTimeout() {
     this[kDelayedTimeoutId] = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      this.cleanup(true, new MongoNetworkTimeoutError(message, { beforeHandshake }));
+      this.cleanup(new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
@@ -938,7 +938,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
     const message = `connection ${this.id} to ${this.address} closed`;
-    this.cleanup(options.force, new MongoNetworkError(message));
+    this.cleanup(new MongoNetworkError(message));
   }
 
   /**
@@ -949,7 +949,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
    *
    * This method does nothing if the connection is already closed.
    */
-  private cleanup(force: boolean, error?: Error): void {
+  private cleanup(error?: Error): void {
     if (this.closed) {
       return;
     }
@@ -1032,6 +1032,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       agreedCompressor: this.description.compressor ?? 'none',
       zlibCompressionLevel: this.description.zlibCompressionLevel
     });
+
+    if (options.noResponse) return { ok: 1 };
 
     const response = await read(this);
 
