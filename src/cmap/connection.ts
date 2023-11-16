@@ -783,11 +783,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
-  commandAsync: (
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions | undefined
-  ) => Promise<Document>;
+  commandAsync: ModernConnection['command'];
   /** @internal */
   authContext?: AuthContext;
 
@@ -830,14 +826,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions | undefined,
-        callback: Callback
-      ) => this.command(ns, cmd, options, callback as any)
-    );
+    this.commandAsync = this.command.bind(this);
 
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
@@ -1179,6 +1168,36 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       : new OpQueryRequest(db, cmd, commandOptions);
 
     return message;
+  }
+
+  private async sendCommand(
+    message: WriteProtocolMessageType,
+    options: CommandOptions
+  ): Promise<Document> {
+    await writeCommand(this, message, {
+      agreedCompressor: this.description.compressor ?? 'none',
+      zlibCompressionLevel: this.description.zlibCompressionLevel
+    });
+
+    const response = await read(this);
+
+    response.parse(options);
+
+    const [document] = response.documents;
+
+    if (!Buffer.isBuffer(document)) {
+      const { session } = options;
+      if (session) {
+        updateSessionFromResponse(session, document);
+      }
+
+      if (document.$clusterTime) {
+        this[kClusterTime] = document.$clusterTime;
+        this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+      }
+    }
+
+    return document;
   }
 
   async command(
