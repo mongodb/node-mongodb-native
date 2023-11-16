@@ -925,7 +925,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
   destroy(options: DestroyOptions, callback?: Callback): void {
     if (this.closed) {
-      process.nextTick(() => callback?.());
+      if (typeof callback === 'function') process.nextTick(callback);
       return;
     }
     if (typeof callback === 'function') {
@@ -949,33 +949,14 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
    *
    * This method does nothing if the connection is already closed.
    */
-  private cleanup(force: boolean, _error?: Error): void {
+  private cleanup(force: boolean, error?: Error): void {
     if (this.closed) {
       return;
     }
 
     this.closed = true;
-
-    const completeCleanup = () => {
-      this.emit(Connection.CLOSE);
-    };
-
-    this.socket.removeAllListeners();
-
-    if (force) {
-      this.socket.destroy();
-      completeCleanup();
-      return;
-    }
-
-    if (!this.socket.writableEnded) {
-      this.socket.end(() => {
-        this.socket.destroy();
-        completeCleanup();
-      });
-    } else {
-      completeCleanup();
-    }
+    this.socket.destroy(error);
+    this.emit(Connection.CLOSE);
   }
 
   private prepareCommand(db: string, command: Document, options: CommandOptions) {
