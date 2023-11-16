@@ -1181,19 +1181,54 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     return message;
   }
 
-  command(
+  async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {},
-    callback: Callback
-  ): void {
+    options: CommandOptions = {}
+  ): Promise<Document> {
     const message = this.prepareCommand(ns.db, command, options);
 
-    try {
-      write(this as any as Connection, message, options, callback);
-    } catch (err) {
-      callback(err);
+    let started = 0;
+    if (this.monitorCommands) {
+      started = now();
+      this.emit(
+        ModernConnection.COMMAND_STARTED,
+        new CommandStartedEvent(this as unknown as Connection, message)
+      );
     }
+
+    const document = await this.sendCommand(message, options);
+
+    if (document.writeConcernError) {
+      const writeConcernError = new MongoWriteConcernError(document.writeConcernError, document);
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_SUCCEEDED,
+          new CommandSucceededEvent(this as unknown as Connection, message, document, started)
+        );
+      }
+      throw writeConcernError;
+    }
+
+    if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+      const serverError = new MongoServerError(document);
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, serverError, started)
+        );
+      }
+      throw serverError;
+    }
+
+    if (this.monitorCommands) {
+      this.emit(
+        ModernConnection.COMMAND_SUCCEEDED,
+        new CommandSucceededEvent(this as unknown as Connection, message, document, started)
+      );
+    }
+
+    return document;
   }
 }
 
