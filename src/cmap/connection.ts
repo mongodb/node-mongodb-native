@@ -796,10 +796,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kLastUseTime]: number;
   /** @internal */
-  [kQueue]: Map<number, OperationDescription>;
-  /** @internal */
-  [kMessageStream]: MessageStream;
-  /** @internal */
   socket: Stream;
   /** @internal */
   [kHello]: Document | null;
@@ -841,27 +837,12 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kGeneration] = options.generation;
     this[kLastUseTime] = now();
 
-    // setup parser stream and message handling
-    this[kQueue] = new Map();
-    this[kMessageStream] = new MessageStream({
-      ...options,
-      maxBsonMessageSize: this.hello?.maxBsonMessageSize
-    });
     this.socket = stream;
 
     this[kDelayedTimeoutId] = null;
 
-    this[kMessageStream].on('message', message => this.onMessage(message));
-    this[kMessageStream].on('error', error => this.onError(error));
-    this.socket.on('close', () => this.onClose());
-    this.socket.on('timeout', () => this.onTimeout());
-    this.socket.on('error', () => {
-      /* ignore errors, listen to `close` instead */
-    });
-
-    // hook the message stream up to the passed in stream
-    this.socket.pipe(this[kMessageStream]);
-    this[kMessageStream].pipe(this.socket);
+    this.socket.once('timeout', this.onTimeout.bind(this));
+    this.socket.once('close', this.onTimeout.bind(this));
   }
 
   get description(): StreamDescription {
@@ -879,15 +860,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
-  }
-
-  // Set the whether the message stream is for a monitoring connection.
-  set isMonitoringConnection(value: boolean) {
-    this[kMessageStream].isMonitoringConnection = value;
-  }
-
-  get isMonitoringConnection(): boolean {
-    return this[kMessageStream].isMonitoringConnection;
   }
 
   get serviceId(): ObjectId | undefined {
@@ -977,7 +949,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
    *
    * This method does nothing if the connection is already closed.
    */
-  private cleanup(force: boolean, error?: Error): void {
+  private cleanup(force: boolean, _error?: Error): void {
     if (this.closed) {
       return;
     }
@@ -985,19 +957,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.closed = true;
 
     const completeCleanup = () => {
-      for (const op of this[kQueue].values()) {
-        op.cb(error);
-      }
-
-      this[kQueue].clear();
-
       this.emit(Connection.CLOSE);
     };
 
     this.socket.removeAllListeners();
-    this[kMessageStream].removeAllListeners();
-
-    this[kMessageStream].destroy();
 
     if (force) {
       this.socket.destroy();
