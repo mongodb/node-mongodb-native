@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.17.2](https://github.com/mongodb/node-mongodb-native/compare/v4.17.1...v4.17.2) (2023-11-16)
+
+
+### Bug Fixes
+
+* **NODE-5751:** RTTPinger always sends legacy hello ([#3923](https://github.com/mongodb/node-mongodb-native/issues/3923)) ([bc3d020](https://github.com/mongodb/node-mongodb-native/commit/bc3d02015c8d91b363e127c6826c3090f0f11d6b))
+
 ## [4.17.1](https://github.com/mongodb/node-mongodb-native/compare/v4.17.0...v4.17.1) (2023-08-23)
 
 
