@@ -1116,12 +1116,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: CommandOptions | undefined,
-    callback: Callback
-  ): void {
+  private prepareCommand(db: string, command: Document, options: CommandOptions) {
     let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
@@ -1145,12 +1140,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      const err = applySession(session, cmd, options);
-      if (err) {
-        return callback(err);
-      }
+      const sessionError = applySession(session, cmd, options);
+      if (sessionError) throw sessionError;
     } else if (session?.explicit) {
-      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
+      throw new MongoCompatibilityError('Current topology does not support sessions');
     }
 
     // if we have a known cluster time, gossip it
@@ -1171,23 +1164,33 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       };
     }
 
-    const commandOptions: Document = Object.assign(
-      {
-        numberToSkip: 0,
-        numberToReturn: -1,
-        checkKeys: false,
-        // This value is not overridable
-        secondaryOk: readPreference.secondaryOk()
-      },
-      options
-    );
+    const commandOptions = {
+      numberToSkip: 0,
+      numberToReturn: -1,
+      checkKeys: false,
+      // This value is not overridable
+      secondaryOk: readPreference.secondaryOk(),
+      ...options,
+      readPreference // ensure we pass in ReadPreference instance
+    };
 
     const message = this.supportsOpMsg
-      ? new OpMsgRequest(ns.db, cmd, commandOptions)
-      : new OpQueryRequest(ns.db, cmd, commandOptions);
+      ? new OpMsgRequest(db, cmd, commandOptions)
+      : new OpQueryRequest(db, cmd, commandOptions);
+
+    return message;
+  }
+
+  command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {},
+    callback: Callback
+  ): void {
+    const message = this.prepareCommand(ns.db, command, options);
 
     try {
-      write(this as any as Connection, message, commandOptions, callback);
+      write(this as any as Connection, message, options, callback);
     } catch (err) {
       callback(err);
     }
