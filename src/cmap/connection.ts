@@ -778,8 +778,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   address: string;
   socketTimeoutMS: number;
   monitorCommands: boolean;
-  /** Indicates that the connection (including underlying TCP socket) has been closed. */
-  closed: boolean;
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
@@ -830,7 +828,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
-    this.closed = false;
     this[kHello] = null;
     this[kClusterTime] = null;
 
@@ -840,8 +837,16 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     this.socket = stream;
     this.controller = new AbortController();
+    this.socket.on('error', this.onError.bind(this));
+    this.socket.on('close', this.onClose.bind(this));
+    this.socket.on('timeout', this.onTimeout.bind(this));
 
     this[kDelayedTimeoutId] = null;
+  }
+
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
+  get closed(): boolean {
+    return this.controller.signal.aborted;
   }
 
   get description(): StreamDescription {
@@ -905,6 +910,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
+  onError(error?: Error) {
+    this.cleanup(error);
+  }
+
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
     this.cleanup(new MongoNetworkError(message));
@@ -949,7 +958,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       return;
     }
 
-    this.closed = true;
     this.socket.destroy();
     this.controller.abort(error);
     this.emit(Connection.CLOSE);
@@ -1115,7 +1123,12 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     if (this.monitorCommands) {
       this.emit(
         ModernConnection.COMMAND_SUCCEEDED,
-        new CommandSucceededEvent(this as unknown as Connection, message, document, started)
+        new CommandSucceededEvent(
+          this as unknown as Connection,
+          message,
+          options.noResponse ? undefined : document,
+          started
+        )
       );
     }
 
