@@ -31,6 +31,7 @@ import {
   MongoTopologyClosedError
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
+import { ServerSelectionLogType, type ServerSelectionLogInputs, MongoLoggableComponent } from '../mongo_logger';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
@@ -70,8 +71,6 @@ import { compareTopologyVersion, ServerDescription } from './server_description'
 import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
 import { SrvPoller, type SrvPollingEvent } from './srv_polling';
 import { TopologyDescription } from './topology_description';
-import { LogConvertible } from '../mongo_logger';
-
 
 // Global state
 let globalTopologyCounter = 0;
@@ -508,6 +507,22 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       .finally(() => callback?.());
   }
 
+  /** @internal */
+  logServerSelection(logType: ServerSelectionLogType, inputs: ServerSelectionLogInputs): void {
+    if (logType === ServerSelectionLogType.START) {
+      const msg = `Server selection started for operation ${inputs.operation}} with ID ${inputs.operationId}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.SUCCESS) {
+      const msg = `Server selection succeeded for operation ${inputs.operation}} with ID ${inputs.operationId}. Selected server: ${inputs.serverHost}:${inputs.serverPort}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.FAILURE) {
+      const msg = `Server selection failed for operation ${inputs.operation}} with ID ${inputs.operationId}. Failure: ${inputs.failure} Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.WAITING) {
+      const msg = `Waiting for server to become available for operation ${inputs.operation}} with ID ${inputs.operationId}. Remaining time: ${inputs.remainingTimeMS}} ms. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.info(MongoLoggableComponent.TOPOLOGY, msg);
+    }
+  }
   /**
    * Selects a server according to the selection predicate provided
    *
@@ -522,7 +537,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     callback: Callback<Server>
   ): void {
     let serverSelector;
-    this.client.mongoLogger.debug('topology', {
+    this.logServerSelection(ServerSelectionLogType.START, {
       selector: 'selector',
       operationId: 100,
       operation: 'op',
@@ -575,7 +590,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
         this.description
       );
-
+      this.logServerSelection(ServerSelectionLogType.FAILURE, {
+        selector: 'selector',
+        operationId: 100,
+        operation: 'op',
+        topologyDescription: 'topDesc',
+        failure: timeoutError
+      });
       waitQueueMember.callback(timeoutError);
     });
 

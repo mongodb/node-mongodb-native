@@ -38,6 +38,7 @@ import {
   CONNECTION_READY
 } from './constants';
 import { HostAddress, parseUnsignedInteger } from './utils';
+import { MongoError } from './error';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -174,6 +175,29 @@ export interface MongoLoggerOptions {
   logDestination: Writable | MongoDBLogWritable;
 }
 
+/** @internal */
+export const ServerSelectionLogType = Object.freeze({
+  START: 'start',
+  SUCCESS: 'success',
+  FAILURE: 'failure',
+  WAITING: 'waiting'
+} as const);
+
+/** @internal */
+export type ServerSelectionLogType =
+  (typeof ServerSelectionLogType)[keyof typeof ServerSelectionLogType];
+
+/** @internal */
+export interface ServerSelectionLogInputs {
+  selector: string;
+  operationId: number;
+  operation: string;
+  topologyDescription: string;
+  serverHost?: string;
+  serverPort?: number;
+  failure?: MongoError;
+  remainingTimeMS?: number;
+}
 /**
  * Parses a string as one of SeverityLevel
  *
