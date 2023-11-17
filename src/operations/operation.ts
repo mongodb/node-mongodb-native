@@ -34,6 +34,7 @@ export interface OperationOptions extends BSONSerializeOptions {
   /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
+  operationName?: string;
 }
 
 /** @internal */
@@ -52,6 +53,7 @@ export abstract class AbstractOperation<TResult = any> {
   server!: Server;
   bypassPinningCheck: boolean;
   trySecondaryWrite: boolean;
+  operationName: string;
 
   // BSON serialization options
   bsonOptions?: BSONSerializeOptions;
@@ -73,6 +75,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
     this.trySecondaryWrite = false;
+    this.operationName = options.operationName ?? '';
   }
 
   abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;

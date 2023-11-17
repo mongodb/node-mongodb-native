@@ -2,7 +2,7 @@ import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
+import { type ConnectionEvents, type DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
@@ -31,6 +31,11 @@ import {
   MongoTopologyClosedError
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
+import {
+  MongoLoggableComponent,
+  type ServerSelectionLogInputs,
+  ServerSelectionLogType
+} from '../mongo_logger';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
@@ -43,7 +48,8 @@ import {
   makeStateMachine,
   ns,
   shuffle,
-  TimeoutController
+  TimeoutController,
+  MongoDBNamespace
 } from '../utils';
 import {
   _advanceClusterTime,
@@ -161,6 +167,7 @@ export interface SelectServerOptions {
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
+  ns?: MongoDBNamespace;
 }
 
 /** @public */
@@ -508,6 +515,23 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       .finally(() => callback?.());
   }
 
+  /** @internal */
+  logServerSelection(logType: ServerSelectionLogType, inputs: ServerSelectionLogInputs): void {
+    if (logType === ServerSelectionLogType.START) {
+      const msg = `Server selection started for operation ${inputs.operation}}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.SUCCESS) {
+      const msg = `Server selection succeeded for operation ${inputs.operation}}. Selected server: ${inputs.serverHost}:${inputs.serverPort}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.FAILURE) {
+      const msg = `Server selection failed for operation ${inputs.operation}}. Failure: ${inputs.failure} Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+    } else if (logType === ServerSelectionLogType.WAITING) {
+      const msg = `Waiting for server to become available for operation ${inputs.operation}}. Remaining time: ${inputs.remainingTimeMS}} ms. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      this.client.mongoLogger.info(MongoLoggableComponent.TOPOLOGY, msg);
+    }
+  }
+
   /**
    * Selects a server according to the selection predicate provided
    *
@@ -521,7 +545,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     options: SelectServerOptions,
     callback: Callback<Server>
   ): void {
-    let serverSelector;
+    let serverSelector: ServerSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
         serverSelector = readPreferenceServerSelector(ReadPreference.fromString(selector));
@@ -533,12 +557,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           ReadPreference.translate(options);
           readPreference = options.readPreference || ReadPreference.primary;
         }
-
         serverSelector = readPreferenceServerSelector(readPreference as ReadPreference);
       }
     } else {
       serverSelector = selector;
     }
+
+    this.logServerSelection(ServerSelectionLogType.START, {
+      selector: JSON.stringify(serverSelector),
+      operation: 'op',
+      topologyDescription: JSON.stringify(this.description)
+    });
 
     options = Object.assign(
       {},
@@ -551,6 +580,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const transaction = session && session.transaction;
 
     if (isSharded && transaction && transaction.server) {
+      this.logServerSelection(ServerSelectionLogType.SUCCESS, {
+        selector: JSON.stringify(serverSelector),
+        operation: 'op',
+        topologyDescription: JSON.stringify(this.description),
+        serverHost: transaction.server.s.description.host,
+        serverPort: transaction.server.s.description.port
+      });
       callback(undefined, transaction.server);
       return;
     }
@@ -569,11 +605,23 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
         this.description
       );
+      this.logServerSelection(ServerSelectionLogType.FAILURE, {
+        selector: JSON.stringify(serverSelector),
+        operation: 'op',
+        topologyDescription: JSON.stringify(this.description),
+        failure: timeoutError
+      });
 
       waitQueueMember.callback(timeoutError);
     });
 
     this[kWaitQueue].push(waitQueueMember);
+    this.logServerSelection(ServerSelectionLogType.WAITING, {
+      selector: JSON.stringify(serverSelector),
+      operation: 'op',
+      topologyDescription: JSON.stringify(this.description),
+      remainingTimeMS: options.serverSelectionTimeoutMS
+    });
     processWaitQueue(this);
   }
 

@@ -1,0 +1,13 @@
+description: expectedSdamEvent-topologyDescriptionChangedEvent-additionalProperties
+
+schemaVersion: '1.14'
+
+tests:
+  - description: foo
+    operations: []
+    expectEvents:
+      - client: client0
+        eventType: sdam
+        events:
+          - topologyDescriptionChangedEvent:
+              foo: bar

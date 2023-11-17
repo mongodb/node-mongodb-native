@@ -29,7 +29,8 @@ import {
   ServerDescriptionChangedEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent
+  ServerHeartbeatSucceededEvent,
+  TopologyDescriptionChangedEvent
 } from '../../mongodb';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
@@ -559,6 +560,24 @@ function compareEvents(
       const expectedSdamEvent = expectedEvent.serverHeartbeatSucceededEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.topologyDescriptionChangedEvent) {
+      expect(actualEvent).to.be.instanceOf(TopologyDescriptionChangedEvent);
+      const expectedServerDescriptionKeys = ['previousDescription', 'newDescription'];
+      expect(expectedServerDescriptionKeys).to.include.all.members(
+        Object.keys(expectedEvent.topologyDescriptionChangedEvent)
+      );
+      for (const descriptionKey of expectedServerDescriptionKeys) {
+        expect(actualEvent).to.have.property(descriptionKey);
+        const expectedDescription =
+          expectedEvent.topologyDescriptionChangedEvent[descriptionKey] ?? {};
+        for (const nestedKey of Object.keys(expectedDescription)) {
+          expect(actualEvent[descriptionKey]).to.have.property(
+            nestedKey,
+            expectedDescription[nestedKey]
+          );
+        }
       }
       return;
     } else {

@@ -37,6 +37,8 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY
 } from './constants';
+import { type MongoError } from './error';
+import { type ServerSelector } from './sdam/server_selection';
 import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -172,6 +174,29 @@ export interface MongoLoggerOptions {
   maxDocumentLength: number;
   /** Destination for log messages. */
   logDestination: Writable | MongoDBLogWritable;
+}
+
+/** @internal */
+export const ServerSelectionLogType = Object.freeze({
+  START: 'start',
+  SUCCESS: 'success',
+  FAILURE: 'failure',
+  WAITING: 'waiting'
+} as const);
+
+/** @internal */
+export type ServerSelectionLogType =
+  (typeof ServerSelectionLogType)[keyof typeof ServerSelectionLogType];
+
+/** @internal */
+export interface ServerSelectionLogInputs {
+  selector: string;
+  operation: string;
+  topologyDescription: string;
+  serverHost?: string;
+  serverPort?: number;
+  failure?: MongoError;
+  remainingTimeMS?: number;
 }
 
 /**
