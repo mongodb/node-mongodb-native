@@ -705,7 +705,10 @@ export class OpMsgResponse {
     this.parsed = true;
   }
 
-  parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {
+  parseBsonSerializationOptions(
+    this: void,
+    { enableUtf8Validation }: BSONSerializeOptions
+  ): {
     utf8: { writeErrors: false } | false;
   } {
     if (enableUtf8Validation === false) {
