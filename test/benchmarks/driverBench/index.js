@@ -7,16 +7,9 @@ const Runner = MongoBench.Runner;
 let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
-const BSON = require('bson');
-
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
-const {
-  makeParallelBenchmarks,
-  makeBsonBench,
-  makeSingleBench,
-  makeMultiBench
-} = require('../mongoBench/suites');
+const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
 
 function average(arr) {
   return arr.reduce((x, y) => x + y, 0) / arr.length;
