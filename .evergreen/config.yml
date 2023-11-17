@@ -170,6 +170,7 @@ functions:
       type: test
       params:
         working_dir: src
+        add_expansions_to_env: true
         timeout_secs: 300
         shell: bash
         script: |
