@@ -730,6 +730,7 @@ BUILD_VARIANTS.push({
   display_name: 'New Connection Tests',
   run_on: DEFAULT_OS,
   expansions: {
+    NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true,
     MONGODB_NEW_CONNECTION: true
   },

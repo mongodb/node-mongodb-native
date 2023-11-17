@@ -4563,6 +4563,7 @@ buildvariants:
     display_name: New Connection Tests
     run_on: rhel80-large
     expansions:
+      NODE_LTS_VERSION: 20
       CLIENT_ENCRYPTION: true
       MONGODB_NEW_CONNECTION: true
     tasks:
