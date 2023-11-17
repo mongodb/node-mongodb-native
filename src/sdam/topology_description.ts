@@ -342,6 +342,18 @@ export class TopologyDescription {
   hasServer(address: string): boolean {
     return this.servers.has(address);
   }
+
+  toString(): string {
+    let s = `{`;
+    for (const [key, value] of Object.entries(this)) {
+      s +=
+        Object.prototype.toString.call(value) === '[object Map]'
+          ? `${key}: ${Object.fromEntries(value)}, `
+          : `${key}: ${JSON.stringify(value)}, `;
+    }
+    s += `}`;
+    return s;
+  }
 }
 
 function topologyTypeForServerType(serverType: ServerType): TopologyType {

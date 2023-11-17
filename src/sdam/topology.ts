@@ -518,17 +518,21 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @internal */
   logServerSelection(logType: ServerSelectionLogType, inputs: ServerSelectionLogInputs): void {
     if (logType === ServerSelectionLogType.START) {
-      const msg = `Server selection started for operation ${inputs.operation}}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      const msg = `Server selection started for operation ${inputs.operation}. Selector: ${inputs.selector}, topology description: ${inputs.topologyDescription}`;
       this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+      console.log(`${JSON.stringify(msg)}\n\n\n\n`); // eslint-disable-line no-console
     } else if (logType === ServerSelectionLogType.SUCCESS) {
-      const msg = `Server selection succeeded for operation ${inputs.operation}}. Selected server: ${inputs.serverHost}:${inputs.serverPort}. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      const msg = `Server selection succeeded for operation ${inputs.operation}. Selected server: ${inputs.serverHost}:${inputs.serverPort}. Selector: ${inputs.selector}, topology description: ${inputs.topologyDescription}`;
       this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+      console.log(`${JSON.stringify(msg)}\n\n\n\n`); // eslint-disable-line no-console
     } else if (logType === ServerSelectionLogType.FAILURE) {
-      const msg = `Server selection failed for operation ${inputs.operation}}. Failure: ${inputs.failure} Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      const msg = `Server selection failed for operation ${inputs.operation}. Failure: ${inputs.failure} Selector: ${inputs.selector}, topology description: ${inputs.topologyDescription}`;
       this.client.mongoLogger.debug(MongoLoggableComponent.TOPOLOGY, msg);
+      console.log(`${JSON.stringify(msg)}\n\n\n\n`); // eslint-disable-line no-console
     } else if (logType === ServerSelectionLogType.WAITING) {
-      const msg = `Waiting for server to become available for operation ${inputs.operation}}. Remaining time: ${inputs.remainingTimeMS}} ms. Selector: ${inputs.selector}}, topology description: ${inputs.topologyDescription}`;
+      const msg = `Waiting for server to become available for operation ${inputs.operation}. Remaining time: ${inputs.remainingTimeMS} ms. Selector: ${inputs.selector}, topology description: ${inputs.topologyDescription}`;
       this.client.mongoLogger.info(MongoLoggableComponent.TOPOLOGY, msg);
+      console.log(`${JSON.stringify(msg)}\n\n\n\n`); // eslint-disable-line no-console
     }
   }
 
@@ -566,7 +570,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this.logServerSelection(ServerSelectionLogType.START, {
       selector: JSON.stringify(serverSelector),
       operation: 'op',
-      topologyDescription: JSON.stringify(this.description)
+      topologyDescription: this.description.toString()
     });
 
     options = Object.assign(
@@ -583,7 +587,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       this.logServerSelection(ServerSelectionLogType.SUCCESS, {
         selector: JSON.stringify(serverSelector),
         operation: 'op',
-        topologyDescription: JSON.stringify(this.description),
+        topologyDescription: this.description.toString(),
         serverHost: transaction.server.s.description.host,
         serverPort: transaction.server.s.description.port
       });
@@ -608,7 +612,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       this.logServerSelection(ServerSelectionLogType.FAILURE, {
         selector: JSON.stringify(serverSelector),
         operation: 'op',
-        topologyDescription: JSON.stringify(this.description),
+        topologyDescription: this.description.toString(),
         failure: timeoutError
       });
 
@@ -619,7 +623,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this.logServerSelection(ServerSelectionLogType.WAITING, {
       selector: JSON.stringify(serverSelector),
       operation: 'op',
-      topologyDescription: JSON.stringify(this.description),
+      topologyDescription: this.description.toString(),
       remainingTimeMS: options.serverSelectionTimeoutMS
     });
     processWaitQueue(this);
