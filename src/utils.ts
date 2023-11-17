@@ -1299,3 +1299,8 @@ export const COSMOS_DB_MSG =
 export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
+
+export async function mayAbort(signal?: AbortSignal) {
+  if (signal == null) return new Promise(() => null); // never ending story
+  return new Promise((_, reject) => signal.addEventListener('abort', reject));
+}

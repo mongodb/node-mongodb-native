@@ -1,4 +1,3 @@
-import { once } from 'events';
 import { on } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
@@ -35,6 +34,7 @@ import {
   type Callback,
   HostAddress,
   maxWireVersion,
+  mayAbort,
   type MongoDBNamespace,
   now,
   uuidV4
@@ -797,6 +797,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   [kLastUseTime]: number;
   /** @internal */
   socket: Stream;
+  controller: AbortController;
   /** @internal */
   [kHello]: Document | null;
   /** @internal */
@@ -838,11 +839,9 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
 
     this.socket = stream;
+    this.controller = new AbortController();
 
     this[kDelayedTimeoutId] = null;
-
-    this.socket.once('timeout', this.onTimeout.bind(this));
-    this.socket.once('close', this.onTimeout.bind(this));
   }
 
   get description(): StreamDescription {
@@ -906,10 +905,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  onError(error: Error) {
-    this.cleanup(error);
-  }
-
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
     this.cleanup(new MongoNetworkError(message));
@@ -955,7 +950,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this.closed = true;
-    this.socket.destroy(error);
+    this.socket.destroy();
+    this.controller.abort(error);
     this.emit(Connection.CLOSE);
   }
 
@@ -1028,14 +1024,28 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     message: WriteProtocolMessageType,
     options: CommandOptions
   ): Promise<Document> {
-    await writeCommand(this, message, {
-      agreedCompressor: this.description.compressor ?? 'none',
-      zlibCompressionLevel: this.description.zlibCompressionLevel
-    });
+    const { signal } = this.controller;
 
-    if (options.noResponse) return { ok: 1 };
+    if (typeof options.socketTimeoutMS === 'number') {
+      this.socket.setTimeout(options.socketTimeoutMS);
+    } else if (this.socketTimeoutMS !== 0) {
+      this.socket.setTimeout(this.socketTimeoutMS);
+    }
 
-    const response = await read(this);
+    let response;
+    try {
+      await writeCommand(this, message, {
+        agreedCompressor: this.description.compressor ?? 'none',
+        zlibCompressionLevel: this.description.zlibCompressionLevel,
+        signal
+      });
+
+      if (options.noResponse) return { ok: 1 };
+
+      response = await read(this, { signal });
+    } finally {
+      this.controller = new AbortController();
+    }
 
     response.parse(options);
 
@@ -1061,6 +1071,12 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     command: Document,
     options: CommandOptions = {}
   ): Promise<Document> {
+    // Temporary to make sure no callback usage:
+    // eslint-disable-next-line prefer-rest-params
+    if (typeof arguments[arguments.length - 1] === 'function') {
+      throw new Error('no callbacks allowed!!');
+    }
+
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
@@ -1121,11 +1137,12 @@ const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
  * Note that `for-await` loops call `return` automatically when the loop is exited.
  */
 export async function* readWireProtocolMessages(
-  connection: ModernConnection
+  connection: ModernConnection,
+  { signal }: { signal?: AbortSignal } = {}
 ): AsyncGenerator<Buffer> {
   const bufferPool = new BufferPool();
   const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
-  for await (const [chunk] of on(connection.socket, 'data')) {
+  for await (const [chunk] of on(connection.socket, 'data', { signal })) {
     bufferPool.append(chunk);
     const sizeOfMessage = bufferPool.getInt32();
 
@@ -1160,7 +1177,9 @@ export async function* readWireProtocolMessages(
 export async function writeCommand(
   connection: ModernConnection,
   command: WriteProtocolMessageType,
-  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
+  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>> & {
+    signal?: AbortSignal;
+  }
 ): Promise<void> {
   const finalCommand =
     options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
@@ -1170,7 +1189,11 @@ export async function writeCommand(
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
   const buffer = Buffer.concat(await finalCommand.toBin());
-  await promisify(connection.socket.write.bind(connection.socket))(buffer);
+  options.signal?.throwIfAborted();
+  await Promise.race([
+    promisify(connection.socket.write.bind(connection.socket))(buffer),
+    mayAbort(options.signal)
+  ]);
 }
 
 /**
@@ -1183,9 +1206,10 @@ export async function writeCommand(
  * Note that `for-await` loops call `return` automatically when the loop is exited.
  */
 export async function* readMany(
-  connection: ModernConnection
+  connection: ModernConnection,
+  options: { signal?: AbortSignal } = {}
 ): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-  for await (const message of readWireProtocolMessages(connection)) {
+  for await (const message of readWireProtocolMessages(connection, options)) {
     const response = await decompressResponse(message);
     yield response;
 
@@ -1200,8 +1224,11 @@ export async function* readMany(
  *
  * Reads a single wire protocol message out of a connection.
  */
-export async function read(connection: ModernConnection): Promise<OpMsgResponse | OpQueryResponse> {
-  for await (const value of readMany(connection)) {
+export async function read(
+  connection: ModernConnection,
+  options: { signal?: AbortSignal } = {}
+): Promise<OpMsgResponse | OpQueryResponse> {
+  for await (const value of readMany(connection, options)) {
     return value;
   }
 
