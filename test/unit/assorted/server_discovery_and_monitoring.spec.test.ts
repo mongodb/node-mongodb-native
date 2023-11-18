@@ -358,7 +358,7 @@ async function executeSDAMTest(testData: SDAMTest) {
         };
         expect(
           thrownError,
-          'expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error")'
+          `expected the error thrown to be one of MongoNetworkError, MongoNetworkTimeoutError or MongoServerError (referred to in the spec as an "Application Error") got ${thrownError.name} ${thrownError.stack}`
         ).to.satisfy(isApplicationError);
       }
     } else if (phase.outcome != null && Object.keys(phase).length === 1) {
@@ -413,18 +413,19 @@ function withConnectionStubImpl(appError) {
       generation:
         typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
 
-      command(ns, cmd, options, callback) {
+      async command(ns, cmd, options) {
         if (appError.type === 'network') {
-          callback(new MongoNetworkError('test generated'));
+          throw new MongoNetworkError('test generated');
         } else if (appError.type === 'timeout') {
-          callback(
-            new MongoNetworkTimeoutError('xxx timed out', {
-              beforeHandshake: appError.when === 'beforeHandshakeCompletes'
-            })
-          );
+          throw new MongoNetworkTimeoutError('xxx timed out', {
+            beforeHandshake: appError.when === 'beforeHandshakeCompletes'
+          });
         } else {
-          callback(new MongoServerError(appError.response));
+          throw new MongoServerError(appError.response);
         }
+      },
+      async commandAsync(ns, cmd, options) {
+        return this.command(ns, cmd, options);
       }
     };
 
