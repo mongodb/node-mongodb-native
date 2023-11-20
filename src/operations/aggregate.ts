@@ -1,3 +1,4 @@
+import { AGGREGATE } from '.././constants';
 import type { Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import { type TODO_NODE_3286 } from '../mongo_types';
@@ -38,6 +39,8 @@ export interface AggregateOptions extends CommandOperationOptions {
 
 /** @internal */
 export class AggregateOperation<T = Document> extends CommandOperation<T> {
+  /** @internal */
+  name = AGGREGATE;
   override options: AggregateOptions;
   target: string | typeof DB_AGGREGATE_COLLECTION;
   pipeline: Document[];

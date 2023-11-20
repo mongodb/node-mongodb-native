@@ -37,6 +37,7 @@ import {
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
   type TopologyDescription,
+  type TopologyDescriptionChangedEvent,
   WriteConcern
 } from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
@@ -104,7 +105,8 @@ export type SdamEvent =
   | ServerDescriptionChangedEvent
   | ServerHeartbeatStartedEvent
   | ServerHeartbeatFailedEvent
-  | ServerHeartbeatSucceededEvent;
+  | ServerHeartbeatSucceededEvent
+  | TopologyDescriptionChangedEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
@@ -138,6 +140,7 @@ export class UnifiedMongoClient extends MongoClient {
     | 'serverHeartbeatStartedEvent'
     | 'serverHeartbeatFailedEvent'
     | 'serverHeartbeatSucceededEvent'
+    | 'topologyDescriptionChangedEvent'
   )[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
@@ -166,7 +169,8 @@ export class UnifiedMongoClient extends MongoClient {
     serverDescriptionChangedEvent: 'serverDescriptionChanged',
     serverHeartbeatStartedEvent: 'serverHeartbeatStarted',
     serverHeartbeatFailedEvent: 'serverHeartbeatFailed',
-    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded'
+    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded',
+    topologyDescriptionChangedEvent: 'toplogyDescriptionChanged',
   } as const;
 
   static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {

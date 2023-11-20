@@ -1,3 +1,4 @@
+import { FIND } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
@@ -74,6 +75,8 @@ export class FindOperation extends CommandOperation<Document> {
    * This allows typescript to delete the key but will
    * not allow a writeConcern to be assigned as a property on options.
    */
+  /** @internal  */
+  name = FIND;
   override options: FindOptions & { writeConcern?: never };
   filter: Document;
 

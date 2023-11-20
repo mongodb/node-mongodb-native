@@ -1,3 +1,4 @@
+import { PROFILE } from '.././constants';
 import type { Db } from '../db';
 import { MongoInvalidArgumentError } from '../error';
 import type { Server } from '../sdam/server';
@@ -22,6 +23,8 @@ export type SetProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
 export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel> {
+  /** @internal */
+  name = PROFILE;
   override options: SetProfilingLevelOptions;
   level: ProfilingLevel;
   profile: 0 | 1 | 2;

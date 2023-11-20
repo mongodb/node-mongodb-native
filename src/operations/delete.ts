@@ -1,3 +1,4 @@
+import { DELETE } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoServerError } from '../error';
@@ -43,6 +44,8 @@ export interface DeleteStatement {
 
 /** @internal */
 export class DeleteOperation extends CommandOperation<DeleteResult> {
+  /** @internal */
+  name = DELETE;
   override options: DeleteOptions;
   statements: DeleteStatement[];
 

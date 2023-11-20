@@ -25,7 +25,8 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { type Callback, maybeCallback, supportsRetryableWrites, MongoDBNamespace } from '../utils';
+import { type Callback, maybeCallback, supportsRetryableWrites } from '../utils';
+import { CommandOperation } from './command';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -151,7 +152,10 @@ async function executeOperationAsync<
     selector = readPreference;
   }
 
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session,
+    operationName: operation instanceof CommandOperation ? operation.name : undefined
+  });
 
   if (session == null) {
     // No session also means it is not retryable, early exit
@@ -251,7 +255,10 @@ async function retryOperation<
   }
 
   // select a new server, and attempt to retry the operation
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session,
+    operationName: operation instanceof CommandOperation ? operation.name : undefined
+  });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
     throw new MongoUnexpectedServerResponseError(

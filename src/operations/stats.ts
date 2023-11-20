@@ -1,3 +1,4 @@
+import { DB_STATS } from '.././constants';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
@@ -13,6 +14,8 @@ export interface DbStatsOptions extends CommandOperationOptions {
 
 /** @internal */
 export class DbStatsOperation extends CommandOperation<Document> {
+  /** @internal */
+  name = DB_STATS;
   override options: DbStatsOptions;
 
   constructor(db: Db, options: DbStatsOptions) {

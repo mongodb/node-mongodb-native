@@ -1,3 +1,4 @@
+import { DISTINCT } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
@@ -14,6 +15,8 @@ export type DistinctOptions = CommandOperationOptions;
  * @internal
  */
 export class DistinctOperation extends CommandOperation<any[]> {
+  /** @internal */
+  name = DISTINCT;
   override options: DistinctOptions;
   collection: Collection;
   /** Field of the document to find distinct values for. */

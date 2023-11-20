@@ -1,3 +1,4 @@
+import { FIND_AND_MODIFY } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError } from '../error';
@@ -122,6 +123,9 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 
 /** @internal */
 class FindAndModifyOperation extends CommandOperation<Document> {
+  /** @internal  */
+  name = FIND_AND_MODIFY;
+
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;

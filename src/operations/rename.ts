@@ -1,3 +1,4 @@
+import { RENAME_COLLECTION } from '.././constants';
 import type { Document } from '../bson';
 import { Collection } from '../collection';
 import type { Server } from '../sdam/server';
@@ -16,6 +17,8 @@ export interface RenameOptions extends CommandOperationOptions {
 
 /** @internal */
 export class RenameOperation extends CommandOperation<Document> {
+  /** @internal */
+  name = RENAME_COLLECTION;
   constructor(
     public collection: Collection,
     public newName: string,

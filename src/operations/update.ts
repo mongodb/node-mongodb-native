@@ -1,3 +1,4 @@
+import { UPDATE } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError, MongoInvalidArgumentError, MongoServerError } from '../error';
@@ -64,6 +65,8 @@ export interface UpdateStatement {
  * UpdateOperation is used in bulk write, while UpdateOneOperation and UpdateManyOperation are only used in the collections API
  */
 export class UpdateOperation extends CommandOperation<Document> {
+  /** @internal  */
+  name = UPDATE;
   override options: UpdateOptions & { ordered?: boolean };
   statements: UpdateStatement[];
 

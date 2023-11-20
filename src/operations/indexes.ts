@@ -1,3 +1,4 @@
+import { CREATE_INDEXES, DROP_INDEXES, LIST_INDEXES } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Db } from '../db';
@@ -203,6 +204,8 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
 export class CreateIndexesOperation<
   T extends string | string[] = string[]
 > extends CommandOperation<T> {
+  /** @internal  */
+  name = CREATE_INDEXES;
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
@@ -316,6 +319,8 @@ export type DropIndexesOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropIndexOperation extends CommandOperation<Document> {
+  /** @internal */
+  name = DROP_INDEXES;
   override options: DropIndexesOptions;
   collection: Collection;
   indexName: string;
@@ -349,6 +354,8 @@ export class ListIndexesOperation extends CommandOperation<Document> {
    * This allows typescript to delete the key but will
    * not allow a writeConcern to be assigned as a property on options.
    */
+  /** @internal  */
+  name = LIST_INDEXES;
   override options: ListIndexesOptions & { writeConcern?: never };
   collectionNamespace: MongoDBNamespace;
 

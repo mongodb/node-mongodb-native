@@ -346,10 +346,14 @@ export class TopologyDescription {
   toString(): string {
     let s = `{`;
     for (const [key, value] of Object.entries(this)) {
+      const isObjectToString =
+        JSON.stringify(value) === '[object Object]'
+          ? `${key}: ${Object.prototype.toString.call(value)}, `
+          : `${key}: ${JSON.stringify(value)}, `;
       s +=
         Object.prototype.toString.call(value) === '[object Map]'
           ? `${key}: ${Object.fromEntries(value)}, `
-          : `${key}: ${JSON.stringify(value)}, `;
+          : isObjectToString;
     }
     s += `}`;
     return s;

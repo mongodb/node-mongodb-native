@@ -35,10 +35,18 @@ import {
   CONNECTION_POOL_CLOSED,
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
-  CONNECTION_READY
+  CONNECTION_READY,
+  SERVER_SELECTION_FAILED,
+  SERVER_SELECTION_STARTED,
+  SERVER_SELECTION_SUCCEEDED,
+  WAITING_FOR_SUITABLE_SERVER
 } from './constants';
-import { type MongoError } from './error';
-import { type ServerSelector } from './sdam/server_selection';
+import {
+  ServerSelectionFailedEvent,
+  ServerSelectionStartedEvent,
+  ServerSelectionSuccessEvent,
+  WaitingForSuitableServerEvent
+} from './sdam/events';
 import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -176,29 +184,6 @@ export interface MongoLoggerOptions {
   logDestination: Writable | MongoDBLogWritable;
 }
 
-/** @internal */
-export const ServerSelectionLogType = Object.freeze({
-  START: 'start',
-  SUCCESS: 'success',
-  FAILURE: 'failure',
-  WAITING: 'waiting'
-} as const);
-
-/** @internal */
-export type ServerSelectionLogType =
-  (typeof ServerSelectionLogType)[keyof typeof ServerSelectionLogType];
-
-/** @internal */
-export interface ServerSelectionLogInputs {
-  selector: string;
-  operation: string;
-  topologyDescription: string;
-  serverHost?: string;
-  serverPort?: number;
-  failure?: MongoError;
-  remainingTimeMS?: number;
-}
-
 /**
  * Parses a string as one of SeverityLevel
  *
@@ -310,7 +295,11 @@ export type LoggableEvent =
   | ConnectionCheckedInEvent
   | ConnectionCheckedOutEvent
   | ConnectionCheckOutStartedEvent
-  | ConnectionCheckOutFailedEvent;
+  | ConnectionCheckOutFailedEvent
+  | ServerSelectionStartedEvent
+  | ServerSelectionFailedEvent
+  | ServerSelectionSuccessEvent
+  | WaitingForSuitableServerEvent;
 
 /** @internal */
 export interface LogConvertible extends Record<string, any> {
@@ -360,6 +349,35 @@ function attachConnectionFields(
   log.serverHost = host;
   log.serverPort = port;
 
+  return log;
+}
+
+function attachServerSelectionFields(
+  log: Record<string, any>,
+  serverSelectionEvent:
+    | ServerSelectionStartedEvent
+    | ServerSelectionFailedEvent
+    | ServerSelectionSuccessEvent
+    | WaitingForSuitableServerEvent
+) {
+  log.selector = serverSelectionEvent.selector;
+  log.operation = serverSelectionEvent.operation;
+  if (serverSelectionEvent instanceof ServerSelectionStartedEvent) {
+    log.message = serverSelectionEvent.message;
+  }
+  if (serverSelectionEvent instanceof ServerSelectionFailedEvent) {
+    log.failure = serverSelectionEvent.failure;
+    log.message = serverSelectionEvent.message;
+  }
+  if (serverSelectionEvent instanceof ServerSelectionSuccessEvent) {
+    log.serverHost = serverSelectionEvent.serverHost;
+    log.serverPort = serverSelectionEvent.serverPort;
+    log.message = serverSelectionEvent.message;
+  }
+  if (serverSelectionEvent instanceof WaitingForSuitableServerEvent) {
+    log.remainingTimeMS = serverSelectionEvent.remainingTimeMS;
+    log.message = serverSelectionEvent.message;
+  }
   return log;
 }
 
@@ -488,6 +506,18 @@ function defaultLogTransform(
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection checked in';
       log.driverConnectionId = logObject.connectionId;
+      return log;
+    case SERVER_SELECTION_STARTED:
+      log = attachServerSelectionFields(log, logObject);
+      return log;
+    case SERVER_SELECTION_FAILED:
+      log = attachServerSelectionFields(log, logObject);
+      return log;
+    case SERVER_SELECTION_SUCCEEDED:
+      log = attachServerSelectionFields(log, logObject);
+      return log;
+    case WAITING_FOR_SUITABLE_SERVER:
+      log = attachServerSelectionFields(log, logObject);
       return log;
     default:
       for (const [key, value] of Object.entries(logObject)) {

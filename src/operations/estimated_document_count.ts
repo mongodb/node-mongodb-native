@@ -1,3 +1,4 @@
+import { COUNT } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
@@ -17,6 +18,8 @@ export interface EstimatedDocumentCountOptions extends CommandOperationOptions {
 
 /** @internal */
 export class EstimatedDocumentCountOperation extends CommandOperation<number> {
+  /** @internal */
+  name = COUNT;
   override options: EstimatedDocumentCountOptions;
   collectionName: string;
 

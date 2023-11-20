@@ -59,6 +59,33 @@ export const CHANGE = 'change' as const;
 export const END = 'end' as const;
 export const RESUME_TOKEN_CHANGED = 'resumeTokenChanged' as const;
 
+export const SERVER_SELECTION_STARTED = 'serverSelectionStarted' as const;
+export const SERVER_SELECTION_FAILED = 'serverSelectionFailed' as const;
+export const SERVER_SELECTION_SUCCEEDED = 'serverSelectionSucceeded' as const;
+export const WAITING_FOR_SUITABLE_SERVER = 'waitingForSuitableServer' as const;
+
+export const FIND = 'find' as const;
+export const FIND_AND_MODIFY = 'findAndModify' as const;
+export const COUNT = 'count' as const;
+export const AGGREGATE = 'aggregate' as const;
+export const CREATE = 'create' as const;
+export const DELETE = 'delete' as const;
+export const DISTINCT = 'distince' as const;
+export const DROP_COLLECTION = 'dropCollection' as const;
+export const DROP_DATABASE = 'dropDatabase' as const;
+export const CREATE_INDEXES = 'createIndexes' as const;
+export const DROP_INDEXES = 'dropIndexes' as const;
+export const LIST_INDEXES = 'listIndexes' as const;
+export const INSERT = 'insert' as const;
+export const LIST_COLLECTIONS = 'listCollections' as const;
+export const LIST_DATABASES = 'listDatabases' as const;
+export const PROFILE = 'profile' as const;
+export const DROP_USER = 'dropUser' as const;
+export const RENAME_COLLECTION = 'renameCollection' as const;
+export const DB_STATS = 'dbStats' as const;
+export const UPDATE = 'update' as const;
+export const VALIDATE = 'validate' as const;
+
 /** @public */
 export const HEARTBEAT_EVENTS = Object.freeze([
   SERVER_HEARTBEAT_STARTED,

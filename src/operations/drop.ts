@@ -1,3 +1,4 @@
+import { DROP_COLLECTION, DROP_DATABASE } from '.././constants';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import { MONGODB_ERROR_CODES, MongoServerError } from '../error';
@@ -14,21 +15,23 @@ export interface DropCollectionOptions extends CommandOperationOptions {
 
 /** @internal */
 export class DropCollectionOperation extends CommandOperation<boolean> {
+  /** @internal */
+  name = DROP_COLLECTION;
   override options: DropCollectionOptions;
   db: Db;
-  name: string;
+  collName: string;
 
   constructor(db: Db, name: string, options: DropCollectionOptions = {}) {
     super(db, options);
     this.db = db;
     this.options = options;
-    this.name = name;
+    this.collName = name;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const db = this.db;
     const options = this.options;
-    const name = this.name;
+    const name = this.collName;
 
     const encryptedFieldsMap = db.client.options.autoEncryption?.encryptedFieldsMap;
     let encryptedFields: Document | undefined =
@@ -72,7 +75,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     server: Server,
     session: ClientSession | undefined
   ): Promise<boolean> {
-    await super.executeCommand(server, session, { drop: this.name });
+    await super.executeCommand(server, session, { drop: this.collName });
     return true;
   }
 }
@@ -82,6 +85,8 @@ export type DropDatabaseOptions = CommandOperationOptions;
 
 /** @internal */
 export class DropDatabaseOperation extends CommandOperation<boolean> {
+  /** @internal */
+  name = DROP_DATABASE;
   override options: DropDatabaseOptions;
 
   constructor(db: Db, options: DropDatabaseOptions) {

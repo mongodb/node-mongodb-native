@@ -1,3 +1,4 @@
+import { VALIDATE } from '.././constants';
 import type { Admin } from '../admin';
 import type { Document } from '../bson';
 import { MongoUnexpectedServerResponseError } from '../error';
@@ -13,6 +14,9 @@ export interface ValidateCollectionOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ValidateCollectionOperation extends CommandOperation<Document> {
+  /** @internal */
+  name = VALIDATE;
+
   override options: ValidateCollectionOptions;
   collectionName: string;
   command: Document;

@@ -75,7 +75,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
     this.trySecondaryWrite = false;
-    this.operationName = options.operationName ?? '';
+    this.operationName = options.operationName ?? 'custom operation';
   }
 
   abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;

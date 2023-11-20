@@ -1,3 +1,4 @@
+import { LIST_DATABASES } from '.././constants';
 import type { Document } from '../bson';
 import type { Db } from '../db';
 import { type TODO_NODE_3286 } from '../mongo_types';
@@ -27,6 +28,8 @@ export interface ListDatabasesOptions extends CommandOperationOptions {
 
 /** @internal */
 export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult> {
+  /** @internal */
+  name = LIST_DATABASES;
   override options: ListDatabasesOptions;
 
   constructor(db: Db, options?: ListDatabasesOptions) {

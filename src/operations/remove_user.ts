@@ -1,3 +1,4 @@
+import { DROP_USER } from '.././constants';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -9,6 +10,8 @@ export type RemoveUserOptions = CommandOperationOptions;
 
 /** @internal */
 export class RemoveUserOperation extends CommandOperation<boolean> {
+  /** @internal */
+  name = DROP_USER;
   override options: RemoveUserOptions;
   username: string;
 

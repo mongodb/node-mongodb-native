@@ -1,3 +1,4 @@
+import { CREATE } from '.././constants';
 import type { Document } from '../bson';
 import {
   MIN_SUPPORTED_QE_SERVER_VERSION,
@@ -108,21 +109,23 @@ const INVALID_QE_VERSION =
 
 /** @internal */
 export class CreateCollectionOperation extends CommandOperation<Collection> {
+  /** @internal */
+  name = CREATE;
   override options: CreateCollectionOptions;
   db: Db;
-  name: string;
+  collName: string;
 
   constructor(db: Db, name: string, options: CreateCollectionOptions = {}) {
     super(db, options);
 
     this.options = options;
     this.db = db;
-    this.name = name;
+    this.collName = name;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
     const db = this.db;
-    const name = this.name;
+    const name = this.collName;
     const options = this.options;
 
     const encryptedFields: Document | undefined =
@@ -175,7 +178,7 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     session: ClientSession | undefined
   ): Promise<Collection> {
     const db = this.db;
-    const name = this.name;
+    const name = this.collName;
     const options = this.options;
 
     const cmd: Document = { create: name };

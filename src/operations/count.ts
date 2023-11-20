@@ -1,3 +1,4 @@
+import { COUNT } from '.././constants';
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import type { Server } from '../sdam/server';
@@ -20,6 +21,8 @@ export interface CountOptions extends CommandOperationOptions {
 
 /** @internal */
 export class CountOperation extends CommandOperation<number> {
+  /** @internal */
+  name = COUNT;
   override options: CountOptions;
   collectionName?: string;
   query: Document;

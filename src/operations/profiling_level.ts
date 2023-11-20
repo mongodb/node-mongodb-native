@@ -1,3 +1,4 @@
+import { PROFILE } from '.././constants';
 import type { Db } from '../db';
 import { MongoUnexpectedServerResponseError } from '../error';
 import type { Server } from '../sdam/server';
@@ -9,6 +10,8 @@ export type ProfilingLevelOptions = CommandOperationOptions;
 
 /** @internal */
 export class ProfilingLevelOperation extends CommandOperation<string> {
+  /** @internal */
+  name = PROFILE;
   override options: ProfilingLevelOptions;
 
   constructor(db: Db, options: ProfilingLevelOptions) {

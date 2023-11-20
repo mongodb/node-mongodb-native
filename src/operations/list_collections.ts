@@ -1,3 +1,4 @@
+import { LIST_COLLECTIONS } from '.././constants';
 import type { Binary, Document } from '../bson';
 import type { Db } from '../db';
 import type { Server } from '../sdam/server';
@@ -25,6 +26,8 @@ export class ListCollectionsOperation extends CommandOperation<Document> {
    * This allows typescript to delete the key but will
    * not allow a writeConcern to be assigned as a property on options.
    */
+  /** @internal */
+  name = LIST_COLLECTIONS;
   override options: ListCollectionsOptions & { writeConcern?: never };
   db: Db;
   filter: Document;

@@ -1,3 +1,26 @@
+import type {
+  AGGREGATE,
+  COUNT,
+  CREATE,
+  CREATE_INDEXES,
+  DB_STATS,
+  DELETE,
+  DISTINCT,
+  DROP_COLLECTION,
+  DROP_DATABASE,
+  DROP_INDEXES,
+  DROP_USER,
+  FIND,
+  FIND_AND_MODIFY,
+  INSERT,
+  LIST_COLLECTIONS,
+  LIST_DATABASES,
+  LIST_INDEXES,
+  PROFILE,
+  RENAME_COLLECTION,
+  UPDATE,
+  VALIDATE
+} from '.././constants';
 import type { BSONSerializeOptions, Document } from '../bson';
 import { MongoInvalidArgumentError } from '../error';
 import { Explain, type ExplainOptions } from '../explain';
@@ -68,6 +91,29 @@ export interface OperationParent {
 
 /** @internal */
 export abstract class CommandOperation<T> extends AbstractOperation<T> {
+  /** @internal */
+  abstract name:
+    | typeof FIND_AND_MODIFY
+    | typeof FIND
+    | typeof COUNT
+    | typeof AGGREGATE
+    | typeof CREATE
+    | typeof DELETE
+    | typeof DISTINCT
+    | typeof DROP_COLLECTION
+    | typeof DROP_DATABASE
+    | typeof CREATE_INDEXES
+    | typeof DROP_INDEXES
+    | typeof LIST_INDEXES
+    | typeof INSERT
+    | typeof LIST_COLLECTIONS
+    | typeof LIST_DATABASES
+    | typeof PROFILE
+    | typeof DROP_USER
+    | typeof RENAME_COLLECTION
+    | typeof DB_STATS
+    | typeof UPDATE
+    | typeof VALIDATE;
   override options: CommandOperationOptions;
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;

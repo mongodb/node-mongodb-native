@@ -1,3 +1,4 @@
+import { INSERT } from '.././constants';
 import type { Document } from '../bson';
 import type { BulkWriteOptions } from '../bulk/common';
 import type { Collection } from '../collection';
@@ -14,6 +15,8 @@ import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
 export class InsertOperation extends CommandOperation<Document> {
+  /** @internal */
+  name = INSERT;
   override options: BulkWriteOptions;
   documents: Document[];
 
