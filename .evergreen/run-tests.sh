@@ -55,6 +55,11 @@ fi
 npm install @mongodb-js/zstd
 npm install snappy
 
+if [[ "$OS" = "Windows_NT" ]]; then
+  # TODO: Temp fix for add_expansions_to_env usage that breaks Windows
+  unset CSFLE_KMS_PROVIDERS
+fi
+
 export AUTH=$AUTH
 export SINGLE_MONGOS_LB_URI=${SINGLE_MONGOS_LB_URI}
 export MULTI_MONGOS_LB_URI=${MULTI_MONGOS_LB_URI}
