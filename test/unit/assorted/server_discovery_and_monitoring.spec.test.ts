@@ -413,7 +413,7 @@ function withConnectionStubImpl(appError) {
       generation:
         typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
 
-      async command(ns, cmd, options) {
+      async command(_ns, _cmd, _options) {
         if (appError.type === 'network') {
           throw new MongoNetworkError('test generated');
         } else if (appError.type === 'timeout') {

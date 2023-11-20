@@ -786,7 +786,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   authContext?: AuthContext;
 
   /**@internal */
-  [kDelayedTimeoutId]: NodeJS.Timeout | null;
+  delayedTimeoutId: NodeJS.Timeout | null = null;
   /** @internal */
   [kDescription]: StreamDescription;
   /** @internal */
@@ -840,13 +840,11 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.socket.on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
-
-    this[kDelayedTimeoutId] = null;
   }
 
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
   get closed(): boolean {
-    return this.controller.signal.aborted;
+    return this.controller.signal.aborted || this.socket.destroyed;
   }
 
   get description(): StreamDescription {
@@ -920,7 +918,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   onTimeout() {
-    this[kDelayedTimeoutId] = setTimeout(() => {
+    this.delayedTimeoutId = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
       this.cleanup(new MongoNetworkTimeoutError(message, { beforeHandshake }));
@@ -1034,6 +1032,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     const { signal } = this.controller;
 
+    signal.throwIfAborted();
+
     if (typeof options.socketTimeoutMS === 'number') {
       this.socket.setTimeout(options.socketTimeoutMS);
     } else if (this.socketTimeoutMS !== 0) {
@@ -1052,7 +1052,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
       response = await read(this, { signal });
     } finally {
-      this.controller = new AbortController();
+      if (!signal.aborted) this.controller = new AbortController();
     }
 
     response.parse(options);
@@ -1156,6 +1156,11 @@ export async function* readWireProtocolMessages(
   const bufferPool = new BufferPool();
   const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
   for await (const [chunk] of on(connection.socket, 'data', { signal })) {
+    if (connection.delayedTimeoutId) {
+      clearTimeout(connection.delayedTimeoutId);
+      connection.delayedTimeoutId = null;
+    }
+
     bufferPool.append(chunk);
     const sizeOfMessage = bufferPool.getInt32();
 
