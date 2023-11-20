@@ -278,7 +278,10 @@ describe('Transactions', function () {
         const session = client.startSession();
         const db = client.db();
 
-        await db.collection('transaction_error_test_2').drop();
+        await db
+          .collection('transaction_error_test_2')
+          .drop()
+          .catch(() => null);
         const coll = await db.createCollection('transaction_error_test_2');
 
         session.startTransaction();
@@ -295,8 +298,8 @@ describe('Transactions', function () {
 
         expect(session.inTransaction()).to.be.true;
 
-        const error = await coll.insertOne({ b: 2 }, { session }).catch(e => e);
-        expect(error).to.exist.and.to.be.an.instanceof(MongoNetworkError);
+        const error = await coll.insertOne({ b: 2 }, { session }).catch(error => error);
+        expect(error).to.be.instanceOf(MongoNetworkError);
         expect(error.hasErrorLabel('TransientTransactionError')).to.be.true;
 
         await session.abortTransaction();
@@ -306,30 +309,18 @@ describe('Transactions', function () {
 
     it('should not have a TransientTransactionError label outside of a transaction', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=4.0.0' } },
-      test: function (done) {
-        const configuration = this.configuration;
-        const client = configuration.newClient({ w: 1 });
+      test: async function () {
+        const db = client.db();
+        const coll = db.collection('test');
 
-        client.connect(err => {
-          expect(err).to.not.exist;
-          const db = client.db(configuration.db);
-          const coll = db.collection('transaction_error_test1');
-
-          client.db('admin').command(
-            {
-              configureFailPoint: 'failCommand',
-              mode: { times: 2 },
-              data: { failCommands: ['insert'], closeConnection: true }
-            },
-            err => {
-              expect(err).to.not.exist;
-              coll.insertOne({ a: 1 }, err => {
-                expect(err).to.exist.and.to.be.an.instanceOf(MongoNetworkError);
-                client.close(done);
-              });
-            }
-          );
+        await client.db('admin').command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 2 }, // fail 2 times for retry
+          data: { failCommands: ['insert'], closeConnection: true }
         });
+
+        const error = await coll.insertOne({ a: 1 }).catch(error => error);
+        expect(error).to.be.instanceOf(MongoNetworkError);
       }
     });
   });
