@@ -844,7 +844,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
   get closed(): boolean {
-    return this.controller.signal.aborted || this.socket.destroyed;
+    return this.controller.signal.aborted;
   }
 
   get description(): StreamDescription {
