@@ -37,7 +37,7 @@ import {
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
   type TopologyDescription,
-  type TopologyDescriptionChangedEvent,
+  type TopologyDescriptionChangedEvent
   WriteConcern
 } from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';

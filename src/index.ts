@@ -143,9 +143,14 @@ export {
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
+  ServerSelectionEvent,
+  ServerSelectionFailedEvent,
+  ServerSelectionStartedEvent,
+  ServerSelectionSuccessEvent,
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent
+  TopologyOpeningEvent,
+  WaitingForSuitableServerEvent
 } from './sdam/events';
 export { SrvPollingEvent } from './sdam/srv_polling';
 
@@ -294,6 +299,7 @@ export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_
 export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { CollectionOptions, CollectionPrivate, ModifyResult } from './collection';
 export type {
+  AGGREGATE,
   CONNECTION_CHECK_OUT_FAILED,
   CONNECTION_CHECK_OUT_STARTED,
   CONNECTION_CHECKED_IN,
@@ -305,7 +311,31 @@ export type {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
-  MONGO_CLIENT_EVENTS
+  COUNT,
+  CREATE,
+  CREATE_INDEXES,
+  DB_STATS,
+  DELETE,
+  DISTINCT,
+  DROP_COLLECTION,
+  DROP_DATABASE,
+  DROP_INDEXES,
+  DROP_USER,
+  FIND,
+  FIND_AND_MODIFY,
+  INSERT,
+  LIST_COLLECTIONS,
+  LIST_DATABASES,
+  LIST_INDEXES,
+  MONGO_CLIENT_EVENTS,
+  PROFILE,
+  RENAME_COLLECTION,
+  SERVER_SELECTION_FAILED,
+  SERVER_SELECTION_STARTED,
+  SERVER_SELECTION_SUCCEEDED,
+  UPDATE,
+  VALIDATE,
+  WAITING_FOR_SUITABLE_SERVER
 } from './constants';
 export type {
   AbstractCursorEvents,

@@ -198,8 +198,13 @@ export class ServerHeartbeatFailedEvent {
   }
 }
 
+/**
+ * The base export class for all monitoring events published from server selection
+ * @public
+ * @category Event
+ */
 export abstract class ServerSelectionEvent {
-  /** String representation of the selector being used to select the server. 
+  /** String representation of the selector being used to select the server.
    *  Defaults to 'custom selector' for application-provided custom selector case.
    */
   selector: string;
@@ -232,6 +237,11 @@ export abstract class ServerSelectionEvent {
   }
 }
 
+/**
+ * An event published when server selection starts
+ * @public
+ * @category Event
+ */
 export class ServerSelectionStartedEvent extends ServerSelectionEvent {
   /** @internal */
   name = SERVER_SELECTION_STARTED;
@@ -247,6 +257,11 @@ export class ServerSelectionStartedEvent extends ServerSelectionEvent {
   }
 }
 
+/**
+ * An event published when a server selection fails
+ * @public
+ * @category Event
+ */
 export class ServerSelectionFailedEvent extends ServerSelectionEvent {
   /** @internal */
   name = SERVER_SELECTION_FAILED;
@@ -266,6 +281,11 @@ export class ServerSelectionFailedEvent extends ServerSelectionEvent {
   }
 }
 
+/**
+ * An event published when server selection succeeds
+ * @public
+ * @category Event
+ */
 export class ServerSelectionSuccessEvent extends ServerSelectionEvent {
   /** @internal */
   name = SERVER_SELECTION_SUCCEEDED;
@@ -290,6 +310,12 @@ export class ServerSelectionSuccessEvent extends ServerSelectionEvent {
     this.serverPort = serverPort;
   }
 }
+
+/**
+ * An event published when server selection is waiting for a suitable server to become available
+ * @public
+ * @category Event
+ */
 export class WaitingForSuitableServerEvent extends ServerSelectionEvent {
   /** @internal */
   name = WAITING_FOR_SUITABLE_SERVER;

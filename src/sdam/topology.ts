@@ -32,7 +32,6 @@ import {
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
 import { TypedEventEmitter } from '../mongo_types';
-import { type CommandOperation } from '../operations/command';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { Transaction } from '../transactions';
@@ -69,7 +68,8 @@ import {
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent,
-  WaitingForSuitableServerEvent} from './events';
+  WaitingForSuitableServerEvent
+} from './events';
 import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
@@ -587,7 +587,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
       startTimeMS: startTimeMS,
       totalTimeMS: options.serverSelectionTimeoutMS,
-      operationName: options?.operationName ?? 'custom operation'
+      operationName: options?.operationName ?? undefined
     };
 
     waitQueueMember.timeoutController.signal.addEventListener('abort', () => {

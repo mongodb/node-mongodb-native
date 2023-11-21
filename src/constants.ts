@@ -59,31 +59,56 @@ export const CHANGE = 'change' as const;
 export const END = 'end' as const;
 export const RESUME_TOKEN_CHANGED = 'resumeTokenChanged' as const;
 
+/** @internal */
 export const SERVER_SELECTION_STARTED = 'serverSelectionStarted' as const;
+/** @internal */
 export const SERVER_SELECTION_FAILED = 'serverSelectionFailed' as const;
+/** @internal */
 export const SERVER_SELECTION_SUCCEEDED = 'serverSelectionSucceeded' as const;
+/** @internal */
 export const WAITING_FOR_SUITABLE_SERVER = 'waitingForSuitableServer' as const;
 
+/** @internal */
 export const FIND = 'find' as const;
+/** @internal */
 export const FIND_AND_MODIFY = 'findAndModify' as const;
+/** @internal */
 export const COUNT = 'count' as const;
+/** @internal */
 export const AGGREGATE = 'aggregate' as const;
+/** @internal */
 export const CREATE = 'create' as const;
+/** @internal */
 export const DELETE = 'delete' as const;
-export const DISTINCT = 'distince' as const;
+/** @internal */
+export const DISTINCT = 'distinct' as const;
+/** @internal */
 export const DROP_COLLECTION = 'dropCollection' as const;
+/** @internal */
 export const DROP_DATABASE = 'dropDatabase' as const;
+/** @internal */
 export const CREATE_INDEXES = 'createIndexes' as const;
+/** @internal */
 export const DROP_INDEXES = 'dropIndexes' as const;
+/** @internal */
 export const LIST_INDEXES = 'listIndexes' as const;
+/** @internal */
 export const INSERT = 'insert' as const;
+/** @internal */
 export const LIST_COLLECTIONS = 'listCollections' as const;
+/** @internal */
 export const LIST_DATABASES = 'listDatabases' as const;
+/** @internal */
 export const PROFILE = 'profile' as const;
+/** @internal */
 export const DROP_USER = 'dropUser' as const;
+/** @internal */
 export const RENAME_COLLECTION = 'renameCollection' as const;
+/** @internal */
 export const DB_STATS = 'dbStats' as const;
+/** @internal */
 export const UPDATE = 'update' as const;
+/** @internal */
 export const VALIDATE = 'validate' as const;
 
 /** @public */
