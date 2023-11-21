@@ -1200,7 +1200,7 @@ describe('driver utils', function () {
           aborted().catch(error => error),
           aborted(AbortSignal.timeout(100))
         ]).catch(error => error);
-        expect(error).to.be.instanceOf(DOMException);
+        expect(error.name).to.equal('TimeoutError');
       });
     });
   });

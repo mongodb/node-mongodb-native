@@ -29,12 +29,12 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
+  aborted,
   BufferPool,
   calculateDurationInMs,
   type Callback,
   HostAddress,
   maxWireVersion,
-  aborted,
   type MongoDBNamespace,
   now,
   uuidV4
