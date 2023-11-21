@@ -34,7 +34,7 @@ import {
   type Callback,
   HostAddress,
   maxWireVersion,
-  mayAbort,
+  aborted,
   type MongoDBNamespace,
   now,
   uuidV4
@@ -1210,7 +1210,7 @@ export async function writeCommand(
   options.signal?.throwIfAborted();
   await Promise.race([
     promisify(connection.socket.write.bind(connection.socket))(buffer),
-    mayAbort(options.signal)
+    aborted(options.signal)
   ]);
 }
 

@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
 
 import {
+  aborted,
   BufferPool,
   ByteUtils,
   compareObjectId,
@@ -15,6 +17,7 @@ import {
   maybeCallback,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MongoError,
   MongoRuntimeError,
   ObjectId,
   shuffle,
@@ -1162,6 +1165,42 @@ describe('driver utils', function () {
           clock.tick(1);
           expect(spy, 'spy was not called after 3000ms').to.have.been.called;
         });
+      });
+    });
+  });
+
+  describe('aborted()', () => {
+    context('when given an aborted signal', () => {
+      it('rejects the returned promise', async () => {
+        const controller = new AbortController();
+        controller.abort(new MongoError('my error'));
+        const error = await aborted(controller.signal).catch(error => error);
+        expect(error).to.be.instanceOf(MongoError);
+        expect(error.message).to.equal('my error');
+      });
+    });
+
+    context('when given a signal that aborts after some time', () => {
+      it('rejects the returned promise after the timeout', async () => {
+        const controller = new AbortController();
+        setTimeout(() => controller.abort(new MongoError('my error')), 10);
+        const start = +new Date();
+        const error = await aborted(controller.signal).catch(error => error);
+        const end = +new Date();
+
+        expect(error).to.be.instanceOf(MongoError);
+        expect(error.message).to.equal('my error');
+        expect(end - start).to.be.within(8, 13);
+      });
+    });
+
+    context('when given a nullish value', () => {
+      it('returns a promise that pends forever', async () => {
+        const error = await Promise.race([
+          aborted().catch(error => error),
+          aborted(AbortSignal.timeout(100))
+        ]).catch(error => error);
+        expect(error).to.be.instanceOf(DOMException);
       });
     });
   });
