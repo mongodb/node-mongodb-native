@@ -22,6 +22,7 @@ import {
   MongoParseError,
   MongoRuntimeError,
   MongoServerError,
+  MongoUnexpectedServerResponseError,
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
@@ -1097,7 +1098,29 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       );
     }
 
-    const document = await this.sendCommand(message, options);
+    let document = null;
+    try {
+      document = await this.sendCommand(message, options);
+    } catch (ioError) {
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, ioError, started)
+        );
+      }
+      throw ioError;
+    }
+
+    if (document == null) {
+      const unexpected = new MongoUnexpectedServerResponseError(
+        'sendCommand did not throw and did not return a document'
+      );
+      this.emit(
+        ModernConnection.COMMAND_FAILED,
+        new CommandFailedEvent(this as unknown as Connection, message, unexpected, started)
+      );
+      throw unexpected;
+    }
 
     if (document.writeConcernError) {
       const writeConcernError = new MongoWriteConcernError(document.writeConcernError, document);
