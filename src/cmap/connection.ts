@@ -1207,7 +1207,6 @@ export async function writeCommand(
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
   const buffer = Buffer.concat(await finalCommand.toBin());
-  options.signal?.throwIfAborted();
   await Promise.race([
     promisify(connection.socket.write.bind(connection.socket))(buffer),
     aborted(options.signal)
