@@ -1115,10 +1115,12 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       const unexpected = new MongoUnexpectedServerResponseError(
         'sendCommand did not throw and did not return a document'
       );
-      this.emit(
-        ModernConnection.COMMAND_FAILED,
-        new CommandFailedEvent(this as unknown as Connection, message, unexpected, started)
-      );
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, unexpected, started)
+        );
+      }
       throw unexpected;
     }
 
