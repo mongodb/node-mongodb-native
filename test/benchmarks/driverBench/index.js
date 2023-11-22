@@ -7,23 +7,15 @@ const Runner = MongoBench.Runner;
 let bsonType = 'js-bson';
 // TODO(NODE-4606): test against different driver configurations in CI
 
-const BSON = require('bson');
-
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
-const {
-  makeParallelBenchmarks,
-  makeBsonBench,
-  makeSingleBench,
-  makeMultiBench
-} = require('../mongoBench/suites');
+const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
 
 function average(arr) {
   return arr.reduce((x, y) => x + y, 0) / arr.length;
 }
 
 const benchmarkRunner = new Runner()
-  .suite('bsonBench', suite => makeBsonBench({ suite, BSON }))
   .suite('singleBench', suite => makeSingleBench(suite))
   .suite('multiBench', suite => makeMultiBench(suite))
   .suite('parallel', suite => makeParallelBenchmarks(suite));
@@ -31,7 +23,6 @@ const benchmarkRunner = new Runner()
 benchmarkRunner
   .run()
   .then(microBench => {
-    const bsonBench = average(Object.values(microBench.bsonBench));
     const singleBench = average([
       microBench.singleBench.findOne,
       microBench.singleBench.smallDocInsertOne,
@@ -66,7 +57,6 @@ benchmarkRunner
     const driverBench = average([readBench, writeBench]);
 
     const benchmarkResults = {
-      bsonBench,
       singleBench,
       multiBench,
       parallelBench,
