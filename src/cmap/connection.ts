@@ -30,7 +30,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
-  aborted,
+  abortable,
   BufferPool,
   calculateDurationInMs,
   type Callback,
@@ -1049,6 +1049,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
         signal
       });
 
+      signal.throwIfAborted();
+
       if (options.noResponse) return { ok: 1 };
 
       response = await read(this, { signal });
@@ -1081,12 +1083,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     command: Document,
     options: CommandOptions = {}
   ): Promise<Document> {
-    // Temporary to make sure no callback usage:
-    // eslint-disable-next-line prefer-rest-params
-    if (typeof arguments[arguments.length - 1] === 'function') {
-      throw new Error('no callbacks allowed!!');
-    }
-
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
@@ -1232,11 +1228,12 @@ export async function writeCommand(
           agreedCompressor: options.agreedCompressor ?? 'none',
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
+
   const buffer = Buffer.concat(await finalCommand.toBin());
-  await Promise.race([
-    promisify(connection.socket.write.bind(connection.socket))(buffer),
-    aborted(options.signal)
-  ]);
+
+  const socketWriteFn = promisify(connection.socket.write.bind(connection.socket));
+
+  return abortable(socketWriteFn(buffer), options);
 }
 
 /**

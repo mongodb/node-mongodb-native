@@ -1300,14 +1300,35 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
 
+export async function abortable<T>(
+  promise: Promise<T>,
+  { signal }: { signal?: AbortSignal }
+): Promise<T> {
+  const { abort, done } = aborted(signal);
+  try {
+    return await Promise.race([promise, abort]);
+  } finally {
+    done.abort();
+  }
+}
+
 /**
  * Takes an AbortSignal and creates a promise that will reject when the signal aborts
  * If the argument provided is nullish the returned promise will **never** resolve.
  * @param signal - an optional abort signal to link to a promise rejection
  */
-export async function aborted(signal?: AbortSignal): Promise<void> {
+export function aborted(signal?: AbortSignal): {
+  abort: Promise<any>;
+  done: AbortController;
+} {
+  const done = new AbortController();
   signal?.throwIfAborted();
-  return new Promise((_, reject) =>
-    signal?.addEventListener('abort', () => reject(signal.reason), { once: true })
+  const abort = new Promise<void>((_, reject) =>
+    signal?.addEventListener('abort', () => reject(signal.reason), {
+      once: true,
+      // @ts-expect-error: @types/node erroneously claim this does not exist
+      signal: done.signal
+    })
   );
+  return { abort, done };
 }

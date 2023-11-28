@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
 import {
+  abortable,
   aborted,
   BufferPool,
   ByteUtils,
@@ -1174,7 +1175,7 @@ describe('driver utils', function () {
       it('rejects the returned promise', async () => {
         const controller = new AbortController();
         controller.abort(new MongoError('my error'));
-        const error = await aborted(controller.signal).catch(error => error);
+        const error = await aborted(controller.signal).abort.catch(error => error);
         expect(error).to.be.instanceOf(MongoError);
         expect(error.message).to.equal('my error');
       });
@@ -1185,7 +1186,7 @@ describe('driver utils', function () {
         const controller = new AbortController();
         setTimeout(() => controller.abort(new MongoError('my error')), 10);
         const start = +new Date();
-        const error = await aborted(controller.signal).catch(error => error);
+        const error = await aborted(controller.signal).abort.catch(error => error);
         const end = +new Date();
 
         expect(error).to.be.instanceOf(MongoError);
@@ -1197,10 +1198,75 @@ describe('driver utils', function () {
     context('when given a nullish value', () => {
       it('returns a promise that pends forever', async () => {
         const error = await Promise.race([
-          aborted().catch(error => error),
+          aborted().abort.catch(error => error),
           aborted(AbortSignal.timeout(100))
         ]).catch(error => error);
         expect(error.name).to.equal('TimeoutError');
+      });
+    });
+  });
+
+  describe('abortable()', () => {
+    it("rejects with the signal's reason", async () => {
+      const controller = new AbortController();
+      controller.abort(new Error('my error'));
+      const error = await abortable(Promise.reject(new Error('Not expected')), {
+        signal: controller.signal
+      }).catch(error => error);
+      expect(error.message).to.equal('my error');
+    });
+
+    context('when given a promise that rejects', () => {
+      it("rejects with the given promise's rejection value", async () => {
+        const controller = new AbortController();
+        const error = await abortable(Promise.reject(new Error('my error')), {
+          signal: controller.signal
+        }).catch(error => error);
+        expect(error.message).to.equal('my error');
+      });
+
+      it('cleans up abort listener', async () => {
+        const controller = new AbortController();
+        const addEventListener = sinon.spy(controller.signal, 'addEventListener');
+        const removeEventListener = sinon.spy(controller.signal, 'removeEventListener');
+        await abortable(Promise.reject(), { signal: controller.signal }).catch(() => null);
+        expect(removeEventListener).to.have.been.called;
+        expect(removeEventListener).to.have.callCount(addEventListener.callCount);
+      });
+    });
+
+    context('when given a promise that resolves', () => {
+      it("resolves with the given promise's resolution value", async () => {
+        const controller = new AbortController();
+        const result = await abortable(Promise.resolve({ ok: 1 }), {
+          signal: controller.signal
+        });
+        expect(result).to.have.property('ok', 1);
+      });
+
+      it('cleans up abort listener', async () => {
+        const controller = new AbortController();
+        const addEventListener = sinon.spy(controller.signal, 'addEventListener');
+        const removeEventListener = sinon.spy(controller.signal, 'removeEventListener');
+        await abortable(Promise.resolve(), { signal: controller.signal });
+        expect(removeEventListener).to.have.been.called;
+        expect(removeEventListener).to.have.callCount(addEventListener.callCount);
+      });
+    });
+
+    context('when given a promise that pends forever', () => {
+      it('cleans up abort listener when given signal is aborted', async () => {
+        const controller = new AbortController();
+        const addEventListener = sinon.spy(controller.signal, 'addEventListener');
+        const removeEventListener = sinon.spy(controller.signal, 'removeEventListener');
+        setTimeout(() => controller.abort(new MongoError('my error')), 10);
+        const error = await abortable(new Promise<Error | undefined>(() => null), {
+          signal: controller.signal
+        }).catch(error => error);
+
+        expect(error?.message).to.equal('my error');
+        expect(removeEventListener).to.have.been.called;
+        expect(removeEventListener).to.have.callCount(addEventListener.callCount);
       });
     });
   });
