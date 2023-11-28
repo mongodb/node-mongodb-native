@@ -1,13 +1,16 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { executeOperation, Server } from '../../mongodb';
+import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
+import * as mock from '../../tools/mongodb-mock/index';
 
 describe.only('AbstractOperation commmandName', async function () {
   let client;
   let db;
   let collection;
+  let admin;
+  let mockServer;
   interface AbstractOperationSubclasses {
     subclassOperation: mongodb.AbstractOperation; // v in mongodb && typeof v === 'function' && v.prototype instanceof AbstractOperation
     subclassType: any;
@@ -17,8 +20,10 @@ describe.only('AbstractOperation commmandName', async function () {
   before(async function () {
     client = this.configuration.newClient();
     db = client.db('foo');
+    admin = client.db().admin();
     await db.createCollection('bar', {});
     collection = db.collection('bar');
+    await mock.createServer();
     commandNameArray = [
       {
         subclassOperation: new mongodb.BulkWriteShimOperation(collection, {}),
@@ -82,6 +87,10 @@ describe.only('AbstractOperation commmandName', async function () {
       },
       {
         subclassOperation: new mongodb.FindOperation(collection, {}),
+        subclassType: mongodb.FindOperation
+      },
+      {
+        subclassOperation: new mongodb.FindAndModifyOperation(collection, {}),
         subclassType: mongodb.FindOperation
       },
       {
@@ -149,15 +158,20 @@ describe.only('AbstractOperation commmandName', async function () {
         subclassType: mongodb.IsCappedOperation
       },
       {
-        subclassOperation: new mongodb.KillCursorsOperation(collection, {}),
+        subclassOperation: new mongodb.KillCursorsOperation(
+          new Long(1),
+          collection.fullNamespace,
+          mockServer,
+          {}
+        ),
         subclassType: mongodb.KillCursorsOperation
       },
       {
-        subclassOperation: new mongodb.ListCollectionsOperation(collection, {}),
+        subclassOperation: new mongodb.ListCollectionsOperation(db, { a: 1 }, {}),
         subclassType: mongodb.ListCollectionsOperation
       },
       {
-        subclassOperation: new mongodb.ListDatabasesOperation(collection, {}),
+        subclassOperation: new mongodb.ListDatabasesOperation(db, {}),
         subclassType: mongodb.ListDatabasesOperation
       },
       {
@@ -169,35 +183,46 @@ describe.only('AbstractOperation commmandName', async function () {
         subclassType: mongodb.ProfilingLevelOperation
       },
       {
-        subclassOperation: new mongodb.RemoveUserOperation(collection, {}),
+        subclassOperation: new mongodb.RemoveUserOperation(db, 'userToDrop', {}),
         subclassType: mongodb.RemoveUserOperation
       },
       {
-        subclassOperation: new mongodb.RenameOperation(collection, {}),
+        subclassOperation: new mongodb.RenameOperation(collection, 'newName', {}),
         subclassType: mongodb.RenameOperation
       },
       {
-        subclassOperation: new mongodb.RunCommandOperation(collection, {}),
+        subclassOperation: new mongodb.RunCommandOperation(
+          db,
+          { dummyCommand: 'dummyCommand' },
+          {}
+        ),
         subclassType: mongodb.RunCommandOperation
       },
       {
-        subclassOperation: new mongodb.RunAdminCommandOperation(collection, {}),
+        subclassOperation: new mongodb.RunAdminCommandOperation(
+          { dummyCommand: 'dummyCommand' },
+          {}
+        ),
         subclassType: mongodb.RunAdminCommandOperation
       },
       {
-        subclassOperation: new mongodb.CreateSearchIndexesOperation(collection, {}),
+        subclassOperation: new mongodb.CreateSearchIndexesOperation(collection, [
+          { definition: { a: 1 } }
+        ]),
         subclassType: mongodb.CreateSearchIndexesOperation
       },
       {
-        subclassOperation: new mongodb.DropSearchIndexOperation(collection, {}),
+        subclassOperation: new mongodb.DropSearchIndexOperation(collection, 'dummyName'),
         subclassType: mongodb.DropSearchIndexOperation
       },
       {
-        subclassOperation: new mongodb.UpdateSearchIndexOperation(collection, {}),
+        subclassOperation: new mongodb.UpdateSearchIndexOperation(collection, 'dummyName', {
+          a: 1
+        }),
         subclassType: mongodb.UpdateSearchIndexOperation
       },
       {
-        subclassOperation: new mongodb.SetProfilingLevelOperation(collection, {}),
+        subclassOperation: new mongodb.SetProfilingLevelOperation(db, 'all', {}),
         subclassType: mongodb.SetProfilingLevelOperation
       },
       {
@@ -205,23 +230,27 @@ describe.only('AbstractOperation commmandName', async function () {
         subclassType: mongodb.DbStatsOperation
       },
       {
-        subclassOperation: new mongodb.UpdateOperation(collection, {}),
+        subclassOperation: new mongodb.UpdateOperation(
+          collection.fullNamespace,
+          { q: { a: 1 }, u: { b: 2 } },
+          {}
+        ),
         subclassType: mongodb.UpdateOperation
       },
       {
-        subclassOperation: new mongodb.UpdateOneOperation(collection, {}),
+        subclassOperation: new mongodb.UpdateOneOperation(collection, { a: 1 }, { b: 1 }, {}),
         subclassType: mongodb.UpdateOneOperation
       },
       {
-        subclassOperation: new mongodb.UpdateManyOperation(collection, {}),
+        subclassOperation: new mongodb.UpdateManyOperation(collection, { a: 1 }, { b: 1 }, {}),
         subclassType: mongodb.UpdateManyOperation
       },
       {
-        subclassOperation: new mongodb.ReplaceOneOperation(collection, {}),
+        subclassOperation: new mongodb.ReplaceOneOperation(collection, { a: 1 }, { b: 1 }, {}),
         subclassType: mongodb.ReplaceOneOperation
       },
       {
-        subclassOperation: new mongodb.ValidateCollectionOperation(collection, {}),
+        subclassOperation: new mongodb.ValidateCollectionOperation(admin, collection, {}),
         subclassType: mongodb.ValidateCollectionOperation
       }
     ];
@@ -239,13 +268,25 @@ describe.only('AbstractOperation commmandName', async function () {
 
   for (const { subclassOperation, subclassType } of commandNameArray) {
     context(`when subclass is ${subclassOperation.constructor.name}`, async function () {
+      const commandName =
+        subclassType instanceof mongodb.RunAdminCommandOperation
+          ? 'runAdminCommand'
+          : subclassType instanceof mongodb.RunCommandOperation
+          ? 'runCommand'
+          : subclassType instanceof mongodb.OptionsOperation
+          ? 'options'
+          : subclassType instanceof mongodb.IsCappedOperation
+          ? 'isCapped'
+          : subclassOperation.commandName;
+
       it(`subclass prototype's commandName should equal operation.commandName`, async function () {
         const prototypeCommandName = Object.getOwnPropertyDescriptor(
           subclassType.prototype,
           'commandName'
         )?.get?.call(null);
-        expect(prototypeCommandName).to.equal(subclassOperation.commandName);
+        expect(prototypeCommandName).to.equal(commandName);
       });
+
       it(`server.command's first key should equal operation.commandName`, async function () {
         const cmdCallerStub = sinon
           .stub(Server.prototype, 'command')
@@ -253,7 +294,7 @@ describe.only('AbstractOperation commmandName', async function () {
         await executeOperation(client, subclassOperation);
         expect(cmdCallerStub).to.have.been.calledOnceWith(
           sinon.match.any,
-          sinon.match.hasOwn(subclassOperation.commandName)
+          sinon.match.hasOwn(commandName)
         );
         sinon.restore();
       });

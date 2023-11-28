@@ -16,6 +16,10 @@ export class ProfilingLevelOperation extends CommandOperation<string> {
     this.options = options;
   }
 
+  override get commandName() {
+    return 'profile' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
     const doc = await super.executeCommand(server, session, { profile: -1 });
     if (doc.ok === 1) {

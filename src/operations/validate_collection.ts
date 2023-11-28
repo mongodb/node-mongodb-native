@@ -33,6 +33,10 @@ export class ValidateCollectionOperation extends CommandOperation<Document> {
     this.collectionName = collectionName;
   }
 
+  override get commandName() {
+    return 'validate' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const collectionName = this.collectionName;
 

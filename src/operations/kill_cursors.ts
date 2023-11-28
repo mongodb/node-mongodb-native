@@ -25,6 +25,10 @@ export class KillCursorsOperation extends AbstractOperation {
     this.server = server;
   }
 
+  override get commandName() {
+    return 'killCursors' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
     if (server !== this.server) {
       throw new MongoRuntimeError('Killcursor must run on the same server operation began on');

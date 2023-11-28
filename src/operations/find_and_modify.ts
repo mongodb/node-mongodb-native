@@ -121,7 +121,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 }
 
 /** @internal */
-class FindAndModifyOperation extends CommandOperation<Document> {
+export class FindAndModifyOperation extends CommandOperation<Document> {
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;
