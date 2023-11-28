@@ -75,6 +75,8 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
   }
 
+  abstract get commandName(): string;
+
   abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;
 
   hasAspect(aspect: symbol): boolean {
