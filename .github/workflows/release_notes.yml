@@ -30,9 +30,9 @@ jobs:
           API_ENDPOINT: /repos/${{ github.repository }}/collaborators?permission=admin
         shell: bash
         run: |
-          if [ $COMMENTER -eq "empty_triggering_actor" ]; then exit 1; fi
+          if [ $COMMENTER = "empty_triggering_actor" ]; then exit 1; fi
           set -o pipefail
-          for gh api "$API_ENDPOINT" --paginate --jq ".[].login" | grep -q "^$COMMENTER\$"; then
+          if gh api "$API_ENDPOINT" --paginate --jq ".[].login" | grep -q "^$COMMENTER\$"; then
             echo "$COMMENTER permitted to trigger notes!" && exit 0
           else
             echo "$COMMENTER not permitted to trigger notes" && exit 1
