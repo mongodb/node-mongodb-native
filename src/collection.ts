@@ -740,7 +740,7 @@ export class Collection<TSchema extends Document = Document> {
    * @see https://www.mongodb.com/docs/manual/reference/operator/query/centerSphere/#op._S_centerSphere
    */
   async countDocuments(
-    filter: Document = {},
+    filter: Filter<TSchema> = {},
     options: CountDocumentsOptions = {}
   ): Promise<number> {
     return executeOperation(
