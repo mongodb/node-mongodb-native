@@ -120,6 +120,10 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
     this.name = name;
   }
 
+  override get commandName() {
+    return 'create' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
     const db = this.db;
     const name = this.name;

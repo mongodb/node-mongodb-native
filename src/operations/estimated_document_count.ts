@@ -26,6 +26,10 @@ export class EstimatedDocumentCountOperation extends CommandOperation<number> {
     this.collectionName = collection.collectionName;
   }
 
+  override get commandName() {
+    return 'count' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
     const cmd: Document = { count: this.collectionName };
 

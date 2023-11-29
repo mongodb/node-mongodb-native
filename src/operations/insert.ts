@@ -24,6 +24,10 @@ export class InsertOperation extends CommandOperation<Document> {
     this.documents = documents;
   }
 
+  override get commandName() {
+    return 'insert' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -66,6 +70,10 @@ export interface InsertOneResult<TSchema = Document> {
 export class InsertOneOperation extends InsertOperation {
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
     super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
+  }
+
+  override get commandName() {
+    return super.commandName;
   }
 
   override async execute(
@@ -112,6 +120,10 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     this.options = options;
     this.collection = collection;
     this.docs = docs;
+  }
+
+  override get commandName() {
+    return 'insert' as const;
   }
 
   override async execute(

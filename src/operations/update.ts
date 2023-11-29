@@ -140,6 +140,10 @@ export class UpdateOneOperation extends UpdateOperation {
     }
   }
 
+  override get commandName() {
+    return super.commandName;
+  }
+
   override async execute(
     server: Server,
     session: ClientSession | undefined
@@ -172,6 +176,10 @@ export class UpdateManyOperation extends UpdateOperation {
     if (!hasAtomicOperators(update)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
+  }
+
+  override get commandName() {
+    return super.commandName;
   }
 
   override async execute(
@@ -225,6 +233,10 @@ export class ReplaceOneOperation extends UpdateOperation {
     if (hasAtomicOperators(replacement)) {
       throw new MongoInvalidArgumentError('Replacement document must not contain atomic operators');
     }
+  }
+
+  override get commandName() {
+    return super.commandName;
   }
 
   override async execute(

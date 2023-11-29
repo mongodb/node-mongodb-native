@@ -888,7 +888,7 @@ export class BulkWriteShimOperation extends AbstractOperation {
   }
 
   get commandName(): string {
-    return 'bulkWrite';
+    return 'bulkWrite' as const;
   }
 
   execute(_server: Server, session: ClientSession | undefined): Promise<any> {

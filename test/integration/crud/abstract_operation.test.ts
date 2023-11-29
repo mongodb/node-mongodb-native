@@ -5,299 +5,302 @@ import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 
-describe.only('AbstractOperation commmandName', async function () {
-  let client;
-  let db;
-  let collection;
-  let admin;
-  let mockServer;
-  interface AbstractOperationSubclasses {
-    subclassOperation: mongodb.AbstractOperation; // v in mongodb && typeof v === 'function' && v.prototype instanceof AbstractOperation
-    subclassType: any;
-  }
-  let commandNameArray: AbstractOperationSubclasses[] = [];
+describe('AbstractOperation commandName', async function () {
+  describe('commandName getter', async function () {
+    interface AbstractOperationSubclasses {
+      subclassCreator: () => mongodb.AbstractOperation; // v in mongodb && typeof v === 'function' && v.prototype instanceof AbstractOperation
+      subclassType: any;
+    }
 
-  before(async function () {
-    client = this.configuration.newClient();
-    db = client.db('foo');
-    admin = client.db().admin();
-    await db.createCollection('bar', {});
-    collection = db.collection('bar');
-    await mock.createServer();
-    commandNameArray = [
-      {
-        subclassOperation: new mongodb.BulkWriteShimOperation(collection, {}),
+    const serverlessOperationSubclasses = [
+      'RunAdminCommandOperation',
+      'RunCommandOperation',
+      'OptionsOperation',
+      'IsCappedOperation',
+      'BulkWriteShimOperation',
+      'BulkWriteOperation',
+      'IndexExistsOperation',
+      'IndexOperation',
+      'CollectionsOperation',
+      'IndexInformationOperation'
+    ];
+
+    let client;
+    let db;
+    let admin;
+    let collection;
+    let mockServer;
+    const subclassArray: AbstractOperationSubclasses[] = [
+      /* {
+        subclassCreator: () => new mongodb.BulkWriteShimOperation(
+          new mongodb.OrderedBulkOperation(collection, {}),
+          {}
+        ),
         subclassType: mongodb.BulkWriteShimOperation
-      },
+      }, */
       {
-        subclassOperation: new mongodb.AggregateOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.AggregateOperation(collection.fullNamespace, [{ a: 1 }], {}),
         subclassType: mongodb.AggregateOperation
       },
       {
-        subclassOperation: new mongodb.BulkWriteOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.BulkWriteOperation(collection, [{ insertOne: { document: { a: 1 } } }], {}),
         subclassType: mongodb.BulkWriteOperation
       },
       {
-        subclassOperation: new mongodb.CollectionsOperation(collection, {}),
+        subclassCreator: () => new mongodb.CollectionsOperation(db, {}),
         subclassType: mongodb.CollectionsOperation
       },
       {
-        subclassOperation: new mongodb.CommandOperation(collection, {}),
-        subclassType: mongodb.CommandOperation
-      },
-      {
-        subclassOperation: new mongodb.CountOperation(collection, {}),
+        subclassCreator: () => new mongodb.CountOperation(collection.fullNamespace, { a: 1 }, {}),
         subclassType: mongodb.CountOperation
       },
       {
-        subclassOperation: new mongodb.CountDocumentsOperation(collection, {}),
+        subclassCreator: () => new mongodb.CountDocumentsOperation(collection, { a: 1 }, {}),
         subclassType: mongodb.CountDocumentsOperation
       },
       {
-        subclassOperation: new mongodb.CreateCollectionOperation(collection, {}),
+        subclassCreator: () => new mongodb.CreateCollectionOperation(db, 'name'),
         subclassType: mongodb.CreateCollectionOperation
       },
       {
-        subclassOperation: new mongodb.DeleteOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.DeleteOperation(collection.fullNamespace, [{ q: { a: 1 }, limit: 1 }], {}),
         subclassType: mongodb.DeleteOperation
       },
       {
-        subclassOperation: new mongodb.DeleteOneOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.DeleteOneOperation(collection, [{ q: { a: 1 }, limit: 1 }], {}),
         subclassType: mongodb.DeleteOneOperation
       },
       {
-        subclassOperation: new mongodb.DeleteManyOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.DeleteManyOperation(collection, [{ q: { a: 1 }, limit: 1 }], {}),
         subclassType: mongodb.DeleteManyOperation
       },
       {
-        subclassOperation: new mongodb.DistinctOperation(collection, {}),
+        subclassCreator: () => new mongodb.DistinctOperation(collection, 'a', { a: 1 }),
         subclassType: mongodb.DistinctOperation
       },
       {
-        subclassOperation: new mongodb.DropCollectionOperation(collection, {}),
+        subclassCreator: () => new mongodb.DropCollectionOperation(db, 'collectionName', {}),
         subclassType: mongodb.DropCollectionOperation
       },
       {
-        subclassOperation: new mongodb.DropDatabaseOperation(collection, {}),
+        subclassCreator: () => new mongodb.DropDatabaseOperation(db, {}),
         subclassType: mongodb.DropDatabaseOperation
       },
       {
-        subclassOperation: new mongodb.EstimatedDocumentCountOperation(collection, {}),
+        subclassCreator: () => new mongodb.EstimatedDocumentCountOperation(collection, {}),
         subclassType: mongodb.EstimatedDocumentCountOperation
       },
       {
-        subclassOperation: new mongodb.FindOperation(collection, {}),
+        subclassCreator: () => new mongodb.FindOperation(collection, collection.fullNamespace),
         subclassType: mongodb.FindOperation
       },
       {
-        subclassOperation: new mongodb.FindAndModifyOperation(collection, {}),
-        subclassType: mongodb.FindOperation
+        subclassCreator: () => new mongodb.FindAndModifyOperation(collection, { a: 1 }, {}),
+        subclassType: mongodb.FindAndModifyOperation
       },
       {
-        subclassOperation: new mongodb.FindOneAndDeleteOperation(collection, {}),
+        subclassCreator: () => new mongodb.FindOneAndDeleteOperation(collection, { a: 1 }, {}),
         subclassType: mongodb.FindOneAndDeleteOperation
       },
       {
-        subclassOperation: new mongodb.FindOneAndReplaceOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.FindOneAndReplaceOperation(collection, { a: 2 }, { a: 1 }, {}),
         subclassType: mongodb.FindOneAndReplaceOperation
       },
       {
-        subclassOperation: new mongodb.FindOneAndUpdateOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.FindOneAndUpdateOperation(collection, { a: 2 }, { $a: 1 }, {}),
         subclassType: mongodb.FindOneAndUpdateOperation
       },
       {
-        subclassOperation: new mongodb.GetMoreOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.GetMoreOperation(collection.fullNamespace, new Long(1), mockServer, {}),
         subclassType: mongodb.GetMoreOperation
       },
       {
-        subclassOperation: new mongodb.IndexesOperation(collection, {}),
+        subclassCreator: () => new mongodb.IndexesOperation(collection, {}),
         subclassType: mongodb.IndexesOperation
       },
       {
-        subclassOperation: new mongodb.CreateIndexesOperation(collection, {}),
+        subclassCreator: () => new mongodb.CreateIndexesOperation(db, 'bar', [{ key: { a: 1 } }]),
         subclassType: mongodb.CreateIndexesOperation
       },
       {
-        subclassOperation: new mongodb.CreateIndexOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.CreateIndexOperation(db, 'collectionName', 'indexDescription'),
         subclassType: mongodb.CreateIndexOperation
       },
       {
-        subclassOperation: new mongodb.EnsureIndexOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.EnsureIndexOperation(db, 'collectionName', 'indexDescription'),
         subclassType: mongodb.EnsureIndexOperation
       },
       {
-        subclassOperation: new mongodb.DropIndexOperation(collection, {}),
+        subclassCreator: () => new mongodb.DropIndexOperation(collection, 'a', {}),
         subclassType: mongodb.DropIndexOperation
       },
       {
-        subclassOperation: new mongodb.ListIndexesOperation(collection, {}),
+        subclassCreator: () => new mongodb.ListIndexesOperation(collection, {}),
         subclassType: mongodb.ListIndexesOperation
       },
       {
-        subclassOperation: new mongodb.IndexExistsOperation(collection, {}),
+        subclassCreator: () => new mongodb.IndexExistsOperation(collection, 'a', {}),
         subclassType: mongodb.IndexExistsOperation
       },
       {
-        subclassOperation: new mongodb.IndexInformationOperation(collection, {}),
+        subclassCreator: () => new mongodb.IndexInformationOperation(db, 'a', {}),
         subclassType: mongodb.IndexInformationOperation
       },
       {
-        subclassOperation: new mongodb.InsertOperation(collection, {}),
+        subclassCreator: () =>
+          new mongodb.InsertOperation(collection.fullNamespace, [{ a: 1 }], {}),
         subclassType: mongodb.InsertOperation
       },
       {
-        subclassOperation: new mongodb.InsertOneOperation(collection, {}),
+        subclassCreator: () => new mongodb.InsertOneOperation(collection, { a: 1 }, {}),
         subclassType: mongodb.InsertOneOperation
       },
       {
-        subclassOperation: new mongodb.InsertManyOperation(collection, {}),
+        subclassCreator: () => new mongodb.InsertManyOperation(collection, [{ a: 1 }], {}),
         subclassType: mongodb.InsertManyOperation
       },
       {
-        subclassOperation: new mongodb.IsCappedOperation(collection, {}),
+        subclassCreator: () => new mongodb.IsCappedOperation(collection, {}),
         subclassType: mongodb.IsCappedOperation
       },
       {
-        subclassOperation: new mongodb.KillCursorsOperation(
-          new Long(1),
-          collection.fullNamespace,
-          mockServer,
-          {}
-        ),
+        subclassCreator: () =>
+          new mongodb.KillCursorsOperation(new Long(1), collection.fullNamespace, mockServer, {}),
         subclassType: mongodb.KillCursorsOperation
       },
       {
-        subclassOperation: new mongodb.ListCollectionsOperation(db, { a: 1 }, {}),
+        subclassCreator: () => new mongodb.ListCollectionsOperation(db, { a: 1 }, {}),
         subclassType: mongodb.ListCollectionsOperation
       },
       {
-        subclassOperation: new mongodb.ListDatabasesOperation(db, {}),
+        subclassCreator: () => new mongodb.ListDatabasesOperation(db, {}),
         subclassType: mongodb.ListDatabasesOperation
       },
       {
-        subclassOperation: new mongodb.OptionsOperation(collection, {}),
+        subclassCreator: () => new mongodb.OptionsOperation(collection, {}),
         subclassType: mongodb.OptionsOperation
       },
       {
-        subclassOperation: new mongodb.ProfilingLevelOperation(collection, {}),
+        subclassCreator: () => new mongodb.ProfilingLevelOperation(db, {}),
         subclassType: mongodb.ProfilingLevelOperation
       },
       {
-        subclassOperation: new mongodb.RemoveUserOperation(db, 'userToDrop', {}),
+        subclassCreator: () => new mongodb.RemoveUserOperation(db, 'userToDrop', {}),
         subclassType: mongodb.RemoveUserOperation
       },
       {
-        subclassOperation: new mongodb.RenameOperation(collection, 'newName', {}),
+        subclassCreator: () => new mongodb.RenameOperation(collection, 'newName', {}),
         subclassType: mongodb.RenameOperation
       },
       {
-        subclassOperation: new mongodb.RunCommandOperation(
-          db,
-          { dummyCommand: 'dummyCommand' },
-          {}
-        ),
+        subclassCreator: () =>
+          new mongodb.RunCommandOperation(db, { dummyCommand: 'dummyCommand' }, {}),
         subclassType: mongodb.RunCommandOperation
       },
       {
-        subclassOperation: new mongodb.RunAdminCommandOperation(
-          { dummyCommand: 'dummyCommand' },
-          {}
-        ),
+        subclassCreator: () =>
+          new mongodb.RunAdminCommandOperation({ dummyCommand: 'dummyCommand' }, {}),
         subclassType: mongodb.RunAdminCommandOperation
       },
       {
-        subclassOperation: new mongodb.CreateSearchIndexesOperation(collection, [
-          { definition: { a: 1 } }
-        ]),
+        subclassCreator: () =>
+          new mongodb.CreateSearchIndexesOperation(collection, [{ definition: { a: 1 } }]),
         subclassType: mongodb.CreateSearchIndexesOperation
       },
       {
-        subclassOperation: new mongodb.DropSearchIndexOperation(collection, 'dummyName'),
+        subclassCreator: () => new mongodb.DropSearchIndexOperation(collection, 'dummyName'),
         subclassType: mongodb.DropSearchIndexOperation
       },
       {
-        subclassOperation: new mongodb.UpdateSearchIndexOperation(collection, 'dummyName', {
-          a: 1
-        }),
+        subclassCreator: () =>
+          new mongodb.UpdateSearchIndexOperation(collection, 'dummyName', {
+            a: 1
+          }),
         subclassType: mongodb.UpdateSearchIndexOperation
       },
       {
-        subclassOperation: new mongodb.SetProfilingLevelOperation(db, 'all', {}),
+        subclassCreator: () => new mongodb.SetProfilingLevelOperation(db, 'all', {}),
         subclassType: mongodb.SetProfilingLevelOperation
       },
       {
-        subclassOperation: new mongodb.DbStatsOperation(collection, {}),
+        subclassCreator: () => new mongodb.DbStatsOperation(db, {}),
         subclassType: mongodb.DbStatsOperation
       },
       {
-        subclassOperation: new mongodb.UpdateOperation(
-          collection.fullNamespace,
-          { q: { a: 1 }, u: { b: 2 } },
-          {}
-        ),
+        subclassCreator: () =>
+          new mongodb.UpdateOperation(collection.fullNamespace, { q: { a: 1 }, u: { $a: 2 } }, {}),
         subclassType: mongodb.UpdateOperation
       },
       {
-        subclassOperation: new mongodb.UpdateOneOperation(collection, { a: 1 }, { b: 1 }, {}),
+        subclassCreator: () => new mongodb.UpdateOneOperation(collection, { a: 1 }, { $a: 2 }, {}),
         subclassType: mongodb.UpdateOneOperation
       },
       {
-        subclassOperation: new mongodb.UpdateManyOperation(collection, { a: 1 }, { b: 1 }, {}),
+        subclassCreator: () => new mongodb.UpdateManyOperation(collection, { a: 1 }, { $a: 2 }, {}),
         subclassType: mongodb.UpdateManyOperation
       },
       {
-        subclassOperation: new mongodb.ReplaceOneOperation(collection, { a: 1 }, { b: 1 }, {}),
+        subclassCreator: () => new mongodb.ReplaceOneOperation(collection, { a: 1 }, { b: 1 }, {}),
         subclassType: mongodb.ReplaceOneOperation
       },
       {
-        subclassOperation: new mongodb.ValidateCollectionOperation(admin, collection, {}),
+        subclassCreator: () => new mongodb.ValidateCollectionOperation(admin, 'bar', {}),
         subclassType: mongodb.ValidateCollectionOperation
       }
     ];
-  });
 
-  after(async function () {
-    db = undefined;
-    collection = undefined;
-    await client.close();
-  });
-
-  it(`dummy`, function () {
-    console.log('pass');
-  });
-
-  for (const { subclassOperation, subclassType } of commandNameArray) {
-    context(`when subclass is ${subclassOperation.constructor.name}`, async function () {
-      const commandName =
-        subclassType instanceof mongodb.RunAdminCommandOperation
-          ? 'runAdminCommand'
-          : subclassType instanceof mongodb.RunCommandOperation
-          ? 'runCommand'
-          : subclassType instanceof mongodb.OptionsOperation
-          ? 'options'
-          : subclassType instanceof mongodb.IsCappedOperation
-          ? 'isCapped'
-          : subclassOperation.commandName;
-
-      it(`subclass prototype's commandName should equal operation.commandName`, async function () {
-        const prototypeCommandName = Object.getOwnPropertyDescriptor(
-          subclassType.prototype,
-          'commandName'
-        )?.get?.call(null);
-        expect(prototypeCommandName).to.equal(commandName);
-      });
-
-      it(`server.command's first key should equal operation.commandName`, async function () {
-        const cmdCallerStub = sinon
-          .stub(Server.prototype, 'command')
-          .yieldsRight(undefined, { ok: 1 });
-        await executeOperation(client, subclassOperation);
-        expect(cmdCallerStub).to.have.been.calledOnceWith(
-          sinon.match.any,
-          sinon.match.hasOwn(commandName)
-        );
-        sinon.restore();
-      });
+    beforeEach(async function () {
+      client = new mongodb.MongoClient('mongodb://localhost:27017');
+      db = client.db('foo');
+      admin = client.db().admin();
+      collection = db.collection('bar');
+      mockServer = await mock.createServer();
     });
-  }
+
+    afterEach(async function () {
+      db = undefined;
+      collection = undefined;
+      mockServer = undefined;
+      admin = undefined;
+      await client.close();
+      sinon.restore();
+    });
+
+    for (const { subclassCreator, subclassType } of subclassArray) {
+      context.only(`when subclass is ${subclassType.name}`, async function () {
+        it(`subclass prototype's commandName should equal operation.commandName`, async function () {
+          const subclassInstance = subclassCreator();
+          const prototypeCommandName = Object.getOwnPropertyDescriptor(
+            subclassType.prototype,
+            'commandName'
+          )?.get?.call(null);
+          expect(prototypeCommandName).to.equal(subclassInstance.commandName);
+        });
+
+        if (!serverlessOperationSubclasses.includes(subclassType.name.toString())) {
+          it(`server.command's first key should equal operation.commandName`, async function () {
+            const subclassInstance = subclassCreator();
+            const cmdCallerStub = sinon
+              .stub(Server.prototype, 'command')
+              .yieldsRight(undefined, { ok: 1 });
+            await executeOperation(client, subclassInstance);
+            expect(cmdCallerStub).to.have.been.calledWith(
+              sinon.match.any,
+              sinon.match.hasOwn(subclassInstance.commandName)
+            );
+          });
+        }
+      });
+    }
+  });
 });

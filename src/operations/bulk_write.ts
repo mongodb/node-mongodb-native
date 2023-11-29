@@ -26,6 +26,10 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
     this.operations = operations;
   }
 
+  override get commandName() {
+    return 'bulkWrite' as const;
+  }
+
   override async execute(
     server: Server,
     session: ClientSession | undefined

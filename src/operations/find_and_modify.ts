@@ -178,6 +178,10 @@ export class FindAndModifyOperation extends CommandOperation<Document> {
     this.query = query;
   }
 
+  override get commandName() {
+    return 'findAndModify' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const coll = this.collection;
     const query = this.query;
@@ -227,6 +231,10 @@ export class FindOneAndDeleteOperation extends FindAndModifyOperation {
     super(collection, filter, options);
     this.cmdBase.remove = true;
   }
+
+  override get commandName() {
+    return super.commandName;
+  }
 }
 
 /** @internal */
@@ -252,6 +260,9 @@ export class FindOneAndReplaceOperation extends FindAndModifyOperation {
     super(collection, filter, options);
     this.cmdBase.update = replacement;
     configureFindAndModifyCmdBaseUpdateOpts(this.cmdBase, options);
+  }
+  override get commandName() {
+    return super.commandName;
   }
 }
 
@@ -282,6 +293,10 @@ export class FindOneAndUpdateOperation extends FindAndModifyOperation {
     if (options.arrayFilters) {
       this.cmdBase.arrayFilters = options.arrayFilters;
     }
+  }
+
+  override get commandName() {
+    return super.commandName;
   }
 }
 

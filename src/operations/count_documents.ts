@@ -31,6 +31,10 @@ export class CountDocumentsOperation extends AggregateOperation<number> {
     super(collection.s.namespace, pipeline, options);
   }
 
+  override get commandName() {
+    return super.commandName;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
     const result = await super.execute(server, session);
 

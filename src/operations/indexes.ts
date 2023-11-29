@@ -186,6 +186,10 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
     this.collection = collection;
   }
 
+  override get commandName() {
+    return 'listIndexes' as const;
+  }
+
   override async execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
     const coll = this.collection;
     const options = this.options;
@@ -235,6 +239,10 @@ export class CreateIndexesOperation<
     });
   }
 
+  override get commandName() {
+    return 'createIndexes' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     const options = this.options;
     const indexes = this.indexes;
@@ -272,6 +280,11 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
   ) {
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
+
+  override get commandName() {
+    return super.commandName;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
     const indexNames = await super.execute(server, session);
     return indexNames[0];
@@ -293,6 +306,10 @@ export class EnsureIndexOperation extends CreateIndexOperation {
     this.readPreference = ReadPreference.primary;
     this.db = db;
     this.collectionName = collectionName;
+  }
+
+  override get commandName() {
+    return super.commandName;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
@@ -328,6 +345,10 @@ export class DropIndexOperation extends CommandOperation<Document> {
     this.indexName = indexName;
   }
 
+  override get commandName() {
+    return 'dropIndexes' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
     return super.executeCommand(server, session, cmd);
@@ -358,6 +379,10 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     this.options = { ...options };
     delete this.options.writeConcern;
     this.collectionNamespace = collection.s.namespace;
+  }
+
+  override get commandName() {
+    return 'listIndexes' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
@@ -394,6 +419,10 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
     this.indexes = indexes;
   }
 
+  override get commandName() {
+    return 'indexExists' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const coll = this.collection;
     const indexes = this.indexes;
@@ -421,6 +450,10 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
     this.options = options ?? {};
     this.db = db;
     this.name = name;
+  }
+
+  override get commandName() {
+    return 'indexInformation' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
