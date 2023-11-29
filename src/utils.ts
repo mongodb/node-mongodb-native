@@ -1300,9 +1300,17 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
 
+/**
+ * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
+ * If the signal aborts the returned promise will reject, otherwise the given promises resolved value will be returned.
+ * - The given promises rejection will proceed the aborted signal rejection.
+ * If given an already rejected promise and an aborted signal, the promise returned will reject with the given promises rejection value
+ * @param promise - A promise to discard if the signal aborts
+ * @param options - An options object carrying an optional signal
+ */
 export async function abortable<T>(
   promise: Promise<T>,
-  { signal }: { signal?: AbortSignal }
+  { signal }: { signal?: AbortSignal } = {}
 ): Promise<T> {
   const { abort, done } = aborted(signal);
   try {
@@ -1315,6 +1323,7 @@ export async function abortable<T>(
 /**
  * Takes an AbortSignal and creates a promise that will reject when the signal aborts
  * If the argument provided is nullish the returned promise will **never** resolve.
+ * Also returns a done controller - abort the done controller when your task is done to remove the abort listeners
  * @param signal - an optional abort signal to link to a promise rejection
  */
 export function aborted(signal?: AbortSignal): {
