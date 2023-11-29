@@ -5,8 +5,8 @@ import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 
-describe('AbstractOperation commandName', async function () {
-  describe('commandName getter', async function () {
+describe('abstract operation', async function () {
+  describe('command name getter', async function () {
     interface AbstractOperationSubclasses {
       subclassCreator: () => mongodb.AbstractOperation; // v in mongodb && typeof v === 'function' && v.prototype instanceof AbstractOperation
       subclassType: any;
@@ -17,7 +17,6 @@ describe('AbstractOperation commandName', async function () {
       'RunCommandOperation',
       'OptionsOperation',
       'IsCappedOperation',
-      'BulkWriteShimOperation',
       'BulkWriteOperation',
       'IndexExistsOperation',
       'IndexOperation',
@@ -31,13 +30,6 @@ describe('AbstractOperation commandName', async function () {
     let collection;
     let mockServer;
     const subclassArray: AbstractOperationSubclasses[] = [
-      /* {
-        subclassCreator: () => new mongodb.BulkWriteShimOperation(
-          new mongodb.OrderedBulkOperation(collection, {}),
-          {}
-        ),
-        subclassType: mongodb.BulkWriteShimOperation
-      }, */
       {
         subclassCreator: () =>
           new mongodb.AggregateOperation(collection.fullNamespace, [{ a: 1 }], {}),
@@ -277,7 +269,7 @@ describe('AbstractOperation commandName', async function () {
     });
 
     for (const { subclassCreator, subclassType } of subclassArray) {
-      context.only(`when subclass is ${subclassType.name}`, async function () {
+      context(`when subclass is ${subclassType.name}`, async function () {
         it(`subclass prototype's commandName should equal operation.commandName`, async function () {
           const subclassInstance = subclassCreator();
           const prototypeCommandName = Object.getOwnPropertyDescriptor(
