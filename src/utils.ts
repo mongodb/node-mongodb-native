@@ -1322,7 +1322,9 @@ export function aborted(signal?: AbortSignal): {
   done: AbortController;
 } {
   const done = new AbortController();
-  signal?.throwIfAborted();
+  if (signal?.aborted) {
+    return { abort: Promise.reject(signal.reason), done };
+  }
   const abort = new Promise<void>((_, reject) =>
     signal?.addEventListener('abort', () => reject(signal.reason), {
       once: true,

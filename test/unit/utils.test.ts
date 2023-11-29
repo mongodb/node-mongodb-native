@@ -24,6 +24,7 @@ import {
   shuffle,
   TimeoutController
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
@@ -1199,7 +1200,7 @@ describe('driver utils', function () {
       it('returns a promise that pends forever', async () => {
         const error = await Promise.race([
           aborted().abort.catch(error => error),
-          aborted(AbortSignal.timeout(100))
+          aborted(AbortSignal.timeout(100)).abort
         ]).catch(error => error);
         expect(error.name).to.equal('TimeoutError');
       });
@@ -1207,13 +1208,27 @@ describe('driver utils', function () {
   });
 
   describe('abortable()', () => {
-    it("rejects with the signal's reason", async () => {
-      const controller = new AbortController();
-      controller.abort(new Error('my error'));
-      const error = await abortable(Promise.reject(new Error('Not expected')), {
-        signal: controller.signal
-      }).catch(error => error);
-      expect(error.message).to.equal('my error');
+    context('when given a promise that is already rejected', () => {
+      it("rejects with the promises's reason", async () => {
+        const controller = new AbortController();
+        controller.abort(new Error('Not expected'));
+        const error = await abortable(Promise.reject(new Error('my error')), {
+          signal: controller.signal
+        }).catch(error => error);
+        expect(error.message).to.equal('my error');
+      });
+    });
+
+    context('when given a signal that is already aborted', () => {
+      it("rejects with the signal's reason", async () => {
+        const controller = new AbortController();
+        controller.abort(new Error('my error'));
+        const error = await abortable(
+          sleep(1).then(() => Promise.reject(new Error('Not expected'))),
+          { signal: controller.signal }
+        ).catch(error => error);
+        expect(error.message).to.equal('my error');
+      });
     });
 
     context('when given a promise that rejects', () => {
