@@ -1055,7 +1055,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
       response = await read(this, { signal });
     } finally {
-      // Replace controller to avoid boundless 'abort' listeners
+      // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
       if (!signal.aborted) this.controller = new AbortController();
     }
 
