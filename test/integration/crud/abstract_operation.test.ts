@@ -300,7 +300,7 @@ describe('abstract operation', async function () {
         });
 
         if (!serverlessOperationSubclasses.includes(subclassType.name.toString())) {
-          it(`server.command's first key should equal operation.commandName`, async function () {
+          it(`operation.commandName equals key in command document`, async function () {
             const subclassInstance = subclassCreator();
             const yieldDoc =
               subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
