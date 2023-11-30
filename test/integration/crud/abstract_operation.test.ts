@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { executeOperation, Long, Server } from '../../mongodb';
+import { executeOperation, Long, Server, Topology } from '../../mongodb';
 import * as mongodb from '../../mongodb';
-import * as mock from '../../tools/mongodb-mock/index';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('abstract operation', async function () {
   describe('command name getter', async function () {
@@ -24,11 +24,13 @@ describe('abstract operation', async function () {
       'IndexInformationOperation'
     ];
 
+    const sameServerOnlyOperationSubclases = ['GetMoreOperation', 'KillCursorsOperation'];
+
     let client;
     let db;
     let admin;
     let collection;
-    let mockServer;
+    let constructorServer;
     const subclassArray: AbstractOperationSubclasses[] = [
       {
         subclassCreator: () =>
@@ -111,7 +113,12 @@ describe('abstract operation', async function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.GetMoreOperation(collection.fullNamespace, new Long(1), mockServer, {}),
+          new mongodb.GetMoreOperation(
+            collection.fullNamespace,
+            Object.freeze(Long.fromNumber(1)),
+            constructorServer,
+            {}
+          ),
         subclassType: mongodb.GetMoreOperation
       },
       {
@@ -167,7 +174,12 @@ describe('abstract operation', async function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.KillCursorsOperation(new Long(1), collection.fullNamespace, mockServer, {}),
+          new mongodb.KillCursorsOperation(
+            Object.freeze(Long.fromNumber(1)),
+            collection.fullNamespace,
+            constructorServer,
+            {}
+          ),
         subclassType: mongodb.KillCursorsOperation
       },
       {
@@ -230,7 +242,11 @@ describe('abstract operation', async function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.UpdateOperation(collection.fullNamespace, { q: { a: 1 }, u: { $a: 2 } }, {}),
+          new mongodb.UpdateOperation(
+            collection.fullNamespace,
+            [{ q: { a: 1 }, u: { $a: 2 } }],
+            {}
+          ),
         subclassType: mongodb.UpdateOperation
       },
       {
@@ -256,13 +272,17 @@ describe('abstract operation', async function () {
       db = client.db('foo');
       admin = client.db().admin();
       collection = db.collection('bar');
-      mockServer = await mock.createServer();
+      constructorServer = new Server(
+        topologyWithPlaceholderClient([], {} as any),
+        new mongodb.ServerDescription('a:1'),
+        {} as any
+      );
     });
 
     afterEach(async function () {
       db = undefined;
       collection = undefined;
-      mockServer = undefined;
+      constructorServer = undefined;
       admin = undefined;
       await client.close();
       sinon.restore();
@@ -282,10 +302,17 @@ describe('abstract operation', async function () {
         if (!serverlessOperationSubclasses.includes(subclassType.name.toString())) {
           it(`server.command's first key should equal operation.commandName`, async function () {
             const subclassInstance = subclassCreator();
+            const yieldDoc =
+              subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
             const cmdCallerStub = sinon
               .stub(Server.prototype, 'command')
-              .yieldsRight(undefined, { ok: 1 });
-            await executeOperation(client, subclassInstance);
+              .yieldsRight(undefined, yieldDoc);
+            if (sameServerOnlyOperationSubclases.includes(subclassType.name.toString())) {
+              sinon.stub(Topology.prototype, 'selectServer').callsFake((_, __, cb) => cb());
+              await subclassInstance.execute(constructorServer, client.session);
+            } else {
+              await executeOperation(client, subclassInstance);
+            }
             expect(cmdCallerStub).to.have.been.calledWith(
               sinon.match.any,
               sinon.match.hasOwn(subclassInstance.commandName)
