@@ -72,7 +72,7 @@ tests:
               isError: true
         # Configure the monitor check to fail with a timeout.
         # Use "times: 4" to increase the probability that the Monitor check triggers
-        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # the failpoint, since the RTT hello may trigger this failpoint one or many
         # times as well.
       - name: failPoint
         object: testRunner
@@ -86,11 +86,11 @@ tests:
               failCommands:
                 - hello
                 - isMaster
-              blockConnection:  true,
-              blockTimeMS: 1500,                
-              appName: interruptInUse        
+              blockConnection: true
+              blockTimeMS: 1500
+              appName: interruptInUse
       - name: waitForThread
-        object: testRunner,
+        object: testRunner
         arguments:
           thread: *thread1
 
@@ -99,6 +99,8 @@ tests:
         eventType: command
         events:
           - commandStartedEvent:
+              commandName: insert
+          - commandSucceededEvent:
               commandName: insert
           - commandStartedEvent:
               commandName: find
@@ -171,7 +173,7 @@ tests:
                 $where : sleep(2000) || true
         # Configure the monitor check to fail with a timeout.
         # Use "times: 4" to increase the probability that the Monitor check triggers
-        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # the failpoint, since the RTT hello may trigger this failpoint one or many
         # times as well.
       - name: failPoint
         object: testRunner
@@ -185,11 +187,11 @@ tests:
               failCommands:
                 - hello
                 - isMaster
-              blockConnection:  true,
-              blockTimeMS: 1500,                
+              blockConnection: true
+              blockTimeMS: 1500
               appName: interruptInUseRetryable
       - name: waitForThread
-        object: testRunner,
+        object: testRunner
         arguments:
           thread: *thread1
 
@@ -221,7 +223,7 @@ tests:
           - connectionClosedEvent: {}
           - connectionCheckedOutEvent: {}
           - connectionCheckedInEvent: {}
-     
+
     outcome:
       - collectionName: *collectionName
         databaseName: *databaseName
@@ -260,7 +262,7 @@ tests:
                 collectionName: *collectionName
             - thread:
                 id: &thread1 thread1
-      # ensure the primary is discovered                
+      # ensure the primary is discovered
       - name: insertOne
         object: *collection
         arguments:
@@ -274,13 +276,13 @@ tests:
             name: updateOne
             object: *collection
             arguments:
-              filter: 
-                $where": sleep(2000) || true
-              update: 
-                "$set": { "a": "bar" } 
+              filter:
+                $where: sleep(2000) || true
+              update:
+                "$set": { "a": "bar" }
         # Configure the monitor check to fail with a timeout.
         # Use "times: 4" to increase the probability that the Monitor check triggers
-        # the failpoint, since the RTT hello may trigger this failpoint one or many 
+        # the failpoint, since the RTT hello may trigger this failpoint one or many
         # times as well.
       - name: failPoint
         object: testRunner
@@ -294,11 +296,11 @@ tests:
               failCommands:
                 - hello
                 - isMaster
-              blockConnection:  true,
-              blockTimeMS: 1500,                
+              blockConnection: true
+              blockTimeMS: 1500
               appName: interruptInUseRetryableWrite
       - name: waitForThread
-        object: testRunner,
+        object: testRunner
         arguments:
           thread: *thread1
 
@@ -330,7 +332,7 @@ tests:
           - connectionClosedEvent: {}
           - connectionCheckedOutEvent: {}
           - connectionCheckedInEvent: {}
-     
+
     outcome:
       - collectionName: *collectionName
         databaseName: *databaseName
