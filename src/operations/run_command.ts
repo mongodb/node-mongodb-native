@@ -49,7 +49,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
   }
 
   override get commandName() {
-    return 'runAdminCommand' as const;
+    return 'runCommand' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
