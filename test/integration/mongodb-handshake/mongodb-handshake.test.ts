@@ -5,8 +5,10 @@ import * as sinon from 'sinon';
 import {
   Connection,
   LEGACY_HELLO_COMMAND,
+  MessageStream,
   MongoServerError,
-  MongoServerSelectionError
+  MongoServerSelectionError,
+  OpMsgRequest
 } from '../../mongodb';
 
 describe('MongoDB Handshake', () => {
@@ -60,6 +62,25 @@ describe('MongoDB Handshake', () => {
       expect(spy.called).to.be.true;
       const handshakeDoc = spy.getCall(0).args[1];
       expect(handshakeDoc).to.have.property('compression').to.deep.equal(['snappy']);
+    });
+  });
+
+  context('when load-balanced', function () {
+    let writeCommandSpy: Sinon.SinonSpy;
+    beforeEach(() => {
+      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('should send the hello command as OP_MSG', {
+      metadata: { requires: { topology: 'load-balanced' } },
+      test: async function () {
+        client = this.configuration.newClient({ loadBalanced: true });
+        await client.connect();
+        expect(writeCommandSpy).to.have.been.called;
+        expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+      }
     });
   });
 });

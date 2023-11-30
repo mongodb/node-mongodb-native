@@ -1135,4 +1135,109 @@ describe('new Connection()', function () {
       expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
     });
   });
+
+  describe('when serverApi.version is present', () => {
+    const CONNECT_DEFAULTS = {
+      id: 1,
+      tls: false,
+      generation: 1,
+      monitorCommands: false,
+      metadata: {} as ClientMetadata
+    };
+    let server;
+    let connectOptions;
+    let connection: Connection;
+    let writeCommandSpy;
+
+    beforeEach(async () => {
+      server = await mock.createServer();
+      server.setMessageHandler(request => {
+        request.reply(mock.HELLO);
+      });
+      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+    });
+
+    afterEach(async () => {
+      connection?.destroy({ force: true });
+      sinon.restore();
+      await mock.cleanup();
+    });
+
+    it('sends the first command as OP_MSG', async () => {
+      try {
+        connectOptions = {
+          ...CONNECT_DEFAULTS,
+          hostAddress: server.hostAddress() as HostAddress,
+          socketTimeoutMS: 100,
+          serverApi: { version: '1' }
+        };
+
+        connection = await promisify<Connection>(callback =>
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          connect(connectOptions, callback)
+        )();
+
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, {}, callback)
+        )();
+      } catch (error) {
+        /** Connection timeouts, but the handshake message is sent. */
+      }
+
+      expect(writeCommandSpy).to.have.been.called;
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+    });
+  });
+
+  describe('when serverApi.version is not present', () => {
+    const CONNECT_DEFAULTS = {
+      id: 1,
+      tls: false,
+      generation: 1,
+      monitorCommands: false,
+      metadata: {} as ClientMetadata
+    };
+    let server;
+    let connectOptions;
+    let connection: Connection;
+    let writeCommandSpy;
+
+    beforeEach(async () => {
+      server = await mock.createServer();
+      server.setMessageHandler(request => {
+        request.reply(mock.HELLO);
+      });
+      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+    });
+
+    afterEach(async () => {
+      connection?.destroy({ force: true });
+      sinon.restore();
+      await mock.cleanup();
+    });
+
+    it('sends the first command as OP_MSG', async () => {
+      try {
+        connectOptions = {
+          ...CONNECT_DEFAULTS,
+          hostAddress: server.hostAddress() as HostAddress,
+          socketTimeoutMS: 100
+        };
+
+        connection = await promisify<Connection>(callback =>
+          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
+          connect(connectOptions, callback)
+        )();
+
+        await promisify(callback =>
+          connection.command(ns('admin.$cmd'), { hello: 1 }, {}, callback)
+        )();
+      } catch (error) {
+        /** Connection timeouts, but the handshake message is sent. */
+      }
+
+      expect(writeCommandSpy).to.have.been.called;
+      expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
+    });
+  });
 });
