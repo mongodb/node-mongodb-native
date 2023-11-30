@@ -8,7 +8,7 @@ import { topologyWithPlaceholderClient } from '../../tools/utils';
 describe('abstract operation', async function () {
   describe('command name getter', async function () {
     interface AbstractOperationSubclasses {
-      subclassCreator: () => mongodb.AbstractOperation; // v in mongodb && typeof v === 'function' && v.prototype instanceof AbstractOperation
+      subclassCreator: () => mongodb.AbstractOperation;
       subclassType: any;
     }
 
@@ -308,7 +308,6 @@ describe('abstract operation', async function () {
               .stub(Server.prototype, 'command')
               .yieldsRight(undefined, yieldDoc);
             if (sameServerOnlyOperationSubclases.includes(subclassType.name.toString())) {
-              sinon.stub(Topology.prototype, 'selectServer').callsFake((_, __, cb) => cb());
               await subclassInstance.execute(constructorServer, client.session);
             } else {
               await executeOperation(client, subclassInstance);
