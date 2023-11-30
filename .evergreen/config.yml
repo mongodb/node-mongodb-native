@@ -4514,12 +4514,6 @@ buildvariants:
     tasks:
       - test_azurekms_task_group
       - test-azurekms-fail-task
-  - name: ubuntu20-test-azure-oidc
-    display_name: Azure OIDC
-    run_on: ubuntu2004-small
-    batchtime: 20160
-    tasks:
-      - testazureoidc_task_group
   - name: rhel8-test-atlas
     display_name: Atlas Cluster Tests
     run_on: rhel80-large
