@@ -115,7 +115,7 @@ describe('abstract operation', async function () {
         subclassCreator: () =>
           new mongodb.GetMoreOperation(
             collection.fullNamespace,
-            Object.freeze(Long.fromNumber(1)),
+            Long.fromNumber(1),
             constructorServer,
             {}
           ),
@@ -175,7 +175,7 @@ describe('abstract operation', async function () {
       {
         subclassCreator: () =>
           new mongodb.KillCursorsOperation(
-            Object.freeze(Long.fromNumber(1)),
+            Long.fromNumber(1),
             collection.fullNamespace,
             constructorServer,
             {}
