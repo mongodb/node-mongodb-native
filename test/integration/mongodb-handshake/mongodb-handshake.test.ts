@@ -52,6 +52,7 @@ describe('MongoDB Handshake', () => {
 
   context('when compressors are provided on the mongo client', () => {
     let spy: Sinon.SinonSpy;
+
     before(() => {
       spy = sinon.spy(Connection.prototype, 'command');
     });
@@ -73,6 +74,7 @@ describe('MongoDB Handshake', () => {
 
   context('when load-balanced', function () {
     let writeCommandSpy: Sinon.SinonSpy;
+
     beforeEach(() => {
       writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
     });
@@ -96,6 +98,7 @@ describe('MongoDB Handshake', () => {
 
   context('when serverApi version is present', function () {
     let writeCommandSpy: Sinon.SinonSpy;
+
     beforeEach(() => {
       writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
     });
@@ -119,6 +122,7 @@ describe('MongoDB Handshake', () => {
 
   context('when not load-balanced and serverApi version is not present', function () {
     let writeCommandSpy: Sinon.SinonSpy;
+
     beforeEach(() => {
       writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
     });
@@ -128,6 +132,10 @@ describe('MongoDB Handshake', () => {
     it('should send the hello command as OP_MSG', {
       metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
       test: async function () {
+        if (this.configuration.serverApi) {
+          this.currentTest.skipReason = 'Test requires serverApi to NOT be enabled';
+          return this.skip();
+        }
         client = this.configuration.newClient();
         await client.connect();
         // The load-balanced mode doesn’t perform SDAM,
