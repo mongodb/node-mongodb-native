@@ -5,7 +5,7 @@ import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-describe.only('abstract operation', async function () {
+describe('abstract operation', async function () {
   describe('command name getter', async function () {
     interface AbstractOperationSubclasses {
       subclassCreator: () => mongodb.AbstractOperation;
