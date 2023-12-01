@@ -59,6 +59,10 @@ describe('MongoDB Handshake', () => {
     it('constructs a handshake with the specified compressors', async function () {
       client = this.configuration.newClient({ compressors: ['snappy'] });
       await client.connect();
+      // The load-balanced mode doesn’t perform SDAM,
+      // so `connect` doesn’t do anything unless authentication is enabled.
+      // Force the driver to send a command to the server in the noauth mode.
+      await client.db('admin').command({ ping: 1 });
       expect(spy.called).to.be.true;
       const handshakeDoc = spy.getCall(0).args[1];
       expect(handshakeDoc).to.have.property('compression').to.deep.equal(['snappy']);
@@ -78,6 +82,10 @@ describe('MongoDB Handshake', () => {
       test: async function () {
         client = this.configuration.newClient({ loadBalanced: true });
         await client.connect();
+        // The load-balanced mode doesn’t perform SDAM,
+        // so `connect` doesn’t do anything unless authentication is enabled.
+        // Force the driver to send a command to the server in the noauth mode.
+        await client.db('admin').command({ ping: 1 });
         expect(writeCommandSpy).to.have.been.called;
         expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
       }
