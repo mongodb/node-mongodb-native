@@ -1049,9 +1049,9 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
         signal
       });
 
-      signal.throwIfAborted();
-
       if (options.noResponse) return { ok: 1 };
+
+      signal.throwIfAborted();
 
       response = await read(this, { signal });
     } finally {

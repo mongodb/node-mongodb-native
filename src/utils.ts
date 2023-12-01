@@ -1328,7 +1328,7 @@ export async function abortable<T>(
  * Also returns a done controller - abort the done controller when your task is done to remove the abort listeners
  * @param signal - an optional abort signal to link to a promise rejection
  */
-export function aborted(signal?: AbortSignal): {
+function aborted(signal?: AbortSignal): {
   abort: Promise<any>;
   done: AbortController;
 } {

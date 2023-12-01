@@ -1171,46 +1171,60 @@ describe('driver utils', function () {
     });
   });
 
-  describe('aborted()', () => {
-    context('when given an aborted signal', () => {
-      it('rejects the returned promise', async () => {
-        const controller = new AbortController();
-        controller.abort(new MongoError('my error'));
-        const error = await aborted(controller.signal).abort.catch(error => error);
-        expect(error).to.be.instanceOf(MongoError);
-        expect(error.message).to.equal('my error');
-      });
-    });
-
-    context('when given a signal that aborts after some time', () => {
-      it('rejects the returned promise after the timeout', async () => {
-        const controller = new AbortController();
-        setTimeout(() => controller.abort(new MongoError('my error')), 10);
-        const start = +new Date();
-        const error = await aborted(controller.signal).abort.catch(error => error);
-        const end = +new Date();
-
-        expect(error).to.be.instanceOf(MongoError);
-        expect(error.message).to.equal('my error');
-        expect(end - start).to.be.within(8, 13);
-      });
-    });
-
-    context('when given a nullish value', () => {
-      it('returns a promise that pends forever', async () => {
-        const error = await Promise.race([
-          aborted().abort.catch(error => error),
-          aborted(AbortSignal.timeout(100)).abort
-        ]).catch(error => error);
-        expect(error.name).to.equal('TimeoutError');
-      });
-    });
-  });
-
   describe('abortable()', () => {
     const goodError = new Error('good error');
     const badError = new Error('unexpected bad error!');
     const expectedValue = "don't panic";
+
+    context('when not given a signal', () => {
+      it('returns promise fulfillment', async () => {
+        expect(await abortable(Promise.resolve(expectedValue))).to.equal(expectedValue);
+        expect(await abortable(Promise.reject(goodError)).catch(e => e)).to.equal(goodError);
+      });
+
+      it('pends indefinitely', async () => {
+        const forever = abortable(new Promise(() => null));
+        // Assume 100ms is good enough to prove "forever"
+        expect(await Promise.race([forever, sleep(100).then(() => expectedValue)])).to.equal(
+          expectedValue
+        );
+      });
+    });
+
+    context('always removes abort listener it attaches', () => {
+      let controller;
+      let removeEventListenerSpy;
+      let addEventListenerSpy;
+
+      beforeEach(() => {
+        controller = new AbortController();
+        addEventListenerSpy = sinon.spy(controller.signal, 'addEventListener');
+        removeEventListenerSpy = sinon.spy(controller.signal, 'removeEventListener');
+      });
+
+      afterEach(() => sinon.restore());
+
+      const expectListenerCleanup = () => {
+        expect(addEventListenerSpy).to.have.been.calledOnce;
+        expect(removeEventListenerSpy).to.have.been.calledOnce;
+      };
+
+      it('when promise rejects', async () => {
+        await abortable(Promise.reject(goodError), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+
+      it('when promise resolves', async () => {
+        await abortable(Promise.resolve(expectedValue), { signal: controller.signal });
+        expectListenerCleanup();
+      });
+
+      it('when signal aborts', async () => {
+        setTimeout(() => controller.abort(goodError));
+        await abortable(new Promise(() => null), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+    });
 
     context('when given already rejected promise with already aborted signal', () => {
       it('returns promise rejection', async () => {
