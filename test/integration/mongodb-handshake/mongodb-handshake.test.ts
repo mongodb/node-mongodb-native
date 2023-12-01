@@ -133,7 +133,7 @@ describe('MongoDB Handshake', () => {
       metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
       test: async function () {
         if (this.configuration.serverApi) {
-          this.currentTest.skipReason = 'Test requires serverApi to NOT be enabled';
+          this.skipReason = 'Test requires serverApi to NOT be enabled';
           return this.skip();
         }
         client = this.configuration.newClient();
