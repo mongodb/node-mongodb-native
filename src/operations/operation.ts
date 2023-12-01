@@ -75,7 +75,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
   }
 
-  // Must match the first key of the command object sent to server
+  /** Must match the first key of the command object sent to the server */
   // Command name should be stateless (should not use 'this' keyword)
   abstract get commandName(): string;
 
