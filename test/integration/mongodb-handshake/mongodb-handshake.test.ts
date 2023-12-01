@@ -8,7 +8,9 @@ import {
   MessageStream,
   MongoServerError,
   MongoServerSelectionError,
-  OpMsgRequest
+  OpMsgRequest,
+  OpQueryRequest,
+  ServerApiVersion
 } from '../../mongodb';
 
 describe('MongoDB Handshake', () => {
@@ -88,6 +90,56 @@ describe('MongoDB Handshake', () => {
         await client.db('admin').command({ ping: 1 });
         expect(writeCommandSpy).to.have.been.called;
         expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+      }
+    });
+  });
+
+  context('when serverApi version is present', function () {
+    let writeCommandSpy: Sinon.SinonSpy;
+    beforeEach(() => {
+      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('should send the hello command as OP_MSG', {
+      metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
+      test: async function () {
+        client = this.configuration.newClient({}, { serverApi: { version: ServerApiVersion.v1 } });
+        await client.connect();
+        // The load-balanced mode doesn’t perform SDAM,
+        // so `connect` doesn’t do anything unless authentication is enabled.
+        // Force the driver to send a command to the server in the noauth mode.
+        await client.db('admin').command({ ping: 1 });
+        expect(writeCommandSpy).to.have.been.called;
+        expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+      }
+    });
+  });
+
+  context('when not load-balanced and serverApi version is not present', function () {
+    let writeCommandSpy: Sinon.SinonSpy;
+    beforeEach(() => {
+      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('should send the hello command as OP_MSG', {
+      metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
+      test: async function () {
+        client = this.configuration.newClient();
+        await client.connect();
+        // The load-balanced mode doesn’t perform SDAM,
+        // so `connect` doesn’t do anything unless authentication is enabled.
+        // Force the driver to send a command to the server in the noauth mode.
+        await client.db('admin').command({ ping: 1 });
+        expect(writeCommandSpy).to.have.been.called;
+
+        const opRequests = writeCommandSpy.getCalls().map(items => items.args[0]);
+        expect(opRequests[0] instanceof OpQueryRequest).to.equal(true);
+        const isOpMsgRequestSent = !!opRequests.find(op => op instanceof OpMsgRequest);
+        expect(isOpMsgRequestSent).to.equal(true);
       }
     });
   });

@@ -1136,7 +1136,7 @@ describe('new Connection()', function () {
     });
   });
 
-  describe('when serverApi.version is present', () => {
+  describe('when serverApi version is present', () => {
     const CONNECT_DEFAULTS = {
       id: 1,
       tls: false,
@@ -1189,7 +1189,7 @@ describe('new Connection()', function () {
     });
   });
 
-  describe('when serverApi.version is not present', () => {
+  describe('when serverApi version is not present', () => {
     const CONNECT_DEFAULTS = {
       id: 1,
       tls: false,
