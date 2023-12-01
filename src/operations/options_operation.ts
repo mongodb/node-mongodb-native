@@ -16,7 +16,7 @@ export class OptionsOperation extends AbstractOperation<Document> {
     this.collection = collection;
   }
   override get commandName() {
-    return 'options' as const;
+    return 'listCollections' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {

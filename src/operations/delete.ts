@@ -104,10 +104,6 @@ export class DeleteOneOperation extends DeleteOperation {
     super(collection.s.namespace, [makeDeleteStatement(filter, { ...options, limit: 1 })], options);
   }
 
-  override get commandName() {
-    return super.commandName;
-  }
-
   override async execute(
     server: Server,
     session: ClientSession | undefined
@@ -126,10 +122,6 @@ export class DeleteOneOperation extends DeleteOperation {
 export class DeleteManyOperation extends DeleteOperation {
   constructor(collection: Collection, filter: Document, options: DeleteOptions) {
     super(collection.s.namespace, [makeDeleteStatement(filter, options)], options);
-  }
-
-  override get commandName() {
-    return super.commandName;
   }
 
   override async execute(

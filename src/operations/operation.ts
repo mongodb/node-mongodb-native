@@ -75,6 +75,7 @@ export abstract class AbstractOperation<TResult = any> {
     this.trySecondaryWrite = false;
   }
 
+  // Must match the first key of the command object sent to server
   abstract get commandName(): string;
 
   abstract execute(server: Server, session: ClientSession | undefined): Promise<TResult>;

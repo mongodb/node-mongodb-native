@@ -20,7 +20,7 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
   }
 
   override get commandName() {
-    return 'collections' as const;
+    return 'listCollections' as const;
   }
 
   override async execute(

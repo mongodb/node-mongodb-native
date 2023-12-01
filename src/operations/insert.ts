@@ -72,10 +72,6 @@ export class InsertOneOperation extends InsertOperation {
     super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
   }
 
-  override get commandName() {
-    return super.commandName;
-  }
-
   override async execute(
     server: Server,
     session: ClientSession | undefined

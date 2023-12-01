@@ -16,7 +16,7 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
   }
 
   override get commandName() {
-    return 'isCapped' as const;
+    return 'listCollections' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {

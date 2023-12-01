@@ -240,7 +240,7 @@ export class CreateIndexesOperation<
   }
 
   override get commandName() {
-    return 'createIndexes' as const;
+    return 'createIndexes';
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
@@ -281,10 +281,6 @@ export class CreateIndexOperation extends CreateIndexesOperation<string> {
     super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
   }
 
-  override get commandName() {
-    return super.commandName;
-  }
-
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
     const indexNames = await super.execute(server, session);
     return indexNames[0];
@@ -309,7 +305,7 @@ export class EnsureIndexOperation extends CreateIndexOperation {
   }
 
   override get commandName() {
-    return super.commandName;
+    return 'listIndexes';
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
@@ -420,7 +416,7 @@ export class IndexExistsOperation extends AbstractOperation<boolean> {
   }
 
   override get commandName() {
-    return 'indexExists' as const;
+    return 'listIndexes' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
@@ -453,7 +449,7 @@ export class IndexInformationOperation extends AbstractOperation<Document> {
   }
 
   override get commandName() {
-    return 'indexInformation' as const;
+    return 'listIndexes' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
