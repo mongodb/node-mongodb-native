@@ -655,9 +655,7 @@ function supportsOpMsg(conn: Connection) {
     return false;
   }
 
-  return (
-    (conn.serverApi?.version || maxWireVersion(conn) >= 6) && !description.__nodejs_mock_server__
-  );
+  return maxWireVersion(conn) >= 6 && !description.__nodejs_mock_server__;
 }
 
 function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
