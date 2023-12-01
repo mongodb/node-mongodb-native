@@ -343,7 +343,7 @@ describe('abstract operation', async function () {
       context(`when subclass is ${subclassType.name}`, async function () {
         it(`operation.commandName equals correct string`, async function () {
           const subclassInstance = subclassCreator();
-          expect(correctCommandName).to.equal(subclassInstance.commandName);
+          expect(subclassInstance.commandName).to.equal(correctCommandName);
         });
 
         if (!WrapperandServerlessSubclasses.includes(subclassType.name.toString())) {
