@@ -334,7 +334,7 @@ describe('Change Stream prose tests', function () {
         });
         this.client = this.config.newClient(this.mongodbURI, {
           monitorCommands: true,
-          serverApi: null
+          serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
         });
         this.apm = { started: [], succeeded: [], failed: [] };
 
