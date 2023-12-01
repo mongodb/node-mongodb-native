@@ -1303,7 +1303,7 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
 /**
  * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
  * The given promise is _always_ ordered before the signal's abort promise.
- * When given an already rejected promise and an already aborted signal, the promises rejection takes precedence.
+ * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
  *
