@@ -1209,7 +1209,7 @@ describe('driver utils', function () {
 
   describe('abortable()', () => {
     context('when given a promise that is already rejected', () => {
-      it("rejects with the promises's reason", async () => {
+      it("rejects with the promise's reason", async () => {
         const controller = new AbortController();
         controller.abort(new Error('Not expected'));
         const error = await abortable(Promise.reject(new Error('my error')), {
