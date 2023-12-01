@@ -332,7 +332,10 @@ describe('Change Stream prose tests', function () {
           }
           request.reply(this.applyOpTime(response));
         });
-        this.client = this.config.newClient(this.mongodbURI, { monitorCommands: true });
+        this.client = this.config.newClient(this.mongodbURI, {
+          monitorCommands: true,
+          serverApi: null
+        });
         this.apm = { started: [], succeeded: [], failed: [] };
 
         (

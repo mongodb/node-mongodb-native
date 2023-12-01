@@ -132,11 +132,7 @@ describe('MongoDB Handshake', () => {
     it('should send the hello command as OP_MSG', {
       metadata: { requires: { topology: '!load-balanced', mongodb: '>=5.0' } },
       test: async function () {
-        if (this.configuration.serverApi) {
-          this.skipReason = 'Test requires serverApi to NOT be enabled';
-          return this.skip();
-        }
-        client = this.configuration.newClient();
+        client = this.configuration.newClient({}, { serverApi: null });
         await client.connect();
         // The load-balanced mode doesn’t perform SDAM,
         // so `connect` doesn’t do anything unless authentication is enabled.

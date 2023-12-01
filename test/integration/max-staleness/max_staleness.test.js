@@ -54,7 +54,8 @@ describe('Max Staleness', function () {
       var self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(
-        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`
+        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`,
+        { serverApi: null }
       );
 
       client.connect(function (err, client) {
