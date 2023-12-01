@@ -5,7 +5,7 @@ import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-describe('abstract operation', async function () {
+describe.only('abstract operation', async function () {
   describe('command name getter', async function () {
     interface AbstractOperationSubclasses {
       subclassCreator: () => mongodb.AbstractOperation;
@@ -319,7 +319,7 @@ describe('abstract operation', async function () {
     ];
 
     beforeEach(async function () {
-      client = new mongodb.MongoClient('mongodb://localhost:27017');
+      client = this.configuration.newClient();
       db = client.db('foo');
       admin = client.db().admin();
       collection = db.collection('bar');
