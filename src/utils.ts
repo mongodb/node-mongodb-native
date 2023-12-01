@@ -371,7 +371,7 @@ export function uuidV4(): Buffer {
  */
 export function maxWireVersion(topologyOrServer?: Connection | Topology | Server): number {
   if (topologyOrServer) {
-    if (topologyOrServer.loadBalanced || topologyOrServer.serverApi) {
+    if (topologyOrServer.loadBalanced || topologyOrServer.serverApi?.version) {
       // Since we do not have a monitor, we assume
       // when a server API version or load-balanced topology are requested
       // the server is always pointed at the latest mongodb version. There is a risk that for on-prem
