@@ -410,7 +410,7 @@ describe('Sessions Spec', function () {
       await utilClient?.close();
     });
 
-    it('should only use one sessions for many operations when maxPoolSize is 1', async () => {
+    it('should only use one session for many operations when maxPoolSize is 1', async () => {
       const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
 
       const events: CommandStartedEvent[] = [];
