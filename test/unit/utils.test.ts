@@ -4,7 +4,6 @@ import { setTimeout } from 'timers';
 
 import {
   abortable,
-  aborted,
   BufferPool,
   ByteUtils,
   compareObjectId,
@@ -18,7 +17,6 @@ import {
   maybeCallback,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  MongoError,
   MongoRuntimeError,
   ObjectId,
   shuffle,
