@@ -474,7 +474,9 @@ describe('Collection', function () {
     afterEach(() => mock.cleanup());
 
     function testCountDocMock(testConfiguration, config, done) {
-      const client = testConfiguration.newClient(`mongodb://${server.uri()}/test`);
+      const client = testConfiguration.newClient(`mongodb://${server.uri()}/test`, {
+        serverApi: null
+      });
       const close = e => client.close(() => done(e));
 
       server.setMessageHandler(request => {

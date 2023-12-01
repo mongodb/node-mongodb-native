@@ -87,7 +87,9 @@ describe('Max Staleness', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+        serverApi: null
+      });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -125,7 +127,9 @@ describe('Max Staleness', function () {
       test: function (done) {
         var self = this;
         const configuration = this.configuration;
-        const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+          serverApi: null
+        });
         client.connect(function (err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
@@ -160,7 +164,9 @@ describe('Max Staleness', function () {
     test: function (done) {
       var self = this;
       const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+        serverApi: null
+      });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
