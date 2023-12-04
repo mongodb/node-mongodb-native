@@ -35,8 +35,26 @@ import {
   CONNECTION_POOL_CLOSED,
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
-  CONNECTION_READY
+  CONNECTION_READY,
+  SERVER_CLOSED,
+  SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_STARTED,
+  SERVER_HEARTBEAT_SUCCEEDED,
+  SERVER_OPENING,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING
 } from './constants';
+import type {
+  ServerClosedEvent,
+  ServerDescriptionChangedEvent,
+  ServerHeartbeatFailedEvent,
+  ServerHeartbeatStartedEvent,
+  ServerOpeningEvent,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
+} from './sdam/events';
 import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -285,7 +303,15 @@ export type LoggableEvent =
   | ConnectionCheckedInEvent
   | ConnectionCheckedOutEvent
   | ConnectionCheckOutStartedEvent
-  | ConnectionCheckOutFailedEvent;
+  | ConnectionCheckOutFailedEvent
+  | ServerClosedEvent
+  | ServerDescriptionChangedEvent
+  | ServerHeartbeatFailedEvent
+  | ServerHeartbeatStartedEvent
+  | ServerOpeningEvent
+  | TopologyClosedEvent
+  | TopologyDescriptionChangedEvent
+  | TopologyOpeningEvent;
 
 /** @internal */
 export interface LogConvertible extends Record<string, any> {
@@ -335,6 +361,32 @@ function attachConnectionFields(
   log.serverHost = host;
   log.serverPort = port;
 
+  return log;
+}
+
+function attachSDAMFields(
+  log: Record<string, any>,
+  sdamEvent:
+    | ServerClosedEvent
+    | ServerDescriptionChangedEvent
+    | ServerHeartbeatFailedEvent
+    | ServerHeartbeatStartedEvent
+    | ServerOpeningEvent
+    | TopologyClosedEvent
+    | TopologyDescriptionChangedEvent
+    | TopologyOpeningEvent
+) {
+  log.topologyId = sdamEvent.topologyId;
+  if (sdamEvent?.address) {
+    const { host, port } = HostAddress.fromString(sdamEvent.address).toHostPort();
+    log.serverHost = host;
+    log.serverPort = port;
+  }
+  log.driverConnectionId = sdamEvent?.connectionId;
+  log.awaited = sdamEvent?.awaited;
+  log.durationMS = sdamEvent?.durationMS;
+  log.reply = sdamEvent?.reply;
+  log.failure = sdamEvent?.failure;
   return log;
 }
 
@@ -454,15 +506,46 @@ function defaultLogTransform(
       }
       return log;
     case CONNECTION_CHECKED_OUT:
-      log = attachConnectionFields(log, logObject);
+      log = attachSDAMFields(log, logObject);
       log.message = 'Connection checked out';
-
       log.driverConnectionId = logObject.connectionId;
       return log;
     case CONNECTION_CHECKED_IN:
-      log = attachConnectionFields(log, logObject);
+      log = attachSDAMFields(log, logObject);
       log.message = 'Connection checked in';
       log.driverConnectionId = logObject.connectionId;
+      return log;
+    case SERVER_CLOSED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Stopped server monitoring';
+      return log;
+    case SERVER_HEARTBEAT_FAILED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Server hearbeat failed';
+      return log;
+    case SERVER_HEARTBEAT_STARTED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Server heartbeat started';
+      return log;
+    case SERVER_HEARTBEAT_SUCCEEDED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Server heartbeat succeeded';
+      return log;
+    case SERVER_OPENING:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Started server momitoring';
+      return log;
+    case TOPOLOGY_CLOSED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Stopped topology monitoring';
+      return log;
+    case TOPOLOGY_DESCRIPTION_CHANGED:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Topology description changed';
+      return log;
+    case TOPOLOGY_OPENING:
+      log = attachSDAMFields(log, logObject);
+      log.message = 'Started topology momitoring';
       return log;
     default:
       for (const [key, value] of Object.entries(logObject)) {

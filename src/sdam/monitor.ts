@@ -238,7 +238,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
-  monitor.emit(
+  monitor.emitAndLog(
     Server.SERVER_HEARTBEAT_STARTED,
     new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
@@ -247,7 +247,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     monitor.connection?.destroy({ force: true });
     monitor.connection = null;
 
-    monitor.emit(
+    monitor.emitAndLog(
       Server.SERVER_HEARTBEAT_FAILED,
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err, awaited)
     );

@@ -361,7 +361,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     updateServers(this);
 
-    this.emit(
+    this.emitAndLog(
       Topology.TOPOLOGY_DESCRIPTION_CHANGED,
       new TopologyDescriptionChangedEvent(
         this.s.id,
@@ -407,10 +407,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     stateTransition(this, STATE_CONNECTING);
 
     // emit SDAM monitoring events
-    this.emit(Topology.TOPOLOGY_OPENING, new TopologyOpeningEvent(this.s.id));
+    this.emitAndLog(Topology.TOPOLOGY_OPENING, new TopologyOpeningEvent(this.s.id));
 
     // emit an event for the topology change
-    this.emit(
+    this.emitAndLog(
       Topology.TOPOLOGY_DESCRIPTION_CHANGED,
       new TopologyDescriptionChangedEvent(
         this.s.id,
@@ -507,7 +507,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         stateTransition(this, STATE_CLOSED);
 
         // emit an event for close
-        this.emit(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
+        this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
       })
       .finally(() => callback?.());
   }
@@ -652,7 +652,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     if (!equalDescriptions) {
-      this.emit(
+      this.emitAndLog(
         Topology.TOPOLOGY_DESCRIPTION_CHANGED,
         new TopologyDescriptionChangedEvent(
           this.s.id,
@@ -724,7 +724,7 @@ function destroyServer(
   }
 
   server.destroy(options, () => {
-    topology.emit(
+    topology.emitAndLog(
       Topology.SERVER_CLOSED,
       new ServerClosedEvent(topology.s.id, server.description.address)
     );
@@ -762,7 +762,7 @@ function topologyTypeFromOptions(options?: TopologyOptions) {
  * @param serverDescription - The description for the server to initialize and connect to
  */
 function createAndConnectServer(topology: Topology, serverDescription: ServerDescription) {
-  topology.emit(
+  topology.emitAndLog(
     Topology.SERVER_OPENING,
     new ServerOpeningEvent(topology.s.id, serverDescription.address)
   );

@@ -405,7 +405,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
   /** @internal */
   protected component?: MongoLoggableComponent;
   /** @internal */
-  protected emitAndLog<EventKey extends keyof Events>(
+  emitAndLog<EventKey extends keyof Events>(
     event: EventKey | symbol,
     ...args: Parameters<Events[EventKey]>
   ): void {
