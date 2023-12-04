@@ -729,6 +729,18 @@ BUILD_VARIANTS.push({
 });
 
 BUILD_VARIANTS.push({
+  name: 'rhel8-new-connection-tests',
+  display_name: 'New Connection Tests',
+  run_on: DEFAULT_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS,
+    CLIENT_ENCRYPTION: true,
+    MONGODB_NEW_CONNECTION: true
+  },
+  tasks: BASE_TASKS.map(({ name }) => name)
+});
+
+BUILD_VARIANTS.push({
   name: 'rhel8-test-lambda',
   display_name: 'AWS Lambda handler tests',
   run_on: DEFAULT_OS,

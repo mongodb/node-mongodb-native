@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { Connection } from '../../../mongodb';
+import { OpMsgResponse } from '../../../mongodb';
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false
@@ -13,17 +13,17 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
   }
 };
 
-describe('class BinMsg', () => {
-  let onMessageSpy: sinon.SinonSpy;
+describe('class OpMsgResponse', () => {
+  let bsonSpy: sinon.SinonSpy;
 
   beforeEach(() => {
-    onMessageSpy = sinon.spy(Connection.prototype, 'onMessage');
+    bsonSpy = sinon.spy(OpMsgResponse.prototype, 'parseBsonSerializationOptions');
   });
 
   afterEach(() => {
-    onMessageSpy?.restore();
+    bsonSpy?.restore();
     // @ts-expect-error: Allow this to be garbage collected
-    onMessageSpy = null;
+    bsonSpy = null;
   });
 
   let client;
@@ -49,9 +49,8 @@ describe('class BinMsg', () => {
           passOptionTo === 'operation' ? option : {}
         );
 
-        expect(onMessageSpy).to.have.been.called;
-        const binMsg = onMessageSpy.lastCall.firstArg;
-        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(bsonSpy).to.have.been.called;
+        const result = bsonSpy.lastCall.returnValue;
         expect(result).to.deep.equal(EXPECTED_VALIDATION_DISABLED_ARGUMENT);
       });
     }
@@ -76,9 +75,8 @@ describe('class BinMsg', () => {
           passOptionTo === 'operation' ? option : {}
         );
 
-        expect(onMessageSpy).to.have.been.called;
-        const binMsg = onMessageSpy.lastCall.firstArg;
-        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(bsonSpy).to.have.been.called;
+        const result = bsonSpy.lastCall.returnValue;
         expect(result).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
       });
     }
@@ -102,9 +100,8 @@ describe('class BinMsg', () => {
           passOptionTo === 'operation' ? option : {}
         );
 
-        expect(onMessageSpy).to.have.been.called;
-        const binMsg = onMessageSpy.lastCall.firstArg;
-        const result = binMsg.parseBsonSerializationOptions(option);
+        expect(bsonSpy).to.have.been.called;
+        const result = bsonSpy.lastCall.returnValue;
         expect(result).to.deep.equal(EXPECTED_VALIDATION_ENABLED_ARGUMENT);
       });
     }

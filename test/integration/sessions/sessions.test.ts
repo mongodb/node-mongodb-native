@@ -410,7 +410,7 @@ describe('Sessions Spec', function () {
       await utilClient?.close();
     });
 
-    it('should only use two sessions for many operations when maxPoolSize is 1', async () => {
+    it('should only use one session for many operations when maxPoolSize is 1', async () => {
       const documents = Array.from({ length: 50 }).map((_, idx) => ({ _id: idx }));
 
       const events: CommandStartedEvent[] = [];
@@ -420,7 +420,7 @@ describe('Sessions Spec', function () {
       expect(allResults).to.have.lengthOf(documents.length);
       expect(events).to.have.lengthOf(documents.length);
 
-      expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(2);
+      expect(new Set(events.map(ev => ev.command.lsid.id.toString('hex'))).size).to.equal(1);
     });
   });
 
