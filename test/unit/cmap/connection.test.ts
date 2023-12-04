@@ -1080,7 +1080,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
     });
   });
 
@@ -1132,7 +1132,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpQueryRequest);
     });
   });
 
@@ -1185,7 +1185,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof OpMsgRequest).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
     });
   });
 
@@ -1237,7 +1237,7 @@ describe('new Connection()', function () {
       }
 
       expect(writeCommandSpy).to.have.been.called;
-      expect(writeCommandSpy.firstCall.args[0] instanceof OpQueryRequest).to.equal(true);
+      expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpQueryRequest);
     });
   });
 });
