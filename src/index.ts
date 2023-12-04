@@ -139,6 +139,7 @@ export {
 export {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
+  ServerDiscoveryAndMonitoringEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
@@ -305,7 +306,16 @@ export type {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
-  MONGO_CLIENT_EVENTS
+  MONGO_CLIENT_EVENTS,
+  SERVER_CLOSED,
+  SERVER_DESCRIPTION_CHANGED,
+  SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_STARTED,
+  SERVER_HEARTBEAT_SUCCEEDED,
+  SERVER_OPENING,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING
 } from './constants';
 export type {
   AbstractCursorEvents,

@@ -240,7 +240,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
   monitor.emitAndLog(
     Server.SERVER_HEARTBEAT_STARTED,
-    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
+    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable, monitor[kServer].topology.s.id)
   );
 
   function onHeartbeatFailed(err: Error) {
@@ -249,7 +249,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     monitor.emitAndLog(
       Server.SERVER_HEARTBEAT_FAILED,
-      new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err, awaited)
+      new ServerHeartbeatFailedEvent(
+        monitor.address,
+        calculateDurationInMs(start),
+        err,
+        awaited,
+        monitor[kServer].topology.s.id
+      )
     );
 
     const error = !(err instanceof MongoError)
@@ -369,7 +375,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
           monitor.address,
           calculateDurationInMs(start),
           conn.hello,
-          useStreamingProtocol(monitor, conn.hello?.topologyVersion)
+          useStreamingProtocol(monitor, conn.hello?.topologyVersion),
+          monitor[kServer].topology.s.id
         )
       );
 

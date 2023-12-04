@@ -14,7 +14,7 @@ import type { ServerDescription } from './server_description';
 import type { TopologyDescription } from './topology_description';
 
 /**
- * The base export class for all monitoring events published from the connection pool
+ * The base export class for all monitoring events published from server discovery and monitoring.
  * @public
  * @category Event
  */
@@ -24,14 +24,15 @@ export abstract class ServerDiscoveryAndMonitoringEvent {
 
   /** @internal */
   abstract name:
-    | typeof SERVER_HEARTBEAT_FAILED
-    | typeof SERVER_HEARTBEAT_STARTED
-    | typeof SERVER_HEARTBEAT_SUCCEEDED
-    | typeof SERVER_OPENING
     | typeof TOPOLOGY_CLOSED
     | typeof TOPOLOGY_DESCRIPTION_CHANGED
     | typeof TOPOLOGY_OPENING
-    | typeof SERVER_CLOSED;
+    | typeof SERVER_OPENING
+    | typeof SERVER_CLOSED
+    | typeof SERVER_DESCRIPTION_CHANGED
+    | typeof SERVER_HEARTBEAT_FAILED
+    | typeof SERVER_HEARTBEAT_STARTED
+    | typeof SERVER_HEARTBEAT_SUCCEEDED;
 
   /** @internal */
   constructor(topologyId: number) {
@@ -44,9 +45,7 @@ export abstract class ServerDiscoveryAndMonitoringEvent {
  * @public
  * @category Event
  */
-export class ServerDescriptionChangedEvent {
-  /** A unique identifier for the topology */
-  topologyId: number;
+export class ServerDescriptionChangedEvent extends ServerDiscoveryAndMonitoringEvent {
   /** The address (host/port pair) of the server */
   address: string;
   /** The previous server description */
@@ -62,7 +61,7 @@ export class ServerDescriptionChangedEvent {
     previousDescription: ServerDescription,
     newDescription: ServerDescription
   ) {
-    this.topologyId = topologyId;
+    super(topologyId);
     this.address = address;
     this.previousDescription = previousDescription;
     this.newDescription = newDescription;
