@@ -17,8 +17,15 @@ function awsSdk() {
 
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
+  let client: MongoClient;
 
-  before(() => {
+  beforeEach(function () {
+    const MONGODB_URI = process.env.MONGODB_URI;
+    if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-AWS') === -1) {
+      this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
+      return this.skip();
+    }
+
     const { MONGODB_AWS_SDK = 'unset' } = process.env;
     expect(
       ['true', 'false'],
@@ -32,15 +39,6 @@ describe('MONGODB-AWS', function () {
         ? 'expected aws sdk to be installed'
         : 'expected aws sdk to not be installed'
     ).to.be[MONGODB_AWS_SDK];
-  });
-
-  let client: MongoClient;
-  beforeEach(function () {
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-AWS') === -1) {
-      this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
-      this.skip();
-    }
   });
 
   afterEach(async () => {
