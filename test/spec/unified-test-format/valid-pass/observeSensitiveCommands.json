@@ -1,0 +1,691 @@
+{
+  "description": "observeSensitiveCommands",
+  "schemaVersion": "1.5",
+  "runOnRequirements": [
+    {
+      "auth": false
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ],
+        "observeSensitiveCommands": true
+      }
+    },
+    {
+      "client": {
+        "id": "client1",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ],
+        "observeSensitiveCommands": false
+      }
+    },
+    {
+      "client": {
+        "id": "client2",
+        "observeEvents": [
+          "commandStartedEvent",
+          "commandSucceededEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "observeSensitiveCommands"
+      }
+    },
+    {
+      "database": {
+        "id": "database1",
+        "client": "client1",
+        "databaseName": "observeSensitiveCommands"
+      }
+    },
+    {
+      "database": {
+        "id": "database2",
+        "client": "client2",
+        "databaseName": "observeSensitiveCommands"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "getnonce is observed with observeSensitiveCommands=true",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "getnonce",
+            "command": {
+              "getnonce": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "getnonce",
+                "command": {
+                  "getnonce": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "getnonce",
+                "reply": {
+                  "ok": {
+                    "$$exists": false
+                  },
+                  "nonce": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "getnonce is not observed with observeSensitiveCommands=false",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "getnonce",
+            "command": {
+              "getnonce": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client1",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "getnonce is not observed by default",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "getnonce",
+            "command": {
+              "getnonce": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client2",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "hello with speculativeAuthenticate",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9"
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "hello",
+                "command": {
+                  "hello": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client1",
+          "events": []
+        },
+        {
+          "client": "client2",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "hello without speculativeAuthenticate is always observed",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.9"
+        }
+      ],
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "hello",
+            "command": {
+              "hello": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "hello",
+                "command": {
+                  "hello": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "hello",
+                "command": {
+                  "hello": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client2",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "hello",
+                "command": {
+                  "hello": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "hello",
+                "reply": {
+                  "isWritablePrimary": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "legacy hello with speculativeAuthenticate",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1,
+              "speculativeAuthenticate": {
+                "saslStart": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ismaster",
+                "command": {
+                  "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "isMaster",
+                "command": {
+                  "isMaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": false
+                  },
+                  "speculativeAuthenticate": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client1",
+          "events": []
+        },
+        {
+          "client": "client2",
+          "events": []
+        }
+      ]
+    },
+    {
+      "description": "legacy hello without speculativeAuthenticate is always observed",
+      "operations": [
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database1",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "ismaster",
+            "command": {
+              "ismaster": 1
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database2",
+          "arguments": {
+            "commandName": "isMaster",
+            "command": {
+              "isMaster": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ismaster",
+                "command": {
+                  "ismaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "isMaster",
+                "command": {
+                  "isMaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client1",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ismaster",
+                "command": {
+                  "ismaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "isMaster",
+                "command": {
+                  "isMaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "client": "client2",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ismaster",
+                "command": {
+                  "ismaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "ismaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "isMaster",
+                "command": {
+                  "isMaster": 1
+                }
+              }
+            },
+            {
+              "commandSucceededEvent": {
+                "commandName": "isMaster",
+                "reply": {
+                  "ismaster": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
