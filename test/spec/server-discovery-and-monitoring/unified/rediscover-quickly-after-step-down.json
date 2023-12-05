@@ -1,0 +1,242 @@
+{
+  "description": "rediscover-quickly-after-step-down",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "serverless": "forbid",
+      "topologies": [
+        "replicaset"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "setupClient"
+      }
+    },
+    {
+      "database": {
+        "id": "adminDatabase",
+        "client": "setupClient",
+        "databaseName": "admin"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test-replSetStepDown",
+      "databaseName": "sdam-tests",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Rediscover quickly after replSetStepDown",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "observeEvents": [
+                    "poolClearedEvent",
+                    "commandStartedEvent"
+                  ],
+                  "uriOptions": {
+                    "appname": "replSetStepDownTest",
+                    "heartbeatFrequencyMS": 60000,
+                    "serverSelectionTimeoutMS": 5000,
+                    "w": "majority"
+                  }
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              },
+              {
+                "collection": {
+                  "id": "collection",
+                  "database": "database",
+                  "collectionName": "test-replSetStepDown"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ]
+          }
+        },
+        {
+          "name": "recordTopologyDescription",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "id": "topologyDescription"
+          }
+        },
+        {
+          "name": "assertTopologyType",
+          "object": "testRunner",
+          "arguments": {
+            "topologyDescription": "topologyDescription",
+            "topologyType": "ReplicaSetWithPrimary"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "adminDatabase",
+          "arguments": {
+            "command": {
+              "replSetFreeze": 0
+            },
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "commandName": "replSetFreeze"
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "adminDatabase",
+          "arguments": {
+            "command": {
+              "replSetStepDown": 30,
+              "secondaryCatchUpPeriodSecs": 30,
+              "force": false
+            },
+            "commandName": "replSetStepDown"
+          }
+        },
+        {
+          "name": "waitForPrimaryChange",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "priorTopologyDescription": "topologyDescription",
+            "timeoutMS": 15000
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 5
+              },
+              {
+                "_id": 6
+              }
+            ]
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "poolClearedEvent": {}
+            },
+            "count": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "command",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test-replSetStepDown",
+                  "documents": [
+                    {
+                      "_id": 3
+                    },
+                    {
+                      "_id": 4
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "sdam-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test-replSetStepDown",
+                  "documents": [
+                    {
+                      "_id": 5
+                    },
+                    {
+                      "_id": 6
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "sdam-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test-replSetStepDown",
+          "databaseName": "sdam-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            },
+            {
+              "_id": 5
+            },
+            {
+              "_id": 6
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "description": "hello-command-error",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.9",
+      "serverless": "forbid",
+      "topologies": [
+        "single",
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "setupClient",
+        "useMultipleMongoses": false
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "hello-command-error",
+      "databaseName": "sdam-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "Command error on Monitor handshake",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "setupClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 4
+              },
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "commandErrorHandshakeTest",
+                "closeConnection": false,
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "serverDescriptionChangedEvent",
+                    "poolClearedEvent",
+                    "commandStartedEvent"
+                  ],
+                  "uriOptions": {
+                    "retryWrites": false,
+                    "connectTimeoutMS": 250,
+                    "heartbeatFrequencyMS": 500,
+                    "appname": "commandErrorHandshakeTest"
+                  }
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              },
+              {
+                "collection": {
+                  "id": "collection",
+                  "database": "database",
+                  "collectionName": "hello-command-error"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverDescriptionChangedEvent": {
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "command",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "hello-command-error",
+                  "documents": [
+                    {
+                      "_id": 1
+                    },
+                    {
+                      "_id": 2
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "sdam-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "hello-command-error",
+          "databaseName": "sdam-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Command error on Monitor check",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "commandStartedEvent",
+                    "serverDescriptionChangedEvent",
+                    "poolClearedEvent"
+                  ],
+                  "uriOptions": {
+                    "retryWrites": false,
+                    "connectTimeoutMS": 1000,
+                    "heartbeatFrequencyMS": 500,
+                    "appname": "commandErrorCheckTest"
+                  }
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "sdam-tests"
+                }
+              },
+              {
+                "collection": {
+                  "id": "collection",
+                  "database": "database",
+                  "collectionName": "hello-command-error"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              }
+            ]
+          }
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "commandErrorCheckTest",
+                "closeConnection": false,
+                "blockConnection": true,
+                "blockTimeMS": 750,
+                "errorCode": 91
+              }
+            },
+            "client": "setupClient"
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverDescriptionChangedEvent": {
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "poolClearedEvent": {}
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ]
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "serverDescriptionChangedEvent": {
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            "count": 1
+          }
+        },
+        {
+          "name": "assertEventCount",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "poolClearedEvent": {}
+            },
+            "count": 1
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "command",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "hello-command-error",
+                  "documents": [
+                    {
+                      "_id": 1
+                    },
+                    {
+                      "_id": 2
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "sdam-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "hello-command-error",
+                  "documents": [
+                    {
+                      "_id": 3
+                    },
+                    {
+                      "_id": 4
+                    }
+                  ]
+                },
+                "commandName": "insert",
+                "databaseName": "sdam-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "hello-command-error",
+          "databaseName": "sdam-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
