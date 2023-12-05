@@ -636,6 +636,8 @@ export function compareLogs(
   actual: ExpectedLogMessage[],
   entities: EntitiesMap
 ): void {
+  console.log('ACTUAL LOGS', actual);
+  console.log('EXPECTED LOGS', expected);
   expect(actual).to.have.lengthOf(expected.length);
 
   for (const [index, actualLog] of actual.entries()) {
