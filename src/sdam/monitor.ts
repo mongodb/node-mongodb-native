@@ -235,6 +235,7 @@ function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let start = now();
+  let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
   monitor.emit(
@@ -242,7 +243,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
 
-  function failureHandler(err: Error, awaited: boolean) {
+  function onHeartbeatFailed(err: Error) {
     monitor.connection?.destroy({ force: true });
     monitor.connection = null;
 
@@ -261,6 +262,38 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     monitor.emit('resetServer', error);
     callback(err);
+  }
+
+  function onHeartbeatSucceeded(hello: Document) {
+    if (!('isWritablePrimary' in hello)) {
+      // Provide hello-style response document.
+      hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
+    }
+
+    const duration =
+      isAwaitable && monitor.rttPinger
+        ? monitor.rttPinger.roundTripTime
+        : calculateDurationInMs(start);
+
+    monitor.emit(
+      Server.SERVER_HEARTBEAT_SUCCEEDED,
+      new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
+    );
+
+    // If we are using the streaming protocol then we immediately issue another 'started'
+    // event, otherwise the "check" is complete and return to the main monitor loop.
+    if (isAwaitable) {
+      monitor.emit(
+        Server.SERVER_HEARTBEAT_STARTED,
+        new ServerHeartbeatStartedEvent(monitor.address, true)
+      );
+      start = now();
+    } else {
+      monitor.rttPinger?.close();
+      monitor.rttPinger = undefined;
+
+      callback(undefined, hello);
+    }
   }
 
   const { connection } = monitor;
@@ -293,41 +326,18 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
-    connection.command(ns('admin.$cmd'), cmd, options, (err, hello) => {
-      if (err) {
-        return failureHandler(err, isAwaitable);
-      }
+    if (isAwaitable) {
+      awaited = true;
+      return connection.moreToComeCommand(ns('admin.$cmd'), cmd, options, (error, hello) => {
+        if (error) return onHeartbeatFailed(error);
+        return onHeartbeatSucceeded(hello);
+      });
+    }
 
-      if (!('isWritablePrimary' in hello)) {
-        // Provide hello-style response document.
-        hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
-      }
-
-      const duration =
-        isAwaitable && monitor.rttPinger
-          ? monitor.rttPinger.roundTripTime
-          : calculateDurationInMs(start);
-
-      monitor.emit(
-        Server.SERVER_HEARTBEAT_SUCCEEDED,
-        new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
-      );
-
-      // If we are using the streaming protocol then we immediately issue another 'started'
-      // event, otherwise the "check" is complete and return to the main monitor loop.
-      if (isAwaitable) {
-        monitor.emit(
-          Server.SERVER_HEARTBEAT_STARTED,
-          new ServerHeartbeatStartedEvent(monitor.address, true)
-        );
-        start = now();
-      } else {
-        monitor.rttPinger?.close();
-        monitor.rttPinger = undefined;
-
-        callback(undefined, hello);
-      }
-    });
+    awaited = false;
+    connection
+      .commandAsync(ns('admin.$cmd'), cmd, options)
+      .then(onHeartbeatSucceeded, onHeartbeatFailed);
 
     return;
   }
@@ -337,7 +347,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     if (err) {
       monitor.connection = null;
 
-      failureHandler(err, false);
+      awaited = false;
+      onHeartbeatFailed(err);
       return;
     }
 

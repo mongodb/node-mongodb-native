@@ -562,6 +562,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       callback(err);
     }
   }
+
+  moreToComeCommand(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    callback: Callback
+  ) {
+    return this.command(ns, command, options, callback);
+  }
 }
 
 /** @internal */
