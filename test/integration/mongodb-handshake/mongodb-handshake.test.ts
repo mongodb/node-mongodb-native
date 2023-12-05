@@ -5,7 +5,6 @@ import * as sinon from 'sinon';
 import {
   Connection,
   LEGACY_HELLO_COMMAND,
-  MessageStream,
   MongoServerError,
   MongoServerSelectionError,
   OpMsgRequest,
@@ -73,10 +72,10 @@ describe('MongoDB Handshake', () => {
   });
 
   context('when load-balanced', function () {
-    let writeCommandSpy: Sinon.SinonSpy;
+    let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
     beforeEach(() => {
-      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+      opMsgRequestToBinSpy = sinon.spy(OpMsgRequest.prototype, 'toBin');
     });
 
     afterEach(() => sinon.restore());
@@ -85,22 +84,21 @@ describe('MongoDB Handshake', () => {
       metadata: { requires: { topology: 'load-balanced' } },
       test: async function () {
         client = this.configuration.newClient({ loadBalanced: true });
-        await client.connect();
         // The load-balanced mode doesn’t perform SDAM,
         // so `connect` doesn’t do anything unless authentication is enabled.
         // Force the driver to send a command to the server in the noauth mode.
         await client.db('admin').command({ ping: 1 });
-        expect(writeCommandSpy).to.have.been.called;
-        expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
+        expect(opMsgRequestToBinSpy).to.have.been.called;
+        expect(opMsgRequestToBinSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
       }
     });
   });
 
   context('when serverApi version is present', function () {
-    let writeCommandSpy: Sinon.SinonSpy;
+    let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
     beforeEach(() => {
-      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+      opMsgRequestToBinSpy = sinon.spy(OpMsgRequest.prototype, 'toBin');
     });
 
     afterEach(() => sinon.restore());
@@ -110,21 +108,19 @@ describe('MongoDB Handshake', () => {
       test: async function () {
         client = this.configuration.newClient({}, { serverApi: { version: ServerApiVersion.v1 } });
         await client.connect();
-        // The load-balanced mode doesn’t perform SDAM,
-        // so `connect` doesn’t do anything unless authentication is enabled.
-        // Force the driver to send a command to the server in the noauth mode.
-        await client.db('admin').command({ ping: 1 });
-        expect(writeCommandSpy).to.have.been.called;
-        expect(writeCommandSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
+        expect(opMsgRequestToBinSpy).to.have.been.called;
+        expect(opMsgRequestToBinSpy.firstCall.args[0]).to.be.an.instanceof(OpMsgRequest);
       }
     });
   });
 
   context('when not load-balanced and serverApi version is not present', function () {
-    let writeCommandSpy: Sinon.SinonSpy;
+    let opQueryRequestToBinSpy: Sinon.SinonSpy;
+    let opMsgRequestToBinSpy: Sinon.SinonSpy;
 
     beforeEach(() => {
-      writeCommandSpy = sinon.spy(MessageStream.prototype, 'writeCommand');
+      opQueryRequestToBinSpy = sinon.spy(OpQueryRequest.prototype, 'toBin');
+      opMsgRequestToBinSpy = sinon.spy(OpMsgRequest.prototype, 'toBin');
     });
 
     afterEach(() => sinon.restore());
@@ -138,16 +134,10 @@ describe('MongoDB Handshake', () => {
         }
         client = this.configuration.newClient();
         await client.connect();
-        // The load-balanced mode doesn’t perform SDAM,
-        // so `connect` doesn’t do anything unless authentication is enabled.
-        // Force the driver to send a command to the server in the noauth mode.
         await client.db('admin').command({ ping: 1 });
-        expect(writeCommandSpy).to.have.been.called;
-
-        const opRequests = writeCommandSpy.getCalls().map(items => items.args[0]);
-        expect(opRequests[0] instanceof OpQueryRequest).to.equal(true);
-        const isOpMsgRequestSent = !!opRequests.find(op => op instanceof OpMsgRequest);
-        expect(isOpMsgRequestSent).to.be.true;
+        expect(opQueryRequestToBinSpy).to.have.been.called;
+        expect(opMsgRequestToBinSpy).to.have.been.called;
+        opMsgRequestToBinSpy.calledAfter(opQueryRequestToBinSpy);
       }
     });
   });
