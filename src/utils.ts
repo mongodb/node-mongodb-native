@@ -1301,3 +1301,49 @@ export const COSMOS_DB_MSG =
 export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
+
+/**
+ * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
+ * The given promise is _always_ ordered before the signal's abort promise.
+ * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
+ *
+ * @param promise - A promise to discard if the signal aborts
+ * @param options - An options object carrying an optional signal
+ */
+export async function abortable<T>(
+  promise: Promise<T>,
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<T> {
+  const { abort, done } = aborted(signal);
+  try {
+    return await Promise.race([promise, abort]);
+  } finally {
+    done.abort();
+  }
+}
+
+/**
+ * Takes an AbortSignal and creates a promise that will reject when the signal aborts
+ * If the argument provided is nullish the returned promise will **never** resolve.
+ * Also returns a done controller - abort the done controller when your task is done to remove the abort listeners
+ * @param signal - an optional abort signal to link to a promise rejection
+ */
+function aborted(signal?: AbortSignal): {
+  abort: Promise<any>;
+  done: AbortController;
+} {
+  const done = new AbortController();
+  if (signal?.aborted) {
+    return { abort: Promise.reject(signal.reason), done };
+  }
+  const abort = new Promise<void>((_, reject) =>
+    signal?.addEventListener('abort', () => reject(signal.reason), {
+      once: true,
+      // @ts-expect-error: @types/node erroneously claim this does not exist
+      signal: done.signal
+    })
+  );
+  return { abort, done };
+}

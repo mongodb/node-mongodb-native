@@ -218,8 +218,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     super();
 
     this.options = Object.freeze({
-      ...options,
       connectionType: Connection,
+      ...options,
       maxPoolSize: options.maxPoolSize ?? 100,
       minPoolSize: options.minPoolSize ?? 0,
       maxConnecting: options.maxConnecting ?? 2,

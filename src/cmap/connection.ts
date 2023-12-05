@@ -1,4 +1,3 @@
-import { once } from 'events';
 import { on } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
@@ -23,6 +22,7 @@ import {
   MongoParseError,
   MongoRuntimeError,
   MongoServerError,
+  MongoUnexpectedServerResponseError,
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
@@ -30,6 +30,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
+  abortable,
   BufferPool,
   calculateDurationInMs,
   type Callback,
@@ -778,21 +779,15 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   address: string;
   socketTimeoutMS: number;
   monitorCommands: boolean;
-  /** Indicates that the connection (including underlying TCP socket) has been closed. */
-  closed: boolean;
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
-  commandAsync: (
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions | undefined
-  ) => Promise<Document>;
+  commandAsync: ModernConnection['command'];
   /** @internal */
   authContext?: AuthContext;
 
   /**@internal */
-  [kDelayedTimeoutId]: NodeJS.Timeout | null;
+  delayedTimeoutId: NodeJS.Timeout | null = null;
   /** @internal */
   [kDescription]: StreamDescription;
   /** @internal */
@@ -800,11 +795,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kLastUseTime]: number;
   /** @internal */
-  [kQueue]: Map<number, OperationDescription>;
-  /** @internal */
-  [kMessageStream]: MessageStream;
-  /** @internal */
   socket: Stream;
+  controller: AbortController;
   /** @internal */
   [kHello]: Document | null;
   /** @internal */
@@ -830,21 +822,13 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions | undefined,
-        callback: Callback
-      ) => this.command(ns, cmd, options, callback as any)
-    );
+    this.commandAsync = this.command.bind(this);
 
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
-    this.closed = false;
     this[kHello] = null;
     this[kClusterTime] = null;
 
@@ -852,27 +836,16 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kGeneration] = options.generation;
     this[kLastUseTime] = now();
 
-    // setup parser stream and message handling
-    this[kQueue] = new Map();
-    this[kMessageStream] = new MessageStream({
-      ...options,
-      maxBsonMessageSize: this.hello?.maxBsonMessageSize
-    });
     this.socket = stream;
+    this.controller = new AbortController();
+    this.socket.on('error', this.onError.bind(this));
+    this.socket.on('close', this.onClose.bind(this));
+    this.socket.on('timeout', this.onTimeout.bind(this));
+  }
 
-    this[kDelayedTimeoutId] = null;
-
-    this[kMessageStream].on('message', message => this.onMessage(message));
-    this[kMessageStream].on('error', error => this.onError(error));
-    this.socket.on('close', () => this.onClose());
-    this.socket.on('timeout', () => this.onTimeout());
-    this.socket.on('error', () => {
-      /* ignore errors, listen to `close` instead */
-    });
-
-    // hook the message stream up to the passed in stream
-    this.socket.pipe(this[kMessageStream]);
-    this[kMessageStream].pipe(this.socket);
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
+  get closed(): boolean {
+    return this.controller.signal.aborted;
   }
 
   get description(): StreamDescription {
@@ -890,15 +863,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     // TODO: remove this, and only use the `StreamDescription` in the future
     this[kHello] = response;
-  }
-
-  // Set the whether the message stream is for a monitoring connection.
-  set isMonitoringConnection(value: boolean) {
-    this[kMessageStream].isMonitoringConnection = value;
-  }
-
-  get isMonitoringConnection(): boolean {
-    return this[kMessageStream].isMonitoringConnection;
   }
 
   get serviceId(): ObjectId | undefined {
@@ -945,116 +909,26 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this[kLastUseTime] = now();
   }
 
-  onError(error: Error) {
-    this.cleanup(true, error);
+  onError(error?: Error) {
+    this.cleanup(error);
   }
 
   onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
-    this.cleanup(true, new MongoNetworkError(message));
+    this.cleanup(new MongoNetworkError(message));
   }
 
   onTimeout() {
-    this[kDelayedTimeoutId] = setTimeout(() => {
+    this.delayedTimeoutId = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
-      this.cleanup(true, new MongoNetworkTimeoutError(message, { beforeHandshake }));
+      this.cleanup(new MongoNetworkTimeoutError(message, { beforeHandshake }));
     }, 1).unref(); // No need for this timer to hold the event loop open
-  }
-
-  onMessage(message: OpMsgResponse | OpQueryResponse) {
-    const delayedTimeoutId = this[kDelayedTimeoutId];
-    if (delayedTimeoutId != null) {
-      clearTimeout(delayedTimeoutId);
-      this[kDelayedTimeoutId] = null;
-    }
-
-    const socketTimeoutMS = this.socket.timeout ?? 0;
-    this.socket.setTimeout(0);
-
-    // always emit the message, in case we are streaming
-    this.emit('message', message);
-    let operationDescription = this[kQueue].get(message.responseTo);
-
-    if (!operationDescription && this.isMonitoringConnection) {
-      // This is how we recover when the initial hello's requestId is not
-      // the responseTo when hello responses have been skipped:
-
-      // First check if the map is of invalid size
-      if (this[kQueue].size > 1) {
-        this.cleanup(true, new MongoRuntimeError(INVALID_QUEUE_SIZE));
-      } else {
-        // Get the first orphaned operation description.
-        const entry = this[kQueue].entries().next();
-        if (entry.value != null) {
-          const [requestId, orphaned]: [number, OperationDescription] = entry.value;
-          // If the orphaned operation description exists then set it.
-          operationDescription = orphaned;
-          // Remove the entry with the bad request id from the queue.
-          this[kQueue].delete(requestId);
-        }
-      }
-    }
-
-    if (!operationDescription) {
-      return;
-    }
-
-    const callback = operationDescription.cb;
-
-    // SERVER-45775: For exhaust responses we should be able to use the same requestId to
-    // track response, however the server currently synthetically produces remote requests
-    // making the `responseTo` change on each response
-    this[kQueue].delete(message.responseTo);
-    if ('moreToCome' in message && message.moreToCome) {
-      // If the operation description check above does find an orphaned
-      // description and sets the operationDescription then this line will put one
-      // back in the queue with the correct requestId and will resolve not being able
-      // to find the next one via the responseTo of the next streaming hello.
-      this[kQueue].set(message.requestId, operationDescription);
-      this.socket.setTimeout(socketTimeoutMS);
-    }
-
-    try {
-      // Pass in the entire description because it has BSON parsing options
-      message.parse(operationDescription);
-    } catch (err) {
-      // If this error is generated by our own code, it will already have the correct class applied
-      // if it is not, then it is coming from a catastrophic data parse failure or the BSON library
-      // in either case, it should not be wrapped
-      callback(err);
-      return;
-    }
-
-    if (message.documents[0]) {
-      const document: Document = message.documents[0];
-      const session = operationDescription.session;
-      if (session) {
-        updateSessionFromResponse(session, document);
-      }
-
-      if (document.$clusterTime) {
-        this[kClusterTime] = document.$clusterTime;
-        this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
-      }
-
-      if (document.writeConcernError) {
-        callback(new MongoWriteConcernError(document.writeConcernError, document), document);
-        return;
-      }
-
-      if (document.ok === 0 || document.$err || document.errmsg || document.code) {
-        callback(new MongoServerError(document));
-        return;
-      }
-    }
-
-    callback(undefined, message.documents[0]);
   }
 
   destroy(options: DestroyOptions, callback?: Callback): void {
     if (this.closed) {
-      process.nextTick(() => callback?.());
+      if (typeof callback === 'function') process.nextTick(callback);
       return;
     }
     if (typeof callback === 'function') {
@@ -1067,7 +941,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.removeAllListeners(Connection.PINNED);
     this.removeAllListeners(Connection.UNPINNED);
     const message = `connection ${this.id} to ${this.address} closed`;
-    this.cleanup(options.force, new MongoNetworkError(message));
+    this.cleanup(new MongoNetworkError(message));
   }
 
   /**
@@ -1078,50 +952,17 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
    *
    * This method does nothing if the connection is already closed.
    */
-  private cleanup(force: boolean, error?: Error): void {
+  private cleanup(error?: Error): void {
     if (this.closed) {
       return;
     }
 
-    this.closed = true;
-
-    const completeCleanup = () => {
-      for (const op of this[kQueue].values()) {
-        op.cb(error);
-      }
-
-      this[kQueue].clear();
-
-      this.emit(Connection.CLOSE);
-    };
-
-    this.socket.removeAllListeners();
-    this[kMessageStream].removeAllListeners();
-
-    this[kMessageStream].destroy();
-
-    if (force) {
-      this.socket.destroy();
-      completeCleanup();
-      return;
-    }
-
-    if (!this.socket.writableEnded) {
-      this.socket.end(() => {
-        this.socket.destroy();
-        completeCleanup();
-      });
-    } else {
-      completeCleanup();
-    }
+    this.socket.destroy();
+    this.controller.abort(error);
+    this.emit(Connection.CLOSE);
   }
 
-  command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: CommandOptions | undefined,
-    callback: Callback
-  ): void {
+  private prepareCommand(db: string, command: Document, options: CommandOptions) {
     let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
@@ -1145,12 +986,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
         clusterTime = session.clusterTime;
       }
 
-      const err = applySession(session, cmd, options);
-      if (err) {
-        return callback(err);
-      }
+      const sessionError = applySession(session, cmd, options);
+      if (sessionError) throw sessionError;
     } else if (session?.explicit) {
-      return callback(new MongoCompatibilityError('Current topology does not support sessions'));
+      throw new MongoCompatibilityError('Current topology does not support sessions');
     }
 
     // if we have a known cluster time, gossip it
@@ -1171,26 +1010,151 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       };
     }
 
-    const commandOptions: Document = Object.assign(
-      {
-        numberToSkip: 0,
-        numberToReturn: -1,
-        checkKeys: false,
-        // This value is not overridable
-        secondaryOk: readPreference.secondaryOk()
-      },
-      options
-    );
+    const commandOptions = {
+      numberToSkip: 0,
+      numberToReturn: -1,
+      checkKeys: false,
+      // This value is not overridable
+      secondaryOk: readPreference.secondaryOk(),
+      ...options,
+      readPreference // ensure we pass in ReadPreference instance
+    };
 
     const message = this.supportsOpMsg
-      ? new OpMsgRequest(ns.db, cmd, commandOptions)
-      : new OpQueryRequest(ns.db, cmd, commandOptions);
+      ? new OpMsgRequest(db, cmd, commandOptions)
+      : new OpQueryRequest(db, cmd, commandOptions);
 
-    try {
-      write(this as any as Connection, message, commandOptions, callback);
-    } catch (err) {
-      callback(err);
+    return message;
+  }
+
+  private async sendCommand(
+    message: WriteProtocolMessageType,
+    options: CommandOptions
+  ): Promise<Document> {
+    const { signal } = this.controller;
+
+    signal.throwIfAborted();
+
+    if (typeof options.socketTimeoutMS === 'number') {
+      this.socket.setTimeout(options.socketTimeoutMS);
+    } else if (this.socketTimeoutMS !== 0) {
+      this.socket.setTimeout(this.socketTimeoutMS);
     }
+
+    let response;
+    try {
+      await writeCommand(this, message, {
+        agreedCompressor: this.description.compressor ?? 'none',
+        zlibCompressionLevel: this.description.zlibCompressionLevel,
+        signal
+      });
+
+      if (options.noResponse) return { ok: 1 };
+
+      signal.throwIfAborted();
+
+      response = await read(this, { signal });
+    } finally {
+      // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
+      if (!signal.aborted) this.controller = new AbortController();
+    }
+
+    response.parse(options);
+
+    const [document] = response.documents;
+
+    if (!Buffer.isBuffer(document)) {
+      const { session } = options;
+      if (session) {
+        updateSessionFromResponse(session, document);
+      }
+
+      if (document.$clusterTime) {
+        this[kClusterTime] = document.$clusterTime;
+        this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+      }
+    }
+
+    return document;
+  }
+
+  async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {}
+  ): Promise<Document> {
+    const message = this.prepareCommand(ns.db, command, options);
+
+    let started = 0;
+    if (this.monitorCommands) {
+      started = now();
+      this.emit(
+        ModernConnection.COMMAND_STARTED,
+        new CommandStartedEvent(this as unknown as Connection, message)
+      );
+    }
+
+    let document = null;
+    try {
+      document = await this.sendCommand(message, options);
+    } catch (ioError) {
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, ioError, started)
+        );
+      }
+      throw ioError;
+    }
+
+    if (document == null) {
+      const unexpected = new MongoUnexpectedServerResponseError(
+        'sendCommand did not throw and did not return a document'
+      );
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, unexpected, started)
+        );
+      }
+      throw unexpected;
+    }
+
+    if (document.writeConcernError) {
+      const writeConcernError = new MongoWriteConcernError(document.writeConcernError, document);
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_SUCCEEDED,
+          new CommandSucceededEvent(this as unknown as Connection, message, document, started)
+        );
+      }
+      throw writeConcernError;
+    }
+
+    if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+      const serverError = new MongoServerError(document);
+      if (this.monitorCommands) {
+        this.emit(
+          ModernConnection.COMMAND_FAILED,
+          new CommandFailedEvent(this as unknown as Connection, message, serverError, started)
+        );
+      }
+      throw serverError;
+    }
+
+    if (this.monitorCommands) {
+      this.emit(
+        ModernConnection.COMMAND_SUCCEEDED,
+        new CommandSucceededEvent(
+          this as unknown as Connection,
+          message,
+          options.noResponse ? undefined : document,
+          started
+        )
+      );
+    }
+
+    return document;
   }
 }
 
@@ -1208,11 +1172,17 @@ const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
  * Note that `for-await` loops call `return` automatically when the loop is exited.
  */
 export async function* readWireProtocolMessages(
-  connection: ModernConnection
+  connection: ModernConnection,
+  { signal }: { signal?: AbortSignal } = {}
 ): AsyncGenerator<Buffer> {
   const bufferPool = new BufferPool();
   const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
-  for await (const [chunk] of on(connection.socket, 'data')) {
+  for await (const [chunk] of on(connection.socket, 'data', { signal })) {
+    if (connection.delayedTimeoutId) {
+      clearTimeout(connection.delayedTimeoutId);
+      connection.delayedTimeoutId = null;
+    }
+
     bufferPool.append(chunk);
     const sizeOfMessage = bufferPool.getInt32();
 
@@ -1247,9 +1217,10 @@ export async function* readWireProtocolMessages(
 export async function writeCommand(
   connection: ModernConnection,
   command: WriteProtocolMessageType,
-  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
+  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>> & {
+    signal?: AbortSignal;
+  }
 ): Promise<void> {
-  const drained = once(connection.socket, 'drain');
   const finalCommand =
     options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
       ? command
@@ -1257,9 +1228,12 @@ export async function writeCommand(
           agreedCompressor: options.agreedCompressor ?? 'none',
           zlibCompressionLevel: options.zlibCompressionLevel ?? 0
         });
+
   const buffer = Buffer.concat(await finalCommand.toBin());
-  connection.socket.push(buffer);
-  await drained;
+
+  const socketWriteFn = promisify(connection.socket.write.bind(connection.socket));
+
+  return abortable(socketWriteFn(buffer), options);
 }
 
 /**
@@ -1272,9 +1246,10 @@ export async function writeCommand(
  * Note that `for-await` loops call `return` automatically when the loop is exited.
  */
 export async function* readMany(
-  connection: ModernConnection
+  connection: ModernConnection,
+  options: { signal?: AbortSignal } = {}
 ): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-  for await (const message of readWireProtocolMessages(connection)) {
+  for await (const message of readWireProtocolMessages(connection, options)) {
     const response = await decompressResponse(message);
     yield response;
 
@@ -1289,8 +1264,11 @@ export async function* readMany(
  *
  * Reads a single wire protocol message out of a connection.
  */
-export async function read(connection: ModernConnection): Promise<OpMsgResponse | OpQueryResponse> {
-  for await (const value of readMany(connection)) {
+export async function read(
+  connection: ModernConnection,
+  options: { signal?: AbortSignal } = {}
+): Promise<OpMsgResponse | OpQueryResponse> {
+  for await (const value of readMany(connection, options)) {
     return value;
   }
 
