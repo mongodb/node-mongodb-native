@@ -23,8 +23,6 @@ const kServer = Symbol('server');
 /** @internal */
 const kMonitorId = Symbol('monitorId');
 /** @internal */
-const kConnection = Symbol('connection');
-/** @internal */
 const kCancellationToken = Symbol('cancellationToken');
 /** @internal */
 const kRoundTripTime = Symbol('roundTripTime');
@@ -94,21 +92,17 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   connectOptions: ConnectionOptions;
   isRunningInFaasEnv: boolean;
   [kServer]: Server;
-  [kConnection]?: Connection;
+  connection: Connection | null;
   [kCancellationToken]: CancellationToken;
   /** @internal */
   [kMonitorId]?: MonitorInterval;
   rttPinger?: RTTPinger;
 
-  get connection(): Connection | undefined {
-    return this[kConnection];
-  }
-
   constructor(server: Server, options: MonitorOptions) {
     super();
 
     this[kServer] = server;
-    this[kConnection] = undefined;
+    this.connection = null;
     this[kCancellationToken] = new CancellationToken();
     this[kCancellationToken].setMaxListeners(Infinity);
     this[kMonitorId] = undefined;
@@ -219,8 +213,8 @@ function resetMonitorState(monitor: Monitor) {
 
   monitor[kCancellationToken].emit('cancel');
 
-  monitor[kConnection]?.destroy({ force: true });
-  monitor[kConnection] = undefined;
+  monitor.connection?.destroy({ force: true });
+  monitor.connection = null;
 }
 
 function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion | null): boolean {
@@ -249,8 +243,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   );
 
   function failureHandler(err: Error, awaited: boolean) {
-    monitor[kConnection]?.destroy({ force: true });
-    monitor[kConnection] = undefined;
+    monitor.connection?.destroy({ force: true });
+    monitor.connection = null;
 
     monitor.emit(
       Server.SERVER_HEARTBEAT_FAILED,
@@ -269,7 +263,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     callback(err);
   }
 
-  const connection = monitor[kConnection];
+  const { connection } = monitor;
   if (connection && !connection.closed) {
     const { serverApi, helloOk } = connection;
     const connectTimeoutMS = monitor.options.connectTimeoutMS;
@@ -341,7 +335,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   // connecting does an implicit `hello`
   connect(monitor.connectOptions, (err, conn) => {
     if (err) {
-      monitor[kConnection] = undefined;
+      monitor.connection = null;
 
       failureHandler(err, false);
       return;
@@ -357,7 +351,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         return;
       }
 
-      monitor[kConnection] = conn;
+      monitor.connection = conn;
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(
