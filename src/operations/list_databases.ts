@@ -35,6 +35,10 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
+  override get commandName() {
+    return 'listDatabases' as const;
+  }
+
   override async execute(
     server: Server,
     session: ClientSession | undefined

@@ -82,6 +82,10 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
     }
   }
 
+  override get commandName() {
+    return 'aggregate' as const;
+  }
+
   override get canRetryRead(): boolean {
     return !this.hasWriteStage;
   }

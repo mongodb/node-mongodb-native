@@ -47,6 +47,10 @@ export class ListCollectionsOperation extends CommandOperation<Document> {
     }
   }
 
+  override get commandName() {
+    return 'listCollections' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
   }

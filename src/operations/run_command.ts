@@ -22,6 +22,10 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
     this.ns = parent.s.namespace.withCollection('$cmd');
   }
 
+  override get commandName() {
+    return 'runCommand' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
     return server.commandAsync(this.ns, this.command, {
@@ -42,6 +46,10 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
   ) {
     super(options);
     this.ns = new MongoDBNamespace('admin', '$cmd');
+  }
+
+  override get commandName() {
+    return 'runCommand' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {

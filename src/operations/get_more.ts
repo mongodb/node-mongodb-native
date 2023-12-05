@@ -48,6 +48,9 @@ export class GetMoreOperation extends AbstractOperation {
     this.server = server;
   }
 
+  override get commandName() {
+    return 'getMore' as const;
+  }
   /**
    * Although there is a server already associated with the get more operation, the signature
    * for execute passes a server so we will just use that one.

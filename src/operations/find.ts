@@ -97,6 +97,10 @@ export class FindOperation extends CommandOperation<Document> {
     this.filter = filter != null && filter._bsontype === 'ObjectId' ? { _id: filter } : filter;
   }
 
+  override get commandName() {
+    return 'find' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     this.server = server;
 

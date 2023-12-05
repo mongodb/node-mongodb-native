@@ -19,6 +19,10 @@ export class CollectionsOperation extends AbstractOperation<Collection[]> {
     this.db = db;
   }
 
+  override get commandName() {
+    return 'listCollections' as const;
+  }
+
   override async execute(
     server: Server,
     session: ClientSession | undefined

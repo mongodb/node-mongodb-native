@@ -38,6 +38,10 @@ export class DistinctOperation extends CommandOperation<any[]> {
     this.query = query;
   }
 
+  override get commandName() {
+    return 'distinct' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<any[]> {
     const coll = this.collection;
     const key = this.key;

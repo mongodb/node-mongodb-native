@@ -25,6 +25,10 @@ export class RenameOperation extends CommandOperation<Document> {
     this.ns = new MongoDBNamespace('admin', '$cmd');
   }
 
+  override get commandName(): string {
+    return 'renameCollection' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Collection> {
     // Build the command
     const renameCollection = this.collection.namespace;

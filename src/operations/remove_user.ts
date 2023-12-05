@@ -18,6 +18,10 @@ export class RemoveUserOperation extends CommandOperation<boolean> {
     this.username = username;
   }
 
+  override get commandName() {
+    return 'dropUser' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     await super.executeCommand(server, session, { dropUser: this.username });
     return true;
