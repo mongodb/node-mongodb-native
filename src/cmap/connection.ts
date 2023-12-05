@@ -1253,7 +1253,7 @@ export async function* readMany(
     const response = await decompressResponse(message);
     yield response;
 
-    if (!('moreToCome' in response) || !response.moreToCome) {
+    if (!response.moreToCome) {
       return;
     }
   }
