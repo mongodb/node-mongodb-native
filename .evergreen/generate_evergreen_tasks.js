@@ -700,13 +700,16 @@ BUILD_VARIANTS.push({
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
 });
 
-BUILD_VARIANTS.push({
-  name: 'ubuntu20-test-azure-oidc',
-  display_name: 'Azure OIDC',
-  run_on: UBUNTU_20_OS,
-  batchtime: 20160,
-  tasks: ['testazureoidc_task_group']
-});
+// TODO(DRIVERS-2416/NODE-4929) - Azure credentials are expired, a new drivers ticket
+//   should be created but at the moment for our test failures we will reference the
+//   open DRIVERS ticket and completed NODE ticket.
+// BUILD_VARIANTS.push({
+//   name: 'ubuntu20-test-azure-oidc',
+//   display_name: 'Azure OIDC',
+//   run_on: UBUNTU_20_OS,
+//   batchtime: 20160,
+//   tasks: ['testazureoidc_task_group']
+// });
 
 BUILD_VARIANTS.push({
   name: 'rhel8-test-atlas',
@@ -723,6 +726,18 @@ BUILD_VARIANTS.push({
     CLIENT_ENCRYPTION: true
   },
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
+});
+
+BUILD_VARIANTS.push({
+  name: 'rhel8-new-connection-tests',
+  display_name: 'New Connection Tests',
+  run_on: DEFAULT_OS,
+  expansions: {
+    NODE_LTS_VERSION: LATEST_LTS,
+    CLIENT_ENCRYPTION: true,
+    MONGODB_NEW_CONNECTION: true
+  },
+  tasks: BASE_TASKS.map(({ name }) => name)
 });
 
 BUILD_VARIANTS.push({
