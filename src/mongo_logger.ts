@@ -513,7 +513,7 @@ function defaultLogTransform(
     case SERVER_OPENING:
       log = attachSDAMFields(log, logObject);
       log = attachConnectionFields(log, logObject);
-      log.message = 'Started server momitoring';
+      log.message = 'Started server monitoring';
       return log;
     case SERVER_CLOSED:
       log = attachSDAMFields(log, logObject);
@@ -541,7 +541,7 @@ function defaultLogTransform(
       return log;
     case TOPOLOGY_OPENING:
       log = attachSDAMFields(log, logObject);
-      log.message = 'Started topology momitoring';
+      log.message = 'Started topology monitoring';
       return log;
     case TOPOLOGY_CLOSED:
       log = attachSDAMFields(log, logObject);

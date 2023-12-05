@@ -319,6 +319,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       detectSrvRecords: ev => this.detectSrvRecords(ev)
     };
 
+    this.mongoLogger = client.mongoLogger;
+    this.component = 'topology';
+
     if (options.srvHost && !options.loadBalanced) {
       this.s.srvPoller =
         options.srvPoller ??

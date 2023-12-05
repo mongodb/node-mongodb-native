@@ -17,6 +17,7 @@ import {
 } from './events';
 import { Server } from './server';
 import type { TopologyVersion } from './server_description';
+import { MongoLogger } from '../mongo_logger';
 
 /** @internal */
 const kServer = Symbol('server');
@@ -98,6 +99,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kMonitorId]?: MonitorInterval;
   rttPinger?: RTTPinger;
 
+  get connection(): Connection | undefined {
+    return this[kConnection];
+  }
+
   constructor(server: Server, options: MonitorOptions) {
     super();
 
@@ -109,7 +114,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.s = {
       state: STATE_CLOSED
     };
-
     this.address = server.description.address;
     this.options = Object.freeze({
       connectTimeoutMS: options.connectTimeoutMS ?? 10000,
@@ -144,6 +148,9 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     }
 
     this.connectOptions = Object.freeze(connectOptions);
+
+    this.mongoLogger = mongoLogger;
+    this.component = 'topology';
   }
 
   connect(): void {
