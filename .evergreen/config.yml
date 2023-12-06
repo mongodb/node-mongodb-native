@@ -431,7 +431,7 @@ functions:
         add_expansions_to_env: true
         args:
           - .evergreen/install-dependencies.sh
-  install aws-credential-providers:
+  remove aws-credential-providers:
     - command: shell.exec
       type: setup
       params:
@@ -440,7 +440,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
-          npm install @aws-sdk/credential-providers
+          rm -rf ./node_modules/@aws-sdk/credential-providers
   run atlas tests:
     - command: shell.exec
       type: test
@@ -633,6 +633,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -669,6 +671,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -691,6 +695,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -717,6 +723,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -743,6 +751,7 @@ functions:
     - command: shell.exec
       type: test
       params:
+        add_expansions_to_env: true
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -769,6 +778,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -794,6 +805,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: src
         script: |
           ${PREPARE_SHELL}
@@ -803,22 +816,46 @@ functions:
       type: test
       params:
         working_dir: src
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         shell: bash
-        script: |
+        script: >
           ${PREPARE_SHELL}
+
           AUTH_AWS_DIR=${DRIVERS_TOOLS}/.evergreen/auth_aws
+
           ECS_SRC_DIR=$AUTH_AWS_DIR/src
 
+
           # pack up project directory to ssh it to the container
+
           mkdir -p $ECS_SRC_DIR/.evergreen
-          cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
-          tar -czf $ECS_SRC_DIR/src.tgz -C $PROJECT_DIRECTORY .
+
 
           set -ex
+
+
+          echo "export MONGODB_AWS_SDK=$MONGODB_AWS_SDK" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+
+          echo "if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi" >>
+          $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+
+          echo "npm run check:aws" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+
+
+          cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
+
+          tar -czf $ECS_SRC_DIR/src.tgz -C $PROJECT_DIRECTORY .
+
+
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
+
           . ./activate-authawsvenv.sh
+
           export MONGODB_BINARIES="${MONGODB_BINARIES}";
+
           export PROJECT_DIRECTORY=$ECS_SRC_DIR;
+
           python aws_tester.py ecs
   run-ocsp-test:
     - command: shell.exec
@@ -1955,8 +1992,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1971,8 +2008,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -1987,8 +2024,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2003,8 +2040,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2019,8 +2056,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2035,8 +2072,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2051,8 +2088,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2067,8 +2104,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2083,10 +2120,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with regular aws credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -2098,26 +2137,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with assume role credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
   - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - command: expansions.update
@@ -2128,10 +2154,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -2144,10 +2172,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -2159,43 +2189,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws ECS auth test
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - command: expansions.update
@@ -2206,8 +2206,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2222,8 +2222,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2238,8 +2238,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2254,8 +2254,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2270,8 +2270,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2286,8 +2286,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2302,8 +2302,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2318,8 +2318,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2334,10 +2334,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with regular aws credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -2349,26 +2351,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with assume role credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
   - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - command: expansions.update
@@ -2379,10 +2368,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -2395,10 +2386,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -2410,42 +2403,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws ECS auth test
-  - name: >-
-      aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - command: expansions.update
@@ -2456,8 +2420,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2472,8 +2436,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2488,8 +2452,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2504,8 +2468,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2520,8 +2484,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2536,8 +2500,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2552,8 +2516,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2568,8 +2532,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2584,10 +2548,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with regular aws credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -2599,26 +2565,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with assume role credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
   - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - command: expansions.update
@@ -2629,10 +2582,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -2645,10 +2600,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -2660,42 +2617,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws ECS auth test
-  - name: >-
-      aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
     commands:
       - command: expansions.update
@@ -2706,8 +2634,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2722,8 +2650,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2738,8 +2666,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2754,8 +2682,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2770,8 +2698,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2786,8 +2714,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2802,8 +2730,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2818,8 +2746,8 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'true'}
       - func: install dependencies
-      - func: install aws-credential-providers
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
@@ -2834,10 +2762,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with regular aws credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
     commands:
@@ -2849,26 +2779,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with assume role credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
   - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
     commands:
       - command: expansions.update
@@ -2879,10 +2796,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials as environment variables
   - name: >-
       aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
@@ -2895,10 +2814,12 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws auth test with aws credentials and session token as environment variables
   - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
     commands:
@@ -2910,42 +2831,13 @@ tasks:
             - {key: AUTH, value: auth}
             - {key: ORCHESTRATION_FILE, value: auth-aws.json}
             - {key: TOPOLOGY, value: server}
+            - {key: MONGODB_AWS_SDK, value: 'false'}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: add aws auth variables to file
       - func: setup aws env
+      - func: remove aws-credential-providers
       - func: run aws ECS auth test
-  - name: >-
-      aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: run-unit-tests-node-16
     tags:
       - unit-tests
@@ -4411,15 +4303,10 @@ buildvariants:
       - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
       - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
       - >-
         aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -4430,15 +4317,10 @@ buildvariants:
       - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
       - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
       - >-
         aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -4449,15 +4331,10 @@ buildvariants:
       - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
       - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
       - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
       - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
       - >-
         aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
@@ -4468,15 +4345,10 @@ buildvariants:
       - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
       - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
       - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
       - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
       - >-
         aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
       - aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
   - name: ubuntu2204-test-atlas-data-lake
     display_name: Atlas Data Lake Tests
     run_on: ubuntu2204-large

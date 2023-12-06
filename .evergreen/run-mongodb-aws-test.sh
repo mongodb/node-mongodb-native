@@ -21,4 +21,5 @@ shopt -s expand_aliases # needed for `urlencode` alias
 set -x
 
 npm install aws4
+if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi
 npm run check:aws
