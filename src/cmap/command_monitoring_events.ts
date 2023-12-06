@@ -187,19 +187,11 @@ export const HELLO_COMMANDS = new Set([
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
 const namespace = (command: OpQueryRequest) => command.ns;
 const collectionName = (command: OpQueryRequest) => command.ns.split('.')[1];
-
-const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) => {
-  console.log('commandName----------------------');
-  console.log(commandName);
-  console.log('----------------------');
-  console.log('commandDoc.speculativeAuthenticate----------------------');
-  console.log(commandDoc.speculativeAuthenticate);
-  console.log('----------------------');
-  return SENSITIVE_COMMANDS.has(commandName) ||
-    (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
+const maybeRedact = (commandName: string, commandDoc: Document, result: Error | Document) =>
+  SENSITIVE_COMMANDS.has(commandName) ||
+  (HELLO_COMMANDS.has(commandName) && commandDoc.speculativeAuthenticate)
     ? {}
     : result;
-};
 
 const LEGACY_FIND_QUERY_MAP: { [key: string]: string } = {
   $query: 'filter',

@@ -241,11 +241,6 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   isIgnored(e: CommandEvent): boolean {
-    if (HELLO_COMMANDS.has(e.commandName)) {
-      console.log('isIgnored e.commandName----------------------');
-      console.log(e.commandName);
-      console.log('----------------------');
-    }
     return this.ignoredEvents.includes(e.commandName);
   }
 
@@ -272,6 +267,9 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
+    console.log('e----------------------');
+    console.log(e);
+    console.log('----------------------');
     if (!this.isIgnored(e)) {
       this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
