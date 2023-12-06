@@ -292,9 +292,9 @@ export class UnifiedMongoClient extends MongoClient {
       (this.observeSensitiveCommands === true || !this.isSensitiveCommand(e)) &&
       !this.isIgnored(e)
     ) {
+      this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
     }
-    this.commandEvents.push(e);
   };
 
   // NOTE: pushCmapEvent must be an arrow function
