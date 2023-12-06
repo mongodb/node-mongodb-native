@@ -15,6 +15,10 @@ export class IsCappedOperation extends AbstractOperation<boolean> {
     this.collection = collection;
   }
 
+  override get commandName() {
+    return 'listCollections' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const coll = this.collection;
     const [collection] = await coll.s.db

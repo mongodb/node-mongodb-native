@@ -24,6 +24,10 @@ export class InsertOperation extends CommandOperation<Document> {
     this.documents = documents;
   }
 
+  override get commandName() {
+    return 'insert' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const options = this.options ?? {};
     const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -112,6 +116,10 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     this.options = options;
     this.collection = collection;
     this.docs = docs;
+  }
+
+  override get commandName() {
+    return 'insert' as const;
   }
 
   override async execute(

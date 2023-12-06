@@ -25,6 +25,10 @@ export class CreateSearchIndexesOperation extends AbstractOperation<string[]> {
     super();
   }
 
+  override get commandName() {
+    return 'createSearchIndexes' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
     const namespace = this.collection.fullNamespace;
     const command = {

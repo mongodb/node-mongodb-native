@@ -12,6 +12,10 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     super();
   }
 
+  override get commandName() {
+    return 'dropSearchIndex' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
     const namespace = this.collection.fullNamespace;
 

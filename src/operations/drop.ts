@@ -25,6 +25,10 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
     this.name = name;
   }
 
+  override get commandName() {
+    return 'drop' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     const db = this.db;
     const options = this.options;
@@ -88,6 +92,10 @@ export class DropDatabaseOperation extends CommandOperation<boolean> {
     super(db, options);
     this.options = options;
   }
+  override get commandName() {
+    return 'dropDatabase' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
     await super.executeCommand(server, session, { dropDatabase: 1 });
     return true;

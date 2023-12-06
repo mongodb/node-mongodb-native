@@ -20,6 +20,10 @@ export class DbStatsOperation extends CommandOperation<Document> {
     this.options = options;
   }
 
+  override get commandName() {
+    return 'dbStats' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const command: Document = { dbStats: true };
     if (this.options.scale != null) {

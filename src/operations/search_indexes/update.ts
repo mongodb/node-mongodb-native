@@ -15,6 +15,10 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
     super();
   }
 
+  override get commandName() {
+    return 'updateSearchIndex' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
     const namespace = this.collection.fullNamespace;
     const command = {

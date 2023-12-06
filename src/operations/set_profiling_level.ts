@@ -47,6 +47,10 @@ export class SetProfilingLevelOperation extends CommandOperation<ProfilingLevel>
     this.level = level;
   }
 
+  override get commandName() {
+    return 'profile' as const;
+  }
+
   override async execute(
     server: Server,
     session: ClientSession | undefined

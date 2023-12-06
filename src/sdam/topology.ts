@@ -382,6 +382,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     return this.s.options.loadBalanced;
   }
 
+  get serverApi(): ServerApi | undefined {
+    return this.s.options.serverApi;
+  }
+
   get capabilities(): ServerCapabilities {
     return new ServerCapabilities(this.lastHello());
   }
