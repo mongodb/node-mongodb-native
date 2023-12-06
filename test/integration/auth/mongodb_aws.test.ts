@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import * as http from 'http';
 import { performance } from 'perf_hooks';
@@ -5,14 +7,38 @@ import * as sinon from 'sinon';
 
 import { MongoAWSError, type MongoClient, MongoDBAWS, MongoServerError } from '../../mongodb';
 
+function awsSdk() {
+  try {
+    return require('@aws-sdk/credential-providers');
+  } catch {
+    return null;
+  }
+}
+
 describe('MONGODB-AWS', function () {
+  let awsSdkPresent;
   let client: MongoClient;
+
   beforeEach(function () {
     const MONGODB_URI = process.env.MONGODB_URI;
     if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-AWS') === -1) {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
-      this.skip();
+      return this.skip();
     }
+
+    const { MONGODB_AWS_SDK = 'unset' } = process.env;
+    expect(
+      ['true', 'false'],
+      `Always inform the AWS tests if they run with or without the SDK (MONGODB_AWS_SDK=${MONGODB_AWS_SDK})`
+    ).to.include(MONGODB_AWS_SDK);
+
+    awsSdkPresent = !!awsSdk();
+    expect(
+      awsSdkPresent,
+      MONGODB_AWS_SDK === 'true'
+        ? 'expected aws sdk to be installed'
+        : 'expected aws sdk to not be installed'
+    ).to.be[MONGODB_AWS_SDK];
   });
 
   afterEach(async () => {
@@ -167,13 +193,7 @@ describe('MONGODB-AWS', function () {
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
-          credentialProvider = (() => {
-            try {
-              return require('@aws-sdk/credential-providers');
-            } catch {
-              return null;
-            }
-          })();
+          credentialProvider = awsSdk();
           return AWS_WEB_IDENTITY_TOKEN_FILE.length === 0 || credentialProvider == null;
         };
 
