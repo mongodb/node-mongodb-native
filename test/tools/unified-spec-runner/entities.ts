@@ -241,9 +241,11 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   isIgnored(e: CommandEvent): boolean {
-    console.log('----------------------');
-    console.log(e.commandName);
-    console.log('----------------------');
+    if (HELLO_COMMANDS.has(e.commandName)) {
+      console.log('isIgnored e.commandName----------------------');
+      console.log(e.commandName);
+      console.log('----------------------');
+    }
     return this.ignoredEvents.includes(e.commandName);
   }
 
