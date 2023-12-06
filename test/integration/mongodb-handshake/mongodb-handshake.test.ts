@@ -83,9 +83,6 @@ describe('MongoDB Handshake', () => {
       metadata: { requires: { topology: 'load-balanced' } },
       test: async function () {
         client = this.configuration.newClient({ loadBalanced: true });
-        // The load-balanced mode doesn’t perform SDAM,
-        // so `connect` doesn’t do anything unless authentication is enabled.
-        // Force the driver to send a command to the server in the noauth mode.
         await client.db('admin').command({ ping: 1 });
         expect(opMsgRequestToBinSpy).to.have.been.called;
       }
@@ -130,7 +127,7 @@ describe('MongoDB Handshake', () => {
           return this.skip();
         }
         client = this.configuration.newClient();
-        await client.connect();
+        await client.db('admin').command({ ping: 1 });
         expect(opQueryRequestToBinSpy).to.have.been.called;
         expect(opMsgRequestToBinSpy).to.have.been.called;
         opMsgRequestToBinSpy.calledAfter(opQueryRequestToBinSpy);
