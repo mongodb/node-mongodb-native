@@ -218,9 +218,9 @@ export class UnifiedMongoClient extends MongoClient {
 
     if (!description.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
-    } else {
-      this.observeSensitiveCommands = true;
     }
+
+    this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
