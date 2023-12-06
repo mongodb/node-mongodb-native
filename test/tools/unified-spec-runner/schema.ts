@@ -273,6 +273,8 @@ export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedS
 export interface ExpectedLogMessagesForClient {
   client: string;
   messages: ExpectedLogMessage[];
+  ignoreMessages: ExpectedLogMessage[];
+  ignoreExtraMessages: boolean;
 }
 
 export interface ExpectedCommandEvent {

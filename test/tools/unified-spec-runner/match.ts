@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { EJSON } from 'bson';
+import { EJSON, Int32 } from 'bson';
 import { expect } from 'chai';
 import { inspect } from 'util';
 
@@ -289,6 +289,8 @@ export function resultCheck(
   ) {
     // case to handle +0 and -0
     expect(Object.is(expected, actual)).to.be.true;
+  } else if (actual instanceof Int32 && typeof expected === 'number') {
+    expect(actual.value).to.equal(expected);
   } else {
     expect(actual).to.equal(expected);
   }
@@ -631,13 +633,35 @@ export function matchesEvents(
   }
 }
 
+export function filterLogs(
+  logsToIgnore: ExpectedLogMessage[],
+  actual: ExpectedLogMessage[],
+  entities: EntitiesMap
+): ExpectedLogMessage[] {
+  function isLogRelevant(log: ExpectedLogMessage) {
+    for (const logToIgnore of logsToIgnore) {
+      if (log.level === logToIgnore.level && log.component === logToIgnore.component) {
+        try {
+          // see if log matches a log to ignore, it is not relevant
+          resultCheck(log.data, logToIgnore.data, entities, undefined, false);
+          return false;
+        } catch {
+          continue;
+        }
+      }
+    }
+    // if log does not match any logs to ignore, it is relevant
+    return true;
+  }
+  const filteredMessages: ExpectedLogMessage[] = actual.filter(isLogRelevant);
+  return filteredMessages;
+}
+
 export function compareLogs(
   expected: ExpectedLogMessage[],
   actual: ExpectedLogMessage[],
   entities: EntitiesMap
 ): void {
-  console.log('ACTUAL LOGS', actual);
-  console.log('EXPECTED LOGS', expected);
   expect(actual).to.have.lengthOf(expected.length);
 
   for (const [index, actualLog] of actual.entries()) {

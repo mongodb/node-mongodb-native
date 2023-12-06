@@ -169,7 +169,7 @@ export class TopologyClosedEvent extends ServerDiscoveryAndMonitoringEvent {
 export class ServerHeartbeatStartedEvent extends ServerDiscoveryAndMonitoringEvent {
   /** The connection id for the command */
   connectionId: string;
-  /** Is true when using the streaming protocol. */
+  /** Is true when using the streaming protocol */
   awaited: boolean;
   /** @internal */
   name = SERVER_HEARTBEAT_STARTED;
@@ -194,7 +194,7 @@ export class ServerHeartbeatSucceededEvent extends ServerDiscoveryAndMonitoringE
   duration: number;
   /** The command reply */
   reply: Document;
-  /** Is true when using the streaming protocol. */
+  /** Is true when using the streaming protocol */
   awaited: boolean;
   /** @internal */
   name = SERVER_HEARTBEAT_SUCCEEDED;
@@ -227,7 +227,7 @@ export class ServerHeartbeatFailedEvent extends ServerDiscoveryAndMonitoringEven
   duration: number;
   /** The command failure */
   failure: Error;
-  /** Is true when using the streaming protocol. */
+  /** Is true when using the streaming protocol */
   awaited: boolean;
   /** @internal */
   name = SERVER_HEARTBEAT_FAILED;

@@ -178,7 +178,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     // create the monitor
-    this.monitor = new Monitor(this, this.s.options, this.topology.mongoLogger);
+    this.monitor = new Monitor(this, this.s.options, this.topology.client.mongoLogger);
 
     for (const event of HEARTBEAT_EVENTS) {
       this.monitor.on(event, (e: any) => this.emit(event, e));

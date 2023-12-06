@@ -358,9 +358,9 @@ function attachCommandFields(
 
 function attachConnectionFields(
   log: Record<string, any>,
-  connectionPoolEvent: ConnectionPoolMonitoringEvent | ServerOpeningEvent | ServerClosedEvent
+  connectionOrSDAMEvent: ConnectionPoolMonitoringEvent | ServerOpeningEvent | ServerClosedEvent
 ) {
-  const { host, port } = HostAddress.fromString(connectionPoolEvent.address).toHostPort();
+  const { host, port } = HostAddress.fromString(connectionOrSDAMEvent.address).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
 
@@ -381,7 +381,10 @@ function attachServerHeartbeatFields(
 ) {
   const { awaited, connectionId } = serverHeartbeatEvent;
   log.awaited = awaited;
-  log.driverConnectionId = connectionId;
+  log.driverConnectionId = 1;
+  const { host, port } = HostAddress.fromString(connectionId).toHostPort();
+  log.serverHost = host;
+  log.serverPort = port;
   return log;
 }
 
@@ -513,7 +516,7 @@ function defaultLogTransform(
     case SERVER_OPENING:
       log = attachSDAMFields(log, logObject);
       log = attachConnectionFields(log, logObject);
-      log.message = 'Started server monitoring';
+      log.message = 'Starting server monitoring';
       return log;
     case SERVER_CLOSED:
       log = attachSDAMFields(log, logObject);
@@ -530,18 +533,18 @@ function defaultLogTransform(
       log = attachServerHeartbeatFields(log, logObject);
       log.message = 'Server heartbeat succeeded';
       log.durationMS = logObject.duration;
-      log.reply = logObject.reply.toString();
+      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
       return log;
     case SERVER_HEARTBEAT_FAILED:
       log = attachSDAMFields(log, logObject);
       log = attachServerHeartbeatFields(log, logObject);
-      log.message = 'Server hearbeat failed';
+      log.message = 'Server heartbeat failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure;
+      log.failure = logObject.failure.message;
       return log;
     case TOPOLOGY_OPENING:
       log = attachSDAMFields(log, logObject);
-      log.message = 'Started topology monitoring';
+      log.message = 'Starting topology monitoring';
       return log;
     case TOPOLOGY_CLOSED:
       log = attachSDAMFields(log, logObject);
@@ -550,8 +553,14 @@ function defaultLogTransform(
     case TOPOLOGY_DESCRIPTION_CHANGED:
       log = attachSDAMFields(log, logObject);
       log.message = 'Topology description changed';
-      log.previousDescription = logObject.previousDescription.toString();
-      log.newDescription = logObject.newDescription.toString();
+      log.previousDescription = log.reply = stringifyWithMaxLen(
+        logObject.previousDescription,
+        maxDocumentLength
+      );
+      log.newDescription = log.reply = stringifyWithMaxLen(
+        logObject.newDescription,
+        maxDocumentLength
+      );
       return log;
     default:
       for (const [key, value] of Object.entries(logObject)) {

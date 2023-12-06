@@ -302,7 +302,7 @@ function extractReply(command: WriteProtocolMessageType, reply?: Document) {
   return deepCopy(reply.result ? reply.result : reply);
 }
 
-function extractConnectionDetails(connection: Connection) {
+export function extractConnectionDetails(connection: Connection) {
   let connectionId;
   if ('id' in connection) {
     connectionId = connection.id;

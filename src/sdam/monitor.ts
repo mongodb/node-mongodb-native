@@ -6,6 +6,7 @@ import { Connection, type ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
+import { MongoLoggableComponent, type MongoLogger } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, EventEmitterWithState } from '../utils';
 import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
@@ -17,7 +18,6 @@ import {
 } from './events';
 import { Server } from './server';
 import type { TopologyVersion } from './server_description';
-import { MongoLogger } from '../mongo_logger';
 
 /** @internal */
 const kServer = Symbol('server');
@@ -98,6 +98,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   [kMonitorId]?: MonitorInterval;
   rttPinger?: RTTPinger;
+  /** @internal */
+  override mongoLogger: MongoLogger;
+  /** @internal */
+  override component = MongoLoggableComponent.TOPOLOGY;
 
   get connection(): Connection | undefined {
     return this[kConnection];
@@ -150,7 +154,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.connectOptions = Object.freeze(connectOptions);
 
     this.mongoLogger = mongoLogger;
-    this.component = 'topology';
   }
 
   connect(): void {
@@ -264,6 +267,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         monitor[kServer].topology.s.id
       )
     );
+    monitor[kConnection]?.destroy({ force: true });
+    monitor[kConnection] = undefined;
 
     const error = !(err instanceof MongoError)
       ? new MongoError(MongoError.buildErrorMessage(err), { cause: err })
