@@ -54,7 +54,8 @@ describe('Max Staleness', function () {
       var self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(
-        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`
+        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`,
+        { serverApi: null } // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       );
 
       client.connect(function (err, client) {
@@ -86,7 +87,9 @@ describe('Max Staleness', function () {
 
     test: function (done) {
       const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+        serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
+      });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
 
@@ -124,7 +127,9 @@ describe('Max Staleness', function () {
       test: function (done) {
         var self = this;
         const configuration = this.configuration;
-        const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+          serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
+        });
         client.connect(function (err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
@@ -159,7 +164,9 @@ describe('Max Staleness', function () {
     test: function (done) {
       var self = this;
       const configuration = this.configuration;
-      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`);
+      const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
+        serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
+      });
       client.connect(function (err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
