@@ -2,6 +2,7 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 
+import { HELLO_COMMANDS } from '../../../src/cmap/command_monitoring_events';
 import {
   AbstractCursor,
   ChangeStream,
@@ -240,6 +241,9 @@ export class UnifiedMongoClient extends MongoClient {
   }
 
   isIgnored(e: CommandEvent): boolean {
+    console.log('----------------------');
+    console.log(e.commandName);
+    console.log('----------------------');
     return this.ignoredEvents.includes(e.commandName);
   }
 
