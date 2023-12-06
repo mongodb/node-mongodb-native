@@ -563,13 +563,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  moreToComeCommand(
+  exhaustCommand(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
-    callback: Callback
+    replyListener: Callback
   ) {
-    return this.command(ns, command, options, callback);
+    return this.command(ns, command, options, replyListener);
   }
 }
 
@@ -1164,6 +1164,15 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     return document;
+  }
+
+  exhaustCommand(
+    _ns: MongoDBNamespace,
+    _command: Document,
+    _options: CommandOptions,
+    _replyListener: Callback
+  ) {
+    throw new Error('NODE-5742: not implemented.');
   }
 }
 

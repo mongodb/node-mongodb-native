@@ -328,7 +328,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     if (isAwaitable) {
       awaited = true;
-      return connection.moreToComeCommand(ns('admin.$cmd'), cmd, options, (error, hello) => {
+      return connection.exhaustCommand(ns('admin.$cmd'), cmd, options, (error, hello) => {
         if (error) return onHeartbeatFailed(error);
         return onHeartbeatSucceeded(hello);
       });
