@@ -177,11 +177,7 @@ export const SENSITIVE_COMMANDS = new Set([
   'copydb'
 ]);
 
-export const HELLO_COMMANDS = new Set([
-  'hello',
-  LEGACY_HELLO_COMMAND,
-  LEGACY_HELLO_COMMAND_CAMEL_CASE
-]);
+const HELLO_COMMANDS = new Set(['hello', LEGACY_HELLO_COMMAND, LEGACY_HELLO_COMMAND_CAMEL_CASE]);
 
 // helper methods
 const extractCommandName = (commandDoc: Document) => Object.keys(commandDoc)[0];
