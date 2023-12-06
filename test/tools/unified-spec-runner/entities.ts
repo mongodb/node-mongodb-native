@@ -252,10 +252,10 @@ export class UnifiedMongoClient extends MongoClient {
         typeof e.reply === 'object' &&
         (e.reply === null || !Object.keys(e.reply).length))
     ) {
-      return false;
+      return true;
     }
 
-    return true;
+    return false;
   }
 
   isIgnored(e: CommandEvent): boolean {
