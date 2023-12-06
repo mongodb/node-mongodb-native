@@ -119,7 +119,6 @@ export class UnifiedMongoClient extends MongoClient {
   logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
-  observeSensitiveCommands = false;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -218,8 +217,6 @@ export class UnifiedMongoClient extends MongoClient {
 
     if (!description.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
-    } else {
-      this.observeSensitiveCommands = description.observeSensitiveCommands;
     }
 
     this.observedCommandEvents = (description.observeEvents ?? [])
@@ -291,10 +288,7 @@ export class UnifiedMongoClient extends MongoClient {
     console.log('e----------------------');
     console.log(e);
     console.log('----------------------');
-    console.log('this.observeSensitiveCommands----------------------');
-    console.log(this.observeSensitiveCommands);
-    console.log('----------------------');
-    if ((!this.observeSensitiveCommands || !this.isSensitiveCommand(e)) && !this.isIgnored(e)) {
+    if (!this.isSensitiveCommand(e) && !this.isIgnored(e)) {
       this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
     }
