@@ -288,16 +288,13 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
-    console.log('e----------------------');
-    console.log(e);
-    console.log('----------------------');
     if (
       (this.observeSensitiveCommands === true || !this.isSensitiveCommand(e)) &&
       !this.isIgnored(e)
     ) {
-      this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
     }
+    this.commandEvents.push(e);
   };
 
   // NOTE: pushCmapEvent must be an arrow function
