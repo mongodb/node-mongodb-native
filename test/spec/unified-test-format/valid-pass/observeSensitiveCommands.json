@@ -61,6 +61,11 @@
   "tests": [
     {
       "description": "getnonce is observed with observeSensitiveCommands=true",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "6.1.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -106,6 +111,11 @@
     },
     {
       "description": "getnonce is not observed with observeSensitiveCommands=false",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "6.1.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",
@@ -127,6 +137,11 @@
     },
     {
       "description": "getnonce is not observed by default",
+      "runOnRequirements": [
+        {
+          "maxServerVersion": "6.1.99"
+        }
+      ],
       "operations": [
         {
           "name": "runCommand",

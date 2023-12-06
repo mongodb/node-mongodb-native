@@ -38,6 +38,8 @@ createEntities:
 
 tests:
   - description: "getnonce is observed with observeSensitiveCommands=true"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
     operations:
       - name: runCommand
         object: *databaseObserveSensitiveCommands
@@ -57,6 +59,8 @@ tests:
                 nonce: { $$exists: false }
 
   - description: "getnonce is not observed with observeSensitiveCommands=false"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
     operations:
       - name: runCommand
         object: *databaseDoNotObserveSensitiveCommands
@@ -68,6 +72,8 @@ tests:
         events: []
 
   - description: "getnonce is not observed by default"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
     operations:
       - name: runCommand
         object: *databaseDoNotObserveSensitiveCommandsByDefault
@@ -247,4 +253,3 @@ tests:
         events: *ismasterAndisMasterEvents
       - client: *clientDoNotObserveSensitiveCommandsByDefault
         events: *ismasterAndisMasterEvents
-        
