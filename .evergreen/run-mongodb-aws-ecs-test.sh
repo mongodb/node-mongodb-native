@@ -10,11 +10,7 @@ cd $PROJECT_DIRECTORY
 tar -xzf src.tgz .
 
 # load node.js
-set +x
 source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
-set -x
 
 # run the tests
 npm install aws4
-
-npm run check:aws

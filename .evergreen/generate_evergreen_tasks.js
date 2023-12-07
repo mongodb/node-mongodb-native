@@ -332,12 +332,18 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
   const awsFuncs = [
     { func: 'run aws auth test with regular aws credentials' },
     { func: 'run aws auth test with assume role credentials' },
-    { func: 'run aws auth test with aws EC2 credentials' },
+    { func: 'run aws auth test with aws EC2 credentials', onlySdk: true },
     { func: 'run aws auth test with aws credentials as environment variables' },
     { func: 'run aws auth test with aws credentials and session token as environment variables' },
     { func: 'run aws ECS auth test' },
-    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset' },
-    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
+    {
+      func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset',
+      onlySdk: true
+    },
+    {
+      func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set',
+      onlySdk: true
+    }
   ];
 
   const awsTasks = awsFuncs.map(fn => ({
@@ -347,33 +353,37 @@ for (const VERSION of AWS_AUTH_VERSIONS) {
         VERSION,
         AUTH: 'auth',
         ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
+        TOPOLOGY: 'server',
+        MONGODB_AWS_SDK: 'true'
       }),
       { func: 'install dependencies' },
-      { func: 'install aws-credential-providers' },
       { func: 'bootstrap mongo-orchestration' },
       { func: 'add aws auth variables to file' },
       { func: 'setup aws env' },
-      { ...fn }
+      { func: fn.func }
     ]
   }));
 
-  const awsNoPeerDependenciesTasks = awsFuncs.map(fn => ({
-    name: `${name(fn.func)}-no-peer-dependencies`,
-    commands: [
-      updateExpansions({
-        VERSION,
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'add aws auth variables to file' },
-      { func: 'setup aws env' },
-      { ...fn }
-    ]
-  }));
+  const awsNoPeerDependenciesTasks = awsFuncs
+    .filter(fn => fn.onlySdk !== true)
+    .map(fn => ({
+      name: `${name(fn.func)}-no-peer-dependencies`,
+      commands: [
+        updateExpansions({
+          VERSION: VERSION,
+          AUTH: 'auth',
+          ORCHESTRATION_FILE: 'auth-aws.json',
+          TOPOLOGY: 'server',
+          MONGODB_AWS_SDK: 'false'
+        }),
+        { func: 'install dependencies' },
+        { func: 'bootstrap mongo-orchestration' },
+        { func: 'add aws auth variables to file' },
+        { func: 'setup aws env' },
+        { func: 'remove aws-credential-providers' },
+        { func: fn.func }
+      ]
+    }));
 
   const allAwsTasks = awsTasks.concat(awsNoPeerDependenciesTasks);
 
