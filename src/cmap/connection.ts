@@ -170,11 +170,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
-  commandAsync: (
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions | undefined
-  ) => Promise<Document>;
   /** @internal */
   authContext?: AuthContext;
 
@@ -217,15 +212,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions | undefined,
-        callback: Callback
-      ) => this.command(ns, cmd, options, callback as any)
-    );
-
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
@@ -260,6 +246,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // hook the message stream up to the passed in stream
     this[kStream].pipe(this[kMessageStream]);
     this[kMessageStream].pipe(this[kStream]);
+  }
+
+  // This whole class is temporary,
+  // Need to move this to be defined on the prototype for spying.
+  async commandAsync(ns: MongoDBNamespace, cmd: Document, opt?: CommandOptions) {
+    return promisify(this.command.bind(this))(ns, cmd, opt);
   }
 
   get description(): StreamDescription {
@@ -791,7 +783,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   lastHelloMS?: number;
   serverApi?: ServerApi;
   helloOk?: boolean;
-  commandAsync: ModernConnection['command'];
   /** @internal */
   authContext?: AuthContext;
 
@@ -831,8 +822,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
-    this.commandAsync = this.command.bind(this);
-
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
@@ -850,6 +839,10 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.socket.on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
+  }
+
+  async commandAsync(...args: Parameters<typeof this.command>) {
+    return this.command(...args);
   }
 
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
@@ -1036,13 +1029,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     return message;
   }
 
-  private async sendCommand(
-    message: WriteProtocolMessageType,
-    options: CommandOptions
-  ): Promise<Document> {
-    const { signal } = this.controller;
-
-    signal.throwIfAborted();
+  private async *sendWire(message: WriteProtocolMessageType, options: CommandOptions) {
+    this.controller.signal.throwIfAborted();
 
     if (typeof options.socketTimeoutMS === 'number') {
       this.socket.setTimeout(options.socketTimeoutMS);
@@ -1050,48 +1038,59 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       this.socket.setTimeout(this.socketTimeoutMS);
     }
 
-    let response;
     try {
       await writeCommand(this, message, {
         agreedCompressor: this.description.compressor ?? 'none',
         zlibCompressionLevel: this.description.zlibCompressionLevel,
-        signal
+        signal: this.controller.signal
       });
 
-      if (options.noResponse) return { ok: 1 };
-
-      signal.throwIfAborted();
-
-      response = await read(this, { signal });
-    } finally {
       // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
-      if (!signal.aborted) this.controller = new AbortController();
-    }
+      this.controller = new AbortController();
 
-    response.parse(options);
-
-    const [document] = response.documents;
-
-    if (!Buffer.isBuffer(document)) {
-      const { session } = options;
-      if (session) {
-        updateSessionFromResponse(session, document);
+      if (options.noResponse) {
+        yield { ok: 1 };
+        return;
       }
 
-      if (document.$clusterTime) {
-        this[kClusterTime] = document.$clusterTime;
-        this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
-      }
-    }
+      this.controller.signal.throwIfAborted();
 
-    return document;
+      for await (const response of readMany(this, { signal: this.controller.signal })) {
+        this.socket.setTimeout(0);
+        response.parse(options);
+
+        const [document] = response.documents;
+
+        if (!Buffer.isBuffer(document)) {
+          const { session } = options;
+          if (session) {
+            updateSessionFromResponse(session, document);
+          }
+
+          if (document.$clusterTime) {
+            this[kClusterTime] = document.$clusterTime;
+            this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+          }
+        }
+
+        this.controller.signal.throwIfAborted();
+        // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
+        this.controller = new AbortController();
+        yield document;
+        this.controller.signal.throwIfAborted();
+
+        if (typeof options.socketTimeoutMS === 'number') {
+          this.socket.setTimeout(options.socketTimeoutMS);
+        } else if (this.socketTimeoutMS !== 0) {
+          this.socket.setTimeout(this.socketTimeoutMS);
+        }
+      }
+    } finally {
+      this.socket.setTimeout(0);
+    }
   }
 
-  async command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: CommandOptions = {}
-  ): Promise<Document> {
+  async *sendCommand(ns: MongoDBNamespace, command: Document, options: CommandOptions = {}) {
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
@@ -1103,76 +1102,87 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       );
     }
 
-    let document = null;
+    let document;
     try {
-      document = await this.sendCommand(message, options);
-    } catch (ioError) {
-      if (this.monitorCommands) {
-        this.emit(
-          ModernConnection.COMMAND_FAILED,
-          new CommandFailedEvent(this as unknown as Connection, message, ioError, started)
-        );
+      this.controller.signal.throwIfAborted();
+      for await (document of this.sendWire(message, options)) {
+        if (!Buffer.isBuffer(document) && document.writeConcernError) {
+          throw new MongoWriteConcernError(document.writeConcernError, document);
+        }
+
+        if (
+          !Buffer.isBuffer(document) &&
+          (document.ok === 0 || document.$err || document.errmsg || document.code)
+        ) {
+          throw new MongoServerError(document);
+        }
+
+        if (this.monitorCommands) {
+          this.emit(
+            ModernConnection.COMMAND_SUCCEEDED,
+            new CommandSucceededEvent(
+              this as unknown as Connection,
+              message,
+              options.noResponse ? undefined : document,
+              started
+            )
+          );
+        }
+
+        this.controller.signal.throwIfAborted();
+        yield document;
+        this.controller.signal.throwIfAborted();
       }
-      throw ioError;
-    }
-
-    if (document == null) {
-      const unexpected = new MongoUnexpectedServerResponseError(
-        'sendCommand did not throw and did not return a document'
-      );
+    } catch (error) {
       if (this.monitorCommands) {
-        this.emit(
-          ModernConnection.COMMAND_FAILED,
-          new CommandFailedEvent(this as unknown as Connection, message, unexpected, started)
-        );
+        error.name === 'MongoWriteConcernError'
+          ? this.emit(
+              ModernConnection.COMMAND_SUCCEEDED,
+              new CommandSucceededEvent(
+                this as unknown as Connection,
+                message,
+                options.noResponse ? undefined : document,
+                started
+              )
+            )
+          : this.emit(
+              ModernConnection.COMMAND_FAILED,
+              new CommandFailedEvent(this as unknown as Connection, message, error, started)
+            );
       }
-      throw unexpected;
+      throw error;
     }
+  }
 
-    if (document.writeConcernError) {
-      const writeConcernError = new MongoWriteConcernError(document.writeConcernError, document);
-      if (this.monitorCommands) {
-        this.emit(
-          ModernConnection.COMMAND_SUCCEEDED,
-          new CommandSucceededEvent(this as unknown as Connection, message, document, started)
-        );
-      }
-      throw writeConcernError;
+  async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {}
+  ): Promise<Document> {
+    this.controller.signal.throwIfAborted();
+    for await (const document of this.sendCommand(ns, command, options)) {
+      this.controller.signal.throwIfAborted();
+      return document;
     }
-
-    if (document.ok === 0 || document.$err || document.errmsg || document.code) {
-      const serverError = new MongoServerError(document);
-      if (this.monitorCommands) {
-        this.emit(
-          ModernConnection.COMMAND_FAILED,
-          new CommandFailedEvent(this as unknown as Connection, message, serverError, started)
-        );
-      }
-      throw serverError;
-    }
-
-    if (this.monitorCommands) {
-      this.emit(
-        ModernConnection.COMMAND_SUCCEEDED,
-        new CommandSucceededEvent(
-          this as unknown as Connection,
-          message,
-          options.noResponse ? undefined : document,
-          started
-        )
-      );
-    }
-
-    return document;
+    throw new MongoUnexpectedServerResponseError('Unable to get response from server');
   }
 
   exhaustCommand(
-    _ns: MongoDBNamespace,
-    _command: Document,
-    _options: CommandOptions,
-    _replyListener: Callback
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions,
+    replyListener: Callback
   ) {
-    throw new Error('NODE-5742: not implemented.');
+    const exhaustLoop = async () => {
+      this.controller.signal.throwIfAborted();
+      for await (const reply of this.sendCommand(ns, command, options)) {
+        this.controller.signal.throwIfAborted();
+        replyListener(undefined, reply);
+        this.controller.signal.throwIfAborted();
+      }
+      throw new MongoUnexpectedServerResponseError('Server ended moreToCome unexpectedly');
+    };
+    exhaustLoop().catch(replyListener);
   }
 }
 
