@@ -125,7 +125,7 @@ describe('monitoring', function () {
     });
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
-  describe.only('Monitor', function () {
+  describe('Monitor', function () {
     let monitor;
 
     beforeEach(() => {

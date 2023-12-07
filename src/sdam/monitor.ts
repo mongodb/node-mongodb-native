@@ -6,7 +6,7 @@ import { Connection, type ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
-import { MongoLoggableComponent, type MongoLogger } from '../mongo_logger';
+import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, EventEmitterWithState } from '../utils';
 import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
@@ -385,7 +385,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
           monitor.address,
           calculateDurationInMs(start),
           conn.hello,
-          useStreamingProtocol(monitor, conn.hello?.topologyVersion),
+          useStreamingProtocol(monitor, conn.hello?.topologyVersion)
         )
       );
 
