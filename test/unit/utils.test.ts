@@ -1,7 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
 
 import {
+  abortable,
   BufferPool,
   ByteUtils,
   compareObjectId,
@@ -20,6 +22,7 @@ import {
   shuffle,
   TimeoutController
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 import { createTimerSandbox } from './timer_sandbox';
 
 describe('driver utils', function () {
@@ -1162,6 +1165,150 @@ describe('driver utils', function () {
           clock.tick(1);
           expect(spy, 'spy was not called after 3000ms').to.have.been.called;
         });
+      });
+    });
+  });
+
+  describe('abortable()', () => {
+    const goodError = new Error('good error');
+    const badError = new Error('unexpected bad error!');
+    const expectedValue = "don't panic";
+
+    context('when not given a signal', () => {
+      it('returns promise fulfillment if the promise resolves or rejects', async () => {
+        expect(await abortable(Promise.resolve(expectedValue))).to.equal(expectedValue);
+        expect(await abortable(Promise.reject(goodError)).catch(e => e)).to.equal(goodError);
+      });
+
+      it('pends indefinitely if the promise is never settled', async () => {
+        const forever = abortable(new Promise(() => null));
+        // Assume 100ms is good enough to prove "forever"
+        expect(await Promise.race([forever, sleep(100).then(() => expectedValue)])).to.equal(
+          expectedValue
+        );
+      });
+    });
+
+    context('always removes the abort listener it attaches', () => {
+      let controller;
+      let removeEventListenerSpy;
+      let addEventListenerSpy;
+
+      beforeEach(() => {
+        controller = new AbortController();
+        addEventListenerSpy = sinon.spy(controller.signal, 'addEventListener');
+        removeEventListenerSpy = sinon.spy(controller.signal, 'removeEventListener');
+      });
+
+      afterEach(() => sinon.restore());
+
+      const expectListenerCleanup = () => {
+        expect(addEventListenerSpy).to.have.been.calledOnce;
+        expect(removeEventListenerSpy).to.have.been.calledOnce;
+      };
+
+      it('when promise rejects', async () => {
+        await abortable(Promise.reject(goodError), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+
+      it('when promise resolves', async () => {
+        await abortable(Promise.resolve(expectedValue), { signal: controller.signal });
+        expectListenerCleanup();
+      });
+
+      it('when signal aborts', async () => {
+        setTimeout(() => controller.abort(goodError));
+        await abortable(new Promise(() => null), { signal: controller.signal }).catch(e => e);
+        expectListenerCleanup();
+      });
+    });
+
+    context('when given already rejected promise with already aborted signal', () => {
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(badError);
+        const result = await abortable(Promise.reject(goodError), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    context('when given already resolved promise with already aborted signal', () => {
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(badError);
+        const result = await abortable(Promise.resolve(expectedValue), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    context('when given already rejected promise with not yet aborted signal', () => {
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(Promise.reject(goodError), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    context('when given already resolved promise with not yet aborted signal', () => {
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(Promise.resolve(expectedValue), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    context('when given unresolved promise with an already aborted signal', () => {
+      it('returns signal reason', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        controller.abort(goodError);
+        const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    context('when given eventually rejecting promise with not yet aborted signal', () => {
+      const eventuallyReject = async () => {
+        await sleep(1);
+        throw goodError;
+      };
+
+      it('returns promise rejection', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(eventuallyReject(), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
+      });
+    });
+
+    context('when given eventually resolving promise with not yet aborted signal', () => {
+      const eventuallyResolve = async () => {
+        await sleep(1);
+        return expectedValue;
+      };
+
+      it('returns promise resolution', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        const result = await abortable(eventuallyResolve(), { signal }).catch(e => e);
+        expect(result).to.deep.equal(expectedValue);
+      });
+    });
+
+    context('when given unresolved promise with eventually aborted signal', () => {
+      it('returns signal reason', async () => {
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        setTimeout(() => controller.abort(goodError), 1);
+
+        const result = await abortable(new Promise(() => null), { signal }).catch(e => e);
+        expect(result).to.deep.equal(goodError);
       });
     });
   });

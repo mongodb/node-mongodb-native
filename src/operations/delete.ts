@@ -53,6 +53,10 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
     this.statements = statements;
   }
 
+  override get commandName() {
+    return 'delete' as const;
+  }
+
   override get canRetryWrite(): boolean {
     if (super.canRetryWrite === false) {
       return false;

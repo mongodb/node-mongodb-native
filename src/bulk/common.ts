@@ -880,11 +880,15 @@ const executeCommandsAsync = promisify(executeCommands);
  * We would like this logic to simply live inside the BulkWriteOperation class
  * @internal
  */
-class BulkWriteShimOperation extends AbstractOperation {
+export class BulkWriteShimOperation extends AbstractOperation {
   bulkOperation: BulkOperationBase;
   constructor(bulkOperation: BulkOperationBase, options: BulkWriteOptions) {
     super(options);
     this.bulkOperation = bulkOperation;
+  }
+
+  get commandName(): string {
+    return 'bulkWrite' as const;
   }
 
   execute(_server: Server, session: ClientSession | undefined): Promise<any> {

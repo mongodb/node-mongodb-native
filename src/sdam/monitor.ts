@@ -127,24 +127,21 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
-    const connectOptions = Object.assign(
-      {
-        id: '<monitor>' as const,
-        generation: server.pool.generation,
-        connectionType: Connection,
-        cancellationToken,
-        hostAddress: server.description.hostAddress
-      },
-      options,
+    const connectOptions = {
+      id: '<monitor>' as const,
+      generation: server.pool.generation,
+      cancellationToken,
+      hostAddress: server.description.hostAddress,
+      ...options,
       // force BSON serialization options
-      {
-        raw: false,
-        useBigInt64: false,
-        promoteLongs: true,
-        promoteValues: true,
-        promoteBuffers: true
-      }
-    );
+      raw: false,
+      useBigInt64: false,
+      promoteLongs: true,
+      promoteValues: true,
+      promoteBuffers: true,
+      // TODO(NODE-5741): override monitors to use old connection
+      connectionType: Connection
+    };
 
     // ensure no authentication is used for monitoring
     delete connectOptions.credentials;

@@ -330,7 +330,7 @@ The following steps will walk you through how to start and test a load balancer.
    A new file name `lb.env` is automatically created.
 1. Source the environment variables using a command like `source lb.env`.
 1. Export **each** of the environment variables that were created in `lb.env`. For example: `export SINGLE_MONGOS_LB_URI`.
-1. Export the `LOAD_BALANCED` environment variable to 'true': `export LOAD_BALANCED='true'`
+1. Export the `LOAD_BALANCER` environment variable to 'true': `export LOAD_BALANCER='true'`
 1. Disable auth for tests: `export AUTH='noauth'`
 1. Run the test suite as you normally would:
    ```sh

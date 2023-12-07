@@ -200,6 +200,8 @@ functions:
       type: test
       params:
         working_dir: "src"
+        env:
+          MONGODB_NEW_CONNECTION: ${MONGODB_NEW_CONNECTION|false}
         timeout_secs: 300
         shell: bash
         script: |
@@ -476,7 +478,7 @@ functions:
         args:
           - .evergreen/install-dependencies.sh
 
-  "install aws-credential-providers":
+  "remove aws-credential-providers":
     - command: shell.exec
       type: setup
       params:
@@ -485,7 +487,7 @@ functions:
         script: |
           ${PREPARE_SHELL}
           source "${PROJECT_DIRECTORY}/.evergreen/init-node-and-npm-env.sh"
-          npm install @aws-sdk/credential-providers
+          rm -rf ./node_modules/@aws-sdk/credential-providers
 
   "run atlas tests":
     - command: shell.exec
@@ -674,6 +676,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -711,6 +715,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -734,6 +740,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -761,6 +769,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -788,6 +798,7 @@ functions:
     - command: shell.exec
       type: test
       params:
+        add_expansions_to_env: true
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -815,6 +826,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -841,6 +854,8 @@ functions:
     - command: shell.exec
       type: test
       params:
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
@@ -851,6 +866,8 @@ functions:
       type: test
       params:
         working_dir: src
+        env:
+          MONGODB_AWS_SDK: ${MONGODB_AWS_SDK}
         shell: bash
         script: |
           ${PREPARE_SHELL}
@@ -859,10 +876,16 @@ functions:
 
           # pack up project directory to ssh it to the container
           mkdir -p $ECS_SRC_DIR/.evergreen
+
+          set -ex
+
+          echo "export MONGODB_AWS_SDK=$MONGODB_AWS_SDK" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+          echo "if [ $MONGODB_AWS_SDK = 'false' ]; then rm -rf ./node_modules/@aws-sdk/credential-providers; fi" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+          echo "npm run check:aws" >> $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh
+
           cp $PROJECT_DIRECTORY/.evergreen/run-mongodb-aws-ecs-test.sh $ECS_SRC_DIR/.evergreen
           tar -czf $ECS_SRC_DIR/src.tgz -C $PROJECT_DIRECTORY .
 
-          set -ex
           cd ${DRIVERS_TOOLS}/.evergreen/auth_aws
           . ./activate-authawsvenv.sh
           export MONGODB_BINARIES="${MONGODB_BINARIES}";

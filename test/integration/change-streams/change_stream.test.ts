@@ -1262,7 +1262,9 @@ describe('Change Streams', function () {
           }
           req.reply({ ok: 1 });
         });
-        const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`);
+        const client = this.configuration.newClient(`mongodb://${mockServer.uri()}/`, {
+          serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
+        });
         client.connect(err => {
           expect(err).to.not.exist;
           const collection = client.db('cs').collection('test');

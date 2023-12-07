@@ -367,14 +367,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           return cb(err);
         }
 
-        conn.command(
-          ns,
-          cmd,
-          finalOptions,
-          makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-            this.decrementOperationCount();
-            cb(error, response);
-          })
+        const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+          this.decrementOperationCount();
+          cb(error, response);
+        });
+        conn.commandAsync(ns, cmd, finalOptions).then(
+          r => handler(undefined, r),
+          e => handler(e)
         );
       },
       callback
@@ -530,6 +529,10 @@ function makeOperationHandler(
 
     if (!error) {
       return callback(new MongoUnexpectedServerResponseError('Empty response with no error'));
+    }
+
+    if (error.name === 'AbortError' && error.cause instanceof MongoError) {
+      error = error.cause;
     }
 
     if (!(error instanceof MongoError)) {

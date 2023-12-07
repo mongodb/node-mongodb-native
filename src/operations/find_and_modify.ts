@@ -121,7 +121,7 @@ function configureFindAndModifyCmdBaseUpdateOpts(
 }
 
 /** @internal */
-class FindAndModifyOperation extends CommandOperation<Document> {
+export class FindAndModifyOperation extends CommandOperation<Document> {
   override options: FindOneAndReplaceOptions | FindOneAndUpdateOptions | FindOneAndDeleteOptions;
   cmdBase: FindAndModifyCmdBase;
   collection: Collection;
@@ -176,6 +176,10 @@ class FindAndModifyOperation extends CommandOperation<Document> {
 
     this.collection = collection;
     this.query = query;
+  }
+
+  override get commandName() {
+    return 'findAndModify' as const;
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {

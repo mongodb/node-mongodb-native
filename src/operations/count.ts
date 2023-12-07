@@ -32,6 +32,10 @@ export class CountOperation extends CommandOperation<number> {
     this.query = filter;
   }
 
+  override get commandName() {
+    return 'count' as const;
+  }
+
   override async execute(server: Server, session: ClientSession | undefined): Promise<number> {
     const options = this.options;
     const cmd: Document = {

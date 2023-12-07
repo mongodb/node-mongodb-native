@@ -167,6 +167,7 @@ const testConfigBeforeHook = async function () {
     serverApi: MONGODB_API_VERSION,
     atlas: process.env.ATLAS_CONNECTIVITY != null,
     aws: MONGODB_URI.includes('authMechanism=MONGODB-AWS'),
+    awsSdk: process.env.MONGODB_AWS_SDK,
     azure: MONGODB_URI.includes('PROVIDER_NAME:azure'),
     adl: this.configuration.buildInfo.dataLake
       ? this.configuration.buildInfo.dataLake.version
@@ -176,7 +177,8 @@ const testConfigBeforeHook = async function () {
     ocsp: process.env.OCSP_TLS_SHOULD_SUCCEED != null && process.env.CA_FILE != null,
     socks5: MONGODB_URI.includes('proxyHost='),
     compressor: process.env.COMPRESSOR,
-    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH
+    cryptSharedLibPath: process.env.CRYPT_SHARED_LIB_PATH,
+    newConnectionTesting: process.env.MONGODB_NEW_CONNECTION
   };
 
   console.error(inspect(currentEnv, { colors: true }));
