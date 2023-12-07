@@ -410,7 +410,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     ...args: Parameters<Events[EventKey]>
   ): void {
     this.emit(event, ...args);
-    if (this.component) this.mongoLogger?.debug?.(this.component, args[0]);
+    if (this.component) this.mongoLogger?.debug(this.component, args[0]);
   }
 }
 

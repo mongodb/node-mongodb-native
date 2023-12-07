@@ -25,7 +25,16 @@ class MockServer {
     this.pool = { generation: 1 };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
-    this.topology = { s: { topologyId: 1 }, client: { mongoLogger: {} } };
+    this.topology = {
+      s: { topologyId: 1 },
+      client: {
+        mongoLogger: {
+          debug: function (_v: any, _x: any) {
+            return;
+          }
+        }
+      }
+    };
   }
 }
 
