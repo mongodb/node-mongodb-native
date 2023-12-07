@@ -358,9 +358,9 @@ function attachCommandFields(
 
 function attachConnectionFields(
   log: Record<string, any>,
-  connectionOrSDAMEvent: ConnectionPoolMonitoringEvent | ServerOpeningEvent | ServerClosedEvent
+  event: ConnectionPoolMonitoringEvent | ServerOpeningEvent | ServerClosedEvent
 ) {
-  const { host, port } = HostAddress.fromString(connectionOrSDAMEvent.address).toHostPort();
+  const { host, port } = HostAddress.fromString(event.address).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
 
@@ -381,7 +381,7 @@ function attachServerHeartbeatFields(
 ) {
   const { awaited, connectionId } = serverHeartbeatEvent;
   log.awaited = awaited;
-  log.driverConnectionId = 1;
+  log.driverConnectionId = serverHeartbeatEvent.connectionId;
   const { host, port } = HostAddress.fromString(connectionId).toHostPort();
   log.serverHost = host;
   log.serverPort = port;

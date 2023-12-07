@@ -352,9 +352,6 @@
                 "driverConnectionId": {
                   "$$exists": true
                 },
-                "serverConnectionId": {
-                  "$$exists": true
-                },
                 "durationMS": {
                   "$$type": [
                     "int",
@@ -393,9 +390,6 @@
                 "driverConnectionId": {
                   "$$exists": true
                 },
-                "serverConnectionId": {
-                  "$$exists": true
-                },
                 "durationMS": {
                   "$$type": [
                     "int",
@@ -432,9 +426,6 @@
                   ]
                 },
                 "driverConnectionId": {
-                  "$$exists": true
-                },
-                "serverConnectionId": {
                   "$$exists": true
                 },
                 "durationMS": {

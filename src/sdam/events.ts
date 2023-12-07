@@ -175,7 +175,7 @@ export class ServerHeartbeatStartedEvent extends ServerDiscoveryAndMonitoringEve
   name = SERVER_HEARTBEAT_STARTED;
 
   /** @internal */
-  constructor(connectionId: string, awaited: boolean, topologyId: number) {
+  constructor(topologyId: number, connectionId: string, awaited: boolean) {
     super(topologyId);
     this.connectionId = connectionId;
     this.awaited = awaited;
@@ -201,11 +201,11 @@ export class ServerHeartbeatSucceededEvent extends ServerDiscoveryAndMonitoringE
 
   /** @internal */
   constructor(
+    topologyId: number,
     connectionId: string,
     duration: number,
     reply: Document | null,
-    awaited: boolean,
-    topologyId: number
+    awaited: boolean
   ) {
     super(topologyId);
     this.connectionId = connectionId;
@@ -234,11 +234,11 @@ export class ServerHeartbeatFailedEvent extends ServerDiscoveryAndMonitoringEven
 
   /** @internal */
   constructor(
+    topologyId: number,
     connectionId: string,
     duration: number,
     failure: Error,
-    awaited: boolean,
-    topologyId: number
+    awaited: boolean
   ) {
     super(topologyId);
     this.connectionId = connectionId;

@@ -20,10 +20,12 @@ import { createTimerSandbox } from '../timer_sandbox';
 class MockServer {
   pool: any;
   description: ServerDescription;
+  topology: any;
   constructor(options) {
     this.pool = { generation: 1 };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
+    this.topology = { s: { topologyId: 1 }, client: { mongoLogger: {} } };
   }
 }
 
@@ -123,7 +125,7 @@ describe('monitoring', function () {
     });
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
-  describe('Monitor', function () {
+  describe.only('Monitor', function () {
     let monitor;
 
     beforeEach(() => {

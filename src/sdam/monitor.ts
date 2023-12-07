@@ -99,8 +99,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   [kMonitorId]?: MonitorInterval;
   rttPinger?: RTTPinger;
   /** @internal */
-  override mongoLogger: MongoLogger;
-  /** @internal */
   override component = MongoLoggableComponent.TOPOLOGY;
 
   get connection(): Connection | undefined {
@@ -126,6 +124,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       serverMonitoringMode: options.serverMonitoringMode
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
+    this.mongoLogger = this[kServer].topology.client.mongoLogger;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -152,8 +151,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     }
 
     this.connectOptions = Object.freeze(connectOptions);
-
-    this.mongoLogger = mongoLogger;
   }
 
   connect(): void {
@@ -250,7 +247,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
   monitor.emitAndLog(
     Server.SERVER_HEARTBEAT_STARTED,
-    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable, monitor[kServer].topology.s.id)
+    new ServerHeartbeatStartedEvent(monitor[kServer].topology.s.id, monitor.address, isAwaitable)
   );
 
   function onHeartbeatFailed(err: Error) {
@@ -260,11 +257,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     monitor.emitAndLog(
       Server.SERVER_HEARTBEAT_FAILED,
       new ServerHeartbeatFailedEvent(
+        monitor[kServer].topology.s.id,
         monitor.address,
         calculateDurationInMs(start),
         err,
-        awaited,
-        monitor[kServer].topology.s.id
+        awaited
       )
     );
     monitor[kConnection]?.destroy({ force: true });
@@ -384,11 +381,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       monitor.emit(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(
+          monitor[kServer].topology.s.id,
           monitor.address,
           calculateDurationInMs(start),
           conn.hello,
           useStreamingProtocol(monitor, conn.hello?.topologyVersion),
-          monitor[kServer].topology.s.id
         )
       );
 
