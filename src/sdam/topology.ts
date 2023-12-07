@@ -69,6 +69,12 @@ import type { ServerMonitoringMode } from './monitor';
 import { Server, type ServerEvents, type ServerOptions } from './server';
 import { compareTopologyVersion, ServerDescription } from './server_description';
 import { readPreferenceServerSelector, type ServerSelector } from './server_selection';
+import {
+  ServerSelectionFailedEvent,
+  ServerSelectionStartedEvent,
+  ServerSelectionSuccessEvent,
+  WaitingForSuitableServerEvent
+} from './server_selection_events';
 import { SrvPoller, type SrvPollingEvent } from './srv_polling';
 import { TopologyDescription } from './topology_description';
 
