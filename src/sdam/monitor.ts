@@ -101,10 +101,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   override component = MongoLoggableComponent.TOPOLOGY;
 
-  get connection(): Connection | undefined {
-    return this[kConnection];
-  }
-
   constructor(server: Server, options: MonitorOptions) {
     super();
 
@@ -264,8 +260,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         awaited
       )
     );
-    monitor[kConnection]?.destroy({ force: true });
-    monitor[kConnection] = undefined;
 
     const error = !(err instanceof MongoError)
       ? new MongoError(MongoError.buildErrorMessage(err), { cause: err })
@@ -290,17 +284,23 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         ? monitor.rttPinger.roundTripTime
         : calculateDurationInMs(start);
 
-    monitor.emit(
+    monitor.emitAndLog(
       Server.SERVER_HEARTBEAT_SUCCEEDED,
-      new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
+      new ServerHeartbeatSucceededEvent(
+        monitor[kServer].topology.s.id,
+        monitor.address,
+        duration,
+        hello,
+        isAwaitable
+      )
     );
 
     // If we are using the streaming protocol then we immediately issue another 'started'
     // event, otherwise the "check" is complete and return to the main monitor loop.
     if (isAwaitable) {
-      monitor.emit(
+      monitor.emitAndLog(
         Server.SERVER_HEARTBEAT_STARTED,
-        new ServerHeartbeatStartedEvent(monitor.address, true)
+        new ServerHeartbeatStartedEvent(monitor[kServer].topology.s.id, monitor.address, true)
       );
       start = now();
     } else {
@@ -378,7 +378,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       }
 
       monitor.connection = conn;
-      monitor.emit(
+      monitor.emitAndLog(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         new ServerHeartbeatSucceededEvent(
           monitor[kServer].topology.s.id,
