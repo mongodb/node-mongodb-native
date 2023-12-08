@@ -216,13 +216,17 @@ export class UnifiedMongoClient extends MongoClient {
       'configureFailPoint'
     ];
 
+    console.log('description.observeSensitiveCommands----------------------');
+    console.log(description.observeSensitiveCommands);
+    console.log('----------------------');
+
     if (!description.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
-    } else {
-      console.log('this.ignoredEvents----------------------');
-      console.log(this.ignoredEvents);
-      console.log('----------------------');
     }
+
+    console.log('this.ignoredEvents----------------------');
+    console.log(this.ignoredEvents);
+    console.log('----------------------');
 
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
