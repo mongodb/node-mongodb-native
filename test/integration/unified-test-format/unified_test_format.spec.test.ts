@@ -37,7 +37,7 @@ const filter: TestFilter = ({ description }) => {
   return false;
 };
 
-describe.only('Unified test format runner', function unifiedTestRunner() {
+describe('Unified test format runner', function unifiedTestRunner() {
   // Valid tests that should pass
   runUnifiedSuite(loadSpecTests('unified-test-format/valid-pass'), filter);
 });
