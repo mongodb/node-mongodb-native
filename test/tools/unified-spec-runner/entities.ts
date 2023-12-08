@@ -251,6 +251,9 @@ export class UnifiedMongoClient extends MongoClient {
   // See src/cmap/command_monitoring_events.ts
   // We can infer that the command was sensitive if its command or reply is an empty object.
   isSensitiveCommand(e: CommandEvent): boolean {
+    console.log('e----------------------');
+    console.log(e);
+    console.log('----------------------');
     if (
       (e.name === 'commandStarted' &&
         typeof e.command === 'object' &&
@@ -259,9 +262,6 @@ export class UnifiedMongoClient extends MongoClient {
         typeof e.reply === 'object' &&
         (e.reply === null || !Object.keys(e.reply).length))
     ) {
-      console.log('e----------------------');
-      console.log(e);
-      console.log('----------------------');
       return true;
     }
 
