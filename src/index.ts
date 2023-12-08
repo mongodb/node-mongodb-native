@@ -139,7 +139,6 @@ export {
 export {
   ServerClosedEvent,
   ServerDescriptionChangedEvent,
-  ServerDiscoveryAndMonitoringEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
   ServerHeartbeatSucceededEvent,
@@ -367,6 +366,9 @@ export type {
   LogConvertible,
   Loggable,
   LoggableEvent,
+  LoggableServerHeartbeatFailedEvent,
+  LoggableServerHeartbeatStartedEvent,
+  LoggableServerHeartbeatSucceededEvent,
   MongoDBLogWritable,
   MongoLoggableComponent,
   MongoLogger,

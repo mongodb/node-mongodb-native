@@ -352,42 +352,7 @@
                 "driverConnectionId": {
                   "$$exists": true
                 },
-                "durationMS": {
-                  "$$type": [
-                    "int",
-                    "long"
-                  ]
-                },
-                "reply": {
-                  "$$matchAsDocument": {
-                    "$$matchAsRoot": {
-                      "ok": 1
-                    }
-                  }
-                }
-              }
-            },
-            {
-              "level": "debug",
-              "component": "topology",
-              "data": {
-                "message": "Server heartbeat succeeded",
-                "awaited": {
-                  "$$exists": true
-                },
-                "topologyId": {
-                  "$$exists": true
-                },
-                "serverHost": {
-                  "$$type": "string"
-                },
-                "serverPort": {
-                  "$$type": [
-                    "int",
-                    "long"
-                  ]
-                },
-                "driverConnectionId": {
+                "serverConnectionId": {
                   "$$exists": true
                 },
                 "durationMS": {
@@ -426,6 +391,50 @@
                   ]
                 },
                 "driverConnectionId": {
+                  "$$exists": true
+                },
+                "serverConnectionId": {
+                  "$$exists": true
+                },
+                "durationMS": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "reply": {
+                  "$$matchAsDocument": {
+                    "$$matchAsRoot": {
+                      "ok": 1
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "topology",
+              "data": {
+                "message": "Server heartbeat succeeded",
+                "awaited": {
+                  "$$exists": true
+                },
+                "topologyId": {
+                  "$$exists": true
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                },
+                "driverConnectionId": {
+                  "$$exists": true
+                },
+                "serverConnectionId": {
                   "$$exists": true
                 },
                 "durationMS": {

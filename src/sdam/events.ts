@@ -14,38 +14,13 @@ import type { ServerDescription } from './server_description';
 import type { TopologyDescription } from './topology_description';
 
 /**
- * The base export class for all monitoring events published from server discovery and monitoring.
- * @public
- * @category Event
- */
-export abstract class ServerDiscoveryAndMonitoringEvent {
-  /** A unique identifier for the topology  */
-  topologyId: number;
-
-  /** @internal */
-  abstract name:
-    | typeof TOPOLOGY_CLOSED
-    | typeof TOPOLOGY_DESCRIPTION_CHANGED
-    | typeof TOPOLOGY_OPENING
-    | typeof SERVER_OPENING
-    | typeof SERVER_CLOSED
-    | typeof SERVER_DESCRIPTION_CHANGED
-    | typeof SERVER_HEARTBEAT_FAILED
-    | typeof SERVER_HEARTBEAT_STARTED
-    | typeof SERVER_HEARTBEAT_SUCCEEDED;
-
-  /** @internal */
-  constructor(topologyId: number) {
-    this.topologyId = topologyId;
-  }
-}
-
-/**
  * Emitted when server description changes, but does NOT include changes to the RTT.
  * @public
  * @category Event
  */
-export class ServerDescriptionChangedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerDescriptionChangedEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
   /** The previous server description */
@@ -61,7 +36,7 @@ export class ServerDescriptionChangedEvent extends ServerDiscoveryAndMonitoringE
     previousDescription: ServerDescription,
     newDescription: ServerDescription
   ) {
-    super(topologyId);
+    this.topologyId = topologyId;
     this.address = address;
     this.previousDescription = previousDescription;
     this.newDescription = newDescription;
@@ -73,7 +48,9 @@ export class ServerDescriptionChangedEvent extends ServerDiscoveryAndMonitoringE
  * @public
  * @category Event
  */
-export class ServerOpeningEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerOpeningEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
   /** @internal */
@@ -81,7 +58,7 @@ export class ServerOpeningEvent extends ServerDiscoveryAndMonitoringEvent {
 
   /** @internal */
   constructor(topologyId: number, address: string) {
-    super(topologyId);
+    this.topologyId = topologyId;
     this.address = address;
   }
 }
@@ -91,7 +68,9 @@ export class ServerOpeningEvent extends ServerDiscoveryAndMonitoringEvent {
  * @public
  * @category Event
  */
-export class ServerClosedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerClosedEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
   /** @internal */
@@ -99,7 +78,7 @@ export class ServerClosedEvent extends ServerDiscoveryAndMonitoringEvent {
 
   /** @internal */
   constructor(topologyId: number, address: string) {
-    super(topologyId);
+    this.topologyId = topologyId;
     this.address = address;
   }
 }
@@ -109,7 +88,9 @@ export class ServerClosedEvent extends ServerDiscoveryAndMonitoringEvent {
  * @public
  * @category Event
  */
-export class TopologyDescriptionChangedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class TopologyDescriptionChangedEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** The old topology description */
   previousDescription: TopologyDescription;
   /** The new topology description */
@@ -123,7 +104,7 @@ export class TopologyDescriptionChangedEvent extends ServerDiscoveryAndMonitorin
     previousDescription: TopologyDescription,
     newDescription: TopologyDescription
   ) {
-    super(topologyId);
+    this.topologyId = topologyId;
     this.previousDescription = previousDescription;
     this.newDescription = newDescription;
   }
@@ -134,13 +115,15 @@ export class TopologyDescriptionChangedEvent extends ServerDiscoveryAndMonitorin
  * @public
  * @category Event
  */
-export class TopologyOpeningEvent extends ServerDiscoveryAndMonitoringEvent {
+export class TopologyOpeningEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** @internal */
   name = TOPOLOGY_OPENING;
 
   /** @internal */
   constructor(topologyId: number) {
-    super(topologyId);
+    this.topologyId = topologyId;
   }
 }
 
@@ -149,13 +132,15 @@ export class TopologyOpeningEvent extends ServerDiscoveryAndMonitoringEvent {
  * @public
  * @category Event
  */
-export class TopologyClosedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class TopologyClosedEvent {
+  /** A unique identifier for the topology  */
+  topologyId: number;
   /** @internal */
   name = TOPOLOGY_CLOSED;
 
   /** @internal */
   constructor(topologyId: number) {
-    super(topologyId);
+    this.topologyId = topologyId;
   }
 }
 
@@ -166,7 +151,7 @@ export class TopologyClosedEvent extends ServerDiscoveryAndMonitoringEvent {
  * @public
  * @category Event
  */
-export class ServerHeartbeatStartedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerHeartbeatStartedEvent {
   /** The connection id for the command */
   connectionId: string;
   /** Is true when using the streaming protocol */
@@ -175,8 +160,7 @@ export class ServerHeartbeatStartedEvent extends ServerDiscoveryAndMonitoringEve
   name = SERVER_HEARTBEAT_STARTED;
 
   /** @internal */
-  constructor(topologyId: number, connectionId: string, awaited: boolean) {
-    super(topologyId);
+  constructor(connectionId: string, awaited: boolean) {
     this.connectionId = connectionId;
     this.awaited = awaited;
   }
@@ -187,7 +171,7 @@ export class ServerHeartbeatStartedEvent extends ServerDiscoveryAndMonitoringEve
  * @public
  * @category Event
  */
-export class ServerHeartbeatSucceededEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerHeartbeatSucceededEvent {
   /** The connection id for the command */
   connectionId: string;
   /** The execution time of the event in ms */
@@ -200,14 +184,7 @@ export class ServerHeartbeatSucceededEvent extends ServerDiscoveryAndMonitoringE
   name = SERVER_HEARTBEAT_SUCCEEDED;
 
   /** @internal */
-  constructor(
-    topologyId: number,
-    connectionId: string,
-    duration: number,
-    reply: Document | null,
-    awaited: boolean
-  ) {
-    super(topologyId);
+  constructor(connectionId: string, duration: number, reply: Document | null, awaited: boolean) {
     this.connectionId = connectionId;
     this.duration = duration;
     this.reply = reply ?? {};
@@ -220,7 +197,7 @@ export class ServerHeartbeatSucceededEvent extends ServerDiscoveryAndMonitoringE
  * @public
  * @category Event
  */
-export class ServerHeartbeatFailedEvent extends ServerDiscoveryAndMonitoringEvent {
+export class ServerHeartbeatFailedEvent {
   /** The connection id for the command */
   connectionId: string;
   /** The execution time of the event in ms */
@@ -233,14 +210,7 @@ export class ServerHeartbeatFailedEvent extends ServerDiscoveryAndMonitoringEven
   name = SERVER_HEARTBEAT_FAILED;
 
   /** @internal */
-  constructor(
-    topologyId: number,
-    connectionId: string,
-    duration: number,
-    failure: Error,
-    awaited: boolean
-  ) {
-    super(topologyId);
+  constructor(connectionId: string, duration: number, failure: Error, awaited: boolean) {
     this.connectionId = connectionId;
     this.duration = duration;
     this.failure = failure;

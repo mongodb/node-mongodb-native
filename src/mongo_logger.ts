@@ -1,4 +1,4 @@
-import { EJSON } from 'bson';
+import { type Document, EJSON } from 'bson';
 import type { Writable } from 'stream';
 import { inspect } from 'util';
 
@@ -47,11 +47,6 @@ import {
 } from './constants';
 import type {
   ServerClosedEvent,
-  ServerDescriptionChangedEvent,
-  ServerDiscoveryAndMonitoringEvent,
-  ServerHeartbeatFailedEvent,
-  ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent,
   ServerOpeningEvent,
   TopologyClosedEvent,
   TopologyDescriptionChangedEvent,
@@ -291,6 +286,45 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 }
 
 /** @internal */
+export type LoggableServerHeartbeatStartedEvent = {
+  topologyId: number;
+  awaited: boolean;
+  connectionId: string;
+  name: typeof SERVER_HEARTBEAT_STARTED;
+};
+
+/** @internal */
+export type LoggableServerHeartbeatSucceededEvent = {
+  topologyId: number;
+  awaited: boolean;
+  connectionId: string;
+  reply: Document;
+  serverConnectionId: number | '<monitor>';
+  duration: number;
+  name: typeof SERVER_HEARTBEAT_SUCCEEDED;
+};
+
+/** @internal */
+export type LoggableServerHeartbeatFailedEvent = {
+  topologyId: number;
+  awaited: boolean;
+  connectionId: string;
+  failure: Error;
+  duration: number;
+  name: typeof SERVER_HEARTBEAT_FAILED;
+};
+
+type SDAMLoggableEvent =
+  | ServerClosedEvent
+  | LoggableServerHeartbeatFailedEvent
+  | LoggableServerHeartbeatStartedEvent
+  | LoggableServerHeartbeatSucceededEvent
+  | ServerOpeningEvent
+  | TopologyClosedEvent
+  | TopologyDescriptionChangedEvent
+  | TopologyOpeningEvent;
+
+/** @internal */
 export type LoggableEvent =
   | CommandStartedEvent
   | CommandSucceededEvent
@@ -307,10 +341,9 @@ export type LoggableEvent =
   | ConnectionCheckOutStartedEvent
   | ConnectionCheckOutFailedEvent
   | ServerClosedEvent
-  | ServerDescriptionChangedEvent
-  | ServerHeartbeatFailedEvent
-  | ServerHeartbeatStartedEvent
-  | ServerHeartbeatSucceededEvent
+  | LoggableServerHeartbeatFailedEvent
+  | LoggableServerHeartbeatStartedEvent
+  | LoggableServerHeartbeatSucceededEvent
   | ServerOpeningEvent
   | TopologyClosedEvent
   | TopologyDescriptionChangedEvent
@@ -367,7 +400,7 @@ function attachConnectionFields(
   return log;
 }
 
-function attachSDAMFields(log: Record<string, any>, sdamEvent: ServerDiscoveryAndMonitoringEvent) {
+function attachSDAMFields(log: Record<string, any>, sdamEvent: SDAMLoggableEvent) {
   log.topologyId = sdamEvent.topologyId;
   return log;
 }
@@ -375,9 +408,9 @@ function attachSDAMFields(log: Record<string, any>, sdamEvent: ServerDiscoveryAn
 function attachServerHeartbeatFields(
   log: Record<string, any>,
   serverHeartbeatEvent:
-    | ServerHeartbeatFailedEvent
-    | ServerHeartbeatStartedEvent
-    | ServerHeartbeatSucceededEvent
+    | LoggableServerHeartbeatFailedEvent
+    | LoggableServerHeartbeatStartedEvent
+    | LoggableServerHeartbeatSucceededEvent
 ) {
   const { awaited, connectionId } = serverHeartbeatEvent;
   log.awaited = awaited;
@@ -533,6 +566,7 @@ function defaultLogTransform(
       log = attachServerHeartbeatFields(log, logObject);
       log.message = 'Server heartbeat succeeded';
       log.durationMS = logObject.duration;
+      log.serverConnectionId = logObject.serverConnectionId;
       log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
       return log;
     case SERVER_HEARTBEAT_FAILED:

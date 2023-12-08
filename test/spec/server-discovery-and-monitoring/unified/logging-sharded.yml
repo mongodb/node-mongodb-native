@@ -163,6 +163,7 @@ tests:
               serverHost: { $$type: string }
               serverPort: { $$type: [int, long] }
               driverConnectionId: { $$exists: true }
+              serverConnectionId: { $$exists: true }
               durationMS: { $$type: [int, long] }
               reply:
                 $$matchAsDocument:

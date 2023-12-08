@@ -241,24 +241,22 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
-  monitor.emitAndLog(
+  monitor.emitAndLogHeartbeat(
     Server.SERVER_HEARTBEAT_STARTED,
-    new ServerHeartbeatStartedEvent(monitor[kServer].topology.s.id, monitor.address, isAwaitable)
+    monitor[kServer].topology.s.id,
+    undefined,
+    new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
 
   function onHeartbeatFailed(err: Error) {
     monitor.connection?.destroy({ force: true });
     monitor.connection = null;
 
-    monitor.emitAndLog(
+    monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_FAILED,
-      new ServerHeartbeatFailedEvent(
-        monitor[kServer].topology.s.id,
-        monitor.address,
-        calculateDurationInMs(start),
-        err,
-        awaited
-      )
+      monitor[kServer].topology.s.id,
+      undefined,
+      new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err, awaited)
     );
 
     const error = !(err instanceof MongoError)
@@ -284,23 +282,21 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         ? monitor.rttPinger.roundTripTime
         : calculateDurationInMs(start);
 
-    monitor.emitAndLog(
+    monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_SUCCEEDED,
-      new ServerHeartbeatSucceededEvent(
-        monitor[kServer].topology.s.id,
-        monitor.address,
-        duration,
-        hello,
-        isAwaitable
-      )
+      monitor[kServer].topology.s.id,
+      hello.connectionId,
+      new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
     );
 
     // If we are using the streaming protocol then we immediately issue another 'started'
     // event, otherwise the "check" is complete and return to the main monitor loop.
     if (isAwaitable) {
-      monitor.emitAndLog(
+      monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_STARTED,
-        new ServerHeartbeatStartedEvent(monitor[kServer].topology.s.id, monitor.address, true)
+        monitor[kServer].topology.s.id,
+        undefined,
+        new ServerHeartbeatStartedEvent(monitor.address, true)
       );
       start = now();
     } else {
@@ -378,10 +374,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       }
 
       monitor.connection = conn;
-      monitor.emitAndLog(
+      monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
+        monitor[kServer].topology.s.id,
+        conn.id,
         new ServerHeartbeatSucceededEvent(
-          monitor[kServer].topology.s.id,
           monitor.address,
           calculateDurationInMs(start),
           conn.hello,
