@@ -216,17 +216,9 @@ export class UnifiedMongoClient extends MongoClient {
       'configureFailPoint'
     ];
 
-    console.log('description.observeSensitiveCommands----------------------');
-    console.log(description.observeSensitiveCommands);
-    console.log('----------------------');
-
     if (!description.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
     }
-
-    console.log('this.ignoredEvents----------------------');
-    console.log(this.ignoredEvents);
-    console.log('----------------------');
 
     this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
@@ -255,9 +247,6 @@ export class UnifiedMongoClient extends MongoClient {
   // See src/cmap/command_monitoring_events.ts
   // We can infer that the command was sensitive if its command or reply is an empty object.
   isSensitiveCommand(e: CommandEvent): boolean {
-    console.log('e----------------------');
-    console.log(e);
-    console.log('----------------------');
     if (
       (e.name === 'commandStarted' &&
         typeof e.command === 'object' &&
