@@ -576,7 +576,7 @@ function defaultLogTransform(
       log.message = 'Server heartbeat succeeded';
       log.durationMS = logObject.duration;
       log.serverConnectionId = logObject.serverConnectionId;
-      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
+      log.reply = EJSON.stringify(logObject.reply, { relaxed: true });
       return log;
     case SERVER_HEARTBEAT_FAILED:
       log = attachSDAMFields(log, logObject);

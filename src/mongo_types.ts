@@ -429,10 +429,11 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
       const loggableHeartbeatEvent:
         | LoggableServerHeartbeatFailedEvent
         | LoggableServerHeartbeatSucceededEvent
-        | LoggableServerHeartbeatStartedEvent = Object.assign(
-        { topologyId: topologyId, serverConnectionId: serverConnectionId ?? null },
-        args[0]
-      );
+        | LoggableServerHeartbeatStartedEvent = {
+        topologyId: topologyId,
+        serverConnectionId: serverConnectionId ?? null,
+        ...args[0]
+      };
       this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
     }
   }
