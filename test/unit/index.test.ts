@@ -116,7 +116,6 @@ const EXPECTED_EXPORTS = [
   'ServerApiVersion',
   'ServerClosedEvent',
   'ServerDescriptionChangedEvent',
-  'ServerDiscoveryAndMonitoringEvent',
   'ServerHeartbeatFailedEvent',
   'ServerHeartbeatStartedEvent',
   'ServerHeartbeatSucceededEvent',
