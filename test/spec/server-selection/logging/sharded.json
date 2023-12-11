@@ -1,5 +1,5 @@
 {
-  "description": "sharded-logging",
+  "description": "server-selection-logging",
   "schemaVersion": "1.14",
   "runOnRequirements": [
     {
