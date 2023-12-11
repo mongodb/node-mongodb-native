@@ -226,7 +226,8 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      mongodbLogPath: logCollector
+      mongodbLogPath: logCollector,
+      mongodbLogMaxDocumentLength: 1250
     } as any);
     this.logCollector = logCollector;
 

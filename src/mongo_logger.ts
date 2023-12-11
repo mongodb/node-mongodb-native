@@ -1,4 +1,4 @@
-import { type Document, EJSON } from 'bson';
+import { type Document, EJSON, type EJSONOptions } from 'bson';
 import type { Writable } from 'stream';
 import { inspect } from 'util';
 
@@ -364,8 +364,12 @@ export interface LogConvertible extends Record<string, any> {
 }
 
 /** @internal */
-export function stringifyWithMaxLen(value: any, maxDocumentLength: number): string {
-  const ejson = EJSON.stringify(value);
+export function stringifyWithMaxLen(
+  value: any,
+  maxDocumentLength: number,
+  options: EJSONOptions = {}
+): string {
+  const ejson = EJSON.stringify(value, options);
 
   return maxDocumentLength !== 0 && ejson.length > maxDocumentLength
     ? `${ejson.slice(0, maxDocumentLength)}...`
@@ -576,7 +580,7 @@ function defaultLogTransform(
       log.message = 'Server heartbeat succeeded';
       log.durationMS = logObject.duration;
       log.serverConnectionId = logObject.serverConnectionId;
-      log.reply = EJSON.stringify(logObject.reply, { relaxed: true });
+      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
       return log;
     case SERVER_HEARTBEAT_FAILED:
       log = attachSDAMFields(log, logObject);
