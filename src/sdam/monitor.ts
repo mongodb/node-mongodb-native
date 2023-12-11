@@ -377,7 +377,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         monitor[kServer].topology.s.id,
-        conn.id,
+        conn.hello?.connectionId,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
           calculateDurationInMs(start),

@@ -19,7 +19,7 @@ import type { TopologyDescription } from './topology_description';
  * @category Event
  */
 export class ServerDescriptionChangedEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
@@ -49,7 +49,7 @@ export class ServerDescriptionChangedEvent {
  * @category Event
  */
 export class ServerOpeningEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
@@ -69,7 +69,7 @@ export class ServerOpeningEvent {
  * @category Event
  */
 export class ServerClosedEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** The address (host/port pair) of the server */
   address: string;
@@ -89,7 +89,7 @@ export class ServerClosedEvent {
  * @category Event
  */
 export class TopologyDescriptionChangedEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** The old topology description */
   previousDescription: TopologyDescription;
@@ -116,7 +116,7 @@ export class TopologyDescriptionChangedEvent {
  * @category Event
  */
 export class TopologyOpeningEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** @internal */
   name = TOPOLOGY_OPENING;
@@ -133,7 +133,7 @@ export class TopologyOpeningEvent {
  * @category Event
  */
 export class TopologyClosedEvent {
-  /** A unique identifier for the topology  */
+  /** A unique identifier for the topology */
   topologyId: number;
   /** @internal */
   name = TOPOLOGY_CLOSED;

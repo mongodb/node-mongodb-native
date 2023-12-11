@@ -285,7 +285,10 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
   return s0Num < s1Num ? -1 : s0Num > s1Num ? 1 : 0;
 }
 
-/** @internal */
+/**
+ * @internal
+ * Must be separate from Events API due to differences in spec requirements for logging server heartbeat beginning
+ */
 export type LoggableServerHeartbeatStartedEvent = {
   topologyId: number;
   awaited: boolean;
@@ -293,7 +296,10 @@ export type LoggableServerHeartbeatStartedEvent = {
   name: typeof SERVER_HEARTBEAT_STARTED;
 };
 
-/** @internal */
+/**
+ * @internal
+ * Must be separate from Events API due to differences in spec requirements for logging server heartbeat success
+ */
 export type LoggableServerHeartbeatSucceededEvent = {
   topologyId: number;
   awaited: boolean;
@@ -304,7 +310,10 @@ export type LoggableServerHeartbeatSucceededEvent = {
   name: typeof SERVER_HEARTBEAT_SUCCEEDED;
 };
 
-/** @internal */
+/**
+ * @internal
+ * Must be separate from Events API due to differences in spec requirements for logging server heartbeat failure
+ */
 export type LoggableServerHeartbeatFailedEvent = {
   topologyId: number;
   awaited: boolean;

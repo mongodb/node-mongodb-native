@@ -12,7 +12,13 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
-import type { MongoLoggableComponent, MongoLogger } from './mongo_logger';
+import type {
+  LoggableServerHeartbeatFailedEvent,
+  LoggableServerHeartbeatStartedEvent,
+  LoggableServerHeartbeatSucceededEvent,
+  MongoLoggableComponent,
+  MongoLogger
+} from './mongo_logger';
 import type { Sort } from './sort';
 
 /** @internal */
@@ -420,9 +426,14 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
   ): void {
     this.emit(event, ...args);
     if (this.component) {
-      args[0].topologyId = topologyId;
-      args[0].serverConnectionId = serverConnectionId ?? null;
-      this.mongoLogger?.debug(this.component, args[0]);
+      const loggableHeartbeatEvent:
+        | LoggableServerHeartbeatFailedEvent
+        | LoggableServerHeartbeatSucceededEvent
+        | LoggableServerHeartbeatStartedEvent = Object.assign(
+        { topologyId: topologyId, serverConnectionId: serverConnectionId ?? null },
+        args[0]
+      );
+      this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
     }
   }
 }
