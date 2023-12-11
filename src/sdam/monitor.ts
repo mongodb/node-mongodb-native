@@ -2,7 +2,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import { type Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
-import { type Connection, type ConnectionOptions } from '../cmap/connection';
+import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
