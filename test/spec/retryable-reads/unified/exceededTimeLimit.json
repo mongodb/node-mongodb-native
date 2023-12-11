@@ -1,0 +1,147 @@
+{
+  "description": "ExceededTimeLimit is a retryable read",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "single",
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.7",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "retryable-reads-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "exceededtimelimit-test"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "exceededtimelimit-test",
+      "databaseName": "retryable-reads-tests",
+      "documents": [
+        {
+          "_id": 1,
+          "x": 11
+        },
+        {
+          "_id": 2,
+          "x": 22
+        },
+        {
+          "_id": 3,
+          "x": 33
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "Find succeeds on second attempt after ExceededTimeLimit",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 262
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": {
+                "$gt": 1
+              }
+            }
+          },
+          "object": "collection0",
+          "expectResult": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "exceededtimelimit-test",
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "retryable-reads-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "find": "exceededtimelimit-test",
+                  "filter": {
+                    "_id": {
+                      "$gt": 1
+                    }
+                  }
+                },
+                "commandName": "find",
+                "databaseName": "retryable-reads-tests"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
