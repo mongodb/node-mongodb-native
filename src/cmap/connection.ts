@@ -1073,9 +1073,9 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
           }
         }
 
-        this.controller.signal.throwIfAborted();
         // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
         this.controller = new AbortController();
+
         yield document;
         this.controller.signal.throwIfAborted();
 
@@ -1129,7 +1129,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
           );
         }
 
-        this.controller.signal.throwIfAborted();
         yield document;
         this.controller.signal.throwIfAborted();
       }
@@ -1161,7 +1160,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   ): Promise<Document> {
     this.controller.signal.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options)) {
-      this.controller.signal.throwIfAborted();
       return document;
     }
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
@@ -1176,7 +1174,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     const exhaustLoop = async () => {
       this.controller.signal.throwIfAborted();
       for await (const reply of this.sendCommand(ns, command, options)) {
-        this.controller.signal.throwIfAborted();
         replyListener(undefined, reply);
         this.controller.signal.throwIfAborted();
       }
