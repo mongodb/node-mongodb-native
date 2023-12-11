@@ -5,23 +5,24 @@ import {
   WAITING_FOR_SUITABLE_SERVER
 } from '../constants';
 import { type ReadPreference } from '../read_preference';
+import { HostAddress } from '../utils';
 import { type ServerSelector } from './server_selection';
 import type { TopologyDescription } from './topology_description';
 
 /**
- * The base export class for all monitoring events published from server selection
- * @public
- * @category Event
+ * The base export class for all logs published from server selection
+ * @internal
+ * @category Log Type
  */
 export abstract class ServerSelectionEvent {
   /** String representation of the selector being used to select the server.
    *  Defaults to 'custom selector' for application-provided custom selector case.
    */
-  selector: string;
+  selector: string | ReadPreference | ServerSelector;
   /** The name of the operation for which a server is being selected.  */
   operation: string;
-  /** 	String representation of the current topology description.  */
-  topologyDescription: string;
+  /** 	The current topology description.  */
+  topologyDescription: TopologyDescription;
 
   /** @internal */
   abstract name:
@@ -30,26 +31,23 @@ export abstract class ServerSelectionEvent {
     | typeof SERVER_SELECTION_FAILED
     | typeof WAITING_FOR_SUITABLE_SERVER;
 
+  abstract message: string;
+
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
-    operation: string | undefined,
-    topologyDescription: TopologyDescription
+    topologyDescription: TopologyDescription,
+    operation?: string
   ) {
-    this.selector =
-      typeof selector === 'string'
-        ? selector
-        : typeof selector === 'function'
-        ? 'custom selector'
-        : JSON.stringify(selector.toJSON(), null, 2);
-    this.operation = operation ?? 'custom operation';
-    this.topologyDescription = topologyDescription.toString();
+    this.selector = selector;
+    this.operation = operation ?? 'n/a';
+    this.topologyDescription = topologyDescription;
   }
 }
 
 /**
  * An event published when server selection starts
- * @public
+ * @internal
  * @category Event
  */
 export class ServerSelectionStartedEvent extends ServerSelectionEvent {
@@ -60,16 +58,16 @@ export class ServerSelectionStartedEvent extends ServerSelectionEvent {
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
-    operation: string | undefined,
-    topologyDescription: TopologyDescription
+    topologyDescription: TopologyDescription,
+    operation?: string
   ) {
-    super(selector, operation, topologyDescription);
+    super(selector, topologyDescription, operation);
   }
 }
 
 /**
  * An event published when a server selection fails
- * @public
+ * @internal
  * @category Event
  */
 export class ServerSelectionFailedEvent extends ServerSelectionEvent {
@@ -77,26 +75,26 @@ export class ServerSelectionFailedEvent extends ServerSelectionEvent {
   name = SERVER_SELECTION_FAILED;
   message = 'Server selection failed';
   /** Representation of the error the driver will throw regarding server selection failing. */
-  failure: string;
+  failure: Error;
 
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
-    operation: string | undefined,
     topologyDescription: TopologyDescription,
-    errMsg: string
+    error: Error,
+    operation?: string
   ) {
-    super(selector, operation, topologyDescription);
-    this.failure = errMsg;
+    super(selector, topologyDescription, operation);
+    this.failure = error;
   }
 }
 
 /**
  * An event published when server selection succeeds
- * @public
+ * @internal
  * @category Event
  */
-export class ServerSelectionSuccessEvent extends ServerSelectionEvent {
+export class ServerSelectionSucceededEvent extends ServerSelectionEvent {
   /** @internal */
   name = SERVER_SELECTION_SUCCEEDED;
   message = 'Server selection succeeded';
@@ -110,20 +108,20 @@ export class ServerSelectionSuccessEvent extends ServerSelectionEvent {
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
-    operation: string | undefined,
     topologyDescription: TopologyDescription,
-    serverHost: string,
-    serverPort: number
+    address: string,
+    operation?: string
   ) {
-    super(selector, operation, topologyDescription);
-    this.serverHost = serverHost;
-    this.serverPort = serverPort;
+    super(selector, topologyDescription, operation);
+    const { host, port } = HostAddress.fromString(address).toHostPort();
+    this.serverHost = host;
+    this.serverPort = port;
   }
 }
 
 /**
  * An event published when server selection is waiting for a suitable server to become available
- * @public
+ * @internal
  * @category Event
  */
 export class WaitingForSuitableServerEvent extends ServerSelectionEvent {
@@ -131,18 +129,16 @@ export class WaitingForSuitableServerEvent extends ServerSelectionEvent {
   name = WAITING_FOR_SUITABLE_SERVER;
   message = 'Waiting for suitable server to become available';
   /** The remaining time left until server selection will time out. */
-  remainingTimeMS?: number;
+  remainingTimeMS: number;
 
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
-    operation: string | undefined,
     topologyDescription: TopologyDescription,
-    remainingTimeMS: number | undefined
+    remainingTimeMS: number,
+    operation?: string
   ) {
-    super(selector, operation, topologyDescription);
-    if (remainingTimeMS) {
-      this.remainingTimeMS = remainingTimeMS;
-    }
+    super(selector, topologyDescription, operation);
+    this.remainingTimeMS = remainingTimeMS;
   }
 }

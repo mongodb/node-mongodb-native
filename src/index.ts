@@ -147,6 +147,13 @@ export {
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
 } from './sdam/events';
+export {
+  ServerSelectionEvent,
+  ServerSelectionFailedEvent,
+  ServerSelectionStartedEvent,
+  ServerSelectionSucceededEvent,
+  WaitingForSuitableServerEvent
+} from './sdam/server_selection_events';
 export { SrvPollingEvent } from './sdam/srv_polling';
 
 // type only exports below, these are removed from emitted JS
@@ -305,7 +312,11 @@ export type {
   SERVER_OPENING,
   TOPOLOGY_CLOSED,
   TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING
+  TOPOLOGY_OPENING,
+  SERVER_SELECTION_FAILED,
+  SERVER_SELECTION_STARTED,
+  SERVER_SELECTION_SUCCEEDED,
+  WAITING_FOR_SUITABLE_SERVER
 } from './constants';
 export type {
   AbstractCursorEvents,

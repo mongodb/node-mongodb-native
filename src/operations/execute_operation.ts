@@ -151,7 +151,10 @@ async function executeOperationAsync<
     selector = readPreference;
   }
 
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session: session,
+    operationName: operation.commandName
+  });
 
   if (session == null) {
     // No session also means it is not retryable, early exit
@@ -251,7 +254,10 @@ async function retryOperation<
   }
 
   // select a new server, and attempt to retry the operation
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session: session,
+    operationName: operation.commandName
+  });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
     throw new MongoUnexpectedServerResponseError(
