@@ -1150,7 +1150,7 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
 ]);
 
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
-const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([...RETRYABLE_READ_ERROR_CODES]);
+const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
 export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
   // pre-4.4 server, then the driver adds an error label for every valid case
