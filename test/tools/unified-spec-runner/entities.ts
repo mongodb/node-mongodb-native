@@ -227,6 +227,7 @@ export class UnifiedMongoClient extends MongoClient {
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
       mongodbLogPath: logCollector,
+      // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
       mongodbLogMaxDocumentLength: 1250
     } as any);
     this.logCollector = logCollector;
