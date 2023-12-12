@@ -289,7 +289,7 @@ export function resultCheck(
   ) {
     // case to handle +0 and -0
     expect(Object.is(expected, actual)).to.be.true;
-  } else if (actual._bsontype === 'Int32' && typeof expected === 'number') {
+  } else if (actual && actual._bsontype === 'Int32' && typeof expected === 'number') {
     expect(actual.value).to.equal(expected);
   } else {
     expect(actual).to.equal(expected);
