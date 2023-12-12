@@ -317,6 +317,9 @@ export class OpQueryResponse {
   bsonRegExp?: boolean;
   index?: number;
 
+  /** moreToCome is an OP_MSG only concept */
+  moreToCome = false;
+
   constructor(
     message: Buffer,
     msgHeader: MessageHeader,
@@ -598,6 +601,7 @@ export class OpMsgResponse {
   fromCompressed?: boolean;
   responseFlags: number;
   checksumPresent: boolean;
+  /** Indicates the server will be sending more responses on this connection */
   moreToCome: boolean;
   exhaustAllowed: boolean;
   useBigInt64: boolean;

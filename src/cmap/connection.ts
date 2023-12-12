@@ -562,6 +562,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       callback(err);
     }
   }
+
+  exhaustCommand(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    replyListener: Callback
+  ) {
+    return this.command(ns, command, options, replyListener);
+  }
 }
 
 /** @internal */
@@ -1156,6 +1165,15 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     return document;
   }
+
+  exhaustCommand(
+    _ns: MongoDBNamespace,
+    _command: Document,
+    _options: CommandOptions,
+    _replyListener: Callback
+  ) {
+    throw new Error('NODE-5742: not implemented.');
+  }
 }
 
 const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
@@ -1253,7 +1271,7 @@ export async function* readMany(
     const response = await decompressResponse(message);
     yield response;
 
-    if (!('moreToCome' in response) || !response.moreToCome) {
+    if (!response.moreToCome) {
       return;
     }
   }
