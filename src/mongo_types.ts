@@ -418,6 +418,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     this.emit(event, ...args);
     if (this.component) this.mongoLogger?.debug(this.component, args[0]);
   }
+  /** @internal */
   emitAndLogHeartbeat<EventKey extends keyof Events>(
     event: EventKey | symbol,
     topologyId: number,
