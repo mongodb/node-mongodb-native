@@ -119,6 +119,7 @@ export class UnifiedMongoClient extends MongoClient {
   logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
+  observeSensitiveCommands: boolean;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -219,6 +220,8 @@ export class UnifiedMongoClient extends MongoClient {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
     }
 
+    this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
+
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
       .filter(e => !!e);
@@ -237,6 +240,25 @@ export class UnifiedMongoClient extends MongoClient {
     for (const eventName of this.observedSdamEvents) {
       this.on(eventName, this.pushSdamEvent);
     }
+  }
+
+  // If the command or reply included a speculativeAuthenticate field,
+  // they will be already have redacted in maybeRedact()
+  // See src/cmap/command_monitoring_events.ts
+  // We can infer that the command was sensitive if its command or reply is an empty object.
+  isSensitiveCommand(e: CommandEvent): boolean {
+    if (
+      (e.name === 'commandStarted' &&
+        typeof e.command === 'object' &&
+        !Object.keys(e.command).length) ||
+      (e.name === 'commandSucceeded' &&
+        typeof e.reply === 'object' &&
+        (e.reply === null || !Object.keys(e.reply).length))
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   isIgnored(e: CommandEvent): boolean {
@@ -266,7 +288,10 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
-    if (!this.isIgnored(e)) {
+    if (
+      (this.observeSensitiveCommands === true || !this.isSensitiveCommand(e)) &&
+      !this.isIgnored(e)
+    ) {
       this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
     }
