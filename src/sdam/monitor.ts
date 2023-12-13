@@ -2,7 +2,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import { type Document, Long } from '../bson';
 import { connect } from '../cmap/connect';
-import { Connection, type ConnectionOptions } from '../cmap/connection';
+import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
@@ -135,9 +135,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       useBigInt64: false,
       promoteLongs: true,
       promoteValues: true,
-      promoteBuffers: true,
-      // TODO(NODE-5741): override monitors to use old connection
-      connectionType: Connection
+      promoteBuffers: true
     };
 
     // ensure no authentication is used for monitoring

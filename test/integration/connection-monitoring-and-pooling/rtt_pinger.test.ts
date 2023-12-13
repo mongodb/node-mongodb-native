@@ -164,7 +164,7 @@ describe('class RTTPinger', () => {
       const rttPingers = await getRTTPingers(client);
 
       for (const rtt of rttPingers) {
-        sinon.stub(rtt.connection, 'command').yieldsRight(new Error('any error'));
+        sinon.stub(rtt.connection, 'commandAsync').rejects(new Error('any error'));
       }
       const spies = rttPingers.map(rtt => sinon.spy(rtt.connection, 'destroy'));
 
