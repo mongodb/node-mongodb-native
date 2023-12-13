@@ -1330,7 +1330,7 @@ export async function abortable<T>(
   }
 }
 
-function promiseWithResolvers<T>() {
+export function promiseWithResolvers<T>() {
   let resolve: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
   let reject: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
   const promise = new Promise<T>(function withResolversExecutor(promiseResolve, promiseReject) {

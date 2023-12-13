@@ -1,4 +1,3 @@
-import { on } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -61,6 +60,7 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { MessageStream, type OperationDescription } from './message_stream';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { decompressResponse } from './wire_protocol/compression';
+import { onData } from './wire_protocol/on_data';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -1052,9 +1052,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
         signal: this.controller.signal
       });
 
-      // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
-      this.controller = new AbortController();
-
       if (options.noResponse) {
         yield { ok: 1 };
         return;
@@ -1079,9 +1076,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
             this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
           }
         }
-
-        // TODO(NODE-5770): Replace controller to avoid boundless 'abort' listeners
-        this.controller = new AbortController();
 
         yield document;
         this.controller.signal.throwIfAborted();
@@ -1205,11 +1199,11 @@ const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
  */
 export async function* readWireProtocolMessages(
   connection: ModernConnection,
-  { signal }: { signal?: AbortSignal } = {}
+  { signal }: { signal: AbortSignal }
 ): AsyncGenerator<Buffer> {
   const bufferPool = new BufferPool();
   const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
-  for await (const [chunk] of on(connection.socket, 'data', { signal })) {
+  for await (const chunk of onData(connection.socket, { signal })) {
     if (connection.delayedTimeoutId) {
       clearTimeout(connection.delayedTimeoutId);
       connection.delayedTimeoutId = null;
@@ -1277,7 +1271,7 @@ export async function writeCommand(
  */
 export async function* readMany(
   connection: ModernConnection,
-  options: { signal?: AbortSignal } = {}
+  options: { signal: AbortSignal }
 ): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
   for await (const message of readWireProtocolMessages(connection, options)) {
     const response = await decompressResponse(message);
@@ -1287,20 +1281,4 @@ export async function* readMany(
       return;
     }
   }
-}
-
-/**
- * @internal
- *
- * Reads a single wire protocol message out of a connection.
- */
-export async function read(
-  connection: ModernConnection,
-  options: { signal?: AbortSignal } = {}
-): Promise<OpMsgResponse | OpQueryResponse> {
-  for await (const value of readMany(connection, options)) {
-    return value;
-  }
-
-  throw new MongoRuntimeError('unable to read message off of connection');
 }
