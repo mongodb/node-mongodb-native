@@ -1,5 +1,6 @@
 {
   "description": "sharded-logging-node-driver",
+  
   "schemaVersion": "1.14",
   "runOnRequirements": [
     {

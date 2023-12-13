@@ -1,5 +1,5 @@
 {
-  "description": "server-selection-logging-node-driver",
+  "description": "load-balanced-logging-node-driver",
   "schemaVersion": "1.13",
   "runOnRequirements": [
     {

@@ -1,5 +1,5 @@
 {
-  "description": "server-selection-logging",
+  "description": "load-balanced-logging",
   "schemaVersion": "1.13",
   "runOnRequirements": [
     {
