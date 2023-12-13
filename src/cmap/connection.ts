@@ -1243,7 +1243,7 @@ export async function writeCommand(
   connection: ModernConnection,
   command: WriteProtocolMessageType,
   options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>> & {
-    signal?: AbortSignal;
+    signal: AbortSignal;
   }
 ): Promise<void> {
   const finalCommand =
