@@ -46,8 +46,11 @@ export const CONNECTION_CHECKED_OUT = 'connectionCheckedOut' as const;
 /** @internal */
 export const CONNECTION_CHECKED_IN = 'connectionCheckedIn' as const;
 export const CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
+/** @internal */
 export const COMMAND_STARTED = 'commandStarted' as const;
+/** @internal */
 export const COMMAND_SUCCEEDED = 'commandSucceeded' as const;
+/** @internal */
 export const COMMAND_FAILED = 'commandFailed' as const;
 export const SERVER_HEARTBEAT_STARTED = 'serverHeartbeatStarted' as const;
 export const SERVER_HEARTBEAT_SUCCEEDED = 'serverHeartbeatSucceeded' as const;

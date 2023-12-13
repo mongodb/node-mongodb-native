@@ -32,7 +32,7 @@ export class StreamDescription {
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
   loadBalanced: boolean;
-  serverConnectionId: number | '<monitor' | undefined;
+  serverConnectionId: number | '<monitor>' | undefined;
 
   __nodejs_mock_server__?: boolean;
 

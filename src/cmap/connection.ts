@@ -26,6 +26,8 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import type { MongoLogger } from '../mongo_logger';
+import { MongoLoggableComponent, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -191,6 +193,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   [kHello]: Document | null;
   /** @internal */
   [kClusterTime]: Document | null;
+  /** @internal  */
+  override component = MongoLoggableComponent.CONNECTION;
+  /** @internal */
+  override mongoLogger: MongoLogger | undefined;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -716,8 +722,14 @@ function write(
   }
 
   // if command monitoring is enabled we need to modify the callback here
-  if (conn.monitorCommands) {
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
+  if (conn.monitorCommands || conn.mongoLogger?.willLog(SeverityLevel.DEBUG, conn.component)) {
+    conn.emitAndLogCommand(
+      conn.monitorCommands,
+      Connection.COMMAND_STARTED,
+      conn[kDescription].serverConnectionId,
+      command.databaseName,
+      new CommandStartedEvent(conn, command)
+    );
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
@@ -725,19 +737,28 @@ function write(
       // a command succeeded event, even if there's an error. Write concern errors
       // will have an ok: 1 in their reply.
       if (err && reply?.ok !== 1) {
-        conn.emit(
+        conn.emitAndLogCommand(
+          conn.monitorCommands,
           Connection.COMMAND_FAILED,
+          conn[kDescription].serverConnectionId,
+          command.databaseName,
           new CommandFailedEvent(conn, command, err, operationDescription.started)
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
-          conn.emit(
+          conn.emitAndLogCommand(
+            conn.monitorCommands,
             Connection.COMMAND_FAILED,
+            conn[kDescription].serverConnectionId,
+            command.databaseName,
             new CommandFailedEvent(conn, command, reply, operationDescription.started)
           );
         } else {
-          conn.emit(
+          conn.emitAndLogCommand(
+            conn.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
+            conn[kDescription].serverConnectionId,
+            command.databaseName,
             new CommandSucceededEvent(conn, command, reply, operationDescription.started)
           );
         }

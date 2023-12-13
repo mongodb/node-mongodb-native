@@ -1,12 +1,7 @@
-import { EJSON, Document, ObjectId, EJSONOptions } from 'bson';
+import { type Document, EJSON, type EJSONOptions, type ObjectId } from 'bson';
 import type { Writable } from 'stream';
 import { inspect } from 'util';
 
-import type {
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent
-} from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,

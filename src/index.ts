@@ -294,6 +294,9 @@ export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_
 export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { CollectionOptions, CollectionPrivate, ModifyResult } from './collection';
 export type {
+  COMMAND_FAILED,
+  COMMAND_STARTED,
+  COMMAND_SUCCEEDED,
   CONNECTION_CHECK_OUT_FAILED,
   CONNECTION_CHECK_OUT_STARTED,
   CONNECTION_CHECKED_IN,
@@ -356,6 +359,9 @@ export type {
   LogComponentSeveritiesClientOptions,
   LogConvertible,
   Loggable,
+  LoggableCommandFailedEvent,
+  LoggableCommandStartedEvent,
+  LoggableCommandSucceededEvent,
   LoggableEvent,
   MongoDBLogWritable,
   MongoLoggableComponent,

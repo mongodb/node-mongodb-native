@@ -12,7 +12,13 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
-import type { MongoLoggableComponent, MongoLogger } from './mongo_logger';
+import type {
+  LoggableCommandFailedEvent,
+  LoggableCommandStartedEvent,
+  LoggableCommandSucceededEvent,
+  MongoLoggableComponent,
+  MongoLogger
+} from './mongo_logger';
 import type { Sort } from './sort';
 
 /** @internal */
@@ -412,25 +418,29 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     this.emit(event, ...args);
     if (this.component) this.mongoLogger?.debug(this.component, args[0]);
   }
-  protected emitAndLogCommand<EventKey extends keyof Events>(
+  /** @internal */
+  emitAndLogCommand<EventKey extends keyof Events>(
+    monitorCommands: boolean,
     event: EventKey | symbol,
-    serverConnectionId?: number | '<monitor>',
+    serverConnectionId: number | '<monitor>' | undefined,
+    databaseName?: string,
     ...args: Parameters<Events[EventKey]>
   ): void {
-    this.emit(event, ...args);
+    if (monitorCommands) {
+      this.emit(event, ...args);
+    }
     if (this.component) {
-      const loggableHeartbeatEvent:
-        | LoggableServerHeartbeatFailedEvent
-        | LoggableServerHeartbeatSucceededEvent
-        | LoggableServerHeartbeatStartedEvent = {
-        topologyId: topologyId,
+      const loggableCommandEvent:
+        | LoggableCommandStartedEvent
+        | LoggableCommandFailedEvent
+        | LoggableCommandSucceededEvent = {
         serverConnectionId: serverConnectionId ?? null,
+        databaseName: databaseName,
         ...args[0]
       };
-      this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
+      this.mongoLogger?.debug(this.component, loggableCommandEvent);
     }
   }
-  
 }
 
 /** @public */
