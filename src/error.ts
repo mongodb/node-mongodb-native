@@ -1145,14 +1145,12 @@ const RETRYABLE_READ_ERROR_CODES = new Set<number>([
   MONGODB_ERROR_CODES.InterruptedAtShutdown,
   MONGODB_ERROR_CODES.InterruptedDueToReplStateChange,
   MONGODB_ERROR_CODES.NotPrimaryNoSecondaryOk,
-  MONGODB_ERROR_CODES.NotPrimaryOrSecondary
+  MONGODB_ERROR_CODES.NotPrimaryOrSecondary,
+  MONGODB_ERROR_CODES.ExceededTimeLimit
 ]);
 
 // see: https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst#terms
-const RETRYABLE_WRITE_ERROR_CODES = new Set<number>([
-  ...RETRYABLE_READ_ERROR_CODES,
-  MONGODB_ERROR_CODES.ExceededTimeLimit
-]);
+const RETRYABLE_WRITE_ERROR_CODES = RETRYABLE_READ_ERROR_CODES;
 
 export function needsRetryableWriteLabel(error: Error, maxWireVersion: number): boolean {
   // pre-4.4 server, then the driver adds an error label for every valid case
