@@ -52,7 +52,7 @@
         "collectionName": "unsatisfiableRPColl",
         "collectionOptions": {
           "readPreference": {
-            "mode": "Secondary",
+            "mode": "secondary",
             "tagSets": [
               {
                 "nonexistenttag": "a"

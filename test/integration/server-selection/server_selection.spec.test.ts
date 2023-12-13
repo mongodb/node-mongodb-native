@@ -3,7 +3,7 @@ import * as path from 'path';
 import { loadSpecTests } from '../../spec';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
-describe('Server Selection Unified Tests (Spec)', function () {
+describe.skip('Server Selection Unified Tests (Spec)', function () {
   const tests = loadSpecTests(path.join('server-selection', 'logging'));
   runUnifiedSuite(tests, test => {
     if (
@@ -14,6 +14,7 @@ describe('Server Selection Unified Tests (Spec)', function () {
     ) {
       return 'not applicable: operationId not supported';
     }
-    return 'TODO: NODE-2471 (ping on connect) and NODE-5774 (duplicate server selection for bulkWrite and other wrapper operations)';
+    return false;
   });
-});
+}).skipReason =
+  'TODO: unskip these tests - NODE-2471 (ping on connect) and NODE-5774 (duplicate server selection for bulkWrite and other wrapper operations';
