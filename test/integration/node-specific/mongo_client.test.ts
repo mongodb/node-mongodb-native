@@ -9,7 +9,7 @@ import {
   Connection,
   Db,
   getTopology,
-  isHello,
+  ModernConnection,
   MongoClient,
   MongoNotConnectedError,
   MongoServerSelectionError,
@@ -21,8 +21,16 @@ import { runLater } from '../../tools/utils';
 import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
+  let client: MongoClient;
   before(function () {
     return setupDatabase(this.configuration);
+  });
+
+  afterEach(async () => {
+    sinon.restore();
+    await client?.close();
+    // @ts-expect-error: Put this variable back to undefined to force tests to make their own client
+    client = undefined;
   });
 
   it('should correctly pass through extra db options', {
@@ -334,53 +342,40 @@ describe('class MongoClient', function () {
 
   it('must respect an infinite connectTimeoutMS for the streaming protocol', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
-    test: function (done) {
-      const client = this.configuration.newClient({
+    test: async function () {
+      client = this.configuration.newClient({
         connectTimeoutMS: 0,
         heartbeatFrequencyMS: 500
       });
-      client.connect(err => {
-        expect(err).to.not.exist;
-        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function (...args) {
-          const ns = args[0];
-          const command = args[1];
-          const options = args[2] || {};
+      const connectionType =
+        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
 
-          // @ts-expect-error: exhaustAllowed is a protocol option
-          if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
-            expect(options).property('socketTimeoutMS').to.equal(0);
-            stub.restore();
-            client.close(done);
-          }
-          stub.wrappedMethod.apply(this, args);
-        });
-      });
+      const spy = sinon.spy(connectionType.prototype, 'commandAsync');
+
+      await client.connect();
+
+      const options = spy.getCall(0).args[2];
+      expect(options).property('socketTimeoutMS').to.equal(0);
     }
   });
 
   it('must respect a finite connectTimeoutMS for the streaming protocol', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 4.4' } },
-    test: function (done) {
-      const client = this.configuration.newClient({
+    test: async function () {
+      client = this.configuration.newClient({
         connectTimeoutMS: 10,
         heartbeatFrequencyMS: 500
       });
-      client.connect(err => {
-        expect(err).to.not.exist;
-        const stub = sinon.stub(Connection.prototype, 'command').callsFake(function (...args) {
-          const ns = args[0];
-          const command = args[1];
-          const options = args[2] || {};
 
-          // @ts-expect-error: exhaustAllowed is a protocol option
-          if (ns.toString() === 'admin.$cmd' && isHello(command) && options.exhaustAllowed) {
-            expect(options).property('socketTimeoutMS').to.equal(510);
-            stub.restore();
-            client.close(done);
-          }
-          stub.wrappedMethod.apply(this, args);
-        });
-      });
+      const connectionType =
+        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
+
+      const spy = sinon.spy(connectionType.prototype, 'commandAsync');
+
+      await client.connect();
+
+      const options = spy.getCall(0).args[2];
+      expect(options).property('socketTimeoutMS').to.equal(10);
     }
   });
 
