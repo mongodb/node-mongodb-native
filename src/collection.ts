@@ -345,7 +345,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async updateOne(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema> | Partial<TSchema>,
+    update: UpdateFilter<TSchema>,
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(

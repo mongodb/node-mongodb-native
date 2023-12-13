@@ -712,7 +712,7 @@ export class FindOperators {
   }
 
   /** Add a multiple update operation to the bulk operation */
-  update(updateDocument: Document | Document[]): BulkOperationBase {
+  update(updateDocument: UpdateFilter<Document> | Document[]): BulkOperationBase {
     const currentOp = buildCurrentOp(this.bulkOperation);
     return this.bulkOperation.addToOperationsList(
       BatchType.UPDATE,
@@ -724,7 +724,7 @@ export class FindOperators {
   }
 
   /** Add a single update operation to the bulk operation */
-  updateOne(updateDocument: Document | Document[]): BulkOperationBase {
+  updateOne(updateDocument: UpdateFilter<Document> | Document[]): BulkOperationBase {
     if (!hasAtomicOperators(updateDocument)) {
       throw new MongoInvalidArgumentError('Update document requires atomic operators');
     }
