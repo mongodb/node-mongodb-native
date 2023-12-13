@@ -819,6 +819,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @event */
   static readonly UNPINNED = UNPINNED;
 
+  socketWrite: (buffer: Uint8Array, options: { signal: AbortSignal }) => Promise<void>;
+
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
@@ -839,6 +841,11 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     this.socket.on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
+
+    const socketWrite = promisify(this.socket.write.bind(this.socket));
+    this.socketWrite = (buffer, options) => {
+      return abortable(socketWrite(buffer), options);
+    };
   }
 
   async commandAsync(...args: Parameters<typeof this.command>) {
@@ -1256,9 +1263,7 @@ export async function writeCommand(
 
   const buffer = Buffer.concat(await finalCommand.toBin());
 
-  const socketWriteFn = promisify(connection.socket.write.bind(connection.socket));
-
-  return abortable(socketWriteFn(buffer), options);
+  return connection.socketWrite(buffer, options);
 }
 
 /**
