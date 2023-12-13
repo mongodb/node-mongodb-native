@@ -6,6 +6,8 @@ const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const { MongoClient } = require('../../..');
 const { GridFSBucket } = require('../../..');
+// eslint-disable-next-line no-restricted-modules
+const { ModernConnection, Connection } = require('../../../lib/cmap/connection');
 
 // eslint-disable-next-line no-restricted-modules
 const { MONGODB_ERROR_CODES } = require('../../../lib/error');
@@ -25,7 +27,9 @@ function loadSpecString(filePath) {
 }
 
 function makeClient() {
-  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017');
+  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', {
+    connectionType: Connection
+  });
 }
 
 function connectClient() {

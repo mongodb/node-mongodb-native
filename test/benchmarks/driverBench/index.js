@@ -1,6 +1,7 @@
 'use strict';
 
 const MongoBench = require('../mongoBench');
+const os = require('node:os');
 
 const Runner = MongoBench.Runner;
 
@@ -10,6 +11,21 @@ let bsonType = 'js-bson';
 const { inspect } = require('util');
 const { writeFile } = require('fs/promises');
 const { makeParallelBenchmarks, makeSingleBench, makeMultiBench } = require('../mongoBench/suites');
+
+const hw = os.cpus();
+const ram = os.totalmem() / 1024 ** 3;
+const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
+
+const systemInfo = () =>
+  [
+    `Connection`,
+    `\n- cpu: ${platform.name}`,
+    `- cores: ${platform.cores}`,
+    `- arch: ${os.arch()}`,
+    `- os: ${process.platform} (${os.release()})`,
+    `- ram: ${platform.ram}`
+  ].join('\n');
+console.log(systemInfo());
 
 function average(arr) {
   return arr.reduce((x, y) => x + y, 0) / arr.length;
