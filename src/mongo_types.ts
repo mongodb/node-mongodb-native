@@ -412,6 +412,25 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     this.emit(event, ...args);
     if (this.component) this.mongoLogger?.debug(this.component, args[0]);
   }
+  protected emitAndLogCommand<EventKey extends keyof Events>(
+    event: EventKey | symbol,
+    serverConnectionId?: number | '<monitor>',
+    ...args: Parameters<Events[EventKey]>
+  ): void {
+    this.emit(event, ...args);
+    if (this.component) {
+      const loggableHeartbeatEvent:
+        | LoggableServerHeartbeatFailedEvent
+        | LoggableServerHeartbeatSucceededEvent
+        | LoggableServerHeartbeatStartedEvent = {
+        topologyId: topologyId,
+        serverConnectionId: serverConnectionId ?? null,
+        ...args[0]
+      };
+      this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
+    }
+  }
+  
 }
 
 /** @public */

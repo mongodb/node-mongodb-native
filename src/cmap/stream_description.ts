@@ -32,6 +32,7 @@ export class StreamDescription {
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
   loadBalanced: boolean;
+  serverConnectionId: number | '<monitor' | undefined;
 
   __nodejs_mock_server__?: boolean;
 
@@ -51,6 +52,7 @@ export class StreamDescription {
       options && options.compressors && Array.isArray(options.compressors)
         ? options.compressors
         : [];
+    this.serverConnectionId = undefined;
   }
 
   receiveResponse(response: Document | null): void {
@@ -72,5 +74,7 @@ export class StreamDescription {
     if (response.compression) {
       this.compressor = this.compressors.filter(c => response.compression?.includes(c))[0];
     }
+
+    this.serverConnectionId = response.connectionId;
   }
 }

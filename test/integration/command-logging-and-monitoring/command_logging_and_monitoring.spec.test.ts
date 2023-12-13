@@ -22,7 +22,7 @@ describe('Command Logging and Monitoring Spec', function () {
     );
   });
 
-  describe.skip('Command Logging Spec', () => {
+  describe('Command Logging Spec', () => {
     runUnifiedSuite(loadSpecTests(path.join('command-logging-and-monitoring', 'logging')));
-  }).skipReason = 'TODO(NODE-4686): Unskip these tests';
+  });
 });
