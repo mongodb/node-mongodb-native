@@ -141,6 +141,7 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+  mongoLogger: MongoLogger | undefined;
 }
 
 /** @internal */
@@ -194,7 +195,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   [kClusterTime]: Document | null;
   /** @internal  */
-  override component = MongoLoggableComponent.CONNECTION;
+  override component = MongoLoggableComponent.COMMAND;
   /** @internal */
   override mongoLogger: MongoLogger | undefined;
 
@@ -226,6 +227,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.closed = false;
     this[kHello] = null;
     this[kClusterTime] = null;
+    this.mongoLogger = options.mongoLogger;
 
     this[kDescription] = new StreamDescription(this.address, options);
     this[kGeneration] = options.generation;
@@ -722,7 +724,10 @@ function write(
   }
 
   // if command monitoring is enabled we need to modify the callback here
-  if (conn.monitorCommands || conn.mongoLogger?.willLog(SeverityLevel.DEBUG, conn.component)) {
+  if (
+    conn.hello &&
+    (conn.monitorCommands || conn.mongoLogger?.willLog(SeverityLevel.DEBUG, conn.component))
+  ) {
     conn.emitAndLogCommand(
       conn.monitorCommands,
       Connection.COMMAND_STARTED,

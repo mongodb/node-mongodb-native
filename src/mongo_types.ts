@@ -423,7 +423,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     monitorCommands: boolean,
     event: EventKey | symbol,
     serverConnectionId: number | '<monitor>' | undefined,
-    databaseName?: string,
+    databaseName: string,
     ...args: Parameters<Events[EventKey]>
   ): void {
     if (monitorCommands) {

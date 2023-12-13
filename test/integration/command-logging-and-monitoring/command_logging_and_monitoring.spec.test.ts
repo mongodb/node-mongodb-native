@@ -11,7 +11,7 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 // the server. There's nothing we can change here.
 const SKIP = ['A successful unordered bulk write with an unacknowledged write concern'];
 
-describe.only('Command Logging and Monitoring Spec', function () {
+describe('Command Logging and Monitoring Spec', function () {
   describe('Command Monitoring Spec (unified)', () => {
     runUnifiedSuite(
       loadSpecTests(path.join('command-logging-and-monitoring', 'monitoring')),
@@ -22,13 +22,13 @@ describe.only('Command Logging and Monitoring Spec', function () {
     );
   });
 
-  describe('Command Logging Spec', () => {
+  describe.only('Command Logging Spec', () => {
     const tests = loadSpecTests(path.join('command-logging-and-monitoring', 'logging'));
     runUnifiedSuite(tests, test => {
       if (
         [
-          'Failed bulkWrite operation: log messages have operationIds',
-          'Successful bulkWrite operation: log messages have operationIds'
+          'Successful bulk write command log messages include operationIds',
+          'Failed bulk write command log message includes operationId'
         ].includes(test.description)
       ) {
         return 'not applicable: operationId not supported';
