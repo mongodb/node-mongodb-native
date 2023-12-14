@@ -20,10 +20,21 @@ import { createTimerSandbox } from '../timer_sandbox';
 class MockServer {
   pool: any;
   description: ServerDescription;
+  topology: any;
   constructor(options) {
     this.pool = { generation: 1 };
     this.description = new ServerDescription(`${options.host}:${options.port}`);
     this.description.type = ServerType.Unknown;
+    this.topology = {
+      s: { topologyId: 1 },
+      client: {
+        mongoLogger: {
+          debug: function (_v: any, _x: any) {
+            return;
+          }
+        }
+      }
+    };
   }
 }
 

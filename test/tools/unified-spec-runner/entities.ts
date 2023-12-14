@@ -32,11 +32,16 @@ import {
   ReadConcern,
   ReadPreference,
   SENSITIVE_COMMANDS,
+  type ServerClosedEvent,
   type ServerDescriptionChangedEvent,
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
+  type ServerOpeningEvent,
+  type TopologyClosedEvent,
   type TopologyDescription,
+  type TopologyDescriptionChangedEvent,
+  type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
@@ -104,7 +109,12 @@ export type SdamEvent =
   | ServerDescriptionChangedEvent
   | ServerHeartbeatStartedEvent
   | ServerHeartbeatFailedEvent
-  | ServerHeartbeatSucceededEvent;
+  | ServerHeartbeatSucceededEvent
+  | TopologyOpeningEvent
+  | TopologyDescriptionChangedEvent
+  | TopologyClosedEvent
+  | ServerOpeningEvent
+  | ServerClosedEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
@@ -135,10 +145,15 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedIn'
   )[];
   observedSdamEvents: (
-    | 'serverDescriptionChangedEvent'
-    | 'serverHeartbeatStartedEvent'
-    | 'serverHeartbeatFailedEvent'
-    | 'serverHeartbeatSucceededEvent'
+    | 'serverDescriptionChanged'
+    | 'serverHeartbeatStarted'
+    | 'serverHeartbeatFailed'
+    | 'serverHeartbeatSucceeded'
+    | 'serverOpened'
+    | 'serverClosed'
+    | 'topologyOpened'
+    | 'topologyClosed'
+    | 'topologyDescriptionChangedEvent'
   )[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
@@ -167,7 +182,12 @@ export class UnifiedMongoClient extends MongoClient {
     serverDescriptionChangedEvent: 'serverDescriptionChanged',
     serverHeartbeatStartedEvent: 'serverHeartbeatStarted',
     serverHeartbeatFailedEvent: 'serverHeartbeatFailed',
-    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded'
+    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded',
+    serverOpeningEvent: 'serverOpening',
+    serverClosedEvent: 'serverClosed',
+    topologyOpeningEvent: 'topologyOpening',
+    topologyClosedEvent: 'topologyClosed',
+    topologyDescriptionChangedEvent: 'topologyDescriptionChanged'
   } as const;
 
   static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {
@@ -207,7 +227,9 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      mongodbLogPath: logCollector
+      mongodbLogPath: logCollector,
+      // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
+      mongodbLogMaxDocumentLength: 1250
     } as any);
     this.logCollector = logCollector;
 
