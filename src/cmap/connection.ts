@@ -717,7 +717,10 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
+    conn.emit(
+      Connection.COMMAND_STARTED,
+      new CommandStartedEvent(conn, command, conn.hello?.connectionId)
+    );
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
@@ -727,18 +730,36 @@ function write(
       if (err && reply?.ok !== 1) {
         conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(conn, command, err, operationDescription.started)
+          new CommandFailedEvent(
+            conn,
+            command,
+            err,
+            operationDescription.started,
+            conn.hello?.connectionId
+          )
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
           conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(conn, command, reply, operationDescription.started)
+            new CommandFailedEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn.hello?.connectionId
+            )
           );
         } else {
           conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
+            new CommandSucceededEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn.hello?.connectionId
+            )
           );
         }
       }

@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from '../bson';
+import { type Document, type Double, Long, type ObjectId } from '../bson';
 import {
   COMMAND_FAILED,
   COMMAND_STARTED,
@@ -22,7 +22,14 @@ export class CommandStartedEvent {
   commandName: string;
   command: Document;
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+.
+   */
+  serverConnectionId?: bigint;
   serviceId?: ObjectId;
   /** @internal */
   name = COMMAND_STARTED;
@@ -67,7 +74,13 @@ export class CommandStartedEvent {
  */
 export class CommandSucceededEvent {
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
+   */
+  serverConnectionId?: bigint;
   requestId: number;
   duration: number;
   commandName: string;
@@ -117,7 +130,13 @@ export class CommandSucceededEvent {
  */
 export class CommandFailedEvent {
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
+   */
+  serverConnectionId?: bigint;
   requestId: number;
   duration: number;
   commandName: string;
@@ -139,7 +158,8 @@ export class CommandFailedEvent {
     connection: Connection,
     command: WriteProtocolMessageType,
     error: Error | Document,
-    started: number
+    started: number,
+    serverConnectionId: number | Double | bigint | Long | undefined
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -153,6 +173,13 @@ export class CommandFailedEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
+    if (serverConnectionId) {
+      this.serverConnectionId = Long.isLong(serverConnectionId)
+        ? serverConnectionId.toBigInt()
+        : typeof serverConnectionId === 'bigint' || typeof serverConnectionId === 'number'
+        ? BigInt(serverConnectionId)
+        : BigInt(serverConnectionId.valueOf());
+    }
   }
 
   /* @internal */
