@@ -1,3 +1,4 @@
+import { HostAddress } from '.././utils';
 import {
   SERVER_SELECTION_FAILED,
   SERVER_SELECTION_STARTED,
@@ -37,10 +38,10 @@ export abstract class ServerSelectionEvent {
   constructor(
     selector: string | ReadPreference | ServerSelector,
     topologyDescription: TopologyDescription,
-    operation?: string
+    operation: string
   ) {
     this.selector = selector;
-    this.operation = operation ?? 'n/a';
+    this.operation = operation;
     this.topologyDescription = topologyDescription;
   }
 }
@@ -59,7 +60,7 @@ export class ServerSelectionStartedEvent extends ServerSelectionEvent {
   constructor(
     selector: string | ReadPreference | ServerSelector,
     topologyDescription: TopologyDescription,
-    operation?: string
+    operation: string
   ) {
     super(selector, topologyDescription, operation);
   }
@@ -82,7 +83,7 @@ export class ServerSelectionFailedEvent extends ServerSelectionEvent {
     selector: string | ReadPreference | ServerSelector,
     topologyDescription: TopologyDescription,
     error: Error,
-    operation?: string
+    operation: string
   ) {
     super(selector, topologyDescription, operation);
     this.failure = error;
@@ -98,19 +99,17 @@ export class ServerSelectionSucceededEvent extends ServerSelectionEvent {
   /** @internal */
   name = SERVER_SELECTION_SUCCEEDED;
   message = 'Server selection succeeded';
-  /**  The hostname, IP address, or Unix domain socket path for the selected server.*/
+  /** 	The hostname, IP address, or Unix domain socket path for the selected server. */
   serverHost: string;
-  /** The port for the selected server. Optional; not present for Unix domain sockets.
-   * When the user does not specify a port and the default (27017) is used
-   * */
-  serverPort: number;
+  /** The port for the selected server. Optional; not present for Unix domain sockets. When the user does not specify a port and the default (27017) is used, the driver SHOULD include it here. */
+  serverPort: number | undefined;
 
   /** @internal */
   constructor(
     selector: string | ReadPreference | ServerSelector,
     topologyDescription: TopologyDescription,
     address: string,
-    operation?: string
+    operation: string
   ) {
     super(selector, topologyDescription, operation);
     const { host, port } = HostAddress.fromString(address).toHostPort();
@@ -136,7 +135,7 @@ export class WaitingForSuitableServerEvent extends ServerSelectionEvent {
     selector: string | ReadPreference | ServerSelector,
     topologyDescription: TopologyDescription,
     remainingTimeMS: number,
-    operation?: string
+    operation: string
   ) {
     super(selector, topologyDescription, operation);
     this.remainingTimeMS = remainingTimeMS;

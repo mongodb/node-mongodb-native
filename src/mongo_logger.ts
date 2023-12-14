@@ -484,7 +484,8 @@ function defaultLogTransform(
       return log;
     case SERVER_SELECTION_SUCCEEDED:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-      log = attachConnectionFields(log, logObject);
+      log.serverHost = logObject.serverHost;
+      log.serverPort = logObject.serverPort;
       return log;
     case WAITING_FOR_SUITABLE_SERVER:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);

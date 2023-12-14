@@ -106,7 +106,8 @@ export interface ServerSelectionRequest {
   callback: ServerSelectionCallback;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
-  operationName?: string;
+  operationName: string;
+  waitingLogged: boolean;
 }
 
 /** @internal */
@@ -171,7 +172,7 @@ export interface SelectServerOptions {
   /** How long to block for server selection before throwing an error */
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
-  operationName?: string;
+  operationName: string;
 }
 
 /** @public */
@@ -457,35 +458,40 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       callback ? callback(error) : this.emit(Topology.ERROR, error);
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
-    this.selectServer(readPreferenceServerSelector(readPreference), options, (err, server) => {
-      if (err) {
-        return this.close({ force: false }, () => exitWithError(err));
+    const selectServerOptions = { operationName: 'ping', ...options };
+    this.selectServer(
+      readPreferenceServerSelector(readPreference),
+      selectServerOptions,
+      (err, server) => {
+        if (err) {
+          return this.close({ force: false }, () => exitWithError(err));
+        }
+
+        // TODO: NODE-2471
+        const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+        if (!skipPingOnConnect && server && this.s.credentials) {
+          server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
+            if (err) {
+              return exitWithError(err);
+            }
+
+            stateTransition(this, STATE_CONNECTED);
+            this.emit(Topology.OPEN, this);
+            this.emit(Topology.CONNECT, this);
+
+            callback?.(undefined, this);
+          });
+
+          return;
+        }
+
+        stateTransition(this, STATE_CONNECTED);
+        this.emit(Topology.OPEN, this);
+        this.emit(Topology.CONNECT, this);
+
+        callback?.(undefined, this);
       }
-
-      // TODO: NODE-2471
-      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
-      if (!skipPingOnConnect && server && this.s.credentials) {
-        server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
-          if (err) {
-            return exitWithError(err);
-          }
-
-          stateTransition(this, STATE_CONNECTED);
-          this.emit(Topology.OPEN, this);
-          this.emit(Topology.CONNECT, this);
-
-          callback?.(undefined, this);
-        });
-
-        return;
-      }
-
-      stateTransition(this, STATE_CONNECTED);
-      this.emit(Topology.OPEN, this);
-      this.emit(Topology.CONNECT, this);
-
-      callback?.(undefined, this);
-    });
+    );
   }
 
   /** Close this topology */
@@ -559,8 +565,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     this.client.mongoLogger.debug(
-      'topology',
-      new ServerSelectionStartedEvent(selector, this.description, options?.operationName)
+      MongoLoggableComponent.SERVER_SELECTION,
+      new ServerSelectionStartedEvent(selector, this.description, options.operationName)
     );
 
     options = Object.assign(
@@ -574,6 +580,15 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const transaction = session && session.transaction;
 
     if (isSharded && transaction && transaction.server) {
+      this.client.mongoLogger.debug(
+        MongoLoggableComponent.SERVER_SELECTION,
+        new ServerSelectionSucceededEvent(
+          selector,
+          this.description,
+          transaction.server.pool.address,
+          options.operationName
+        )
+      );
       callback(undefined, transaction.server);
       return;
     }
@@ -585,7 +600,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       transaction,
       callback,
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
-      operationName: options?.operationName
+      operationName: options.operationName,
+      waitingLogged: false
     };
 
     waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
@@ -601,7 +617,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           selector,
           this.description,
           timeoutError,
-          options?.operationName
+          options.operationName
         )
       );
       waitQueueMember.callback(timeoutError);
@@ -894,7 +910,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
             waitQueueMember.serverSelector,
             waitQueueMember.topologyDescription,
             err,
-            waitQueueMember?.operationName
+            waitQueueMember.operationName
           )
         );
       }
@@ -930,13 +946,33 @@ function processWaitQueue(topology: Topology) {
         : serverDescriptions;
     } catch (e) {
       waitQueueMember.timeoutController.clear();
-
+      topology.client.mongoLogger.debug(
+        MongoLoggableComponent.SERVER_SELECTION,
+        new ServerSelectionFailedEvent(
+          waitQueueMember.serverSelector,
+          topology.description,
+          e,
+          waitQueueMember.operationName
+        )
+      );
       waitQueueMember.callback(e);
       continue;
     }
 
     let selectedServer: Server | undefined;
     if (selectedDescriptions.length === 0) {
+      if (!waitQueueMember.waitingLogged) {
+        topology.client.mongoLogger.info(
+          MongoLoggableComponent.SERVER_SELECTION,
+          new WaitingForSuitableServerEvent(
+            waitQueueMember.serverSelector,
+            topology.description,
+            waitQueueMember.timeoutController.getRemainingTimeMS(),
+            waitQueueMember.operationName
+          )
+        );
+        waitQueueMember.waitingLogged = true;
+      }
       topology[kWaitQueue].push(waitQueueMember);
       continue;
     } else if (selectedDescriptions.length === 1) {
@@ -963,7 +999,7 @@ function processWaitQueue(topology: Topology) {
           waitQueueMember.serverSelector,
           topology.description,
           error,
-          waitQueueMember?.operationName
+          waitQueueMember.operationName
         )
       );
       waitQueueMember.callback(error);
@@ -982,7 +1018,7 @@ function processWaitQueue(topology: Topology) {
         waitQueueMember.serverSelector,
         waitQueueMember.topologyDescription,
         selectedServer.pool.address,
-        waitQueueMember?.operationName
+        waitQueueMember.operationName
       )
     );
     waitQueueMember.callback(undefined, selectedServer);
