@@ -726,8 +726,8 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (
-    conn.hello &&
-    (conn.monitorCommands || conn.mongoLogger?.willLog(SeverityLevel.DEBUG, conn.component))
+    conn.monitorCommands ||
+    (conn.hello && conn.mongoLogger?.willLog(SeverityLevel.DEBUG, conn.component))
   ) {
     conn.emitAndLogCommand(
       conn.monitorCommands,
