@@ -10,7 +10,6 @@ import {
   COMMAND_FAILED,
   COMMAND_STARTED,
   COMMAND_SUCCEEDED,
-  MESSAGE,
   PINNED,
   UNPINNED
 } from '../constants';
@@ -130,7 +129,6 @@ export type ConnectionEvents = {
   commandFailed(event: CommandFailedEvent): void;
   clusterTimeReceived(clusterTime: Document): void;
   close(): void;
-  message(message: any): void;
   pinned(pinType: string): void;
   unpinned(pinType: string): void;
 };
@@ -187,8 +185,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   static readonly CLUSTER_TIME_RECEIVED = CLUSTER_TIME_RECEIVED;
   /** @event */
   static readonly CLOSE = CLOSE;
-  /** @event */
-  static readonly MESSAGE = MESSAGE;
   /** @event */
   static readonly PINNED = PINNED;
   /** @event */
