@@ -228,6 +228,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this.controller.signal.aborted;
   }
 
+  public get hello() {
+    return this.description.hello;
+  }
+
   // the `connect` method stores the result of the handshake hello on the connection
   public set hello(response: Document | null) {
     this.description.receiveResponse(response);

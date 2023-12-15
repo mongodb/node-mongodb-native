@@ -12,7 +12,7 @@ import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
-function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
+function getDefaultAuthMechanism(hello: Document | null): AuthMechanism {
   if (hello) {
     // If hello contains saslSupportedMechs, use scram-sha-256
     // if it is available, else scram-sha-1
@@ -151,7 +151,7 @@ export class MongoCredentials {
    *
    * @param hello - A hello response from the server
    */
-  resolveAuthMechanism(hello?: Document): MongoCredentials {
+  resolveAuthMechanism(hello: Document | null): MongoCredentials {
     // If the mechanism is not "default", then it does not need to be resolved
     if (this.mechanism.match(/DEFAULT/i)) {
       return new MongoCredentials({
