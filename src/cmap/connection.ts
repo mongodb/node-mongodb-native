@@ -1,5 +1,5 @@
 import { type Readable, Transform, type TransformCallback } from 'stream';
-import { setTimeout } from 'timers';
+import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
@@ -61,19 +61,6 @@ import { StreamDescription, type StreamDescriptionOptions } from './stream_descr
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
-
-/** @internal */
-const kGeneration = Symbol('generation');
-/** @internal */
-const kLastUseTime = Symbol('lastUseTime');
-/** @internal */
-const kClusterTime = Symbol('clusterTime');
-/** @internal */
-const kDescription = Symbol('description');
-/** @internal */
-const kHello = Symbol('hello');
-/** @internal */
-const kAutoEncrypter = Symbol('autoEncrypter');
 
 /** @internal */
 export interface CommandOptions extends BSONSerializeOptions {
@@ -154,15 +141,6 @@ export function hasSessionSupport(conn: Connection): boolean {
   return description.logicalSessionTimeoutMinutes != null;
 }
 
-function supportsOpMsg(conn: Connection) {
-  const description = conn.description;
-  if (description == null) {
-    return false;
-  }
-
-  return maxWireVersion(conn) >= 6 && !description.__nodejs_mock_server__;
-}
-
 function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
   if (options.proxyHost) {
     // If proxy options are specified, the properties of `stream` itself
@@ -180,33 +158,24 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
 
 /** @internal */
 export class Connection extends TypedEventEmitter<ConnectionEvents> {
-  id: number | '<monitor>';
-  address: string;
-  socketTimeoutMS: number;
-  monitorCommands: boolean;
-  lastHelloMS?: number;
-  serverApi?: ServerApi;
-  helloOk?: boolean;
-  /** @internal */
-  authContext?: AuthContext;
+  public id: number | '<monitor>';
+  public address: string;
+  public lastHelloMS?: number;
+  public serverApi?: ServerApi;
+  public helloOk?: boolean;
+  public authContext?: AuthContext;
+  public delayedTimeoutId: NodeJS.Timeout | null = null;
+  public generation: number;
+  public readonly description: Readonly<StreamDescription>;
 
-  delayedTimeoutId: NodeJS.Timeout | null = null;
-  /** @internal */
-  [kDescription]: StreamDescription;
-  /** @internal */
-  [kGeneration]: number;
-  /** @internal */
-  [kLastUseTime]: number;
-
+  private lastUseTime: number;
+  private socketTimeoutMS: number;
+  private monitorCommands: boolean;
   private socket: Stream;
   private controller: AbortController;
   private messageStream: Readable;
   private socketWrite: (buffer: Uint8Array) => Promise<void>;
-
-  /** @internal */
-  [kHello]: Document | null;
-  /** @internal */
-  [kClusterTime]: Document | null;
+  private clusterTime: Document | null = null;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -233,12 +202,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
-    this[kHello] = null;
-    this[kClusterTime] = null;
 
-    this[kDescription] = new StreamDescription(this.address, options);
-    this[kGeneration] = options.generation;
-    this[kLastUseTime] = now();
+    this.description = new StreamDescription(this.address, options);
+    this.generation = options.generation;
+    this.lastUseTime = now();
 
     this.socket = stream;
     this.controller = new AbortController();
@@ -257,81 +224,54 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
-  get closed(): boolean {
+  public get closed(): boolean {
     return this.controller.signal.aborted;
   }
 
-  get description(): StreamDescription {
-    return this[kDescription];
-  }
-
-  get hello(): Document | null {
-    return this[kHello];
-  }
-
   // the `connect` method stores the result of the handshake hello on the connection
-  set hello(response: Document | null) {
-    this[kDescription].receiveResponse(response);
-    this[kDescription] = Object.freeze(this[kDescription]);
-
-    // TODO: remove this, and only use the `StreamDescription` in the future
-    this[kHello] = response;
+  public set hello(response: Document | null) {
+    this.description.receiveResponse(response);
+    Object.freeze(this.description);
   }
 
-  get serviceId(): ObjectId | undefined {
+  public get serviceId(): ObjectId | undefined {
     return this.hello?.serviceId;
   }
 
-  get loadBalanced(): boolean {
+  public get loadBalanced(): boolean {
     return this.description.loadBalanced;
   }
 
-  get generation(): number {
-    return this[kGeneration] || 0;
+  public get idleTime(): number {
+    return calculateDurationInMs(this.lastUseTime);
   }
 
-  set generation(generation: number) {
-    this[kGeneration] = generation;
-  }
-
-  get idleTime(): number {
-    return calculateDurationInMs(this[kLastUseTime]);
-  }
-
-  get clusterTime(): Document | null {
-    return this[kClusterTime];
-  }
-
-  get stream(): Stream {
-    return this.socket;
-  }
-
-  get hasSessionSupport(): boolean {
+  private get hasSessionSupport(): boolean {
     return this.description.logicalSessionTimeoutMinutes != null;
   }
 
-  get supportsOpMsg(): boolean {
+  private get supportsOpMsg(): boolean {
     return (
       this.description != null &&
-      maxWireVersion(this as any as Connection) >= 6 &&
+      maxWireVersion(this) >= 6 &&
       !this.description.__nodejs_mock_server__
     );
   }
 
-  markAvailable(): void {
-    this[kLastUseTime] = now();
+  public markAvailable(): void {
+    this.lastUseTime = now();
   }
 
-  onError(error?: Error) {
+  public onError(error?: Error) {
     this.cleanup(error);
   }
 
-  onClose() {
+  private onClose() {
     const message = `connection ${this.id} to ${this.address} closed`;
     this.cleanup(new MongoNetworkError(message));
   }
 
-  onTimeout() {
+  private onTimeout() {
     this.delayedTimeoutId = setTimeout(() => {
       const message = `connection ${this.id} to ${this.address} timed out`;
       const beforeHandshake = this.hello == null;
@@ -339,7 +279,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
-  destroy(options: DestroyOptions, callback?: Callback): void {
+  public destroy(options: DestroyOptions, callback?: Callback): void {
     if (this.closed) {
       if (typeof callback === 'function') process.nextTick(callback);
       return;
@@ -474,7 +414,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           }
 
           if (document.$clusterTime) {
-            this[kClusterTime] = document.$clusterTime;
+            this.clusterTime = document.$clusterTime;
             this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
           }
         }
@@ -493,7 +433,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  async *sendCommand(ns: MongoDBNamespace, command: Document, options: CommandOptions = {}) {
+  private async *sendCommand(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {}
+  ) {
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
@@ -555,7 +499,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  async command(
+  public async command(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions = {}
@@ -567,7 +511,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
   }
 
-  exhaustCommand(
+  public exhaustCommand(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions,
@@ -590,7 +534,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    * Writes an OP_MSG or OP_QUERY request to the socket, optionally compressing the command. This method
    * waits until the socket's buffer has emptied (the Nodejs socket `drain` event has fired).
    */
-  async writeCommand(
+  private async writeCommand(
     command: WriteProtocolMessageType,
     options: { agreedCompressor?: CompressorName; zlibCompressionLevel?: number }
   ): Promise<void> {
@@ -616,7 +560,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
+  private async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
     for await (const message of onData(this.messageStream, { signal: this.controller.signal })) {
       const response = await decompressResponse(message);
       yield response;
@@ -638,6 +582,7 @@ export class SizedMessageTransform extends Transform {
     this.bufferPool = new BufferPool();
     this.connection = connection;
   }
+
   override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
     if (this.connection.delayedTimeoutId != null) {
       clearTimeout(this.connection.delayedTimeoutId);
@@ -667,11 +612,11 @@ export class SizedMessageTransform extends Transform {
 /** @internal */
 export class CryptoConnection extends Connection {
   /** @internal */
-  [kAutoEncrypter]?: AutoEncrypter;
+  autoEncrypter?: AutoEncrypter;
 
   constructor(stream: Stream, options: ConnectionOptions) {
     super(stream, options);
-    this[kAutoEncrypter] = options.autoEncrypter;
+    this.autoEncrypter = options.autoEncrypter;
   }
 
   /** @internal @override */
@@ -680,7 +625,7 @@ export class CryptoConnection extends Connection {
     cmd: Document,
     options: CommandOptions
   ): Promise<Document> {
-    const autoEncrypter = this[kAutoEncrypter];
+    const { autoEncrypter } = this;
     if (!autoEncrypter) {
       throw new MongoMissingDependencyError('No AutoEncrypter available for encryption');
     }
