@@ -1,4 +1,4 @@
-import type { Document } from '../bson';
+import { type Document, type Double, Long } from '../bson';
 import { ServerType } from '../sdam/common';
 import { parseServerType } from '../sdam/server_description';
 import type { CompressorName } from './wire_protocol/compression';
@@ -36,6 +36,7 @@ export class StreamDescription {
   __nodejs_mock_server__?: boolean;
 
   zlibCompressionLevel?: number;
+  serverConnectionId?: bigint | undefined;
 
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
@@ -58,6 +59,9 @@ export class StreamDescription {
       return;
     }
     this.type = parseServerType(response);
+    if (response.serverConnectionId) {
+      this.serverConnectionId = this.parseServerConnectionID(response.serverConnectionId);
+    }
     for (const field of RESPONSE_FIELDS) {
       if (response[field] != null) {
         this[field] = response[field];
@@ -72,5 +76,14 @@ export class StreamDescription {
     if (response.compression) {
       this.compressor = this.compressors.filter(c => response.compression?.includes(c))[0];
     }
+  }
+
+  /* @internal */
+  parseServerConnectionID(serverConnectionId: number | Double | bigint | Long): bigint {
+    return Long.isLong(serverConnectionId)
+      ? serverConnectionId.toBigInt()
+      : typeof serverConnectionId === 'bigint' || typeof serverConnectionId === 'number'
+      ? BigInt(serverConnectionId)
+      : BigInt(serverConnectionId.valueOf());
   }
 }

@@ -1,4 +1,4 @@
-import { type Document, type Double, Long, type ObjectId } from '../bson';
+import { type Document, type ObjectId } from '../bson';
 import {
   COMMAND_FAILED,
   COMMAND_STARTED,
@@ -44,7 +44,7 @@ export class CommandStartedEvent {
   constructor(
     connection: Connection,
     command: WriteProtocolMessageType,
-    serverConnectionId?: number | Double | bigint | Long | undefined
+    serverConnectionId?: bigint | undefined
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -64,7 +64,7 @@ export class CommandStartedEvent {
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
     if (serverConnectionId) {
-      this.serverConnectionId = parseServerConnectionID(serverConnectionId);
+      this.serverConnectionId = serverConnectionId;
     }
   }
 
@@ -110,7 +110,7 @@ export class CommandSucceededEvent {
     command: WriteProtocolMessageType,
     reply: Document | undefined,
     started: number,
-    serverConnectionId?: number | Double | bigint | Long | undefined
+    serverConnectionId?: bigint | undefined
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -124,7 +124,7 @@ export class CommandSucceededEvent {
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
     if (serverConnectionId) {
-      this.serverConnectionId = parseServerConnectionID(serverConnectionId);
+      this.serverConnectionId = serverConnectionId;
     }
   }
 
@@ -170,7 +170,7 @@ export class CommandFailedEvent {
     command: WriteProtocolMessageType,
     error: Error | Document,
     started: number,
-    serverConnectionId?: number | Double | bigint | Long | undefined
+    serverConnectionId?: bigint | undefined
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -185,7 +185,7 @@ export class CommandFailedEvent {
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
     if (serverConnectionId) {
-      this.serverConnectionId = parseServerConnectionID(serverConnectionId);
+      this.serverConnectionId = serverConnectionId;
     }
   }
 
@@ -193,15 +193,6 @@ export class CommandFailedEvent {
   get hasServiceId(): boolean {
     return !!this.serviceId;
   }
-}
-
-/* @internal */
-function parseServerConnectionID(serverConnectionId: number | Double | bigint | Long): bigint {
-  return Long.isLong(serverConnectionId)
-    ? serverConnectionId.toBigInt()
-    : typeof serverConnectionId === 'bigint' || typeof serverConnectionId === 'number'
-    ? BigInt(serverConnectionId)
-    : BigInt(serverConnectionId.valueOf());
 }
 
 /**
