@@ -1,3 +1,5 @@
+import { promisify } from 'node:util';
+
 import { expect } from 'chai';
 
 import {
@@ -32,54 +34,49 @@ describe('Connection', function () {
   describe('Connection - functional/cmap', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: function (done) {
+      test: async function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} })
         };
 
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
-
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
-            expect(err).to.not.exist;
-            expect(hello).to.exist;
-            expect(hello.ok).to.equal(1);
-            done();
-          });
-        });
+        let conn;
+        try {
+          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
+          expect(hello).to.have.property('ok', 1);
+        } finally {
+          conn?.destroy();
+        }
       }
     });
 
     it('should emit command monitoring events', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: function (done) {
+      test: async function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
-          monitorCommands: true,
           ...this.configuration.options,
+          monitorCommands: true,
           metadata: makeClientMetadata({ driverInfo: {} })
         };
 
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
+        let conn;
+        try {
+          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
 
-          const events = [];
+          const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
           conn.on('commandSucceeded', event => events.push(event));
           conn.on('commandFailed', event => events.push(event));
 
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
-            expect(err).to.not.exist;
-            expect(hello).to.exist;
-            expect(hello.ok).to.equal(1);
-            expect(events).to.have.length(2);
-            done();
-          });
-        });
+          const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
+          expect(hello).to.have.property('ok', 1);
+          expect(events).to.have.lengthOf(2);
+        } finally {
+          conn?.destroy();
+        }
       }
     });
 

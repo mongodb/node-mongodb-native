@@ -21,7 +21,7 @@ describe('MongoDB Handshake', () => {
     before(() => {
       sinon.stub(Connection.prototype, 'commandAsync').callsFake(async function (ns, cmd, options) {
         // @ts-expect-error: sinon will place wrappedMethod there
-        const commandAsync = connectionType.prototype.commandAsync.wrappedMethod.bind(this);
+        const commandAsync = Connection.prototype.commandAsync.wrappedMethod.bind(this);
 
         if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
           return commandAsync(
