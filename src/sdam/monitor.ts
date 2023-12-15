@@ -362,10 +362,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     if (conn) {
-      // Tell the connection that we are using the streaming protocol so that the
-      // connection's message stream will only read the last hello on the buffer.
-      conn.isMonitoringConnection = true;
-
       if (isInCloseState(monitor)) {
         conn.destroy({ force: true });
         return;

@@ -11,7 +11,6 @@ import {
   OpQueryResponse,
   type WriteProtocolMessageType
 } from '../commands';
-import { type OperationDescription } from '../message_stream';
 import { OP_COMPRESSED, OP_MSG } from './constants';
 
 /** @public */
@@ -144,7 +143,7 @@ const MESSAGE_HEADER_SIZE = 16;
  */
 export async function compressCommand(
   command: WriteProtocolMessageType,
-  description: OperationDescription
+  description: { agreedCompressor?: CompressorName; zlibCompressionLevel?: number }
 ): Promise<Buffer> {
   const finalCommand =
     description.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)

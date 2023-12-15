@@ -745,7 +745,6 @@ BUILD_VARIANTS.push({
   expansions: {
     NODE_LTS_VERSION: LATEST_LTS,
     CLIENT_ENCRYPTION: true,
-    MONGODB_NEW_CONNECTION: true
   },
   tasks: BASE_TASKS.map(({ name }) => name)
 });

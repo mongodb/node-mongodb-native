@@ -264,11 +264,9 @@ export type {
 export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
 export type {
   CommandOptions,
-  Connection,
   ConnectionEvents,
   ConnectionOptions,
   DestroyOptions,
-  ModernConnection,
   ProxyOptions
 } from './cmap/connection';
 export type {
@@ -281,11 +279,6 @@ export type {
   WithConnectionCallback
 } from './cmap/connection_pool';
 export type { ClientMetadata, ClientMetadataOptions } from './cmap/handshake/client_metadata';
-export type {
-  MessageStream,
-  MessageStreamOptions,
-  OperationDescription
-} from './cmap/message_stream';
 export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';

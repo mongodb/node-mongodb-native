@@ -242,10 +242,6 @@ export class TestConfiguration {
       throw new Error(`Cannot use options to specify host/port, must be in ${connectionString}`);
     }
 
-    if (process.env.MONGODB_NEW_CONNECTION === 'true') {
-      serverOptions.ConnectionType = ModernConnection;
-    }
-
     return new MongoClient(connectionString, serverOptions);
   }
 
