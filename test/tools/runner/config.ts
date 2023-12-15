@@ -6,7 +6,6 @@ import * as url from 'url';
 import {
   type AuthMechanism,
   HostAddress,
-  ModernConnection,
   MongoClient,
   type ServerApi,
   TopologyType,
