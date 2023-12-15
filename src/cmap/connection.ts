@@ -1,3 +1,4 @@
+import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
@@ -786,7 +787,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @internal */
   authContext?: AuthContext;
 
-  /**@internal */
   delayedTimeoutId: NodeJS.Timeout | null = null;
   /** @internal */
   [kDescription]: StreamDescription;
@@ -794,9 +794,12 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   [kGeneration]: number;
   /** @internal */
   [kLastUseTime]: number;
-  /** @internal */
-  socket: Stream;
-  controller: AbortController;
+
+  private socket: Stream;
+  private controller: AbortController;
+  private messageStream: Readable;
+  private socketWrite: (buffer: Uint8Array, options: { signal: AbortSignal }) => Promise<void>;
+
   /** @internal */
   [kHello]: Document | null;
   /** @internal */
@@ -819,8 +822,6 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   /** @event */
   static readonly UNPINNED = UNPINNED;
 
-  socketWrite: (buffer: Uint8Array, options: { signal: AbortSignal }) => Promise<void>;
-
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
@@ -838,13 +839,17 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     this.socket = stream;
     this.controller = new AbortController();
-    this.socket.on('error', this.onError.bind(this));
+
+    this.messageStream = this.socket
+      .on('error', this.onError.bind(this))
+      .pipe(new SizedMessageTransform({ connection: this }))
+      .on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
 
     const socketWrite = promisify(this.socket.write.bind(this.socket));
-    this.socketWrite = (buffer, options) => {
-      return abortable(socketWrite(buffer), options);
+    this.socketWrite = async buffer => {
+      return abortable(socketWrite(buffer), { signal: this.controller.signal });
     };
   }
 
@@ -1046,10 +1051,9 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     try {
-      await writeCommand(this, message, {
+      await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
-        zlibCompressionLevel: this.description.zlibCompressionLevel,
-        signal: this.controller.signal
+        zlibCompressionLevel: this.description.zlibCompressionLevel
       });
 
       if (options.noResponse) {
@@ -1059,7 +1063,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
       this.controller.signal.throwIfAborted();
 
-      for await (const response of readMany(this, { signal: this.controller.signal })) {
+      for await (const response of this.readMany()) {
         this.socket.setTimeout(0);
         response.parse(options);
 
@@ -1182,103 +1186,78 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
     };
     exhaustLoop().catch(replyListener);
   }
+
+  /**
+   * @internal
+   *
+   * Writes an OP_MSG or OP_QUERY request to the socket, optionally compressing the command. This method
+   * waits until the socket's buffer has emptied (the Nodejs socket `drain` event has fired).
+   */
+  async writeCommand(
+    command: WriteProtocolMessageType,
+    options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>>
+  ): Promise<void> {
+    const finalCommand =
+      options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
+        ? command
+        : new OpCompressedRequest(command, {
+            agreedCompressor: options.agreedCompressor ?? 'none',
+            zlibCompressionLevel: options.zlibCompressionLevel ?? 0
+          });
+
+    const buffer = Buffer.concat(await finalCommand.toBin());
+
+    return this.socketWrite(buffer, { signal: this.controller.signal });
+  }
+
+  /**
+   * @internal
+   *
+   * Returns an async generator that yields full wire protocol messages from the underlying socket.  This function
+   * yields messages until `moreToCome` is false or not present in a response, or the caller cancels the request
+   * by calling `return` on the generator.
+   *
+   * Note that `for-await` loops call `return` automatically when the loop is exited.
+   */
+  async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
+    for await (const message of onData(this.messageStream, { signal: this.controller.signal })) {
+      const response = await decompressResponse(message);
+      yield response;
+
+      if (!response.moreToCome) {
+        return;
+      }
+    }
+  }
 }
 
-const kDefaultMaxBsonMessageSize = 1024 * 1024 * 16 * 4;
+/** @internal */
+export class SizedMessageTransform extends Transform {
+  bufferPool: BufferPool;
+  connection: ModernConnection;
 
-/**
- * @internal
- *
- * This helper reads chucks of data out of a socket and buffers them until it has received a
- * full wire protocol message.
- *
- * By itself, produces an infinite async generator of wire protocol messages and consumers must end
- * the stream by calling `return` on the generator.
- *
- * Note that `for-await` loops call `return` automatically when the loop is exited.
- */
-export async function* readWireProtocolMessages(
-  connection: ModernConnection,
-  { signal }: { signal: AbortSignal }
-): AsyncGenerator<Buffer> {
-  const bufferPool = new BufferPool();
-  const maxBsonMessageSize = connection.hello?.maxBsonMessageSize ?? kDefaultMaxBsonMessageSize;
-  for await (const chunk of onData(connection.socket, { signal })) {
-    if (connection.delayedTimeoutId) {
-      clearTimeout(connection.delayedTimeoutId);
-      connection.delayedTimeoutId = null;
-    }
-
-    bufferPool.append(chunk);
-    const sizeOfMessage = bufferPool.getInt32();
+  constructor({ connection }: { connection: ModernConnection }) {
+    super({ objectMode: false });
+    this.bufferPool = new BufferPool();
+    this.connection = connection;
+  }
+  override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
+    this.bufferPool.append(chunk);
+    const sizeOfMessage = this.bufferPool.getInt32();
 
     if (sizeOfMessage == null) {
-      continue;
+      return callback();
     }
 
     if (sizeOfMessage < 0) {
-      throw new MongoParseError(`Invalid message size: ${sizeOfMessage}`);
+      return callback(new MongoParseError(`Invalid message size: ${sizeOfMessage}, too small`));
     }
 
-    if (sizeOfMessage > maxBsonMessageSize) {
-      throw new MongoParseError(
-        `Invalid message size: ${sizeOfMessage}, max allowed: ${maxBsonMessageSize}`
-      );
+    if (sizeOfMessage > this.bufferPool.length) {
+      return callback();
     }
 
-    if (sizeOfMessage > bufferPool.length) {
-      continue;
-    }
-
-    yield bufferPool.read(sizeOfMessage);
-  }
-}
-
-/**
- * @internal
- *
- * Writes an OP_MSG or OP_QUERY request to the socket, optionally compressing the command. This method
- * waits until the socket's buffer has emptied (the Nodejs socket `drain` event has fired).
- */
-export async function writeCommand(
-  connection: ModernConnection,
-  command: WriteProtocolMessageType,
-  options: Partial<Pick<OperationDescription, 'agreedCompressor' | 'zlibCompressionLevel'>> & {
-    signal: AbortSignal;
-  }
-): Promise<void> {
-  const finalCommand =
-    options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
-      ? command
-      : new OpCompressedRequest(command, {
-          agreedCompressor: options.agreedCompressor ?? 'none',
-          zlibCompressionLevel: options.zlibCompressionLevel ?? 0
-        });
-
-  const buffer = Buffer.concat(await finalCommand.toBin());
-
-  return connection.socketWrite(buffer, options);
-}
-
-/**
- * @internal
- *
- * Returns an async generator that yields full wire protocol messages from the underlying socket.  This function
- * yields messages until `moreToCome` is false or not present in a response, or the caller cancels the request
- * by calling `return` on the generator.
- *
- * Note that `for-await` loops call `return` automatically when the loop is exited.
- */
-export async function* readMany(
-  connection: ModernConnection,
-  options: { signal: AbortSignal }
-): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-  for await (const message of readWireProtocolMessages(connection, options)) {
-    const response = await decompressResponse(message);
-    yield response;
-
-    if (!response.moreToCome) {
-      return;
-    }
+    const message = this.bufferPool.read(sizeOfMessage);
+    return callback(null, message);
   }
 }
