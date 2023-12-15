@@ -738,16 +738,6 @@ BUILD_VARIANTS.push({
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
 
-BUILD_VARIANTS.push({
-  name: 'rhel8-new-connection-tests',
-  display_name: 'New Connection Tests',
-  run_on: DEFAULT_OS,
-  expansions: {
-    NODE_LTS_VERSION: LATEST_LTS,
-    CLIENT_ENCRYPTION: true,
-  },
-  tasks: BASE_TASKS.map(({ name }) => name)
-});
 
 BUILD_VARIANTS.push({
   name: 'rhel8-test-lambda',
