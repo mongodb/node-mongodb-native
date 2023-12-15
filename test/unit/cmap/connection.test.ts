@@ -187,7 +187,7 @@ describe('new Connection()', function () {
     });
   });
 
-  it('calls the command function through commandAsync', async function () {
+  it('calls the command function through command', async function () {
     server.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -205,7 +205,7 @@ describe('new Connection()', function () {
     const connection: Connection = await connectAsync(options);
     const commandSpy = sinon.spy(connection, 'command');
 
-    await connection.commandAsync(ns('dummy'), { ping: 1 }, {});
+    await connection.command(ns('dummy'), { ping: 1 }, {});
     expect(commandSpy).to.have.been.calledOnce;
   });
 

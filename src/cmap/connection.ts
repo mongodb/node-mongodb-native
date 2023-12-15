@@ -256,10 +256,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     };
   }
 
-  async commandAsync(...args: Parameters<typeof this.command>) {
-    return this.command(...args);
-  }
-
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
   get closed(): boolean {
     return this.controller.signal.aborted;

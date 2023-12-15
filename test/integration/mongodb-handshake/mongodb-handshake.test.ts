@@ -19,18 +19,14 @@ describe('MongoDB Handshake', () => {
 
   context('when hello is too large', () => {
     before(() => {
-      sinon.stub(Connection.prototype, 'commandAsync').callsFake(async function (ns, cmd, options) {
+      sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
         // @ts-expect-error: sinon will place wrappedMethod there
-        const commandAsync = Connection.prototype.commandAsync.wrappedMethod.bind(this);
+        const command = Connection.prototype.command.wrappedMethod.bind(this);
 
         if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-          return commandAsync(
-            ns,
-            { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } },
-            options
-          );
+          return command(ns, { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } }, options);
         }
-        return commandAsync(ns, cmd, options);
+        return command(ns, cmd, options);
       });
     });
 
@@ -52,7 +48,7 @@ describe('MongoDB Handshake', () => {
     let spy: Sinon.SinonSpy;
 
     before(() => {
-      spy = sinon.spy(Connection.prototype, 'commandAsync');
+      spy = sinon.spy(Connection.prototype, 'command');
     });
 
     after(() => sinon.restore());

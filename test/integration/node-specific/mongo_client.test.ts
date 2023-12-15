@@ -347,7 +347,7 @@ describe('class MongoClient', function () {
         heartbeatFrequencyMS: 500
       });
 
-      const spy = sinon.spy(Connection.prototype, 'commandAsync');
+      const spy = sinon.spy(Connection.prototype, 'command');
 
       await client.connect();
 
@@ -364,7 +364,7 @@ describe('class MongoClient', function () {
         heartbeatFrequencyMS: 500
       });
 
-      const spy = sinon.spy(Connection.prototype, 'commandAsync');
+      const spy = sinon.spy(Connection.prototype, 'command');
 
       await client.connect();
 

@@ -20,6 +20,6 @@ export class Plain extends AuthProvider {
       autoAuthorize: 1
     };
 
-    await connection.commandAsync(ns('$external.$cmd'), command, undefined);
+    await connection.command(ns('$external.$cmd'), command, undefined);
   }
 }

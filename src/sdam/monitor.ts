@@ -345,7 +345,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     awaited = false;
     connection
-      .commandAsync(ns('admin.$cmd'), cmd, options)
+      .command(ns('admin.$cmd'), cmd, options)
       .then(onHeartbeatSucceeded, onHeartbeatFailed);
 
     return;
@@ -513,7 +513,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const commandName =
     connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
-  connection.commandAsync(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
+  connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
     () => measureAndReschedule(),
     () => {
       rttPinger.connection?.destroy({ force: true });

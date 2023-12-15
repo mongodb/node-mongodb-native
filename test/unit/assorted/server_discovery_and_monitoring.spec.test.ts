@@ -424,7 +424,7 @@ function withConnectionStubImpl(appError) {
           throw new MongoServerError(appError.response);
         }
       },
-      async commandAsync(ns, cmd, options) {
+      async command(ns, cmd, options) {
         return this.command(ns, cmd, options);
       }
     };
