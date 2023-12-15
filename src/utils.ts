@@ -1333,12 +1333,11 @@ export async function abortable<T>(
 }
 
 export function promiseWithResolvers<T>() {
-  let resolve: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
-  let reject: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
+  let resolve!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
+  let reject!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
   const promise = new Promise<T>(function withResolversExecutor(promiseResolve, promiseReject) {
     resolve = promiseResolve;
     reject = promiseReject;
   });
-  // @ts-expect-error: TS does not know what I know
   return { promise, resolve, reject } as const;
 }

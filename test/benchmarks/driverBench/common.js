@@ -7,7 +7,7 @@ const { pipeline } = require('stream/promises');
 const { MongoClient } = require('../../..');
 const { GridFSBucket } = require('../../..');
 // eslint-disable-next-line no-restricted-modules
-const { ModernConnection, Connection } = require('../../../lib/cmap/connection');
+const { ModernConnection } = require('../../../lib/cmap/connection');
 
 // eslint-disable-next-line no-restricted-modules
 const { MONGODB_ERROR_CODES } = require('../../../lib/error');
