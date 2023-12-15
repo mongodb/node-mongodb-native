@@ -18,12 +18,12 @@ const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
 
 const systemInfo = () =>
   [
-    `Connection`,
+    `ModernConnection`,
     `\n- cpu: ${platform.name}`,
     `- cores: ${platform.cores}`,
     `- arch: ${os.arch()}`,
     `- os: ${process.platform} (${os.release()})`,
-    `- ram: ${platform.ram}`
+    `- ram: ${platform.ram}\n`
   ].join('\n');
 console.log(systemInfo());
 
