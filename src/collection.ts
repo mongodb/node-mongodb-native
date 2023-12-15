@@ -16,6 +16,7 @@ import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
+  OneOrMore,
   OptionalUnlessRequiredId,
   TODO_NODE_3286,
   UpdateFilter,
@@ -340,12 +341,18 @@ export class Collection<TSchema extends Document = Document> {
    * Update a single document in a collection
    *
    * @param filter - The filter used to select the document to update
-   * @param update - The update operations to be applied to the document
+   * @param update - The modifications to apply
    * @param options - Optional settings for the command
    */
   async updateOne(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    /**
+     * The value of update can be either:
+     * UpdateFilter<TSchema> - A document that contains update operator expressions,
+     * Document - A replacement document with only <field1>: <value1> pairs,
+     * Document[] - an aggregation pipeline.
+     * */
+    update: UpdateFilter<TSchema> | OneOrMore<Document>,
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
@@ -386,12 +393,18 @@ export class Collection<TSchema extends Document = Document> {
    * Update multiple documents in a collection
    *
    * @param filter - The filter used to select the documents to update
-   * @param update - The update operations to be applied to the documents
+   * @param update - The modifications to apply
    * @param options - Optional settings for the command
    */
   async updateMany(
     filter: Filter<TSchema>,
-    update: UpdateFilter<TSchema>,
+    /**
+     * The value of update can be either:
+     * UpdateFilter<TSchema> - A document that contains update operator expressions,
+     * Document - A replacement document with only <field1>: <value1> pairs,
+     * Document[] - an aggregation pipeline.
+     * */
+    update: UpdateFilter<TSchema> | OneOrMore<Document>,
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
