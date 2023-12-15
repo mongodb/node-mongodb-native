@@ -719,7 +719,7 @@ function write(
   if (conn.monitorCommands) {
     conn.emit(
       Connection.COMMAND_STARTED,
-      new CommandStartedEvent(conn, command, conn.hello?.connectionId)
+      new CommandStartedEvent(conn, command, conn[kDescription].serverConnectionId)
     );
 
     operationDescription.started = now();
@@ -735,7 +735,7 @@ function write(
             command,
             err,
             operationDescription.started,
-            conn.hello?.connectionId
+            conn[kDescription].serverConnectionId
           )
         );
       } else {
@@ -747,7 +747,7 @@ function write(
               command,
               reply,
               operationDescription.started,
-              conn.hello?.connectionId
+              conn[kDescription].serverConnectionId
             )
           );
         } else {
@@ -758,7 +758,7 @@ function write(
               command,
               reply,
               operationDescription.started,
-              conn.hello?.connectionId
+              conn[kDescription].serverConnectionId
             )
           );
         }
