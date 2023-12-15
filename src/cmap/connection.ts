@@ -798,7 +798,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
   private socket: Stream;
   private controller: AbortController;
   private messageStream: Readable;
-  private socketWrite: (buffer: Uint8Array, options: { signal: AbortSignal }) => Promise<void>;
+  private socketWrite: (buffer: Uint8Array) => Promise<void>;
 
   /** @internal */
   [kHello]: Document | null;
@@ -1207,7 +1207,7 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
-    return this.socketWrite(buffer, { signal: this.controller.signal });
+    return this.socketWrite(buffer);
   }
 
   /**

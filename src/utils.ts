@@ -1321,7 +1321,9 @@ export async function abortable<T>(
   function rejectOnAbort() {
     reject(signal.reason);
   }
-  signal.addEventListener('abort', rejectOnAbort, { once: true });
+
+  if (signal.aborted) rejectOnAbort();
+  else signal.addEventListener('abort', rejectOnAbort, { once: true });
 
   try {
     return await Promise.race([promise, aborted]);
