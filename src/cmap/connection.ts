@@ -1242,6 +1242,11 @@ export class SizedMessageTransform extends Transform {
     this.connection = connection;
   }
   override _transform(chunk: Buffer, encoding: unknown, callback: TransformCallback): void {
+    if (this.connection.delayedTimeoutId != null) {
+      clearTimeout(this.connection.delayedTimeoutId);
+      this.connection.delayedTimeoutId = null;
+    }
+
     this.bufferPool.append(chunk);
     const sizeOfMessage = this.bufferPool.getInt32();
 
