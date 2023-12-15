@@ -2,15 +2,18 @@ import { type EventEmitter } from 'events';
 
 import { List, promiseWithResolvers } from '../../utils';
 
+type PendingPromises = Omit<
+  ReturnType<typeof promiseWithResolvers<IteratorResult<Buffer>>>,
+  'promise'
+>;
+
 export function onData(emitter: EventEmitter, options: { signal: AbortSignal }) {
   const signal = options.signal;
   signal.throwIfAborted();
 
   // Preparing controlling queues and variables
   const unconsumedEvents = new List<Buffer>();
-  const unconsumedPromises = new List<
-    Omit<ReturnType<typeof promiseWithResolvers<IteratorResult<Buffer>>>, 'promise'>
-  >();
+  const unconsumedPromises = new List<PendingPromises>();
   let error: Error | null = null;
   let finished = false;
 
