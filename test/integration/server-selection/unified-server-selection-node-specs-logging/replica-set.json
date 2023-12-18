@@ -100,6 +100,63 @@
                 "selector": {
                   "$$exists": true
                 },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                }
+              }
+            },
+            {
+              "level": "info",
+              "component": "serverSelection",
+              "data": {
+                "message": "Waiting for suitable server to become available",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                },
+                "remainingTimeMS": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection succeeded",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection started",
+                "selector": {
+                  "$$exists": true
+                },
                 "operation": "insert",
                 "topologyDescription": {
                   "$$exists": true
@@ -169,6 +226,63 @@
         {
           "client": "client",
           "messages": [
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection started",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                }
+              }
+            },
+            {
+              "level": "info",
+              "component": "serverSelection",
+              "data": {
+                "message": "Waiting for suitable server to become available",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                },
+                "remainingTimeMS": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
+              "level": "debug",
+              "component": "serverSelection",
+              "data": {
+                "message": "Server selection succeeded",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                },
+                "serverHost": {
+                  "$$type": "string"
+                },
+                "serverPort": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
             {
               "level": "debug",
               "component": "serverSelection",
