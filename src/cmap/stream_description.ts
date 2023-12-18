@@ -82,8 +82,7 @@ export class StreamDescription {
   parseServerConnectionID(serverConnectionId: number | Double | bigint | Long): bigint {
     return Long.isLong(serverConnectionId)
       ? serverConnectionId.toBigInt()
-      : typeof serverConnectionId === 'bigint' || typeof serverConnectionId === 'number'
-      ? BigInt(serverConnectionId)
-      : BigInt(serverConnectionId.valueOf());
+      : // @ts-expect-error: Doubles are coercible to number
+        BigInt(serverConnectionId);
   }
 }
