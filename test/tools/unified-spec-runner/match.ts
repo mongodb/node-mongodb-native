@@ -486,6 +486,9 @@ function compareEvents(
         expect.fail(`expected ${path} to be instanceof CommandStartedEvent`);
       }
       compareCommandStartedEvents(actualEvent, expectedEvent.commandStartedEvent, entities, path);
+      if (expectedEvent.commandStartedEvent.hasServerConnectionId) {
+        expect(actualEvent).property('serverConnectionId').to.exist;
+      }
     } else if (expectedEvent.commandSucceededEvent) {
       const path = `${rootPrefix}.commandSucceededEvent`;
       if (!(actualEvent instanceof CommandSucceededEvent)) {
@@ -497,12 +500,18 @@ function compareEvents(
         entities,
         path
       );
+      if (expectedEvent.commandSucceededEvent.hasServerConnectionId) {
+        expect(actualEvent).property('serverConnectionId').to.exist;
+      }
     } else if (expectedEvent.commandFailedEvent) {
       const path = `${rootPrefix}.commandFailedEvent`;
       if (!(actualEvent instanceof CommandFailedEvent)) {
         expect.fail(`expected ${path} to be instanceof CommandFailedEvent`);
       }
       compareCommandFailedEvents(actualEvent, expectedEvent.commandFailedEvent, entities, path);
+      if (expectedEvent.commandFailedEvent.hasServerConnectionId) {
+        expect(actualEvent).property('serverConnectionId').to.exist;
+      }
     } else if (expectedEvent.connectionClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ConnectionClosedEvent);
       if (expectedEvent.connectionClosedEvent.hasServiceId) {

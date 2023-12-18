@@ -59,8 +59,8 @@ export class StreamDescription {
       return;
     }
     this.type = parseServerType(response);
-    if (response.serverConnectionId) {
-      this.serverConnectionId = this.parseServerConnectionID(response.serverConnectionId);
+    if (response.connectionId) {
+      this.serverConnectionId = this.parseServerConnectionID(response.connectionId);
     }
     for (const field of RESPONSE_FIELDS) {
       if (response[field] != null) {
