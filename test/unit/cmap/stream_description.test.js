@@ -74,28 +74,28 @@ describe('StreamDescription - unit/cmap', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
           // eslint-disable-next-line no-undef
-          description.receiveResponse({ serverConnectionId: BigInt(2) });
+          description.receiveResponse({ connectionId: BigInt(2) });
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
       context('when serverConnectionId is of type BSON Double', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
-          description.receiveResponse({ serverConnectionId: new Double(2) });
+          description.receiveResponse({ connectionId: new Double(2) });
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
       context('when serverConnectionId is of type number', function () {
         it('should save serverConnectionID as a bigint on stream description', function () {
           const description = new StreamDescription('a:27017', {});
-          description.receiveResponse({ serverConnectionId: 2 });
+          description.receiveResponse({ connectionId: 2 });
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
       context('when serverConnectionId is of type BSON Long', function () {
         it('should parse serverConnectionId properly', function () {
           const description = new StreamDescription('a:27017', {});
-          description.receiveResponse({ serverConnectionId: new Long(2) });
+          description.receiveResponse({ connectionId: new Long(2) });
           expect(description.serverConnectionId).to.equal(expectedServerConnectionId);
         });
       });
