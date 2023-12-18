@@ -439,3 +439,42 @@ export async function testPushWithId(): Promise<void> {
     collectionWithSchema.updateMany({}, {})
   );
 }
+
+{
+  // NODE-5647 - Type error with $addToSet in bulkWrite
+  interface TestDocument {
+    readonly myId: number;
+    readonly mySet: number[];
+  }
+  const collection = undefined as unknown as Collection<TestDocument>;
+  collection.updateOne({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collection.updateOne({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+  collection.updateMany({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collection.updateMany({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+
+  interface IndexSingatureTestDocument extends Document {
+    readonly myId: number;
+    readonly mySet: number[];
+  }
+  const indexSingatureCollection = undefined as unknown as Collection<IndexSingatureTestDocument>;
+  indexSingatureCollection.updateOne({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  indexSingatureCollection.updateOne({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+  indexSingatureCollection.updateMany({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  indexSingatureCollection.updateMany({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+}

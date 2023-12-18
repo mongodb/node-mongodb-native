@@ -16,7 +16,6 @@ import type { MongoClient, PkFactory } from './mongo_client';
 import type {
   Filter,
   Flatten,
-  OneOrMore,
   OptionalUnlessRequiredId,
   TODO_NODE_3286,
   UpdateFilter,
@@ -349,10 +348,9 @@ export class Collection<TSchema extends Document = Document> {
     /**
      * The value of update can be either:
      * UpdateFilter<TSchema> - A document that contains update operator expressions,
-     * Document - A replacement document with only <field1>: <value1> pairs,
      * Document[] - an aggregation pipeline.
      * */
-    update: UpdateFilter<TSchema> | OneOrMore<Document>,
+    update: UpdateFilter<TSchema> | Document[],
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(
@@ -401,10 +399,9 @@ export class Collection<TSchema extends Document = Document> {
     /**
      * The value of update can be either:
      * UpdateFilter<TSchema> - A document that contains update operator expressions,
-     * Document - A replacement document with only <field1>: <value1> pairs,
      * Document[] - an aggregation pipeline.
      * */
-    update: UpdateFilter<TSchema> | OneOrMore<Document>,
+    update: UpdateFilter<TSchema> | Document[],
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
     return executeOperation(

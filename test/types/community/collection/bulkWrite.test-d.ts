@@ -1,6 +1,6 @@
 import { expectError } from 'tsd';
 
-import { MongoClient, ObjectId } from '../../../mongodb';
+import { type Collection, type Document, MongoClient, ObjectId } from '../../../mongodb';
 
 // TODO(NODE-3347): Improve these tests to use more expect assertions
 
@@ -297,3 +297,106 @@ collectionType.bulkWrite([
     }
   }
 ]);
+
+{
+  // NODE-5647 - Type error with $addToSet in bulkWrite
+  interface TestDocument {
+    readonly myId: number;
+    readonly mySet: number[];
+  }
+  const collection = undefined as unknown as Collection<TestDocument>;
+  collection.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  collection.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
+  collection.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  collection.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
+
+  interface IndexSingatureTestDocument extends Document {
+    readonly myId: number;
+    readonly mySet: number[];
+  }
+  const indexSingatureCollection = undefined as unknown as Collection<IndexSingatureTestDocument>;
+  indexSingatureCollection.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  indexSingatureCollection.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
+  indexSingatureCollection.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  indexSingatureCollection.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
+}
