@@ -12,7 +12,7 @@ import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 const SKIP = ['A successful unordered bulk write with an unacknowledged write concern'];
 
 describe('Command Logging and Monitoring Spec', function () {
-  describe.only('Command Monitoring Spec (unified)', () => {
+  describe('Command Monitoring Spec (unified)', () => {
     runUnifiedSuite(
       loadSpecTests(path.join('command-logging-and-monitoring', 'monitoring')),
       ({ description }) =>

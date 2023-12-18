@@ -36,7 +36,7 @@ export class StreamDescription {
   __nodejs_mock_server__?: boolean;
 
   zlibCompressionLevel?: number;
-  serverConnectionId?: bigint | undefined;
+  serverConnectionId: bigint | null;
 
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
@@ -52,6 +52,7 @@ export class StreamDescription {
       options && options.compressors && Array.isArray(options.compressors)
         ? options.compressors
         : [];
+    this.serverConnectionId = null;
   }
 
   receiveResponse(response: Document | null): void {
@@ -59,8 +60,10 @@ export class StreamDescription {
       return;
     }
     this.type = parseServerType(response);
-    if (response.connectionId) {
+    if ('connectionId' in response) {
       this.serverConnectionId = this.parseServerConnectionID(response.connectionId);
+    } else {
+      this.serverConnectionId = null;
     }
     for (const field of RESPONSE_FIELDS) {
       if (response[field] != null) {

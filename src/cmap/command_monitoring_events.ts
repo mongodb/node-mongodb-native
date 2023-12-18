@@ -29,7 +29,7 @@ export class CommandStartedEvent {
    * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId"
    * from the server on 4.2+.
    */
-  serverConnectionId?: bigint;
+  serverConnectionId: bigint | null;
   serviceId?: ObjectId;
   /** @internal */
   name = COMMAND_STARTED;
@@ -44,7 +44,7 @@ export class CommandStartedEvent {
   constructor(
     connection: Connection,
     command: WriteProtocolMessageType,
-    serverConnectionId?: bigint | undefined
+    serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -85,7 +85,7 @@ export class CommandSucceededEvent {
    * Server generated connection id
    * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
    */
-  serverConnectionId?: bigint;
+  serverConnectionId: bigint | null;
   requestId: number;
   duration: number;
   commandName: string;
@@ -108,7 +108,7 @@ export class CommandSucceededEvent {
     command: WriteProtocolMessageType,
     reply: Document | undefined,
     started: number,
-    serverConnectionId?: bigint | undefined
+    serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -143,7 +143,7 @@ export class CommandFailedEvent {
    * Server generated connection id
    * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
    */
-  serverConnectionId?: bigint;
+  serverConnectionId: bigint | null;
   requestId: number;
   duration: number;
   commandName: string;
@@ -166,7 +166,7 @@ export class CommandFailedEvent {
     command: WriteProtocolMessageType,
     error: Error | Document,
     started: number,
-    serverConnectionId?: bigint | undefined
+    serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
