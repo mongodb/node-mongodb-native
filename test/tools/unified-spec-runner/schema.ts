@@ -270,16 +270,16 @@ export interface ExpectedCommandEvent {
     command?: Document;
     commandName?: string;
     databaseName?: string;
-    hasServerConnectionId?: bigint;
+    hasServerConnectionId?: boolean;
   };
   commandSucceededEvent?: {
     reply?: Document;
     commandName?: string;
-    hasServerConnectionId?: bigint;
+    hasServerConnectionId?: boolean;
   };
   commandFailedEvent?: {
     commandName?: string;
-    hasServerConnectionId?: bigint;
+    hasServerConnectionId?: boolean;
   };
 }
 export interface ExpectedCmapEvent {

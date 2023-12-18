@@ -63,9 +63,7 @@ export class CommandStartedEvent {
     this.databaseName = command.databaseName;
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
-    if (serverConnectionId) {
-      this.serverConnectionId = serverConnectionId;
-    }
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
@@ -123,9 +121,7 @@ export class CommandSucceededEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
-    if (serverConnectionId) {
-      this.serverConnectionId = serverConnectionId;
-    }
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
@@ -184,9 +180,7 @@ export class CommandFailedEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
-    if (serverConnectionId) {
-      this.serverConnectionId = serverConnectionId;
-    }
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
