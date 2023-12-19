@@ -1314,36 +1314,30 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
  */
 export async function abortable<T>(
   promise: Promise<T>,
-  { signal }: { signal?: AbortSignal } = {}
+  { signal }: { signal: AbortSignal }
 ): Promise<T> {
-  const { abort, done } = aborted(signal);
+  const { promise: aborted, reject } = promiseWithResolvers<never>();
+
+  function rejectOnAbort() {
+    reject(signal.reason);
+  }
+
+  if (signal.aborted) rejectOnAbort();
+  else signal.addEventListener('abort', rejectOnAbort, { once: true });
+
   try {
-    return await Promise.race([promise, abort]);
+    return await Promise.race([promise, aborted]);
   } finally {
-    done.abort();
+    signal.removeEventListener('abort', rejectOnAbort);
   }
 }
 
-/**
- * Takes an AbortSignal and creates a promise that will reject when the signal aborts
- * If the argument provided is nullish the returned promise will **never** resolve.
- * Also returns a done controller - abort the done controller when your task is done to remove the abort listeners
- * @param signal - an optional abort signal to link to a promise rejection
- */
-function aborted(signal?: AbortSignal): {
-  abort: Promise<any>;
-  done: AbortController;
-} {
-  const done = new AbortController();
-  if (signal?.aborted) {
-    return { abort: Promise.reject(signal.reason), done };
-  }
-  const abort = new Promise<void>((_, reject) =>
-    signal?.addEventListener('abort', () => reject(signal.reason), {
-      once: true,
-      // @ts-expect-error: @types/node erroneously claim this does not exist
-      signal: done.signal
-    })
-  );
-  return { abort, done };
+export function promiseWithResolvers<T>() {
+  let resolve!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
+  let reject!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
+  const promise = new Promise<T>(function withResolversExecutor(promiseResolve, promiseReject) {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return { promise, resolve, reject } as const;
 }

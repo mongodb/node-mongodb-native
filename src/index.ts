@@ -269,10 +269,7 @@ export type {
   ConnectionOptions,
   DestroyOptions,
   ModernConnection,
-  ProxyOptions,
-  read,
-  readMany,
-  writeCommand
+  ProxyOptions
 } from './cmap/connection';
 export type {
   CloseOptions,
