@@ -443,7 +443,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (this.monitorCommands) {
       started = now();
-      this.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(this, message));
+      this.emit(
+        Connection.COMMAND_STARTED,
+        new CommandStartedEvent(this, message, this.description.serverConnectionId)
+      );
     }
 
     let document;
@@ -469,7 +472,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
               message,
               options.noResponse ? undefined : document,
               started,
-              this[kDescription].serverConnectionId
+              this.description.serverConnectionId
             )
           );
         }
@@ -479,21 +482,29 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
     } catch (error) {
       if (this.monitorCommands) {
-        error.name === 'MongoWriteConcernError'
-          ? this.emit(
-              Connection.COMMAND_SUCCEEDED,
-              new CommandSucceededEvent(
-                this,
-                message,
-                options.noResponse ? undefined : document,
-                started,
-                this[kDescription].serverConnectionId
-              )
+        if (error.name === 'MongoWriteConcernError') {
+          this.emit(
+            Connection.COMMAND_SUCCEEDED,
+            new CommandSucceededEvent(
+              this,
+              message,
+              options.noResponse ? undefined : document,
+              started,
+              this.description.serverConnectionId
             )
-          : this.emit(
-              Connection.COMMAND_FAILED,
-              new CommandFailedEvent(this, message, error, started)
-            );
+          );
+        } else {
+          this.emit(
+            Connection.COMMAND_FAILED,
+            new CommandFailedEvent(
+              this,
+              message,
+              error,
+              started,
+              this.description.serverConnectionId
+            )
+          );
+        }
       }
       throw error;
     }
