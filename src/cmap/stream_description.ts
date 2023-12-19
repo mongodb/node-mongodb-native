@@ -1,4 +1,4 @@
-import type { Document } from '../bson';
+import { type Document, type Double, Long } from '../bson';
 import { ServerType } from '../sdam/common';
 import { parseServerType } from '../sdam/server_description';
 import type { CompressorName } from './wire_protocol/compression';
@@ -36,6 +36,7 @@ export class StreamDescription {
   __nodejs_mock_server__?: boolean;
 
   zlibCompressionLevel?: number;
+  serverConnectionId: bigint | null;
 
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
@@ -51,6 +52,7 @@ export class StreamDescription {
       options && options.compressors && Array.isArray(options.compressors)
         ? options.compressors
         : [];
+    this.serverConnectionId = null;
   }
 
   receiveResponse(response: Document | null): void {
@@ -58,6 +60,11 @@ export class StreamDescription {
       return;
     }
     this.type = parseServerType(response);
+    if ('connectionId' in response) {
+      this.serverConnectionId = this.parseServerConnectionID(response.connectionId);
+    } else {
+      this.serverConnectionId = null;
+    }
     for (const field of RESPONSE_FIELDS) {
       if (response[field] != null) {
         this[field] = response[field];
@@ -72,5 +79,15 @@ export class StreamDescription {
     if (response.compression) {
       this.compressor = this.compressors.filter(c => response.compression?.includes(c))[0];
     }
+  }
+
+  /* @internal */
+  parseServerConnectionID(serverConnectionId: number | Double | bigint | Long): bigint {
+    // Connection ids are always integral, so it's safe to coerce doubles as well as
+    // any integral type.
+    return Long.isLong(serverConnectionId)
+      ? serverConnectionId.toBigInt()
+      : // @ts-expect-error: Doubles are coercible to number
+        BigInt(serverConnectionId);
   }
 }

@@ -282,13 +282,16 @@ export interface ExpectedCommandEvent {
     command?: Document;
     commandName?: string;
     databaseName?: string;
+    hasServerConnectionId?: boolean;
   };
   commandSucceededEvent?: {
     reply?: Document;
     commandName?: string;
+    hasServerConnectionId?: boolean;
   };
   commandFailedEvent?: {
     commandName?: string;
+    hasServerConnectionId?: boolean;
   };
 }
 export interface ExpectedCmapEvent {

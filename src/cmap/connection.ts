@@ -717,7 +717,10 @@ function write(
 
   // if command monitoring is enabled we need to modify the callback here
   if (conn.monitorCommands) {
-    conn.emit(Connection.COMMAND_STARTED, new CommandStartedEvent(conn, command));
+    conn.emit(
+      Connection.COMMAND_STARTED,
+      new CommandStartedEvent(conn, command, conn[kDescription].serverConnectionId)
+    );
 
     operationDescription.started = now();
     operationDescription.cb = (err, reply) => {
@@ -727,18 +730,36 @@ function write(
       if (err && reply?.ok !== 1) {
         conn.emit(
           Connection.COMMAND_FAILED,
-          new CommandFailedEvent(conn, command, err, operationDescription.started)
+          new CommandFailedEvent(
+            conn,
+            command,
+            err,
+            operationDescription.started,
+            conn[kDescription].serverConnectionId
+          )
         );
       } else {
         if (reply && (reply.ok === 0 || reply.$err)) {
           conn.emit(
             Connection.COMMAND_FAILED,
-            new CommandFailedEvent(conn, command, reply, operationDescription.started)
+            new CommandFailedEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn[kDescription].serverConnectionId
+            )
           );
         } else {
           conn.emit(
             Connection.COMMAND_SUCCEEDED,
-            new CommandSucceededEvent(conn, command, reply, operationDescription.started)
+            new CommandSucceededEvent(
+              conn,
+              command,
+              reply,
+              operationDescription.started,
+              conn[kDescription].serverConnectionId
+            )
           );
         }
       }
@@ -1098,7 +1119,11 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
       started = now();
       this.emit(
         ModernConnection.COMMAND_STARTED,
-        new CommandStartedEvent(this as unknown as Connection, message)
+        new CommandStartedEvent(
+          this as unknown as Connection,
+          message,
+          this[kDescription].serverConnectionId
+        )
       );
     }
 
@@ -1124,7 +1149,8 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
               this as unknown as Connection,
               message,
               options.noResponse ? undefined : document,
-              started
+              started,
+              this[kDescription].serverConnectionId
             )
           );
         }
@@ -1141,12 +1167,19 @@ export class ModernConnection extends TypedEventEmitter<ConnectionEvents> {
                 this as unknown as Connection,
                 message,
                 options.noResponse ? undefined : document,
-                started
+                started,
+                this[kDescription].serverConnectionId
               )
             )
           : this.emit(
               ModernConnection.COMMAND_FAILED,
-              new CommandFailedEvent(this as unknown as Connection, message, error, started)
+              new CommandFailedEvent(
+                this as unknown as Connection,
+                message,
+                error,
+                started,
+                this[kDescription].serverConnectionId
+              )
             );
       }
       throw error;
