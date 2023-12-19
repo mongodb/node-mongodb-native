@@ -1,6 +1,6 @@
 {
   "description": "auth-shutdown-error",
-  "schemaVersion": "1.10",
+  "schemaVersion": "1.4",
   "runOnRequirements": [
     {
       "minServerVersion": "4.4",

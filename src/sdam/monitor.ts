@@ -6,6 +6,7 @@ import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
+import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, EventEmitterWithState } from '../utils';
 import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
@@ -97,6 +98,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   [kMonitorId]?: MonitorInterval;
   rttPinger?: RTTPinger;
+  /** @internal */
+  override component = MongoLoggableComponent.TOPOLOGY;
 
   constructor(server: Server, options: MonitorOptions) {
     super();
@@ -109,7 +112,6 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.s = {
       state: STATE_CLOSED
     };
-
     this.address = server.description.address;
     this.options = Object.freeze({
       connectTimeoutMS: options.connectTimeoutMS ?? 10000,
@@ -118,6 +120,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       serverMonitoringMode: options.serverMonitoringMode
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
+    this.mongoLogger = this[kServer].topology.client.mongoLogger;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -236,8 +239,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
-  monitor.emit(
+  monitor.emitAndLogHeartbeat(
     Server.SERVER_HEARTBEAT_STARTED,
+    monitor[kServer].topology.s.id,
+    undefined,
     new ServerHeartbeatStartedEvent(monitor.address, isAwaitable)
   );
 
@@ -245,8 +250,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     monitor.connection?.destroy({ force: true });
     monitor.connection = null;
 
-    monitor.emit(
+    monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_FAILED,
+      monitor[kServer].topology.s.id,
+      undefined,
       new ServerHeartbeatFailedEvent(monitor.address, calculateDurationInMs(start), err, awaited)
     );
 
@@ -273,16 +280,20 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         ? monitor.rttPinger.roundTripTime
         : calculateDurationInMs(start);
 
-    monitor.emit(
+    monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_SUCCEEDED,
+      monitor[kServer].topology.s.id,
+      hello.connectionId,
       new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
     );
 
     // If we are using the streaming protocol then we immediately issue another 'started'
     // event, otherwise the "check" is complete and return to the main monitor loop.
     if (isAwaitable) {
-      monitor.emit(
+      monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_STARTED,
+        monitor[kServer].topology.s.id,
+        undefined,
         new ServerHeartbeatStartedEvent(monitor.address, true)
       );
       start = now();
@@ -361,8 +372,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       }
 
       monitor.connection = conn;
-      monitor.emit(
+      monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
+        monitor[kServer].topology.s.id,
+        conn.hello?.connectionId,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
           calculateDurationInMs(start),

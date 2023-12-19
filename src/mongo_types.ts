@@ -12,7 +12,13 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
-import type { MongoLoggableComponent, MongoLogger } from './mongo_logger';
+import type {
+  LoggableServerHeartbeatFailedEvent,
+  LoggableServerHeartbeatStartedEvent,
+  LoggableServerHeartbeatSucceededEvent,
+  MongoLoggableComponent,
+  MongoLogger
+} from './mongo_logger';
 import type { Sort } from './sort';
 
 /** @internal */
@@ -405,12 +411,32 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
   /** @internal */
   protected component?: MongoLoggableComponent;
   /** @internal */
-  protected emitAndLog<EventKey extends keyof Events>(
+  emitAndLog<EventKey extends keyof Events>(
     event: EventKey | symbol,
     ...args: Parameters<Events[EventKey]>
   ): void {
     this.emit(event, ...args);
     if (this.component) this.mongoLogger?.debug(this.component, args[0]);
+  }
+  /** @internal */
+  emitAndLogHeartbeat<EventKey extends keyof Events>(
+    event: EventKey | symbol,
+    topologyId: number,
+    serverConnectionId?: number | '<monitor>',
+    ...args: Parameters<Events[EventKey]>
+  ): void {
+    this.emit(event, ...args);
+    if (this.component) {
+      const loggableHeartbeatEvent:
+        | LoggableServerHeartbeatFailedEvent
+        | LoggableServerHeartbeatSucceededEvent
+        | LoggableServerHeartbeatStartedEvent = {
+        topologyId: topologyId,
+        serverConnectionId: serverConnectionId ?? null,
+        ...args[0]
+      };
+      this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
+    }
   }
 }
 

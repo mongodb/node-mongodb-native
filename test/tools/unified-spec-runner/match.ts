@@ -26,10 +26,15 @@ import {
   MongoServerError,
   ObjectId,
   type OneOrMore,
+  ServerClosedEvent,
   ServerDescriptionChangedEvent,
   ServerHeartbeatFailedEvent,
   ServerHeartbeatStartedEvent,
-  ServerHeartbeatSucceededEvent
+  ServerHeartbeatSucceededEvent,
+  ServerOpeningEvent,
+  TopologyClosedEvent,
+  TopologyDescriptionChangedEvent,
+  TopologyOpeningEvent
 } from '../../mongodb';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
@@ -284,6 +289,8 @@ export function resultCheck(
   ) {
     // case to handle +0 and -0
     expect(Object.is(expected, actual)).to.be.true;
+  } else if (actual && actual._bsontype === 'Int32' && typeof expected === 'number') {
+    expect(actual.value).to.equal(expected);
   } else {
     expect(actual).to.equal(expected);
   }
@@ -576,6 +583,41 @@ function compareEvents(
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
       return;
+    } else if (expectedEvent.serverOpeningEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerOpeningEvent);
+      const expectedSdamEvent = expectedEvent.serverOpeningEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.serverClosedEvent) {
+      expect(actualEvent).to.be.instanceOf(ServerClosedEvent);
+      const expectedSdamEvent = expectedEvent.serverClosedEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.topologyOpeningEvent) {
+      expect(actualEvent).to.be.instanceOf(TopologyOpeningEvent);
+      const expectedSdamEvent = expectedEvent.topologyOpeningEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.topologyClosingEvent) {
+      expect(actualEvent).to.be.instanceOf(TopologyClosedEvent);
+      const expectedSdamEvent = expectedEvent.topologyClosingEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
+    } else if (expectedEvent.topologyDescriptionChangedEvent) {
+      expect(actualEvent).to.be.instanceOf(TopologyDescriptionChangedEvent);
+      const expectedSdamEvent = expectedEvent.topologyDescriptionChangedEvent;
+      for (const property of Object.keys(expectedSdamEvent)) {
+        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      }
+      return;
     } else {
       expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
     }
@@ -604,6 +646,28 @@ export function matchesEvents(
 
     compareEvents(actual, expected, entities);
   }
+}
+
+export function filterLogs(
+  logsToIgnore: ExpectedLogMessage[],
+  actual: ExpectedLogMessage[],
+  entities: EntitiesMap
+): ExpectedLogMessage[] {
+  function isLogRelevant(log: ExpectedLogMessage) {
+    for (const logToIgnore of logsToIgnore) {
+      try {
+        // see if log matches a log to ignore, it is not relevant
+        resultCheck(log.data, logToIgnore.data, entities, undefined, false);
+        return false;
+      } catch {
+        continue;
+      }
+    }
+    // if log does not match any logs to ignore, it is relevant
+    return true;
+  }
+  const filteredMessages: ExpectedLogMessage[] = actual.filter(isLogRelevant);
+  return filteredMessages;
 }
 
 export function compareLogs(
