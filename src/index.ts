@@ -264,6 +264,7 @@ export type {
 export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
 export type {
   CommandOptions,
+  Connection,
   ConnectionEvents,
   ConnectionOptions,
   DestroyOptions,

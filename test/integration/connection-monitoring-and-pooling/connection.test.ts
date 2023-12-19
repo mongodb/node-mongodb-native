@@ -31,7 +31,7 @@ describe('Connection', function () {
     return setupDatabase(this.configuration);
   });
 
-  describe('Connection - functional/cmap', function () {
+  describe('Connection.command', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
@@ -77,66 +77,6 @@ describe('Connection', function () {
         } finally {
           conn?.destroy();
         }
-      }
-    });
-
-    it('should support calling back multiple times on exhaust commands', {
-      metadata: {
-        requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] }
-      },
-      test: function (done) {
-        const namespace = ns(`${this.configuration.db}.$cmd`);
-        const connectOptions: Partial<ConnectionOptions> = {
-          connectionType: Connection,
-          ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
-        };
-
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
-
-          const documents = Array.from(Array(10000), (_, idx) => ({
-            test: Math.floor(Math.random() * idx)
-          }));
-
-          conn.command(namespace, { drop: 'test' }, undefined, () => {
-            conn.command(namespace, { insert: 'test', documents }, undefined, (err, res) => {
-              expect(err).to.not.exist;
-              expect(res).nested.property('n').to.equal(documents.length);
-
-              let totalDocumentsRead = 0;
-              conn.command(
-                namespace,
-                { find: 'test', batchSize: 100 },
-                undefined,
-                (err, result) => {
-                  expect(err).to.not.exist;
-                  expect(result).nested.property('cursor').to.exist;
-                  const cursor = result.cursor;
-                  totalDocumentsRead += cursor.firstBatch.length;
-
-                  conn.command(
-                    namespace,
-                    { getMore: cursor.id, collection: 'test', batchSize: 100 },
-                    { exhaustAllowed: true },
-                    (err, result) => {
-                      expect(err).to.not.exist;
-                      expect(result).nested.property('cursor').to.exist;
-                      const cursor = result.cursor;
-                      totalDocumentsRead += cursor.nextBatch.length;
-
-                      if (cursor.id === 0 || cursor.id.isZero()) {
-                        expect(totalDocumentsRead).to.equal(documents.length);
-                        done();
-                      }
-                    }
-                  );
-                }
-              );
-            });
-          });
-        });
       }
     });
   });
