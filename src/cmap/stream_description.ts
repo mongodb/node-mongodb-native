@@ -83,6 +83,8 @@ export class StreamDescription {
 
   /* @internal */
   parseServerConnectionID(serverConnectionId: number | Double | bigint | Long): bigint {
+    // Connection ids are always integral, so it's safe to coerce doubles as well as
+    // any integral type.
     return Long.isLong(serverConnectionId)
       ? serverConnectionId.toBigInt()
       : // @ts-expect-error: Doubles are coercible to number
