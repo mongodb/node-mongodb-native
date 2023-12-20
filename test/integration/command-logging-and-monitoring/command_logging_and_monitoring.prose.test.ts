@@ -2,7 +2,7 @@ import { expect } from 'chai';
 
 import { DEFAULT_MAX_DOCUMENT_LENGTH, type Document } from '../../mongodb';
 
-describe('Command Logging and Monitoring Prose Tests', function () {
+describe.only('Command Logging and Monitoring Prose Tests', function () {
   const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
   const ELLIPSES_LENGTH = 3;
   context('When no custom truncation limit is provided', function () {
@@ -193,6 +193,11 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(50 + ELLIPSES_LENGTH);
+
+        const insertManyCommandSucceeded = writable.buffer[3];
+        expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
+        expect(insertManyCommandSucceeded?.reply).to.be.a('string');
+        expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(50 + ELLIPSES_LENGTH);
 
         await client.close();
       }
