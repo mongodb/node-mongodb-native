@@ -232,23 +232,16 @@ export type ArrayOperator<Type> = {
   $sort?: Sort;
 };
 
-/** @internal */
-type RemoveIndex<T> = {
-  [K in keyof T as string extends K
-    ? never
-    : number extends K
-    ? never
-    : symbol extends K
-    ? never
-    : K]: T[K];
-};
-
 /** @public */
 export type SetFields<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
     | OptionalId<Flatten<TSchema[key]>>
     | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
-} & NotAcceptedFields<RemoveIndex<TSchema>, ReadonlyArray<any> | undefined>) & {
+} & IsAny<
+  TSchema[keyof TSchema],
+  object,
+  NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>
+>) & {
   readonly [key: string]: AddToSetOperators<any> | any;
 };
 

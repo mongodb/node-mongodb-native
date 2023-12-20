@@ -303,8 +303,21 @@ collectionType.bulkWrite([
   interface TestDocument {
     readonly myId: number;
     readonly mySet: number[];
+    readonly myAny: any;
   }
   const collection = undefined as unknown as Collection<TestDocument>;
+  expectError(
+    collection.bulkWrite([
+      {
+        updateOne: {
+          filter: { myId: 0 },
+          update: {
+            $addToSet: { mySet: 'value of other type' }
+          }
+        }
+      }
+    ])
+  );
   collection.bulkWrite([
     {
       updateOne: {
@@ -319,11 +332,43 @@ collectionType.bulkWrite([
     {
       updateOne: {
         filter: { myId: 0 },
+        update: {
+          $addToSet: { myAny: 1 }
+        }
+      }
+    }
+  ]);
+  collection.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
         update: [
           {
-            $addToSet: { mySet: 0 }
+            $addToSet: { myAny: 0 }
           }
         ]
+      }
+    }
+  ]);
+  expectError(
+    collection.bulkWrite([
+      {
+        updateMany: {
+          filter: { myId: 0 },
+          update: {
+            $addToSet: { mySet: 'value of other type' }
+          }
+        }
+      }
+    ])
+  );
+  collection.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
       }
     }
   ]);
@@ -332,7 +377,7 @@ collectionType.bulkWrite([
       updateMany: {
         filter: { myId: 0 },
         update: {
-          $addToSet: { mySet: 0 }
+          $addToSet: { myAny: 1 }
         }
       }
     }

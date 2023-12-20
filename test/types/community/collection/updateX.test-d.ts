@@ -445,15 +445,20 @@ export async function testPushWithId(): Promise<void> {
   interface TestDocument {
     readonly myId: number;
     readonly mySet: number[];
+    readonly myAny: any;
   }
   const collection = undefined as unknown as Collection<TestDocument>;
+  expectError(collection.updateOne({ myId: 0 }, { $addToSet: { mySet: 'value of other type' } }));
   collection.updateOne({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collection.updateOne({ myId: 0 }, { $addToSet: { myAny: 1 } });
   collection.updateOne({ myId: 0 }, [
     {
       $addToSet: { mySet: 0 }
     }
   ]);
+  expectError(collection.updateMany({ myId: 0 }, { $addToSet: { mySet: 'value of other type' } }));
   collection.updateMany({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collection.updateMany({ myId: 0 }, { $addToSet: { myAny: 1 } });
   collection.updateMany({ myId: 0 }, [
     {
       $addToSet: { mySet: 0 }
@@ -463,16 +468,35 @@ export async function testPushWithId(): Promise<void> {
   interface IndexSingatureTestDocument extends Document {
     readonly myId: number;
     readonly mySet: number[];
+    readonly myAny: any;
   }
   const indexSingatureCollection = undefined as unknown as Collection<IndexSingatureTestDocument>;
   indexSingatureCollection.updateOne({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  indexSingatureCollection.updateOne({ myId: 0 }, { $addToSet: { myAny: 1 } });
   indexSingatureCollection.updateOne({ myId: 0 }, [
     {
       $addToSet: { mySet: 0 }
     }
   ]);
   indexSingatureCollection.updateMany({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  indexSingatureCollection.updateMany({ myId: 0 }, { $addToSet: { myAny: 1 } });
   indexSingatureCollection.updateMany({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+
+  const collectionOfAnyType = undefined as unknown as Collection<any>;
+  collectionOfAnyType.updateOne({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collectionOfAnyType.updateOne({ myId: 0 }, { $addToSet: { myAny: 1 } });
+  collectionOfAnyType.updateOne({ myId: 0 }, [
+    {
+      $addToSet: { mySet: 0 }
+    }
+  ]);
+  collectionOfAnyType.updateMany({ myId: 0 }, { $addToSet: { mySet: 0 } });
+  collectionOfAnyType.updateMany({ myId: 0 }, { $addToSet: { myAny: 1 } });
+  collectionOfAnyType.updateMany({ myId: 0 }, [
     {
       $addToSet: { mySet: 0 }
     }
