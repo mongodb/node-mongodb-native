@@ -115,7 +115,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
-  mongoLogger: MongoLogger | undefined;
+  /** @internal */
+  mongoLogger?: MongoLogger | undefined;
 }
 
 /** @internal */

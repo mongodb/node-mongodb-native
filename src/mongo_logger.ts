@@ -705,7 +705,6 @@ export class MongoLogger {
       if (isLogConvertible(message)) {
         logMessage = { ...logMessage, ...message.toLog() };
       } else {
-        
         logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }
