@@ -163,7 +163,7 @@ export class CallbackWorkflow implements Workflow {
     if (!reauthenticating && response?.speculativeAuthenticate) {
       result = response.speculativeAuthenticate;
     } else {
-      result = await connection.commandAsync(
+      result = await connection.command(
         ns(credentials.source),
         startCommandDocument(credentials),
         undefined
@@ -181,7 +181,7 @@ export class CallbackWorkflow implements Workflow {
     tokenResult: IdPServerResponse,
     conversationId?: number
   ): Promise<Document> {
-    const result = await connection.commandAsync(
+    const result = await connection.command(
       ns(credentials.source),
       finishCommandDocument(tokenResult.accessToken, conversationId),
       undefined

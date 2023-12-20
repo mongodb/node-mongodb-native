@@ -109,7 +109,7 @@ export class MongoDBAWS extends AuthProvider {
       payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
     };
 
-    const saslStartResponse = await connection.commandAsync(ns(`${db}.$cmd`), saslStart, undefined);
+    const saslStartResponse = await connection.command(ns(`${db}.$cmd`), saslStart, undefined);
 
     const serverResponse = BSON.deserialize(saslStartResponse.payload.buffer, bsonOptions) as {
       s: Binary;
@@ -169,7 +169,7 @@ export class MongoDBAWS extends AuthProvider {
       payload: BSON.serialize(payload, bsonOptions)
     };
 
-    await connection.commandAsync(ns(`${db}.$cmd`), saslContinue, undefined);
+    await connection.command(ns(`${db}.$cmd`), saslContinue, undefined);
   }
 }
 

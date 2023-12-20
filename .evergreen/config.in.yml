@@ -200,8 +200,6 @@ functions:
       type: test
       params:
         working_dir: "src"
-        env:
-          MONGODB_NEW_CONNECTION: ${MONGODB_NEW_CONNECTION|false}
         timeout_secs: 300
         shell: bash
         script: |

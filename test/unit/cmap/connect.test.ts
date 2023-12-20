@@ -145,7 +145,8 @@ describe('Connect Tests', function () {
     });
 
     it('creates a connection with an infinite timeout', async () => {
-      expect(connection.stream).to.have.property('timeout', 0);
+      // @ts-expect-error: accessing private property
+      expect(connection.socket).to.have.property('timeout', 0);
     });
 
     it('connection instance has property socketTimeoutMS equal to the value passed in the connectOptions', async () => {

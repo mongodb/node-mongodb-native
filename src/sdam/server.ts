@@ -371,7 +371,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
           this.decrementOperationCount();
           cb(error, response);
         });
-        conn.commandAsync(ns, cmd, finalOptions).then(
+        conn.command(ns, cmd, finalOptions).then(
           r => handler(undefined, r),
           e => handler(e)
         );

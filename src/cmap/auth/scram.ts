@@ -112,7 +112,7 @@ async function executeScram(cryptoMethod: CryptoMethod, authContext: AuthContext
   const db = credentials.source;
 
   const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-  const response = await connection.commandAsync(ns(`${db}.$cmd`), saslStartCmd, undefined);
+  const response = await connection.command(ns(`${db}.$cmd`), saslStartCmd, undefined);
   await continueScramConversation(cryptoMethod, response, authContext);
 }
 
@@ -186,7 +186,7 @@ async function continueScramConversation(
     payload: new Binary(Buffer.from(clientFinal))
   };
 
-  const r = await connection.commandAsync(ns(`${db}.$cmd`), saslContinueCmd, undefined);
+  const r = await connection.command(ns(`${db}.$cmd`), saslContinueCmd, undefined);
   const parsedResponse = parsePayload(r.payload);
 
   if (!compareDigest(Buffer.from(parsedResponse.v, 'base64'), serverSignature)) {
@@ -204,7 +204,7 @@ async function continueScramConversation(
     payload: Buffer.alloc(0)
   };
 
-  await connection.commandAsync(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
+  await connection.command(ns(`${db}.$cmd`), retrySaslContinueCmd, undefined);
 }
 
 function parsePayload(payload: Binary) {

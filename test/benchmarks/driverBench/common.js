@@ -7,9 +7,6 @@ const { pipeline } = require('stream/promises');
 const { MongoClient } = require('../../..');
 const { GridFSBucket } = require('../../..');
 // eslint-disable-next-line no-restricted-modules
-const { ModernConnection } = require('../../../lib/cmap/connection');
-
-// eslint-disable-next-line no-restricted-modules
 const { MONGODB_ERROR_CODES } = require('../../../lib/error');
 
 const DB_NAME = 'perftest';
@@ -27,9 +24,7 @@ function loadSpecString(filePath) {
 }
 
 function makeClient() {
-  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017', {
-    connectionType: ModernConnection
-  });
+  this.client = new MongoClient(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017');
 }
 
 function connectClient() {

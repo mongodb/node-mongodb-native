@@ -18,7 +18,6 @@ const platform = { name: hw[0].model, cores: hw.length, ram: `${ram}GB` };
 
 const systemInfo = () =>
   [
-    `ModernConnection`,
     `\n- cpu: ${platform.name}`,
     `- cores: ${platform.cores}`,
     `- arch: ${os.arch()}`,

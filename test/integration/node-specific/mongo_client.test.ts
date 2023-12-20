@@ -9,7 +9,6 @@ import {
   Connection,
   Db,
   getTopology,
-  ModernConnection,
   MongoClient,
   MongoNotConnectedError,
   MongoServerSelectionError,
@@ -347,10 +346,8 @@ describe('class MongoClient', function () {
         connectTimeoutMS: 0,
         heartbeatFrequencyMS: 500
       });
-      const connectionType =
-        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
 
-      const spy = sinon.spy(connectionType.prototype, 'commandAsync');
+      const spy = sinon.spy(Connection.prototype, 'command');
 
       await client.connect();
 
@@ -367,10 +364,7 @@ describe('class MongoClient', function () {
         heartbeatFrequencyMS: 500
       });
 
-      const connectionType =
-        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
-
-      const spy = sinon.spy(connectionType.prototype, 'commandAsync');
+      const spy = sinon.spy(Connection.prototype, 'command');
 
       await client.connect();
 

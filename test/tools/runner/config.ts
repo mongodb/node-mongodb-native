@@ -6,7 +6,6 @@ import * as url from 'url';
 import {
   type AuthMechanism,
   HostAddress,
-  ModernConnection,
   MongoClient,
   type ServerApi,
   TopologyType,
@@ -240,10 +239,6 @@ export class TestConfiguration {
     const connectionString = url.format(urlOptions);
     if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
       throw new Error(`Cannot use options to specify host/port, must be in ${connectionString}`);
-    }
-
-    if (process.env.MONGODB_NEW_CONNECTION === 'true') {
-      serverOptions.ConnectionType = ModernConnection;
     }
 
     return new MongoClient(connectionString, serverOptions);

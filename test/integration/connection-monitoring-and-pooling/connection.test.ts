@@ -1,3 +1,5 @@
+import { promisify } from 'node:util';
+
 import { expect } from 'chai';
 
 import {
@@ -29,117 +31,52 @@ describe('Connection', function () {
     return setupDatabase(this.configuration);
   });
 
-  describe('Connection - functional/cmap', function () {
+  describe('Connection.command', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: function (done) {
+      test: async function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} })
         };
 
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
-
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
-            expect(err).to.not.exist;
-            expect(hello).to.exist;
-            expect(hello.ok).to.equal(1);
-            done();
-          });
-        });
+        let conn;
+        try {
+          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
+          expect(hello).to.have.property('ok', 1);
+        } finally {
+          conn?.destroy();
+        }
       }
     });
 
     it('should emit command monitoring events', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
-      test: function (done) {
+      test: async function () {
         const connectOptions: Partial<ConnectionOptions> = {
           connectionType: Connection,
-          monitorCommands: true,
           ...this.configuration.options,
+          monitorCommands: true,
           metadata: makeClientMetadata({ driverInfo: {} })
         };
 
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
+        let conn;
+        try {
+          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
 
-          const events = [];
+          const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
           conn.on('commandSucceeded', event => events.push(event));
           conn.on('commandFailed', event => events.push(event));
 
-          conn.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 }, undefined, (err, hello) => {
-            expect(err).to.not.exist;
-            expect(hello).to.exist;
-            expect(hello.ok).to.equal(1);
-            expect(events).to.have.length(2);
-            done();
-          });
-        });
-      }
-    });
-
-    it('should support calling back multiple times on exhaust commands', {
-      metadata: {
-        requires: { apiVersion: false, mongodb: '>=4.2.0', topology: ['single'] }
-      },
-      test: function (done) {
-        const namespace = ns(`${this.configuration.db}.$cmd`);
-        const connectOptions: Partial<ConnectionOptions> = {
-          connectionType: Connection,
-          ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
-        };
-
-        connect(connectOptions as any as ConnectionOptions, (err, conn) => {
-          expect(err).to.not.exist;
-          this.defer(_done => conn.destroy(_done));
-
-          const documents = Array.from(Array(10000), (_, idx) => ({
-            test: Math.floor(Math.random() * idx)
-          }));
-
-          conn.command(namespace, { drop: 'test' }, undefined, () => {
-            conn.command(namespace, { insert: 'test', documents }, undefined, (err, res) => {
-              expect(err).to.not.exist;
-              expect(res).nested.property('n').to.equal(documents.length);
-
-              let totalDocumentsRead = 0;
-              conn.command(
-                namespace,
-                { find: 'test', batchSize: 100 },
-                undefined,
-                (err, result) => {
-                  expect(err).to.not.exist;
-                  expect(result).nested.property('cursor').to.exist;
-                  const cursor = result.cursor;
-                  totalDocumentsRead += cursor.firstBatch.length;
-
-                  conn.command(
-                    namespace,
-                    { getMore: cursor.id, collection: 'test', batchSize: 100 },
-                    { exhaustAllowed: true },
-                    (err, result) => {
-                      expect(err).to.not.exist;
-                      expect(result).nested.property('cursor').to.exist;
-                      const cursor = result.cursor;
-                      totalDocumentsRead += cursor.nextBatch.length;
-
-                      if (cursor.id === 0 || cursor.id.isZero()) {
-                        expect(totalDocumentsRead).to.equal(documents.length);
-                        done();
-                      }
-                    }
-                  );
-                }
-              );
-            });
-          });
-        });
+          const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
+          expect(hello).to.have.property('ok', 1);
+          expect(events).to.have.lengthOf(2);
+        } finally {
+          conn?.destroy();
+        }
       }
     });
   });

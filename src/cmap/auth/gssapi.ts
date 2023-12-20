@@ -30,7 +30,7 @@ async function externalCommand(
   connection: Connection,
   command: ReturnType<typeof saslStart> | ReturnType<typeof saslContinue>
 ): Promise<{ payload: string; conversationId: any }> {
-  return connection.commandAsync(ns('$external.$cmd'), command, undefined) as Promise<{
+  return connection.command(ns('$external.$cmd'), command, undefined) as Promise<{
     payload: string;
     conversationId: any;
   }>;
