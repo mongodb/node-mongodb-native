@@ -129,12 +129,22 @@ export type ObservableCmapEventId =
   | 'connectionCheckOutFailedEvent'
   | 'connectionCheckedOutEvent'
   | 'connectionCheckedInEvent';
+export type ObservableSdamEventId =
+  | 'serverDescriptionChangedEvent'
+  | 'serverHeartbeatStartedEvent'
+  | 'serverHeartbeatFailedEvent'
+  | 'serverHeartbeatSucceededEvent'
+  | 'topologyOpeningEvent'
+  | 'topologyDescriptionChangedEvent'
+  | 'topologyClosedEvent'
+  | 'serverOpeningEvent'
+  | 'serverClosedEvent';
 
 export interface ClientEntity {
   id: string;
   uriOptions?: Document;
   useMultipleMongoses?: boolean;
-  observeEvents?: (ObservableCommandEventId | ObservableCmapEventId)[];
+  observeEvents?: (ObservableCommandEventId | ObservableCmapEventId | ObservableSdamEventId)[];
   observeLogMessages?: Record<MongoLoggableComponent, SeverityLevel>;
   ignoreCommandMonitoringEvents?: string[];
   serverApi?: ServerApi;
@@ -263,6 +273,8 @@ export type ExpectedEvent = ExpectedCommandEvent | ExpectedCmapEvent | ExpectedS
 export interface ExpectedLogMessagesForClient {
   client: string;
   messages: ExpectedLogMessage[];
+  ignoreMessages: ExpectedLogMessage[];
+  ignoreExtraMessages: boolean;
 }
 
 export interface ExpectedCommandEvent {
@@ -270,13 +282,16 @@ export interface ExpectedCommandEvent {
     command?: Document;
     commandName?: string;
     databaseName?: string;
+    hasServerConnectionId?: boolean;
   };
   commandSucceededEvent?: {
     reply?: Document;
     commandName?: string;
+    hasServerConnectionId?: boolean;
   };
   commandFailedEvent?: {
     commandName?: string;
+    hasServerConnectionId?: boolean;
   };
 }
 export interface ExpectedCmapEvent {
@@ -315,7 +330,29 @@ export interface ExpectedSdamEvent {
     awaited?: boolean;
   };
   serverHeartbeatSucceededEvent?: {
+    topologyId?: any;
     awaited?: boolean;
+  };
+  topologyDescriptionChangedEvent?: {
+    topologyId?: any;
+    previousDescription?: {
+      type?: string;
+    };
+    newDescription?: {
+      type?: string;
+    };
+  };
+  topologyOpeningEvent?: {
+    topologyId?: any;
+  };
+  topologyClosingEvent?: {
+    topologyId?: any;
+  };
+  serverOpeningEvent?: {
+    topologyId?: any;
+  };
+  serverClosedEvent?: {
+    topologyId?: any;
   };
 }
 export interface StoreEventsAsEntity {

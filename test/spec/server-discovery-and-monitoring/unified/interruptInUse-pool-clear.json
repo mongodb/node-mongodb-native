@@ -4,11 +4,11 @@
   "runOnRequirements": [
     {
       "minServerVersion": "4.9",
+      "serverless": "forbid",
       "topologies": [
         "replicaset",
         "sharded"
-      ],
-      "serverless": "forbid"
+      ]
     }
   ],
   "createEntities": [
@@ -39,13 +39,6 @@
                 "client": {
                   "id": "client",
                   "useMultipleMongoses": false,
-                  "uriOptions": {
-                    "connectTimeoutMS": 500,
-                    "heartbeatFrequencyMS": 500,
-                    "appname": "interruptInUse",
-                    "retryReads": false,
-                    "minPoolSize": 0
-                  },
                   "observeEvents": [
                     "poolClearedEvent",
                     "connectionClosedEvent",
@@ -54,7 +47,14 @@
                     "commandFailedEvent",
                     "connectionCheckedOutEvent",
                     "connectionCheckedInEvent"
-                  ]
+                  ],
+                  "uriOptions": {
+                    "connectTimeoutMS": 500,
+                    "heartbeatFrequencyMS": 500,
+                    "appname": "interruptInUse",
+                    "retryReads": false,
+                    "minPoolSize": 0
+                  }
                 }
               },
               {
@@ -111,6 +111,7 @@
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
+            "client": "setupClient",
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
@@ -125,8 +126,7 @@
                 "blockTimeMS": 1500,
                 "appName": "interruptInUse"
               }
-            },
-            "client": "setupClient"
+            }
           }
         },
         {
@@ -215,22 +215,22 @@
                 "client": {
                   "id": "client",
                   "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "poolClearedEvent",
+                    "connectionClosedEvent",
+                    "commandStartedEvent",
+                    "commandFailedEvent",
+                    "commandSucceededEvent",
+                    "connectionCheckedOutEvent",
+                    "connectionCheckedInEvent"
+                  ],
                   "uriOptions": {
                     "connectTimeoutMS": 500,
                     "heartbeatFrequencyMS": 500,
                     "appname": "interruptInUseRetryable",
                     "retryReads": true,
                     "minPoolSize": 0
-                  },
-                  "observeEvents": [
-                    "poolClearedEvent",
-                    "connectionClosedEvent",
-                    "commandFailedEvent",
-                    "commandStartedEvent",
-                    "commandSucceededEvent",
-                    "connectionCheckedOutEvent",
-                    "connectionCheckedInEvent"
-                  ]
+                  }
                 }
               },
               {
@@ -284,6 +284,7 @@
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
+            "client": "setupClient",
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
@@ -298,8 +299,7 @@
                 "blockTimeMS": 1500,
                 "appName": "interruptInUseRetryable"
               }
-            },
-            "client": "setupClient"
+            }
           }
         },
         {
@@ -404,22 +404,22 @@
                 "client": {
                   "id": "client",
                   "useMultipleMongoses": false,
+                  "observeEvents": [
+                    "poolClearedEvent",
+                    "connectionClosedEvent",
+                    "commandStartedEvent",
+                    "commandFailedEvent",
+                    "commandSucceededEvent",
+                    "connectionCheckedOutEvent",
+                    "connectionCheckedInEvent"
+                  ],
                   "uriOptions": {
                     "connectTimeoutMS": 500,
                     "heartbeatFrequencyMS": 500,
                     "appname": "interruptInUseRetryableWrite",
                     "retryWrites": true,
                     "minPoolSize": 0
-                  },
-                  "observeEvents": [
-                    "poolClearedEvent",
-                    "connectionClosedEvent",
-                    "commandFailedEvent",
-                    "commandStartedEvent",
-                    "commandSucceededEvent",
-                    "connectionCheckedOutEvent",
-                    "connectionCheckedInEvent"
-                  ]
+                  }
                 }
               },
               {
@@ -465,13 +465,11 @@
                 "filter": {
                   "$where": "sleep(2000) || true"
                 },
-                "update": [
-                  {
-                    "$set": {
-                      "a": "bar"
-                    }
+                "update": {
+                  "$set": {
+                    "a": "bar"
                   }
-                ]
+                }
               }
             }
           }
@@ -480,6 +478,7 @@
           "name": "failPoint",
           "object": "testRunner",
           "arguments": {
+            "client": "setupClient",
             "failPoint": {
               "configureFailPoint": "failCommand",
               "mode": {
@@ -494,8 +493,7 @@
                 "blockTimeMS": 1500,
                 "appName": "interruptInUseRetryableWrite"
               }
-            },
-            "client": "setupClient"
+            }
           }
         },
         {

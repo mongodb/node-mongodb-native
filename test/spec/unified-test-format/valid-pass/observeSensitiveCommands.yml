@@ -1,0 +1,255 @@
+description: "observeSensitiveCommands"
+
+schemaVersion: "1.5"
+
+runOnRequirements:
+  - auth: false
+
+createEntities:
+  - client:
+      id: &clientObserveSensitiveCommands client0
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+      observeSensitiveCommands: true
+  - client:
+      id: &clientDoNotObserveSensitiveCommands client1
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+      observeSensitiveCommands: false
+  - client:
+      id: &clientDoNotObserveSensitiveCommandsByDefault client2
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+  - database:
+      id: &databaseObserveSensitiveCommands database0
+      client: *clientObserveSensitiveCommands
+      databaseName: &databaseName observeSensitiveCommands
+  - database:
+      id: &databaseDoNotObserveSensitiveCommands database1
+      client: *clientDoNotObserveSensitiveCommands
+      databaseName: *databaseName
+  - database:
+      id: &databaseDoNotObserveSensitiveCommandsByDefault database2
+      client: *clientDoNotObserveSensitiveCommandsByDefault
+      databaseName: *databaseName
+
+tests:
+  - description: "getnonce is observed with observeSensitiveCommands=true"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
+    operations:
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments:
+          commandName: getnonce
+          command: { getnonce: 1 }
+    expectEvents:
+      - client: *clientObserveSensitiveCommands
+        events:
+          - commandStartedEvent:
+              commandName: getnonce
+              command: { getnonce: { $$exists: false } }
+          - commandSucceededEvent:
+              commandName: getnonce
+              reply:
+                ok: { $$exists: false }
+                nonce: { $$exists: false }
+
+  - description: "getnonce is not observed with observeSensitiveCommands=false"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
+    operations:
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments:
+          commandName: getnonce
+          command: { getnonce: 1 }
+    expectEvents:
+      - client: *clientDoNotObserveSensitiveCommands
+        events: []
+
+  - description: "getnonce is not observed by default"
+    runOnRequirements:
+    - maxServerVersion: 6.1.99 # getnonce removed as of 6.2 via SERVER-71007
+    operations:
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments:
+          commandName: getnonce
+          command: { getnonce: 1 }
+    expectEvents:
+      - client: *clientDoNotObserveSensitiveCommandsByDefault
+        events: []
+
+  - description: "hello with speculativeAuthenticate"
+    runOnRequirements:
+      - minServerVersion: "4.9"
+    operations:
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &helloArgs
+          commandName: hello
+          command:
+            hello: 1
+            speculativeAuthenticate: { saslStart: 1 }
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *helloArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *helloArgs
+    expectEvents:
+      - client: *clientObserveSensitiveCommands
+        events:
+          - commandStartedEvent:
+              commandName: hello
+              command:
+                # Assert that all fields in command are redacted
+                hello: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: hello
+              reply:
+                # Assert that all fields in reply are redacted
+                isWritablePrimary: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+      - client: *clientDoNotObserveSensitiveCommands
+        events: []
+      - client: *clientDoNotObserveSensitiveCommandsByDefault
+        events: []
+
+  - description: "hello without speculativeAuthenticate is always observed"
+    runOnRequirements:
+      - minServerVersion: "4.9"
+    operations:
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &helloArgs
+          commandName: hello
+          command: { hello: 1 }
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *helloArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *helloArgs
+    expectEvents:
+      - client: *clientObserveSensitiveCommands
+        events: &helloEvents
+          - commandStartedEvent:
+              commandName: hello
+              command: { hello: 1 }
+          - commandSucceededEvent:
+              commandName: hello
+              reply: { isWritablePrimary: { $$exists: true } }
+      - client: *clientDoNotObserveSensitiveCommands
+        events: *helloEvents
+      - client: *clientDoNotObserveSensitiveCommandsByDefault
+        events: *helloEvents
+
+  - description: "legacy hello with speculativeAuthenticate"
+    operations:
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &ismasterArgs
+          commandName: ismaster
+          command:
+            ismaster: 1
+            speculativeAuthenticate: { saslStart: 1 }
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &isMasterArgs
+          commandName: isMaster
+          command:
+            isMaster: 1
+            speculativeAuthenticate: { saslStart: 1 }
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *ismasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *isMasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *ismasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *isMasterArgs
+    expectEvents:
+      - client: *clientObserveSensitiveCommands
+        events:
+          - commandStartedEvent:
+              commandName: ismaster
+              command:
+                # Assert that all fields in command are redacted
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: ismaster
+              reply:
+                # Assert that all fields in reply are redacted
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandStartedEvent:
+              commandName: isMaster
+              command:
+                # Assert that all fields in command are redacted
+                isMaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+          - commandSucceededEvent:
+              commandName: isMaster
+              reply:
+                # Assert that all fields in reply are redacted
+                ismaster: { $$exists: false }
+                speculativeAuthenticate: { $$exists: false }
+      - client: *clientDoNotObserveSensitiveCommands
+        events: []
+      - client: *clientDoNotObserveSensitiveCommandsByDefault
+        events: []
+
+  - description: "legacy hello without speculativeAuthenticate is always observed"
+    operations:
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &ismasterArgs
+          commandName: ismaster
+          command: { ismaster: 1 }
+      - name: runCommand
+        object: *databaseObserveSensitiveCommands
+        arguments: &isMasterArgs
+          commandName: isMaster
+          command: { isMaster: 1 }
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *ismasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommands
+        arguments: *isMasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *ismasterArgs
+      - name: runCommand
+        object: *databaseDoNotObserveSensitiveCommandsByDefault
+        arguments: *isMasterArgs
+    expectEvents:
+      - client: *clientObserveSensitiveCommands
+        events: &ismasterAndisMasterEvents
+          - commandStartedEvent:
+              commandName: ismaster
+              command: { ismaster: 1 }
+          - commandSucceededEvent:
+              commandName: ismaster
+              reply: { ismaster: { $$exists: true } }
+          - commandStartedEvent:
+              commandName: isMaster
+              command: { isMaster: 1 }
+          - commandSucceededEvent:
+              commandName: isMaster
+              reply: { ismaster: { $$exists: true } }
+      - client: *clientDoNotObserveSensitiveCommands
+        events: *ismasterAndisMasterEvents
+      - client: *clientDoNotObserveSensitiveCommandsByDefault
+        events: *ismasterAndisMasterEvents

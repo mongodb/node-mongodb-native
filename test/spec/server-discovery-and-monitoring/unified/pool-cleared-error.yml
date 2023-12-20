@@ -1,7 +1,7 @@
 ---
 description: pool-cleared-error
 
-schemaVersion: "1.10"
+schemaVersion: "1.4"
 
 runOnRequirements:
     # This test requires retryable writes, failCommand appName, and

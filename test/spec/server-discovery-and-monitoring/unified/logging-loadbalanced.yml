@@ -1,0 +1,74 @@
+description: "loadbalanced-logging"
+
+schemaVersion: "1.16"
+
+runOnRequirements:
+  - topologies:
+      - load-balanced
+    minServerVersion: "4.4" # awaitable hello
+
+tests:
+  - description: "Topology lifecycle"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeLogMessages:
+                  topology: debug
+                observeEvents:
+                  - topologyDescriptionChangedEvent
+      # ensure the topology has been fully discovered before closing the client.
+      # expected events are initial server discovery and server connect event.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 2
+      - name: close
+        object: *client
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: topology
+            data:
+              message: "Starting topology monitoring"
+              topologyId: { $$exists: true }
+          - level: debug
+            component: topology
+            data:
+              message: "Topology description changed"
+              topologyId: { $$exists: true }
+              previousDescription:  { $$exists: true } # unknown topology
+              newDescription: { $$exists: true } # unknown topology, disconnected server
+          - level: debug
+            component: topology
+            data:
+              message: "Starting server monitoring"
+              topologyId: { $$exists: true }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+          - level: debug
+            component: topology
+            data:
+              message: "Topology description changed"
+              topologyId: { $$exists: true }
+              previousDescription:  { $$exists: true }
+              newDescription: { $$exists: true } # loadBalanced topology
+          - level: debug
+            component: topology
+            data:
+              message: "Stopped server monitoring"
+              topologyId: { $$exists: true }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+          - level: debug
+            component: topology
+            data:
+              message: "Stopped topology monitoring"
+              topologyId: { $$exists: true }

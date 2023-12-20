@@ -32,11 +32,16 @@ import {
   ReadConcern,
   ReadPreference,
   SENSITIVE_COMMANDS,
+  type ServerClosedEvent,
   type ServerDescriptionChangedEvent,
   type ServerHeartbeatFailedEvent,
   type ServerHeartbeatStartedEvent,
   type ServerHeartbeatSucceededEvent,
+  type ServerOpeningEvent,
+  type TopologyClosedEvent,
   type TopologyDescription,
+  type TopologyDescriptionChangedEvent,
+  type TopologyOpeningEvent,
   WriteConcern
 } from '../../mongodb';
 import { ejson, getEnvironmentalOptions } from '../../tools/utils';
@@ -104,7 +109,12 @@ export type SdamEvent =
   | ServerDescriptionChangedEvent
   | ServerHeartbeatStartedEvent
   | ServerHeartbeatFailedEvent
-  | ServerHeartbeatSucceededEvent;
+  | ServerHeartbeatSucceededEvent
+  | TopologyOpeningEvent
+  | TopologyDescriptionChangedEvent
+  | TopologyClosedEvent
+  | ServerOpeningEvent
+  | ServerClosedEvent;
 export type LogMessage = Omit<ExpectedLogMessage, 'failureIsRedacted'>;
 
 function getClient(address) {
@@ -119,6 +129,7 @@ export class UnifiedMongoClient extends MongoClient {
   logCollector: { buffer: LogMessage[]; write: (log: Log) => void };
 
   ignoredEvents: string[];
+  observeSensitiveCommands: boolean;
   observedCommandEvents: ('commandStarted' | 'commandSucceeded' | 'commandFailed')[];
   observedCmapEvents: (
     | 'connectionPoolCreated'
@@ -134,10 +145,15 @@ export class UnifiedMongoClient extends MongoClient {
     | 'connectionCheckedIn'
   )[];
   observedSdamEvents: (
-    | 'serverDescriptionChangedEvent'
-    | 'serverHeartbeatStartedEvent'
-    | 'serverHeartbeatFailedEvent'
-    | 'serverHeartbeatSucceededEvent'
+    | 'serverDescriptionChanged'
+    | 'serverHeartbeatStarted'
+    | 'serverHeartbeatFailed'
+    | 'serverHeartbeatSucceeded'
+    | 'serverOpened'
+    | 'serverClosed'
+    | 'topologyOpened'
+    | 'topologyClosed'
+    | 'topologyDescriptionChangedEvent'
   )[];
   observedEventEmitter = new EventEmitter();
   _credentials: MongoCredentials | null;
@@ -166,7 +182,12 @@ export class UnifiedMongoClient extends MongoClient {
     serverDescriptionChangedEvent: 'serverDescriptionChanged',
     serverHeartbeatStartedEvent: 'serverHeartbeatStarted',
     serverHeartbeatFailedEvent: 'serverHeartbeatFailed',
-    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded'
+    serverHeartbeatSucceededEvent: 'serverHeartbeatSucceeded',
+    serverOpeningEvent: 'serverOpening',
+    serverClosedEvent: 'serverClosed',
+    topologyOpeningEvent: 'topologyOpening',
+    topologyClosedEvent: 'topologyClosed',
+    topologyDescriptionChangedEvent: 'topologyDescriptionChanged'
   } as const;
 
   static LOGGING_COMPONENT_TO_ENV_VAR_NAME = {
@@ -206,7 +227,9 @@ export class UnifiedMongoClient extends MongoClient {
       [Symbol.for('@@mdb.internalLoggerConfig')]: componentSeverities,
       ...getEnvironmentalOptions(),
       ...(description.serverApi ? { serverApi: description.serverApi } : {}),
-      mongodbLogPath: logCollector
+      mongodbLogPath: logCollector,
+      // TODO(NODE-5785): We need to increase the truncation length because signature.hash is a Buffer making hellos too long
+      mongodbLogMaxDocumentLength: 1250
     } as any);
     this.logCollector = logCollector;
 
@@ -218,6 +241,8 @@ export class UnifiedMongoClient extends MongoClient {
     if (!description.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
     }
+
+    this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
@@ -237,6 +262,25 @@ export class UnifiedMongoClient extends MongoClient {
     for (const eventName of this.observedSdamEvents) {
       this.on(eventName, this.pushSdamEvent);
     }
+  }
+
+  // If the command or reply included a speculativeAuthenticate field,
+  // they will be already have redacted in maybeRedact()
+  // See src/cmap/command_monitoring_events.ts
+  // We can infer that the command was sensitive if its command or reply is an empty object.
+  isSensitiveCommand(e: CommandEvent): boolean {
+    if (
+      (e.name === 'commandStarted' &&
+        typeof e.command === 'object' &&
+        !Object.keys(e.command).length) ||
+      (e.name === 'commandSucceeded' &&
+        typeof e.reply === 'object' &&
+        (e.reply === null || !Object.keys(e.reply).length))
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   isIgnored(e: CommandEvent): boolean {
@@ -266,7 +310,10 @@ export class UnifiedMongoClient extends MongoClient {
 
   // NOTE: pushCommandEvent must be an arrow function
   pushCommandEvent: (e: CommandEvent) => void = e => {
-    if (!this.isIgnored(e)) {
+    if (
+      (this.observeSensitiveCommands === true || !this.isSensitiveCommand(e)) &&
+      !this.isIgnored(e)
+    ) {
       this.commandEvents.push(e);
       this.observedEventEmitter.emit('observedEvent');
     }

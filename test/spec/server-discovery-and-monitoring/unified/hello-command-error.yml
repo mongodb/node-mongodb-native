@@ -1,7 +1,7 @@
 ---
 description: hello-command-error
 
-schemaVersion: "1.10"
+schemaVersion: "1.4"
 
 runOnRequirements:
     # failCommand appName requirements

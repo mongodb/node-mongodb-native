@@ -1,4 +1,4 @@
-import type { Document, ObjectId } from '../bson';
+import { type Document, type ObjectId } from '../bson';
 import {
   COMMAND_FAILED,
   COMMAND_STARTED,
@@ -22,7 +22,14 @@ export class CommandStartedEvent {
   commandName: string;
   command: Document;
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId"
+   * from the server on 4.2+.
+   */
+  serverConnectionId: bigint | null;
   serviceId?: ObjectId;
   /** @internal */
   name = COMMAND_STARTED;
@@ -34,7 +41,11 @@ export class CommandStartedEvent {
    * @param pool - the pool that originated the command
    * @param command - the command
    */
-  constructor(connection: Connection, command: WriteProtocolMessageType) {
+  constructor(
+    connection: Connection,
+    command: WriteProtocolMessageType,
+    serverConnectionId: bigint | null
+  ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
     const { address, connectionId, serviceId } = extractConnectionDetails(connection);
@@ -52,6 +63,7 @@ export class CommandStartedEvent {
     this.databaseName = command.databaseName;
     this.commandName = commandName;
     this.command = maybeRedact(commandName, cmd, cmd);
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
@@ -67,7 +79,13 @@ export class CommandStartedEvent {
  */
 export class CommandSucceededEvent {
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
+   */
+  serverConnectionId: bigint | null;
   requestId: number;
   duration: number;
   commandName: string;
@@ -89,7 +107,8 @@ export class CommandSucceededEvent {
     connection: Connection,
     command: WriteProtocolMessageType,
     reply: Document | undefined,
-    started: number
+    started: number,
+    serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -102,6 +121,7 @@ export class CommandSucceededEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.reply = maybeRedact(commandName, cmd, extractReply(command, reply));
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */
@@ -117,7 +137,13 @@ export class CommandSucceededEvent {
  */
 export class CommandFailedEvent {
   address: string;
+  /** Driver generated connection id */
   connectionId?: string | number;
+  /**
+   * Server generated connection id
+   * Distinct from the connection id and is returned by the hello or legacy hello response as "connectionId" from the server on 4.2+.
+   */
+  serverConnectionId: bigint | null;
   requestId: number;
   duration: number;
   commandName: string;
@@ -139,7 +165,8 @@ export class CommandFailedEvent {
     connection: Connection,
     command: WriteProtocolMessageType,
     error: Error | Document,
-    started: number
+    started: number,
+    serverConnectionId: bigint | null
   ) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
@@ -153,6 +180,7 @@ export class CommandFailedEvent {
     this.commandName = commandName;
     this.duration = calculateDurationInMs(started);
     this.failure = maybeRedact(commandName, cmd, error) as Error;
+    this.serverConnectionId = serverConnectionId;
   }
 
   /* @internal */

@@ -17,11 +17,17 @@ export const MESSAGE = 'message' as const;
 export const PINNED = 'pinned' as const;
 export const UNPINNED = 'unpinned' as const;
 export const DESCRIPTION_RECEIVED = 'descriptionReceived';
+/** @internal */
 export const SERVER_OPENING = 'serverOpening' as const;
+/** @internal */
 export const SERVER_CLOSED = 'serverClosed' as const;
+/** @internal */
 export const SERVER_DESCRIPTION_CHANGED = 'serverDescriptionChanged' as const;
+/** @internal */
 export const TOPOLOGY_OPENING = 'topologyOpening' as const;
+/** @internal */
 export const TOPOLOGY_CLOSED = 'topologyClosed' as const;
+/** @internal */
 export const TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as const;
 /** @internal */
 export const CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
@@ -49,8 +55,11 @@ export const CLUSTER_TIME_RECEIVED = 'clusterTimeReceived' as const;
 export const COMMAND_STARTED = 'commandStarted' as const;
 export const COMMAND_SUCCEEDED = 'commandSucceeded' as const;
 export const COMMAND_FAILED = 'commandFailed' as const;
+/** @internal */
 export const SERVER_HEARTBEAT_STARTED = 'serverHeartbeatStarted' as const;
+/** @internal */
 export const SERVER_HEARTBEAT_SUCCEEDED = 'serverHeartbeatSucceeded' as const;
+/** @internal */
 export const SERVER_HEARTBEAT_FAILED = 'serverHeartbeatFailed' as const;
 export const RESPONSE = 'response' as const;
 export const MORE = 'more' as const;

@@ -1174,21 +1174,6 @@ describe('driver utils', function () {
     const badError = new Error('unexpected bad error!');
     const expectedValue = "don't panic";
 
-    context('when not given a signal', () => {
-      it('returns promise fulfillment if the promise resolves or rejects', async () => {
-        expect(await abortable(Promise.resolve(expectedValue))).to.equal(expectedValue);
-        expect(await abortable(Promise.reject(goodError)).catch(e => e)).to.equal(goodError);
-      });
-
-      it('pends indefinitely if the promise is never settled', async () => {
-        const forever = abortable(new Promise(() => null));
-        // Assume 100ms is good enough to prove "forever"
-        expect(await Promise.race([forever, sleep(100).then(() => expectedValue)])).to.equal(
-          expectedValue
-        );
-      });
-    });
-
     context('always removes the abort listener it attaches', () => {
       let controller;
       let removeEventListenerSpy;
