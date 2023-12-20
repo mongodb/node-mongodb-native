@@ -444,4 +444,50 @@ collectionType.bulkWrite([
       }
     }
   ]);
+
+  const collectionOfAnyType = undefined as unknown as Collection<any>;
+  collectionOfAnyType.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  collectionOfAnyType.bulkWrite([
+    {
+      updateOne: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
+  collectionOfAnyType.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: {
+          $addToSet: { mySet: 0 }
+        }
+      }
+    }
+  ]);
+  collectionOfAnyType.bulkWrite([
+    {
+      updateMany: {
+        filter: { myId: 0 },
+        update: [
+          {
+            $addToSet: { mySet: 0 }
+          }
+        ]
+      }
+    }
+  ]);
 }
