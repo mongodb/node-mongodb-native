@@ -1,12 +1,8 @@
-import { type Document, EJSON, type EJSONOptions } from 'bson';
+import { type Document, EJSON, type EJSONOptions, type ObjectId } from 'bson';
 import type { Writable } from 'stream';
 import { inspect } from 'util';
 
-import type {
-  CommandFailedEvent,
-  CommandStartedEvent,
-  CommandSucceededEvent
-} from './cmap/command_monitoring_events';
+import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
   ConnectionCheckedOutEvent,
@@ -287,6 +283,40 @@ function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
 
 /**
  * @internal
+ * Must be separate from Events API due to differences in spec requirements for logging a command success
+ */
+export type LoggableCommandSucceededEvent = {
+  address: string;
+  connectionId?: string | number;
+  requestId: number;
+  duration: number;
+  commandName: string;
+  reply: Document | undefined;
+  serviceId?: ObjectId;
+  name: typeof COMMAND_SUCCEEDED;
+  serverConnectionId: bigint | null;
+  databaseName: string;
+};
+
+/**
+ * @internal
+ * Must be separate from Events API due to differences in spec requirements for logging a command failure
+ */
+export type LoggableCommandFailedEvent = {
+  address: string;
+  connectionId?: string | number;
+  requestId: number;
+  duration: number;
+  commandName: string;
+  failure: Error;
+  serviceId?: ObjectId;
+  name: typeof COMMAND_FAILED;
+  serverConnectionId: bigint | null;
+  databaseName: string;
+};
+
+/**
+ * @internal
  * Must be separate from Events API due to differences in spec requirements for logging server heartbeat beginning
  */
 export type LoggableServerHeartbeatStartedEvent = {
@@ -336,8 +366,8 @@ type SDAMLoggableEvent =
 /** @internal */
 export type LoggableEvent =
   | CommandStartedEvent
-  | CommandSucceededEvent
-  | CommandFailedEvent
+  | LoggableCommandSucceededEvent
+  | LoggableCommandFailedEvent
   | ConnectionPoolCreatedEvent
   | ConnectionPoolReadyEvent
   | ConnectionPoolClosedEvent
@@ -387,7 +417,7 @@ function isLogConvertible(obj: Loggable): obj is LogConvertible {
 
 function attachCommandFields(
   log: Record<string, any>,
-  commandEvent: CommandStartedEvent | CommandSucceededEvent | CommandFailedEvent
+  commandEvent: CommandStartedEvent | LoggableCommandSucceededEvent | LoggableCommandFailedEvent
 ) {
   log.commandName = commandEvent.commandName;
   log.requestId = commandEvent.requestId;
@@ -398,6 +428,8 @@ function attachCommandFields(
   if (commandEvent?.serviceId) {
     log.serviceId = commandEvent.serviceId.toHexString();
   }
+  log.databaseName = commandEvent.databaseName;
+  log.serverConnectionId = commandEvent?.serverConnectionId;
 
   return log;
 }
@@ -444,20 +476,20 @@ function defaultLogTransform(
     case COMMAND_STARTED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command started';
-      log.command = stringifyWithMaxLen(logObject.command, maxDocumentLength);
+      log.command = stringifyWithMaxLen(logObject.command, maxDocumentLength, { relaxed: true });
       log.databaseName = logObject.databaseName;
       return log;
     case COMMAND_SUCCEEDED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command succeeded';
       log.durationMS = logObject.duration;
-      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength);
+      log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
       return log;
     case COMMAND_FAILED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure;
+      log.failure = logObject.failure.message;
       return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);
@@ -655,12 +687,16 @@ export class MongoLogger {
     this.logDestination = options.logDestination;
   }
 
+  willLog(severity: SeverityLevel, component: MongoLoggableComponent): boolean {
+    return compareSeverity(severity, this.componentSeverities[component]) <= 0;
+  }
+
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
     message: Loggable | string
   ): void {
-    if (compareSeverity(severity, this.componentSeverities[component]) > 0) return;
+    if (!this.willLog(severity, component)) return;
 
     let logMessage: Log = { t: new Date(), c: component, s: severity };
     if (typeof message === 'string') {
@@ -669,6 +705,7 @@ export class MongoLogger {
       if (isLogConvertible(message)) {
         logMessage = { ...logMessage, ...message.toLog() };
       } else {
+        
         logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }

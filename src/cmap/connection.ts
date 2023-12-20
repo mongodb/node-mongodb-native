@@ -24,6 +24,7 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -114,6 +115,7 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+  mongoLogger: MongoLogger | undefined;
 }
 
 /** @internal */

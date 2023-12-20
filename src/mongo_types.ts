@@ -12,7 +12,10 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
+import { type CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
+  LoggableCommandFailedEvent,
+  LoggableCommandSucceededEvent,
   LoggableServerHeartbeatFailedEvent,
   LoggableServerHeartbeatStartedEvent,
   LoggableServerHeartbeatSucceededEvent,
@@ -436,6 +439,27 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
         ...args[0]
       };
       this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
+    }
+  }
+  /** @internal */
+  emitAndLogCommand<EventKey extends keyof Events>(
+    monitorCommands: boolean,
+    event: EventKey | symbol,
+    databaseName: string,
+    ...args: Parameters<Events[EventKey]>
+  ): void {
+    if (monitorCommands) {
+      this.emit(event, ...args);
+    }
+    if (this.component && typeof args[0]?.serverConnectionId === 'bigint') {
+      const loggableCommandEvent:
+        | CommandStartedEvent
+        | LoggableCommandFailedEvent
+        | LoggableCommandSucceededEvent = {
+        databaseName: databaseName,
+        ...args[0]
+      };
+      this.mongoLogger?.debug(this.component, loggableCommandEvent);
     }
   }
 }
