@@ -160,7 +160,7 @@ describe('monitoring', function () {
 
       monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
       monitor.on('serverHeartbeatSucceeded', () => {
-        expect(monitor.connection.isMonitoringConnection).to.be.true;
+        expect(monitor.connection).to.have.property('id', '<monitor>');
         done();
       });
       monitor.connect();
