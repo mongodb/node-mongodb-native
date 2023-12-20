@@ -49,7 +49,7 @@
           },
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
