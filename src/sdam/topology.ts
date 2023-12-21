@@ -609,7 +609,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         this.description
       );
       this.client.mongoLogger.debug(
-        'topology',
+        MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionFailedEvent(
           selector,
           this.description,
@@ -894,7 +894,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
     if (!waitQueueMember[kCancelled]) {
       if (err) {
         waitQueueMember.mongoLogger.debug(
-          'topology',
+          MongoLoggableComponent.SERVER_SELECTION,
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             waitQueueMember.topologyDescription,
@@ -985,7 +985,7 @@ function processWaitQueue(topology: Topology) {
         topology.description
       );
       topology.client.mongoLogger.debug(
-        'topology',
+        MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionFailedEvent(
           waitQueueMember.serverSelector,
           topology.description,
