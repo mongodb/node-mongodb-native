@@ -40,21 +40,12 @@ import {
   SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED,
   SERVER_OPENING,
-  TOPOLOGY_CLOSED,
-  TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING
-} from './constants';
-import type {
-  ServerClosedEvent,
-  ServerOpeningEvent,
-  TopologyClosedEvent,
-  TopologyDescriptionChangedEvent,
-  TopologyOpeningEvent
-} from './sdam/events';
-import type {
   SERVER_SELECTION_FAILED,
   SERVER_SELECTION_STARTED,
   SERVER_SELECTION_SUCCEEDED,
+  TOPOLOGY_CLOSED,
+  TOPOLOGY_DESCRIPTION_CHANGED,
+  TOPOLOGY_OPENING,
   WAITING_FOR_SUITABLE_SERVER
 } from './constants';
 import type {
@@ -392,11 +383,17 @@ export function stringifyWithMaxLen(
   maxDocumentLength: number,
   options: EJSONOptions = {}
 ): string {
-  const ejson = EJSON.stringify(value, options);
+  maxDocumentLength = 20;
+  let strToTruncate: string;
+  if (typeof value === 'function') {
+    strToTruncate = value.toString();
+  } else {
+    strToTruncate = EJSON.stringify(value, options);
+  }
 
-  return maxDocumentLength !== 0 && ejson.length > maxDocumentLength
-    ? `${ejson.slice(0, maxDocumentLength)}...`
-    : ejson;
+  return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
+    ? `${strToTruncate.slice(0, maxDocumentLength)}...`
+    : strToTruncate;
 }
 
 /** @internal */

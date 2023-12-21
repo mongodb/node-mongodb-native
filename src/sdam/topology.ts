@@ -31,7 +31,7 @@ import {
   MongoTopologyClosedError
 } from '../error';
 import type { MongoClient, ServerApi } from '../mongo_client';
-import type { MongoLogger } from '../mongo_logger';
+import { MongoLoggableComponent, type MongoLogger } from '../mongo_logger';
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
@@ -42,6 +42,7 @@ import {
   HostAddress,
   List,
   makeStateMachine,
+  now,
   ns,
   shuffle,
   TimeoutController
@@ -103,6 +104,7 @@ export interface ServerSelectionRequest {
   topologyDescription: TopologyDescription;
   mongoLogger: MongoLogger;
   transaction?: Transaction;
+  startTime: number;
   callback: ServerSelectionCallback;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
@@ -569,12 +571,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       new ServerSelectionStartedEvent(selector, this.description, options.operationName)
     );
 
-    options = Object.assign(
-      {},
-      { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS },
-      options
-    );
-
     const isSharded = this.description.type === TopologyType.Sharded;
     const session = options.session;
     const transaction = session && session.transaction;
@@ -600,6 +596,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       transaction,
       callback,
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
+      startTime: now(),
       operationName: options.operationName,
       waitingLogged: false
     };
@@ -624,14 +621,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     });
 
     this[kWaitQueue].push(waitQueueMember);
-    this.client.mongoLogger.info(
-      'topology',
-      new WaitingForSuitableServerEvent(
-        selector,
-        this.description,
-        waitQueueMember.timeoutController.getRemainingTimeMS()
-      )
-    );
     processWaitQueue(this);
   }
 
@@ -967,7 +956,9 @@ function processWaitQueue(topology: Topology) {
           new WaitingForSuitableServerEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            waitQueueMember.timeoutController.getRemainingTimeMS(),
+            topology.s.serverSelectionTimeoutMS !== 0
+              ? topology.s.serverSelectionTimeoutMS - (now() - waitQueueMember.startTime)
+              : -1,
             waitQueueMember.operationName
           )
         );
@@ -1013,7 +1004,7 @@ function processWaitQueue(topology: Topology) {
     waitQueueMember.timeoutController.clear();
 
     topology.client.mongoLogger.debug(
-      'topology',
+      MongoLoggableComponent.SERVER_SELECTION,
       new ServerSelectionSucceededEvent(
         waitQueueMember.serverSelector,
         waitQueueMember.topologyDescription,

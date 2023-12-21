@@ -6,7 +6,6 @@ import {
   WAITING_FOR_SUITABLE_SERVER
 } from '../constants';
 import { type ReadPreference } from '../read_preference';
-import { HostAddress } from '../utils';
 import { type ServerSelector } from './server_selection';
 import type { TopologyDescription } from './topology_description';
 
