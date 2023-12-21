@@ -24,6 +24,7 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -114,6 +115,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+  /** @internal */
+  mongoLogger?: MongoLogger | undefined;
 }
 
 /** @internal */
@@ -174,6 +177,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private messageStream: Readable;
   private socketWrite: (buffer: Uint8Array) => Promise<void>;
   private clusterTime: Document | null = null;
+  /** @internal  */
+  override component = MongoLoggableComponent.COMMAND;
+  /** @internal */
+  override mongoLogger: MongoLogger | undefined;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -198,6 +205,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
+    this.mongoLogger = options.mongoLogger;
 
     this.description = new StreamDescription(this.address, options);
     this.generation = options.generation;
@@ -441,10 +449,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
-    if (this.monitorCommands) {
+    if (
+      this.monitorCommands ||
+      (typeof this.description.serverConnectionId === 'bigint' &&
+        this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+    ) {
       started = now();
-      this.emit(
+      this.emitAndLogCommand(
+        this.monitorCommands,
         Connection.COMMAND_STARTED,
+        message.databaseName,
         new CommandStartedEvent(this, message, this.description.serverConnectionId)
       );
     }
@@ -464,9 +478,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           throw new MongoServerError(document);
         }
 
-        if (this.monitorCommands) {
-          this.emit(
+        if (
+          this.monitorCommands ||
+          (typeof this.description.serverConnectionId === 'bigint' &&
+            this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+        ) {
+          this.emitAndLogCommand(
+            this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
+            message.databaseName,
             new CommandSucceededEvent(
               this,
               message,
@@ -481,10 +501,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.controller.signal.throwIfAborted();
       }
     } catch (error) {
-      if (this.monitorCommands) {
+      if (
+        this.monitorCommands ||
+        (typeof this.description.serverConnectionId === 'bigint' &&
+          this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+      ) {
         if (error.name === 'MongoWriteConcernError') {
-          this.emit(
+          this.emitAndLogCommand(
+            this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
+            message.databaseName,
             new CommandSucceededEvent(
               this,
               message,
@@ -494,8 +520,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             )
           );
         } else {
-          this.emit(
+          this.emitAndLogCommand(
+            this.monitorCommands,
             Connection.COMMAND_FAILED,
+            message.databaseName,
             new CommandFailedEvent(
               this,
               message,
