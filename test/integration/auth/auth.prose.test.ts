@@ -1,13 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import {
-  Connection,
-  LEGACY_HELLO_COMMAND,
-  ModernConnection,
-  type MongoClient,
-  ScramSHA256
-} from '../../mongodb';
+import { Connection, LEGACY_HELLO_COMMAND, type MongoClient, ScramSHA256 } from '../../mongodb';
 
 function makeConnectionString(config, username, password) {
   return `mongodb://${username}:${password}@${config.host}:${config.port}/admin?`;
@@ -295,9 +289,7 @@ describe('Authentication Spec Prose Tests', function () {
           };
 
           client = this.configuration.newClient({}, options);
-          const connectionType =
-            process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
-          const commandSpy = sinon.spy(connectionType.prototype, 'command');
+          const commandSpy = sinon.spy(Connection.prototype, 'command');
           await client.connect();
           const calls = commandSpy
             .getCalls()

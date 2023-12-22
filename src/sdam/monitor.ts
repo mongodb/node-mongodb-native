@@ -345,7 +345,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     awaited = false;
     connection
-      .commandAsync(ns('admin.$cmd'), cmd, options)
+      .command(ns('admin.$cmd'), cmd, options)
       .then(onHeartbeatSucceeded, onHeartbeatFailed);
 
     return;
@@ -362,10 +362,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     }
 
     if (conn) {
-      // Tell the connection that we are using the streaming protocol so that the
-      // connection's message stream will only read the last hello on the buffer.
-      conn.isMonitoringConnection = true;
-
       if (isInCloseState(monitor)) {
         conn.destroy({ force: true });
         return;
@@ -517,7 +513,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const commandName =
     connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
-  connection.commandAsync(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
+  connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
     () => measureAndReschedule(),
     () => {
       rttPinger.connection?.destroy({ force: true });

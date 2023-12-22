@@ -5,7 +5,6 @@ import * as sinon from 'sinon';
 import {
   Connection,
   LEGACY_HELLO_COMMAND,
-  ModernConnection,
   MongoServerError,
   MongoServerSelectionError,
   OpMsgRequest,
@@ -20,24 +19,15 @@ describe('MongoDB Handshake', () => {
 
   context('when hello is too large', () => {
     before(() => {
-      const connectionType =
-        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
+      sinon.stub(Connection.prototype, 'command').callsFake(async function (ns, cmd, options) {
+        // @ts-expect-error: sinon will place wrappedMethod there
+        const command = Connection.prototype.command.wrappedMethod.bind(this);
 
-      sinon
-        .stub(connectionType.prototype, 'commandAsync')
-        .callsFake(async function (ns, cmd, options) {
-          // @ts-expect-error: sinon will place wrappedMethod there
-          const commandAsync = connectionType.prototype.commandAsync.wrappedMethod.bind(this);
-
-          if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
-            return commandAsync(
-              ns,
-              { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } },
-              options
-            );
-          }
-          return commandAsync(ns, cmd, options);
-        });
+        if (cmd.hello || cmd[LEGACY_HELLO_COMMAND]) {
+          return command(ns, { ...cmd, client: { driver: { name: 'a'.repeat(1000) } } }, options);
+        }
+        return command(ns, cmd, options);
+      });
     });
 
     after(() => sinon.restore());
@@ -58,9 +48,7 @@ describe('MongoDB Handshake', () => {
     let spy: Sinon.SinonSpy;
 
     before(() => {
-      const connectionType =
-        process.env.MONGODB_NEW_CONNECTION === 'true' ? ModernConnection : Connection;
-      spy = sinon.spy(connectionType.prototype, 'commandAsync');
+      spy = sinon.spy(Connection.prototype, 'command');
     });
 
     after(() => sinon.restore());

@@ -13,11 +13,7 @@ export class MongoCR extends AuthProvider {
 
     const { username, password, source } = credentials;
 
-    const { nonce } = await connection.commandAsync(
-      ns(`${source}.$cmd`),
-      { getnonce: 1 },
-      undefined
-    );
+    const { nonce } = await connection.command(ns(`${source}.$cmd`), { getnonce: 1 }, undefined);
 
     const hashPassword = crypto
       .createHash('md5')
@@ -37,6 +33,6 @@ export class MongoCR extends AuthProvider {
       key
     };
 
-    await connection.commandAsync(ns(`${source}.$cmd`), authenticateCommand, undefined);
+    await connection.command(ns(`${source}.$cmd`), authenticateCommand, undefined);
   }
 }

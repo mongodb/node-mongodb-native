@@ -38,6 +38,8 @@ export class StreamDescription {
   zlibCompressionLevel?: number;
   serverConnectionId: bigint | null;
 
+  public hello: Document | null = null;
+
   constructor(address: string, options?: StreamDescriptionOptions) {
     this.address = address;
     this.type = ServerType.Unknown;
@@ -59,6 +61,7 @@ export class StreamDescription {
     if (response == null) {
       return;
     }
+    this.hello = response;
     this.type = parseServerType(response);
     if ('connectionId' in response) {
       this.serverConnectionId = this.parseServerConnectionID(response.connectionId);

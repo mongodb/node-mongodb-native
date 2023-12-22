@@ -29,11 +29,7 @@ export class X509 extends AuthProvider {
       return;
     }
 
-    await connection.commandAsync(
-      ns('$external.$cmd'),
-      x509AuthenticateCommand(credentials),
-      undefined
-    );
+    await connection.command(ns('$external.$cmd'), x509AuthenticateCommand(credentials), undefined);
   }
 }
 

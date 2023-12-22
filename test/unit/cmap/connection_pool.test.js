@@ -6,6 +6,7 @@ const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers');
+const { promisify } = require('util');
 const { ns, isHello } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
@@ -32,7 +33,7 @@ describe('Connection Pool', function () {
     })
   );
 
-  it('should destroy connections which have been closed', function (done) {
+  it('should destroy connections which have been closed', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -52,31 +53,15 @@ describe('Connection Pool', function () {
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
 
-    pool.checkOut((err, conn) => {
-      expect(err).to.not.exist;
+    const conn = await promisify(pool.checkOut.bind(pool))();
+    const error = await conn.command(ns('admin.$cmd'), { ping: 1 }, {}).catch(error => error);
 
-      conn.command(ns('admin.$cmd'), { ping: 1 }, undefined, (err, result) => {
-        expect(err).to.exist;
-        expect(result).to.not.exist;
+    expect(error).to.be.instanceOf(Error);
+    pool.checkIn(conn);
 
-        pool.checkIn(conn);
-
-        expect(events).to.have.length(1);
-        const closeEvent = events[0];
-        expect(closeEvent).have.property('reason').equal('error');
-      });
-    });
-
-    pool.withConnection(
-      undefined,
-      (err, conn, cb) => {
-        expect(err).to.not.exist;
-        cb();
-      },
-      () => {
-        pool.close(done);
-      }
-    );
+    expect(events).to.have.length(1);
+    const closeEvent = events[0];
+    expect(closeEvent).have.property('reason').equal('error');
   });
 
   it('should propagate socket timeouts to connections', function (done) {

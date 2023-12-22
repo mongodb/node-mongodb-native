@@ -131,7 +131,7 @@ async function performInitialHandshake(
   }
 
   const start = new Date().getTime();
-  const response = await conn.commandAsync(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
+  const response = await conn.command(ns('admin.$cmd'), handshakeDoc, handshakeOptions);
 
   if (!('isWritablePrimary' in response)) {
     // Provide hello-style response document.
