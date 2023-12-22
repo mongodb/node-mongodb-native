@@ -32,6 +32,73 @@ describe('Cursor', function () {
     await client.close();
   });
 
+  it('find immediately closes the cursor when there are no more documents to return', async function () {
+    const db = client.db();
+
+    const collection = await db.collection('test_to_a');
+    await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+    const cursor = collection.find({ a: 1 });
+    cursor.limit(1);
+    cursor.batchSize(-1);
+    const doc = await cursor.next();
+    expect(doc).to.exist;
+    expect(cursor.closed).to.be.true;
+
+    await collection.drop().catch(() => null);
+  });
+
+  it('find does not close the cursor when there are more documents to return', async function () {
+    const db = client.db();
+
+    const collection = await db.collection('test_to_a');
+    await collection.drop().catch(() => null);
+    await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+
+    const cursor = collection.find();
+
+    // Doc 1
+    let doc = await cursor.next();
+    expect(doc).to.exist;
+    expect(cursor.closed).to.be.true;
+
+    // Doc 2
+    doc = await cursor.next();
+    expect(doc).to.exist;
+    expect(cursor.closed).to.be.true;
+
+    // Doc 3
+    doc = await cursor.next();
+    expect(doc).to.exist;
+    expect(cursor.closed).to.be.true;
+
+    // Doc 4
+    doc = await cursor.next();
+    expect(doc).to.exist;
+    expect(cursor.closed).to.be.true;
+
+    // Doc 5 does not exist
+    doc = await cursor.next();
+    expect(doc).to.not.exist;
+    expect(cursor.closed).to.be.true;
+
+    await collection.drop().catch(() => null);
+  });
+
+  it('aggregate().toArray() closes the cursor when there are no more documents to return', async function () {
+    const db = client.db();
+
+    const collection = await db.collection('test_to_a');
+    await collection.drop().catch(() => null);
+    await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+    const cursor = collection.aggregate();
+    cursor.match({ a: 1 });
+    const docs = await cursor.toArray();
+    expect(docs.length).to.equal(4);
+    expect(cursor.closed).to.be.true;
+
+    await collection.drop().catch(() => null);
+  });
+
   it('should not throw an error when toArray and forEach are called after cursor is closed', async function () {
     const db = client.db();
 

@@ -46,6 +46,8 @@ const kClosed = Symbol('closed');
 const kKilled = Symbol('killed');
 /** @internal */
 const kInit = Symbol('kInit');
+/** @internal */
+const kIteratedFinalBatch = Symbol('kIteratedFinalBatch');
 
 /** @public */
 export const CURSOR_FLAGS = [
@@ -155,6 +157,8 @@ export abstract class AbstractCursor<
   [kKilled]: boolean;
   /** @internal */
   [kOptions]: InternalAbstractCursorOptions;
+  /** @internal */
+  [kIteratedFinalBatch]: boolean;
 
   /** @event */
   static readonly CLOSE = 'close' as const;
@@ -177,6 +181,7 @@ export abstract class AbstractCursor<
     this[kInitialized] = false;
     this[kClosed] = false;
     this[kKilled] = false;
+    this[kIteratedFinalBatch] = false;
     this[kOptions] = {
       readPreference:
         options.readPreference && options.readPreference instanceof ReadPreference
@@ -222,6 +227,11 @@ export abstract class AbstractCursor<
   /** @internal */
   get isDead() {
     return (this[kId]?.isZero() ?? false) || this[kClosed] || this[kKilled];
+  }
+
+  /** @internal */
+  get iteratedFinalBatch() {
+    return this[kIteratedFinalBatch];
   }
 
   /** @internal */
@@ -310,7 +320,6 @@ export abstract class AbstractCursor<
               'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
 
             await cleanupCursor(this, { needsToEmitClosed: true }).catch(() => null);
-
             throw new MongoAPIError(message);
           }
           break;
@@ -318,17 +327,15 @@ export abstract class AbstractCursor<
 
         yield document;
 
-        if (this[kId] === Long.ZERO) {
-          // Cursor exhausted
+        // The cursor returned all results from the final batch.
+        if (this[kId]?.isZero() && this[kDocuments].length === 0) {
+          this[kIteratedFinalBatch] = true;
           break;
         }
       }
     } finally {
-      // Only close the cursor if it has not already been closed. This finally clause handles
-      // the case when a user would break out of a for await of loop early.
-      if (!this.closed) {
-        await this.close().catch(() => null);
-      }
+      // This finally clause handles the case when a user would break out of a for await of loop early.
+      await this.close().catch(() => null);
     }
   }
 
@@ -357,7 +364,7 @@ export abstract class AbstractCursor<
   }
 
   async hasNext(): Promise<boolean> {
-    if (this[kId] === Long.ZERO) {
+    if (this[kId]?.isZero()) {
       return false;
     }
 
@@ -375,9 +382,9 @@ export abstract class AbstractCursor<
     return false;
   }
 
-  /** Get the next available document from the cursor, returns null if no more documents are available. */
+  /** Gets the next available document from the cursor, returns null if no more documents are available. */
   async next(): Promise<TSchema | null> {
-    if (this[kId] === Long.ZERO) {
+    if (this.iteratedFinalBatch) {
       throw new MongoCursorExhaustedError();
     }
 
@@ -385,10 +392,10 @@ export abstract class AbstractCursor<
   }
 
   /**
-   * Try to get the next available document from the cursor or `null` if an empty batch is returned
+   * Gets the next available document from the cursor or `null` if an empty batch is returned.
    */
   async tryNext(): Promise<TSchema | null> {
-    if (this[kId] === Long.ZERO) {
+    if (this.iteratedFinalBatch) {
       throw new MongoCursorExhaustedError();
     }
 
@@ -417,7 +424,6 @@ export abstract class AbstractCursor<
 
   async close(): Promise<void> {
     const needsToEmitClosed = !this[kClosed];
-    this[kClosed] = true;
     await cleanupCursor(this, { needsToEmitClosed });
   }
 
@@ -592,6 +598,7 @@ export abstract class AbstractCursor<
     this[kDocuments].clear();
     this[kClosed] = false;
     this[kKilled] = false;
+    this[kIteratedFinalBatch] = false;
     this[kInitialized] = false;
 
     const session = this[kSession];
@@ -655,8 +662,7 @@ export abstract class AbstractCursor<
       }
 
       // When server responses return without a cursor document, we close this cursor
-      // and return the raw server response. This is often the case for explain commands
-      // for example
+      // and return the raw server response.
       if (this[kId] == null) {
         this[kId] = Long.ZERO;
         // TODO(NODE-3286): ExecutionResult needs to accept a generic parameter
@@ -672,7 +678,7 @@ export abstract class AbstractCursor<
       throw error;
     }
 
-    if (this.isDead) {
+    if (this.iteratedFinalBatch) {
       await cleanupCursor(this, undefined);
     }
 
@@ -701,13 +707,13 @@ async function next<T>(
     transform: boolean;
   }
 ): Promise<T | null> {
-  if (cursor.closed) {
+  if (cursor.iteratedFinalBatch || cursor.killed) {
     return null;
   }
 
   do {
     if (cursor[kId] == null) {
-      // All cursors must operate within a session, one must be made implicitly if not explicitly provided
+      // All cursors must operate within a session, one must be made implicitly if not explicitly provided.
       await cursor[kInit]();
     }
 
@@ -718,25 +724,32 @@ async function next<T>(
         try {
           return cursor[kTransform](doc);
         } catch (error) {
-          // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
-          // error instead.
+          // `cleanupCursor` should never throw, but if it does we want to throw the original error instead.
           await cleanupCursor(cursor, { error, needsToEmitClosed: true }).catch(() => null);
           throw error;
         }
+      }
+
+      // Cursor exhausted.
+      // A cursor is considered exhausted or closed when the server reports its id as zero.
+      // When the cursor is exhausted the client session MUST be ended
+      // and the server session returned to the pool as early as possible
+      // rather than waiting for a caller to completely iterate the final batch.
+      // https://github.com/mongodb/specifications/blob/master/source/run-command/run-command.rst#driver-sessions-1
+      if (cursor[kId]?.isZero()) {
+        await cleanupCursor(cursor, { needsToEmitClosed: true }).catch(() => null);
       }
 
       return doc;
     }
 
     if (cursor.isDead) {
-      // if the cursor is dead, we clean it up
-      // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
-      // and we should surface the error
-      await cleanupCursor(cursor, {});
+      // If the cursor is dead, we clean it up.
+      await cleanupCursor(cursor, {}).catch(() => null);
       return null;
     }
 
-    // otherwise need to call getMore
+    // Otherwise need to call getMore.
     const batchSize = cursor[kOptions].batchSize || 1000;
 
     try {
@@ -753,30 +766,39 @@ async function next<T>(
         cursor[kDocuments].pushMany(response.cursor.nextBatch);
         cursor[kId] = cursorId;
       }
+
+      // The cursor returned all results from the final batch.
+      if (cursor[kId]?.isZero() && cursor[kDocuments].length === 0) {
+        cursor[kIteratedFinalBatch] = true;
+      }
     } catch (error) {
-      // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
-      // error instead.
+      // `cleanupCursor` should never throw, but if it does we want to throw the original error instead.
       await cleanupCursor(cursor, { error }).catch(() => null);
       throw error;
     }
 
-    if (cursor.isDead) {
-      // If we successfully received a response from a cursor BUT the cursor indicates that it is exhausted,
-      // we intentionally clean up the cursor to release its session back into the pool before the cursor
-      // is iterated.  This prevents a cursor that is exhausted on the server from holding
-      // onto a session indefinitely until the AbstractCursor is iterated.
-      //
-      // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
-      // and we should surface the error
-      await cleanupCursor(cursor, {});
+    // If we successfully received a response from a cursor BUT the cursor indicates that it is exhausted,
+    // we intentionally clean up the cursor to release its session back into the pool before the cursor
+    // is iterated. This prevents a cursor that is exhausted on the server from holding
+    // onto a session indefinitely until the AbstractCursor is iterated.
+    if (cursor.iteratedFinalBatch) {
+      await cleanupCursor(cursor, {}).catch(() => null);
     }
 
     if (cursor[kDocuments].length === 0 && blocking === false) {
       return null;
     }
-  } while (!cursor.isDead || cursor[kDocuments].length !== 0);
+  } while (!cursor.iteratedFinalBatch || cursor[kDocuments].length !== 0);
 
   return null;
+}
+
+function emitClosedIfRequsted(cursor: AbstractCursor, needsToEmitClosed?: boolean) {
+  if (needsToEmitClosed) {
+    cursor[kClosed] = true;
+    cursor[kId] = Long.ZERO;
+    cursor.emit(AbstractCursor.CLOSE);
+  }
 }
 
 async function cleanupCursor(
@@ -801,11 +823,7 @@ async function cleanupCursor(
   }
 
   if (cursorId == null || server == null || cursorId.isZero() || cursorNs == null) {
-    if (needsToEmitClosed) {
-      cursor[kClosed] = true;
-      cursor[kId] = Long.ZERO;
-      cursor.emit(AbstractCursor.CLOSE);
-    }
+    emitClosedIfRequsted(cursor, needsToEmitClosed);
 
     if (session) {
       if (session.owner === cursor) {
@@ -827,7 +845,7 @@ async function cleanupCursor(
         try {
           await session.endSession({ error });
         } finally {
-          cursor.emit(AbstractCursor.CLOSE);
+          emitClosedIfRequsted(cursor, needsToEmitClosed);
         }
         return;
       }
@@ -837,7 +855,7 @@ async function cleanupCursor(
       }
     }
 
-    cursor.emit(AbstractCursor.CLOSE);
+    emitClosedIfRequsted(cursor, needsToEmitClosed);
     return;
   }
 
