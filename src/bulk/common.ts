@@ -91,7 +91,7 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
    * The modifications to apply. The value can be either:
    * UpdateFilter<TSchema> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
-   * */
+   */
   update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
@@ -111,7 +111,7 @@ export interface UpdateManyModel<TSchema extends Document = Document> {
    * The modifications to apply. The value can be either:
    * UpdateFilter<TSchema> - A document that contains update operator expressions,
    * Document[] - an aggregation pipeline.
-   * */
+   */
   update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
