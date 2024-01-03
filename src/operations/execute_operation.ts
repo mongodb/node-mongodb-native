@@ -25,7 +25,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { type Callback, maybeCallback, supportsRetryableWrites } from '../utils';
+import { supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -61,26 +61,7 @@ export interface ExecutionResult {
  * @param operation - The operation to execute
  * @param callback - The command result callback
  */
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult>;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback: Callback<TResult>): void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
-  return maybeCallback(() => executeOperationAsync(client, operation), callback);
-}
-
-async function executeOperationAsync<
+export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T): Promise<TResult> {

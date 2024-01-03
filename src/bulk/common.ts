@@ -579,23 +579,18 @@ function executeCommands(
   }
 
   try {
-    if (isInsertBatch(batch)) {
-      executeOperation(
-        bulkOperation.s.collection.client,
-        new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
-        resultHandler
-      );
-    } else if (isUpdateBatch(batch)) {
-      executeOperation(
-        bulkOperation.s.collection.client,
-        new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
-        resultHandler
-      );
-    } else if (isDeleteBatch(batch)) {
-      executeOperation(
-        bulkOperation.s.collection.client,
-        new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions),
-        resultHandler
+    const operation = isInsertBatch(batch)
+      ? new InsertOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      : isUpdateBatch(batch)
+      ? new UpdateOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      : isDeleteBatch(batch)
+      ? new DeleteOperation(bulkOperation.s.namespace, batch.operations, finalOptions)
+      : null;
+
+    if (operation != null) {
+      executeOperation(bulkOperation.s.collection.client, operation).then(
+        result => resultHandler(undefined, result),
+        error => resultHandler(error)
       );
     }
   } catch (err) {
