@@ -469,7 +469,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           return this.close({ force: false }, () => exitWithError(err));
         }
 
-        // TODO: NODE-2471
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
         if (!skipPingOnConnect && server && this.s.credentials) {
           server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
@@ -595,7 +594,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       mongoLogger: this.client.mongoLogger,
       transaction,
       callback,
-      timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
+      timeoutController: new TimeoutController(this.s.serverSelectionTimeoutMS),
       startTime: now(),
       operationName: options.operationName,
       waitingLogged: false
@@ -605,7 +604,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueMember[kCancelled] = true;
       waitQueueMember.timeoutController.clear();
       const timeoutError = new MongoServerSelectionError(
-        `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
+        `Server selection timed out after ${this.s.serverSelectionTimeoutMS} ms`,
         this.description
       );
       this.client.mongoLogger.debug(

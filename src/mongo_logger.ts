@@ -383,7 +383,6 @@ export function stringifyWithMaxLen(
   maxDocumentLength: number,
   options: EJSONOptions = {}
 ): string {
-  maxDocumentLength = 20;
   let strToTruncate: string;
   if (typeof value === 'function') {
     strToTruncate = value.toString();
