@@ -94,6 +94,26 @@
               }
             },
             {
+              "level": "info",
+              "component": "serverSelection",
+              "data": {
+                "message": "Waiting for suitable server to become available",
+                "selector": {
+                  "$$exists": true
+                },
+                "operation": "ping",
+                "topologyDescription": {
+                  "$$exists": true
+                },
+                "remainingTimeMS": {
+                  "$$type": [
+                    "int",
+                    "long"
+                  ]
+                }
+              }
+            },
+            {
               "level": "debug",
               "component": "serverSelection",
               "data": {
