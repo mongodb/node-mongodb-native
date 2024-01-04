@@ -446,12 +446,13 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     monitorCommands: boolean,
     event: EventKey | symbol,
     databaseName: string,
+    hello: Document | null,
     ...args: Parameters<Events[EventKey]>
   ): void {
     if (monitorCommands) {
       this.emit(event, ...args);
     }
-    if (this.component && args[0]?.serverConnectionId) {
+    if (this.component && hello) {
       const loggableCommandEvent:
         | CommandStartedEvent
         | LoggableCommandFailedEvent

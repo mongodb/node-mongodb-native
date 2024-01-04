@@ -451,14 +451,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (
       this.monitorCommands ||
-      (this.description.serverConnectionId &&
-        this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+      (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
     ) {
       started = now();
       this.emitAndLogCommand(
         this.monitorCommands,
         Connection.COMMAND_STARTED,
         message.databaseName,
+        this.description.hello,
         new CommandStartedEvent(this, message, this.description.serverConnectionId)
       );
     }
@@ -480,13 +480,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (
           this.monitorCommands ||
-          (this.description.serverConnectionId &&
-            this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+          (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
         ) {
           this.emitAndLogCommand(
             this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
             message.databaseName,
+            this.description.hello,
             new CommandSucceededEvent(
               this,
               message,
@@ -503,14 +503,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (error) {
       if (
         this.monitorCommands ||
-        (this.description.serverConnectionId &&
-          this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+        (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
       ) {
         if (error.name === 'MongoWriteConcernError') {
           this.emitAndLogCommand(
             this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
             message.databaseName,
+            this.description.hello,
             new CommandSucceededEvent(
               this,
               message,
@@ -524,6 +524,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             this.monitorCommands,
             Connection.COMMAND_FAILED,
             message.databaseName,
+            this.description.hello,
             new CommandFailedEvent(
               this,
               message,
