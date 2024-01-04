@@ -451,7 +451,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (
       this.monitorCommands ||
-      (typeof this.description.serverConnectionId === 'bigint' &&
+      (this.description.serverConnectionId &&
         this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
     ) {
       started = now();
@@ -480,7 +480,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (
           this.monitorCommands ||
-          (typeof this.description.serverConnectionId === 'bigint' &&
+          (this.description.serverConnectionId &&
             this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
         ) {
           this.emitAndLogCommand(
@@ -503,7 +503,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (error) {
       if (
         this.monitorCommands ||
-        (typeof this.description.serverConnectionId === 'bigint' &&
+        (this.description.serverConnectionId &&
           this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
       ) {
         if (error.name === 'MongoWriteConcernError') {
