@@ -451,7 +451,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
     if (monitorCommands) {
       this.emit(event, ...args);
     }
-    if (this.component && typeof args[0]?.serverConnectionId) {
+    if (this.component && args[0]?.serverConnectionId) {
       const loggableCommandEvent:
         | CommandStartedEvent
         | LoggableCommandFailedEvent
