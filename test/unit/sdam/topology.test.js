@@ -456,7 +456,7 @@ describe('Topology (unit)', function () {
       this.sinon.restore();
     });
 
-    it.only('should schedule monitoring if no suitable server is found', function (done) {
+    it('should schedule monitoring if no suitable server is found', function (done) {
       const topology = topologyWithPlaceholderClient('someserver:27019');
       const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
