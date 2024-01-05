@@ -700,7 +700,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       id: this[kConnectionCounter].next().value,
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
-      mongoLogger: this[kServer].topology.client.mongoLogger
+      mongoLogger: this.mongoLogger
     };
 
     this[kPending]++;

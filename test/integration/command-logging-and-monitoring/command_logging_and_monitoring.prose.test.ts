@@ -27,7 +27,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
     */
 
     it('should follow default truncation limit of 1000', {
-      metadata: {},
+      metadata: { requires: { mongodb: '>4.2.0' } },
       test: async function () {
         const writable = {
           buffer: [],
@@ -110,7 +110,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         and confirm that the server error is a string of length 5 + (length of trailing ellipsis).
     */
     it('should follow custom truncation limit', {
-      metadata: {},
+      metadata: { requires: { mongodb: '>4.2.0' } },
       test: async function () {
         const writable = {
           buffer: [],
@@ -164,7 +164,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
      where the max length falls in the middle of a multi-byte codepoint are handled gracefully.
     */
     it('should handle unicode codepoints in middle and end of truncation gracefully', {
-      metadata: {},
+      metadata: { requires: { mongodb: '>4.2.0' } },
       test: async function () {
         const writable = {
           buffer: [],
