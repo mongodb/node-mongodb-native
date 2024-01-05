@@ -565,6 +565,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       serverSelector = selector;
     }
 
+    options = { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS, ...options };
     this.client.mongoLogger.debug(
       MongoLoggableComponent.SERVER_SELECTION,
       new ServerSelectionStartedEvent(selector, this.description, options.operationName)
@@ -594,7 +595,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       mongoLogger: this.client.mongoLogger,
       transaction,
       callback,
-      timeoutController: new TimeoutController(this.s.serverSelectionTimeoutMS),
+      timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
       startTime: now(),
       operationName: options.operationName,
       waitingLogged: false
@@ -604,7 +605,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       waitQueueMember[kCancelled] = true;
       waitQueueMember.timeoutController.clear();
       const timeoutError = new MongoServerSelectionError(
-        `Server selection timed out after ${this.s.serverSelectionTimeoutMS} ms`,
+        `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
         this.description
       );
       this.client.mongoLogger.debug(
