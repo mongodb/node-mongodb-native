@@ -57,7 +57,6 @@ export interface ExecutionResult {
  *
  * The expectation is that this function:
  * - Connects the MongoClient if it has not already been connected
- *   - This amounts to creating and starting the Monitors, something that serverSelection could also do
  * - Creates a session if none is provided and cleans up the session it creates
  * - Selects a server based on readPreference or various factors
  * - Retries an operation if it fails for certain errors, see {@link retryOperation}
