@@ -1,15 +1,11 @@
 import { expect } from 'chai';
 import { once } from 'events';
-import * as sinon from 'sinon';
-import { setTimeout } from 'timers/promises';
 
-import { connect } from '../../mongodb';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
   type MongoClient,
   SERVER_HEARTBEAT_FAILED,
-  SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../mongodb';
 
