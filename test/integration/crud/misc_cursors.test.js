@@ -99,6 +99,25 @@ describe('Cursor', function () {
     await collection.drop().catch(() => null);
   });
 
+  it('hasNext checks if a cursor can provide additional data', async function () {
+    const db = client.db();
+
+    const collection = await db.collection('test_to_a');
+    await collection.drop().catch(() => null);
+    await collection.insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+
+    const cursor = collection.find();
+    let numberOfIterations = 0;
+
+    while (await cursor.hasNext()) {
+      await cursor.next();
+      numberOfIterations += 1;
+      expect(cursor.closed).to.be.true;
+    }
+
+    expect(numberOfIterations).to.equal(4);
+  });
+
   it('should not throw an error when toArray and forEach are called after cursor is closed', async function () {
     const db = client.db();
 

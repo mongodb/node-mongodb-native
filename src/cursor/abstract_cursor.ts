@@ -364,7 +364,7 @@ export abstract class AbstractCursor<
   }
 
   async hasNext(): Promise<boolean> {
-    if (this[kId]?.isZero()) {
+    if (this.iteratedFinalBatch) {
       return false;
     }
 
