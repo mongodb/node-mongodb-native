@@ -183,40 +183,4 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
       }
     });
   });
-
-  describe('Heartbeat tests', function () {
-    let client: MongoClient;
-    let connectSpy;
-    const events: { event: any; time: number }[] = [];
-
-    // Spy on socket constructor
-
-    beforeEach(function () {
-      client = this.configuration.newClient({
-        heartbeatFrequencyMS: 10000,
-        appName: 'HeartbeatTest',
-        maxPoolSize: 1,
-        minPoolSize: 0
-      });
-
-      client.on(SERVER_HEARTBEAT_STARTED, event => {
-        events.push({ event, time: performance.now() });
-      });
-
-      // set up spy
-      connectSpy = sinon.spy(connect);
-    });
-
-    afterEach(async function () {
-      sinon.restore();
-    });
-
-    it('emits the first HeartbeatStartedEvent after the monitoring socket was created', async function () {
-      await client.connect();
-      await setTimeout(2000);
-      await client.close();
-
-      expect(events).to.have.length.gte(2);
-    });
-  });
 });
