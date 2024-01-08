@@ -1,11 +1,15 @@
 import { expect } from 'chai';
 import { once } from 'events';
+import * as sinon from 'sinon';
+import { setTimeout } from 'timers/promises';
 
+import { connect } from '../../mongodb';
 import {
   CONNECTION_POOL_CLEARED,
   CONNECTION_POOL_READY,
   type MongoClient,
   SERVER_HEARTBEAT_FAILED,
+  SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED
 } from '../../mongodb';
 
@@ -177,6 +181,42 @@ describe('Server Discovery and Monitoring Prose Tests', function () {
 
         expect(events).to.be.empty;
       }
+    });
+  });
+
+  describe('Heartbeat tests', function () {
+    let client: MongoClient;
+    let connectSpy;
+    const events: { event: any; time: number }[] = [];
+
+    // Spy on socket constructor
+
+    beforeEach(function () {
+      client = this.configuration.newClient({
+        heartbeatFrequencyMS: 10000,
+        appName: 'HeartbeatTest',
+        maxPoolSize: 1,
+        minPoolSize: 0
+      });
+
+      client.on(SERVER_HEARTBEAT_STARTED, event => {
+        events.push({ event, time: performance.now() });
+      });
+
+      // set up spy
+      connectSpy = sinon.spy(connect);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+    });
+
+    it('emits the first HeartbeatStartedEvent after the monitoring socket was created', async function () {
+      await client.connect();
+      await setTimeout(2000);
+      await client.close();
+
+      expect(events).to.have.length.gte(2);
     });
   });
 });
