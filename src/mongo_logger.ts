@@ -13,7 +13,6 @@ import type {
   ConnectionPoolClearedEvent,
   ConnectionPoolClosedEvent,
   ConnectionPoolCreatedEvent,
-  ConnectionPoolMonitoringEvent,
   ConnectionPoolReadyEvent,
   ConnectionReadyEvent
 } from './cmap/connection_pool_events';
@@ -37,9 +36,13 @@ import {
   SERVER_HEARTBEAT_STARTED,
   SERVER_HEARTBEAT_SUCCEEDED,
   SERVER_OPENING,
+  SERVER_SELECTION_FAILED,
+  SERVER_SELECTION_STARTED,
+  SERVER_SELECTION_SUCCEEDED,
   TOPOLOGY_CLOSED,
   TOPOLOGY_DESCRIPTION_CHANGED,
-  TOPOLOGY_OPENING
+  TOPOLOGY_OPENING,
+  WAITING_FOR_SUITABLE_SERVER
 } from './constants';
 import type {
   ServerClosedEvent,
@@ -48,6 +51,13 @@ import type {
   TopologyDescriptionChangedEvent,
   TopologyOpeningEvent
 } from './sdam/events';
+import type {
+  ServerSelectionEvent,
+  ServerSelectionFailedEvent,
+  ServerSelectionStartedEvent,
+  ServerSelectionSucceededEvent,
+  WaitingForSuitableServerEvent
+} from './sdam/server_selection_events';
 import { HostAddress, parseUnsignedInteger } from './utils';
 
 /** @internal */
@@ -365,6 +375,10 @@ type SDAMLoggableEvent =
 
 /** @internal */
 export type LoggableEvent =
+  | ServerSelectionStartedEvent
+  | ServerSelectionFailedEvent
+  | ServerSelectionSucceededEvent
+  | WaitingForSuitableServerEvent
   | CommandStartedEvent
   | LoggableCommandSucceededEvent
   | LoggableCommandFailedEvent
@@ -399,11 +413,16 @@ export function stringifyWithMaxLen(
   maxDocumentLength: number,
   options: EJSONOptions = {}
 ): string {
-  const ejson = EJSON.stringify(value, options);
+  let strToTruncate: string;
+  if (typeof value === 'function') {
+    strToTruncate = value.toString();
+  } else {
+    strToTruncate = EJSON.stringify(value, options);
+  }
 
-  return maxDocumentLength !== 0 && ejson.length > maxDocumentLength
-    ? `${ejson.slice(0, maxDocumentLength)}...`
-    : ejson;
+  return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
+    ? `${strToTruncate.slice(0, maxDocumentLength)}...`
+    : strToTruncate;
 }
 
 /** @internal */
@@ -413,6 +432,20 @@ function isLogConvertible(obj: Loggable): obj is LogConvertible {
   const objAsLogConvertible = obj as LogConvertible;
   // eslint-disable-next-line no-restricted-syntax
   return objAsLogConvertible.toLog !== undefined && typeof objAsLogConvertible.toLog === 'function';
+}
+
+function attachServerSelectionFields(
+  log: Record<string, any>,
+  serverSelectionEvent: ServerSelectionEvent,
+  maxDocumentLength: number = DEFAULT_MAX_DOCUMENT_LENGTH
+) {
+  const { selector, operation, topologyDescription, message } = serverSelectionEvent;
+  log.selector = stringifyWithMaxLen(selector, maxDocumentLength);
+  log.operation = operation;
+  log.topologyDescription = stringifyWithMaxLen(topologyDescription, maxDocumentLength);
+  log.message = message;
+
+  return log;
 }
 
 function attachCommandFields(
@@ -434,10 +467,7 @@ function attachCommandFields(
   return log;
 }
 
-function attachConnectionFields(
-  log: Record<string, any>,
-  event: ConnectionPoolMonitoringEvent | ServerOpeningEvent | ServerClosedEvent
-) {
+function attachConnectionFields(log: Record<string, any>, event: any) {
   const { host, port } = HostAddress.fromString(event.address).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
@@ -473,6 +503,22 @@ function defaultLogTransform(
   let log: Omit<Log, 's' | 't' | 'c'> = Object.create(null);
 
   switch (logObject.name) {
+    case SERVER_SELECTION_STARTED:
+      log = attachServerSelectionFields(log, logObject, maxDocumentLength);
+      return log;
+    case SERVER_SELECTION_FAILED:
+      log = attachServerSelectionFields(log, logObject, maxDocumentLength);
+      log.failure = logObject.failure.message;
+      return log;
+    case SERVER_SELECTION_SUCCEEDED:
+      log = attachServerSelectionFields(log, logObject, maxDocumentLength);
+      log.serverHost = logObject.serverHost;
+      log.serverPort = logObject.serverPort;
+      return log;
+    case WAITING_FOR_SUITABLE_SERVER:
+      log = attachServerSelectionFields(log, logObject, maxDocumentLength);
+      log.remainingTimeMS = logObject.remainingTimeMS;
+      return log;
     case COMMAND_STARTED:
       log = attachCommandFields(log, logObject);
       log.message = 'Command started';

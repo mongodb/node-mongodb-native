@@ -87,8 +87,12 @@ export interface ReplaceOneModel<TSchema extends Document = Document> {
 export interface UpdateOneModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
   filter: Filter<TSchema>;
-  /** A document or pipeline containing update operators. */
-  update: UpdateFilter<TSchema> | UpdateFilter<TSchema>[];
+  /**
+   * The modifications to apply. The value can be either:
+   * UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * Document[] - an aggregation pipeline.
+   */
+  update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */
@@ -103,8 +107,12 @@ export interface UpdateOneModel<TSchema extends Document = Document> {
 export interface UpdateManyModel<TSchema extends Document = Document> {
   /** The filter to limit the updated documents. */
   filter: Filter<TSchema>;
-  /** A document or pipeline containing update operators. */
-  update: UpdateFilter<TSchema> | UpdateFilter<TSchema>[];
+  /**
+   * The modifications to apply. The value can be either:
+   * UpdateFilter<TSchema> - A document that contains update operator expressions,
+   * Document[] - an aggregation pipeline.
+   */
+  update: UpdateFilter<TSchema> | Document[];
   /** A set of filters specifying to which array elements an update should apply. */
   arrayFilters?: Document[];
   /** Specifies a collation. */

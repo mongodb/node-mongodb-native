@@ -30,6 +30,14 @@ export const TOPOLOGY_CLOSED = 'topologyClosed' as const;
 /** @internal */
 export const TOPOLOGY_DESCRIPTION_CHANGED = 'topologyDescriptionChanged' as const;
 /** @internal */
+export const SERVER_SELECTION_STARTED = 'serverSelectionStarted' as const;
+/** @internal */
+export const SERVER_SELECTION_FAILED = 'serverSelectionFailed' as const;
+/** @internal */
+export const SERVER_SELECTION_SUCCEEDED = 'serverSelectionSucceeded' as const;
+/** @internal */
+export const WAITING_FOR_SUITABLE_SERVER = 'waitingForSuitableServer' as const;
+/** @internal */
 export const CONNECTION_POOL_CREATED = 'connectionPoolCreated' as const;
 /** @internal */
 export const CONNECTION_POOL_CLOSED = 'connectionPoolClosed' as const;
