@@ -237,7 +237,11 @@ export type SetFields<TSchema> = ({
   readonly [key in KeysOfAType<TSchema, ReadonlyArray<any> | undefined>]?:
     | OptionalId<Flatten<TSchema[key]>>
     | AddToSetOperators<Array<OptionalId<Flatten<TSchema[key]>>>>;
-} & NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>) & {
+} & IsAny<
+  TSchema[keyof TSchema],
+  object,
+  NotAcceptedFields<TSchema, ReadonlyArray<any> | undefined>
+>) & {
   readonly [key: string]: AddToSetOperators<any> | any;
 };
 
