@@ -51,15 +51,22 @@ export interface ExecutionResult {
  * @internal
  *
  * @remarks
- * This method reduces large amounts of duplication in the entire codebase by providing
- * a single point for determining whether callbacks or promises should be used. Additionally
- * it allows for a single point of entry to provide features such as implicit sessions, which
+ * Allows for a single point of entry to provide features such as implicit sessions, which
  * are required by the Driver Sessions specification in the event that a ClientSession is
- * not provided
+ * not provided.
  *
- * @param topology - The topology to execute this operation on
+ * The expectation is that this function:
+ * - Connects the MongoClient if it has not already been connected
+ *   - This amounts to creating and starting the Monitors, something that serverSelection could also do
+ * - Creates a session if none is provided and cleans up the session it creates
+ * - Selects a server based on readPreference or various factors
+ * - Retries an operation if it fails for certain errors, see {@link retryOperation}
+ *
+ * @typeParam T - The operation's type
+ * @typeParam TResult - The type of the operation's result, calculated from T
+ *
+ * @param client - The MongoClient to execute this operation with
  * @param operation - The operation to execute
- * @param callback - The command result callback
  */
 export async function executeOperation<
   T extends AbstractOperation<TResult>,
