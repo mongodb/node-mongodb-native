@@ -14,9 +14,12 @@ describe('Heartbeat tests', function () {
     // Create TCP server that responds to hellos by closing the connection
     // and pushing "client connection created" to shared array
     server = createServer(clientSocket => {
-      console.log(`connection from ${clientSocket.remoteAddress}`);
       events.push('client connected');
-      clientSocket.end();
+
+      clientSocket.once('data', () => {
+        events.push('client hello received');
+        clientSocket.end();
+      });
     });
     server.listen(9999);
 
@@ -50,10 +53,11 @@ describe('Heartbeat tests', function () {
     if (server.listening) server.close();
   });
 
-  it('emits the first HeartbeatStartedEvent after the monitoring socket was created', async function () {
-    expect(events).to.have.lengthOf(3);
+  it('emits the first HeartbeatStartedEvent after the monitoring socket was created and before hello is sent', async function () {
+    expect(events).to.have.lengthOf(4);
     expect(events[0]).to.equal('client connection created');
     expect(events[1]).to.equal(SERVER_HEARTBEAT_STARTED);
+    expect(events[2]).to.equal('client hello received');
     expect(events[3]).to.equal(SERVER_HEARTBEAT_FAILED);
   });
 });
