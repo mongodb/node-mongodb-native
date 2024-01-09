@@ -57,8 +57,17 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         // 3.
         await client.db('admin').collection('test').insertMany(docs);
 
+        // remove sensitive commands for uniformity
+        const cleanedBuffer = [];
+        const afterInsertBufferLength = writable.buffer.length;
+        for (let i = 0; i < afterInsertBufferLength; i++) {
+          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
+            cleanedBuffer.push(writable.buffer[i]);
+          }
+        }
+
         // 4.
-        const insertManyCommandStarted = writable.buffer[2];
+        const insertManyCommandStarted = cleanedBuffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(
@@ -66,7 +75,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         );
 
         // 5.
-        const insertManyCommandSucceeded = writable.buffer[3];
+        const insertManyCommandSucceeded = cleanedBuffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(
@@ -76,8 +85,15 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         // 6.
         await client.db('admin').collection('test').find()._initialize();
 
+        // remove sensitive commands again for uniformity
+        for (let j = afterInsertBufferLength; j < writable.buffer.length; j++) {
+          if (writable.buffer[j].command !== '{}' && writable.buffer[j].reply !== '{}') {
+            cleanedBuffer.push(writable.buffer[j]);
+          }
+        }
+
         // 7.
-        const findCommandSucceeded = writable.buffer[5];
+        const findCommandSucceeded = cleanedBuffer[3];
         expect(findCommandSucceeded?.message).to.equal('Command succeeded');
         expect(findCommandSucceeded?.reply).to.be.a('string');
         expect(findCommandSucceeded?.reply?.length).to.equal(
@@ -135,14 +151,22 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         // 2.
         await client.db('admin').command({ hello: 'true' });
 
+        // remove sensitive commands for uniformity
+        const cleanedBuffer = [];
+        for (let i = 0; i < writable.buffer.length; i++) {
+          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
+            cleanedBuffer.push(writable.buffer[i]);
+          }
+        }
+
         // 3.
-        const insertManyCommandStarted = writable.buffer[2];
+        const insertManyCommandStarted = cleanedBuffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(5 + ELLIPSES_LENGTH);
 
         // 4.
-        const insertManyCommandSucceeded = writable.buffer[3];
+        const insertManyCommandSucceeded = cleanedBuffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(5 + ELLIPSES_LENGTH);
@@ -189,12 +213,20 @@ describe('Command Logging and Monitoring Prose Tests', function () {
 
         await client.db('admin').collection('test').insertMany(docs);
 
-        const insertManyCommandStarted = writable.buffer[2];
+        // remove sensitive commands for uniformity
+        const cleanedBuffer = [];
+        for (let i = 0; i < writable.buffer.length; i++) {
+          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
+            cleanedBuffer.push(writable.buffer[i]);
+          }
+        }
+
+        const insertManyCommandStarted = cleanedBuffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(50 + ELLIPSES_LENGTH);
 
-        const insertManyCommandSucceeded = writable.buffer[3];
+        const insertManyCommandSucceeded = cleanedBuffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(50 + ELLIPSES_LENGTH);
