@@ -321,6 +321,12 @@ export class StateMachine {
         reject(mcError);
       }
 
+      function onclose() {
+        destroySockets();
+        const mcError = new MongoCryptError('KMS request closed');
+        reject(mcError);
+      }
+
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         rawSocket = net.connect({
           host: this.options.proxyOptions.proxyHost,
@@ -329,6 +335,8 @@ export class StateMachine {
 
         rawSocket.on('timeout', ontimeout);
         rawSocket.on('error', onerror);
+        rawSocket.on('close', onclose);
+
         try {
           // eslint-disable-next-line @typescript-eslint/no-var-requires
           const events = require('events') as typeof import('events');
@@ -374,6 +382,7 @@ export class StateMachine {
 
       socket.once('timeout', ontimeout);
       socket.once('error', onerror);
+      socket.once('close', onclose);
 
       socket.on('data', data => {
         buffer.append(data);
