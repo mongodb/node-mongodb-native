@@ -14,7 +14,8 @@
         "useMultipleMongoses": false,
         "observeLogMessages": {
           "command": "debug"
-        }
+        },
+        "observeSensitiveCommands": true
       }
     },
     {

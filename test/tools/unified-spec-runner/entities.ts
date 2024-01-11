@@ -232,17 +232,16 @@ export class UnifiedMongoClient extends MongoClient {
       mongodbLogMaxDocumentLength: 1250
     } as any);
     this.logCollector = logCollector;
+    this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.ignoredEvents = [
       ...(description.ignoreCommandMonitoringEvents ?? []),
       'configureFailPoint'
     ];
 
-    if (!description.observeSensitiveCommands) {
+    if (!this.observeSensitiveCommands) {
       this.ignoredEvents.push(...Array.from(SENSITIVE_COMMANDS));
     }
-
-    this.observeSensitiveCommands = description.observeSensitiveCommands ?? false;
 
     this.observedCommandEvents = (description.observeEvents ?? [])
       .map(e => UnifiedMongoClient.COMMAND_EVENT_NAME_LOOKUP[e])
@@ -280,6 +279,17 @@ export class UnifiedMongoClient extends MongoClient {
       return true;
     }
 
+    return false;
+  }
+
+  isSensitiveLog(log: LogMessage): boolean {
+    if (
+      (log.data?.message === 'Command started' && log.data?.command === '{}') ||
+      (log.data?.message === 'Command succeeded' && log.data?.reply === '{}') ||
+      (log.data?.message === 'Command failed' && log.data?.failure === '{}')
+    ) {
+      return true;
+    }
     return false;
   }
 

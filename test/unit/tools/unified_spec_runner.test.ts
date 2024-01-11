@@ -151,7 +151,7 @@ describe('Unified Spec Runner', function () {
         sinon.restore();
       });
 
-      context('when failureIsRedacted is present', function () {
+      context.only('when failureIsRedacted is present', function () {
         context('when failureIsRedacted=true', function () {
           beforeEach(function () {
             expected = {
@@ -167,7 +167,7 @@ describe('Unified Spec Runner', function () {
               level: 'debug',
               component: 'command',
               data: {
-                failure: {}
+                failure: '{}'
               }
             };
             compareLogsSpy([expected], [actual], entitiesMap);

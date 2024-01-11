@@ -248,7 +248,7 @@ async function runUnifiedTest(
         if (!testClient!.observeSensitiveCommands) {
           filteredTestClientLogs = filteredTestClientLogs.filter(
             log =>
-              !(log.data && log.data.commandName && SENSITIVE_COMMANDS.has(log.data.commandName))
+              !SENSITIVE_COMMANDS.has(log?.data?.commandName) && !testClient!.isSensitiveLog(log)
           );
         }
         compareLogs(expectedLogsForClient.messages, filteredTestClientLogs, entities);

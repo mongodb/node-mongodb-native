@@ -537,7 +537,7 @@ function defaultLogTransform(
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message;
+      log.failure = logObject.failure.message ?? '{}';
       return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);
