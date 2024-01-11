@@ -151,7 +151,7 @@ describe('Unified Spec Runner', function () {
         sinon.restore();
       });
 
-      context.only('when failureIsRedacted is present', function () {
+      context('when failureIsRedacted is present', function () {
         context('when failureIsRedacted=true', function () {
           beforeEach(function () {
             expected = {
