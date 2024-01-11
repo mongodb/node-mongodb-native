@@ -1,5 +1,6 @@
 /* Specification prose tests */
 
+// TODO(NODE-5824): Implement CSOT prose tests
 describe.skip('CSOT spec prose tests', () => {
   context('1. Multi-batch writes', () => {
     /**

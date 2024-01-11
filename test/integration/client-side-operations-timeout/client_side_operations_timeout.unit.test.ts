@@ -5,6 +5,7 @@
  * Drivers SHOULD implement these if it is possible to do so using the driver's existing test infrastructure.
  */
 
+// TODO(NODE-5824): Implement CSOT prose tests
 describe.skip('CSOT spec unit tests', () => {
   context('Operations should ignore waitQueueTimeoutMS if timeoutMS is also set.', () => {});
 
