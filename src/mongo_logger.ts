@@ -413,7 +413,6 @@ export function stringifyWithMaxLen(
   maxDocumentLength: number,
   options: EJSONOptions = {}
 ): string {
-  // eslint-disable-next-line @typescript-eslint/no-inferrable-types
   let strToTruncate = '';
 
   if (typeof value === 'function') {
