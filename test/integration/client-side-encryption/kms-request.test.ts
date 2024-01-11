@@ -5,7 +5,7 @@ import { once } from 'events';
 
 const { ClientEncryption } = require('../../../src/client-side-encryption/client_encryption');
 
-describe.only('kmsRequest', function () {
+describe('kmsRequest', function () {
   context('when server closes connection without an error', function () {
     const endpoint = 'https://localhost:5699';
     const provider = 'kmip';
@@ -17,15 +17,17 @@ describe.only('kmsRequest', function () {
     let clientEncrypted;
     let db;
 
-    beforeEach(async function () {
+    before(async function () {
       const serverKey = fs.readFileSync(`${__dirname}/ssl/server-key.pem`);
       const serverCrt = fs.readFileSync(`${__dirname}/ssl/server-crt.pem`);
       const ca = fs.readFileSync(`${__dirname}/ssl/ca.pem`);
       const clientKey = fs.readFileSync(`${__dirname}/ssl/client.pem`);
-      
+
       tlsOptions = {
         tlsCAFile: ca,
-        tlsCertificateKeyFile: clientKey
+        tlsCertificateKeyFile: clientKey,
+        requestCert: true,
+        rejectUnauthorized: false
       };
 
       const autoEncryption = {
@@ -64,35 +66,24 @@ describe.only('kmsRequest', function () {
 
     it('kmsRequest rejects with kms request closed error', async function () {
       try {
-        console.log('tlsOptions----------------------');
-        console.log(tlsOptions);
-        console.log('----------------------');
         const clientEncryption = new ClientEncryption(client, {
           keyVaultNamespace,
           kmsProviders,
           tlsOptions
         });
-        const createCollectionOptions = {
-          encryptedFields: { fields: [{ path: 'ssn', bsonType: 'string', keyId: null }] }
-        };
         const masterKey = {};
-        const { encryptedFields } = await clientEncryption.createEncryptedCollection(
-          db,
-          'testing1',
-          {
-            provider,
-            createCollectionOptions,
-            masterKey
-          }
-        );
-        console.log('encryptedFields----------------------');
-        console.log(encryptedFields);
+        const dataKeyId = await clientEncryption.createDataKey(provider, {
+          masterKey,
+          keyAltNames: ['0703-dataKe6']
+        });
+        console.log('dataKeyId----------------------');
+        console.log(dataKeyId);
         console.log('----------------------');
       } catch (err) {
         console.log('err----------------------');
         console.log(err);
         console.log('----------------------');
-        expect(err.name).to.equal('MongoCryptCreateDataKeyError');
+        expect(err.name).to.equal('MongoCryptError');
         expect(err.message).to.include('KMS request closed');
         return;
       } finally {
