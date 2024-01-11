@@ -1,0 +1,204 @@
+description: "legacy timeouts continue to work if timeoutMS is not set"
+
+schemaVersion: "1.0"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+
+initialData:
+  - collectionName: &collectionName coll
+    databaseName: &databaseName test
+    documents: []
+
+tests:
+  - description: "socketTimeoutMS is not used to derive a maxTimeMS command field"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+                uriOptions:
+                  socketTimeoutMS: 50000
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+
+  - description: "waitQueueTimeoutMS is not used to derive a maxTimeMS command field"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+                uriOptions:
+                  waitQueueTimeoutMS: 50000
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+
+  - description: "wTimeoutMS is not used to derive a maxTimeMS command field"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+                uriOptions:
+                  wTimeoutMS: &wTimeoutMS 50000
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+                writeConcern:
+                  wtimeout: *wTimeoutMS
+
+  # If the maxTimeMS option is set for a specific command, it should be used as the maxTimeMS command field without any
+  # modifications. This is different from timeoutMS because in that case, drivers subtract the target server's min
+  # RTT from the remaining timeout to derive a maxTimeMS field.
+  - description: "maxTimeMS option is used directly as the maxTimeMS field on a command"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: estimatedDocumentCount
+        object: *collection
+        arguments:
+          maxTimeMS: &maxTimeMS 50000
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: *maxTimeMS
+
+  # Same test as above but with the maxCommitTimeMS option.
+  - description: "maxCommitTimeMS option is used directly as the maxTimeMS field on a commitTransaction command"
+    runOnRequirements:
+      # Note: minServerVersion is specified in top-level runOnRequirements
+      - topologies: ["replicaset", "sharded"]
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+            - session:
+                id: &session session
+                client: *client
+                sessionOptions:
+                  defaultTransactionOptions:
+                    maxCommitTimeMS: &maxCommitTimeMS 1000
+      - name: startTransaction
+        object: *session
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+          session: *session
+      - name: commitTransaction
+        object: *session
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: commitTransaction
+              databaseName: admin
+              command:
+                commitTransaction: 1
+                maxTimeMS: *maxCommitTimeMS

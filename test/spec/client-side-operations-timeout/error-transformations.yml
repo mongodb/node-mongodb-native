@@ -1,0 +1,96 @@
+description: "MaxTimeMSExpired server errors are transformed into a custom timeout error"
+
+schemaVersion: "1.9"
+
+# failCommand is available on 4.0 for replica sets and 4.2 for sharded clusters.
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: ["replicaset"]
+  - minServerVersion: "4.2"
+    topologies: ["sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      uriOptions:
+        timeoutMS: 250
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  # A server response like {ok: 0, code: 50, ...} is transformed.
+  - description: "basic MaxTimeMSExpired error is transformed"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 50
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+
+  # A server response like {ok: 1, writeConcernError: {code: 50, ...}} is transformed.
+  - description: "write concern error MaxTimeMSExpired is transformed"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              writeConcernError:
+                code: 50
+                errmsg: "maxTimeMS expired"
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { _id: 1 }
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }

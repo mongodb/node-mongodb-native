@@ -1,0 +1,1877 @@
+# Tests in this file are generated from override-collection-timeoutMS.yml.template.
+
+description: "timeoutMS can be overridden for a MongoCollection"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies: ["replicaset", "sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      uriOptions:
+        timeoutMS: 10
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+      ignoreCommandMonitoringEvents:
+        - killCursors
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+
+initialData:
+  - collectionName: &collectionName coll
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  # For each collection-level operation, we execute two tests:
+  #
+  # 1. timeoutMS can be overridden to a non-zero value for a MongoCollection. Each test uses the client entity defined
+  # above to construct a collection entity with timeoutMS=1000 and configures a fail point to block the operation for
+  # 15ms so the operation succeeds.
+  #
+  # 2. timeoutMS can be overridden to 0 for a MongoCollection. Each test constructs a collection entity with
+  # timeoutMS=0 using the global client entity and configures a fail point to block the operation for 15ms. The
+  # operation should succeed and the command sent to the server should not contain a maxTimeMS field.
+
+  - description: "timeoutMS can be configured on a MongoCollection - aggregate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - aggregate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - count on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - count on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - countDocuments on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - countDocuments on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - estimatedDocumentCount on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - estimatedDocumentCount on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - distinct on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - distinct on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - find on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - find on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - findOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - findOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - listIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - listIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - listIndexNames on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexNames
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - listIndexNames on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexNames
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - createChangeStream on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - createChangeStream on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - insertOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - insertOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - insertMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - insertMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - deleteOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - deleteOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - deleteMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteMany
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - deleteMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteMany
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - replaceOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - replaceOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - updateOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - updateOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - updateMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateMany
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - updateMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateMany
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - findOneAndDelete on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - findOneAndDelete on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - findOneAndReplace on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - findOneAndReplace on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - findOneAndUpdate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - findOneAndUpdate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - bulkWrite on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - bulkWrite on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - createIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["createIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createIndex
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+              command:
+                createIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - createIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["createIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createIndex
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+              command:
+                createIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - dropIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndex
+        object: *collection
+        arguments:
+          name: "x_1"
+          
+        expectError:
+          isClientError: false
+          isTimeoutError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - dropIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndex
+        object: *collection
+        arguments:
+          name: "x_1"
+          
+        expectError:
+          isClientError: false
+          isTimeoutError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoCollection - dropIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 1000
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoCollection - dropIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+                collectionOptions:
+                  timeoutMS: 0
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  

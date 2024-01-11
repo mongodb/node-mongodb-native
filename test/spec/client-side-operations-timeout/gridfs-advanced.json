@@ -1,0 +1,385 @@
+{
+  "description": "timeoutMS behaves correctly for advanced GridFS API operations",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "uriOptions": {
+          "timeoutMS": 75
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket",
+        "database": "database"
+      }
+    },
+    {
+      "collection": {
+        "id": "filesCollection",
+        "database": "database",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "chunksCollection",
+        "database": "database",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "test",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "length": 8,
+          "chunkSize": 4,
+          "uploadDate": {
+            "$date": "1970-01-01T00:00:00.000Z"
+          },
+          "filename": "length-8",
+          "contentType": "application/octet-stream",
+          "aliases": [],
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "test",
+      "documents": [
+        {
+          "_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 0,
+          "data": {
+            "$binary": {
+              "base64": "ESIzRA==",
+              "subType": "00"
+            }
+          }
+        },
+        {
+          "_id": {
+            "$oid": "000000000000000000000006"
+          },
+          "files_id": {
+            "$oid": "000000000000000000000005"
+          },
+          "n": 1,
+          "data": {
+            "$binary": {
+              "base64": "ESIzRA==",
+              "subType": "00"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS can be overridden for a rename",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "rename",
+          "object": "bucket",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000005"
+            },
+            "newFilename": "foo",
+            "timeoutMS": 2000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "fs.files",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to update during a rename",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "rename",
+          "object": "bucket",
+          "arguments": {
+            "id": {
+              "$oid": "000000000000000000000005"
+            },
+            "newFilename": "foo"
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "fs.files",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be overridden for drop",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "drop"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "drop",
+          "object": "bucket",
+          "arguments": {
+            "timeoutMS": 2000
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to files collection drop",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "drop"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "drop",
+          "object": "bucket",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "drop",
+                "databaseName": "test",
+                "command": {
+                  "drop": "fs.files",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to chunks collection drop",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "drop"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "drop",
+          "object": "bucket",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to drop as a whole, not individual parts",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "drop"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "drop",
+          "object": "bucket",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    }
+  ]
+}
