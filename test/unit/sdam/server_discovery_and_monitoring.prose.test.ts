@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import { once } from 'events';
 import { createServer, type Server } from 'net';
 
 import { MongoClient, SERVER_HEARTBEAT_FAILED, SERVER_HEARTBEAT_STARTED } from '../../mongodb';
@@ -9,6 +10,8 @@ describe('Heartbeat tests', function () {
   let server: Server;
   // Shared array
   const events: string[] = [];
+  const PORT = 9999;
+  const CONN_STRING = `mongodb://localhost:${PORT}`;
 
   beforeEach(async function () {
     // Create TCP server that responds to hellos by closing the connection
@@ -18,21 +21,19 @@ describe('Heartbeat tests', function () {
 
       clientSocket.once('data', () => {
         events.push('client hello received');
-        clientSocket.end();
+        clientSocket.destroy();
       });
     });
-    server.listen(9999);
+    server.listen(PORT);
+
+    await once(server, 'listening');
 
     // set up client to connect to mock server with the following configuration
     // {
     //    serverSelectionTimeoutMS: 500,
-    //    maxPoolSize: 1,
-    //    minPoolSize: 0
     // }
-    client = new MongoClient('mongodb://localhost:9999', {
-      serverSelectionTimeoutMS: 500,
-      maxPoolSize: 1,
-      minPoolSize: 0
+    client = new MongoClient(CONN_STRING, {
+      serverSelectionTimeoutMS: 500
     });
 
     // Listen to `ServerHeartbeatStartedEvent` and `ServerHeartbeatSucceededEvent`, pushing the
@@ -42,22 +43,25 @@ describe('Heartbeat tests', function () {
         events.push(e);
       });
     }
-
-    // Attempt to connect to mock server
-    const maybeError = await client.connect().catch(e => e);
-    // Catch error
-    expect(maybeError).to.be.instanceOf(Error);
   });
 
   afterEach(async function () {
     if (server.listening) server.close();
   });
 
-  it('emits the first HeartbeatStartedEvent after the monitoring socket was created and before hello is sent', async function () {
+  it('emits the first HeartbeatStartedEvent before the monitoring socket was created', async function () {
+    // Attempt to connect to mock server
+    const maybeError = await client.connect().catch(e => e);
+    // Catch error
+    expect(maybeError).to.be.instanceOf(Error);
+
     expect(events).to.have.lengthOf(4);
-    expect(events[0]).to.equal('client connection created');
-    expect(events[1]).to.equal(SERVER_HEARTBEAT_STARTED);
-    expect(events[2]).to.equal('client hello received');
-    expect(events[3]).to.equal(SERVER_HEARTBEAT_FAILED);
+
+    expect(events).to.deep.equal([
+      SERVER_HEARTBEAT_STARTED,
+      'client connected',
+      'client hello received',
+      SERVER_HEARTBEAT_FAILED
+    ]);
   });
 });
