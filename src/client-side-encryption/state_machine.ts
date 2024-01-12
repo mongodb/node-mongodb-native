@@ -14,7 +14,7 @@ import {
 import { type ProxyOptions } from '../cmap/connection';
 import { getSocks, type SocksLib } from '../deps';
 import { type MongoClient, type MongoClientOptions } from '../mongo_client';
-import { BufferPool, MongoDBCollectionNamespace } from '../utils';
+import { BufferPool, MongoDBCollectionNamespace, promiseWithResolvers } from '../utils';
 import { type DataKey } from './client_encryption';
 import { MongoCryptError } from './errors';
 import { type MongocryptdManager } from './mongocryptd_manager';
@@ -309,18 +309,20 @@ export class StateMachine {
 
     function ontimeout() {
       destroySockets();
-      throw new MongoCryptError('KMS request timed out');
+      return new MongoCryptError('KMS request timed out');
     }
 
     function onerror(err: Error) {
       destroySockets();
-      throw new MongoCryptError('KMS request failed', { cause: err });
+      return new MongoCryptError('KMS request failed', { cause: err });
     }
 
     function onclose() {
       destroySockets();
-      throw new MongoCryptError('KMS request closed');
+      return new MongoCryptError('KMS request closed');
     }
+
+    const { promise: willError, reject } = promiseWithResolvers();
 
     if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
       rawSocket = net.connect({
@@ -328,18 +330,12 @@ export class StateMachine {
         port: this.options.proxyOptions.proxyPort || 1080
       });
 
-      await Promise.race([
-        new Promise((resolve, reject) => {
-          rawSocket.once('timeout', reject);
-        }).catch(ontimeout),
-        new Promise((resolve, reject) => {
-          rawSocket.once('error', reject);
-        }).catch(onerror),
-        new Promise((resolve, reject) => {
-          rawSocket.once('close', reject);
-        }).catch(onclose),
-        once(rawSocket, 'connect')
-      ]);
+      rawSocket
+        .once('timeout', () => reject(ontimeout()))
+        .once('error', err => reject(onerror(err)))
+        .once('close', () => reject(onclose()));
+
+      await Promise.race([willError, once(rawSocket, 'connect')]);
 
       try {
         socks ??= loadSocks();
@@ -359,7 +355,7 @@ export class StateMachine {
           })
         ).socket;
       } catch (err) {
-        return onerror(err);
+        throw onerror(err);
       }
     }
 
@@ -372,8 +368,8 @@ export class StateMachine {
         if (error) throw error;
         try {
           await this.setTlsOptions(providerTlsOptions, options);
-        } catch (error) {
-          return onerror(error);
+        } catch (err) {
+          throw onerror(err);
         }
       }
     }
@@ -382,32 +378,27 @@ export class StateMachine {
       socket.write(message);
     });
 
-    await Promise.race([
-      new Promise((resolve, reject) => {
-        socket.once('timeout', reject);
-      }).catch(ontimeout),
-      new Promise((resolve, reject) => {
-        socket.once('error', reject);
-      }).catch(onerror),
-      new Promise((resolve, reject) => {
-        socket.once('close', reject);
-      }).catch(onclose),
-      new Promise<void>(resolve => {
-        socket.on('data', data => {
-          buffer.append(data);
-          while (request.bytesNeeded > 0 && buffer.length) {
-            const bytesNeeded = Math.min(request.bytesNeeded, buffer.length);
-            request.addResponse(buffer.read(bytesNeeded));
-          }
+    const { promise: willSuccseed, resolve } = promiseWithResolvers();
 
-          if (request.bytesNeeded <= 0) {
-            // There's no need for any more activity on this socket at this point.
-            destroySockets();
-            resolve();
-          }
-        });
-      })
-    ]);
+    socket
+      .once('timeout', () => reject(ontimeout()))
+      .once('error', err => reject(onerror(err)))
+      .once('close', () => reject(onclose()))
+      .on('data', data => {
+        buffer.append(data);
+        while (request.bytesNeeded > 0 && buffer.length) {
+          const bytesNeeded = Math.min(request.bytesNeeded, buffer.length);
+          request.addResponse(buffer.read(bytesNeeded));
+        }
+
+        if (request.bytesNeeded <= 0) {
+          // There's no need for any more activity on this socket at this point.
+          destroySockets();
+          resolve(undefined);
+        }
+      });
+
+    await Promise.race([willError, willSuccseed]);
   }
 
   *requests(context: MongoCryptContext) {
