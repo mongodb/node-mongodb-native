@@ -1,0 +1,2724 @@
+# Tests in this file are generated from retryability-timeoutMS.yml.template.
+
+description: "timeoutMS behaves correctly for retryable operations"
+
+schemaVersion: "1.9"
+
+# failCommand is available on 4.0+ replica sets and 4.2+ sharded clusters.
+runOnRequirements:
+  - minServerVersion: "4.0"
+    topologies: ["replicaset"]
+  - minServerVersion: "4.2"
+    topologies: ["sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      uriOptions:
+        timeoutMS: 100
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+      ignoreCommandMonitoringEvents:
+        - killCursors
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  # For each retryable operation, run three tests:
+  #
+  # 1. timeoutMS applies to the whole operation, not to individual attempts - Client timeoutMS=100 and the operation is
+  # fails with a retryable error after being blocked server-side for 60ms. The operation should fail with a timeout error
+  # because the second attempt should take it over the 100ms limit. This test only runs on 4.4+ because it uses the
+  # blockConnection option in failCommand.
+  #
+  # 2. operation is retried multiple times if timeoutMS is set to a non-zero value - Client timeoutMS=100 and the
+  # operation fails with a retryable error twice. Drivers should send the original operation and two retries, the
+  # second of which should succeed.
+  #
+  # 3. operation is retried multiple times if timeoutMS is set to a zero - Override timeoutMS to zero for the operation
+  # and set a fail point to force a retryable error twice. Drivers should send the original operation and two retries,
+  # the second of which should succeed.
+  #
+  # The fail points in these tests use error code 7 (HostNotFound) because it is a retryable error but does not trigger
+  # an SDAM state change so we don't lose any time to server rediscovery. The tests also explicitly specify an
+  # errorLabels array in the fail point to avoid behavioral differences among server types and ensure that the error
+  # will be considered retryable.
+
+  - description: "timeoutMS applies to whole operation, not individual attempts - insertOne on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - insertOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: insertOne
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          document: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - insertOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: insertOne
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          document: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - insertMany on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - insertMany on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: insertMany
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          documents:
+            - { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - insertMany on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: insertMany
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          documents:
+            - { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - deleteOne on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - deleteOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["delete"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: deleteOne
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - deleteOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["delete"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: deleteOne
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - replaceOne on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - replaceOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: replaceOne
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - replaceOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: replaceOne
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - updateOne on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - updateOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: updateOne
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - updateOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: updateOne
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - findOneAndDelete on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - findOneAndDelete on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - findOneAndDelete on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - findOneAndReplace on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - findOneAndReplace on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - findOneAndReplace on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - findOneAndUpdate on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - findOneAndUpdate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - findOneAndUpdate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - bulkWrite on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - bulkWrite on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - bulkWrite on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - listDatabases on client"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - listDatabases on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabases
+        object: *client
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - listDatabases on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabases
+        object: *client
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - listDatabaseNames on client"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabaseNames
+        object: *client
+        
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - listDatabaseNames on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabaseNames
+        object: *client
+        arguments:
+          timeoutMS: 1000
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - listDatabaseNames on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listDatabaseNames
+        object: *client
+        arguments:
+          timeoutMS: 0
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - createChangeStream on client"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *client
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - createChangeStream on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *client
+        arguments:
+          timeoutMS: 1000
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - createChangeStream on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *client
+        arguments:
+          timeoutMS: 0
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - aggregate on database"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *database
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - aggregate on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *database
+        arguments:
+          timeoutMS: 1000
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - aggregate on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *database
+        arguments:
+          timeoutMS: 0
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - listCollections on database"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollections
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - listCollections on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollections
+        object: *database
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - listCollections on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollections
+        object: *database
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - listCollectionNames on database"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - listCollectionNames on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - listCollectionNames on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - createChangeStream on database"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *database
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - createChangeStream on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *database
+        arguments:
+          timeoutMS: 1000
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - createChangeStream on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *database
+        arguments:
+          timeoutMS: 0
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - aggregate on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - aggregate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - aggregate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: aggregate
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - count on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - count on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: count
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - count on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: count
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - countDocuments on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - countDocuments on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: countDocuments
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - countDocuments on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: countDocuments
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - estimatedDocumentCount on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - estimatedDocumentCount on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: estimatedDocumentCount
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - estimatedDocumentCount on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: estimatedDocumentCount
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - distinct on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - distinct on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["distinct"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: distinct
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          fieldName: x
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - distinct on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["distinct"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: distinct
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          fieldName: x
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - find on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - find on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: find
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - find on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: find
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - findOne on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - findOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOne
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - findOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: findOne
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - listIndexes on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: listIndexes
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - listIndexes on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listIndexes"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listIndexes
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - listIndexes on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listIndexes"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: listIndexes
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS applies to whole operation, not individual attempts - createChangeStream on collection"
+    runOnRequirements:
+      - minServerVersion: "4.4"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 60
+              errorCode: 7
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+  - description: "operation is retried multiple times for non-zero timeoutMS - createChangeStream on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          timeoutMS: 1000
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "operation is retried multiple times if timeoutMS is zero - createChangeStream on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              errorCode: 7
+              closeConnection: false
+              errorLabels: ["RetryableWriteError"]
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          timeoutMS: 0
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  

@@ -1,0 +1,1676 @@
+# Tests in this file are generated from retryability-legacy-timeouts.yml.template.
+
+description: "legacy timeouts behave correctly for retryable operations"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies: ["replicaset", "sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      uriOptions:
+        socketTimeoutMS: 100
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+      ignoreCommandMonitoringEvents:
+        - killCursors
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  # For each retryable operation, run two tests:
+  #
+  # 1. Socket timeouts are retried once - Each test constructs a client entity with socketTimeoutMS=100, configures a
+  # fail point to block the operation once for 125ms, and expects the operation to succeed.
+  #
+  # 2. Operations fail after two consecutive socket timeouts - Same as (1) but the fail point is configured to block
+  # the operation twice and the test expects the operation to fail.
+
+  - description: "operation succeeds after one socket timeout - insertOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - insertOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation succeeds after one socket timeout - insertMany on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - insertMany on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation succeeds after one socket timeout - deleteOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - deleteOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+  - description: "operation succeeds after one socket timeout - replaceOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - replaceOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+  - description: "operation succeeds after one socket timeout - updateOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - updateOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+  - description: "operation succeeds after one socket timeout - findOneAndDelete on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - findOneAndDelete on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation succeeds after one socket timeout - findOneAndReplace on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - findOneAndReplace on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation succeeds after one socket timeout - findOneAndUpdate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - findOneAndUpdate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+  - description: "operation succeeds after one socket timeout - bulkWrite on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - bulkWrite on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+  - description: "operation succeeds after one socket timeout - listDatabases on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+  - description: "operation fails after two consecutive socket timeouts - listDatabases on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+  - description: "operation succeeds after one socket timeout - listDatabaseNames on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listDatabaseNames
+        object: *client
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+  - description: "operation fails after two consecutive socket timeouts - listDatabaseNames on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listDatabaseNames
+        object: *client
+        
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+  - description: "operation succeeds after one socket timeout - createChangeStream on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *client
+        arguments:
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+  - description: "operation fails after two consecutive socket timeouts - createChangeStream on client"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *client
+        arguments:
+          pipeline: []
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+  - description: "operation succeeds after one socket timeout - aggregate on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: aggregate
+        object: *database
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+  - description: "operation fails after two consecutive socket timeouts - aggregate on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: aggregate
+        object: *database
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+  - description: "operation succeeds after one socket timeout - listCollections on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listCollections
+        object: *database
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+  - description: "operation fails after two consecutive socket timeouts - listCollections on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listCollections
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+  - description: "operation succeeds after one socket timeout - listCollectionNames on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+  - description: "operation fails after two consecutive socket timeouts - listCollectionNames on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+  - description: "operation succeeds after one socket timeout - createChangeStream on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *database
+        arguments:
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+  - description: "operation fails after two consecutive socket timeouts - createChangeStream on database"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *database
+        arguments:
+          pipeline: []
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+  - description: "operation succeeds after one socket timeout - aggregate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - aggregate on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  - description: "operation succeeds after one socket timeout - count on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - count on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+  - description: "operation succeeds after one socket timeout - countDocuments on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - countDocuments on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  - description: "operation succeeds after one socket timeout - estimatedDocumentCount on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: estimatedDocumentCount
+        object: *collection
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - estimatedDocumentCount on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+  - description: "operation succeeds after one socket timeout - distinct on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - distinct on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+  - description: "operation succeeds after one socket timeout - find on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - find on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+  - description: "operation succeeds after one socket timeout - findOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - findOne on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+  - description: "operation succeeds after one socket timeout - listIndexes on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listIndexes
+        object: *collection
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - listIndexes on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: listIndexes
+        object: *collection
+        
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+  - description: "operation succeeds after one socket timeout - createChangeStream on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  - description: "operation fails after two consecutive socket timeouts - createChangeStream on collection"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 125
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+            # Network errors are considered client errors by the unified test format spec.
+            isClientError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+  

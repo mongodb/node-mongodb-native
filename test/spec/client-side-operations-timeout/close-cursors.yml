@@ -1,0 +1,127 @@
+description: "timeoutMS behaves correctly when closing cursors"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents:
+      - { _id: 0 }
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  - description: "timeoutMS is refreshed for close"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["getMore"]
+              blockConnection: true
+              blockTimeMS: 50
+      - name: createFindCursor
+        object: *collection
+        arguments:
+          filter: {}
+          batchSize: 2
+          timeoutMS: 20
+        saveResultAsEntity: &cursor cursor
+      # Iterate the cursor three times. The third should do a getMore, which should fail with a timeout error.
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+      - name: iterateUntilDocumentOrError
+        object: *cursor
+        expectError:
+          isTimeoutError: true
+      # All errors from close() are ignored, so we close the cursor here but assert that killCursors was executed
+      # successfully via command monitoring expectations below.
+      - name: close
+        object: *cursor
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+          - commandSucceededEvent:
+              commandName: find
+          - commandStartedEvent:
+              commandName: getMore
+          - commandFailedEvent:
+              commandName: getMore
+          - commandStartedEvent:
+              command:
+                killCursors: *collectionName
+                # The close() operation should inherit timeoutMS from the initial find(). 
+                maxTimeMS: { $$type: ["int", "long"] }
+              commandName: killCursors
+          - commandSucceededEvent:
+              commandName: killCursors
+
+  - description: "timeoutMS can be overridden for close"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["killCursors"]
+              blockConnection: true
+              blockTimeMS: 30
+      - name: createFindCursor
+        object: *collection
+        arguments:
+          filter: {}
+          batchSize: 2
+          timeoutMS: 20
+        saveResultAsEntity: &cursor cursor
+      - name: close
+        object: *cursor
+        arguments:
+          timeoutMS: 40
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+          - commandSucceededEvent:
+              commandName: find
+          - commandStartedEvent:
+              command:
+                killCursors: *collection
+                maxTimeMS: { $$type: ["int", "long"] }
+              commandName: killCursors
+          - commandSucceededEvent:
+              commandName: killCursors

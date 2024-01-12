@@ -1,0 +1,183 @@
+{
+  "description": "timeoutMS behaves correctly for GridFS find operations",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "uriOptions": {
+          "timeoutMS": 75
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket",
+        "database": "database"
+      }
+    },
+    {
+      "collection": {
+        "id": "filesCollection",
+        "database": "database",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "chunksCollection",
+        "database": "database",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "test",
+      "documents": []
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS can be overridden for a find",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "bucket",
+          "arguments": {
+            "filter": {},
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "fs.files",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to find command",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "bucket",
+          "arguments": {
+            "filter": {}
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "fs.files",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,422 @@
+{
+  "description": "timeoutMS behaves correctly for tailable awaitData cursors",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "uriOptions": {
+          "timeoutMS": 10
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "createOptions": {
+        "capped": true,
+        "size": 500
+      },
+      "documents": [
+        {
+          "_id": 0
+        },
+        {
+          "_id": 1
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "error if timeoutMode is cursor_lifetime",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "timeoutMode": "cursorLifetime",
+            "cursorType": "tailableAwait"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "error if maxAwaitTimeMS is greater than timeoutMS",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 10
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "error if maxAwaitTimeMS is equal to timeoutMS",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 5
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to find",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait"
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "tailable": true,
+                  "awaitData": true,
+                  "maxTimeMS": {
+                    "$$exists": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is not set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "timeoutMS": 20,
+            "batchSize": 1
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "tailable": true,
+                  "awaitData": true,
+                  "maxTimeMS": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "timeoutMS": 20,
+            "batchSize": 1,
+            "maxAwaitTimeMS": 1
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "tailable": true,
+                  "awaitData": true,
+                  "maxTimeMS": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore - failure",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createFindCursor",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "cursorType": "tailableAwait",
+            "batchSize": 1
+          },
+          "saveResultAsEntity": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "tailableCursor",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "tailable": true,
+                  "awaitData": true,
+                  "maxTimeMS": {
+                    "$$exists": true
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
