@@ -253,7 +253,7 @@ describe('StateMachine', function () {
 
     context('when server closed the socket', function () {
       let server;
-  
+
       beforeEach(async () => {
         server = net.createServer(async socket => {
           socket.end();
@@ -261,25 +261,25 @@ describe('StateMachine', function () {
         server.listen(0);
         await once(server, 'listening');
       });
-  
+
       afterEach(() => {
         server.close();
       });
-  
-      it('rejects with the kms request closed error', async function () {
+
+      it('throws a MongoCryptError error', async function () {
         const stateMachine = new StateMachine({
           proxyOptions: {
             proxyHost: 'localhost',
             proxyPort: server.address().port
           }
         } as any);
-  
+
         const request = new MockRequest(Buffer.from('foobar'), 500);
         try {
           await stateMachine.kmsRequest(request);
         } catch (err) {
           expect(err.name).to.equal('MongoCryptError');
-          expect(err.message).to.equal('KMS request closed');
+          expect(err.message).to.equal('KMS request failed');
           return;
         }
         expect.fail('missed exception');

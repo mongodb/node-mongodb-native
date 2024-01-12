@@ -1,3 +1,4 @@
+import { once } from 'events';
 import * as fs from 'fs/promises';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
@@ -282,7 +283,7 @@ export class StateMachine {
    * @param kmsContext - A C++ KMS context returned from the bindings
    * @returns A promise that resolves when the KMS reply has be fully parsed
    */
-  kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
+  async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
     const options: tls.ConnectionOptions & { host: string; port: number } = {
@@ -291,113 +292,122 @@ export class StateMachine {
       port
     };
     const message = request.message;
+    const buffer = new BufferPool();
 
-    // TODO(NODE-3959): We can adopt `for-await on(socket, 'data')` with logic to control abort
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      const buffer = new BufferPool();
+    // eslint-disable-next-line prefer-const
+    let socket: net.Socket;
+    let rawSocket: net.Socket;
 
-      // eslint-disable-next-line prefer-const
-      let socket: net.Socket;
-      let rawSocket: net.Socket;
-
-      function destroySockets() {
-        for (const sock of [socket, rawSocket]) {
-          if (sock) {
-            sock.removeAllListeners();
-            sock.destroy();
-          }
+    function destroySockets() {
+      for (const sock of [socket, rawSocket]) {
+        if (sock) {
+          sock.removeAllListeners();
+          sock.destroy();
         }
       }
+    }
 
-      function ontimeout() {
-        destroySockets();
-        reject(new MongoCryptError('KMS request timed out'));
+    function ontimeout() {
+      destroySockets();
+      throw new MongoCryptError('KMS request timed out');
+    }
+
+    function onerror(err: Error) {
+      destroySockets();
+      throw new MongoCryptError('KMS request failed', { cause: err });
+    }
+
+    function onclose() {
+      destroySockets();
+      throw new MongoCryptError('KMS request closed');
+    }
+
+    if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
+      rawSocket = net.connect({
+        host: this.options.proxyOptions.proxyHost,
+        port: this.options.proxyOptions.proxyPort || 1080
+      });
+
+      await Promise.race([
+        new Promise((resolve, reject) => {
+          rawSocket.once('timeout', reject);
+        }).catch(ontimeout),
+        new Promise((resolve, reject) => {
+          rawSocket.once('error', reject);
+        }).catch(onerror),
+        new Promise((resolve, reject) => {
+          rawSocket.once('close', reject);
+        }).catch(onclose),
+        once(rawSocket, 'connect')
+      ]);
+
+      try {
+        socks ??= loadSocks();
+        options.socket = (
+          await socks.SocksClient.createConnection({
+            existing_socket: rawSocket,
+            command: 'connect',
+            destination: { host: options.host, port: options.port },
+            proxy: {
+              // host and port are ignored because we pass existing_socket
+              host: 'iLoveJavaScript',
+              port: 0,
+              type: 5,
+              userId: this.options.proxyOptions.proxyUsername,
+              password: this.options.proxyOptions.proxyPassword
+            }
+          })
+        ).socket;
+      } catch (err) {
+        return onerror(err);
       }
+    }
 
-      function onerror(err: Error) {
-        destroySockets();
-        const mcError = new MongoCryptError('KMS request failed', { cause: err });
-        reject(mcError);
-      }
-
-      function onclose() {
-        destroySockets();
-        const mcError = new MongoCryptError('KMS request closed');
-        reject(mcError);
-      }
-
-      if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        rawSocket = net.connect({
-          host: this.options.proxyOptions.proxyHost,
-          port: this.options.proxyOptions.proxyPort || 1080
-        });
-
-        rawSocket.on('timeout', ontimeout);
-        rawSocket.on('error', onerror);
-        rawSocket.on('close', onclose);
-
+    const tlsOptions = this.options.tlsOptions;
+    if (tlsOptions) {
+      const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
+      const providerTlsOptions = tlsOptions[kmsProvider];
+      if (providerTlsOptions) {
+        const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
+        if (error) throw error;
         try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const events = require('events') as typeof import('events');
-          await events.once(rawSocket, 'connect');
-          socks ??= loadSocks();
-          options.socket = (
-            await socks.SocksClient.createConnection({
-              existing_socket: rawSocket,
-              command: 'connect',
-              destination: { host: options.host, port: options.port },
-              proxy: {
-                // host and port are ignored because we pass existing_socket
-                host: 'iLoveJavaScript',
-                port: 0,
-                type: 5,
-                userId: this.options.proxyOptions.proxyUsername,
-                password: this.options.proxyOptions.proxyPassword
-              }
-            })
-          ).socket;
-        } catch (err) {
-          return onerror(err);
+          await this.setTlsOptions(providerTlsOptions, options);
+        } catch (error) {
+          return onerror(error);
         }
       }
+    }
 
-      const tlsOptions = this.options.tlsOptions;
-      if (tlsOptions) {
-        const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
-        const providerTlsOptions = tlsOptions[kmsProvider];
-        if (providerTlsOptions) {
-          const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
-          if (error) reject(error);
-          try {
-            await this.setTlsOptions(providerTlsOptions, options);
-          } catch (error) {
-            return onerror(error);
-          }
-        }
-      }
-      socket = tls.connect(options, () => {
-        socket.write(message);
-      });
-
-      socket.once('timeout', ontimeout);
-      socket.once('error', onerror);
-      socket.once('close', onclose);
-
-      socket.on('data', data => {
-        buffer.append(data);
-        while (request.bytesNeeded > 0 && buffer.length) {
-          const bytesNeeded = Math.min(request.bytesNeeded, buffer.length);
-          request.addResponse(buffer.read(bytesNeeded));
-        }
-
-        if (request.bytesNeeded <= 0) {
-          // There's no need for any more activity on this socket at this point.
-          destroySockets();
-          resolve();
-        }
-      });
+    socket = tls.connect(options, () => {
+      socket.write(message);
     });
+
+    await Promise.race([
+      new Promise((resolve, reject) => {
+        socket.once('timeout', reject);
+      }).catch(ontimeout),
+      new Promise((resolve, reject) => {
+        socket.once('error', reject);
+      }).catch(onerror),
+      new Promise((resolve, reject) => {
+        socket.once('close', reject);
+      }).catch(onclose),
+      new Promise<void>(resolve => {
+        socket.on('data', data => {
+          buffer.append(data);
+          while (request.bytesNeeded > 0 && buffer.length) {
+            const bytesNeeded = Math.min(request.bytesNeeded, buffer.length);
+            request.addResponse(buffer.read(bytesNeeded));
+          }
+
+          if (request.bytesNeeded <= 0) {
+            // There's no need for any more activity on this socket at this point.
+            destroySockets();
+            resolve();
+          }
+        });
+      })
+    ]);
   }
 
   *requests(context: MongoCryptContext) {
