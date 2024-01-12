@@ -1,17 +1,17 @@
-'use strict';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-const { expect } = require('chai');
-const sinon = require('sinon');
-const { ObjectId } = require('../../mongodb');
-const { ReadPreference } = require('../../mongodb');
-const {
+import {
+  MIN_SECONDARY_WRITE_WIRE_VERSION,
+  ObjectId,
+  ReadPreference,
+  readPreferenceServerSelector,
   sameServerSelector,
   secondaryWritableServerSelector,
-  MIN_SECONDARY_WRITE_WIRE_VERSION
-} = require('../../mongodb');
-const { ServerDescription } = require('../../mongodb');
-const { TopologyDescription } = require('../../mongodb');
-const { TopologyType } = require('../../mongodb');
+  ServerDescription,
+  TopologyDescription,
+  TopologyType
+} from '../../mongodb';
 
 describe('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {
@@ -24,7 +24,16 @@ describe('server selection', function () {
     secondary: true,
     ok: 1
   });
+  const secondaryTwo = new ServerDescription('127.0.0.1:27024', {
+    setName: 'test',
+    secondary: true,
+    ok: 1
+  });
   const mongos = new ServerDescription('127.0.0.1:27019', {
+    msg: 'isdbgrid',
+    ok: 1
+  });
+  const mongosTwo = new ServerDescription('127.0.0.1:27023', {
     msg: 'isdbgrid',
     ok: 1
   });
@@ -35,6 +44,93 @@ describe('server selection', function () {
   });
   const unknown = new ServerDescription('127.0.0.1:27022', {
     ok: 0
+  });
+
+  describe('#readPreferenceServerSelector', function () {
+    let selector;
+    let servers;
+
+    context('when the topology is sharded', function () {
+      const topologyDescription = new TopologyDescription(
+        TopologyType.Sharded,
+        new Map(),
+        'test',
+        MIN_SECONDARY_WRITE_WIRE_VERSION,
+        new ObjectId(),
+        MIN_SECONDARY_WRITE_WIRE_VERSION
+      );
+
+      beforeEach(function () {
+        selector = readPreferenceServerSelector(ReadPreference.secondaryPreferred);
+      });
+
+      context('when there are deprioritized servers', function () {
+        context('when there are other servers', function () {
+          beforeEach(function () {
+            servers = selector(topologyDescription, [mongos], [mongosTwo]);
+          });
+
+          it('returns a server from the other servers', function () {
+            expect(servers).to.deep.equal([mongos]);
+          });
+        });
+
+        context('when there are no other servers', function () {
+          beforeEach(function () {
+            servers = selector(topologyDescription, [], [mongosTwo]);
+          });
+
+          it('returns a server from the deprioritized servers', function () {
+            expect(servers).to.deep.equal([mongosTwo]);
+          });
+        });
+      });
+
+      context('when there are no deprioritised servers', function () {
+        beforeEach(function () {
+          servers = selector(topologyDescription, [mongos]);
+        });
+
+        it('returns a server from the other servers', function () {
+          expect(servers).to.deep.equal([mongos]);
+        });
+      });
+    });
+
+    context('when the topology is not sharded', function () {
+      const topologyDescription = new TopologyDescription(
+        TopologyType.ReplicaSetWithPrimary,
+        new Map(),
+        'test',
+        MIN_SECONDARY_WRITE_WIRE_VERSION,
+        new ObjectId(),
+        MIN_SECONDARY_WRITE_WIRE_VERSION
+      );
+
+      beforeEach(function () {
+        selector = readPreferenceServerSelector(ReadPreference.secondary);
+      });
+
+      context('when there are deprioritized servers', function () {
+        beforeEach(function () {
+          servers = selector(topologyDescription, [secondaryTwo], [secondary]);
+        });
+
+        it('selects from all server lists', function () {
+          expect(servers).to.contain.oneOf([secondary, secondaryTwo]);
+        });
+      });
+
+      context('when there are no deprioritised servers', function () {
+        beforeEach(function () {
+          servers = selector(topologyDescription, [secondary], []);
+        });
+
+        it('selects from all non-deprioritised servers', function () {
+          expect(servers).to.deep.equal([secondary]);
+        });
+      });
+    });
   });
 
   describe('#sameServerSelector', function () {

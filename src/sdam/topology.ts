@@ -110,6 +110,7 @@ export interface ServerSelectionRequest {
   timeoutController: TimeoutController;
   operationName: string;
   waitingLogged: boolean;
+  previousServer?: ServerDescription;
 }
 
 /** @internal */
@@ -175,6 +176,7 @@ export interface SelectServerOptions {
   serverSelectionTimeoutMS?: number;
   session?: ClientSession;
   operationName: string;
+  previousServer?: ServerDescription;
 }
 
 /** @public */
@@ -598,7 +600,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
       startTime: now(),
       operationName: options.operationName,
-      waitingLogged: false
+      waitingLogged: false,
+      previousServer: options.previousServer
     };
 
     waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
@@ -930,8 +933,13 @@ function processWaitQueue(topology: Topology) {
     let selectedDescriptions;
     try {
       const serverSelector = waitQueueMember.serverSelector;
+      const previousServer = waitQueueMember.previousServer;
       selectedDescriptions = serverSelector
-        ? serverSelector(topology.description, serverDescriptions)
+        ? serverSelector(
+            topology.description,
+            serverDescriptions,
+            previousServer ? [previousServer] : []
+          )
         : serverDescriptions;
     } catch (e) {
       waitQueueMember.timeoutController.clear();
