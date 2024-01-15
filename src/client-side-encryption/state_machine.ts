@@ -319,20 +319,13 @@ export class StateMachine {
     }
 
     try {
-      const { promise: onceRawSocketError, reject: rawSocketReject } = promiseWithResolvers();
-
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         rawSocket = net.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
 
-        rawSocket
-          .once('timeout', () => rawSocketReject(ontimeout()))
-          .once('error', err => rawSocketReject(onerror(err)))
-          .once('close', () => rawSocketReject(onclose()));
-
-        await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
+        await once(rawSocket, 'connect');
 
         try {
           socks ??= loadSocks();
@@ -375,13 +368,12 @@ export class StateMachine {
         socket.write(message);
       });
 
-      const { promise: onceSocketError, reject: socketReject } = promiseWithResolvers();
-      const { promise: onDataFullyRead, resolve: socketResolve } = promiseWithResolvers();
+      const { promise, reject, resolve } = promiseWithResolvers();
 
       socket
-        .once('timeout', () => socketReject(ontimeout()))
-        .once('error', err => socketReject(onerror(err)))
-        .once('close', () => socketReject(onclose()))
+        .once('timeout', () => reject(ontimeout()))
+        .once('error', err => reject(onerror(err)))
+        .once('close', () => reject(onclose()))
         .on('data', data => {
           buffer.append(data);
           while (request.bytesNeeded > 0 && buffer.length) {
@@ -390,11 +382,11 @@ export class StateMachine {
           }
 
           if (request.bytesNeeded <= 0) {
-            socketResolve(undefined);
+            resolve(undefined);
           }
         });
 
-      await Promise.race([onceSocketError, onDataFullyRead]);
+      await promise;
     } catch (err) {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
