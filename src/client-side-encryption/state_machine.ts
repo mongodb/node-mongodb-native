@@ -325,12 +325,13 @@ export class StateMachine {
           port: this.options.proxyOptions.proxyPort || 1080
         });
 
-        const { promise: onRawSocketError, reject } = promiseWithResolvers();
+        const { promise: onRawSocketConnect, reject, resolve } = promiseWithResolvers();
         rawSocket
           .on('timeout', () => reject(ontimeout()))
           .on('error', err => reject(onerror(err)))
-          .on('close', () => reject(onclose()));
-        await Promise.race([onRawSocketError, once(rawSocket, 'connect')]);
+          .on('close', () => reject(onclose()))
+          .once('connect', () => resolve(undefined));
+        await onRawSocketConnect;
 
         try {
           socks ??= loadSocks();
@@ -373,7 +374,7 @@ export class StateMachine {
         socket.write(message);
       });
 
-      const { promise, reject, resolve } = promiseWithResolvers();
+      const { promise: onSocketDataFullyRead, reject, resolve } = promiseWithResolvers();
       socket
         .once('timeout', () => reject(ontimeout()))
         .once('error', err => reject(onerror(err)))
@@ -386,13 +387,15 @@ export class StateMachine {
           }
 
           if (request.bytesNeeded <= 0) {
+            // There's no need for any more activity on this socket at this point.
+            destroySockets();
             resolve(undefined);
           }
         });
 
-      await promise;
+      await onSocketDataFullyRead;
     } catch (err) {
-      // There's no need for any more activity on this socket at this point.
+      // Destroy sockets on error.
       destroySockets();
       throw err;
     }
