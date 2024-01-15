@@ -1,0 +1,113 @@
+{
+  "description": "tests for timeoutMS behavior that applies to all cursor types",
+  "schemaVersion": "1.0",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client"
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "find errors if timeoutMode is set and timeoutMS is not",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {},
+            "timeoutMode": "cursorLifetime"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "collection aggregate errors if timeoutMode is set and timeoutMS is not",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMode": "cursorLifetime"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "database aggregate errors if timeoutMode is set and timeoutMS is not",
+      "operations": [
+        {
+          "name": "aggregate",
+          "object": "database",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMode": "cursorLifetime"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "listCollections errors if timeoutMode is set and timeoutMS is not",
+      "operations": [
+        {
+          "name": "listCollections",
+          "object": "database",
+          "arguments": {
+            "filter": {},
+            "timeoutMode": "cursorLifetime"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "listIndexes errors if timeoutMode is set and timeoutMS is not",
+      "operations": [
+        {
+          "name": "listIndexes",
+          "object": "collection",
+          "arguments": {
+            "timeoutMode": "cursorLifetime"
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+description: "timeoutMS can be overridden for individual session operations"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies: ["replicaset", "sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+        - commandSucceededEvent
+        - commandFailedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+  - session:
+      id: &session session
+      client: *client
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  # Drivers ignore errors from abortTransaction, so the tests in this file use commandSucceededEvent and
+  # commandFailedEvent events to assert success/failure.
+
+  - description: "timeoutMS can be overridden for commitTransaction"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["commitTransaction"]
+              blockConnection: true
+              blockTimeMS: 60
+      - name: startTransaction
+        object: *session
+      - name: insertOne
+        object: *collection
+        arguments:
+          session: *session
+          document: { _id: 1 }
+      - name: commitTransaction
+        object: *session
+        arguments:
+          timeoutMS: 50
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandSucceededEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: commitTransaction
+              databaseName: admin
+              command:
+                commitTransaction: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandFailedEvent:
+              commandName: commitTransaction
+
+  - description: "timeoutMS applied to abortTransaction"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["abortTransaction"]
+              blockConnection: true
+              blockTimeMS: 60
+      - name: startTransaction
+        object: *session
+      - name: insertOne
+        object: *collection
+        arguments:
+          session: *session
+          document: { _id: 1 }
+      - name: abortTransaction
+        object: *session
+        arguments:
+          timeoutMS: 50
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+          - commandSucceededEvent:
+              commandName: insert
+          - commandStartedEvent:
+              commandName: abortTransaction
+              databaseName: admin
+              command:
+                abortTransaction: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandFailedEvent:
+              commandName: abortTransaction
+
+  - description: "timeoutMS applied to withTransaction"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 60
+      - name: withTransaction
+        object: *session
+        arguments:
+          timeoutMS: 50
+          callback:
+            - name: insertOne
+              object: *collection
+              arguments:
+                session: *session
+                document: { _id: 1 }
+              expectError:
+                isTimeoutError: true
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          # Because the insert expects an error and gets an error, it technically succeeds, so withTransaction will
+          # try to run commitTransaction. This will fail client-side, though, because the timeout has already expired,
+          # so no command is sent.
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                # withTransaction specifies timeoutMS for each operation in the callback that uses the session, so the
+                # insert command should have a maxTimeMS field.
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandFailedEvent:
+              commandName: insert
