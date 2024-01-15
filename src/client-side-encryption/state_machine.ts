@@ -319,7 +319,7 @@ export class StateMachine {
     }
 
     try {
-      const { promise: willError, reject } = promiseWithResolvers();
+      const { promise: onceRawSocketError, reject: rawSocketReject } = promiseWithResolvers();
 
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
         rawSocket = net.connect({
@@ -328,11 +328,11 @@ export class StateMachine {
         });
 
         rawSocket
-          .once('timeout', () => reject(ontimeout()))
-          .once('error', err => reject(onerror(err)))
-          .once('close', () => reject(onclose()));
+          .once('timeout', () => rawSocketReject(ontimeout()))
+          .once('error', err => rawSocketReject(onerror(err)))
+          .once('close', () => rawSocketReject(onclose()));
 
-        await Promise.race([willError, once(rawSocket, 'connect')]);
+        await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
 
         try {
           socks ??= loadSocks();
@@ -375,12 +375,13 @@ export class StateMachine {
         socket.write(message);
       });
 
-      const { promise: willSuccseed, resolve } = promiseWithResolvers();
+      const { promise: onceSocketError, reject: socketReject } = promiseWithResolvers();
+      const { promise: onDataFullyRead, resolve: socketResolve } = promiseWithResolvers();
 
       socket
-        .once('timeout', () => reject(ontimeout()))
-        .once('error', err => reject(onerror(err)))
-        .once('close', () => reject(onclose()))
+        .once('timeout', () => socketReject(ontimeout()))
+        .once('error', err => socketReject(onerror(err)))
+        .once('close', () => socketReject(onclose()))
         .on('data', data => {
           buffer.append(data);
           while (request.bytesNeeded > 0 && buffer.length) {
@@ -389,11 +390,11 @@ export class StateMachine {
           }
 
           if (request.bytesNeeded <= 0) {
-            resolve(undefined);
+            socketResolve(undefined);
           }
         });
 
-      await Promise.race([willError, willSuccseed]);
+      await Promise.race([onceSocketError, onDataFullyRead]);
     } catch (err) {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
