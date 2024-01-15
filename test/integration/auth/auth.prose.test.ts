@@ -357,6 +357,7 @@ describe('Authentication Spec Prose Tests', function () {
         const db = utilClient.db('admin');
         await Promise.all(users.map(user => db.removeUser(user.username)));
         await utilClient?.close();
+        await client?.close();
       });
 
       for (const { username, password } of [
@@ -365,7 +366,7 @@ describe('Authentication Spec Prose Tests', function () {
         { username: '\u2168', password: 'IV' },
         { username: '\u2168', password: 'I\u00ADV' }
       ]) {
-        it.skip(
+        it(
           `logs in with username "${username}" and password "${password}"`,
           metadata,
           async function () {
@@ -375,11 +376,11 @@ describe('Authentication Spec Prose Tests', function () {
               authMechanism: 'SCRAM-SHA-256'
             };
 
-            client = this.configuration.newClient(options);
+            client = this.configuration.newClient(process.env.MONGODB_URI, options);
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
           }
-        ).skipReason = 'todo(NODE-5621): fix the issue with unicode characters.';
+        );
       }
     });
   });
