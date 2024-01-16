@@ -168,6 +168,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public delayedTimeoutId: NodeJS.Timeout | null = null;
   public generation: number;
   public readonly description: Readonly<StreamDescription>;
+  /**
+   * @public
+   * Represents if the connection has been established:
+   *  - TCP handshake
+   *  - TLS negotiated
+   *  - mongodb handshake (saslStart, saslContinue), includes authentication
+   * Once connection is established, command logging can log events (if enabled)
+   */
   public established: boolean;
 
   private lastUseTime: number;
