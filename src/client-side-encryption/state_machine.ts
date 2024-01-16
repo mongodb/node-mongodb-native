@@ -325,7 +325,12 @@ export class StateMachine {
           port: this.options.proxyOptions.proxyPort || 1080
         });
 
-        await once(rawSocket, 'connect');
+        const { promise: onceRawSocketError, reject } = promiseWithResolvers<void>();
+        rawSocket
+          .once('timeout', () => reject(ontimeout()))
+          .once('error', err => reject(onerror(err)))
+          .once('close', () => reject(onclose()));
+        await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
 
         try {
           socks ??= loadSocks();
@@ -384,7 +389,6 @@ export class StateMachine {
             resolve();
           }
         });
-
       await onSocketDataFullyRead;
     } finally {
       // There's no need for any more activity on this socket at this point.
