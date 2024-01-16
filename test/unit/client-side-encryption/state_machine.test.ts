@@ -266,12 +266,29 @@ describe('StateMachine', function () {
         server.close();
       });
 
-      it('throws a MongoCryptError error', async function () {
+      it('throws a MongoCryptError error with proxyOptions', async function () {
         const stateMachine = new StateMachine({
           proxyOptions: {
             proxyHost: 'localhost',
             proxyPort: server.address().port
           }
+        } as any);
+
+        const request = new MockRequest(Buffer.from('foobar'), 500);
+        try {
+          await stateMachine.kmsRequest(request);
+        } catch (err) {
+          expect(err.name).to.equal('MongoCryptError');
+          expect(err.message).to.equal('KMS request failed');
+          return;
+        }
+        expect.fail('missed exception');
+      });
+
+      it('throws a MongoCryptError error with host and port', async function () {
+        const stateMachine = new StateMachine({
+          host: 'localhost',
+          port: server.address().port
         } as any);
 
         const request = new MockRequest(Buffer.from('foobar'), 500);
