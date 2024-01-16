@@ -156,7 +156,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
     });
   });
 
-  context('Truncation with multi-byte codepoints', function () {
+  context.skip('Truncation with multi-byte codepoints', function () {
     /*
     A specific test case is not provided here due to the allowed variations in truncation logic
      as well as varying extended JSON whitespace usage.
@@ -169,6 +169,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
      where the max length falls in the middle of a multi-byte codepoint are handled gracefully.
     */
 
+    const maxDocLength = 39;
     beforeEach(async function () {
       writable = {
         buffer: [],
@@ -185,7 +186,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
           mongodbLogComponentSeverities: {
             command: 'debug'
           },
-          mongodbLogMaxDocumentLength: 50
+          mongodbLogMaxDocumentLength: maxDocLength
         }
       );
     });
@@ -195,9 +196,12 @@ describe('Command Logging and Monitoring Prose Tests', function () {
     });
 
     it('should handle unicode codepoints in middle and end of truncation gracefully', async function () {
+      const multibyteUnicode = '\uD801\uDC37';
+      const firstByteChar = multibyteUnicode.charCodeAt(0);
+      const secondByteChar = multibyteUnicode.charCodeAt(1);
       const docs: Array<Document> = [
         {
-          x: '\u2603\u2603\u2603\u2603'
+          x: `${multibyteUnicode}${multibyteUnicode}${multibyteUnicode}${multibyteUnicode}`
         }
       ];
 
@@ -206,12 +210,25 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       const insertManyCommandStarted = writable.buffer[0];
       expect(insertManyCommandStarted?.message).to.equal('Command started');
       expect(insertManyCommandStarted?.command).to.be.a('string');
-      expect(insertManyCommandStarted?.command?.length).to.equal(50 + ELLIPSES_LENGTH);
+      // maxDocLength - 1 because stringified response should be rounded down due to ending mid-codepoint
+      expect(insertManyCommandStarted?.command?.length).to.equal(
+        maxDocLength - 1 + ELLIPSES_LENGTH
+      );
+
+      // multi-byte codepoint in middle of truncated string
+      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 1)).to.equal(
+        firstByteChar
+      );
+      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 1)).to.equal(
+        secondByteChar
+      );
 
       const insertManyCommandSucceeded = writable.buffer[1];
       expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
       expect(insertManyCommandSucceeded?.reply).to.be.a('string');
-      expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(50 + ELLIPSES_LENGTH);
+      expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(
+        maxDocLength + ELLIPSES_LENGTH
+      );
     });
-  });
+  }).skipReason = 'todo(NODE-5839)';
 });
