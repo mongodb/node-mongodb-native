@@ -293,8 +293,9 @@ export class StateMachine {
     };
     const message = request.message;
     const buffer = new BufferPool();
-    const rawSocket = new net.Socket();
+
     let socket: tls.TLSSocket;
+    let rawSocket: net.Socket;
 
     function destroySockets() {
       for (const sock of [socket, rawSocket]) {
@@ -318,18 +319,16 @@ export class StateMachine {
     }
 
     try {
-      const { promise: onceRawSocketError, reject: rejectOnRawSocket } =
-        promiseWithResolvers<void>();
-
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        rawSocket.connect({
+        rawSocket = net.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
+        const { promise: onceRawSocketError, reject } = promiseWithResolvers();
         rawSocket
-          .once('timeout', () => rejectOnRawSocket(ontimeout()))
-          .once('error', err => rejectOnRawSocket(onerror(err)))
-          .once('close', () => rejectOnRawSocket(onclose()));
+          .once('timeout', () => reject(ontimeout()))
+          .once('error', err => reject(onerror(err)))
+          .once('close', () => reject(onclose()));
         await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
 
         try {
@@ -369,7 +368,7 @@ export class StateMachine {
         }
       }
 
-      const socket = tls.connect(options, () => {
+      socket = tls.connect(options, () => {
         socket.write(message);
       });
 

@@ -16,7 +16,7 @@ import { Db } from '../../../src/db';
 import { MongoClient } from '../../../src/mongo_client';
 import { Int32, Long, serialize } from '../../mongodb';
 
-describe('StateMachine', function () {
+describe.only('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {
     _bytesNeeded: number;
     endpoint = 'some.fake.host.com';
@@ -275,6 +275,7 @@ describe('StateMachine', function () {
           }
         } as any);
         const request = new MockRequest(Buffer.from('foobar'), 500);
+
         try {
           await stateMachine.kmsRequest(request);
         } catch (err) {
