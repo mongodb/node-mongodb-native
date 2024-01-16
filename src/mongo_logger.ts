@@ -1,7 +1,7 @@
-import { type Document, EJSON, type EJSONOptions, type ObjectId } from 'bson';
 import type { Writable } from 'stream';
 import { inspect } from 'util';
 
+import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
 import type {
   ConnectionCheckedInEvent,
@@ -536,7 +536,7 @@ function defaultLogTransform(
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message ?? '{}';
+      log.failure = logObject.failure.message ?? '(redacted)';
       return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);

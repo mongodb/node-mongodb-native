@@ -13,6 +13,8 @@ export {
   deserialize,
   Document,
   Double,
+  EJSON,
+  EJSONOptions,
   Int32,
   Long,
   MaxKey,

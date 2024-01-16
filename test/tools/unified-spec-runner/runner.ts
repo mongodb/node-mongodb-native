@@ -3,13 +3,7 @@ import { expect } from 'chai';
 import { gte as semverGte, satisfies as semverSatisfies } from 'semver';
 
 import type { MongoClient } from '../../mongodb';
-import {
-  MONGODB_ERROR_CODES,
-  ns,
-  ReadPreference,
-  SENSITIVE_COMMANDS,
-  TopologyType
-} from '../../mongodb';
+import { MONGODB_ERROR_CODES, ns, ReadPreference, TopologyType } from '../../mongodb';
 import { ejson } from '../utils';
 import { AstrolabeResultsWriter } from './astrolabe_results_writer';
 import { EntitiesMap, type UnifiedMongoClient } from './entities';
@@ -238,19 +232,13 @@ async function runUnifiedTest(
         const testClient = clientList.get(clientId);
 
         expect(testClient, `No client entity found with id ${clientId}`).to.exist;
-        let filteredTestClientLogs = expectedLogsForClient.ignoreMessages
+        const filteredTestClientLogs = expectedLogsForClient.ignoreMessages
           ? filterExtraLogs(
               expectedLogsForClient.ignoreMessages,
               testClient!.collectedLogs,
               entities
             )
           : testClient!.collectedLogs;
-        if (!testClient!.observeSensitiveCommands) {
-          filteredTestClientLogs = filteredTestClientLogs.filter(
-            log =>
-              !SENSITIVE_COMMANDS.has(log?.data?.commandName) && !testClient!.isSensitiveLog(log)
-          );
-        }
         compareLogs(expectedLogsForClient.messages, filteredTestClientLogs, entities);
       }
     }

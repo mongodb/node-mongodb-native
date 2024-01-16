@@ -282,17 +282,6 @@ export class UnifiedMongoClient extends MongoClient {
     return false;
   }
 
-  isSensitiveLog(log: LogMessage): boolean {
-    if (
-      (log.data?.message === 'Command started' && log.data?.command === '{}') ||
-      (log.data?.message === 'Command succeeded' && log.data?.reply === '{}') ||
-      (log.data?.message === 'Command failed' && log.data?.failure === '{}')
-    ) {
-      return true;
-    }
-    return false;
-  }
-
   isIgnored(e: CommandEvent): boolean {
     return this.ignoredEvents.includes(e.commandName);
   }

@@ -5,6 +5,9 @@ import { DEFAULT_MAX_DOCUMENT_LENGTH, type Document } from '../../mongodb';
 describe('Command Logging and Monitoring Prose Tests', function () {
   const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
   const ELLIPSES_LENGTH = 3;
+  let client;
+  let writable;
+
   context('When no custom truncation limit is provided', function () {
     /*
         1. Configure logging with a minimum severity level of "debug" for the "command" component. 
@@ -26,28 +29,33 @@ describe('Command Logging and Monitoring Prose Tests', function () {
            the reply is a string of length 1000 + (length of trailing ellipsis).
     */
 
+    beforeEach(async function () {
+      writable = {
+        buffer: [],
+        write(log) {
+          this.buffer.push(log);
+        }
+      };
+      // 1.
+      client = this.configuration.newClient(
+        {},
+        {
+          [loggerFeatureFlag]: true,
+          mongodbLogPath: writable,
+          mongodbLogComponentSeverities: {
+            command: 'debug'
+          }
+        }
+      );
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
     it('should follow default truncation limit of 1000', {
       metadata: {},
       test: async function () {
-        const writable = {
-          buffer: [],
-          write(log) {
-            this.buffer.push(log);
-          }
-        };
-
-        // 1.
-        const client = this.configuration.newClient(
-          {},
-          {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: writable,
-            mongodbLogComponentSeverities: {
-              command: 'debug'
-            }
-          }
-        );
-
         // 2.
         const docs: Array<Document> = [];
         for (let i = 0; i < 100; i++) {
@@ -57,17 +65,8 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         // 3.
         await client.db('admin').collection('test').insertMany(docs);
 
-        // remove sensitive commands for uniformity
-        const cleanedBuffer = [];
-        const afterInsertBufferLength = writable.buffer.length;
-        for (let i = 0; i < afterInsertBufferLength; i++) {
-          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
-            cleanedBuffer.push(writable.buffer[i]);
-          }
-        }
-
         // 4.
-        const insertManyCommandStarted = cleanedBuffer[0];
+        const insertManyCommandStarted = writable.buffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(
@@ -75,7 +74,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         );
 
         // 5.
-        const insertManyCommandSucceeded = cleanedBuffer[1];
+        const insertManyCommandSucceeded = writable.buffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(
@@ -83,27 +82,19 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         );
 
         // 6.
-        await client.db('admin').collection('test').find()._initialize();
-
-        // remove sensitive commands again for uniformity
-        for (let j = afterInsertBufferLength; j < writable.buffer.length; j++) {
-          if (writable.buffer[j].command !== '{}' && writable.buffer[j].reply !== '{}') {
-            cleanedBuffer.push(writable.buffer[j]);
-          }
-        }
+        await client.db('admin').collection('test').find().toArray();
 
         // 7.
-        const findCommandSucceeded = cleanedBuffer[3];
+        const findCommandSucceeded = writable.buffer[3];
         expect(findCommandSucceeded?.message).to.equal('Command succeeded');
         expect(findCommandSucceeded?.reply).to.be.a('string');
         expect(findCommandSucceeded?.reply?.length).to.equal(
           DEFAULT_MAX_DOCUMENT_LENGTH + ELLIPSES_LENGTH
         );
-
-        await client.close();
       }
     });
   });
+
   context('When custom truncation limit is provided', function () {
     /*
     1. Configure logging with a minimum severity level of "debug" for the "command" component. 
@@ -125,48 +116,45 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         Inspect the resulting "command failed" log message 
         and confirm that the server error is a string of length 5 + (length of trailing ellipsis).
     */
+    beforeEach(async function () {
+      writable = {
+        buffer: [],
+        write(log) {
+          this.buffer.push(log);
+        }
+      };
+      // 1.
+      client = this.configuration.newClient(
+        {},
+        {
+          [loggerFeatureFlag]: true,
+          mongodbLogPath: writable,
+          mongodbLogComponentSeverities: {
+            command: 'debug'
+          },
+          mongodbLogMaxDocumentLength: 5
+        }
+      );
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
     it('should follow custom truncation limit', {
       metadata: {},
       test: async function () {
-        const writable = {
-          buffer: [],
-          write(log) {
-            this.buffer.push(log);
-          }
-        };
-
-        // 1.
-        const client = this.configuration.newClient(
-          {},
-          {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: writable,
-            mongodbLogComponentSeverities: {
-              command: 'debug'
-            },
-            mongodbLogMaxDocumentLength: 5
-          }
-        );
-
         // 2.
         await client.db('admin').command({ hello: 'true' });
 
-        // remove sensitive commands for uniformity
-        const cleanedBuffer = [];
-        for (let i = 0; i < writable.buffer.length; i++) {
-          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
-            cleanedBuffer.push(writable.buffer[i]);
-          }
-        }
-
         // 3.
-        const insertManyCommandStarted = cleanedBuffer[0];
+        const insertManyCommandStarted = writable.buffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(5 + ELLIPSES_LENGTH);
 
         // 4.
-        const insertManyCommandSucceeded = cleanedBuffer[1];
+        const insertManyCommandSucceeded = writable.buffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(5 + ELLIPSES_LENGTH);
@@ -175,6 +163,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       }
     });
   });
+
   context('Truncation with multi-byte codepoints', function () {
     /*
     A specific test case is not provided here due to the allowed variations in truncation logic
@@ -187,51 +176,52 @@ describe('Command Logging and Monitoring Prose Tests', function () {
      there also MUST be tests confirming that cases
      where the max length falls in the middle of a multi-byte codepoint are handled gracefully.
     */
+
+    beforeEach(async function () {
+      writable = {
+        buffer: [],
+        write(log) {
+          this.buffer.push(log);
+        }
+      };
+      // 1.
+      client = this.configuration.newClient(
+        {},
+        {
+          [loggerFeatureFlag]: true,
+          mongodbLogPath: writable,
+          mongodbLogComponentSeverities: {
+            command: 'debug'
+          },
+          mongodbLogMaxDocumentLength: 50
+        }
+      );
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
     it('should handle unicode codepoints in middle and end of truncation gracefully', {
       metadata: {},
       test: async function () {
-        const writable = {
-          buffer: [],
-          write(log) {
-            this.buffer.push(log);
-          }
-        };
-
-        const client = this.configuration.newClient(
-          {},
+        const docs: Array<Document> = [
           {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: writable,
-            mongodbLogComponentSeverities: {
-              command: 'debug'
-            },
-            mongodbLogMaxDocumentLength: 50
+            x: '\u2603\u2603\u2603\u2603'
           }
-        );
-
-        const docs: Array<Document> = [{ x: '&&&&&&&&&&&&&&&&' }];
+        ];
 
         await client.db('admin').collection('test').insertMany(docs);
 
-        // remove sensitive commands for uniformity
-        const cleanedBuffer = [];
-        for (let i = 0; i < writable.buffer.length; i++) {
-          if (writable.buffer[i].command !== '{}' && writable.buffer[i].reply !== '{}') {
-            cleanedBuffer.push(writable.buffer[i]);
-          }
-        }
-
-        const insertManyCommandStarted = cleanedBuffer[0];
+        const insertManyCommandStarted = writable.buffer[0];
         expect(insertManyCommandStarted?.message).to.equal('Command started');
         expect(insertManyCommandStarted?.command).to.be.a('string');
         expect(insertManyCommandStarted?.command?.length).to.equal(50 + ELLIPSES_LENGTH);
 
-        const insertManyCommandSucceeded = cleanedBuffer[1];
+        const insertManyCommandSucceeded = writable.buffer[1];
         expect(insertManyCommandSucceeded?.message).to.equal('Command succeeded');
         expect(insertManyCommandSucceeded?.reply).to.be.a('string');
         expect(insertManyCommandSucceeded?.reply?.length).to.be.at.most(50 + ELLIPSES_LENGTH);
-
-        await client.close();
       }
     });
   });

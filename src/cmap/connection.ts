@@ -168,6 +168,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public delayedTimeoutId: NodeJS.Timeout | null = null;
   public generation: number;
   public readonly description: Readonly<StreamDescription>;
+  public established: boolean;
 
   private lastUseTime: number;
   private socketTimeoutMS: number;
@@ -206,6 +207,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.monitorCommands = options.monitorCommands;
     this.serverApi = options.serverApi;
     this.mongoLogger = options.mongoLogger;
+    this.established = false;
 
     this.description = new StreamDescription(this.address, options);
     this.generation = options.generation;
@@ -451,14 +453,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (
       this.monitorCommands ||
-      (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+      (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
     ) {
       started = now();
       this.emitAndLogCommand(
         this.monitorCommands,
         Connection.COMMAND_STARTED,
         message.databaseName,
-        this.description.hello,
+        this.established,
         new CommandStartedEvent(this, message, this.description.serverConnectionId)
       );
     }
@@ -480,13 +482,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (
           this.monitorCommands ||
-          (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+          (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
         ) {
           this.emitAndLogCommand(
             this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
             message.databaseName,
-            this.description.hello,
+            this.established,
             new CommandSucceededEvent(
               this,
               message,
@@ -503,14 +505,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (error) {
       if (
         this.monitorCommands ||
-        (this.description.hello && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+        (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
       ) {
         if (error.name === 'MongoWriteConcernError') {
           this.emitAndLogCommand(
             this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
             message.databaseName,
-            this.description.hello,
+            this.established,
             new CommandSucceededEvent(
               this,
               message,
@@ -524,7 +526,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             this.monitorCommands,
             Connection.COMMAND_FAILED,
             message.databaseName,
-            this.description.hello,
+            this.established,
             new CommandFailedEvent(
               this,
               message,
