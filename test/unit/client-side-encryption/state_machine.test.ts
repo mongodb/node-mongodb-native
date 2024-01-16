@@ -16,7 +16,7 @@ import { Db } from '../../../src/db';
 import { MongoClient } from '../../../src/mongo_client';
 import { Int32, Long, serialize } from '../../mongodb';
 
-describe.only('StateMachine', function () {
+describe('StateMachine', function () {
   class MockRequest implements MongoCryptKMSRequest {
     _bytesNeeded: number;
     endpoint = 'some.fake.host.com';
