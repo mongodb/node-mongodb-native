@@ -293,18 +293,7 @@ export class StateMachine {
     };
     const message = request.message;
     const buffer = new BufferPool();
-
-    let socket: tls.TLSSocket;
-    let rawSocket: net.Socket;
-
-    function destroySockets() {
-      for (const sock of [socket, rawSocket]) {
-        if (sock) {
-          sock.removeAllListeners();
-          sock.destroy();
-        }
-      }
-    }
+    const rawSocket = new net.Socket();
 
     function ontimeout() {
       return new MongoCryptError('KMS request timed out');
@@ -319,17 +308,18 @@ export class StateMachine {
     }
 
     try {
+      const { promise: onceRawSocketError, reject: rejectOnRawSocket } =
+        promiseWithResolvers<void>();
+
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        rawSocket = net.connect({
+        rawSocket.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
-
-        const { promise: onceRawSocketError, reject } = promiseWithResolvers<void>();
         rawSocket
-          .once('timeout', () => reject(ontimeout()))
-          .once('error', err => reject(onerror(err)))
-          .once('close', () => reject(onclose()));
+          .once('timeout', () => rejectOnRawSocket(ontimeout()))
+          .once('error', err => rejectOnRawSocket(onerror(err)))
+          .once('close', () => rejectOnRawSocket(onclose()));
         await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
 
         try {
@@ -369,7 +359,7 @@ export class StateMachine {
         }
       }
 
-      socket = tls.connect(options, () => {
+      const socket = tls.connect(options, () => {
         socket.write(message);
       });
 
@@ -392,7 +382,8 @@ export class StateMachine {
       await onSocketDataFullyRead;
     } finally {
       // There's no need for any more activity on this socket at this point.
-      destroySockets();
+      rawSocket.removeAllListeners();
+      rawSocket.destroy();
     }
   }
 

@@ -254,7 +254,7 @@ describe('StateMachine', function () {
     context('when server closed the socket', function () {
       let server;
 
-      beforeEach(async () => {
+      beforeEach(async function () {
         server = net.createServer(async socket => {
           socket.end();
         });
@@ -262,8 +262,9 @@ describe('StateMachine', function () {
         await once(server, 'listening');
       });
 
-      afterEach(() => {
+      afterEach(function () {
         server.close();
+        this.sinon.restore();
       });
 
       it('throws a MongoCryptError error with proxyOptions', async function () {
@@ -273,7 +274,6 @@ describe('StateMachine', function () {
             proxyPort: server.address().port
           }
         } as any);
-
         const request = new MockRequest(Buffer.from('foobar'), 500);
         try {
           await stateMachine.kmsRequest(request);
@@ -285,18 +285,32 @@ describe('StateMachine', function () {
         expect.fail('missed exception');
       });
 
-      it('throws a MongoCryptError error with host and port', async function () {
+      it('throws a MongoCryptError error with a tls endpoint', async function () {
         const stateMachine = new StateMachine({
-          host: 'localhost',
-          port: server.address().port
+          tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
         } as any);
+        const request = new MockRequest(Buffer.from('foobar'), -1);
+        const buffer = Buffer.from('foobar');
 
-        const request = new MockRequest(Buffer.from('foobar'), 500);
+        this.sinon.stub(fs, 'readFile').callsFake(fileName => {
+          expect(fileName).to.equal('test.pem');
+          return Promise.resolve(buffer);
+        });
+        this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
+          this.fakeSocket = new MockSocket(callback);
+          return this.fakeSocket;
+        });
+
         try {
-          await stateMachine.kmsRequest(request);
+          const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+          await promisify(setTimeout)(0);
+          this.fakeSocket.emit('close');
+
+          await kmsRequestPromise;
         } catch (err) {
           expect(err.name).to.equal('MongoCryptError');
-          expect(err.message).to.equal('KMS request failed');
+          expect(err.message).to.equal('KMS request closed');
           return;
         }
         expect.fail('missed exception');
