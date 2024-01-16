@@ -294,7 +294,7 @@ export class StateMachine {
     const message = request.message;
     const buffer = new BufferPool();
 
-    let socket: net.Socket;
+    let socket: tls.TLSSocket;
     let rawSocket: net.Socket;
 
     function destroySockets() {
@@ -310,8 +310,8 @@ export class StateMachine {
       return new MongoCryptError('KMS request timed out');
     }
 
-    function onerror(err: Error) {
-      return new MongoCryptError('KMS request failed', { cause: err });
+    function onerror(cause: Error) {
+      return new MongoCryptError('KMS request failed', { cause });
     }
 
     function onclose() {
@@ -368,7 +368,7 @@ export class StateMachine {
         socket.write(message);
       });
 
-      const { promise: onSocketDataFullyRead, reject, resolve } = promiseWithResolvers();
+      const { promise: onSocketDataFullyRead, reject, resolve } = promiseWithResolvers<void>();
       socket
         .once('timeout', () => reject(ontimeout()))
         .once('error', err => reject(onerror(err)))
@@ -381,17 +381,14 @@ export class StateMachine {
           }
 
           if (request.bytesNeeded <= 0) {
-            // There's no need for any more activity on this socket at this point.
-            destroySockets();
-            resolve(undefined);
+            resolve();
           }
         });
 
       await onSocketDataFullyRead;
-    } catch (err) {
-      // Destroy sockets on error.
+    } finally {
+      // There's no need for any more activity on this socket at this point.
       destroySockets();
-      throw err;
     }
   }
 
