@@ -294,6 +294,16 @@ export class StateMachine {
     const message = request.message;
     const buffer = new BufferPool();
     const rawSocket = new net.Socket();
+    let socket: tls.TLSSocket;
+
+    function destroySockets() {
+      for (const sock of [socket, rawSocket]) {
+        if (sock) {
+          sock.removeAllListeners();
+          sock.destroy();
+        }
+      }
+    }
 
     function ontimeout() {
       return new MongoCryptError('KMS request timed out');
@@ -382,8 +392,7 @@ export class StateMachine {
       await onSocketDataFullyRead;
     } finally {
       // There's no need for any more activity on this socket at this point.
-      rawSocket.removeAllListeners();
-      rawSocket.destroy();
+      destroySockets();
     }
   }
 
