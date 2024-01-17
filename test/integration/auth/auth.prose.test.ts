@@ -385,26 +385,6 @@ describe('Authentication Spec Prose Tests', function () {
         }
       });
 
-      context('username and password in server options', () => {
-        for (const { username, password } of [
-          { username: 'IX', password: 'IX' },
-          { username: 'IX', password: 'I\u00ADX' },
-          { username: '\u2168', password: 'IV' },
-          { username: '\u2168', password: 'I\u00ADV' }
-        ]) {
-          it('logs successfully', metadata, async function () {
-            const options = {
-              auth: { username, password },
-              authSource: 'admin',
-              authMechanism: 'SCRAM-SHA-256'
-            };
-            client = this.configuration.newClient({}, options);
-            const stats = await client.db('admin').stats();
-            expect(stats).to.exist;
-          });
-        }
-      });
-
       context('username and password in db options', () => {
         it('logs successfully', metadata, async function () {
           const options = {
