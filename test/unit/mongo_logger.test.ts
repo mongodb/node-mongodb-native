@@ -19,6 +19,7 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
+  createStdioLogger,
   DEFAULT_MAX_DOCUMENT_LENGTH,
   defaultLogTransform,
   type Log,
@@ -26,7 +27,8 @@ import {
   MongoLogger,
   type MongoLoggerOptions,
   SeverityLevel,
-  stringifyWithMaxLen} from '../mongodb';
+  stringifyWithMaxLen
+} from '../mongodb';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
@@ -1277,7 +1279,7 @@ describe('class MongoLogger', function () {
         });
       });
 
-      context.only('EJSON stringify invalid inputs', function () {
+      context('EJSON stringify invalid inputs', function () {
         const errorInputs = [
           {
             name: 'Map with non-string keys',
@@ -1303,7 +1305,7 @@ describe('class MongoLogger', function () {
         }
       });
 
-      context.only('when given anonymous function as input', function () {
+      context('when given anonymous function as input', function () {
         it('should output default error message', function () {
           expect(stringifyWithMaxLen((v: number) => v + 1, DEFAULT_MAX_DOCUMENT_LENGTH)).to.equal(
             'anonymous function'
@@ -1313,11 +1315,97 @@ describe('class MongoLogger', function () {
     });
   });
 
-  describe.only('defaultLogTransform', function () {
+  describe('defaultLogTransform', function () {
     context('when provided a Loggable Event with invalid host-port', function () {
       // this is an important case to consider, because in the case of an undefined address, the HostAddress.toString() function will throw
       it('should not throw and output empty host string instead', function () {
         expect(defaultLogTransform({ name: 'connectionCreated' }).serverHost).to.equal('');
+      });
+    });
+  });
+
+  describe('log', function () {
+    context('stream failure handling', function () {
+      const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
+        default: 'error'
+      } as any;
+      context('when stream is not stderr', function () {
+        let stderrStub;
+
+        beforeEach(function () {
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        context('when stream user defined stream and stream.write throws', function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', function () {
+            const stream = {
+              write(_log) {
+                throw Error('This writable always throws');
+              }
+            };
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: stream
+            });
+            // print random message at the debug level
+            logger.debug('random message');
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'This writable always throws' }`
+            );
+            logger.debug('random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.not.be.null;
+          });
+        });
+
+        context('when stream is stdout and stdout.write throws', function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', function () {
+            sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stdout)
+            });
+            logger.debug('random message');
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'I am stdout and do not work' }`
+            );
+            logger.debug('random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.not.be.null;
+          });
+        });
+      });
+
+      context('when stream is stderr', function () {
+        context('when stderr.write throws', function () {
+          beforeEach(function () {
+            sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
+          });
+          afterEach(function () {
+            sinon.restore();
+          });
+
+          it('should not throw error', function () {
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stderr)
+            });
+            expect(() => logger.debug('random message')).to.not.throw(Error);
+          });
+        });
       });
     });
   });

@@ -744,6 +744,30 @@ export class MongoLogger {
     return compareSeverity(severity, this.componentSeverities[component]) <= 0;
   }
 
+  turnOffSeverities() {
+    this.componentSeverities[MongoLoggableComponent.CLIENT] = SeverityLevel.OFF;
+    this.componentSeverities[MongoLoggableComponent.COMMAND] = SeverityLevel.OFF;
+    this.componentSeverities[MongoLoggableComponent.SERVER_SELECTION] = SeverityLevel.OFF;
+    this.componentSeverities[MongoLoggableComponent.TOPOLOGY] = SeverityLevel.OFF;
+    this.componentSeverities[MongoLoggableComponent.CONNECTION] = SeverityLevel.OFF;
+  }
+
+  logWriteFailureHandler(errorMessage: string) {
+    try {
+      const tempLogDestination = createStdioLogger(process.stderr);
+      tempLogDestination.write({
+        t: new Date(),
+        c: MongoLoggableComponent.CLIENT,
+        s: SeverityLevel.ERROR,
+        message: `User input for mongodbLogPath is now invalid. Now logging to stderr.`,
+        error: errorMessage
+      });
+      this.logDestination = tempLogDestination;
+    } catch (e) {
+      this.turnOffSeverities();
+    }
+  }
+
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
@@ -761,7 +785,11 @@ export class MongoLogger {
         logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }
-    this.logDestination.write(logMessage);
+    try {
+      this.logDestination.write(logMessage);
+    } catch (e) {
+      this.logWriteFailureHandler(e.message);
+    }
   }
 
   /**
