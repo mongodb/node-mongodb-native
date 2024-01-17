@@ -70,5 +70,12 @@ tests:
           - level: debug
             component: topology
             data:
+              message: "Topology description changed"
+              topologyId: { $$exists: true }
+              previousDescription: { $$exists: true } # loadBalanced topology
+              newDescription: { $$exists: true } # unknown topology
+          - level: debug
+            component: topology
+            data:
               message: "Stopped topology monitoring"
               topologyId: { $$exists: true }
