@@ -20,13 +20,13 @@ import {
   CONNECTION_POOL_READY,
   CONNECTION_READY,
   DEFAULT_MAX_DOCUMENT_LENGTH,
+  defaultLogTransform,
   type Log,
   type MongoDBLogWritable,
   MongoLogger,
   type MongoLoggerOptions,
   SeverityLevel,
-  stringifyWithMaxLen
-} from '../mongodb';
+  stringifyWithMaxLen} from '../mongodb';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
@@ -1275,6 +1275,36 @@ describe('class MongoLogger', function () {
             EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));
           }).to.not.throw();
         });
+      });
+
+      context.only('EJSON stringify invalid inputs', function () {
+        const errorInputs = [];
+        for (let i = 0; i < errorInputs.length; i++) {
+          context(`when value is ${errorInputs[i].name}`, function () {
+            it('should output default error message, with no error thrown', function () {
+              expect(
+                stringifyWithMaxLen(errorInputs[i].input, DEFAULT_MAX_DOCUMENT_LENGTH)
+              ).to.equal('... ESJON failed : Error ...');
+            });
+          });
+        }
+      });
+
+      context.only('when given anonymous function as input', function () {
+        it('should output default error message', function () {
+          expect(stringifyWithMaxLen((v: number) => v + 1, DEFAULT_MAX_DOCUMENT_LENGTH)).to.equal(
+            'anonymous function'
+          );
+        });
+      });
+    });
+  });
+
+  describe.only('defaultLogTransform', function () {
+    context('when provided a Loggable Event with invalid host-port', function () {
+      // this is an important case to consider, because in the case of an undefined address, the HostAddress.toString() function will throw
+      it('should not throw and output empty host string instead', function () {
+        expect(defaultLogTransform({ name: 'connectionCreated' }).serverHost).to.equal('');
       });
     });
   });
