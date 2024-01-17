@@ -294,7 +294,10 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     }
 
     if (topologyDescription.type === TopologyType.Sharded) {
-      const selectable = servers.length > 0 ? servers : deprioritized;
+      const filtered = servers.filter(server => {
+        return !deprioritized.includes(server);
+      });
+      const selectable = filtered.length > 0 ? filtered : deprioritized;
       return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
     }
 
