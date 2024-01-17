@@ -288,30 +288,17 @@ describe('StateMachine', function () {
 
       it('throws a MongoCryptError error with a tls endpoint', async function () {
         const stateMachine = new StateMachine({
+          host: 'localhost',
+          post: server.address().port,
           tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
         } as any);
-        const request = new MockRequest(Buffer.from('foobar'), -1);
-        const buffer = Buffer.from('foobar');
-
-        this.sinon.stub(fs, 'readFile').callsFake(fileName => {
-          expect(fileName).to.equal('test.pem');
-          return Promise.resolve(buffer);
-        });
-        this.sinon.stub(tls, 'connect').callsFake((options, callback) => {
-          this.fakeSocket = new MockSocket(callback);
-          return this.fakeSocket;
-        });
+        const request = new MockRequest(Buffer.from('foobar'), 500);
 
         try {
-          const kmsRequestPromise = stateMachine.kmsRequest(request);
-
-          await promisify(setTimeout)(0);
-          this.fakeSocket.emit('close');
-
-          await kmsRequestPromise;
+          await stateMachine.kmsRequest(request);
         } catch (err) {
           expect(err.name).to.equal('MongoCryptError');
-          expect(err.message).to.equal('KMS request closed');
+          expect(err.message).to.equal('KMS request failed');
           return;
         }
         expect.fail('missed exception');
