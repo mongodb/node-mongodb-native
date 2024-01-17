@@ -252,21 +252,21 @@ describe('StateMachine', function () {
     });
 
     context('when server closed the socket', function () {
-      let server;
-
-      beforeEach(async function () {
-        server = net.createServer(async socket => {
-          socket.end();
-        });
-        server.listen(0);
-        await once(server, 'listening');
-      });
-
-      afterEach(function () {
-        server.close();
-      });
-
       context('Socks5', function () {
+        let server;
+
+        beforeEach(async function () {
+          server = net.createServer(async socket => {
+            socket.end();
+          });
+          server.listen(0);
+          await once(server, 'listening');
+        });
+
+        afterEach(function () {
+          server.close();
+        });
+
         it('throws a MongoCryptError with SocksClientError cause', async function () {
           const stateMachine = new StateMachine({
             proxyOptions: {
@@ -288,15 +288,27 @@ describe('StateMachine', function () {
         });
       });
 
-      context('endpoint', function () {
-        const netSocket = new net.Socket();
+      context('endpoint with host and port', function () {
+        let server;
+        let serverSocket;
 
         beforeEach(async function () {
-          netSocket.connect({
+          server = net.createServer(async socket => {
+            serverSocket = socket;
+          });
+          server.listen(0);
+          await once(server, 'listening');
+        });
+
+        afterEach(function () {
+          server.close();
+        });
+
+        beforeEach(async function () {
+          const netSocket = net.connect({
             port: server.address().port
           });
           await once(netSocket, 'connect');
-
           this.sinon.stub(tls, 'connect').returns(netSocket);
         });
 
@@ -316,7 +328,7 @@ describe('StateMachine', function () {
             const kmsRequestPromise = stateMachine.kmsRequest(request);
 
             await promisify(setTimeout)(0);
-            netSocket.end();
+            serverSocket.end();
 
             await kmsRequestPromise;
           } catch (err) {
