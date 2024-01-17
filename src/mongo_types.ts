@@ -13,14 +13,14 @@ import type {
   Timestamp
 } from './bson';
 import { type CommandStartedEvent } from './cmap/command_monitoring_events';
-import type {
-  LoggableCommandFailedEvent,
-  LoggableCommandSucceededEvent,
-  LoggableServerHeartbeatFailedEvent,
-  LoggableServerHeartbeatStartedEvent,
-  LoggableServerHeartbeatSucceededEvent,
+import {
+  type LoggableCommandFailedEvent,
+  type LoggableCommandSucceededEvent,
+  type LoggableServerHeartbeatFailedEvent,
+  type LoggableServerHeartbeatStartedEvent,
+  type LoggableServerHeartbeatSucceededEvent,
   MongoLoggableComponent,
-  MongoLogger
+  type MongoLogger
 } from './mongo_logger';
 import type { Sort } from './sort';
 
@@ -464,7 +464,7 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
         databaseName: databaseName,
         ...args[0]
       };
-      this.mongoLogger?.debug(this.component, loggableCommandEvent);
+      this.mongoLogger?.debug(MongoLoggableComponent.COMMAND, loggableCommandEvent);
     }
   }
 }
