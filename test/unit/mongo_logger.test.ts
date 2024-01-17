@@ -1278,7 +1278,20 @@ describe('class MongoLogger', function () {
       });
 
       context.only('EJSON stringify invalid inputs', function () {
-        const errorInputs = [];
+        const errorInputs = [
+          {
+            name: 'Map with non-string keys',
+            input: new Map([
+              [1, 'one'],
+              [2, 'two'],
+              [3, 'three']
+            ])
+          },
+          {
+            name: 'Object with invalid _bsontype',
+            input: { _bsontype: 'i will never be a real bson type' }
+          }
+        ];
         for (let i = 0; i < errorInputs.length; i++) {
           context(`when value is ${errorInputs[i].name}`, function () {
             it('should output default error message, with no error thrown', function () {
