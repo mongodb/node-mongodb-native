@@ -174,6 +174,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *  - TCP handshake
    *  - TLS negotiated
    *  - mongodb handshake (saslStart, saslContinue), includes authentication
+   *
    * Once connection is established, command logging can log events (if enabled)
    */
   public established: boolean;
@@ -186,8 +187,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private messageStream: Readable;
   private socketWrite: (buffer: Uint8Array) => Promise<void>;
   private clusterTime: Document | null = null;
-  /** @internal  */
-  override component = MongoLoggableComponent.COMMAND;
   /** @internal */
   override mongoLogger: MongoLogger | undefined;
 
@@ -461,7 +460,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (
       this.monitorCommands ||
-      (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+      (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
     ) {
       started = now();
       this.emitAndLogCommand(
@@ -490,7 +489,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (
           this.monitorCommands ||
-          (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+          (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
         ) {
           this.emitAndLogCommand(
             this.monitorCommands,
@@ -513,7 +512,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (error) {
       if (
         this.monitorCommands ||
-        (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, this.component))
+        (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
       ) {
         if (error.name === 'MongoWriteConcernError') {
           this.emitAndLogCommand(

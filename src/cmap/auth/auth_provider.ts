@@ -65,9 +65,11 @@ export abstract class AuthProvider {
     }
     try {
       context.reauthenticating = true;
+      context.connection.established = false;
       await this.auth(context);
     } finally {
       context.reauthenticating = false;
+      context.connection.established = true;
     }
   }
 }
