@@ -286,19 +286,19 @@ export class StateMachine {
   async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    const options: tls.ConnectionOptions & { host: string; port: number } = {
+    const options: tls.ConnectionOptions & { host: string; port: number; socket: net.Socket } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
-      port
+      port,
+      socket: new net.Socket()
     };
     const message = request.message;
     const buffer = new BufferPool();
 
     let socket: tls.TLSSocket;
-    let rawSocket: net.Socket;
 
     function destroySockets() {
-      for (const sock of [socket, rawSocket]) {
+      for (const sock of [socket, options.socket]) {
         if (sock) {
           sock.removeAllListeners();
           sock.destroy();
@@ -318,36 +318,35 @@ export class StateMachine {
       return new MongoCryptError('KMS request closed');
     }
 
+    const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
+    options.socket
+      .once('timeout', () => rejectOnNetSocketError(ontimeout()))
+      .once('error', err => rejectOnNetSocketError(onerror(err)))
+      .once('close', () => rejectOnNetSocketError(onclose()));
+
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        rawSocket = net.connect({
+        options.socket.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
-        const { promise: onceRawSocketError, reject } = promiseWithResolvers();
-        rawSocket
-          .once('timeout', () => reject(ontimeout()))
-          .once('error', err => reject(onerror(err)))
-          .once('close', () => reject(onclose()));
-        await Promise.race([onceRawSocketError, once(rawSocket, 'connect')]);
+        await Promise.race([onceNetSocketError, once(options.socket, 'connect')]);
 
         try {
           socks ??= loadSocks();
-          options.socket = (
-            await socks.SocksClient.createConnection({
-              existing_socket: rawSocket,
-              command: 'connect',
-              destination: { host: options.host, port: options.port },
-              proxy: {
-                // host and port are ignored because we pass existing_socket
-                host: 'iLoveJavaScript',
-                port: 0,
-                type: 5,
-                userId: this.options.proxyOptions.proxyUsername,
-                password: this.options.proxyOptions.proxyPassword
-              }
-            })
-          ).socket;
+          await socks.SocksClient.createConnection({
+            existing_socket: options.socket,
+            command: 'connect',
+            destination: { host: options.host, port: options.port },
+            proxy: {
+              // host and port are ignored because we pass existing_socket
+              host: 'iLoveJavaScript',
+              port: 0,
+              type: 5,
+              userId: this.options.proxyOptions.proxyUsername,
+              password: this.options.proxyOptions.proxyPassword
+            }
+          });
         } catch (err) {
           throw onerror(err);
         }
@@ -372,11 +371,15 @@ export class StateMachine {
         socket.write(message);
       });
 
-      const { promise: onSocketDataFullyRead, reject, resolve } = promiseWithResolvers<void>();
+      const {
+        promise: onSocketDataFullyRead,
+        reject: rejectOnTlsSocketError,
+        resolve
+      } = promiseWithResolvers<void>();
       socket
-        .once('timeout', () => reject(ontimeout()))
-        .once('error', err => reject(onerror(err)))
-        .once('close', () => reject(onclose()))
+        .once('timeout', () => rejectOnTlsSocketError(ontimeout()))
+        .once('error', err => rejectOnTlsSocketError(onerror(err)))
+        .once('close', () => rejectOnTlsSocketError(onclose()))
         .on('data', data => {
           buffer.append(data);
           while (request.bytesNeeded > 0 && buffer.length) {
