@@ -25,7 +25,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { type Callback, maybeCallback, supportsRetryableWrites } from '../utils';
+import { supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -51,36 +51,23 @@ export interface ExecutionResult {
  * @internal
  *
  * @remarks
- * This method reduces large amounts of duplication in the entire codebase by providing
- * a single point for determining whether callbacks or promises should be used. Additionally
- * it allows for a single point of entry to provide features such as implicit sessions, which
+ * Allows for a single point of entry to provide features such as implicit sessions, which
  * are required by the Driver Sessions specification in the event that a ClientSession is
- * not provided
+ * not provided.
  *
- * @param topology - The topology to execute this operation on
+ * The expectation is that this function:
+ * - Connects the MongoClient if it has not already been connected
+ * - Creates a session if none is provided and cleans up the session it creates
+ * - Selects a server based on readPreference or various factors
+ * - Retries an operation if it fails for certain errors, see {@link retryOperation}
+ *
+ * @typeParam T - The operation's type
+ * @typeParam TResult - The type of the operation's result, calculated from T
+ *
+ * @param client - The MongoClient to execute this operation with
  * @param operation - The operation to execute
- * @param callback - The command result callback
  */
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T): Promise<TResult>;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback: Callback<TResult>): void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void;
-export function executeOperation<
-  T extends AbstractOperation<TResult>,
-  TResult = ResultTypeFromOperation<T>
->(client: MongoClient, operation: T, callback?: Callback<TResult>): Promise<TResult> | void {
-  return maybeCallback(() => executeOperationAsync(client, operation), callback);
-}
-
-async function executeOperationAsync<
+export async function executeOperation<
   T extends AbstractOperation<TResult>,
   TResult = ResultTypeFromOperation<T>
 >(client: MongoClient, operation: T): Promise<TResult> {
@@ -151,7 +138,10 @@ async function executeOperationAsync<
     selector = readPreference;
   }
 
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session,
+    operationName: operation.commandName
+  });
 
   if (session == null) {
     // No session also means it is not retryable, early exit
@@ -251,7 +241,10 @@ async function retryOperation<
   }
 
   // select a new server, and attempt to retry the operation
-  const server = await topology.selectServerAsync(selector, { session });
+  const server = await topology.selectServerAsync(selector, {
+    session,
+    operationName: operation.commandName
+  });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
     throw new MongoUnexpectedServerResponseError(

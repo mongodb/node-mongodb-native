@@ -1,0 +1,598 @@
+{
+  "description": "timeoutMS behaves correctly for change streams",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "topologies": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "error if maxAwaitTimeMS is greater than timeoutMS",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 10
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "error if maxAwaitTimeMS is equal to timeoutMS",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 5,
+            "maxAwaitTimeMS": 5
+          },
+          "expectError": {
+            "isClientError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to initial aggregate",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 55
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 50
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is not set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 30
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 1050
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "changeStream"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate",
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 20,
+            "batchSize": 2,
+            "maxAwaitTimeMS": 1
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "iterateOnce",
+          "object": "changeStream"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": 1
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applies to full resume attempt in a next call",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 20
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "getMore",
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 12,
+                "errorCode": 7,
+                "errorLabels": [
+                  "ResumableChangeStreamError"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "change stream can be iterated again if previous iteration times out",
+      "operations": [
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "maxAwaitTimeMS": 1,
+            "timeoutMS": 100
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 150
+              }
+            }
+          }
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        },
+        {
+          "name": "iterateOnce",
+          "object": "changeStream"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS is refreshed for getMore - failure",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "getMore"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "pipeline": [],
+            "timeoutMS": 10
+          },
+          "saveResultAsEntity": "changeStream"
+        },
+        {
+          "name": "iterateUntilDocumentOrError",
+          "object": "changeStream",
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "getMore",
+                "databaseName": "test",
+                "command": {
+                  "getMore": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  },
+                  "collection": "coll"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

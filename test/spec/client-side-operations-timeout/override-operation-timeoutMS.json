@@ -1,0 +1,3577 @@
+{
+  "description": "timeoutMS can be overridden for an operation",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "topologies": [
+        "replicaset",
+        "sharded"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "uriOptions": {
+          "timeoutMS": 10
+        },
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ],
+        "ignoreCommandMonitoringEvents": [
+          "killCursors"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection",
+        "database": "database",
+        "collectionName": "coll"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS can be configured for an operation - listDatabases on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listDatabases",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listDatabases",
+                "databaseName": "admin",
+                "command": {
+                  "listDatabases": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listDatabases on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listDatabases",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listDatabases",
+                "databaseName": "admin",
+                "command": {
+                  "listDatabases": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - listDatabaseNames on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listDatabaseNames",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listDatabases",
+                "databaseName": "admin",
+                "command": {
+                  "listDatabases": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listDatabaseNames on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listDatabases"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listDatabaseNames",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listDatabases",
+                "databaseName": "admin",
+                "command": {
+                  "listDatabases": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - createChangeStream on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 1000,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "admin",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - createChangeStream on client",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "client",
+          "arguments": {
+            "timeoutMS": 0,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "admin",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - aggregate on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 1000,
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - aggregate on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 0,
+            "pipeline": [
+              {
+                "$listLocalSessions": {}
+              },
+              {
+                "$limit": 1
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - listCollections on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listCollections"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listCollections",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listCollections",
+                "databaseName": "test",
+                "command": {
+                  "listCollections": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listCollections on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listCollections"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listCollections",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listCollections",
+                "databaseName": "test",
+                "command": {
+                  "listCollections": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - listCollectionNames on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listCollections"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listCollectionNames",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listCollections",
+                "databaseName": "test",
+                "command": {
+                  "listCollections": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listCollectionNames on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listCollections"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listCollectionNames",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listCollections",
+                "databaseName": "test",
+                "command": {
+                  "listCollections": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - runCommand on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "ping"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 1000,
+            "command": {
+              "ping": 1
+            },
+            "commandName": "ping"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ping",
+                "databaseName": "test",
+                "command": {
+                  "ping": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - runCommand on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "ping"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 0,
+            "command": {
+              "ping": 1
+            },
+            "commandName": "ping"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "ping",
+                "databaseName": "test",
+                "command": {
+                  "ping": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - createChangeStream on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 1000,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - createChangeStream on database",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "database",
+          "arguments": {
+            "timeoutMS": 0,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": 1,
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - aggregate on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - aggregate on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - count on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "count",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "count",
+                "databaseName": "test",
+                "command": {
+                  "count": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - count on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "count",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "count",
+                "databaseName": "test",
+                "command": {
+                  "count": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - countDocuments on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - countDocuments on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - estimatedDocumentCount on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "count",
+                "databaseName": "test",
+                "command": {
+                  "count": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - estimatedDocumentCount on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "count"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "estimatedDocumentCount",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "count",
+                "databaseName": "test",
+                "command": {
+                  "count": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - distinct on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "distinct"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "distinct",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "fieldName": "x",
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "distinct",
+                "databaseName": "test",
+                "command": {
+                  "distinct": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - distinct on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "distinct"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "distinct",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "fieldName": "x",
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "distinct",
+                "databaseName": "test",
+                "command": {
+                  "distinct": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - find on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - find on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - findOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - findOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "find",
+                "databaseName": "test",
+                "command": {
+                  "find": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - listIndexes on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listIndexes",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listIndexes",
+                "databaseName": "test",
+                "command": {
+                  "listIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listIndexes on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listIndexes",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listIndexes",
+                "databaseName": "test",
+                "command": {
+                  "listIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - listIndexNames on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listIndexNames",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listIndexes",
+                "databaseName": "test",
+                "command": {
+                  "listIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - listIndexNames on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "listIndexNames",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "listIndexes",
+                "databaseName": "test",
+                "command": {
+                  "listIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - createChangeStream on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - createChangeStream on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createChangeStream",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "pipeline": []
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "aggregate",
+                "databaseName": "test",
+                "command": {
+                  "aggregate": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - insertOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - insertOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "document": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - insertMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "documents": [
+              {
+                "x": 1
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - insertMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "documents": [
+              {
+                "x": 1
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - deleteOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "delete",
+                "databaseName": "test",
+                "command": {
+                  "delete": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - deleteOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "delete",
+                "databaseName": "test",
+                "command": {
+                  "delete": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - deleteMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "delete",
+                "databaseName": "test",
+                "command": {
+                  "delete": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - deleteMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "delete",
+                "databaseName": "test",
+                "command": {
+                  "delete": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - replaceOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {},
+            "replacement": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - replaceOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {},
+            "replacement": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - updateOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - updateOne on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - updateMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - updateMany on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "update",
+                "databaseName": "test",
+                "command": {
+                  "update": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - findOneAndDelete on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - findOneAndDelete on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {}
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - findOneAndReplace on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {},
+            "replacement": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - findOneAndReplace on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {},
+            "replacement": {
+              "x": 1
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - findOneAndUpdate on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - findOneAndUpdate on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "filter": {},
+            "update": {
+              "$set": {
+                "x": 1
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "findAndModify",
+                "databaseName": "test",
+                "command": {
+                  "findAndModify": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - bulkWrite on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - bulkWrite on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - createIndex on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "createIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createIndex",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "createIndexes",
+                "databaseName": "test",
+                "command": {
+                  "createIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - createIndex on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "createIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "createIndex",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "keys": {
+              "x": 1
+            },
+            "name": "x_1"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "createIndexes",
+                "databaseName": "test",
+                "command": {
+                  "createIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - dropIndex on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndex",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000,
+            "name": "x_1"
+          },
+          "expectError": {
+            "isTimeoutError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "dropIndexes",
+                "databaseName": "test",
+                "command": {
+                  "dropIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - dropIndex on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndex",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0,
+            "name": "x_1"
+          },
+          "expectError": {
+            "isTimeoutError": false
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "dropIndexes",
+                "databaseName": "test",
+                "command": {
+                  "dropIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be configured for an operation - dropIndexes on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndexes",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 1000
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "dropIndexes",
+                "databaseName": "test",
+                "command": {
+                  "dropIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$type": [
+                      "int",
+                      "long"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS can be set to 0 for an operation - dropIndexes on collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "dropIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 15
+              }
+            }
+          }
+        },
+        {
+          "name": "dropIndexes",
+          "object": "collection",
+          "arguments": {
+            "timeoutMS": 0
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "dropIndexes",
+                "databaseName": "test",
+                "command": {
+                  "dropIndexes": "coll",
+                  "maxTimeMS": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

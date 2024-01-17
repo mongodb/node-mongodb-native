@@ -1,0 +1,393 @@
+{
+  "description": "timeoutMS behaves correctly during command execution",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.9",
+      "topologies": [
+        "single",
+        "replicaset",
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "coll",
+      "databaseName": "test",
+      "documents": []
+    },
+    {
+      "collectionName": "timeoutColl",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "maxTimeMS value in the command is less than timeoutMS",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "reduceMaxTimeMSTest",
+                "blockConnection": true,
+                "blockTimeMS": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "appName": "reduceMaxTimeMSTest",
+                    "w": 1,
+                    "timeoutMS": 500,
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "test"
+                }
+              },
+              {
+                "collection": {
+                  "id": "timeoutCollection",
+                  "database": "database",
+                  "collectionName": "timeoutColl"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "timeoutMS": 100000
+          }
+        },
+        {
+          "name": "wait",
+          "object": "testRunner",
+          "arguments": {
+            "ms": 1000
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl",
+                  "maxTimeMS": {
+                    "$$lte": 450
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "command is not sent if RTT is greater than timeoutMS",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "rttTooHighTest",
+                "blockConnection": true,
+                "blockTimeMS": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "appName": "rttTooHighTest",
+                    "w": 1,
+                    "timeoutMS": 10,
+                    "heartbeatFrequencyMS": 500
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "test"
+                }
+              },
+              {
+                "collection": {
+                  "id": "timeoutCollection",
+                  "database": "database",
+                  "collectionName": "timeoutColl"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "timeoutMS": 100000
+          }
+        },
+        {
+          "name": "wait",
+          "object": "testRunner",
+          "arguments": {
+            "ms": 1000
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "short-circuit is not enabled with only 1 RTT measurement",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": "alwaysOn",
+              "data": {
+                "failCommands": [
+                  "hello",
+                  "isMaster"
+                ],
+                "appName": "reduceMaxTimeMSTest",
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "useMultipleMongoses": false,
+                  "uriOptions": {
+                    "appName": "reduceMaxTimeMSTest",
+                    "w": 1,
+                    "timeoutMS": 90,
+                    "heartbeatFrequencyMS": 100000
+                  },
+                  "observeEvents": [
+                    "commandStartedEvent"
+                  ]
+                }
+              },
+              {
+                "database": {
+                  "id": "database",
+                  "client": "client",
+                  "databaseName": "test"
+                }
+              },
+              {
+                "collection": {
+                  "id": "timeoutCollection",
+                  "database": "database",
+                  "collectionName": "timeoutColl"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "timeoutMS": 100000
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "timeoutCollection",
+          "arguments": {
+            "document": {
+              "_id": 2
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl"
+                }
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "commandName": "insert",
+                "databaseName": "test",
+                "command": {
+                  "insert": "timeoutColl",
+                  "maxTimeMS": {
+                    "$$lte": 450
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -129,7 +129,12 @@ const EXPECTED_EXPORTS = [
   'TopologyType',
   'UnorderedBulkOperation',
   'UUID',
-  'WriteConcern'
+  'WriteConcern',
+  'ServerSelectionEvent',
+  'ServerSelectionFailedEvent',
+  'ServerSelectionStartedEvent',
+  'ServerSelectionSucceededEvent',
+  'WaitingForSuitableServerEvent'
 ];
 
 describe('mongodb entrypoint', () => {

@@ -1,0 +1,126 @@
+description: "replica-set-logging"
+
+schemaVersion: "1.14"
+
+runOnRequirements:
+  - topologies:
+    - replicaset
+
+createEntities:
+  - client:
+      id: &client client
+      uriOptions:
+        retryWrites: false  # so we don't retry after hitting a failpoint
+        heartbeatFrequencyMS: 500
+        serverSelectionTimeoutMS: 2000 # avoid hanging for 30s in test expecting SS failure due to timeout
+      observeLogMessages:
+        serverSelection: debug
+      observeEvents:
+        - serverDescriptionChangedEvent
+        - topologyDescriptionChangedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName logging-tests
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName server-selection
+  - client:
+      id: &failPointClient failPointClient
+  - collection:
+      id: &unsatisfiableRPColl unsatisfiableRPColl
+      database: *database
+      collectionName: &unsatisfiableRPColl unsatisfiableRPColl
+      collectionOptions:
+        readPreference:
+          mode: Secondary
+          tagSets:
+            - { nonexistenttag : a }
+
+tests:
+  - description: "A successful operation"
+    operations:
+      # ensure we've discovered the primary before starting, so we don't get an unexpected "waiting" message
+      # when server selection happens for the insert, or have extra logs from the driver performing server
+      # expected events are initial cluster type change from unknown to ReplicaSet, and connect events for each of 3 servers.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 4
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x : 1 }
+    expectLogMessages:
+      - client: *client
+        messages:
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection started"
+              selector: { $$exists: true }
+              operation: insert
+              topologyDescription: { $$exists: true } 
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection succeeded"
+              selector: { $$exists: true }
+              operation: insert
+              topologyDescription: { $$exists: true }
+              serverHost: { $$type: string }
+              serverPort: { $$type: [int, long] }
+
+  - description: "Server selection fails due to unsatisfiable read preference"
+    runOnRequirements:
+      - minServerVersion: "4.0" # min version for failCommand on mongod
+    operations:
+      # ensure we've discovered the primary before starting, so we don't get an unexpected "waiting" message
+      # when server selection happens for the insert, or have extra logs from the driver performing server
+      # expected events are initial cluster type change from unknown to ReplicaSet, and connect events for each of 3 servers.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 4
+      # the `find` should never succeed due to the unsatisfiable read preference.
+      - name: find
+        object: *unsatisfiableRPColl
+        arguments:
+          filter: { x : 1 }
+        expectError:
+          isClientError: true # server selection error
+    expectLogMessages:
+      # the topology won't change during this time, so although we exhaust
+      # serverSelectionTimeoutMS we only expect a single message.
+      - client: *client
+        messages:
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection started"
+              selector: { $$exists: true }
+              operation: find
+              topologyDescription: { $$exists: true } 
+          - level: info
+            component: serverSelection
+            data:
+              message: "Waiting for suitable server to become available"
+              selector: { $$exists: true }
+              operation: find
+              topologyDescription: { $$exists: true } 
+              remainingTimeMS: { $$type: [int, long] }
+          - level: debug
+            component: serverSelection
+            data:
+              message: "Server selection failed"
+              selector: { $$exists: true }
+              operation: find
+              topologyDescription: { $$exists: true }
+              failure: { $$exists: true }

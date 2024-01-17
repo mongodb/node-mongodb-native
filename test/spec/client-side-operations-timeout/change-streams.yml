@@ -1,0 +1,333 @@
+description: "timeoutMS behaves correctly for change streams"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies: ["replicaset", "sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+      # Drivers are not required to execute killCursors during resume attempts, so it should be ignored for command
+      # monitoring assertions.
+      ignoreCommandMonitoringEvents: ["killCursors"]
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - collection:
+      id: &collection collection
+      database: *database
+      collectionName: &collectionName coll
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  - description: "error if maxAwaitTimeMS is greater than timeoutMS"
+    operations:
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 5
+          maxAwaitTimeMS: 10
+        expectError:
+          isClientError: true
+
+  - description: "error if maxAwaitTimeMS is equal to timeoutMS"
+    operations:
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 5
+          maxAwaitTimeMS: 5
+        expectError:
+          isClientError: true
+
+  - description: "timeoutMS applied to initial aggregate"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 55
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 50
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  
+  # If maxAwaitTimeMS is not set, timeoutMS should be refreshed for the getMore and the getMore should not have a
+  # maxTimeMS field. This test requires a high timeout because the server applies a default 1000ms maxAwaitTime. To
+  # ensure that the driver is refreshing the timeout between commands, the test blocks aggregate and getMore commands
+  # for 30ms each and creates/iterates a change stream with timeoutMS=1050. The initial aggregate will block for 30ms
+  # and the getMore will block for 1030ms.
+  - description: "timeoutMS is refreshed for getMore if maxAwaitTimeMS is not set"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate", "getMore"]
+              blockConnection: true
+              blockTimeMS: 30
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 1050
+        saveResultAsEntity: &changeStream changeStream
+      - name: iterateOnce
+        object: *changeStream
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
+                maxTimeMS: { $$exists: false }
+
+  # If maxAwaitTimeMS is set, timeoutMS should still be refreshed for the getMore and the getMore command should have a
+  # maxTimeMS field.
+  - description: "timeoutMS is refreshed for getMore if maxAwaitTimeMS is set"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate", "getMore"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 20
+          batchSize: 2
+          maxAwaitTimeMS: 1
+        saveResultAsEntity: &changeStream changeStream
+      - name: iterateOnce
+        object: *changeStream
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
+                maxTimeMS: 1
+
+  # The timeout should be applied to the entire resume attempt, not individually to each command. The test creates a
+  # change stream with timeoutMS=20 which returns an empty initial batch and then sets a fail point to block both
+  # getMore and aggregate for 12ms each and fail with a resumable error. When the resume attempt happens, the getMore
+  # and aggregate block for longer than 20ms total, so it times out.
+  - description: "timeoutMS applies to full resume attempt in a next call"
+    operations:
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 20
+        saveResultAsEntity: &changeStream changeStream
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["getMore", "aggregate"]
+              blockConnection: true
+              blockTimeMS: 12
+              errorCode: 7 # HostNotFound - resumable but does not require an SDAM state change.
+              # failCommand doesn't correctly add the ResumableChangeStreamError by default. It needs to be specified
+              # manually here so the error is considered resumable. The failGetMoreAfterCursorCheckout fail point
+              # would add the label without this, but it does not support blockConnection functionality.
+              errorLabels: ["ResumableChangeStreamError"]
+      - name: iterateUntilDocumentOrError
+        object: *changeStream
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
+                maxTimeMS: { $$exists: false }
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+
+  - description: "change stream can be iterated again if previous iteration times out"
+    operations:
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          # Specify a short maxAwaitTimeMS because otherwise the getMore on the new cursor will wait for 1000ms and
+          # time out.
+          maxAwaitTimeMS: 1
+          timeoutMS: 100
+        saveResultAsEntity: &changeStream changeStream
+      # Block getMore for 150ms to force the next() call to time out.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["getMore"]
+              blockConnection: true
+              blockTimeMS: 150
+      # The original aggregate didn't return any events so this should do a getMore and return a timeout error.
+      - name: iterateUntilDocumentOrError
+        object: *changeStream
+        expectError:
+          isTimeoutError: true
+      # The previous iteration attempt timed out so this should re-create the change stream. We use iterateOnce rather
+      # than iterateUntilDocumentOrError because there haven't been any events and we only want to assert that the
+      # cursor was re-created.
+      - name: iterateOnce
+        object: *changeStream
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          # The iterateUntilDocumentOrError operation should send a getMore.
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
+          # The iterateOnce operation should re-create the cursor via an aggregate and then send a getMore to iterate
+          # the new cursor.
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
+
+  # The timeoutMS value should be refreshed for getMore's. This is a failure test. The createChangeStream operation
+  # sets timeoutMS=10 and the getMore blocks for 15ms, causing iteration to fail with a timeout error.
+  - description: "timeoutMS is refreshed for getMore - failure"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["getMore"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          timeoutMS: 10
+        saveResultAsEntity: &changeStream changeStream
+      # The first iteration should do a getMore
+      - name: iterateUntilDocumentOrError
+        object: *changeStream
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+          # The iterateUntilDocumentOrError operation should send a getMore.
+          - commandStartedEvent:
+              commandName: getMore
+              databaseName: *databaseName
+              command:
+                getMore: { $$type: ["int", "long"] }
+                collection: *collectionName
