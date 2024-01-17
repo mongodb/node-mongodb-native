@@ -511,6 +511,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
     stateTransition(this, STATE_CLOSED);
+    this.s.description = new TopologyDescription(TopologyType.Unknown, new Map());
+
+    // broadcast that topology is in closed state
+    this.emitAndLog(
+      Topology.TOPOLOGY_DESCRIPTION_CHANGED,
+      new TopologyDescriptionChangedEvent(this.s.id, previousDescription, this.s.description)
+    );
 
     // emit an event for close
     this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
