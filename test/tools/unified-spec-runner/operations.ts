@@ -295,15 +295,30 @@ operations.set('dropCollection', async ({ entities, operation }) => {
   }
 });
 
+operations.set('drop', async ({ entities, operation }) => {
+  const bucket = entities.getEntity('bucket', operation.object);
+  return bucket.drop();
+});
+
+operations.set('dropIndexes', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  return collection.dropIndexes();
+});
+
 operations.set('endSession', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
   return session.endSession();
 });
 
 operations.set('find', async ({ entities, operation }) => {
-  const collection = entities.getEntity('collection', operation.object);
+  let queryable;
+  if (operation.object === 'bucket') {
+    queryable = entities.getEntity('bucket', operation.object);
+  } else {
+    queryable = entities.getEntity('collection', operation.object);
+  }
   const { filter, ...opts } = operation.arguments!;
-  return collection.find(filter, opts).toArray();
+  return queryable.find(filter, opts).toArray();
 });
 
 operations.set('findOne', async ({ entities, operation }) => {
@@ -372,14 +387,33 @@ operations.set('listCollections', async ({ entities, operation }) => {
   return db.listCollections(filter, opts).toArray();
 });
 
+operations.set('listCollectionNames', async ({ entities, operation }) => {
+  const db = entities.getEntity('db', operation.object);
+  const { filter, ...opts } = operation.arguments!;
+  const collections = await db.listCollections(filter, opts).toArray();
+  return collections.map(collection => collection.name);
+});
+
 operations.set('listDatabases', async ({ entities, operation }) => {
   const client = entities.getEntity('client', operation.object);
   return client.db().admin().listDatabases(operation.arguments!);
 });
 
+operations.set('listDatabaseNames', async ({ entities, operation }) => {
+  const client = entities.getEntity('client', operation.object);
+  const result = await client.db().admin().listDatabases(operation.arguments!);
+  return result.databases.map(database => database.name);
+});
+
 operations.set('listIndexes', async ({ entities, operation }) => {
   const collection = entities.getEntity('collection', operation.object);
   return collection.listIndexes(operation.arguments!).toArray();
+});
+
+operations.set('listIndexNames', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const indexes = await collection.listIndexes(operation.arguments!).toArray();
+  return indexes.map(index => index.name);
 });
 
 operations.set('loop', async ({ entities, operation, client, testConfig }) => {
@@ -678,6 +712,12 @@ operations.set('withTransaction', async ({ entities, operation, client, testConf
       await executeOperationAndCheck(callbackOperation, entities, client, testConfig);
     }
   }, options);
+});
+
+operations.set('count', async ({ entities, operation }) => {
+  const collection = entities.getEntity('collection', operation.object);
+  const { filter, ...opts } = operation.arguments!;
+  return collection.count(filter, opts);
 });
 
 operations.set('countDocuments', async ({ entities, operation }) => {
