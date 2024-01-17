@@ -460,7 +460,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let started = 0;
     if (
       this.monitorCommands ||
-      (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
+      (this.established &&
+        this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
     ) {
       started = now();
       this.emitAndLogCommand(
@@ -489,7 +490,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
         if (
           this.monitorCommands ||
-          (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
+          (this.established &&
+            this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
         ) {
           this.emitAndLogCommand(
             this.monitorCommands,
@@ -512,7 +514,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     } catch (error) {
       if (
         this.monitorCommands ||
-        (this.established && this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
+        (this.established &&
+          this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
       ) {
         if (error.name === 'MongoWriteConcernError') {
           this.emitAndLogCommand(
