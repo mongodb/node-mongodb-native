@@ -289,17 +289,16 @@ export class StateMachine {
     const options: tls.ConnectionOptions & { host: string; port: number } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
-      port,
-      socket: new net.Socket()
+      port
     };
     const message = request.message;
     const buffer = new BufferPool();
 
-    let rawSocket: net.Socket;
+    const netSocket: net.Socket = new net.Socket();
     let socket: tls.TLSSocket;
 
     function destroySockets() {
-      for (const sock of [socket, rawSocket]) {
+      for (const sock of [socket, netSocket]) {
         if (sock) {
           sock.removeAllListeners();
           sock.destroy();
@@ -319,25 +318,43 @@ export class StateMachine {
       return new MongoCryptError('KMS request closed');
     }
 
+    const tlsOptions = this.options.tlsOptions;
+    if (tlsOptions) {
+      const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
+      const providerTlsOptions = tlsOptions[kmsProvider];
+      if (providerTlsOptions) {
+        const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
+        if (error) {
+          throw error;
+        }
+        try {
+          await this.setTlsOptions(providerTlsOptions, options);
+        } catch (err) {
+          throw onerror(err);
+        }
+      }
+    }
+
+    const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
+    netSocket
+      .once('timeout', () => rejectOnNetSocketError(ontimeout()))
+      .once('error', err => rejectOnNetSocketError(onerror(err)))
+      .once('close', () => rejectOnNetSocketError(onclose()));
+
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        rawSocket = net.connect({
+        netSocket.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
 
-        const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
-        rawSocket
-          .once('timeout', () => rejectOnNetSocketError(ontimeout()))
-          .once('error', err => rejectOnNetSocketError(onerror(err)))
-          .once('close', () => rejectOnNetSocketError(onclose()));
-        await Promise.race([onceNetSocketError, once(rawSocket, 'connect')]);
+        await Promise.race([onceNetSocketError, once(netSocket, 'connect')]);
 
         try {
           socks ??= loadSocks();
           options.socket = (
             await socks.SocksClient.createConnection({
-              existing_socket: rawSocket,
+              existing_socket: netSocket,
               command: 'connect',
               destination: { host: options.host, port: options.port },
               proxy: {
@@ -352,21 +369,6 @@ export class StateMachine {
           ).socket;
         } catch (err) {
           throw onerror(err);
-        }
-      }
-
-      const tlsOptions = this.options.tlsOptions;
-      if (tlsOptions) {
-        const kmsProvider = request.kmsProvider as ClientEncryptionDataKeyProvider;
-        const providerTlsOptions = tlsOptions[kmsProvider];
-        if (providerTlsOptions) {
-          const error = this.validateTlsOptions(kmsProvider, providerTlsOptions);
-          if (error) throw error;
-          try {
-            await this.setTlsOptions(providerTlsOptions, options);
-          } catch (err) {
-            throw onerror(err);
-          }
         }
       }
 
