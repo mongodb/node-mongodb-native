@@ -264,44 +264,68 @@ describe('StateMachine', function () {
 
       afterEach(function () {
         server.close();
-        this.sinon.restore();
       });
 
-      it('throws a MongoCryptError error with proxyOptions', async function () {
-        const stateMachine = new StateMachine({
-          proxyOptions: {
-            proxyHost: 'localhost',
-            proxyPort: server.address().port
+      context('Socks5', function () {
+        it('throws a MongoCryptError with SocksClientError cause', async function () {
+          const stateMachine = new StateMachine({
+            proxyOptions: {
+              proxyHost: 'localhost',
+              proxyPort: server.address().port
+            }
+          } as any);
+          const request = new MockRequest(Buffer.from('foobar'), 500);
+
+          try {
+            await stateMachine.kmsRequest(request);
+          } catch (err) {
+            expect(err.name).to.equal('MongoCryptError');
+            expect(err.message).to.equal('KMS request failed');
+            expect(err.cause.constructor.name).to.equal('SocksClientError');
+            return;
           }
-        } as any);
-        const request = new MockRequest(Buffer.from('foobar'), 500);
-
-        try {
-          await stateMachine.kmsRequest(request);
-        } catch (err) {
-          expect(err.name).to.equal('MongoCryptError');
-          expect(err.message).to.equal('KMS request failed');
-          return;
-        }
-        expect.fail('missed exception');
+          expect.fail('missed exception');
+        });
       });
 
-      it('throws a MongoCryptError error with a tls endpoint', async function () {
-        const stateMachine = new StateMachine({
-          host: 'localhost',
-          post: server.address().port,
-          tlsOptions: { aws: { tlsCertificateKeyFile: 'test.pem' } }
-        } as any);
-        const request = new MockRequest(Buffer.from('foobar'), 500);
+      context('endpoint', function () {
+        const netSocket = new net.Socket();
 
-        try {
-          await stateMachine.kmsRequest(request);
-        } catch (err) {
-          expect(err.name).to.equal('MongoCryptError');
-          expect(err.message).to.equal('KMS request failed');
-          return;
-        }
-        expect.fail('missed exception');
+        beforeEach(async function () {
+          netSocket.connect({
+            port: server.address().port
+          });
+          await once(netSocket, 'connect');
+
+          this.sinon.stub(tls, 'connect').returns(netSocket);
+        });
+
+        afterEach(function () {
+          server.close();
+          this.sinon.restore();
+        });
+
+        it('throws a MongoCryptError error', async function () {
+          const stateMachine = new StateMachine({
+            host: 'localhost',
+            port: server.address().port
+          } as any);
+          const request = new MockRequest(Buffer.from('foobar'), 500);
+
+          try {
+            const kmsRequestPromise = stateMachine.kmsRequest(request);
+
+            await promisify(setTimeout)(0);
+            netSocket.end();
+
+            await kmsRequestPromise;
+          } catch (err) {
+            expect(err.name).to.equal('MongoCryptError');
+            expect(err.message).to.equal('KMS request closed');
+            return;
+          }
+          expect.fail('missed exception');
+        });
       });
     });
 

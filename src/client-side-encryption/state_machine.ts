@@ -1,4 +1,3 @@
-import { once } from 'events';
 import * as fs from 'fs/promises';
 import { type MongoCryptContext, type MongoCryptKMSRequest } from 'mongodb-client-encryption';
 import * as net from 'net';
@@ -335,11 +334,16 @@ export class StateMachine {
       }
     }
 
-    const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
+    const {
+      promise: willConnect,
+      reject: rejectOnNetSocketError,
+      resolve: resolveOnNetSocketConnect
+    } = promiseWithResolvers<void>();
     netSocket
       .once('timeout', () => rejectOnNetSocketError(ontimeout()))
       .once('error', err => rejectOnNetSocketError(onerror(err)))
-      .once('close', () => rejectOnNetSocketError(onclose()));
+      .once('close', () => rejectOnNetSocketError(onclose()))
+      .once('connect', () => resolveOnNetSocketConnect());
 
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
@@ -347,8 +351,7 @@ export class StateMachine {
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
-
-        await Promise.race([onceNetSocketError, once(netSocket, 'connect')]);
+        await willConnect;
 
         try {
           socks ??= loadSocks();
@@ -377,7 +380,7 @@ export class StateMachine {
       });
 
       const {
-        promise: onSocketDataFullyRead,
+        promise: willResolveKmsRequest,
         reject: rejectOnTlsSocketError,
         resolve
       } = promiseWithResolvers<void>();
@@ -396,7 +399,7 @@ export class StateMachine {
             resolve();
           }
         });
-      await onSocketDataFullyRead;
+      await willResolveKmsRequest;
     } finally {
       // There's no need for any more activity on this socket at this point.
       destroySockets();
