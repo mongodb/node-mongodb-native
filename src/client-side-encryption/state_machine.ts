@@ -286,7 +286,7 @@ export class StateMachine {
   async kmsRequest(request: MongoCryptKMSRequest): Promise<void> {
     const parsedUrl = request.endpoint.split(':');
     const port = parsedUrl[1] != null ? Number.parseInt(parsedUrl[1], 10) : HTTPS_PORT;
-    const options: tls.ConnectionOptions & { host: string; port: number; socket: net.Socket } = {
+    const options: tls.ConnectionOptions & { host: string; port: number } = {
       host: parsedUrl[0],
       servername: parsedUrl[0],
       port,
@@ -295,10 +295,11 @@ export class StateMachine {
     const message = request.message;
     const buffer = new BufferPool();
 
+    let rawSocket: net.Socket;
     let socket: tls.TLSSocket;
 
     function destroySockets() {
-      for (const sock of [socket, options.socket]) {
+      for (const sock of [socket, rawSocket]) {
         if (sock) {
           sock.removeAllListeners();
           sock.destroy();
@@ -318,35 +319,37 @@ export class StateMachine {
       return new MongoCryptError('KMS request closed');
     }
 
-    const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
-    options.socket
-      .once('timeout', () => rejectOnNetSocketError(ontimeout()))
-      .once('error', err => rejectOnNetSocketError(onerror(err)))
-      .once('close', () => rejectOnNetSocketError(onclose()));
-
     try {
       if (this.options.proxyOptions && this.options.proxyOptions.proxyHost) {
-        options.socket.connect({
+        rawSocket = net.connect({
           host: this.options.proxyOptions.proxyHost,
           port: this.options.proxyOptions.proxyPort || 1080
         });
-        await Promise.race([onceNetSocketError, once(options.socket, 'connect')]);
+
+        const { promise: onceNetSocketError, reject: rejectOnNetSocketError } = promiseWithResolvers();
+        rawSocket
+          .once('timeout', () => rejectOnNetSocketError(ontimeout()))
+          .once('error', err => rejectOnNetSocketError(onerror(err)))
+          .once('close', () => rejectOnNetSocketError(onclose()));
+        await Promise.race([onceNetSocketError, once(rawSocket, 'connect')]);
 
         try {
           socks ??= loadSocks();
-          await socks.SocksClient.createConnection({
-            existing_socket: options.socket,
-            command: 'connect',
-            destination: { host: options.host, port: options.port },
-            proxy: {
-              // host and port are ignored because we pass existing_socket
-              host: 'iLoveJavaScript',
-              port: 0,
-              type: 5,
-              userId: this.options.proxyOptions.proxyUsername,
-              password: this.options.proxyOptions.proxyPassword
-            }
-          });
+          options.socket = (
+            await socks.SocksClient.createConnection({
+              existing_socket: rawSocket,
+              command: 'connect',
+              destination: { host: options.host, port: options.port },
+              proxy: {
+                // host and port are ignored because we pass existing_socket
+                host: 'iLoveJavaScript',
+                port: 0,
+                type: 5,
+                userId: this.options.proxyOptions.proxyUsername,
+                password: this.options.proxyOptions.proxyPassword
+              }
+            })
+          ).socket;
         } catch (err) {
           throw onerror(err);
         }
