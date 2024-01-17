@@ -305,7 +305,6 @@ describe('Authentication Spec Prose Tests', function () {
       );
     });
 
-    // todo(NODE-5621): fix the issue with unicode characters.
     describe('Step 4', function () {
       /**
        * Step 4
@@ -343,6 +342,12 @@ describe('Authentication Spec Prose Tests', function () {
         utilClient = this.configuration.newClient();
         const db = utilClient.db('admin');
 
+        try {
+          await Promise.all(users.map(user => db.removeUser(user.username)));
+        } catch (err) {
+          /** We ensure that users are deleted. No action needed. */
+        }
+
         const createUserCommands = users.map(user => ({
           createUser: user.username,
           pwd: user.password,
@@ -354,34 +359,65 @@ describe('Authentication Spec Prose Tests', function () {
       });
 
       afterEach(async function () {
-        const db = utilClient.db('admin');
-        await Promise.all(users.map(user => db.removeUser(user.username)));
         await utilClient?.close();
         await client?.close();
       });
 
-      for (const { username, password } of [
-        { username: 'IX', password: 'IX' },
-        { username: 'IX', password: 'I\u00ADX' },
-        { username: '\u2168', password: 'IV' },
-        { username: '\u2168', password: 'I\u00ADV' }
-      ]) {
-        it(
-          `logs in with username "${username}" and password "${password}"`,
-          metadata,
-          async function () {
+      context('username and password in url', () => {
+        for (const { username, password } of [
+          { username: 'IX', password: 'IX' },
+          { username: 'IX', password: 'I\u00ADX' },
+          { username: '\u2168', password: 'IV' },
+          { username: '\u2168', password: 'I\u00ADV' }
+        ]) {
+          it('logs successfully', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username, password }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+        }
+      });
+
+      context('username and password in server options', () => {
+        for (const { username, password } of [
+          { username: 'IX', password: 'IX' },
+          { username: 'IX', password: 'I\u00ADX' },
+          { username: '\u2168', password: 'IV' },
+          { username: '\u2168', password: 'I\u00ADV' }
+        ]) {
+          it('logs successfully', metadata, async function () {
             const options = {
               auth: { username, password },
               authSource: 'admin',
               authMechanism: 'SCRAM-SHA-256'
             };
-
-            client = this.configuration.newClient(process.env.MONGODB_URI, options);
+            client = this.configuration.newClient({}, options);
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
-          }
-        );
-      }
+          });
+        }
+      });
+
+      context('username and password in db options', () => {
+        it('logs successfully', metadata, async function () {
+          const options = {
+            auth: { username: 'IX', password: 'IX' },
+            authSource: 'admin',
+            authMechanism: 'SCRAM-SHA-256'
+          };
+
+          client = this.configuration.newClient(options);
+          const stats = await client.db('admin').stats();
+          expect(stats).to.exist;
+        });
+      });
     });
   });
 });

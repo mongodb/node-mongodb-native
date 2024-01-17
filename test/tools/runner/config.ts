@@ -277,8 +277,14 @@ export class TestConfiguration {
 
     url.pathname = `/${options.db}`;
 
-    const username = this.options.username || (this.options.auth && this.options.auth.username);
-    const password = this.options.password || (this.options.auth && this.options.auth.password);
+    const username =
+      options.username ||
+      this.options.username ||
+      (this.options.auth && this.options.auth.username);
+    const password =
+      options.password ||
+      this.options.password ||
+      (this.options.auth && this.options.auth.password);
 
     if (username) {
       url.username = username;
