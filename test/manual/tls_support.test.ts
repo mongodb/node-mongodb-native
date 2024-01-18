@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { expect } from 'chai';
 import { promises as fs } from 'fs';
 
@@ -31,6 +33,16 @@ describe('TLS Support', function () {
     'should connect with tls via client options',
     makeConnectionTest(CONNECTION_STRING, tlsSettings)
   );
+
+  beforeEach(function () {
+    if (
+      this.currentTest?.title === 'should connect with tls via url options' &&
+      process.platform === 'win32'
+    ) {
+      this.currentTest.skipReason = 'TODO(NODE-5803): Un-skip Windows TLS tests via URL';
+      return this.skip();
+    }
+  });
 
   it(
     'should connect with tls via url options',
