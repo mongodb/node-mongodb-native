@@ -1,0 +1,206 @@
+description: "timeoutMS behaves correctly for advanced GridFS API operations"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    serverless: forbid  # GridFS ops can be slow on serverless.
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+  - client:
+      id: &client client
+      uriOptions:
+        timeoutMS: 75
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database database
+      client: *client
+      databaseName: &databaseName test
+  - bucket:
+      id: &bucket bucket
+      database: *database
+  - collection:
+      id: &filesCollection filesCollection
+      database: *database
+      collectionName: &filesCollectionName fs.files
+  - collection:
+      id: &chunksCollection chunksCollection
+      database: *database
+      collectionName: &chunksCollectionName fs.chunks
+
+initialData:
+  - collectionName: *filesCollectionName
+    databaseName: *databaseName
+    documents:
+      - _id: &fileDocumentId { $oid: "000000000000000000000005" }
+        length: 8
+        chunkSize: 4
+        uploadDate: { $date: "1970-01-01T00:00:00.000Z" }
+        filename: "length-8"
+        contentType: "application/octet-stream"
+        aliases: []
+        metadata: {}
+  - collectionName: *chunksCollectionName
+    databaseName: *databaseName
+    documents:
+      - _id: { $oid: "000000000000000000000005" }
+        files_id: *fileDocumentId
+        n: 0
+        data: { $binary: { base64: "ESIzRA==", subType: "00" } } # hex: 11223344
+      - _id: { $oid: "000000000000000000000006" }
+        files_id: *fileDocumentId
+        n: 1
+        data: { $binary: { base64: "ESIzRA==", subType: "00" } } # hex: 11223344
+
+tests:
+  # Tests for the "rename" operation.
+
+  - description: "timeoutMS can be overridden for a rename"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 100
+      - name: rename
+        object: *bucket
+        arguments:
+          id: *fileDocumentId
+          newFilename: "foo"
+          timeoutMS: 2000 # The client timeoutMS is 75ms and the operation blocks for 100ms, so 2000ms should let it succeed.
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *filesCollectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+
+  - description: "timeoutMS applied to update during a rename"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 100
+      - name: rename
+        object: *bucket
+        arguments:
+          id: *fileDocumentId
+          newFilename: "foo"
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *filesCollectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+
+  # Tests for the "drop" opration. Any tests that might result in multiple commands being sent do not have expectEvents
+  # assertions as these assertions reduce test robustness and can cause flaky failures.
+
+  - description: "timeoutMS can be overridden for drop"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["drop"]
+              blockConnection: true
+              blockTimeMS: 100
+      - name: drop
+        object: *bucket
+        arguments:
+          timeoutMS: 2000 # The client timeoutMS is 75ms and the operation blocks for 100ms, so 2000ms should let it succeed.
+
+  - description: "timeoutMS applied to files collection drop"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:  
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["drop"]
+              blockConnection: true
+              blockTimeMS: 100
+      - name: drop
+        object: *bucket
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: drop
+              databaseName: *databaseName
+              command:
+                drop: *filesCollectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+
+  - description: "timeoutMS applied to chunks collection drop"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:  
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode:
+              # Skip the drop for the files collection.
+              skip: 1
+            data:
+              failCommands: ["drop"]
+              blockConnection: true
+              blockTimeMS: 100
+      - name: drop
+        object: *bucket
+        expectError:
+          isTimeoutError: true
+
+  - description: "timeoutMS applied to drop as a whole, not individual parts"
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:  
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: ["drop"]
+              blockConnection: true
+              blockTimeMS: 50
+      - name: drop
+        object: *bucket
+        expectError:
+          isTimeoutError: true

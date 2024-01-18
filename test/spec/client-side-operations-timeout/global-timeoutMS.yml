@@ -1,0 +1,3236 @@
+# Tests in this file are generated from global-timeoutMS.yml.template.
+
+description: "timeoutMS can be configured on a MongoClient"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  - minServerVersion: "4.4"
+    topologies: ["replicaset", "sharded"]
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+
+initialData:
+  - collectionName: &collectionName coll
+    databaseName: &databaseName test
+    documents: []
+
+tests:
+  # For each operation, we execute two tests:
+  #
+  # 1. timeoutMS can be configured to a non-zero value on a MongoClient and is inherited by the operation. Each test
+  # constructs a client entity with timeoutMS=250 and configures a fail point to block the operation for 350ms so
+  # execution results in a timeout error.
+  #
+  # 2. timeoutMS can be set to 0 for a MongoClient. Each test constructs a client entity with timeoutMS=0 and
+  # configures a fail point to block the operation for 15ms. The tests expect the operation to succeed and the command
+  # sent to not contain a maxTimeMS field.
+
+  - description: "timeoutMS can be configured on a MongoClient - listDatabases on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listDatabases on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listDatabases
+        object: *client
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - listDatabaseNames on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listDatabaseNames
+        object: *client
+        
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listDatabaseNames on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listDatabases"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listDatabaseNames
+        object: *client
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listDatabases
+              databaseName: admin
+              command:
+                listDatabases: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - createChangeStream on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: createChangeStream
+        object: *client
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - createChangeStream on client"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *client
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: admin
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - aggregate on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: aggregate
+        object: *database
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - aggregate on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: aggregate
+        object: *database
+        arguments:
+          pipeline: [ { $listLocalSessions: {} }, { $limit: 1 } ]
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - listCollections on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listCollections
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listCollections on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listCollections
+        object: *database
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - listCollectionNames on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listCollectionNames on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listCollections"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listCollectionNames
+        object: *database
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listCollections
+              databaseName: *databaseName
+              command:
+                listCollections: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - runCommand on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["ping"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: ping
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: ping
+              databaseName: *databaseName
+              command:
+                ping: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - runCommand on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["ping"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: runCommand
+        object: *database
+        arguments:
+          command: { ping: 1 }
+          commandName: ping
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: ping
+              databaseName: *databaseName
+              command:
+                ping: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - createChangeStream on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: createChangeStream
+        object: *database
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - createChangeStream on database"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *database
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: 1
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - aggregate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - aggregate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: aggregate
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - count on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - count on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: count
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - countDocuments on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - countDocuments on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: countDocuments
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - estimatedDocumentCount on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - estimatedDocumentCount on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["count"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: estimatedDocumentCount
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: count
+              databaseName: *databaseName
+              command:
+                count: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - distinct on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - distinct on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["distinct"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: distinct
+        object: *collection
+        arguments:
+          fieldName: x
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: distinct
+              databaseName: *databaseName
+              command:
+                distinct: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - find on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - find on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: find
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - findOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - findOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["find"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: find
+              databaseName: *databaseName
+              command:
+                find: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - listIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listIndexes
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - listIndexNames on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: listIndexNames
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - listIndexNames on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["listIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: listIndexNames
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: listIndexes
+              databaseName: *databaseName
+              command:
+                listIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - createChangeStream on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - createChangeStream on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["aggregate"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createChangeStream
+        object: *collection
+        arguments:
+          pipeline: []
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: aggregate
+              databaseName: *databaseName
+              command:
+                aggregate: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - insertOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - insertOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertOne
+        object: *collection
+        arguments:
+          document: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - insertMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - insertMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: insertMany
+        object: *collection
+        arguments:
+          documents:
+            - { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - deleteOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - deleteOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteOne
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - deleteMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: deleteMany
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - deleteMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["delete"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: deleteMany
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: delete
+              databaseName: *databaseName
+              command:
+                delete: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - replaceOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - replaceOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: replaceOne
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - updateOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - updateOne on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateOne
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - updateMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: updateMany
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - updateMany on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["update"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: updateMany
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: update
+              databaseName: *databaseName
+              command:
+                update: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - findOneAndDelete on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - findOneAndDelete on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndDelete
+        object: *collection
+        arguments:
+          filter: {}
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - findOneAndReplace on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - findOneAndReplace on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndReplace
+        object: *collection
+        arguments:
+          filter: {}
+          replacement: { x: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - findOneAndUpdate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - findOneAndUpdate on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["findAndModify"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: findOneAndUpdate
+        object: *collection
+        arguments:
+          filter: {}
+          update: { $set: { x: 1 } }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: findAndModify
+              databaseName: *databaseName
+              command:
+                findAndModify: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - bulkWrite on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - bulkWrite on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["insert"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: bulkWrite
+        object: *collection
+        arguments:
+          requests:
+            - insertOne:
+                document: { _id: 1 }
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - createIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["createIndexes"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: createIndex
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+              command:
+                createIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - createIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["createIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: createIndex
+        object: *collection
+        arguments:
+          keys: { x: 1 }
+          name: "x_1"
+          
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: createIndexes
+              databaseName: *databaseName
+              command:
+                createIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - dropIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: dropIndex
+        object: *collection
+        arguments:
+          name: "x_1"
+          
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - dropIndex on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndex
+        object: *collection
+        arguments:
+          name: "x_1"
+          
+        expectError:
+          isClientError: false
+          isTimeoutError: false
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  - description: "timeoutMS can be configured on a MongoClient - dropIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 250
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            # Use "times: 2" to workaround a quirk in Python on Windows where
+            # socket I/O can timeout ~20ms earlier than expected. With
+            # "times: 1" the retry would succeed within the remaining ~20ms.
+            mode: { times: 2 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 350
+      - name: dropIndexes
+        object: *collection
+        
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$type: ["int", "long"] }
+  - description: "timeoutMS can be set to 0 on a MongoClient - dropIndexes on collection"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                uriOptions:
+                  timeoutMS: 0
+                useMultipleMongoses: false
+                observeEvents:
+                  - commandStartedEvent
+                ignoreCommandMonitoringEvents:
+                  - killCursors
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &collection collection
+                database: *database
+                collectionName: *collectionName
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: ["dropIndexes"]
+              blockConnection: true
+              blockTimeMS: 15
+      - name: dropIndexes
+        object: *collection
+        
+        
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: dropIndexes
+              databaseName: *databaseName
+              command:
+                dropIndexes: *collectionName
+                maxTimeMS: { $$exists: false }
+  

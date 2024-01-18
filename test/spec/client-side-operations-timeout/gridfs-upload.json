@@ -1,0 +1,409 @@
+{
+  "description": "timeoutMS behaves correctly for GridFS upload operations",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.4",
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "failPointClient",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "client": {
+        "id": "client",
+        "uriOptions": {
+          "timeoutMS": 75
+        },
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database",
+        "client": "client",
+        "databaseName": "test"
+      }
+    },
+    {
+      "bucket": {
+        "id": "bucket",
+        "database": "database"
+      }
+    },
+    {
+      "collection": {
+        "id": "filesCollection",
+        "database": "database",
+        "collectionName": "fs.files"
+      }
+    },
+    {
+      "collection": {
+        "id": "chunksCollection",
+        "database": "database",
+        "collectionName": "fs.chunks"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "fs.files",
+      "databaseName": "test",
+      "documents": []
+    },
+    {
+      "collectionName": "fs.chunks",
+      "databaseName": "test",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "timeoutMS can be overridden for upload",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            },
+            "timeoutMS": 1000
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to initial find on files collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to listIndexes on files collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to index creation for files collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "createIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to listIndexes on chunks collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to index creation for chunks collection",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "createIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to chunk insertion",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to creation of files document",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "skip": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 100
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    },
+    {
+      "description": "timeoutMS applied to upload as a whole, not individual parts",
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "failPointClient",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 2
+              },
+              "data": {
+                "failCommands": [
+                  "find",
+                  "listIndexes"
+                ],
+                "blockConnection": true,
+                "blockTimeMS": 50
+              }
+            }
+          }
+        },
+        {
+          "name": "upload",
+          "object": "bucket",
+          "arguments": {
+            "filename": "filename",
+            "source": {
+              "$$hexBytes": "1122334455"
+            }
+          },
+          "expectError": {
+            "isTimeoutError": true
+          }
+        }
+      ]
+    }
+  ]
+}

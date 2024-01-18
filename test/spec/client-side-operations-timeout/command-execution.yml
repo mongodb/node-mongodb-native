@@ -1,0 +1,250 @@
+description: "timeoutMS behaves correctly during command execution"
+
+schemaVersion: "1.9"
+
+runOnRequirements:
+  # The appName filter cannot be used to set a fail point on connection handshakes until server version 4.9 due to
+  # SERVER-49220/SERVER-49336.
+  - minServerVersion: "4.9"
+    # Skip load-balanced and serverless which do not support RTT measurements.
+    topologies: [ single, replicaset, sharded ]
+    serverless: forbid
+
+createEntities:
+  - client:
+      id: &failPointClient failPointClient
+      useMultipleMongoses: false
+
+initialData:
+  # The corresponding entities for the collections defined here are created in test-level createEntities operations.
+  # This is done so that tests can set fail points that will affect all of the handshakes and heartbeats done by a
+  # client. The collection and database names are listed here so that the collections will be dropped and re-created at
+  # the beginning of each test.
+  - collectionName: &regularCollectionName coll
+    databaseName: &databaseName test
+    documents: []
+  - collectionName: &timeoutCollectionName timeoutColl
+    databaseName: &databaseName test
+    documents: []
+
+tests:
+  - description: "maxTimeMS value in the command is less than timeoutMS"
+    operations:
+      # Artificially increase the server RTT to ~50ms.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: "alwaysOn"
+            data:
+              failCommands: ["hello", "isMaster"]
+              appName: &appName reduceMaxTimeMSTest
+              blockConnection: true
+              blockTimeMS: 50
+      # Create a client with the app name specified in the fail point and timeoutMS higher than blockTimeMS.
+      # Also create database and collection entities derived from the new client.
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                uriOptions:
+                  appName: *appName
+                  w: 1  # Override server's w:majority default to speed up the test.
+                  timeoutMS: 500
+                  heartbeatFrequencyMS: 500
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &timeoutCollection timeoutCollection
+                database: *database
+                collectionName: *timeoutCollectionName
+      # Do an operation with a large timeout to ensure the servers are discovered.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 1 }
+          timeoutMS: 100000
+      # Wait until short-circuiting has been enabled (at least 2 RTT measurements).
+      - name: wait
+        object: testRunner
+        arguments:
+          ms: 1000
+      # Do an operation with timeoutCollection so the event will include a maxTimeMS field.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 2 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *timeoutCollectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *timeoutCollectionName
+                maxTimeMS: { $$lte: 450 }
+
+  - description: "command is not sent if RTT is greater than timeoutMS"
+    operations:
+      # Artificially increase the server RTT to ~50ms.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: "alwaysOn"
+            data:
+              failCommands: ["hello", "isMaster"]
+              appName: &appName rttTooHighTest
+              blockConnection: true
+              blockTimeMS: 50
+      # Create a client with the app name specified in the fail point. Also create database and collection entities
+      # derived from the new client. There is one collection entity with no timeoutMS and another with a timeoutMS
+      # that's lower than the fail point's blockTimeMS value.
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                uriOptions:
+                  appName: *appName
+                  w: 1  # Override server's w:majority default to speed up the test.
+                  timeoutMS: 10
+                  heartbeatFrequencyMS: 500
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &timeoutCollection timeoutCollection
+                database: *database
+                collectionName: *timeoutCollectionName
+      # Do an operation with a large timeout to ensure the servers are discovered.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 1 }
+          timeoutMS: 100000
+      # Wait until short-circuiting has been enabled (at least 2 RTT measurements).
+      - name: wait
+        object: testRunner
+        arguments:
+          ms: 1000
+      # Do an operation with timeoutCollection which will error.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 2 }
+        expectError:
+          isTimeoutError: true
+      # Do an operation with timeoutCollection which will error.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 3 }
+        expectError:
+          isTimeoutError: true
+      # Do an operation with timeoutCollection which will error.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 4 }
+        expectError:
+          isTimeoutError: true
+    expectEvents:
+      # There should only be one event, which corresponds to the first
+      # insertOne call. For the subsequent insertOne calls, drivers should
+      # fail client-side.
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *timeoutCollectionName
+
+  - description: "short-circuit is not enabled with only 1 RTT measurement"
+    operations:
+      # Artificially increase the server RTT to ~300ms.
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *failPointClient
+          failPoint:
+            configureFailPoint: failCommand
+            mode: "alwaysOn"
+            data:
+              failCommands: ["hello", "isMaster"]
+              appName: &appName reduceMaxTimeMSTest
+              blockConnection: true
+              blockTimeMS: 100
+      # Create a client with the app name specified in the fail point and timeoutMS lower than blockTimeMS.
+      # Also create database and collection entities derived from the new client.
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                useMultipleMongoses: false
+                uriOptions:
+                  appName: *appName
+                  w: 1  # Override server's w:majority default to speed up the test.
+                  timeoutMS: 90
+                  heartbeatFrequencyMS: 100000  # Override heartbeatFrequencyMS to ensure only 1 RTT is recorded.
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database database
+                client: *client
+                databaseName: *databaseName
+            - collection:
+                id: &timeoutCollection timeoutCollection
+                database: *database
+                collectionName: *timeoutCollectionName
+      # Do an operation with a large timeout to ensure the servers are discovered.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 1 }
+          timeoutMS: 100000
+      # Do an operation with timeoutCollection which will succeed. If this
+      # fails it indicates the driver mistakenly used the min RTT even though
+      # there has only been one sample.
+      - name: insertOne
+        object: *timeoutCollection
+        arguments:
+          document: { _id: 2 }
+    expectEvents:
+      - client: *client
+        events:
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *timeoutCollectionName
+          - commandStartedEvent:
+              commandName: insert
+              databaseName: *databaseName
+              command:
+                insert: *timeoutCollectionName
+                maxTimeMS: { $$lte: 450 }

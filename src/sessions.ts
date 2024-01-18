@@ -754,6 +754,37 @@ function endTransaction(
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
+  const handleFirstCommandAttempt = (error?: Error) => {
+    if (command.abortTransaction) {
+      // always unpin on abort regardless of command outcome
+      session.unpin();
+    }
+
+    if (error instanceof MongoError && isRetryableWriteError(error)) {
+      // SPEC-1185: apply majority write concern when retrying commitTransaction
+      if (command.commitTransaction) {
+        // per txns spec, must unpin session in this case
+        session.unpin({ force: true });
+
+        command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+          w: 'majority'
+        });
+      }
+
+      executeOperation(
+        session.client,
+        new RunAdminCommandOperation(command, {
+          session,
+          readPreference: ReadPreference.primary,
+          bypassPinningCheck: true
+        })
+      ).then(() => commandHandler(), commandHandler);
+      return;
+    }
+
+    commandHandler(error);
+  };
+
   // send the command
   executeOperation(
     session.client,
@@ -761,38 +792,8 @@ function endTransaction(
       session,
       readPreference: ReadPreference.primary,
       bypassPinningCheck: true
-    }),
-    error => {
-      if (command.abortTransaction) {
-        // always unpin on abort regardless of command outcome
-        session.unpin();
-      }
-
-      if (error instanceof MongoError && isRetryableWriteError(error)) {
-        // SPEC-1185: apply majority write concern when retrying commitTransaction
-        if (command.commitTransaction) {
-          // per txns spec, must unpin session in this case
-          session.unpin({ force: true });
-
-          command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
-            w: 'majority'
-          });
-        }
-
-        return executeOperation(
-          session.client,
-          new RunAdminCommandOperation(command, {
-            session,
-            readPreference: ReadPreference.primary,
-            bypassPinningCheck: true
-          }),
-          commandHandler
-        );
-      }
-
-      commandHandler(error);
-    }
-  );
+    })
+  ).then(() => handleFirstCommandAttempt(), handleFirstCommandAttempt);
 }
 
 /** @public */
