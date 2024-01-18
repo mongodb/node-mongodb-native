@@ -892,6 +892,26 @@ describe('MongoOptions', function () {
           );
         });
       });
+
+      context('when option is not a valid MongoDBLogwritable stream', function () {
+        it('should default to stderr', function () {
+          const writable = {
+            buffer: [],
+            misnamedWrite(log) {
+              this.buffer.push(log);
+            }
+          };
+          const client = new MongoClient('mongodb://a/', {
+            [loggerFeatureFlag]: true,
+            mongodbLogPath: writable
+          });
+          const log = { t: new Date(), c: 'constructorInvalidOption', s: 'error' };
+          client.options.mongoLoggerOptions.logDestination.write(log);
+          expect(stderrStub.write).calledWith(
+            inspect(log, { breakLength: Infinity, compact: true })
+          );
+        });
+      });
     });
     describe('component severities', function () {
       const components = Object.values(MongoLoggableComponent);

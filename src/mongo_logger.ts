@@ -197,11 +197,12 @@ export interface MongoLoggerOptions {
 
 /**
  * Parses a string as one of SeverityLevel
+ * @internal
  *
  * @param s - the value to be parsed
  * @returns one of SeverityLevel if value can be parsed as such, otherwise null
  */
-function parseSeverityFromString(s?: string): SeverityLevel | null {
+export function parseSeverityFromString(s?: string): SeverityLevel | null {
   const validSeverities: string[] = Object.values(SeverityLevel);
   const lowerSeverity = s?.toLowerCase();
 
@@ -515,7 +516,7 @@ export function defaultLogTransform(
       return log;
     case SERVER_SELECTION_FAILED:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-      log.failure = logObject.failure.message;
+      log.failure = logObject.failure?.message;
       return log;
     case SERVER_SELECTION_SUCCEEDED:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);
@@ -542,7 +543,7 @@ export function defaultLogTransform(
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message ?? '(redacted)';
+      log.failure = logObject.failure?.message ?? '(redacted)';
       return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);
@@ -568,7 +569,7 @@ export function defaultLogTransform(
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool cleared';
       if (logObject.serviceId?._bsontype === 'ObjectId') {
-        log.serviceId = logObject.serviceId.toHexString();
+        log.serviceId = logObject.serviceId?.toHexString();
       }
       return log;
     case CONNECTION_POOL_CLOSED:
@@ -672,7 +673,7 @@ export function defaultLogTransform(
       log = attachServerHeartbeatFields(log, logObject);
       log.message = 'Server heartbeat failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message;
+      log.failure = logObject.failure?.message;
       return log;
     case TOPOLOGY_OPENING:
       log = attachSDAMFields(log, logObject);

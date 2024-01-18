@@ -27,7 +27,8 @@ import {
   MongoLogger,
   type MongoLoggerOptions,
   SeverityLevel,
-  stringifyWithMaxLen
+  stringifyWithMaxLen,
+  parseSeverityFromString
 } from '../mongodb';
 
 class BufferingStream extends Writable {
@@ -1227,6 +1228,12 @@ describe('class MongoLogger', function () {
                 });
               });
             });
+          });
+        });
+
+        context('when invalid severity is passed into parseSeverityFromString', function () {
+          it('should not throw', function () {
+            expect(parseSeverityFromString('notARealSeverityLevel')).to.equal(null);
           });
         });
       });
