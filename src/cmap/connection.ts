@@ -275,6 +275,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     );
   }
 
+  private get shouldEmitAndLogCommand(): boolean {
+    return (
+      (this.monitorCommands ||
+        (this.established &&
+          !this.authContext?.reauthenticating &&
+          this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))) ??
+      false
+    );
+  }
+
   public markAvailable(): void {
     this.lastUseTime = now();
   }
@@ -458,11 +468,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const message = this.prepareCommand(ns.db, command, options);
 
     let started = 0;
-    if (
-      this.monitorCommands ||
-      (this.established &&
-        this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
-    ) {
+    if (this.shouldEmitAndLogCommand) {
       started = now();
       this.emitAndLogCommand(
         this.monitorCommands,
@@ -488,11 +494,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           throw new MongoServerError(document);
         }
 
-        if (
-          this.monitorCommands ||
-          (this.established &&
-            this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
-        ) {
+        if (this.shouldEmitAndLogCommand) {
           this.emitAndLogCommand(
             this.monitorCommands,
             Connection.COMMAND_SUCCEEDED,
@@ -512,11 +514,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.controller.signal.throwIfAborted();
       }
     } catch (error) {
-      if (
-        this.monitorCommands ||
-        (this.established &&
-          this.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.COMMAND))
-      ) {
+      if (this.shouldEmitAndLogCommand) {
         if (error.name === 'MongoWriteConcernError') {
           this.emitAndLogCommand(
             this.monitorCommands,
