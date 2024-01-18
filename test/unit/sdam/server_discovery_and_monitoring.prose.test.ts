@@ -55,8 +55,6 @@ describe('Heartbeat tests', function () {
     // Catch error
     expect(maybeError).to.be.instanceOf(Error);
 
-    expect(events).to.have.lengthOf(4);
-
     expect(events).to.deep.equal([
       SERVER_HEARTBEAT_STARTED,
       'client connected',
