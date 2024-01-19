@@ -39,6 +39,7 @@
 <a href="CommandStartedEvent.html#connectionId" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>connection<wbr/>Id?</span></a>
 <a href="CommandStartedEvent.html#databaseName" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>database<wbr/>Name</span></a>
 <a href="CommandStartedEvent.html#requestId" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>request<wbr/>Id</span></a>
+<a href="CommandStartedEvent.html#serverConnectionId" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>server<wbr/>Connection<wbr/>Id</span></a>
 <a href="CommandStartedEvent.html#serviceId" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>service<wbr/>Id?</span></a>
 </div></section>
 <section class="tsd-index-section">
@@ -69,9 +70,12 @@
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L19">src/cmap/command_monitoring_events.ts:19</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="connectionId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>connection<wbr/>Id</span><a href="#connectionId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">connection<wbr/>Id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">connection<wbr/>Id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Driver generated connection id</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L25">src/cmap/command_monitoring_events.ts:25</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L26">src/cmap/command_monitoring_events.ts:26</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="databaseName" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>database<wbr/>Name</span><a href="#databaseName" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">database<wbr/>Name</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
@@ -82,11 +86,21 @@
 <div class="tsd-signature"><span class="tsd-kind-property">request<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
 <ul>
 <li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L20">src/cmap/command_monitoring_events.ts:20</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member"><a id="serverConnectionId" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><span>server<wbr/>Connection<wbr/>Id</span><a href="#serverConnectionId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">server<wbr/>Connection<wbr/>Id</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">bigint</span></div>
+<div class="tsd-comment tsd-typography"><p>Server generated connection id
+Distinct from the connection id and is returned by the hello or legacy hello response as &quot;connectionId&quot;
+from the server on 4.2+.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L32">src/cmap/command_monitoring_events.ts:32</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member"><a id="serviceId" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>service<wbr/>Id</span><a href="#serviceId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">service<wbr/>Id</span><span class="tsd-signature-symbol">?:</span> <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L26">src/cmap/command_monitoring_events.ts:26</a></li></ul></aside></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L33">src/cmap/command_monitoring_events.ts:33</a></li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member"><a id="hasServiceId" class="tsd-anchor"></a>
@@ -96,7 +110,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L58">src/cmap/command_monitoring_events.ts:58</a></li></ul></aside></li></ul></section></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cmap/command_monitoring_events.ts#L70">src/cmap/command_monitoring_events.ts:70</a></li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -123,6 +137,7 @@
 <li><a href="#connectionId" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>connection<wbr/>Id</span></a></li>
 <li><a href="#databaseName" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>database<wbr/>Name</span></a></li>
 <li><a href="#requestId" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>request<wbr/>Id</span></a></li>
+<li><a href="#serverConnectionId" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>server<wbr/>Connection<wbr/>Id</span></a></li>
 <li><a href="#serviceId" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>service<wbr/>Id</span></a></li>
 <li><a href="#hasServiceId" class=""><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>has<wbr/>Service<wbr/>Id</span></a></li></ul></div></details></div>
 <div class="site-menu">
@@ -470,6 +485,7 @@
 <li><a href="../types/SchemaMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Schema<wbr/>Member</span></a></li>
 <li><a href="../types/ServerApiVersion.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
 <li><a href="../types/ServerEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Events</span></a></li>
+<li><a href="../types/ServerMonitoringMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../types/ServerSessionId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Session<wbr/>Id</span></a></li>
 <li><a href="../types/ServerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../types/SetFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Fields</span></a></li>
@@ -509,6 +525,7 @@
 <li><a href="../variables/ReadPreferenceMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Read<wbr/>Preference<wbr/>Mode</span></a></li>
 <li><a href="../variables/ReturnDocument-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Return<wbr/>Document</span></a></li>
 <li><a href="../variables/ServerApiVersion-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
+<li><a href="../variables/ServerMonitoringMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../variables/ServerType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../variables/TopologyType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Topology<wbr/>Type</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

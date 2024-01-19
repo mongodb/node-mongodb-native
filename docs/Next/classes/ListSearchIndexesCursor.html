@@ -51,6 +51,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Methods</h3>
 <div class="tsd-index-list"><a href="ListSearchIndexesCursor.html#_asyncIterator_" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-2048"><rect fill="var(--color-icon-background)" stroke="#FF4DB8" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.162 16V7.24H10.578L11.514 10.072C11.602 10.328 11.674 10.584 11.73 10.84C11.794 11.088 11.842 11.28 11.874 11.416C11.906 11.28 11.954 11.088 12.018 10.84C12.082 10.584 12.154 10.324 12.234 10.06L13.122 7.24H14.538V16H13.482V12.82C13.482 12.468 13.49 12.068 13.506 11.62C13.53 11.172 13.558 10.716 13.59 10.252C13.622 9.78 13.654 9.332 13.686 8.908C13.726 8.476 13.762 8.1 13.794 7.78L12.366 12.16H11.334L9.894 7.78C9.934 8.092 9.97 8.456 10.002 8.872C10.042 9.28 10.078 9.716 10.11 10.18C10.142 10.636 10.166 11.092 10.182 11.548C10.206 12.004 10.218 12.428 10.218 12.82V16H9.162Z" fill="var(--color-text)"></path></g></svg><span>[async<wbr/>Iterator]</span></a>
+<a href="ListSearchIndexesCursor.html#_captureRejectionSymbol_" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>[capture<wbr/>Rejection<wbr/>Symbol]?</span></a>
 <a href="ListSearchIndexesCursor.html#addCursorFlag" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Cursor<wbr/>Flag</span></a>
 <a href="ListSearchIndexesCursor.html#addListener" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a>
 <a href="ListSearchIndexesCursor.html#batchSize" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>batch<wbr/>Size</span></a>
@@ -95,7 +96,9 @@
 <a href="ListSearchIndexesCursor.html#unwind" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>unwind</span></a>
 <a href="ListSearchIndexesCursor.html#withReadConcern" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Read<wbr/>Concern</span></a>
 <a href="ListSearchIndexesCursor.html#withReadPreference" class="tsd-index-link tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Read<wbr/>Preference</span></a>
+<a href="ListSearchIndexesCursor.html#addAbortListener" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Abort<wbr/>Listener</span></a>
 <a href="ListSearchIndexesCursor.html#getEventListeners" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a>
+<a href="ListSearchIndexesCursor.html#getMaxListeners-2" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a>
 <a href="ListSearchIndexesCursor.html#listenerCount-2" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a>
 <a href="ListSearchIndexesCursor.html#on-4" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>on</span></a>
 <a href="ListSearchIndexesCursor.html#once-4" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>once</span></a>
@@ -110,42 +113,75 @@
 <h4>Event</h4></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#CLOSE">CLOSE</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L161">src/cursor/abstract_cursor.ts:161</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L160">src/cursor/abstract_cursor.ts:160</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejectionSymbol" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>capture<wbr/>Rejection<wbr/>Symbol</span><a href="#captureRejectionSymbol" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejection<wbr/>Symbol</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">captureRejectionSymbol</span></div>
+<div class="tsd-comment tsd-typography"><p>Value: <code>Symbol.for(&#39;nodejs.rejection&#39;)</code></p>
+<p>See how to write a custom <code>rejection handler</code>.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v13.4.0, v12.16.0</p>
+</div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#captureRejectionSymbol">captureRejectionSymbol</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:322</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:402</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="captureRejections" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>capture<wbr/>Rejections</span><a href="#captureRejections" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">capture<wbr/>Rejections</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
-<div class="tsd-comment tsd-typography"><p>Sets or gets the default captureRejection value for all emitters.</p>
+<div class="tsd-comment tsd-typography"><p>Value: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Boolean_type">boolean</a></p>
+<p>Change the default <code>captureRejections</code> option on all new <code>EventEmitter</code> objects.</p>
 </div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v13.4.0, v12.16.0</p>
+</div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#captureRejections">captureRejections</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:327</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:409</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="defaultMaxListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>default<wbr/>Max<wbr/>Listeners</span><a href="#defaultMaxListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-kind-property">default<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>By default, a maximum of <code>10</code> listeners can be registered for any single
+event. This limit can be changed for individual <code>EventEmitter</code> instances
+using the <code>emitter.setMaxListeners(n)</code> method. To change the default
+for <em>all</em><code>EventEmitter</code> instances, the <code>events.defaultMaxListeners</code>property can be used. If this value is not a positive number, a <code>RangeError</code>is thrown.</p>
+<p>Take caution when setting the <code>events.defaultMaxListeners</code> because the
+change affects <em>all</em><code>EventEmitter</code> instances, including those created before
+the change is made. However, calling <code>emitter.setMaxListeners(n)</code> still has
+precedence over <code>events.defaultMaxListeners</code>.</p>
+<p>This is not a hard limit. The <code>EventEmitter</code> instance will allow
+more listeners to be added but will output a trace warning to stderr indicating
+that a &quot;possible EventEmitter memory leak&quot; has been detected. For any single<code>EventEmitter</code>, the <code>emitter.getMaxListeners()</code> and <code>emitter.setMaxListeners()</code>methods can be used to
+temporarily avoid this warning:</p>
+<pre><code class="language-js"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">EventEmitter</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;node:events&#39;</span><span class="hl-1">;</span><br/><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">emitter</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventEmitter</span><span class="hl-1">();</span><br/><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">getMaxListeners</span><span class="hl-1">() + </span><span class="hl-8">1</span><span class="hl-1">);</span><br/><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">once</span><span class="hl-1">(</span><span class="hl-2">&#39;event&#39;</span><span class="hl-1">, () </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">  </span><span class="hl-3">// do stuff</span><br/><span class="hl-1">  </span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-6">Math</span><span class="hl-1">.</span><span class="hl-0">max</span><span class="hl-1">(</span><span class="hl-6">emitter</span><span class="hl-1">.</span><span class="hl-0">getMaxListeners</span><span class="hl-1">() - </span><span class="hl-8">1</span><span class="hl-1">, </span><span class="hl-8">0</span><span class="hl-1">));</span><br/><span class="hl-1">});</span>
+</code><button>Copy</button></pre>
+<p>The <code>--trace-warnings</code> command-line flag can be used to display the
+stack trace for such warnings.</p>
+<p>The emitted warning can be inspected with <code>process.on(&#39;warning&#39;)</code> and will
+have the additional <code>emitter</code>, <code>type</code>, and <code>count</code> properties, referring to
+the event emitter instance, the event&#39;s name and the number of attached
+listeners, respectively.
+Its <code>name</code> property is set to <code>&#39;MaxListenersExceededWarning&#39;</code>.</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v0.11.2</p>
+</div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#defaultMaxListeners">defaultMaxListeners</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:328</li></ul></aside></section>
+<li>Defined in node_modules/@types/node/events.d.ts:446</li></ul></aside></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="errorMonitor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagReadonly">Readonly</code> <span>error<wbr/>Monitor</span><a href="#errorMonitor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">error<wbr/>Monitor</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type ">errorMonitor</span></div>
-<div class="tsd-comment tsd-typography"><p>This symbol shall be used to install a listener for only monitoring <code>&#39;error&#39;</code>
-events. Listeners installed using this symbol are called before the regular
-<code>&#39;error&#39;</code> listeners are called.</p>
-<p>Installing a listener using this symbol does not change the behavior once an
-<code>&#39;error&#39;</code> event is emitted, therefore the process will still crash if no
+<div class="tsd-comment tsd-typography"><p>This symbol shall be used to install a listener for only monitoring <code>&#39;error&#39;</code>events. Listeners installed using this symbol are called before the regular<code>&#39;error&#39;</code> listeners are called.</p>
+<p>Installing a listener using this symbol does not change the behavior once an<code>&#39;error&#39;</code> event is emitted. Therefore, the process will still crash if no
 regular <code>&#39;error&#39;</code> listener is installed.</p>
 </div>
-<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v13.6.0, v12.17.0</p>
+</div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#errorMonitor">errorMonitor</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:321</li></ul></aside></section></section>
+<li>Defined in node_modules/@types/node/events.d.ts:395</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="closed" class="tsd-anchor"></a>
@@ -156,7 +192,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.closed</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L259">src/cursor/abstract_cursor.ts:259</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L263">src/cursor/abstract_cursor.ts:263</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="id" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -165,7 +201,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="BSON.Long.html" class="tsd-signature-type tsd-kind-class">Long</a></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.id</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L219">src/cursor/abstract_cursor.ts:219</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L218">src/cursor/abstract_cursor.ts:218</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="killed" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>killed</span><a href="#killed" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -174,7 +210,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.killed</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L263">src/cursor/abstract_cursor.ts:263</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L267">src/cursor/abstract_cursor.ts:267</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="loadBalanced" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>load<wbr/>Balanced</span><a href="#loadBalanced" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -183,7 +219,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.loadBalanced</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L267">src/cursor/abstract_cursor.ts:267</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L271">src/cursor/abstract_cursor.ts:271</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="namespace" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>namespace</span><a href="#namespace" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -192,7 +228,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="MongoDBNamespace.html" class="tsd-signature-type tsd-kind-class">MongoDBNamespace</a></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.namespace</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L233">src/cursor/abstract_cursor.ts:233</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L237">src/cursor/abstract_cursor.ts:237</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="pipeline" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>pipeline</span><a href="#pipeline" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -210,7 +246,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="ReadConcern.html" class="tsd-signature-type tsd-kind-class">ReadConcern</a></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.readConcern</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L241">src/cursor/abstract_cursor.ts:241</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L245">src/cursor/abstract_cursor.ts:245</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="readPreference" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Preference</span><a href="#readPreference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -219,7 +255,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="ReadPreference.html" class="tsd-signature-type tsd-kind-class">ReadPreference</a></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.readPreference</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L237">src/cursor/abstract_cursor.ts:237</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L241">src/cursor/abstract_cursor.ts:241</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="session" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>session</span><a href="#session" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -233,7 +269,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
 <p>Inherited from AggregationCursor.session</p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L250">src/cursor/abstract_cursor.ts:250</a></li></ul></aside></li></ul></section></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L254">src/cursor/abstract_cursor.ts:254</a></li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="_asyncIterator_" class="tsd-anchor"></a>
@@ -244,7 +280,25 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">AsyncGenerator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#_asyncIterator_">[asyncIterator]</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L291">src/cursor/abstract_cursor.ts:291</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L295">src/cursor/abstract_cursor.ts:295</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="_captureRejectionSymbol_" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagOptional">Optional</code> <span>[capture<wbr/>Rejection<wbr/>Symbol]</span><a href="#_captureRejectionSymbol_" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="_captureRejectionSymbol_._captureRejectionSymbol_-1"><span class="tsd-kind-call-signature">[capture<wbr/>Rejection<wbr/>Symbol]</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">error</span>, <span class="tsd-kind-parameter">event</span>, <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span><a href="#_captureRejectionSymbol_._captureRejectionSymbol_-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">error</span>: <span class="tsd-signature-type ">Error</span></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type">string</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagRest">Rest</code> <span class="tsd-signature-symbol">...</span><span class="tsd-kind-parameter">args</span>: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4><aside class="tsd-sources">
+<p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#_captureRejectionSymbol_">[captureRejectionSymbol]</a></p>
+<ul>
+<li>Defined in node_modules/@types/node/events.d.ts:112</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addCursorFlag" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Cursor<wbr/>Flag</span><a href="#addCursorFlag" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -256,7 +310,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
-<h5><span class="tsd-kind-parameter">flag</span>: <span class="tsd-signature-type">&quot;tailable&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;oplogReplay&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;noCursorTimeout&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;awaitData&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;exhaust&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;partial&quot;</span></h5>
+<h5><span class="tsd-kind-parameter">flag</span>: <span class="tsd-signature-type">&quot;tailable&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;oplogReplay&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;noCursorTimeout&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;awaitData&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;partial&quot;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">&quot;exhaust&quot;</span></h5>
 <div class="tsd-comment tsd-typography"><p>The flag to set, must be one of following [&#39;tailable&#39;, &#39;oplogReplay&#39;, &#39;noCursorTimeout&#39;, &#39;awaitData&#39;, &#39;partial&#39; -.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li>
@@ -269,7 +323,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#addCursorFlag">addCursorFlag</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L440">src/cursor/abstract_cursor.ts:440</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L444">src/cursor/abstract_cursor.ts:444</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="addListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>add<wbr/>Listener</span><a href="#addListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -290,7 +344,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#addListener">addListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L319">src/mongo_types.ts:319</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L332">src/mongo_types.ts:332</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="addListener.addListener-2"><span class="tsd-kind-call-signature">add<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#addListener.addListener-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -316,7 +370,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#addListener">addListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L320">src/mongo_types.ts:320</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L333">src/mongo_types.ts:333</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="addListener.addListener-3"><span class="tsd-kind-call-signature">add<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#addListener.addListener-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -329,7 +383,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#addListener">addListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L324">src/mongo_types.ts:324</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L337">src/mongo_types.ts:337</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="batchSize" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>batch<wbr/>Size</span><a href="#batchSize" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -349,7 +403,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#batchSize">batchSize</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L563">src/cursor/abstract_cursor.ts:563</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L567">src/cursor/abstract_cursor.ts:567</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="bufferedCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>buffered<wbr/>Count</span><a href="#bufferedCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -361,7 +415,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#bufferedCount">bufferedCount</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L272">src/cursor/abstract_cursor.ts:272</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L276">src/cursor/abstract_cursor.ts:276</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="clone" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>clone</span><a href="#clone" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -382,7 +436,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#close-1">close</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L414">src/cursor/abstract_cursor.ts:414</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L418">src/cursor/abstract_cursor.ts:418</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="emit" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>emit</span><a href="#emit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -403,7 +457,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#emit">emit</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L366">src/mongo_types.ts:366</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L379">src/mongo_types.ts:379</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="eventNames" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>event<wbr/>Names</span><a href="#eventNames" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -412,7 +466,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#eventNames">eventNames</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L392">src/mongo_types.ts:392</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L405">src/mongo_types.ts:405</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="explain" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>explain</span><a href="#explain" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -429,7 +483,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#explain">explain</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L80">src/cursor/aggregation_cursor.ts:80</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L78">src/cursor/aggregation_cursor.ts:78</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="forEach" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>for<wbr/>Each</span><a href="#forEach" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -468,7 +522,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#forEach">forEach</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L402">src/cursor/abstract_cursor.ts:402</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L406">src/cursor/abstract_cursor.ts:406</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="geoNear" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>geo<wbr/>Near</span><a href="#geoNear" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -485,7 +539,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#geoNear">geoNear</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L203">src/cursor/aggregation_cursor.ts:203</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L201">src/cursor/aggregation_cursor.ts:201</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="getMaxListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Max<wbr/>Listeners</span><a href="#getMaxListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -494,7 +548,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#getMaxListeners">getMaxListeners</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L393">src/mongo_types.ts:393</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L406">src/mongo_types.ts:406</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="group" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>group</span><a href="#group" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -516,7 +570,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#group">group</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L92">src/cursor/aggregation_cursor.ts:92</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L90">src/cursor/aggregation_cursor.ts:90</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="hasNext" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>has<wbr/>Next</span><a href="#hasNext" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -525,7 +579,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#hasNext">hasNext</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L355">src/cursor/abstract_cursor.ts:355</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L359">src/cursor/abstract_cursor.ts:359</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="limit" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>limit</span><a href="#limit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -542,7 +596,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#limit">limit</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L100">src/cursor/aggregation_cursor.ts:100</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L98">src/cursor/aggregation_cursor.ts:98</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="listenerCount" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>listener<wbr/>Count</span><a href="#listenerCount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -561,7 +615,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#listenerCount">listenerCount</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L371">src/mongo_types.ts:371</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L384">src/mongo_types.ts:384</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="listeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>listeners</span><a href="#listeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -580,7 +634,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <h4 class="tsd-returns-title">Returns <a href="../types/AbstractCursorEvents.html" class="tsd-signature-type tsd-kind-type-alias">AbstractCursorEvents</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">EventKey</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#listeners">listeners</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L358">src/mongo_types.ts:358</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L371">src/mongo_types.ts:371</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="lookup" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>lookup</span><a href="#lookup" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -597,7 +651,7 @@ regular <code>&#39;error&#39;</code> listener is installed.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#lookup">lookup</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L168">src/cursor/aggregation_cursor.ts:168</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L166">src/cursor/aggregation_cursor.ts:166</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="map" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>map</span><a href="#map" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -671,7 +725,7 @@ Take note of the following example:</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#match">match</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L107">src/cursor/aggregation_cursor.ts:107</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L105">src/cursor/aggregation_cursor.ts:105</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="maxTimeMS" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>max<wbr/>TimeMS</span><a href="#maxTimeMS" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -691,7 +745,7 @@ Take note of the following example:</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L548">src/cursor/abstract_cursor.ts:548</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L552">src/cursor/abstract_cursor.ts:552</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="next" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>next</span><a href="#next" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -703,7 +757,7 @@ Take note of the following example:</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#next">next</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L375">src/cursor/abstract_cursor.ts:375</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L379">src/cursor/abstract_cursor.ts:379</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="off" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>off</span><a href="#off" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -724,7 +778,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#off">off</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L347">src/mongo_types.ts:347</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L360">src/mongo_types.ts:360</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="off.off-2"><span class="tsd-kind-call-signature">off</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#off.off-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -750,7 +804,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#off">off</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L348">src/mongo_types.ts:348</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L361">src/mongo_types.ts:361</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="off.off-3"><span class="tsd-kind-call-signature">off</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#off.off-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -763,7 +817,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#off">off</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L352">src/mongo_types.ts:352</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L365">src/mongo_types.ts:365</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="on" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>on</span><a href="#on" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -784,7 +838,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#on">on</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L326">src/mongo_types.ts:326</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L339">src/mongo_types.ts:339</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="on.on-2"><span class="tsd-kind-call-signature">on</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#on.on-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -810,7 +864,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#on">on</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L327">src/mongo_types.ts:327</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L340">src/mongo_types.ts:340</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="on.on-3"><span class="tsd-kind-call-signature">on</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#on.on-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -823,7 +877,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#on">on</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L331">src/mongo_types.ts:331</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L344">src/mongo_types.ts:344</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="once" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>once</span><a href="#once" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -844,7 +898,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#once">once</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L333">src/mongo_types.ts:333</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L346">src/mongo_types.ts:346</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="once.once-2"><span class="tsd-kind-call-signature">once</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#once.once-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -870,7 +924,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#once">once</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L334">src/mongo_types.ts:334</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L347">src/mongo_types.ts:347</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="once.once-3"><span class="tsd-kind-call-signature">once</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#once.once-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -883,7 +937,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#once">once</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L338">src/mongo_types.ts:338</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L351">src/mongo_types.ts:351</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="out" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>out</span><a href="#out" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -900,7 +954,7 @@ Take note of the following example:</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#out">out</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L114">src/cursor/aggregation_cursor.ts:114</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L112">src/cursor/aggregation_cursor.ts:112</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="prependListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>prepend<wbr/>Listener</span><a href="#prependListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -921,7 +975,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependListener">prependListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L375">src/mongo_types.ts:375</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L388">src/mongo_types.ts:388</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="prependListener.prependListener-2"><span class="tsd-kind-call-signature">prepend<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#prependListener.prependListener-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -947,7 +1001,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependListener">prependListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L376">src/mongo_types.ts:376</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L389">src/mongo_types.ts:389</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="prependListener.prependListener-3"><span class="tsd-kind-call-signature">prepend<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#prependListener.prependListener-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -960,7 +1014,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependListener">prependListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L380">src/mongo_types.ts:380</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L393">src/mongo_types.ts:393</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="prependOnceListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>prepend<wbr/>Once<wbr/>Listener</span><a href="#prependOnceListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -981,7 +1035,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependOnceListener">prependOnceListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L382">src/mongo_types.ts:382</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L395">src/mongo_types.ts:395</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="prependOnceListener.prependOnceListener-2"><span class="tsd-kind-call-signature">prepend<wbr/>Once<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#prependOnceListener.prependOnceListener-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1007,7 +1061,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependOnceListener">prependOnceListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L386">src/mongo_types.ts:386</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L399">src/mongo_types.ts:399</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="prependOnceListener.prependOnceListener-3"><span class="tsd-kind-call-signature">prepend<wbr/>Once<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#prependOnceListener.prependOnceListener-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1020,7 +1074,7 @@ Take note of the following example:</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#prependOnceListener">prependOnceListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L390">src/mongo_types.ts:390</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L403">src/mongo_types.ts:403</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="project" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>project</span><a href="#project" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1053,7 +1107,7 @@ You should specify a parameterized type to have assertions on your final results
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#project">project</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L161">src/cursor/aggregation_cursor.ts:161</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L159">src/cursor/aggregation_cursor.ts:159</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="rawListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>raw<wbr/>Listeners</span><a href="#rawListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1072,7 +1126,7 @@ You should specify a parameterized type to have assertions on your final results
 <h4 class="tsd-returns-title">Returns <a href="../types/AbstractCursorEvents.html" class="tsd-signature-type tsd-kind-type-alias">AbstractCursorEvents</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type tsd-kind-type-parameter">EventKey</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">[]</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#rawListeners">rawListeners</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L362">src/mongo_types.ts:362</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L375">src/mongo_types.ts:375</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="readBufferedDocuments" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>read<wbr/>Buffered<wbr/>Documents</span><a href="#readBufferedDocuments" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1089,7 +1143,7 @@ You should specify a parameterized type to have assertions on your final results
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#readBufferedDocuments">readBufferedDocuments</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L277">src/cursor/abstract_cursor.ts:277</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L281">src/cursor/abstract_cursor.ts:281</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="redact" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>redact</span><a href="#redact" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1106,7 +1160,7 @@ You should specify a parameterized type to have assertions on your final results
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#redact">redact</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L175">src/cursor/aggregation_cursor.ts:175</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L173">src/cursor/aggregation_cursor.ts:173</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeAllListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>All<wbr/>Listeners</span><a href="#removeAllListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1125,7 +1179,7 @@ You should specify a parameterized type to have assertions on your final results
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#removeAllListeners">removeAllListeners</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L354">src/mongo_types.ts:354</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L367">src/mongo_types.ts:367</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="removeListener" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>remove<wbr/>Listener</span><a href="#removeListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1146,7 +1200,7 @@ You should specify a parameterized type to have assertions on your final results
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#removeListener">removeListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L340">src/mongo_types.ts:340</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L353">src/mongo_types.ts:353</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="removeListener.removeListener-2"><span class="tsd-kind-call-signature">remove<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#removeListener.removeListener-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1172,7 +1226,7 @@ You should specify a parameterized type to have assertions on your final results
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#removeListener">removeListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L341">src/mongo_types.ts:341</a></li></ul></aside></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L354">src/mongo_types.ts:354</a></li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="removeListener.removeListener-3"><span class="tsd-kind-call-signature">remove<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span>, <span class="tsd-kind-parameter">listener</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a><a href="#removeListener.removeListener-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1185,7 +1239,7 @@ You should specify a parameterized type to have assertions on your final results
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#removeListener">removeListener</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L345">src/mongo_types.ts:345</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L358">src/mongo_types.ts:358</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="rewind" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>rewind</span><a href="#rewind" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1199,7 +1253,7 @@ if the resultant data has already been retrieved by this cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#rewind">rewind</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L582">src/cursor/abstract_cursor.ts:582</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L586">src/cursor/abstract_cursor.ts:586</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="setMaxListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>set<wbr/>Max<wbr/>Listeners</span><a href="#setMaxListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1213,7 +1267,7 @@ if the resultant data has already been retrieved by this cursor.</p>
 <h4 class="tsd-returns-title">Returns <a href="ListSearchIndexesCursor.html" class="tsd-signature-type tsd-kind-class">ListSearchIndexesCursor</a></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#setMaxListeners">setMaxListeners</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L394">src/mongo_types.ts:394</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/mongo_types.ts#L407">src/mongo_types.ts:407</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="skip" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>skip</span><a href="#skip" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1230,7 +1284,7 @@ if the resultant data has already been retrieved by this cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#skip">skip</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L182">src/cursor/aggregation_cursor.ts:182</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L180">src/cursor/aggregation_cursor.ts:180</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="sort" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>sort</span><a href="#sort" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1247,7 +1301,7 @@ if the resultant data has already been retrieved by this cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#sort">sort</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L189">src/cursor/aggregation_cursor.ts:189</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L187">src/cursor/aggregation_cursor.ts:187</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="stream" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>stream</span><a href="#stream" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1261,7 +1315,7 @@ if the resultant data has already been retrieved by this cursor.</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Readable</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-type ">AsyncIterable</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span><br/><span>    </span><span class="tsd-kind-property">name</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span><br/><span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#stream">stream</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L331">src/cursor/abstract_cursor.ts:331</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L335">src/cursor/abstract_cursor.ts:335</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="toArray" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>Array</span><a href="#toArray" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1276,7 +1330,7 @@ cursor.rewind() can be used to reset the cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#toArray">toArray</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L426">src/cursor/abstract_cursor.ts:426</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L430">src/cursor/abstract_cursor.ts:430</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="tryNext" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>try<wbr/>Next</span><a href="#tryNext" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1288,7 +1342,7 @@ cursor.rewind() can be used to reset the cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#tryNext">tryNext</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L386">src/cursor/abstract_cursor.ts:386</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L390">src/cursor/abstract_cursor.ts:390</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="unwind" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>unwind</span><a href="#unwind" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1305,7 +1359,7 @@ cursor.rewind() can be used to reset the cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#unwind">unwind</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L196">src/cursor/aggregation_cursor.ts:196</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/aggregation_cursor.ts#L194">src/cursor/aggregation_cursor.ts:194</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="withReadConcern" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>with<wbr/>Read<wbr/>Concern</span><a href="#withReadConcern" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1322,7 +1376,7 @@ cursor.rewind() can be used to reset the cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#withReadConcern">withReadConcern</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L533">src/cursor/abstract_cursor.ts:533</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L537">src/cursor/abstract_cursor.ts:537</a></li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited"><a id="withReadPreference" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>with<wbr/>Read<wbr/>Preference</span><a href="#withReadPreference" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited">
@@ -1342,7 +1396,51 @@ cursor.rewind() can be used to reset the cursor.</p>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#withReadPreference">withReadPreference</a></p>
 <ul>
-<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L515">src/cursor/abstract_cursor.ts:515</a></li></ul></aside></li></ul></section>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/cursor/abstract_cursor.ts#L519">src/cursor/abstract_cursor.ts:519</a></li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="addAbortListener" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>add<wbr/>Abort<wbr/>Listener</span><a href="#addAbortListener" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="addAbortListener.addAbortListener-1"><span class="tsd-kind-call-signature">add<wbr/>Abort<wbr/>Listener</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">signal</span>, <span class="tsd-kind-parameter">resource</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Disposable</span><a href="#addAbortListener.addAbortListener-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description"><code class="tsd-tag ts-flagExperimental">Experimental</code> 
+<div class="tsd-comment tsd-typography"><p>Listens once to the <code>abort</code> event on the provided <code>signal</code>.</p>
+<p>Listening to the <code>abort</code> event on abort signals is unsafe and may
+lead to resource leaks since another third party with the signal can
+call <code>e.stopImmediatePropagation()</code>. Unfortunately Node.js cannot change
+this since it would violate the web standard. Additionally, the original
+API makes it easy to forget to remove listeners.</p>
+<p>This API allows safely using <code>AbortSignal</code>s in Node.js APIs by solving these
+two issues by listening to the event such that <code>stopImmediatePropagation</code> does
+not prevent the listener from running.</p>
+<p>Returns a disposable so that it may be unsubscribed from more easily.</p>
+<pre><code class="language-js"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">addAbortListener</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;node:events&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-4">function</span><span class="hl-1"> </span><span class="hl-0">example</span><span class="hl-1">(</span><span class="hl-6">signal</span><span class="hl-1">) {</span><br/><span class="hl-1">  </span><span class="hl-4">let</span><span class="hl-1"> </span><span class="hl-6">disposable</span><span class="hl-1">;</span><br/><span class="hl-1">  </span><span class="hl-7">try</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">signal</span><span class="hl-1">.</span><span class="hl-0">addEventListener</span><span class="hl-1">(</span><span class="hl-2">&#39;abort&#39;</span><span class="hl-1">, (</span><span class="hl-6">e</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> </span><span class="hl-6">e</span><span class="hl-1">.</span><span class="hl-0">stopImmediatePropagation</span><span class="hl-1">());</span><br/><span class="hl-1">    </span><span class="hl-6">disposable</span><span class="hl-1"> = </span><span class="hl-0">addAbortListener</span><span class="hl-1">(</span><span class="hl-6">signal</span><span class="hl-1">, (</span><span class="hl-6">e</span><span class="hl-1">) </span><span class="hl-4">=&gt;</span><span class="hl-1"> {</span><br/><span class="hl-1">      </span><span class="hl-3">// Do something when signal is aborted.</span><br/><span class="hl-1">    });</span><br/><span class="hl-1">  } </span><span class="hl-7">finally</span><span class="hl-1"> {</span><br/><span class="hl-1">    </span><span class="hl-6">disposable</span><span class="hl-1">?.[</span><span class="hl-6">Symbol</span><span class="hl-1">.</span><span class="hl-6">dispose</span><span class="hl-1">]();</span><br/><span class="hl-1">  }</span><br/><span class="hl-1">}</span>
+</code><button>Copy</button></pre>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">signal</span>: <span class="tsd-signature-type ">AbortSignal</span></h5></li>
+<li>
+<h5><span class="tsd-kind-parameter">resource</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">)</span></h5>
+<ul class="tsd-parameters">
+<li class="tsd-parameter-signature">
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature"><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">event</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+<li class="tsd-description">
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">event</span>: <span class="tsd-signature-type ">Event</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4></li></ul></li></ul></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Disposable</span></h4><p>Disposable that removes the <code>abort</code> listener.</p>
+
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v20.5.0</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#addAbortListener">addAbortListener</a></p>
+<ul>
+<li>Defined in node_modules/@types/node/events.d.ts:387</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="getEventListeners" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Event<wbr/>Listeners</span><a href="#getEventListeners" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1369,7 +1467,33 @@ event target. This is useful for debugging and diagnostic purposes.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#getEventListeners">getEventListeners</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:296</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/events.d.ts:308</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="getMaxListeners-2" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>get<wbr/>Max<wbr/>Listeners</span><a href="#getMaxListeners-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-inherited tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="getMaxListeners-2.getMaxListeners-3"><span class="tsd-kind-call-signature">get<wbr/>Max<wbr/>Listeners</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">emitter</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#getMaxListeners-2.getMaxListeners-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Returns the currently set max amount of listeners.</p>
+<p>For <code>EventEmitter</code>s this behaves exactly the same as calling <code>.getMaxListeners</code> on
+the emitter.</p>
+<p>For <code>EventTarget</code>s this is the only way to get the max event listeners for the
+event target. If the number of event handlers on a single EventTarget exceeds
+the max set, the EventTarget will print a warning.</p>
+<pre><code class="language-js"><span class="hl-7">import</span><span class="hl-1"> { </span><span class="hl-6">getMaxListeners</span><span class="hl-1">, </span><span class="hl-6">setMaxListeners</span><span class="hl-1">, </span><span class="hl-6">EventEmitter</span><span class="hl-1"> } </span><span class="hl-7">from</span><span class="hl-1"> </span><span class="hl-2">&#39;node:events&#39;</span><span class="hl-1">;</span><br/><br/><span class="hl-1">{</span><br/><span class="hl-1">  </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">ee</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventEmitter</span><span class="hl-1">();</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">ee</span><span class="hl-1">)); </span><span class="hl-3">// 10</span><br/><span class="hl-1">  </span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-8">11</span><span class="hl-1">, </span><span class="hl-6">ee</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">ee</span><span class="hl-1">)); </span><span class="hl-3">// 11</span><br/><span class="hl-1">}</span><br/><span class="hl-1">{</span><br/><span class="hl-1">  </span><span class="hl-4">const</span><span class="hl-1"> </span><span class="hl-5">et</span><span class="hl-1"> = </span><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">EventTarget</span><span class="hl-1">();</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">et</span><span class="hl-1">)); </span><span class="hl-3">// 10</span><br/><span class="hl-1">  </span><span class="hl-0">setMaxListeners</span><span class="hl-1">(</span><span class="hl-8">11</span><span class="hl-1">, </span><span class="hl-6">et</span><span class="hl-1">);</span><br/><span class="hl-1">  </span><span class="hl-6">console</span><span class="hl-1">.</span><span class="hl-0">log</span><span class="hl-1">(</span><span class="hl-0">getMaxListeners</span><span class="hl-1">(</span><span class="hl-6">et</span><span class="hl-1">)); </span><span class="hl-3">// 11</span><br/><span class="hl-1">}</span>
+</code><button>Copy</button></pre>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">emitter</span>: <span class="tsd-signature-type ">EventEmitter</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">_DOMEventTarget</span></h5></li></ul></div>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+<div class="tsd-comment tsd-typography">
+<h4>Since</h4><p>v19.9.0</p>
+</div><aside class="tsd-sources">
+<p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#getMaxListeners-2">getMaxListeners</a></p>
+<ul>
+<li>Defined in node_modules/@types/node/events.d.ts:337</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="listenerCount-2" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>listener<wbr/>Count</span><a href="#listenerCount-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1400,7 +1524,7 @@ event target. This is useful for debugging and diagnostic purposes.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#listenerCount-2">listenerCount</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:268</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/events.d.ts:280</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="on-4" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>on</span><a href="#on-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1435,7 +1559,7 @@ composed of the emitted event arguments.</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#on-4">on</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:250</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/events.d.ts:258</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="once-4" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>once</span><a href="#once-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1473,7 +1597,7 @@ special handling:</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#once-4">once</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:189</li></ul></aside></li>
+<li>Defined in node_modules/@types/node/events.d.ts:193</li></ul></aside></li>
 <li class="tsd-signature tsd-anchor-link" id="once-4.once-6"><span class="tsd-kind-call-signature">once</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">emitter</span>, <span class="tsd-kind-parameter">eventName</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span><a href="#once-4.once-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
 <div class="tsd-parameters">
@@ -1488,7 +1612,7 @@ special handling:</p>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#once-4">once</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:190</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/@types/node/events.d.ts:198</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external"><a id="setMaxListeners-2" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>set<wbr/>Max<wbr/>Listeners</span><a href="#setMaxListeners-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-inherited tsd-is-external">
@@ -1513,7 +1637,7 @@ special handling:</p>
 </div><aside class="tsd-sources">
 <p>Inherited from <a href="AggregationCursor.html">AggregationCursor</a>.<a href="AggregationCursor.html#setMaxListeners-2">setMaxListeners</a></p>
 <ul>
-<li>Defined in node_modules/@types/node/events.d.ts:311</li></ul></aside></li></ul></section></section></div>
+<li>Defined in node_modules/@types/node/events.d.ts:352</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -1548,6 +1672,7 @@ special handling:</p>
 <li><a href="#readPreference" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>read<wbr/>Preference</span></a></li>
 <li><a href="#session" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>session</span></a></li>
 <li><a href="#_asyncIterator_" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>[async<wbr/>Iterator]</span></a></li>
+<li><a href="#_captureRejectionSymbol_" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>[capture<wbr/>Rejection<wbr/>Symbol]</span></a></li>
 <li><a href="#addCursorFlag" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Cursor<wbr/>Flag</span></a></li>
 <li><a href="#addListener" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Listener</span></a></li>
 <li><a href="#batchSize" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>batch<wbr/>Size</span></a></li>
@@ -1592,7 +1717,9 @@ special handling:</p>
 <li><a href="#unwind" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>unwind</span></a></li>
 <li><a href="#withReadConcern" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Read<wbr/>Concern</span></a></li>
 <li><a href="#withReadPreference" class="tsd-is-inherited"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>with<wbr/>Read<wbr/>Preference</span></a></li>
+<li><a href="#addAbortListener" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>add<wbr/>Abort<wbr/>Listener</span></a></li>
 <li><a href="#getEventListeners" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Event<wbr/>Listeners</span></a></li>
+<li><a href="#getMaxListeners-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>get<wbr/>Max<wbr/>Listeners</span></a></li>
 <li><a href="#listenerCount-2" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>listener<wbr/>Count</span></a></li>
 <li><a href="#on-4" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>on</span></a></li>
 <li><a href="#once-4" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>once</span></a></li>
@@ -1942,6 +2069,7 @@ special handling:</p>
 <li><a href="../types/SchemaMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Schema<wbr/>Member</span></a></li>
 <li><a href="../types/ServerApiVersion.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
 <li><a href="../types/ServerEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Events</span></a></li>
+<li><a href="../types/ServerMonitoringMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../types/ServerSessionId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Session<wbr/>Id</span></a></li>
 <li><a href="../types/ServerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../types/SetFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Fields</span></a></li>
@@ -1981,6 +2109,7 @@ special handling:</p>
 <li><a href="../variables/ReadPreferenceMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Read<wbr/>Preference<wbr/>Mode</span></a></li>
 <li><a href="../variables/ReturnDocument-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Return<wbr/>Document</span></a></li>
 <li><a href="../variables/ServerApiVersion-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
+<li><a href="../variables/ServerMonitoringMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../variables/ServerType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../variables/TopologyType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Topology<wbr/>Type</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">

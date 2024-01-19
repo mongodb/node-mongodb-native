@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>deserializeStream | mongodb</title><meta name="description" content="Documentation for mongodb"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>ServerMonitoringMode | mongodb</title><meta name="description" content="Documentation for mongodb"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/search.js" id="tsd-search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
 <div class="tsd-toolbar-contents container">
 <div class="table-cell" id="tsd-search" data-base="..">
 <div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
@@ -13,53 +13,13 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb">
 <li><a href="../modules.html">mongodb</a></li>
-<li><a href="../modules/BSON.html">BSON</a></li>
-<li><a href="BSON.deserializeStream.html">deserializeStream</a></li></ul>
-<h1>Function deserializeStream</h1></div>
-<section class="tsd-panel">
-<ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="deserializeStream"><span class="tsd-kind-call-signature">deserialize<wbr/>Stream</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">data</span>, <span class="tsd-kind-parameter">startIndex</span>, <span class="tsd-kind-parameter">numberOfDocuments</span>, <span class="tsd-kind-parameter">documents</span>, <span class="tsd-kind-parameter">docStartIndex</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><a href="#deserializeStream" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></li>
-<li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Deserialize stream data as BSON documents.</p>
-</div>
-<div class="tsd-parameters">
-<h4 class="tsd-parameters-title">Parameters</h4>
-<ul class="tsd-parameter-list">
-<li>
-<h5><span class="tsd-kind-parameter">data</span>: <span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">ArrayBuffer</span></h5>
-<div class="tsd-comment tsd-typography"><p>the buffer containing the serialized set of BSON documents.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li>
-<li>
-<h5><span class="tsd-kind-parameter">startIndex</span>: <span class="tsd-signature-type">number</span></h5>
-<div class="tsd-comment tsd-typography"><p>the start index in the data Buffer where the deserialization is to start.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li>
-<li>
-<h5><span class="tsd-kind-parameter">numberOfDocuments</span>: <span class="tsd-signature-type">number</span></h5>
-<div class="tsd-comment tsd-typography"><p>number of documents to deserialize.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li>
-<li>
-<h5><span class="tsd-kind-parameter">documents</span>: <a href="../interfaces/BSON.Document.html" class="tsd-signature-type tsd-kind-interface">Document</a><span class="tsd-signature-symbol">[]</span></h5>
-<div class="tsd-comment tsd-typography"><p>an array where to store the deserialized documents.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li>
-<li>
-<h5><span class="tsd-kind-parameter">docStartIndex</span>: <span class="tsd-signature-type">number</span></h5>
-<div class="tsd-comment tsd-typography"><p>the index in the documents array from where to start inserting documents.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li>
-<li>
-<h5><span class="tsd-kind-parameter">options</span>: <a href="../interfaces/BSON.DeserializeOptions.html" class="tsd-signature-type tsd-kind-interface">DeserializeOptions</a></h5>
-<div class="tsd-comment tsd-typography"><p>additional options used for the deserialization.</p>
-</div>
-<div class="tsd-comment tsd-typography"></div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4><p>next index in the buffer after deserialization <strong>x</strong> numbers of documents.</p>
-
+<li><a href="ServerMonitoringMode.html">ServerMonitoringMode</a></li></ul>
+<h1>Type alias ServerMonitoringMode</h1></div>
+<div class="tsd-signature"><span class="tsd-kind-type-alias">Server<wbr/>Monitoring<wbr/>Mode</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">typeof </span><a href="../variables/ServerMonitoringMode-1.html" class="tsd-signature-type tsd-kind-variable">ServerMonitoringMode</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-symbol">keyof </span><span class="tsd-signature-symbol">typeof </span><a href="../variables/ServerMonitoringMode-1.html" class="tsd-signature-type tsd-kind-variable">ServerMonitoringMode</a><span class="tsd-signature-symbol">]</span></div>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:505</li></ul></aside></li></ul></section></div>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/monitor.ts#L46">src/sdam/monitor.ts:46</a></li>
+<li>Defined in <a href="https://github.com/mongodb/node-mongodb-native/blob/main/src/sdam/monitor.ts#L53">src/sdam/monitor.ts:53</a></li></ul></aside></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -96,64 +56,8 @@
 <li><a href="../modules.html#UUID"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>UUID</span></a></li>
 <li><a href="../modules.html#deserialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>deserialize</span></a></li>
 <li><a href="../modules.html#serialize"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-8388608"></use></svg><span>serialize</span></a></li>
-<li>
-<details class="tsd-index-accordion tsd-is-external" open data-key="BSON"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="#icon-chevronDown"></use></svg><a href="../modules/BSON.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>BSON</span></a></summary>
-<div class="tsd-accordion-details">
-<ul class="tsd-nested-navigation">
-<li><a href="../classes/BSON.BSONError.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-128"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)"></path></g></svg><span>BSONError</span></a></li>
-<li><a href="../classes/BSON.BSONRegExp.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>BSONReg<wbr/>Exp</span></a></li>
-<li><a href="../classes/BSON.BSONRuntimeError.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>BSONRuntime<wbr/>Error</span></a></li>
-<li><a href="../classes/BSON.BSONSymbol.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>BSONSymbol</span></a></li>
-<li><a href="../classes/BSON.BSONValue.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>BSONValue</span></a></li>
-<li><a href="../classes/BSON.BSONVersionError.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>BSONVersion<wbr/>Error</span></a></li>
-<li><a href="../classes/BSON.Binary.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Binary</span></a></li>
-<li><a href="../classes/BSON.Code.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Code</span></a></li>
-<li><a href="../classes/BSON.DBRef.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>DBRef</span></a></li>
-<li><a href="../classes/BSON.Decimal128.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Decimal128</span></a></li>
-<li><a href="../classes/BSON.Double.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Double</span></a></li>
-<li><a href="../classes/BSON.Int32.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Int32</span></a></li>
-<li><a href="../classes/BSON.Long.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Long</span></a></li>
-<li><a href="../classes/BSON.MaxKey.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Max<wbr/>Key</span></a></li>
-<li><a href="../classes/BSON.MinKey.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Min<wbr/>Key</span></a></li>
-<li><a href="../classes/BSON.ObjectId.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Object<wbr/>Id</span></a></li>
-<li><a href="../classes/BSON.Timestamp.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Timestamp</span></a></li>
-<li><a href="../classes/BSON.UUID.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>UUID</span></a></li>
-<li><a href="../interfaces/BSON.BSONRegExpExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>BSONReg<wbr/>Exp<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.BSONRegExpExtendedLegacy.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>BSONReg<wbr/>Exp<wbr/>Extended<wbr/>Legacy</span></a></li>
-<li><a href="../interfaces/BSON.BSONSymbolExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>BSONSymbol<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.BinaryExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Binary<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.BinaryExtendedLegacy.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Binary<wbr/>Extended<wbr/>Legacy</span></a></li>
-<li><a href="../interfaces/BSON.CodeExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Code<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.DBRefLike.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>DBRef<wbr/>Like</span></a></li>
-<li><a href="../interfaces/BSON.Decimal128Extended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Decimal128<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.DeserializeOptions.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Deserialize<wbr/>Options</span></a></li>
-<li><a href="../interfaces/BSON.Document.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Document</span></a></li>
-<li><a href="../interfaces/BSON.DoubleExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Double<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.Int32Extended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Int32<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.LongExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Long<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.MaxKeyExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Max<wbr/>Key<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.MinKeyExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Min<wbr/>Key<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.ObjectIdExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Object<wbr/>Id<wbr/>Extended</span></a></li>
-<li><a href="../interfaces/BSON.ObjectIdLike.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Object<wbr/>Id<wbr/>Like</span></a></li>
-<li><a href="../interfaces/BSON.SerializeOptions.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Serialize<wbr/>Options</span></a></li>
-<li><a href="../interfaces/BSON.TimestampExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Timestamp<wbr/>Extended</span></a></li>
-<li><a href="../types/BSON.BSONType.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4194304"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)"></path></g></svg><span>BSONType</span></a></li>
-<li><a href="../types/BSON.BinarySequence.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Binary<wbr/>Sequence</span></a></li>
-<li><a href="../types/BSON.CalculateObjectSizeOptions.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Calculate<wbr/>Object<wbr/>Size<wbr/>Options</span></a></li>
-<li><a href="../types/BSON.EJSONOptions.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>EJSONOptions</span></a></li>
-<li><a href="../types/BSON.LongWithoutOverrides.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Long<wbr/>Without<wbr/>Overrides</span></a></li>
-<li><a href="../types/BSON.TimestampOverrides.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Timestamp<wbr/>Overrides</span></a></li>
-<li><a href="../types/BSON.UUIDExtended.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>UUIDExtended</span></a></li>
-<li><a href="../variables/BSON.BSONType-1.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-32"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-variable)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.106 16L8.85 7.24H9.966L11.454 13.192C11.558 13.608 11.646 13.996 11.718 14.356C11.79 14.708 11.842 14.976 11.874 15.16C11.906 14.976 11.954 14.708 12.018 14.356C12.09 13.996 12.178 13.608 12.282 13.192L13.758 7.24H14.85L12.582 16H11.106Z" fill="var(--color-text)"></path></g></svg><span>BSONType</span></a></li>
-<li><a href="../variables/BSON.EJSON.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>EJSON</span></a></li>
-<li><a href="../variables/BSON.LongWithoutOverridesClass.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Long<wbr/>Without<wbr/>Overrides<wbr/>Class</span></a></li>
-<li><a href="BSON.calculateObjectSize.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-64"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-function)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.39 16V7.24H14.55V8.224H10.446V11.128H14.238V12.112H10.47V16H9.39Z" fill="var(--color-text)"></path></g></svg><span>calculate<wbr/>Object<wbr/>Size</span></a></li>
-<li><a href="BSON.deserialize.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deserialize</span></a></li>
-<li><a href="BSON.deserializeStream.html" class="current tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>deserialize<wbr/>Stream</span></a></li>
-<li><a href="BSON.serialize.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>serialize</span></a></li>
-<li><a href="BSON.serializeWithBufferAndIndex.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>serialize<wbr/>With<wbr/>Buffer<wbr/>And<wbr/>Index</span></a></li>
-<li><a href="BSON.setInternalBufferSize.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-64"></use></svg><span>set<wbr/>Internal<wbr/>Buffer<wbr/>Size</span></a></li></ul></div></details></li>
-<li><a href="../classes/AbstractCursor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Abstract<wbr/>Cursor</span></a></li>
+<li><a href="../modules/BSON.html" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4"></use></svg><span>BSON</span></a></li>
+<li><a href="../classes/AbstractCursor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-128"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-class)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.898 16.1201C11.098 16.1201 10.466 15.8961 10.002 15.4481C9.53803 15.0001 9.30603 14.3841 9.30603 13.6001V9.64012C9.30603 8.85612 9.53803 8.24012 10.002 7.79212C10.466 7.34412 11.098 7.12012 11.898 7.12012C12.682 7.12012 13.306 7.34812 13.77 7.80412C14.234 8.25212 14.466 8.86412 14.466 9.64012H13.386C13.386 9.14412 13.254 8.76412 12.99 8.50012C12.734 8.22812 12.37 8.09212 11.898 8.09212C11.426 8.09212 11.054 8.22412 10.782 8.48812C10.518 8.75212 10.386 9.13212 10.386 9.62812V13.6001C10.386 14.0961 10.518 14.4801 10.782 14.7521C11.054 15.0161 11.426 15.1481 11.898 15.1481C12.37 15.1481 12.734 15.0161 12.99 14.7521C13.254 14.4801 13.386 14.0961 13.386 13.6001H14.466C14.466 14.3761 14.234 14.9921 13.77 15.4481C13.306 15.8961 12.682 16.1201 11.898 16.1201Z" fill="var(--color-text)"></path></g></svg><span>Abstract<wbr/>Cursor</span></a></li>
 <li><a href="../classes/Admin.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Admin</span></a></li>
 <li><a href="../classes/AggregationCursor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Aggregation<wbr/>Cursor</span></a></li>
 <li><a href="../classes/Batch.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Batch</span></a></li>
@@ -256,7 +160,7 @@
 <li><a href="../classes/WriteConcern.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern</span></a></li>
 <li><a href="../classes/WriteConcernError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Concern<wbr/>Error</span></a></li>
 <li><a href="../classes/WriteError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-128"></use></svg><span>Write<wbr/>Error</span></a></li>
-<li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
+<li><a href="../interfaces/AWSEncryptionKeyOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-256"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-interface)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.51 16V15.016H11.298V8.224H9.51V7.24H14.19V8.224H12.402V15.016H14.19V16H9.51Z" fill="var(--color-text)"></path></g></svg><span>AWSEncryption<wbr/>Key<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AbstractCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregateOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregate<wbr/>Options</span></a></li>
 <li><a href="../interfaces/AggregationCursorOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Aggregation<wbr/>Cursor<wbr/>Options</span></a></li>
@@ -389,118 +293,118 @@
 <li><a href="../interfaces/WriteConcernErrorData.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Error<wbr/>Data</span></a></li>
 <li><a href="../interfaces/WriteConcernOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Options</span></a></li>
 <li><a href="../interfaces/WriteConcernSettings.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-256"></use></svg><span>Write<wbr/>Concern<wbr/>Settings</span></a></li>
-<li><a href="../types/AbstractCursorEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Abstract<wbr/>Cursor<wbr/>Events</span></a></li>
-<li><a href="../types/AcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Accepted<wbr/>Fields</span></a></li>
-<li><a href="../types/AddToSetOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Add<wbr/>To<wbr/>Set<wbr/>Operators</span></a></li>
-<li><a href="../types/AlternativeType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Alternative<wbr/>Type</span></a></li>
-<li><a href="../types/AnyBulkWriteOperation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Any<wbr/>Bulk<wbr/>Write<wbr/>Operation</span></a></li>
-<li><a href="../types/AnyError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Any<wbr/>Error</span></a></li>
-<li><a href="../types/ArrayElement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Element</span></a></li>
-<li><a href="../types/ArrayOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Operator</span></a></li>
-<li><a href="../types/AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
-<li><a href="../types/AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
-<li><a href="../types/AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
-<li><a href="../types/BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
-<li><a href="../types/BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
-<li><a href="../types/BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
-<li><a href="../types/CSFLEKMSTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>CSFLEKMSTls<wbr/>Options</span></a></li>
-<li><a href="../types/Callback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Callback</span></a></li>
-<li><a href="../types/ChangeStreamDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Document</span></a></li>
-<li><a href="../types/ChangeStreamEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Events</span></a></li>
-<li><a href="../types/ClientEncryptionDataKeyProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Data<wbr/>Key<wbr/>Provider</span></a></li>
-<li><a href="../types/ClientEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
-<li><a href="../types/ClientSessionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Session<wbr/>Events</span></a></li>
-<li><a href="../types/CommonEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Common<wbr/>Events</span></a></li>
-<li><a href="../types/Compressor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor</span></a></li>
-<li><a href="../types/CompressorName.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor<wbr/>Name</span></a></li>
-<li><a href="../types/Condition.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Condition</span></a></li>
-<li><a href="../types/ConnectionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Connection<wbr/>Events</span></a></li>
-<li><a href="../types/ConnectionPoolEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Connection<wbr/>Pool<wbr/>Events</span></a></li>
-<li><a href="../types/CursorFlag.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Cursor<wbr/>Flag</span></a></li>
-<li><a href="../types/DistinctOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Distinct<wbr/>Options</span></a></li>
-<li><a href="../types/DropDatabaseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Drop<wbr/>Database<wbr/>Options</span></a></li>
-<li><a href="../types/DropIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Drop<wbr/>Indexes<wbr/>Options</span></a></li>
-<li><a href="../types/EnhancedOmit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Enhanced<wbr/>Omit</span></a></li>
-<li><a href="../types/EventEmitterWithState.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Event<wbr/>Emitter<wbr/>With<wbr/>State</span></a></li>
-<li><a href="../types/EventsDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Events<wbr/>Description</span></a></li>
-<li><a href="../types/ExplainVerbosity.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Explain<wbr/>Verbosity</span></a></li>
-<li><a href="../types/ExplainVerbosityLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Explain<wbr/>Verbosity<wbr/>Like</span></a></li>
-<li><a href="../types/Filter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter</span></a></li>
-<li><a href="../types/FilterOperations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter<wbr/>Operations</span></a></li>
-<li><a href="../types/Flatten.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Flatten</span></a></li>
-<li><a href="../types/GSSAPICanonicalizationValue.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GSSAPICanonicalization<wbr/>Value</span></a></li>
-<li><a href="../types/GenericListener.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Generic<wbr/>Listener</span></a></li>
-<li><a href="../types/GridFSBucketEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GridFSBucket<wbr/>Events</span></a></li>
-<li><a href="../types/Hint.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Hint</span></a></li>
-<li><a href="../types/IndexDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Direction</span></a></li>
-<li><a href="../types/IndexSpecification.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Specification</span></a></li>
-<li><a href="../types/InferIdType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Infer<wbr/>Id<wbr/>Type</span></a></li>
-<li><a href="../types/IntegerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Integer<wbr/>Type</span></a></li>
-<li><a href="../types/IsAny.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Is<wbr/>Any</span></a></li>
-<li><a href="../types/Join.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Join</span></a></li>
-<li><a href="../types/KeysOfAType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>OfAType</span></a></li>
-<li><a href="../types/KeysOfOtherType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>Of<wbr/>Other<wbr/>Type</span></a></li>
-<li><a href="../types/ListSearchIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Search<wbr/>Indexes<wbr/>Options</span></a></li>
-<li><a href="../types/MatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
-<li><a href="../types/MongoClientEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Client<wbr/>Events</span></a></li>
-<li><a href="../types/MongoErrorLabel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Error<wbr/>Label</span></a></li>
-<li><a href="../types/MonitorEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Monitor<wbr/>Events</span></a></li>
-<li><a href="../types/NestedPaths.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Nested<wbr/>Paths</span></a></li>
-<li><a href="../types/NestedPathsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Nested<wbr/>Paths<wbr/>Of<wbr/>Type</span></a></li>
-<li><a href="../types/NonObjectIdLikeDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Non<wbr/>Object<wbr/>Id<wbr/>Like<wbr/>Document</span></a></li>
-<li><a href="../types/NotAcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Not<wbr/>Accepted<wbr/>Fields</span></a></li>
-<li><a href="../types/NumericType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Numeric<wbr/>Type</span></a></li>
-<li><a href="../types/OIDCRefreshFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRefresh<wbr/>Function</span></a></li>
-<li><a href="../types/OIDCRequestFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRequest<wbr/>Function</span></a></li>
-<li><a href="../types/OneOrMore.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>One<wbr/>Or<wbr/>More</span></a></li>
-<li><a href="../types/OnlyFieldsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Only<wbr/>Fields<wbr/>Of<wbr/>Type</span></a></li>
-<li><a href="../types/OperationTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Operation<wbr/>Time</span></a></li>
-<li><a href="../types/OptionalId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Optional<wbr/>Id</span></a></li>
-<li><a href="../types/OptionalUnlessRequiredId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Optional<wbr/>Unless<wbr/>Required<wbr/>Id</span></a></li>
-<li><a href="../types/ProfilingLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Profiling<wbr/>Level</span></a></li>
-<li><a href="../types/ProfilingLevelOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Profiling<wbr/>Level<wbr/>Options</span></a></li>
-<li><a href="../types/PropertyType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Property<wbr/>Type</span></a></li>
-<li><a href="../types/PullAllOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Pull<wbr/>All<wbr/>Operator</span></a></li>
-<li><a href="../types/PullOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Pull<wbr/>Operator</span></a></li>
-<li><a href="../types/PushOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Push<wbr/>Operator</span></a></li>
-<li><a href="../types/ReadConcernLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Concern<wbr/>Level</span></a></li>
-<li><a href="../types/ReadConcernLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Concern<wbr/>Like</span></a></li>
-<li><a href="../types/ReadPreferenceLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Preference<wbr/>Like</span></a></li>
-<li><a href="../types/ReadPreferenceMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Preference<wbr/>Mode</span></a></li>
-<li><a href="../types/RegExpOrString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Reg<wbr/>Exp<wbr/>Or<wbr/>String</span></a></li>
-<li><a href="../types/RemoveUserOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Remove<wbr/>User<wbr/>Options</span></a></li>
-<li><a href="../types/ResumeToken.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Resume<wbr/>Token</span></a></li>
-<li><a href="../types/ReturnDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Return<wbr/>Document</span></a></li>
-<li><a href="../types/RunCommandOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Run<wbr/>Command<wbr/>Options</span></a></li>
-<li><a href="../types/RunCursorCommandOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Run<wbr/>Cursor<wbr/>Command<wbr/>Options</span></a></li>
-<li><a href="../types/SchemaMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Schema<wbr/>Member</span></a></li>
-<li><a href="../types/ServerApiVersion.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
-<li><a href="../types/ServerEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Events</span></a></li>
-<li><a href="../types/ServerMonitoringMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
-<li><a href="../types/ServerSessionId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Session<wbr/>Id</span></a></li>
-<li><a href="../types/ServerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Type</span></a></li>
-<li><a href="../types/SetFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Fields</span></a></li>
-<li><a href="../types/SetProfilingLevelOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Profiling<wbr/>Level<wbr/>Options</span></a></li>
-<li><a href="../types/Sort.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sort</span></a></li>
-<li><a href="../types/SortDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sort<wbr/>Direction</span></a></li>
-<li><a href="../types/Stream.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Stream</span></a></li>
-<li><a href="../types/StrictFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Filter</span></a></li>
-<li><a href="../types/StrictMatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
-<li><a href="../types/StrictUpdateFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Update<wbr/>Filter</span></a></li>
-<li><a href="../types/SupportedNodeConnectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Supported<wbr/>Node<wbr/>Connection<wbr/>Options</span></a></li>
-<li><a href="../types/SupportedSocketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Supported<wbr/>Socket<wbr/>Options</span></a></li>
-<li><a href="../types/SupportedTLSConnectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>SupportedTLSConnection<wbr/>Options</span></a></li>
-<li><a href="../types/SupportedTLSSocketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>SupportedTLSSocket<wbr/>Options</span></a></li>
-<li><a href="../types/TagSet.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Tag<wbr/>Set</span></a></li>
-<li><a href="../types/TopologyEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Topology<wbr/>Events</span></a></li>
-<li><a href="../types/TopologyType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Topology<wbr/>Type</span></a></li>
-<li><a href="../types/UpdateFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Update<wbr/>Filter</span></a></li>
-<li><a href="../types/W.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>W</span></a></li>
-<li><a href="../types/WithId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Id</span></a></li>
-<li><a href="../types/WithSessionCallback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Session<wbr/>Callback</span></a></li>
-<li><a href="../types/WithTransactionCallback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Transaction<wbr/>Callback</span></a></li>
-<li><a href="../types/WithoutId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Without<wbr/>Id</span></a></li>
-<li><a href="../variables/AuthMechanism-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
+<li><a href="AbstractCursorEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4194304"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-type-alias)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.31 16V8.224H8.91V7.24H14.79V8.224H12.39V16H11.31Z" fill="var(--color-text)"></path></g></svg><span>Abstract<wbr/>Cursor<wbr/>Events</span></a></li>
+<li><a href="AcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Accepted<wbr/>Fields</span></a></li>
+<li><a href="AddToSetOperators.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Add<wbr/>To<wbr/>Set<wbr/>Operators</span></a></li>
+<li><a href="AlternativeType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Alternative<wbr/>Type</span></a></li>
+<li><a href="AnyBulkWriteOperation.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Any<wbr/>Bulk<wbr/>Write<wbr/>Operation</span></a></li>
+<li><a href="AnyError.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Any<wbr/>Error</span></a></li>
+<li><a href="ArrayElement.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Element</span></a></li>
+<li><a href="ArrayOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Array<wbr/>Operator</span></a></li>
+<li><a href="AuthMechanism.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auth<wbr/>Mechanism</span></a></li>
+<li><a href="AutoEncryptionExtraOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Extra<wbr/>Options</span></a></li>
+<li><a href="AutoEncryptionLoggerLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
+<li><a href="BSONTypeAlias.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>BSONType<wbr/>Alias</span></a></li>
+<li><a href="BatchType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Batch<wbr/>Type</span></a></li>
+<li><a href="BitwiseFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Bitwise<wbr/>Filter</span></a></li>
+<li><a href="CSFLEKMSTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>CSFLEKMSTls<wbr/>Options</span></a></li>
+<li><a href="Callback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Callback</span></a></li>
+<li><a href="ChangeStreamDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Document</span></a></li>
+<li><a href="ChangeStreamEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Change<wbr/>Stream<wbr/>Events</span></a></li>
+<li><a href="ClientEncryptionDataKeyProvider.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Data<wbr/>Key<wbr/>Provider</span></a></li>
+<li><a href="ClientEncryptionTlsOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Encryption<wbr/>Tls<wbr/>Options</span></a></li>
+<li><a href="ClientSessionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Client<wbr/>Session<wbr/>Events</span></a></li>
+<li><a href="CommonEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Common<wbr/>Events</span></a></li>
+<li><a href="Compressor.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor</span></a></li>
+<li><a href="CompressorName.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Compressor<wbr/>Name</span></a></li>
+<li><a href="Condition.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Condition</span></a></li>
+<li><a href="ConnectionEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Connection<wbr/>Events</span></a></li>
+<li><a href="ConnectionPoolEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Connection<wbr/>Pool<wbr/>Events</span></a></li>
+<li><a href="CursorFlag.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Cursor<wbr/>Flag</span></a></li>
+<li><a href="DistinctOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Distinct<wbr/>Options</span></a></li>
+<li><a href="DropDatabaseOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Drop<wbr/>Database<wbr/>Options</span></a></li>
+<li><a href="DropIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Drop<wbr/>Indexes<wbr/>Options</span></a></li>
+<li><a href="EnhancedOmit.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Enhanced<wbr/>Omit</span></a></li>
+<li><a href="EventEmitterWithState.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Event<wbr/>Emitter<wbr/>With<wbr/>State</span></a></li>
+<li><a href="EventsDescription.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Events<wbr/>Description</span></a></li>
+<li><a href="ExplainVerbosity.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Explain<wbr/>Verbosity</span></a></li>
+<li><a href="ExplainVerbosityLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Explain<wbr/>Verbosity<wbr/>Like</span></a></li>
+<li><a href="Filter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter</span></a></li>
+<li><a href="FilterOperations.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Filter<wbr/>Operations</span></a></li>
+<li><a href="Flatten.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Flatten</span></a></li>
+<li><a href="GSSAPICanonicalizationValue.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GSSAPICanonicalization<wbr/>Value</span></a></li>
+<li><a href="GenericListener.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Generic<wbr/>Listener</span></a></li>
+<li><a href="GridFSBucketEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>GridFSBucket<wbr/>Events</span></a></li>
+<li><a href="Hint.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Hint</span></a></li>
+<li><a href="IndexDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Direction</span></a></li>
+<li><a href="IndexSpecification.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Index<wbr/>Specification</span></a></li>
+<li><a href="InferIdType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Infer<wbr/>Id<wbr/>Type</span></a></li>
+<li><a href="IntegerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Integer<wbr/>Type</span></a></li>
+<li><a href="IsAny.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Is<wbr/>Any</span></a></li>
+<li><a href="Join.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Join</span></a></li>
+<li><a href="KeysOfAType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>OfAType</span></a></li>
+<li><a href="KeysOfOtherType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Keys<wbr/>Of<wbr/>Other<wbr/>Type</span></a></li>
+<li><a href="ListSearchIndexesOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>List<wbr/>Search<wbr/>Indexes<wbr/>Options</span></a></li>
+<li><a href="MatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
+<li><a href="MongoClientEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Client<wbr/>Events</span></a></li>
+<li><a href="MongoErrorLabel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Mongo<wbr/>Error<wbr/>Label</span></a></li>
+<li><a href="MonitorEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Monitor<wbr/>Events</span></a></li>
+<li><a href="NestedPaths.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Nested<wbr/>Paths</span></a></li>
+<li><a href="NestedPathsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Nested<wbr/>Paths<wbr/>Of<wbr/>Type</span></a></li>
+<li><a href="NonObjectIdLikeDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Non<wbr/>Object<wbr/>Id<wbr/>Like<wbr/>Document</span></a></li>
+<li><a href="NotAcceptedFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Not<wbr/>Accepted<wbr/>Fields</span></a></li>
+<li><a href="NumericType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Numeric<wbr/>Type</span></a></li>
+<li><a href="OIDCRefreshFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRefresh<wbr/>Function</span></a></li>
+<li><a href="OIDCRequestFunction.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>OIDCRequest<wbr/>Function</span></a></li>
+<li><a href="OneOrMore.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>One<wbr/>Or<wbr/>More</span></a></li>
+<li><a href="OnlyFieldsOfType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Only<wbr/>Fields<wbr/>Of<wbr/>Type</span></a></li>
+<li><a href="OperationTime.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Operation<wbr/>Time</span></a></li>
+<li><a href="OptionalId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Optional<wbr/>Id</span></a></li>
+<li><a href="OptionalUnlessRequiredId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Optional<wbr/>Unless<wbr/>Required<wbr/>Id</span></a></li>
+<li><a href="ProfilingLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Profiling<wbr/>Level</span></a></li>
+<li><a href="ProfilingLevelOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Profiling<wbr/>Level<wbr/>Options</span></a></li>
+<li><a href="PropertyType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Property<wbr/>Type</span></a></li>
+<li><a href="PullAllOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Pull<wbr/>All<wbr/>Operator</span></a></li>
+<li><a href="PullOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Pull<wbr/>Operator</span></a></li>
+<li><a href="PushOperator.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Push<wbr/>Operator</span></a></li>
+<li><a href="ReadConcernLevel.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Concern<wbr/>Level</span></a></li>
+<li><a href="ReadConcernLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Concern<wbr/>Like</span></a></li>
+<li><a href="ReadPreferenceLike.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Preference<wbr/>Like</span></a></li>
+<li><a href="ReadPreferenceMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Read<wbr/>Preference<wbr/>Mode</span></a></li>
+<li><a href="RegExpOrString.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Reg<wbr/>Exp<wbr/>Or<wbr/>String</span></a></li>
+<li><a href="RemoveUserOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Remove<wbr/>User<wbr/>Options</span></a></li>
+<li><a href="ResumeToken.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Resume<wbr/>Token</span></a></li>
+<li><a href="ReturnDocument.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Return<wbr/>Document</span></a></li>
+<li><a href="RunCommandOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Run<wbr/>Command<wbr/>Options</span></a></li>
+<li><a href="RunCursorCommandOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Run<wbr/>Cursor<wbr/>Command<wbr/>Options</span></a></li>
+<li><a href="SchemaMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Schema<wbr/>Member</span></a></li>
+<li><a href="ServerApiVersion.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
+<li><a href="ServerEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Events</span></a></li>
+<li><a href="ServerMonitoringMode.html" class="current"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
+<li><a href="ServerSessionId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Session<wbr/>Id</span></a></li>
+<li><a href="ServerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Type</span></a></li>
+<li><a href="SetFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Fields</span></a></li>
+<li><a href="SetProfilingLevelOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Profiling<wbr/>Level<wbr/>Options</span></a></li>
+<li><a href="Sort.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sort</span></a></li>
+<li><a href="SortDirection.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Sort<wbr/>Direction</span></a></li>
+<li><a href="Stream.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Stream</span></a></li>
+<li><a href="StrictFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Filter</span></a></li>
+<li><a href="StrictMatchKeysAndValues.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Match<wbr/>Keys<wbr/>And<wbr/>Values</span></a></li>
+<li><a href="StrictUpdateFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Strict<wbr/>Update<wbr/>Filter</span></a></li>
+<li><a href="SupportedNodeConnectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Supported<wbr/>Node<wbr/>Connection<wbr/>Options</span></a></li>
+<li><a href="SupportedSocketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Supported<wbr/>Socket<wbr/>Options</span></a></li>
+<li><a href="SupportedTLSConnectionOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>SupportedTLSConnection<wbr/>Options</span></a></li>
+<li><a href="SupportedTLSSocketOptions.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>SupportedTLSSocket<wbr/>Options</span></a></li>
+<li><a href="TagSet.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Tag<wbr/>Set</span></a></li>
+<li><a href="TopologyEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Topology<wbr/>Events</span></a></li>
+<li><a href="TopologyType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Topology<wbr/>Type</span></a></li>
+<li><a href="UpdateFilter.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Update<wbr/>Filter</span></a></li>
+<li><a href="W.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>W</span></a></li>
+<li><a href="WithId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Id</span></a></li>
+<li><a href="WithSessionCallback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Session<wbr/>Callback</span></a></li>
+<li><a href="WithTransactionCallback.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>With<wbr/>Transaction<wbr/>Callback</span></a></li>
+<li><a href="WithoutId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Without<wbr/>Id</span></a></li>
+<li><a href="../variables/AuthMechanism-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-32"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-variable)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M11.106 16L8.85 7.24H9.966L11.454 13.192C11.558 13.608 11.646 13.996 11.718 14.356C11.79 14.708 11.842 14.976 11.874 15.16C11.906 14.976 11.954 14.708 12.018 14.356C12.09 13.996 12.178 13.608 12.282 13.192L13.758 7.24H14.85L12.582 16H11.106Z" fill="var(--color-text)"></path></g></svg><span>Auth<wbr/>Mechanism</span></a></li>
 <li><a href="../variables/AutoEncryptionLoggerLevel-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Auto<wbr/>Encryption<wbr/>Logger<wbr/>Level</span></a></li>
 <li><a href="../variables/BatchType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Batch<wbr/>Type</span></a></li>
 <li><a href="../variables/CURSOR_FLAGS.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>CURSOR_<wbr/>FLAGS</span></a></li>
