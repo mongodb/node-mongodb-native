@@ -58,7 +58,7 @@ import type {
   ServerSelectionSucceededEvent,
   WaitingForSuitableServerEvent
 } from './sdam/server_selection_events';
-import { HostAddress, parseUnsignedInteger } from './utils';
+import { HostAddress, isPromiseLike, parseUnsignedInteger } from './utils';
 
 /** @internal */
 export const SeverityLevel = Object.freeze({
@@ -282,7 +282,7 @@ export interface Log extends Record<string, any> {
 
 /** @internal */
 export interface MongoDBLogWritable {
-  write(log: Log): void;
+  write(log: Log): any;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
@@ -708,6 +708,7 @@ export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
+  pendingLog: any | undefined;
 
   /**
    * This method should be used when logging errors that do not have a public driver API for
@@ -739,6 +740,7 @@ export class MongoLogger {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
+    this.pendingLog = undefined;
   }
 
   willLog(severity: SeverityLevel, component: MongoLoggableComponent): boolean {
@@ -751,7 +753,7 @@ export class MongoLogger {
     }
   }
 
-  logWriteFailureHandler(errorMessage: string) {
+  private logWriteFailureHandler(error: Error) {
     try {
       const tempLogDestination = createStdioLogger(process.stderr);
       tempLogDestination.write({
@@ -759,12 +761,17 @@ export class MongoLogger {
         c: MongoLoggableComponent.CLIENT,
         s: SeverityLevel.ERROR,
         message: `User input for mongodbLogPath is now invalid. Now logging to stderr.`,
-        error: errorMessage
+        error: error.message
       });
       this.logDestination = tempLogDestination;
     } catch (e) {
       this.turnOffSeverities();
     }
+    this.clearPendingLog();
+  }
+
+  private clearPendingLog() {
+    this.pendingLog = undefined;
   }
 
   private log(
@@ -784,10 +791,23 @@ export class MongoLogger {
         logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }
+
+    if (isPromiseLike(this.pendingLog)) {
+      this.pendingLog = this.pendingLog
+        .then(() => this.logDestination.write(logMessage))
+        .then(this.clearPendingLog.bind(this), this.logWriteFailureHandler.bind(this));
+      return;
+    }
+
     try {
-      this.logDestination.write(logMessage);
-    } catch (e) {
-      this.logWriteFailureHandler(e.message);
+      const logResult = this.logDestination.write(logMessage);
+      if (isPromiseLike(logResult))
+        this.pendingLog = logResult.then(
+          this.clearPendingLog.bind(this),
+          this.logWriteFailureHandler.bind(this)
+        );
+    } catch (error) {
+      this.logWriteFailureHandler(error);
     }
   }
 

@@ -2,6 +2,7 @@ import { EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Readable, Writable } from 'stream';
+import { setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
@@ -56,7 +57,7 @@ describe('meta tests for BufferingStream', function () {
   });
 });
 
-describe('class MongoLogger', function () {
+describe('class MongoLogger', async function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
       const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
@@ -1331,11 +1332,11 @@ describe('class MongoLogger', function () {
     });
   });
 
-  describe('log', function () {
-    context('stream failure handling', function () {
-      const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
-        default: 'error'
-      } as any;
+  describe('log', async function () {
+    const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
+      default: 'error'
+    } as any;
+    describe('sync stream failure handling', function () {
       context('when stream is not stderr', function () {
         let stderrStub;
 
@@ -1413,6 +1414,89 @@ describe('class MongoLogger', function () {
             expect(() => logger.debug('random message')).to.not.throw(Error);
           });
         });
+      });
+    });
+    describe('async stream failure handling', async function () {
+      context('when stream is not stderr', function () {
+        let stderrStub;
+
+        beforeEach(function () {
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        context('when stream user defined stream and stream.write throws async', async function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
+            const stream = {
+              async write(_log) {
+                await new Promise(r => setTimeout(r, 500));
+                throw Error('This writable always throws, but only after at least 500ms');
+              }
+            };
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: stream
+            });
+            // print random message at the debug level
+            logger.debug('random message');
+
+            // before timeout resolves, no error
+            expect(stderrStub.write.getCall(0)).to.be.null;
+
+            // manually wait for timeout to end
+            await new Promise(r => setTimeout(r, 600));
+
+            // stderr now contains the error message
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'This writable always throws, but only after at least 500ms' }`
+            );
+
+            logger.debug('random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.not.be.null;
+          });
+        });
+      });
+    });
+    context('when async stream has multiple logs with different timeouts', async function () {
+      it('should preserve their order', async function () {
+        const stream = {
+          buffer: [],
+          async write(log) {
+            if (log.c === 'longer timeout') {
+              await new Promise(r => setTimeout(r, 2000));
+            } else if (log.c === 'shorter timeout') {
+              await new Promise(r => setTimeout(r, 500));
+            }
+            this.buffer.push(log.c);
+          }
+        };
+        const logger = new MongoLogger({
+          componentSeverities,
+          maxDocumentLength: 1000,
+          logDestination: stream
+        });
+
+        logger.debug('longer timeout');
+        logger.debug('shorter timeout');
+        logger.debug('no timeout');
+
+        expect(stream.buffer.length).to.equal(0);
+
+        await new Promise(r => setTimeout(r, 2100));
+        expect(stream.buffer.length).to.equal(1);
+        expect(stream.buffer[0]).to.equal('longer timeout');
+
+        await new Promise(r => setTimeout(r, 600));
+        expect(stream.buffer.length).to.equal(3);
+        expect(stream.buffer[1]).to.equal('shorter timeout');
+        expect(stream.buffer[2]).to.equal('no timeout');
       });
     });
   });
