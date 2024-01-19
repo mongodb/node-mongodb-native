@@ -197,11 +197,12 @@ export interface MongoLoggerOptions {
 
 /**
  * Parses a string as one of SeverityLevel
+ * @internal
  *
  * @param s - the value to be parsed
  * @returns one of SeverityLevel if value can be parsed as such, otherwise null
  */
-function parseSeverityFromString(s?: string): SeverityLevel | null {
+export function parseSeverityFromString(s?: string): SeverityLevel | null {
   const validSeverities: string[] = Object.values(SeverityLevel);
   const lowerSeverity = s?.toLowerCase();
 
@@ -415,10 +416,15 @@ export function stringifyWithMaxLen(
 ): string {
   let strToTruncate = '';
 
-  if (typeof value === 'function') {
-    strToTruncate = value.toString();
-  } else {
-    strToTruncate = EJSON.stringify(value, options);
+  try {
+    strToTruncate =
+      typeof value !== 'function'
+        ? EJSON.stringify(value, options)
+        : value.name !== ''
+        ? value.name
+        : 'anonymous function';
+  } catch (e) {
+    return '... ESJON failed : Error ...';
   }
 
   return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
@@ -455,21 +461,21 @@ function attachCommandFields(
 ) {
   log.commandName = commandEvent.commandName;
   log.requestId = commandEvent.requestId;
-  log.driverConnectionId = commandEvent?.connectionId;
-  const { host, port } = HostAddress.fromString(commandEvent.address).toHostPort();
+  log.driverConnectionId = commandEvent.connectionId;
+  const { host, port } = HostAddress.fromString(commandEvent.address ?? '').toHostPort();
   log.serverHost = host;
   log.serverPort = port;
   if (commandEvent?.serviceId) {
     log.serviceId = commandEvent.serviceId.toHexString();
   }
   log.databaseName = commandEvent.databaseName;
-  log.serverConnectionId = commandEvent?.serverConnectionId;
+  log.serverConnectionId = commandEvent.serverConnectionId;
 
   return log;
 }
 
 function attachConnectionFields(log: Record<string, any>, event: any) {
-  const { host, port } = HostAddress.fromString(event.address).toHostPort();
+  const { host, port } = HostAddress.fromString(event.address ?? '').toHostPort();
   log.serverHost = host;
   log.serverPort = port;
 
@@ -491,13 +497,14 @@ function attachServerHeartbeatFields(
   const { awaited, connectionId } = serverHeartbeatEvent;
   log.awaited = awaited;
   log.driverConnectionId = serverHeartbeatEvent.connectionId;
-  const { host, port } = HostAddress.fromString(connectionId).toHostPort();
+  const { host, port } = HostAddress.fromString(connectionId ?? '').toHostPort();
   log.serverHost = host;
   log.serverPort = port;
   return log;
 }
 
-function defaultLogTransform(
+/** @internal */
+export function defaultLogTransform(
   logObject: LoggableEvent | Record<string, any>,
   maxDocumentLength: number = DEFAULT_MAX_DOCUMENT_LENGTH
 ): Omit<Log, 's' | 't' | 'c'> {
@@ -509,7 +516,7 @@ function defaultLogTransform(
       return log;
     case SERVER_SELECTION_FAILED:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-      log.failure = logObject.failure.message;
+      log.failure = logObject.failure?.message;
       return log;
     case SERVER_SELECTION_SUCCEEDED:
       log = attachServerSelectionFields(log, logObject, maxDocumentLength);
@@ -536,7 +543,7 @@ function defaultLogTransform(
       log = attachCommandFields(log, logObject);
       log.message = 'Command failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message ?? '(redacted)';
+      log.failure = logObject.failure?.message ?? '(redacted)';
       return log;
     case CONNECTION_POOL_CREATED:
       log = attachConnectionFields(log, logObject);
@@ -562,7 +569,7 @@ function defaultLogTransform(
       log = attachConnectionFields(log, logObject);
       log.message = 'Connection pool cleared';
       if (logObject.serviceId?._bsontype === 'ObjectId') {
-        log.serviceId = logObject.serviceId.toHexString();
+        log.serviceId = logObject.serviceId?.toHexString();
       }
       return log;
     case CONNECTION_POOL_CLOSED:
@@ -666,7 +673,7 @@ function defaultLogTransform(
       log = attachServerHeartbeatFields(log, logObject);
       log.message = 'Server heartbeat failed';
       log.durationMS = logObject.duration;
-      log.failure = logObject.failure.message;
+      log.failure = logObject.failure?.message;
       return log;
     case TOPOLOGY_OPENING:
       log = attachSDAMFields(log, logObject);
@@ -738,6 +745,28 @@ export class MongoLogger {
     return compareSeverity(severity, this.componentSeverities[component]) <= 0;
   }
 
+  turnOffSeverities() {
+    for (const key of Object.keys(MongoLoggableComponent)) {
+      this.componentSeverities[key as MongoLoggableComponent] = SeverityLevel.OFF;
+    }
+  }
+
+  logWriteFailureHandler(errorMessage: string) {
+    try {
+      const tempLogDestination = createStdioLogger(process.stderr);
+      tempLogDestination.write({
+        t: new Date(),
+        c: MongoLoggableComponent.CLIENT,
+        s: SeverityLevel.ERROR,
+        message: `User input for mongodbLogPath is now invalid. Now logging to stderr.`,
+        error: errorMessage
+      });
+      this.logDestination = tempLogDestination;
+    } catch (e) {
+      this.turnOffSeverities();
+    }
+  }
+
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
@@ -755,7 +784,11 @@ export class MongoLogger {
         logMessage = { ...logMessage, ...defaultLogTransform(message, this.maxDocumentLength) };
       }
     }
-    this.logDestination.write(logMessage);
+    try {
+      this.logDestination.write(logMessage);
+    } catch (e) {
+      this.logWriteFailureHandler(e.message);
+    }
   }
 
   /**
