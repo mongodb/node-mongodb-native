@@ -302,7 +302,7 @@ describe('Socks5 Connectivity', function () {
 async function testConnection(connectionString, clientOptions) {
   const client = new MongoClient(connectionString, clientOptions);
   let topologyType;
-  client.on('topologyDescriptionChanged', ev => (topologyType = ev.newDescription.type));
+  client.on('topologyDescriptionChanged', ev => (topologyType = ev.previousDescription.type));
 
   try {
     await client.connect();
