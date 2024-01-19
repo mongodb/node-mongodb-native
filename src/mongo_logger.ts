@@ -283,7 +283,10 @@ export interface Log extends Record<string, any> {
   message?: string;
 }
 
-/** @internal */
+/**
+ * @internal
+ * TODO: NODE-5671 - remove internal flag and add API comments
+ */
 export interface MongoDBLogWritable {
   write(log: Log): void;
 }

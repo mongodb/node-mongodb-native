@@ -912,13 +912,11 @@ describe('Connection String', function () {
     });
 
     context('when option is invalid', function () {
-      it('it defaults to stderr', function () {
-        const client = new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', {
-          [loggerFeatureFlag]: true
-        });
-        const log: Log = { t: new Date(), c: 'ConnectionStringInvalidOption', s: 'error' };
-        client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+      it('should throw error at construction', function () {
+        expect(
+          () =>
+            new MongoClient('mongodb://a/?mongodbLogPath=stdnothing', { [loggerFeatureFlag]: true })
+        ).to.throw(MongoAPIError);
       });
     });
   });
