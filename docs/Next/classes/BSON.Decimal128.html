@@ -27,7 +27,7 @@
 <ul class="tsd-hierarchy">
 <li><span class="target">Decimal128</span></li></ul></li></ul></section><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:370</li></ul></aside>
+<li>Defined in node_modules/bson/bson.d.ts:374</li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-index-accordion" open><summary class="tsd-accordion-summary tsd-index-summary">
@@ -40,6 +40,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Properties</h3>
 <div class="tsd-index-list"><a href="BSON.Decimal128.html#bytes" class="tsd-index-link tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-1024"><rect fill="var(--color-icon-background)" stroke="#FF984D" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="12"></rect><path d="M9.354 16V7.24H12.174C12.99 7.24 13.638 7.476 14.118 7.948C14.606 8.412 14.85 9.036 14.85 9.82C14.85 10.604 14.606 11.232 14.118 11.704C13.638 12.168 12.99 12.4 12.174 12.4H10.434V16H9.354ZM10.434 11.428H12.174C12.646 11.428 13.022 11.284 13.302 10.996C13.59 10.7 13.734 10.308 13.734 9.82C13.734 9.324 13.59 8.932 13.302 8.644C13.022 8.356 12.646 8.212 12.174 8.212H10.434V11.428Z" fill="var(--color-text)"></path></g></svg><span>bytes</span></a>
+<a href="BSON.Decimal128.html#_fromString" class="tsd-index-link tsd-is-private tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>_from<wbr/>String</span></a>
 </div></section>
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading">Accessors</h3>
@@ -51,6 +52,7 @@
 <a href="BSON.Decimal128.html#toJSON" class="tsd-index-link tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>toJSON</span></a>
 <a href="BSON.Decimal128.html#toString" class="tsd-index-link tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>to<wbr/>String</span></a>
 <a href="BSON.Decimal128.html#fromString" class="tsd-index-link tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>String</span></a>
+<a href="BSON.Decimal128.html#fromStringWithRounding" class="tsd-index-link tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>String<wbr/>With<wbr/>Rounding</span></a>
 </div></section></div></details></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Constructors</h2>
@@ -72,14 +74,19 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#constructor">constructor</a></p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:377</li></ul></aside></li></ul></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:381</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="bytes" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagReadonly">Readonly</code> <span>bytes</span><a href="#bytes" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">bytes</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type ">Uint8Array</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:372</li></ul></aside></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:376</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-private tsd-is-external"><a id="_fromString" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <code class="tsd-tag ts-flagPrivate">Private</code> <span>_from<wbr/>String</span><a href="#_fromString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">_from<wbr/>String</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:407</li></ul></aside></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Accessors</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="_bsontype" class="tsd-anchor"></a>
@@ -91,19 +98,31 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides BSONValue._bsontype</p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:371</li></ul></aside></li></ul></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:375</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="inspect" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inspect</span><a href="#inspect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="inspect.inspect-1"><span class="tsd-kind-call-signature">inspect</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#inspect.inspect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="inspect.inspect-1"><span class="tsd-kind-call-signature">inspect</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">depth</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?</span>, <span class="tsd-kind-parameter">inspect</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><a href="#inspect.inspect-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Prints a human-readable string of BSON value information
+If invoked manually without node.js.inspect function, this will default to a modified JSON.stringify</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">depth</span>: <span class="tsd-signature-type">number</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-type">unknown</span></h5></li>
+<li>
+<h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">inspect</span>: <span class="tsd-signature-type ">InspectFn</span></h5></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#inspect">inspect</a></p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:389</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:413</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toJSON" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toJSON</span><a href="#toJSON" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -111,7 +130,7 @@
 <li class="tsd-description">
 <h4 class="tsd-returns-title">Returns <a href="../interfaces/BSON.Decimal128Extended.html" class="tsd-signature-type tsd-kind-interface">Decimal128Extended</a></h4><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:386</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:410</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -122,7 +141,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:385</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:409</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="fromString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>from<wbr/>String</span><a href="#fromString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -141,7 +160,31 @@
 <h4 class="tsd-returns-title">Returns <a href="BSON.Decimal128.html" class="tsd-signature-type tsd-kind-class">Decimal128</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:383</li></ul></aside></li></ul></section></section></div>
+<li>Defined in node_modules/bson/bson.d.ts:387</li></ul></aside></li></ul></section>
+<section class="tsd-panel tsd-member tsd-is-external"><a id="fromStringWithRounding" class="tsd-anchor"></a>
+<h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>from<wbr/>String<wbr/>With<wbr/>Rounding</span><a href="#fromStringWithRounding" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
+<ul class="tsd-signatures tsd-is-external">
+<li class="tsd-signature tsd-anchor-link" id="fromStringWithRounding.fromStringWithRounding-1"><span class="tsd-kind-call-signature">from<wbr/>String<wbr/>With<wbr/>Rounding</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">representation</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.Decimal128.html" class="tsd-signature-type tsd-kind-class">Decimal128</a><a href="#fromStringWithRounding.fromStringWithRounding-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create a Decimal128 instance from a string representation, allowing for rounding to 34
+significant digits</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">representation</span>: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>a numeric string representation.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.Decimal128.html" class="tsd-signature-type tsd-kind-class">Decimal128</a></h4>
+<div class="tsd-comment tsd-typography">
+<h4>Example</h4><p>Example of a number that will be rounded</p>
+<pre><code class="language-ts"><span class="hl-1">&gt; </span><span class="hl-4">let</span><span class="hl-1"> </span><span class="hl-6">d</span><span class="hl-1"> = </span><span class="hl-6">Decimal128</span><span class="hl-1">.</span><span class="hl-0">fromString</span><span class="hl-1">(</span><span class="hl-2">&#39;37.499999999999999196428571428571375&#39;</span><span class="hl-1">)</span><br/><span class="hl-10">Uncaught</span><span class="hl-1">:</span><br/><span class="hl-10">BSONError</span><span class="hl-1">: </span><span class="hl-2">&quot;37.499999999999999196428571428571375&quot;</span><span class="hl-1"> </span><span class="hl-6">is</span><span class="hl-1"> </span><span class="hl-6">not</span><span class="hl-1"> </span><span class="hl-6">a</span><span class="hl-1"> </span><span class="hl-6">valid</span><span class="hl-1"> </span><span class="hl-6">Decimal128</span><span class="hl-1"> </span><span class="hl-6">string</span><span class="hl-1"> - </span><span class="hl-6">inexact</span><span class="hl-1"> </span><span class="hl-6">rounding</span><br/><span class="hl-6">at</span><span class="hl-1"> </span><span class="hl-0">invalidErr</span><span class="hl-1"> (/</span><span class="hl-6">home</span><span class="hl-1">/</span><span class="hl-6">wajames</span><span class="hl-1">/</span><span class="hl-6">js</span><span class="hl-1">-</span><span class="hl-6">bson</span><span class="hl-1">/</span><span class="hl-6">lib</span><span class="hl-1">/</span><span class="hl-6">bson</span><span class="hl-1">.</span><span class="hl-6">cjs</span><span class="hl-1">:</span><span class="hl-8">1402</span><span class="hl-1">:</span><span class="hl-8">11</span><span class="hl-1">)</span><br/><span class="hl-6">at</span><span class="hl-1"> </span><span class="hl-6">Decimal128</span><span class="hl-1">.</span><span class="hl-0">fromStringInternal</span><span class="hl-1"> (/</span><span class="hl-6">home</span><span class="hl-1">/</span><span class="hl-6">wajames</span><span class="hl-1">/</span><span class="hl-6">js</span><span class="hl-1">-</span><span class="hl-6">bson</span><span class="hl-1">/</span><span class="hl-6">lib</span><span class="hl-1">/</span><span class="hl-6">bson</span><span class="hl-1">.</span><span class="hl-6">cjs</span><span class="hl-1">:</span><span class="hl-8">1633</span><span class="hl-1">:</span><span class="hl-8">25</span><span class="hl-1">)</span><br/><span class="hl-6">at</span><span class="hl-1"> </span><span class="hl-6">Decimal128</span><span class="hl-1">.</span><span class="hl-0">fromString</span><span class="hl-1"> (/</span><span class="hl-6">home</span><span class="hl-1">/</span><span class="hl-6">wajames</span><span class="hl-1">/</span><span class="hl-6">js</span><span class="hl-1">-</span><span class="hl-6">bson</span><span class="hl-1">/</span><span class="hl-6">lib</span><span class="hl-1">/</span><span class="hl-6">bson</span><span class="hl-1">.</span><span class="hl-6">cjs</span><span class="hl-1">:</span><span class="hl-8">1424</span><span class="hl-1">:</span><span class="hl-8">27</span><span class="hl-1">)</span><br/><br/><span class="hl-1">&gt; </span><span class="hl-6">d</span><span class="hl-1"> = </span><span class="hl-6">Decimal128</span><span class="hl-1">.</span><span class="hl-0">fromStringWithRounding</span><span class="hl-1">(</span><span class="hl-2">&#39;37.499999999999999196428571428571375&#39;</span><span class="hl-1">)</span><br/><span class="hl-4">new</span><span class="hl-1"> </span><span class="hl-0">Decimal128</span><span class="hl-1">(</span><span class="hl-2">&quot;37.49999999999999919642857142857138&quot;</span><span class="hl-1">)</span>
+</code><button>Copy</button></pre>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:406</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -163,11 +206,13 @@
 <ul>
 <li><a href="#constructor" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-512"></use></svg><span>constructor</span></a></li>
 <li><a href="#bytes" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>bytes</span></a></li>
+<li><a href="#_fromString" class="tsd-is-private tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-1024"></use></svg><span>_from<wbr/>String</span></a></li>
 <li><a href="#_bsontype" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-262144"></use></svg><span>_bsontype</span></a></li>
 <li><a href="#inspect" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>inspect</span></a></li>
 <li><a href="#toJSON" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>toJSON</span></a></li>
 <li><a href="#toString" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>to<wbr/>String</span></a></li>
-<li><a href="#fromString" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>String</span></a></li></ul></div></details></div>
+<li><a href="#fromString" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>String</span></a></li>
+<li><a href="#fromStringWithRounding" class="tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-2048"></use></svg><span>from<wbr/>String<wbr/>With<wbr/>Rounding</span></a></li></ul></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><g id="icon-4"><rect fill="var(--color-icon-background)" stroke="var(--color-ts-namespace)" stroke-width="1.5" x="1" y="1" width="22" height="22" rx="6"></rect><path d="M9.33 16V7.24H10.77L13.446 14.74C13.43 14.54 13.41 14.296 13.386 14.008C13.37 13.712 13.354 13.404 13.338 13.084C13.33 12.756 13.326 12.448 13.326 12.16V7.24H14.37V16H12.93L10.266 8.5C10.282 8.692 10.298 8.936 10.314 9.232C10.33 9.52 10.342 9.828 10.35 10.156C10.366 10.476 10.374 10.784 10.374 11.08V16H9.33Z" fill="var(--color-text)"></path></g></svg><span>mongodb</span></a>
 <ul class="tsd-small-nested-navigation">
@@ -569,6 +614,7 @@
 <li><a href="../types/SchemaMember.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Schema<wbr/>Member</span></a></li>
 <li><a href="../types/ServerApiVersion.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
 <li><a href="../types/ServerEvents.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Events</span></a></li>
+<li><a href="../types/ServerMonitoringMode.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../types/ServerSessionId.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Session<wbr/>Id</span></a></li>
 <li><a href="../types/ServerType.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../types/SetFields.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-4194304"></use></svg><span>Set<wbr/>Fields</span></a></li>
@@ -608,6 +654,7 @@
 <li><a href="../variables/ReadPreferenceMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Read<wbr/>Preference<wbr/>Mode</span></a></li>
 <li><a href="../variables/ReturnDocument-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Return<wbr/>Document</span></a></li>
 <li><a href="../variables/ServerApiVersion-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Api<wbr/>Version</span></a></li>
+<li><a href="../variables/ServerMonitoringMode-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Monitoring<wbr/>Mode</span></a></li>
 <li><a href="../variables/ServerType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Server<wbr/>Type</span></a></li>
 <li><a href="../variables/TopologyType-1.html"><svg class="tsd-kind-icon" viewBox="0 0 24 24"><use href="#icon-32"></use></svg><span>Topology<wbr/>Type</span></a></li></ul></nav></div></div></div>
 <div class="tsd-generator">
