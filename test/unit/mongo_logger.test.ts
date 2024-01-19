@@ -809,6 +809,7 @@ describe('class MongoLogger', function () {
               address: '127.0.0.1:27017',
               serviceId: new ObjectId(),
               databaseName: 'db',
+              failure: 'err',
               name: COMMAND_FAILED
             };
 

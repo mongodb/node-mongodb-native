@@ -12,12 +12,15 @@ import type {
   ObjectId,
   Timestamp
 } from './bson';
-import type {
-  LoggableServerHeartbeatFailedEvent,
-  LoggableServerHeartbeatStartedEvent,
-  LoggableServerHeartbeatSucceededEvent,
+import { type CommandStartedEvent } from './cmap/command_monitoring_events';
+import {
+  type LoggableCommandFailedEvent,
+  type LoggableCommandSucceededEvent,
+  type LoggableServerHeartbeatFailedEvent,
+  type LoggableServerHeartbeatStartedEvent,
+  type LoggableServerHeartbeatSucceededEvent,
   MongoLoggableComponent,
-  MongoLogger
+  type MongoLogger
 } from './mongo_logger';
 import type { Sort } from './sort';
 
@@ -440,6 +443,28 @@ export class TypedEventEmitter<Events extends EventsDescription> extends EventEm
         ...args[0]
       };
       this.mongoLogger?.debug(this.component, loggableHeartbeatEvent);
+    }
+  }
+  /** @internal */
+  emitAndLogCommand<EventKey extends keyof Events>(
+    monitorCommands: boolean,
+    event: EventKey | symbol,
+    databaseName: string,
+    connectionEstablished: boolean,
+    ...args: Parameters<Events[EventKey]>
+  ): void {
+    if (monitorCommands) {
+      this.emit(event, ...args);
+    }
+    if (connectionEstablished) {
+      const loggableCommandEvent:
+        | CommandStartedEvent
+        | LoggableCommandFailedEvent
+        | LoggableCommandSucceededEvent = {
+        databaseName: databaseName,
+        ...args[0]
+      };
+      this.mongoLogger?.debug(MongoLoggableComponent.COMMAND, loggableCommandEvent);
     }
   }
 }
