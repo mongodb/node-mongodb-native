@@ -2,7 +2,6 @@ import { EJSON, ObjectId } from 'bson';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { Readable, Writable } from 'stream';
-import { setTimeout } from 'timers';
 import { inspect } from 'util';
 
 import {
@@ -31,6 +30,7 @@ import {
   SeverityLevel,
   stringifyWithMaxLen
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
@@ -1302,12 +1302,12 @@ describe('class MongoLogger', async function () {
             input: { _bsontype: 'i will never be a real bson type' }
           }
         ];
-        for (let i = 0; i < errorInputs.length; i++) {
-          context(`when value is ${errorInputs[i].name}`, function () {
+        for (const errorInput of errorInputs) {
+          context(`when value is ${errorInput.name}`, function () {
             it('should output default error message, with no error thrown', function () {
-              expect(
-                stringifyWithMaxLen(errorInputs[i].input, DEFAULT_MAX_DOCUMENT_LENGTH)
-              ).to.equal('... ESJON failed : Error ...');
+              expect(stringifyWithMaxLen(errorInput.input, 25)).to.equal(
+                '... ESJON failed : Error ...'
+              );
             });
           });
         }
@@ -1380,7 +1380,7 @@ describe('class MongoLogger', async function () {
             const logger = new MongoLogger({
               componentSeverities,
               maxDocumentLength: 1000,
-              logDestination: createStdioLogger(process.stdout)
+              logDestination: createStdioLogger(process.stdout, 'stdout')
             });
             logger.debug('random message');
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
@@ -1432,7 +1432,7 @@ describe('class MongoLogger', async function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
             const stream = {
               async write(_log) {
-                await new Promise(r => setTimeout(r, 500));
+                await sleep(500);
                 throw Error('This writable always throws, but only after at least 500ms');
               }
             };
@@ -1448,7 +1448,7 @@ describe('class MongoLogger', async function () {
             expect(stderrStub.write.getCall(0)).to.be.null;
 
             // manually wait for timeout to end
-            await new Promise(r => setTimeout(r, 600));
+            await sleep(600);
 
             // stderr now contains the error message
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
@@ -1470,9 +1470,9 @@ describe('class MongoLogger', async function () {
           buffer: [],
           async write(log) {
             if (log.c === 'longer timeout') {
-              await new Promise(r => setTimeout(r, 2000));
+              await sleep(2000);
             } else if (log.c === 'shorter timeout') {
-              await new Promise(r => setTimeout(r, 500));
+              await sleep(500);
             }
             this.buffer.push(log.c);
           }
@@ -1489,14 +1489,11 @@ describe('class MongoLogger', async function () {
 
         expect(stream.buffer.length).to.equal(0);
 
-        await new Promise(r => setTimeout(r, 2100));
-        expect(stream.buffer.length).to.equal(1);
-        expect(stream.buffer[0]).to.equal('longer timeout');
+        await sleep(2100);
+        expect(stream.buffer).to.deep.equal(['longer timeout']);
 
-        await new Promise(r => setTimeout(r, 600));
-        expect(stream.buffer.length).to.equal(3);
-        expect(stream.buffer[1]).to.equal('shorter timeout');
-        expect(stream.buffer[2]).to.equal('no timeout');
+        await sleep(600);
+        expect(stream.buffer).to.deep.equal(['longer timeout', 'shorter timeout', 'no timeout']);
       });
     });
   });

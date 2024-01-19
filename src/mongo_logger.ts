@@ -44,6 +44,7 @@ import {
   TOPOLOGY_OPENING,
   WAITING_FOR_SUITABLE_SERVER
 } from './constants';
+import { MongoError } from './error';
 import type {
   ServerClosedEvent,
   ServerOpeningEvent,
@@ -214,14 +215,16 @@ export function parseSeverityFromString(s?: string): SeverityLevel | null {
 }
 
 /** @internal */
-export function createStdioLogger(stream: {
-  write: NodeJS.WriteStream['write'];
-}): MongoDBLogWritable {
+export function createStdioLogger(
+  stream: { write: NodeJS.WriteStream['write'] },
+  streamName: 'stderr' | 'stdout'
+): MongoDBLogWritable {
   return {
     write: (log: Log): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
       return;
-    }
+    },
+    streamName: streamName
   };
 }
 
@@ -240,10 +243,10 @@ function resolveLogPath(
   { mongodbLogPath }: MongoLoggerMongoClientOptions
 ): MongoDBLogWritable {
   if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
-    return createStdioLogger(process.stderr);
+    return createStdioLogger(process.stderr, 'stderr');
   }
   if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath)) {
-    return createStdioLogger(process.stdout);
+    return createStdioLogger(process.stdout, 'stdout');
   }
 
   if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
@@ -251,13 +254,13 @@ function resolveLogPath(
   }
 
   if (MONGODB_LOG_PATH && /^stderr$/i.test(MONGODB_LOG_PATH)) {
-    return createStdioLogger(process.stderr);
+    return createStdioLogger(process.stderr, 'stderr');
   }
   if (MONGODB_LOG_PATH && /^stdout$/i.test(MONGODB_LOG_PATH)) {
-    return createStdioLogger(process.stdout);
+    return createStdioLogger(process.stdout, 'stdout');
   }
 
-  return createStdioLogger(process.stderr);
+  return createStdioLogger(process.stderr, 'stderr');
 }
 
 function resolveSeverityConfiguration(
@@ -282,7 +285,8 @@ export interface Log extends Record<string, any> {
 
 /** @internal */
 export interface MongoDBLogWritable {
-  write(log: Log): any;
+  write(log: Log): PromiseLike<unknown> | any;
+  streamName?: string;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
@@ -424,7 +428,7 @@ export function stringifyWithMaxLen(
         ? value.name
         : 'anonymous function';
   } catch (e) {
-    return '... ESJON failed : Error ...';
+    strToTruncate = `... ESJON failed : Error ${e.message}`;
   }
 
   return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
@@ -708,7 +712,7 @@ export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
-  pendingLog: any | undefined;
+  pendingLog: PromiseLike<unknown> | undefined = undefined;
 
   /**
    * This method should be used when logging errors that do not have a public driver API for
@@ -740,7 +744,6 @@ export class MongoLogger {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
-    this.pendingLog = undefined;
   }
 
   willLog(severity: SeverityLevel, component: MongoLoggableComponent): boolean {
@@ -755,15 +758,18 @@ export class MongoLogger {
 
   private logWriteFailureHandler(error: Error) {
     try {
-      const tempLogDestination = createStdioLogger(process.stderr);
-      tempLogDestination.write({
-        t: new Date(),
-        c: MongoLoggableComponent.CLIENT,
-        s: SeverityLevel.ERROR,
-        message: `User input for mongodbLogPath is now invalid. Now logging to stderr.`,
-        error: error.message
+      if ((this.logDestination as any)?.streamName === 'stderr') {
+        throw MongoError;
+      }
+      this.logDestination = createStdioLogger(process.stderr, 'stderr');
+      this.error(MongoLoggableComponent.CLIENT, {
+        toLog: function () {
+          return {
+            message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.',
+            error: error.message
+          };
+        }
       });
-      this.logDestination = tempLogDestination;
     } catch (e) {
       this.turnOffSeverities();
     }
