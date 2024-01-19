@@ -22,7 +22,18 @@ describe('Command Logging and Monitoring Spec', function () {
     );
   });
 
-  describe.skip('Command Logging Spec', () => {
-    runUnifiedSuite(loadSpecTests(path.join('command-logging-and-monitoring', 'logging')));
-  }).skipReason = 'TODO(NODE-4686): Unskip these tests';
+  describe('Command Logging Spec', () => {
+    const tests = loadSpecTests(path.join('command-logging-and-monitoring', 'logging'));
+    runUnifiedSuite(tests, test => {
+      if (
+        [
+          'Successful bulk write command log messages include operationIds',
+          'Failed bulk write command log message includes operationId'
+        ].includes(test.description)
+      ) {
+        return 'not applicable: operationId not supported';
+      }
+      return false;
+    });
+  });
 });

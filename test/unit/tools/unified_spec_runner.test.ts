@@ -167,7 +167,7 @@ describe('Unified Spec Runner', function () {
               level: 'debug',
               component: 'command',
               data: {
-                failure: {}
+                failure: '(redacted)'
               }
             };
             compareLogsSpy([expected], [actual], entitiesMap);
