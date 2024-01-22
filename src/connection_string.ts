@@ -23,6 +23,7 @@ import {
   ServerApiVersion
 } from './mongo_client';
 import {
+  type MongoDBLogWritable,
   MongoLoggableComponent,
   MongoLogger,
   type MongoLoggerEnvOptions,
@@ -1250,10 +1251,7 @@ export const OPTIONS = {
       if (
         !(
           (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
-          (value &&
-            typeof value === 'object' &&
-            'write' in value &&
-            typeof value.write === 'function')
+          (typeof value === 'object' && typeof (value as MongoDBLogWritable)?.write === 'function')
         )
       ) {
         throw new MongoAPIError(
