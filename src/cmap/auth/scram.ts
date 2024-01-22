@@ -212,7 +212,7 @@ function parsePayload(payload: Binary) {
   const dict: Document = {};
   const parts = payloadStr.split(',');
   for (let i = 0; i < parts.length; i++) {
-    const valueParts = parts[i].split('=');
+    const valueParts = (parts[i].match(/^([^=]*)=(.*)$/) ?? []).slice(1);
     dict[valueParts[0]] = valueParts[1];
   }
   return dict;

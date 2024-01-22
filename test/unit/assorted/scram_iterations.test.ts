@@ -129,4 +129,37 @@ describe('SCRAM Iterations Tests', function () {
       .to.have.property('message')
       .that.matches(/connection(.+)closed/);
   });
+
+  it('should preserve trailing "=" from saslStart responses that are passed to saslContinue', async function () {
+    const credentials = new MongoCredentials({
+      mechanism: 'DEFAULT',
+      source: 'db',
+      username: 'user',
+      password: 'pencil',
+      mechanismProperties: {}
+    });
+    let payload;
+    client.s.options.credentials = credentials;
+
+    server.setMessageHandler(request => {
+      const doc = request.document;
+      if (isHello(doc)) {
+        return request.reply(Object.assign({}, mock.HELLO));
+      } else if (doc.saslStart) {
+        return request.reply({
+          ok: 1,
+          done: false,
+          payload: Buffer.from(
+            'n=__system,r=r7RuW8nC89hmrlIPSpatiEGnZGkuGcsq,r=r7RuW8nC89hmrlIPSpatiEGnZGkuGcsquPuvfddlU3NavdfJxv/XKg==,s=b7rCae/2BRjlcsn93RoUOfqtiwaf0nrXvSKLdQ==,i=15000'
+          )
+        });
+      } else if (doc.saslContinue) {
+        payload = doc.payload.toString('utf8');
+        request.connection.destroy();
+      }
+    });
+
+    await client.connect().catch(error => error);
+    expect(payload).to.includes('r=r7RuW8nC89hmrlIPSpatiEGnZGkuGcsquPuvfddlU3NavdfJxv/XKg==');
+  });
 });
