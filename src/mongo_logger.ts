@@ -222,7 +222,7 @@ export function createStdioLogger(stream: {
     write: promisify((log: Log, cb: (error?: Error) => void): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8', cb);
       return;
-    })
+    }
   };
 }
 
