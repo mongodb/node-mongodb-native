@@ -217,8 +217,8 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: promisify((log: Log): unknown => {
-      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
+    write: promisify((log: Log, cb: () => void): unknown => {
+      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8', cb);
       return;
     })
   };
