@@ -1252,8 +1252,8 @@ export const OPTIONS = {
           (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
           (value &&
             typeof value === 'object' &&
-            Object.keys(value).indexOf('write') >= 0 &&
-            typeof Object.values(value)[Object.keys(value).indexOf('write')] === 'function')
+            'write' in value &&
+            typeof value.write === 'function')
         )
       ) {
         throw new MongoAPIError(
