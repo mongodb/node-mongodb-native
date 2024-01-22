@@ -1,5 +1,5 @@
 import type { Writable } from 'stream';
-import { inspect } from 'util';
+import { inspect, promisify } from 'util';
 
 import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
@@ -217,10 +217,10 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: (log: Log): unknown => {
+    write: promisify((log: Log): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
       return;
-    }
+    })
   };
 }
 
@@ -281,7 +281,7 @@ export interface Log extends Record<string, any> {
 
 /** @internal */
 export interface MongoDBLogWritable {
-  write(log: Log): void;
+  write(log: Log): PromiseLike<unknown> | any;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
