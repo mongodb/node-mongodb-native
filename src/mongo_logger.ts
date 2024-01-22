@@ -1,4 +1,3 @@
-import type { Writable } from 'stream';
 import { inspect } from 'util';
 
 import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
@@ -44,7 +43,6 @@ import {
   TOPOLOGY_OPENING,
   WAITING_FOR_SUITABLE_SERVER
 } from './constants';
-import { MongoError } from './error';
 import type {
   ServerClosedEvent,
   ServerOpeningEvent,
@@ -193,7 +191,9 @@ export interface MongoLoggerOptions {
   /** Max length of embedded EJSON docs. Setting to 0 disables truncation. Defaults to 1000. */
   maxDocumentLength: number;
   /** Destination for log messages. */
-  logDestination: Writable | MongoDBLogWritable;
+  logDestination: MongoDBLogWritable;
+  /** For internal check to see if error should stop logging. */
+  logDestinationIsStdErr: boolean;
 }
 
 /**
@@ -215,16 +215,14 @@ export function parseSeverityFromString(s?: string): SeverityLevel | null {
 }
 
 /** @internal */
-export function createStdioLogger(
-  stream: { write: NodeJS.WriteStream['write'] },
-  streamName: 'stderr' | 'stdout'
-): MongoDBLogWritable {
+export function createStdioLogger(stream: {
+  write: NodeJS.WriteStream['write'];
+}): MongoDBLogWritable {
   return {
     write: (log: Log): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
       return;
-    },
-    streamName: streamName
+    }
   };
 }
 
@@ -241,26 +239,26 @@ export function createStdioLogger(
 function resolveLogPath(
   { MONGODB_LOG_PATH }: MongoLoggerEnvOptions,
   { mongodbLogPath }: MongoLoggerMongoClientOptions
-): MongoDBLogWritable {
+): { mongodbLogPath: MongoDBLogWritable; mongodbLogPathIsStdErr: boolean } {
   if (typeof mongodbLogPath === 'string' && /^stderr$/i.test(mongodbLogPath)) {
-    return createStdioLogger(process.stderr, 'stderr');
+    return { mongodbLogPath: createStdioLogger(process.stderr), mongodbLogPathIsStdErr: true };
   }
   if (typeof mongodbLogPath === 'string' && /^stdout$/i.test(mongodbLogPath)) {
-    return createStdioLogger(process.stdout, 'stdout');
+    return { mongodbLogPath: createStdioLogger(process.stdout), mongodbLogPathIsStdErr: false };
   }
 
   if (typeof mongodbLogPath === 'object' && typeof mongodbLogPath?.write === 'function') {
-    return mongodbLogPath;
+    return { mongodbLogPath: mongodbLogPath, mongodbLogPathIsStdErr: false };
   }
 
   if (MONGODB_LOG_PATH && /^stderr$/i.test(MONGODB_LOG_PATH)) {
-    return createStdioLogger(process.stderr, 'stderr');
+    return { mongodbLogPath: createStdioLogger(process.stderr), mongodbLogPathIsStdErr: true };
   }
   if (MONGODB_LOG_PATH && /^stdout$/i.test(MONGODB_LOG_PATH)) {
-    return createStdioLogger(process.stdout, 'stdout');
+    return { mongodbLogPath: createStdioLogger(process.stdout), mongodbLogPathIsStdErr: false };
   }
 
-  return createStdioLogger(process.stderr, 'stderr');
+  return { mongodbLogPath: createStdioLogger(process.stderr), mongodbLogPathIsStdErr: true };
 }
 
 function resolveSeverityConfiguration(
@@ -286,7 +284,6 @@ export interface Log extends Record<string, any> {
 /** @internal */
 export interface MongoDBLogWritable {
   write(log: Log): PromiseLike<unknown> | any;
-  streamName?: string;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
@@ -711,7 +708,8 @@ export function defaultLogTransform(
 export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
-  logDestination: MongoDBLogWritable | Writable;
+  logDestination: MongoDBLogWritable;
+  logDestinationIsStdErr: boolean;
   pendingLog: PromiseLike<unknown> | unknown = null;
 
   /**
@@ -744,6 +742,7 @@ export class MongoLogger {
     this.componentSeverities = options.componentSeverities;
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
+    this.logDestinationIsStdErr = options.logDestinationIsStdErr;
   }
 
   willLog(severity: SeverityLevel, component: MongoLoggableComponent): boolean {
@@ -758,10 +757,13 @@ export class MongoLogger {
 
   private logWriteFailureHandler(error: Error) {
     try {
-      if ((this.logDestination as any)?.streamName === 'stderr') {
-        throw MongoError;
+      if (this.logDestinationIsStdErr) {
+        this.turnOffSeverities();
+        this.clearPendingLog();
+        return;
       }
-      this.logDestination = createStdioLogger(process.stderr, 'stderr');
+      this.logDestination = createStdioLogger(process.stderr);
+      this.logDestinationIsStdErr = true;
       this.clearPendingLog();
       this.error(MongoLoggableComponent.CLIENT, {
         toLog: function () {
@@ -837,10 +839,12 @@ export class MongoLogger {
     clientOptions: MongoLoggerMongoClientOptions
   ): MongoLoggerOptions {
     // client options take precedence over env options
+    const resolvedLogPath = resolveLogPath(envOptions, clientOptions);
     const combinedOptions = {
       ...envOptions,
       ...clientOptions,
-      mongodbLogPath: resolveLogPath(envOptions, clientOptions)
+      mongodbLogPath: resolvedLogPath.mongodbLogPath,
+      mongodbLogPathIsStdErr: resolvedLogPath.mongodbLogPathIsStdErr
     };
     const defaultSeverity = resolveSeverityConfiguration(
       combinedOptions.mongodbLogComponentSeverities?.default,
@@ -881,7 +885,8 @@ export class MongoLogger {
         combinedOptions.mongodbLogMaxDocumentLength ??
         parseUnsignedInteger(combinedOptions.MONGODB_LOG_MAX_DOCUMENT_LENGTH) ??
         1000,
-      logDestination: combinedOptions.mongodbLogPath
+      logDestination: combinedOptions.mongodbLogPath,
+      logDestinationIsStdErr: combinedOptions.mongodbLogPathIsStdErr
     };
   }
 }

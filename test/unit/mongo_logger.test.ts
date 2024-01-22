@@ -67,7 +67,8 @@ describe('class MongoLogger', async function () {
       const logger = new MongoLogger({
         componentSeverities,
         maxDocumentLength: 10,
-        logDestination: stream
+        logDestination: stream,
+        logDestinationIsStdErr: false
       });
 
       expect(logger).to.have.property('componentSeverities', componentSeverities);
@@ -85,7 +86,8 @@ describe('class MongoLogger', async function () {
         } as { buffer: any[]; write: (log: Log) => void };
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
-          logDestination
+          logDestination,
+          logDestinationIsStdErr: false
         } as any);
 
         logger.error('command', 'Hello world!');
@@ -105,7 +107,8 @@ describe('class MongoLogger', async function () {
 
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
-          logDestination
+          logDestination,
+          logDestinationIsStdErr: false
         } as any);
 
         logger.error('command', 'Hello world!');
@@ -648,7 +651,8 @@ describe('class MongoLogger', async function () {
             componentSeverities: {
               topology: 'off'
             } as any,
-            logDestination: stream
+            logDestination: stream,
+            logDestinationIsStdErr: false
           } as any);
 
           logger[severityLevel]('topology', 'message');
@@ -662,7 +666,8 @@ describe('class MongoLogger', async function () {
               componentSeverities: {
                 command: severityLevel
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             for (let i = index + 1; i < severities.length; i++) {
@@ -681,7 +686,8 @@ describe('class MongoLogger', async function () {
               componentSeverities: {
                 command: severityLevel
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             // Calls all severity logging methods with a level less than or equal to what severityLevel
@@ -706,7 +712,8 @@ describe('class MongoLogger', async function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -722,7 +729,8 @@ describe('class MongoLogger', async function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -742,7 +750,8 @@ describe('class MongoLogger', async function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -760,7 +769,8 @@ describe('class MongoLogger', async function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', message);
@@ -780,7 +790,8 @@ describe('class MongoLogger', async function () {
                 command: 'trace',
                 connection: 'trace'
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
           });
 
@@ -1358,7 +1369,8 @@ describe('class MongoLogger', async function () {
             const logger = new MongoLogger({
               componentSeverities,
               maxDocumentLength: 1000,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             });
             // print random message at the debug level
             logger.debug('random message');
@@ -1397,7 +1409,8 @@ describe('class MongoLogger', async function () {
             const logger = new MongoLogger({
               componentSeverities,
               maxDocumentLength: 1000,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             });
             // print random message at the debug level
             logger.debug('random message');
@@ -1428,7 +1441,8 @@ describe('class MongoLogger', async function () {
             const logger = new MongoLogger({
               componentSeverities,
               maxDocumentLength: 1000,
-              logDestination: createStdioLogger(process.stdout, 'stdout')
+              logDestination: createStdioLogger(process.stdout),
+              logDestinationIsStdErr: false
             });
             logger.debug('random message');
             // manually wait for promise to resolve (takes extra time with promisify)
@@ -1459,7 +1473,8 @@ describe('class MongoLogger', async function () {
             const logger = new MongoLogger({
               componentSeverities,
               maxDocumentLength: 1000,
-              logDestination: createStdioLogger(process.stderr, 'stderr')
+              logDestination: createStdioLogger(process.stderr),
+              logDestinationIsStdErr: true
             });
             expect(() => logger.debug('random message')).to.not.throw(Error);
             expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
@@ -1483,7 +1498,8 @@ describe('class MongoLogger', async function () {
         const logger = new MongoLogger({
           componentSeverities,
           maxDocumentLength: 1000,
-          logDestination: stream
+          logDestination: stream,
+          logDestinationIsStdErr: false
         });
 
         logger.debug('longer timeout');

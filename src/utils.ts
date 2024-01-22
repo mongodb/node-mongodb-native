@@ -171,11 +171,13 @@ export function applyRetryableWrites<T extends HasRetryableWrites>(target: T, db
  * @param value - An object that could be a promise
  * @returns true if the provided value is a Promise
  */
-export function isPromiseLike<T = any>(
-  value?: PromiseLike<T> | void | unknown
-): value is Promise<T> {
-  // @ts-expect-error since value exists, value.then check is valid ts
-  return !!value && typeof value.then === 'function';
+export function isPromiseLike<T = any>(value?: unknown): value is Promise<T> {
+  return (
+    value != null &&
+    typeof value === 'object' &&
+    'then' in value &&
+    typeof value.then === 'function'
+  );
 }
 
 /**
