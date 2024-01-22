@@ -14,7 +14,8 @@ export const MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
 /** @internal */
 export type ServerSelector = (
   topologyDescription: TopologyDescription,
-  servers: ServerDescription[]
+  servers: ServerDescription[],
+  deprioritized?: ServerDescription[]
 ) => ServerDescription[];
 
 /**
@@ -266,7 +267,8 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
 
   return (
     topologyDescription: TopologyDescription,
-    servers: ServerDescription[]
+    servers: ServerDescription[],
+    deprioritized: ServerDescription[] = []
   ): ServerDescription[] => {
     const commonWireVersion = topologyDescription.commonWireVersion;
     if (
@@ -287,11 +289,16 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
       return [];
     }
 
-    if (
-      topologyDescription.type === TopologyType.Single ||
-      topologyDescription.type === TopologyType.Sharded
-    ) {
+    if (topologyDescription.type === TopologyType.Single) {
       return latencyWindowReducer(topologyDescription, servers.filter(knownFilter));
+    }
+
+    if (topologyDescription.type === TopologyType.Sharded) {
+      const filtered = servers.filter(server => {
+        return !deprioritized.includes(server);
+      });
+      const selectable = filtered.length > 0 ? filtered : deprioritized;
+      return latencyWindowReducer(topologyDescription, selectable.filter(knownFilter));
     }
 
     const mode = readPreference.mode;

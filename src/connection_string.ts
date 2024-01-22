@@ -1090,6 +1090,9 @@ export const OPTIONS = {
     target: 'tls',
     type: 'boolean'
   },
+  timeoutMS: {
+    type: 'uint'
+  },
   tls: {
     type: 'boolean'
   },

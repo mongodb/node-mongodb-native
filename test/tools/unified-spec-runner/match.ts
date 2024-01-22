@@ -648,7 +648,7 @@ export function matchesEvents(
   }
 }
 
-export function filterLogs(
+export function filterExtraLogs(
   logsToIgnore: ExpectedLogMessage[],
   actual: ExpectedLogMessage[],
   entities: EntitiesMap
@@ -694,7 +694,9 @@ export function compareLogs(
       expect(actualLog.data.failure, 'Expected failure to exist').to.exist;
       if (expectedLog.failureIsRedacted) {
         // Assert that failure has been redacted
-        expect(actualLog.data.failure, 'Expected failure to have been redacted').to.deep.equal({});
+        expect(actualLog.data.failure, 'Expected failure to have been redacted').to.equal(
+          '(redacted)'
+        );
       } else {
         // Assert that failure has not been redacted
         expect(

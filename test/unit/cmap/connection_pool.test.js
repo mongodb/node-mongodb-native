@@ -18,7 +18,8 @@ describe('Connection Pool', function () {
     topology: {
       client: {
         mongoLogger: {
-          debug: () => null
+          debug: () => null,
+          willLog: () => null
         }
       }
     }

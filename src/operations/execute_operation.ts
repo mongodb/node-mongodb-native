@@ -18,6 +18,7 @@ import {
 import type { MongoClient } from '../mongo_client';
 import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
+import type { ServerDescription } from '../sdam/server_description';
 import {
   sameServerSelector,
   secondaryWritableServerSelector,
@@ -183,7 +184,8 @@ export async function executeOperation<
       return await retryOperation(operation, operationError, {
         session,
         topology,
-        selector
+        selector,
+        previousServer: server.description
       });
     }
     throw operationError;
@@ -199,6 +201,7 @@ type RetryOptions = {
   session: ClientSession;
   topology: Topology;
   selector: ReadPreference | ServerSelector;
+  previousServer: ServerDescription;
 };
 
 async function retryOperation<
@@ -207,7 +210,7 @@ async function retryOperation<
 >(
   operation: T,
   originalError: MongoError,
-  { session, topology, selector }: RetryOptions
+  { session, topology, selector, previousServer }: RetryOptions
 ): Promise<TResult> {
   const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
   const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
@@ -243,7 +246,8 @@ async function retryOperation<
   // select a new server, and attempt to retry the operation
   const server = await topology.selectServerAsync(selector, {
     session,
-    operationName: operation.commandName
+    operationName: operation.commandName,
+    previousServer
   });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {
