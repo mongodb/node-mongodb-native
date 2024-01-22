@@ -1348,7 +1348,7 @@ describe('class MongoLogger', async function () {
           sinon.restore();
         });
 
-        context('when stream user defined stream and stream.write throws', function () {
+        context('when stream is user defined and stream.write throws', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', function () {
             const stream = {
               write(_log) {
@@ -1370,48 +1370,6 @@ describe('class MongoLogger', async function () {
             logger.debug('random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
             expect(stderrStubCall2).to.not.be.null;
-          });
-        });
-
-        context('when stream is stdout and stdout.write throws', function () {
-          it('should catch error, not crash application, warn user, and start writing to stderr', function () {
-            sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
-            // print random message at the debug level
-            const logger = new MongoLogger({
-              componentSeverities,
-              maxDocumentLength: 1000,
-              logDestination: createStdioLogger(process.stdout, 'stdout')
-            });
-            logger.debug('random message');
-            let stderrStubCall = stderrStub.write.getCall(0).args[0];
-            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
-            expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'I am stdout and do not work' }`
-            );
-            logger.debug('random message 2');
-            const stderrStubCall2 = stderrStub.write.getCall(1);
-            expect(stderrStubCall2).to.not.be.null;
-          });
-        });
-      });
-
-      context('when stream is stderr', function () {
-        context('when stderr.write throws', function () {
-          beforeEach(function () {
-            sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
-          });
-          afterEach(function () {
-            sinon.restore();
-          });
-
-          it('should not throw error', function () {
-            // print random message at the debug level
-            const logger = new MongoLogger({
-              componentSeverities,
-              maxDocumentLength: 1000,
-              logDestination: createStdioLogger(process.stderr)
-            });
-            expect(() => logger.debug('random message')).to.not.throw(Error);
           });
         });
       });
@@ -1460,6 +1418,51 @@ describe('class MongoLogger', async function () {
             logger.debug('random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
             expect(stderrStubCall2).to.not.be.null;
+          });
+        });
+
+        context('when stream is stdout and stdout.write throws', async function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
+            sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stdout, 'stdout')
+            });
+            logger.debug('random message');
+            // manually wait for promise to resolve (takes extra time with promisify)
+            await sleep(600);
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'I am stdout and do not work' }`
+            );
+            logger.debug('random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.not.be.null;
+          });
+        });
+      });
+
+      context('when stream is stderr', function () {
+        context('when stderr.write throws', function () {
+          beforeEach(function () {
+            sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
+          });
+          afterEach(function () {
+            sinon.restore();
+          });
+
+          it('should not throw error and turn off severities', function () {
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stderr, 'stderr')
+            });
+            expect(() => logger.debug('random message')).to.not.throw(Error);
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
           });
         });
       });

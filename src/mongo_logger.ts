@@ -712,7 +712,7 @@ export class MongoLogger {
   componentSeverities: Record<MongoLoggableComponent, SeverityLevel>;
   maxDocumentLength: number;
   logDestination: MongoDBLogWritable | Writable;
-  pendingLog: PromiseLike<unknown> | undefined = undefined;
+  pendingLog: PromiseLike<unknown> | unknown = null;
 
   /**
    * This method should be used when logging errors that do not have a public driver API for
@@ -762,6 +762,7 @@ export class MongoLogger {
         throw MongoError;
       }
       this.logDestination = createStdioLogger(process.stderr, 'stderr');
+      this.clearPendingLog();
       this.error(MongoLoggableComponent.CLIENT, {
         toLog: function () {
           return {
@@ -777,7 +778,7 @@ export class MongoLogger {
   }
 
   private clearPendingLog() {
-    this.pendingLog = undefined;
+    this.pendingLog = null;
   }
 
   private log(
@@ -807,11 +808,12 @@ export class MongoLogger {
 
     try {
       const logResult = this.logDestination.write(logMessage);
-      if (isPromiseLike(logResult))
+      if (isPromiseLike(logResult)) {
         this.pendingLog = logResult.then(
           this.clearPendingLog.bind(this),
           this.logWriteFailureHandler.bind(this)
         );
+      }
     } catch (error) {
       this.logWriteFailureHandler(error);
     }
