@@ -352,37 +352,34 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   }
 
   // connecting does an implicit `hello`
-  connect(monitor.connectOptions, (err, conn) => {
-    if (err) {
-      monitor.connection = null;
-
-      awaited = false;
-      onHeartbeatFailed(err);
-      return;
-    }
-
-    if (conn) {
+  connect(monitor.connectOptions).then(
+    connection => {
       if (isInCloseState(monitor)) {
-        conn.destroy({ force: true });
+        connection.destroy({ force: true });
         return;
       }
 
-      monitor.connection = conn;
+      monitor.connection = connection;
       monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         monitor[kServer].topology.s.id,
-        conn.hello?.connectionId,
+        connection.hello?.connectionId,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
           calculateDurationInMs(start),
-          conn.hello,
-          useStreamingProtocol(monitor, conn.hello?.topologyVersion)
+          connection.hello,
+          useStreamingProtocol(monitor, connection.hello?.topologyVersion)
         )
       );
 
-      callback(undefined, conn.hello);
+      callback(undefined, connection.hello);
+    },
+    error => {
+      monitor.connection = null;
+      awaited = false;
+      onHeartbeatFailed(error);
     }
-  });
+  );
 }
 
 function monitorServer(monitor: Monitor) {
@@ -498,16 +495,15 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const connection = rttPinger.connection;
   if (connection == null) {
-    connect(options, (err, conn) => {
-      if (err) {
+    connect(options).then(
+      connection => {
+        measureAndReschedule(connection);
+      },
+      () => {
         rttPinger.connection = undefined;
         rttPinger[kRoundTripTime] = 0;
-        return;
       }
-
-      measureAndReschedule(conn);
-    });
-
+    );
     return;
   }
 

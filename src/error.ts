@@ -109,8 +109,8 @@ export interface ErrorDescription extends Document {
   errInfo?: Document;
 }
 
-function isAggregateError(e: Error): e is Error & { errors: Error[] } {
-  return 'errors' in e && Array.isArray(e.errors);
+function isAggregateError(e: unknown): e is Error & { errors: Error[] } {
+  return e != null && typeof e === 'object' && 'errors' in e && Array.isArray(e.errors);
 }
 
 /**
@@ -150,7 +150,7 @@ export class MongoError extends Error {
   }
 
   /** @internal */
-  static buildErrorMessage(e: Error | string): string {
+  static buildErrorMessage(e: unknown): string {
     if (typeof e === 'string') {
       return e;
     }
@@ -160,7 +160,9 @@ export class MongoError extends Error {
         : e.errors.map(({ message }) => message).join(', ');
     }
 
-    return e.message;
+    return e != null && typeof e === 'object' && 'message' in e && typeof e.message === 'string'
+      ? e.message
+      : 'empty error message';
   }
 
   override get name(): string {
