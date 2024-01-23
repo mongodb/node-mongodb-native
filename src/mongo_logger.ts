@@ -1,4 +1,4 @@
-import { inspect } from 'util';
+import { inspect, promisify } from 'util';
 
 import { type Document, EJSON, type EJSONOptions, type ObjectId } from './bson';
 import type { CommandStartedEvent } from './cmap/command_monitoring_events';
@@ -219,10 +219,10 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: (log: Log): unknown => {
-      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8');
+    write: promisify((log: Log, cb: () => void): unknown => {
+      stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8', cb);
       return;
-    }
+    })
   };
 }
 
@@ -283,7 +283,7 @@ export interface Log extends Record<string, any> {
 
 /** @internal */
 export interface MongoDBLogWritable {
-  write(log: Log): PromiseLike<unknown> | any;
+  write(log: Log): PromiseLike<unknown> | unknown;
 }
 
 function compareSeverity(s0: SeverityLevel, s1: SeverityLevel): 1 | 0 | -1 {
@@ -750,32 +750,29 @@ export class MongoLogger {
   }
 
   turnOffSeverities() {
-    for (const key of Object.keys(MongoLoggableComponent)) {
+    for (const key of Object.values(MongoLoggableComponent)) {
       this.componentSeverities[key as MongoLoggableComponent] = SeverityLevel.OFF;
     }
   }
 
   private logWriteFailureHandler(error: Error) {
-    try {
-      if (this.logDestinationIsStdErr) {
-        this.turnOffSeverities();
-        this.clearPendingLog();
-        return;
-      }
-      this.logDestination = createStdioLogger(process.stderr);
-      this.logDestinationIsStdErr = true;
-      this.clearPendingLog();
-      this.error(MongoLoggableComponent.CLIENT, {
-        toLog: function () {
-          return {
-            message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.',
-            error: error.message
-          };
-        }
-      });
-    } catch (e) {
+    if (this.logDestinationIsStdErr) {
       this.turnOffSeverities();
+      this.clearPendingLog();
+      return;
     }
+    this.logDestination = createStdioLogger(process.stderr);
+    this.logDestinationIsStdErr = true;
+    this.clearPendingLog();
+    this.error(MongoLoggableComponent.CLIENT, {
+      toLog: function () {
+        return {
+          message: 'User input for mongodbLogPath is now invalid. Logging is halted.',
+          error: error.message
+        };
+      }
+    });
+    this.turnOffSeverities();
     this.clearPendingLog();
   }
 

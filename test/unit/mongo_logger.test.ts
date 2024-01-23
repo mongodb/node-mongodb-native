@@ -1345,7 +1345,11 @@ describe('class MongoLogger', async function () {
 
   describe('log', async function () {
     const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
-      default: 'error'
+      command: 'trace',
+      topology: 'trace',
+      serverSelection: 'trace',
+      connection: 'trace',
+      client: 'trace'
     } as any;
     describe('sync stream failure handling', function () {
       context('when stream is not stderr', function () {
@@ -1373,15 +1377,18 @@ describe('class MongoLogger', async function () {
               logDestinationIsStdErr: false
             });
             // print random message at the debug level
-            logger.debug('random message');
+            logger.debug('client', 'random message');
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'This writable always throws' }`
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws' }`
             );
-            logger.debug('random message 2');
+
+            // logging is halted
+            logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
-            expect(stderrStubCall2).to.not.be.null;
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
           });
         });
       });
@@ -1413,7 +1420,7 @@ describe('class MongoLogger', async function () {
               logDestinationIsStdErr: false
             });
             // print random message at the debug level
-            logger.debug('random message');
+            logger.debug('client', 'random message');
 
             // before timeout resolves, no error
             expect(stderrStub.write.getCall(0)).to.be.null;
@@ -1425,12 +1432,14 @@ describe('class MongoLogger', async function () {
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'This writable always throws, but only after at least 500ms' }`
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws, but only after at least 500ms' }`
             );
 
-            logger.debug('random message 2');
+            // no more logging in the future
+            logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
-            expect(stderrStubCall2).to.not.be.null;
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
           });
         });
 
@@ -1444,17 +1453,22 @@ describe('class MongoLogger', async function () {
               logDestination: createStdioLogger(process.stdout),
               logDestinationIsStdErr: false
             });
-            logger.debug('random message');
+            logger.debug('client', 'random message');
+
             // manually wait for promise to resolve (takes extra time with promisify)
             await sleep(600);
+
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Now logging to stderr.', error: 'I am stdout and do not work' }`
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'I am stdout and do not work' }`
             );
-            logger.debug('random message 2');
+
+            // logging is halted
+            logger.debug('client', 'random message 2');
             const stderrStubCall2 = stderrStub.write.getCall(1);
-            expect(stderrStubCall2).to.not.be.null;
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
           });
         });
       });
@@ -1476,7 +1490,7 @@ describe('class MongoLogger', async function () {
               logDestination: createStdioLogger(process.stderr),
               logDestinationIsStdErr: true
             });
-            expect(() => logger.debug('random message')).to.not.throw(Error);
+            expect(() => logger.debug('client', 'random message')).to.not.throw(Error);
             expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
           });
         });
@@ -1487,12 +1501,12 @@ describe('class MongoLogger', async function () {
         const stream = {
           buffer: [],
           async write(log) {
-            if (log.c === 'longer timeout') {
+            if (log.message === 'longer timeout') {
               await sleep(2000);
-            } else if (log.c === 'shorter timeout') {
+            } else if (log.message === 'shorter timeout') {
               await sleep(500);
             }
-            this.buffer.push(log.c);
+            this.buffer.push(log.message);
           }
         };
         const logger = new MongoLogger({
@@ -1502,9 +1516,9 @@ describe('class MongoLogger', async function () {
           logDestinationIsStdErr: false
         });
 
-        logger.debug('longer timeout');
-        logger.debug('shorter timeout');
-        logger.debug('no timeout');
+        logger.debug('client', 'longer timeout');
+        logger.debug('client', 'shorter timeout');
+        logger.debug('client', 'no timeout');
 
         expect(stream.buffer.length).to.equal(0);
 
