@@ -1045,10 +1045,13 @@ describe('MongoOptions', function () {
           });
 
           context('when invalid environment option is provided', function () {
+            afterEach(function () {
+              process.env['MONGODB_LOG_ALL'] = 'undefined';
+            });
+
             it('should still throw error at construction', function () {
               process.env['MONGODB_LOG_ALL'] = 'imFakeToo';
               expect(badClientCreator).to.throw(MongoAPIError);
-              process.env['MONGODB_LOG_ALL'] = 'undefined';
             });
           });
         });
@@ -1099,14 +1102,14 @@ describe('MongoOptions', function () {
     describe('mongodbLogMaxDocumentLength', function () {
       context('when mongodbLogMaxDocumentLength is in options', function () {
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
-          it('it stores value for maxDocumentLength correctly', function () {
+          it('should store value for maxDocumentLength correctly', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
               mongodbLogMaxDocumentLength: 290
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
-          it('it throws error for negative input', function () {
+          it('should throw error for negative input', function () {
             expect(
               () =>
                 new MongoClient('mongodb://a/', {
@@ -1117,23 +1120,61 @@ describe('MongoOptions', function () {
           });
         });
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
-          it('it stores value for maxDocumentLength correctly (client option value takes precedence)', function () {
+          beforeEach(function () {
             process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
+          });
+
+          afterEach(function () {
+            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+          });
+
+          it('should store value for maxDocumentLength correctly (client option value takes precedence)', function () {
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true,
               mongodbLogMaxDocumentLength: 290
             });
             expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+          });
+          it('should throw error for negative input', function () {
+            expect(
+              () =>
+                new MongoClient('mongodb://a/', {
+                  [loggerFeatureFlag]: true,
+                  mongodbLogMaxDocumentLength: -290
+                })
+            ).to.throw(MongoParseError);
           });
         });
       });
       context('when mongodbLogMaxDocumentLength is not in options', function () {
-        it('it stores value for default maxDocumentLength correctly', function () {
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+          it('should store value for default maxDocumentLength correctly', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
           });
-          expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
+        });
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+          afterEach(function () {
+            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+          });
+
+          it('should store value for maxDocumentLength correctly', function () {
+            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(155);
+          });
+
+          it('should not throw error for negative MONGODB_MAX_DOCUMENT_LENGTH and set to default', function () {
+            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '-14';
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
+          });
         });
       });
     });
