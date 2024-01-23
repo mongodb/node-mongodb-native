@@ -1032,9 +1032,9 @@ describe('MongoOptions', function () {
 
           context('when valid environment option is provided', function () {
             it('should still throw error at construction', function () {
-              process.env['MONGODB_LOG_ALL'] = 'emergency';
+              process.env.MONGODB_LOG_ALL = 'emergency';
               expect(badClientCreator).to.throw(MongoAPIError);
-              process.env['MONGODB_LOG_ALL'] = 'undefined';
+              delete process.env.MONGODB_LOG_ALL;
             });
           });
 
@@ -1046,11 +1046,11 @@ describe('MongoOptions', function () {
 
           context('when invalid environment option is provided', function () {
             afterEach(function () {
-              process.env['MONGODB_LOG_ALL'] = 'undefined';
+              delete process.env.MONGODB_LOG_ALL;
             });
 
             it('should still throw error at construction', function () {
-              process.env['MONGODB_LOG_ALL'] = 'imFakeToo';
+              process.env.MONGODB_LOG_ALL = 'imFakeToo';
               expect(badClientCreator).to.throw(MongoAPIError);
             });
           });
@@ -1058,10 +1058,10 @@ describe('MongoOptions', function () {
 
         context('when invalid environment option is provided', function () {
           beforeEach(async function () {
-            process.env['MONGODB_LOG_ALL'] = 'imFakeToo';
+            process.env.MONGODB_LOG_ALL = 'imFakeToo';
           });
           afterEach(async function () {
-            process.env['MONGODB_LOG_ALL'] = 'undefined';
+            delete process.env.MONGODB_LOG_ALL;
           });
 
           context('when client option is not provided', function () {
@@ -1121,11 +1121,11 @@ describe('MongoOptions', function () {
         });
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           beforeEach(function () {
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
           });
 
           afterEach(function () {
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+            delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
           });
 
           it('should store value for maxDocumentLength correctly (client option value takes precedence)', function () {
@@ -1157,11 +1157,11 @@ describe('MongoOptions', function () {
         });
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
           afterEach(function () {
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+            delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
           });
 
           it('should store value for maxDocumentLength correctly', function () {
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true
             });
@@ -1169,7 +1169,7 @@ describe('MongoOptions', function () {
           });
 
           it('should not throw error for negative MONGODB_MAX_DOCUMENT_LENGTH and set to default', function () {
-            process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '-14';
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '-14';
             const client = new MongoClient('mongodb://a/', {
               [loggerFeatureFlag]: true
             });
