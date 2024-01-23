@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { type Document, Long } from '../bson';
-import { connect } from '../cmap/connect';
+import { connect, makeConnection, makeSocket, performInitialHandshake } from '../cmap/connect';
 import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
@@ -235,7 +235,7 @@ function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion
 }
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
-  let start = now();
+  let start: number;
   let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
@@ -335,6 +335,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
+    start = now();
+
     if (isAwaitable) {
       awaited = true;
       return connection.exhaustCommand(ns('admin.$cmd'), cmd, options, (error, hello) => {
@@ -352,7 +354,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   }
 
   // connecting does an implicit `hello`
-  connect(monitor.connectOptions).then(
+  (async () => {
+    const socket = await makeSocket(monitor.connectOptions);
+    const connection = makeConnection(monitor.connectOptions, socket);
+    start = now();
+    await performInitialHandshake(connection, monitor.connectOptions);
+    return connection;
+  })().then(
     connection => {
       if (isInCloseState(monitor)) {
         connection.destroy({ force: true });
