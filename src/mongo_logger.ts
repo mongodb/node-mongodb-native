@@ -219,7 +219,7 @@ export function createStdioLogger(stream: {
   write: NodeJS.WriteStream['write'];
 }): MongoDBLogWritable {
   return {
-    write: promisify((log: Log, cb: () => void): unknown => {
+    write: promisify((log: Log, cb: (error?: Error) => void): unknown => {
       stream.write(inspect(log, { compact: true, breakLength: Infinity }), 'utf-8', cb);
       return;
     })
@@ -418,10 +418,7 @@ export function stringifyWithMaxLen(
   let strToTruncate = '';
 
   try {
-    strToTruncate =
-      typeof value !== 'function'
-        ? EJSON.stringify(value, options)
-        : 'ReadPreference function';
+    strToTruncate = typeof value !== 'function' ? EJSON.stringify(value, options) : value.name;
   } catch (e) {
     strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
   }

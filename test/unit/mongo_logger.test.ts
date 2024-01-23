@@ -56,7 +56,7 @@ describe('meta tests for BufferingStream', function () {
   });
 });
 
-describe.only('class MongoLogger', async function () {
+describe('class MongoLogger', async function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
       const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
@@ -1315,32 +1315,39 @@ describe.only('class MongoLogger', async function () {
         for (const errorInput of errorInputs) {
           context(`when value is ${errorInput.name}`, function () {
             it('should output default error message, with no error thrown', function () {
-              expect(stringifyWithMaxLen(errorInput.input, 25)).to.equal(
-                '... ESJON failed : Error ...'
+              expect(stringifyWithMaxLen(errorInput.input, 40)).to.equal(
+                'Extended JSON serialization failed with:...'
               );
             });
           });
         }
       });
 
-      context('when given anonymous function as input', function () {
-        it('should output default error message', function () {
-          expect(stringifyWithMaxLen((v: number) => v + 1, DEFAULT_MAX_DOCUMENT_LENGTH)).to.equal(
-            'anonymous function'
-          );
+      context('when given function as input', function () {
+        it('should output function.name', function () {
+          expect(
+            stringifyWithMaxLen(function randomFunc() {
+              return 1;
+            }, DEFAULT_MAX_DOCUMENT_LENGTH)
+          ).to.equal('randomFunc');
         });
       });
     });
   });
 
   describe('log', async function () {
-    const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
-      command: 'trace',
-      topology: 'trace',
-      serverSelection: 'trace',
-      connection: 'trace',
-      client: 'trace'
-    } as any;
+    let componentSeverities: MongoLoggerOptions['componentSeverities'];
+
+    beforeEach(function () {
+      componentSeverities = {
+        command: 'trace',
+        topology: 'trace',
+        serverSelection: 'trace',
+        connection: 'trace',
+        client: 'trace'
+      } as any;
+    });
+
     describe('sync stream failure handling', function () {
       context('when stream is not stderr', function () {
         let stderrStub;
