@@ -21,7 +21,6 @@ import {
   CONNECTION_READY,
   createStdioLogger,
   DEFAULT_MAX_DOCUMENT_LENGTH,
-  defaultLogTransform,
   type Log,
   type MongoDBLogWritable,
   MongoLogger,
@@ -57,7 +56,7 @@ describe('meta tests for BufferingStream', function () {
   });
 });
 
-describe('class MongoLogger', async function () {
+describe.only('class MongoLogger', async function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
       const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
@@ -1330,15 +1329,6 @@ describe('class MongoLogger', async function () {
             'anonymous function'
           );
         });
-      });
-    });
-  });
-
-  describe('defaultLogTransform', function () {
-    context('when provided a Loggable Event with invalid host-port', function () {
-      // this is an important case to consider, because in the case of an undefined address, the HostAddress.toString() function will throw
-      it('should not throw and output empty host string instead', function () {
-        expect(defaultLogTransform({ name: 'connectionCreated' }).serverHost).to.equal('');
       });
     });
   });

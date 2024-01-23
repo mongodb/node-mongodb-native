@@ -421,11 +421,9 @@ export function stringifyWithMaxLen(
     strToTruncate =
       typeof value !== 'function'
         ? EJSON.stringify(value, options)
-        : value.name !== ''
-        ? value.name
-        : 'anonymous function';
+        : 'ReadPreference function';
   } catch (e) {
-    strToTruncate = `... ESJON failed : Error ${e.message}`;
+    strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
   }
 
   return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
@@ -463,7 +461,7 @@ function attachCommandFields(
   log.commandName = commandEvent.commandName;
   log.requestId = commandEvent.requestId;
   log.driverConnectionId = commandEvent.connectionId;
-  const { host, port } = HostAddress.fromString(commandEvent.address ?? '').toHostPort();
+  const { host, port } = HostAddress.fromString(commandEvent.address).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
   if (commandEvent?.serviceId) {
@@ -476,7 +474,7 @@ function attachCommandFields(
 }
 
 function attachConnectionFields(log: Record<string, any>, event: any) {
-  const { host, port } = HostAddress.fromString(event.address ?? '').toHostPort();
+  const { host, port } = HostAddress.fromString(event.address).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
 
@@ -498,7 +496,7 @@ function attachServerHeartbeatFields(
   const { awaited, connectionId } = serverHeartbeatEvent;
   log.awaited = awaited;
   log.driverConnectionId = serverHeartbeatEvent.connectionId;
-  const { host, port } = HostAddress.fromString(connectionId ?? '').toHostPort();
+  const { host, port } = HostAddress.fromString(connectionId).toHostPort();
   log.serverHost = host;
   log.serverPort = port;
   return log;
