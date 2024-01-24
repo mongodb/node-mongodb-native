@@ -1,8 +1,11 @@
+import * as net from 'node:net';
+
 import { expect } from 'chai';
 import { coerce } from 'semver';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
+import { MongoClient } from '../../mongodb';
 import {
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -577,6 +580,34 @@ describe('monitoring', function () {
         clock.tick(30);
         expect(fnSpy.calledTwice).to.be.true;
       });
+    });
+  });
+
+  describe('Heartbeat duration', function () {
+    let client: MongoClient;
+    let serverHeartbeatFailed;
+
+    beforeEach(async function () {
+      // Artificially make creating a connection take 200ms
+      sinon.stub(net, 'createConnection').callsFake(function () {
+        const socket = new net.Socket();
+        setTimeout(() => socket.emit('connect'), 80);
+        socket.on('data', () => socket.destroy(new Error('I am not real!')));
+        return socket;
+      });
+
+      client = new MongoClient(`mongodb://localhost:1`, { serverSelectionTimeoutMS: 200 });
+      client.on('serverHeartbeatFailed', ev => (serverHeartbeatFailed = ev));
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it('includes only the time to perform handshake', async function () {
+      const maybeError = await client.connect().catch(e => e);
+      expect(maybeError).to.be.instanceOf(Error);
+      expect(serverHeartbeatFailed).to.have.property('duration').that.is.lessThan(20); // way less than 80ms
     });
   });
 });

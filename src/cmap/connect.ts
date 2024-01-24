@@ -373,7 +373,7 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     const connectEvent = useTLS ? 'secureConnect' : 'connect';
     socket
       .once(connectEvent, () => resolve(socket))
-      .once('error', error => reject(error))
+      .once('error', error => reject(connectionFailureError('error', error)))
       .once('timeout', () => reject(connectionFailureError('timeout')))
       .once('close', () => reject(connectionFailureError('close')));
 

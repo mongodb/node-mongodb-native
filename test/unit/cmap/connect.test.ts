@@ -51,7 +51,7 @@ describe('Connect Tests', function () {
 
     afterEach(() => mock.cleanup());
 
-    it('should auth against a non-arbiter', function (done) {
+    it('should auth against a non-arbiter', async function () {
       const whatHappened = {};
 
       test.server.setMessageHandler(request => {
@@ -71,19 +71,13 @@ describe('Connect Tests', function () {
         }
       });
 
-      connect(test.connectOptions, err => {
-        try {
-          expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
-          expect(whatHappened).to.have.property('saslStart', true);
-        } catch (_err) {
-          err = _err;
-        }
+      await connect(test.connectOptions);
 
-        done(err);
-      });
+      expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
+      expect(whatHappened).to.have.property('saslStart', true);
     });
 
-    it('should not auth against an arbiter', function (done) {
+    it('should not auth against an arbiter', async function () {
       const whatHappened = {};
       test.server.setMessageHandler(request => {
         const doc = request.document;
@@ -102,16 +96,10 @@ describe('Connect Tests', function () {
         }
       });
 
-      connect(test.connectOptions, err => {
-        try {
-          expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
-          expect(whatHappened).to.not.have.property('saslStart');
-        } catch (_err) {
-          err = _err;
-        }
+      await connect(test.connectOptions);
 
-        done(err);
-      });
+      expect(whatHappened).to.have.property(LEGACY_HELLO_COMMAND, true);
+      expect(whatHappened).to.not.have.property('saslStart');
     });
   });
 
@@ -133,10 +121,7 @@ describe('Connect Tests', function () {
         socketTimeoutMS: 15000
       };
 
-      connection = await promisify<Connection>(callback =>
-        //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-        connect(connectOptions, callback)
-      )();
+      connection = await connect(connectOptions);
     });
 
     afterEach(async () => {
@@ -166,19 +151,13 @@ describe('Connect Tests', function () {
           });
         });
 
-        const error = await promisify<Connection>(callback =>
-          connect(
-            {
-              ...connectOptions,
-              // Ensure these timeouts do not fire first
-              socketTimeoutMS: 5000,
-              connectTimeoutMS: 5000,
-              cancellationToken
-            },
-            //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-            callback
-          )
-        )().catch(error => error);
+        const error = await connect({
+          ...connectOptions,
+          // Ensure these timeouts do not fire first
+          socketTimeoutMS: 5000,
+          connectTimeoutMS: 5000,
+          cancellationToken
+        }).catch(error => error);
 
         expect(error, error.stack).to.match(/connection establishment was cancelled/);
       });
@@ -189,21 +168,20 @@ describe('Connect Tests', function () {
         // set no response handler for mock server, effectively black hole requests
         server.setMessageHandler(() => null);
 
-        const error = await promisify<Connection>(callback =>
-          //@ts-expect-error: Callbacks do not have mutual exclusion for error/result existence
-          connect({ ...connectOptions, connectTimeoutMS: 5 }, callback)
-        )().catch(error => error);
+        const error = await connect({ ...connectOptions, connectTimeoutMS: 5 }).catch(
+          error => error
+        );
 
         expect(error).to.match(/timed out/);
       });
     });
   });
 
-  it('should emit `MongoNetworkError` for network errors', function (done) {
-    connect({ hostAddress: new HostAddress('non-existent:27018') }, err => {
-      expect(err).to.be.instanceOf(MongoNetworkError);
-      done();
-    });
+  it('should emit `MongoNetworkError` for network errors', async function () {
+    const error = await connect({
+      hostAddress: new HostAddress('non-existent:27018')
+    }).catch(e => e);
+    expect(error).to.be.instanceOf(MongoNetworkError);
   });
 
   context('prepareHandshakeDocument', () => {

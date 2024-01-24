@@ -35,7 +35,7 @@ describe('Connection', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
-        const connectOptions: Partial<ConnectionOptions> = {
+        const connectOptions: ConnectionOptions = {
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} })
@@ -43,7 +43,7 @@ describe('Connection', function () {
 
         let conn;
         try {
-          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          conn = await connect(connectOptions);
           const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
           expect(hello).to.have.property('ok', 1);
         } finally {
@@ -55,7 +55,7 @@ describe('Connection', function () {
     it('should emit command monitoring events', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
-        const connectOptions: Partial<ConnectionOptions> = {
+        const connectOptions: ConnectionOptions = {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
@@ -64,7 +64,7 @@ describe('Connection', function () {
 
         let conn;
         try {
-          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          conn = await connect(connectOptions);
 
           const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));
