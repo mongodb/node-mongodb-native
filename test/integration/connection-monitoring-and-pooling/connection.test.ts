@@ -1,5 +1,3 @@
-import { promisify } from 'node:util';
-
 import { expect } from 'chai';
 
 import {
