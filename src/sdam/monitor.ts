@@ -358,8 +358,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     const socket = await makeSocket(monitor.connectOptions);
     const connection = makeConnection(monitor.connectOptions, socket);
     start = now();
-    await performInitialHandshake(connection, monitor.connectOptions);
-    return connection;
+    try {
+      await performInitialHandshake(connection, monitor.connectOptions);
+      return connection;
+    } catch (error) {
+      connection.destroy({ force: false });
+      throw error;
+    }
   })().then(
     connection => {
       if (isInCloseState(monitor)) {
