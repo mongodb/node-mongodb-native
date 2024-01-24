@@ -1268,13 +1268,35 @@ describe('class MongoLogger', async function () {
 
     context('when maxDocumentLength is non-zero', function () {
       context('when document has length greater than maxDocumentLength', function () {
-        it('truncates ejson string to length of maxDocumentLength + 3', function () {
-          expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
-            DEFAULT_MAX_DOCUMENT_LENGTH + 3
-          );
+        context('when truncation does not occur mid-multibyte codepoint', function () {
+          it('truncates ejson string to length of maxDocumentLength + 3', function () {
+            expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
+              DEFAULT_MAX_DOCUMENT_LENGTH + 3
+            );
+          });
         });
+
         it('ends with "..."', function () {
           expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.match(/^.*\.\.\.$/);
+        });
+
+        context('when truncation occurs mid-multibyte codepoint', function () {
+          const multiByteCodePoint = '\ud83d\ude0d'; // heart eyes emoji
+          context('when maxDocumentLength = 1 but greater than 0', function () {
+            it('should return an empty string', function () {
+              expect(stringifyWithMaxLen(multiByteCodePoint, 1, { relaxed: true })).to.equal('');
+            });
+          });
+
+          context('when maxDocumentLength > 1', function () {
+            it('should round down maxDocLength to previous codepoint', function () {
+              const randomString = `random ${multiByteCodePoint}random random${multiByteCodePoint}${multiByteCodePoint}`;
+              const randomStringMinusACodePoint = `random ${multiByteCodePoint}random random${multiByteCodePoint}`;
+              expect(
+                stringifyWithMaxLen(randomString, randomString.length - 1, { relaxed: true })
+              ).to.equal(`${randomStringMinusACodePoint}...`);
+            });
+          });
         });
       });
 
@@ -1289,7 +1311,6 @@ describe('class MongoLogger', async function () {
             /^.*\.\.\./
           );
         });
-
         it('produces valid relaxed EJSON', function () {
           expect(() => {
             EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));

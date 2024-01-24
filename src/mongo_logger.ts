@@ -420,10 +420,25 @@ export function stringifyWithMaxLen(
 ): string {
   let strToTruncate = '';
 
-  try {
-    strToTruncate = typeof value !== 'function' ? EJSON.stringify(value, options) : value.name;
-  } catch (e) {
-    strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
+  if (typeof value === 'string') {
+    strToTruncate = value;
+  } else if (typeof value === 'function') {
+    strToTruncate = value.toString();
+  } else {
+    strToTruncate = EJSON.stringify(value, options);
+  }
+
+  // handle truncation that occurs in the middle of multi-byte codepoints
+  if (
+    maxDocumentLength !== 0 &&
+    strToTruncate.length > maxDocumentLength &&
+    strToTruncate.charCodeAt(maxDocumentLength - 1) !==
+      strToTruncate.codePointAt(maxDocumentLength - 1)
+  ) {
+    maxDocumentLength--;
+    if (maxDocumentLength === 0) {
+      return '';
+    }
   }
 
   return maxDocumentLength !== 0 && strToTruncate.length > maxDocumentLength
