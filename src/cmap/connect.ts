@@ -186,6 +186,10 @@ async function performInitialHandshake(
       throw error;
     }
   }
+
+  // Connection establishment is socket creation (tcp handshake, tls handshake, MongoDB handshake (saslStart, saslContinue))
+  // Once connection is established, command logging can log events (if enabled)
+  conn.established = true;
 }
 
 export interface HandshakeDocument extends Document {

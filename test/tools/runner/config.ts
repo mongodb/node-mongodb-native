@@ -158,54 +158,59 @@ export class TestConfiguration {
     return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf('PROVIDER_NAME:azure') > -1;
   }
 
-  newClient(dbOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
+  newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
     serverOptions = Object.assign({}, getEnvironmentalOptions(), serverOptions);
 
-    // support MongoClient constructor form (url, options) for `newClient`
-    if (typeof dbOptions === 'string') {
-      return new MongoClient(dbOptions, serverOptions);
+    // Support MongoClient constructor form (url, options) for `newClient`.
+    if (typeof urlOrQueryOptions === 'string') {
+      if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
+        throw new Error(`Cannot use options to specify host/port, must be in ${urlOrQueryOptions}`);
+      }
+
+      return new MongoClient(urlOrQueryOptions, serverOptions);
     }
 
-    dbOptions = dbOptions || {};
-    // Fall back
-    let dbHost = (serverOptions && serverOptions.host) || this.options.host;
-    const dbPort = (serverOptions && serverOptions.port) || this.options.port;
+    const queryOptions = urlOrQueryOptions || {};
+
+    // Fall back.
+    let dbHost = serverOptions.host || this.options.host;
     if (dbHost.indexOf('.sock') !== -1) {
       dbHost = qs.escape(dbHost);
     }
+    const dbPort = serverOptions.port || this.options.port;
 
-    if (this.options.authMechanism) {
-      Object.assign(dbOptions, {
+    if (this.options.authMechanism && !serverOptions.authMechanism) {
+      Object.assign(queryOptions, {
         authMechanism: this.options.authMechanism
       });
     }
 
-    if (this.options.authMechanismProperties) {
-      Object.assign(dbOptions, {
+    if (this.options.authMechanismProperties && !serverOptions.authMechanismProperties) {
+      Object.assign(queryOptions, {
         authMechanismProperties: convertToConnStringMap(this.options.authMechanismProperties)
       });
     }
 
-    if (this.options.replicaSet) {
-      Object.assign(dbOptions, { replicaSet: this.options.replicaSet });
+    if (this.options.replicaSet && !serverOptions.replicaSet) {
+      Object.assign(queryOptions, { replicaSet: this.options.replicaSet });
     }
 
     if (this.options.proxyURIParams) {
       for (const [name, value] of Object.entries(this.options.proxyURIParams)) {
         if (value) {
-          dbOptions[name] = value;
+          queryOptions[name] = value;
         }
       }
     }
 
-    // Flatten any options nested under `writeConcern` before we make the connection string
-    if (dbOptions.writeConcern) {
-      Object.assign(dbOptions, dbOptions.writeConcern);
-      delete dbOptions.writeConcern;
+    // Flatten any options nested under `writeConcern` before we make the connection string.
+    if (queryOptions.writeConcern && !serverOptions.writeConcern) {
+      Object.assign(queryOptions, queryOptions.writeConcern);
+      delete queryOptions.writeConcern;
     }
 
     if (this.topologyType === TopologyType.LoadBalanced && !this.isServerless) {
-      dbOptions.loadBalanced = true;
+      queryOptions.loadBalanced = true;
     }
 
     const urlOptions: url.UrlObject = {
@@ -213,33 +218,30 @@ export class TestConfiguration {
       slashes: true,
       hostname: dbHost,
       port: this.isServerless ? null : dbPort,
-      query: dbOptions,
+      query: queryOptions,
       pathname: '/'
     };
 
-    if (this.options.auth) {
+    if (this.options.auth && !serverOptions.auth) {
       const { username, password } = this.options.auth;
       if (username) {
         urlOptions.auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}`;
       }
     }
 
-    if (dbOptions.auth) {
-      const { username, password } = dbOptions.auth;
+    if (queryOptions.auth) {
+      const { username, password } = queryOptions.auth;
       if (username) {
         urlOptions.auth = `${encodeURIComponent(username)}:${encodeURIComponent(password)}`;
       }
     }
 
     if (typeof urlOptions.query === 'object') {
-      // Auth goes at the top of the uri, not in the searchParams
-      delete urlOptions.query.auth;
+      // Auth goes at the top of the uri, not in the searchParams.
+      delete urlOptions.query?.auth;
     }
 
     const connectionString = url.format(urlOptions);
-    if (Reflect.has(serverOptions, 'host') || Reflect.has(serverOptions, 'port')) {
-      throw new Error(`Cannot use options to specify host/port, must be in ${connectionString}`);
-    }
 
     return new MongoClient(connectionString, serverOptions);
   }
@@ -277,8 +279,8 @@ export class TestConfiguration {
 
     url.pathname = `/${options.db}`;
 
-    const username = this.options.username || (this.options.auth && this.options.auth.username);
-    const password = this.options.password || (this.options.auth && this.options.auth.password);
+    const username = options.username || this.options.auth?.username;
+    const password = options.password || this.options.auth?.password;
 
     if (username) {
       url.username = username;
