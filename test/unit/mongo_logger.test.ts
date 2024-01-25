@@ -1290,8 +1290,8 @@ describe('class MongoLogger', async function () {
 
           context('when maxDocumentLength > 1', function () {
             it('should round down maxDocLength to previous codepoint', function () {
-              const randomString = `random ${multiByteCodePoint}random random${multiByteCodePoint}${multiByteCodePoint}`;
               const randomStringMinusACodePoint = `random ${multiByteCodePoint}random random${multiByteCodePoint}`;
+              const randomString = `${randomStringMinusACodePoint}${multiByteCodePoint}`;
               expect(
                 stringifyWithMaxLen(randomString, randomString.length - 1, { relaxed: true })
               ).to.equal(`${randomStringMinusACodePoint}...`);
