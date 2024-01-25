@@ -23,9 +23,11 @@ import {
   ServerApiVersion
 } from './mongo_client';
 import {
+  MongoLoggableComponent,
   MongoLogger,
   type MongoLoggerEnvOptions,
-  type MongoLoggerMongoClientOptions
+  type MongoLoggerMongoClientOptions,
+  SeverityLevel
 } from './mongo_logger';
 import { ReadConcern, type ReadConcernLevel } from './read_concern';
 import { ReadPreference, type ReadPreferenceMode } from './read_preference';
@@ -1246,12 +1248,53 @@ export const OPTIONS = {
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogPath: { type: 'any' },
+  mongodbLogPath: {
+    transform({ values: [value] }) {
+      if (
+        !(
+          (typeof value === 'string' && ['stderr', 'stdout'].includes(value)) ||
+          (value &&
+            typeof value === 'object' &&
+            'write' in value &&
+            typeof value.write === 'function')
+        )
+      ) {
+        throw new MongoAPIError(
+          `Option 'mongodbLogPath' must be of type 'stderr' | 'stdout' | MongoDBLogWritable`
+        );
+      }
+      return value;
+    }
+  },
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag
    */
-  mongodbLogComponentSeverities: { type: 'any' },
+  mongodbLogComponentSeverities: {
+    transform({ values: [value] }) {
+      if (typeof value !== 'object' || !value) {
+        throw new MongoAPIError(`Option 'mongodbLogComponentSeverities' must be a non-null object`);
+      }
+      for (const [k, v] of Object.entries(value)) {
+        if (typeof v !== 'string' || typeof k !== 'string') {
+          throw new MongoAPIError(
+            `User input for option 'mongodbLogComponentSeverities' object cannot include a non-string key or value`
+          );
+        }
+        if (!Object.values(MongoLoggableComponent).some(val => val === k) && k !== 'default') {
+          throw new MongoAPIError(
+            `User input for option 'mongodbLogComponentSeverities' contains invalid key: ${k}`
+          );
+        }
+        if (!Object.values(SeverityLevel).some(val => val === v)) {
+          throw new MongoAPIError(
+            `Option 'mongodbLogComponentSeverities' does not support ${v} as a value for ${k}`
+          );
+        }
+      }
+      return value;
+    }
+  },
   /**
    * @internal
    * TODO: NODE-5671 - remove internal flag

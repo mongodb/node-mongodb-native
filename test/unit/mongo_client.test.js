@@ -11,7 +11,7 @@ const { ReadConcern } = require('../mongodb');
 const { WriteConcern } = require('../mongodb');
 const { ReadPreference } = require('../mongodb');
 const { MongoCredentials } = require('../mongodb');
-const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb');
+const { MongoClient, MongoParseError, ServerApiVersion, MongoAPIError } = require('../mongodb');
 const { MongoLogger } = require('../mongodb');
 // eslint-disable-next-line no-restricted-modules
 const { SeverityLevel, MongoLoggableComponent } = require('../../src/mongo_logger');
@@ -821,24 +821,112 @@ describe('MongoOptions', function () {
 
   describe('logging client options', function () {
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    context('when mongodbLogPath is in options', function () {
-      let stderrStub;
-      let stdoutStub;
+    describe('mongodbLogPath', function () {
+      context('when mongodbLogPath is in options', function () {
+        let stderrStub;
+        let stdoutStub;
 
-      beforeEach(() => {
-        stdoutStub = sinon.stub(process.stdout);
-        stderrStub = sinon.stub(process.stderr);
+        beforeEach(() => {
+          stdoutStub = sinon.stub(process.stdout);
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(() => {
+          sinon.restore();
+        });
+
+        context('when option is `stderr`', function () {
+          it('it is accessible through mongoLogger.logDestination', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogPath: 'stderr'
+            });
+            const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
+            client.options.mongoLoggerOptions.logDestination.write(log);
+            expect(stderrStub.write).calledWith(
+              inspect(log, { breakLength: Infinity, compact: true })
+            );
+          });
+        });
+
+        context('when option is a MongoDBLogWritable stream', function () {
+          it('it is accessible through mongoLogger.logDestination', function () {
+            const writable = {
+              buffer: [],
+              write(log) {
+                this.buffer.push(log);
+              }
+            };
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogPath: writable
+            });
+            expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
+          });
+        });
+
+        context('when option is `stdout`', function () {
+          it('it is accessible through mongoLogger.logDestination', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogPath: 'stdout'
+            });
+            const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
+            client.options.mongoLoggerOptions.logDestination.write(log);
+            expect(stdoutStub.write).calledWith(
+              inspect(log, { breakLength: Infinity, compact: true })
+            );
+          });
+        });
+
+        context('when option is invalid', function () {
+          context(`when option is an string that is not 'stderr' or 'stdout'`, function () {
+            it('should throw error at construction', function () {
+              const invalidOption = 'stdnothing';
+              expect(
+                () =>
+                  new MongoClient('mongodb://a/', {
+                    [loggerFeatureFlag]: true,
+                    mongodbLogPath: invalidOption
+                  })
+              ).to.throw(MongoAPIError);
+            });
+          });
+          context('when option is not a valid MongoDBLogWritable stream', function () {
+            it('should throw error at construction', function () {
+              const writable = {
+                buffer: [],
+                misnamedWrite(log) {
+                  this.buffer.push(log);
+                }
+              };
+
+              expect(
+                () =>
+                  new MongoClient('mongodb://a/', {
+                    [loggerFeatureFlag]: true,
+                    mongodbLogPath: writable
+                  })
+              ).to.throw(MongoAPIError);
+            });
+          });
+        });
       });
 
-      afterEach(() => {
-        sinon.restore();
-      });
+      context('when mongodbLogPath is not in options', function () {
+        let stderrStub;
 
-      context('when option is `stderr`', function () {
-        it('it is accessible through mongoLogger.logDestination', function () {
+        beforeEach(() => {
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(() => {
+          sinon.restore();
+        });
+
+        it('should default to stderr', function () {
           const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: 'stderr'
+            [loggerFeatureFlag]: true
           });
           const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
           client.options.mongoLoggerOptions.logDestination.write(log);
@@ -847,53 +935,8 @@ describe('MongoOptions', function () {
           );
         });
       });
-
-      context('when option is a MongoDBLogWritable stream', function () {
-        it('it is accessible through mongoLogger.logDestination', function () {
-          const writable = {
-            buffer: [],
-            write(log) {
-              this.buffer.push(log);
-            }
-          };
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: writable
-          });
-          expect(client.options.mongoLoggerOptions.logDestination).to.deep.equal(writable);
-        });
-      });
-
-      context('when option is `stdout`', function () {
-        it('it is accessible through mongoLogger.logDestination', function () {
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: 'stdout'
-          });
-          const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
-          client.options.mongoLoggerOptions.logDestination.write(log);
-          expect(stdoutStub.write).calledWith(
-            inspect(log, { breakLength: Infinity, compact: true })
-          );
-        });
-      });
-
-      context('when option is invalid', function () {
-        it('it defaults to stderr', function () {
-          const invalidOption = 'stdnothing';
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogPath: invalidOption
-          });
-          const log = { t: new Date(), c: 'constructorInvalidOption', s: 'error' };
-          client.options.mongoLoggerOptions.logDestination.write(log);
-          expect(stderrStub.write).calledWith(
-            inspect(log, { breakLength: Infinity, compact: true })
-          );
-        });
-      });
     });
-    describe('component severities', function () {
+    describe('mongodbLogComponentSeverities', function () {
       const components = Object.values(MongoLoggableComponent);
       const env_component_names = [
         'MONGODB_LOG_COMMAND',
@@ -976,35 +1019,162 @@ describe('MongoOptions', function () {
           }
         });
       });
-    });
-    context('when mongodbLogMaxDocumentLength is in options', function () {
-      context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
-        it('it stores value for maxDocumentLength correctly', function () {
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogMaxDocumentLength: 290
+
+      describe('invalid values', function () {
+        context('when invalid client option is provided', function () {
+          const badClientCreator = () =>
+            new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogComponentSeverities: {
+                default: 'imFake'
+              }
+            });
+
+          context('when valid environment option is provided', function () {
+            it('should still throw error at construction', function () {
+              process.env.MONGODB_LOG_ALL = 'emergency';
+              expect(badClientCreator).to.throw(MongoAPIError);
+              delete process.env.MONGODB_LOG_ALL;
+            });
           });
-          expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
+
+          context('when environment option is not provided', function () {
+            it('should still throw error at construction', function () {
+              expect(badClientCreator).to.throw(MongoAPIError);
+            });
+          });
+
+          context('when invalid environment option is provided', function () {
+            afterEach(function () {
+              delete process.env.MONGODB_LOG_ALL;
+            });
+
+            it('should still throw error at construction', function () {
+              process.env.MONGODB_LOG_ALL = 'imFakeToo';
+              expect(badClientCreator).to.throw(MongoAPIError);
+            });
+          });
         });
-        it('it throws error for negative input', function () {
-          expect(
-            () =>
-              new MongoClient('mongodb://a/', {
+
+        context('when invalid environment option is provided', function () {
+          beforeEach(async function () {
+            process.env.MONGODB_LOG_ALL = 'imFakeToo';
+          });
+          afterEach(async function () {
+            delete process.env.MONGODB_LOG_ALL;
+          });
+
+          context('when client option is not provided', function () {
+            it(`should not throw error, and set component severity to 'off'`, function () {
+              expect(
+                () =>
+                  new MongoClient('mongodb://a/', {
+                    [loggerFeatureFlag]: true,
+                    mongodbLogComponentSeverities: {}
+                  })
+              ).to.not.throw(MongoAPIError);
+              const client = new MongoClient('mongodb://a/', {
                 [loggerFeatureFlag]: true,
-                mongodbLogMaxDocumentLength: -290
-              })
-          ).to.throw(MongoParseError);
+                mongodbLogComponentSeverities: {}
+              });
+              expect(client.mongoLogger.componentSeverities.default).to.equal('off');
+            });
+          });
+          context('when valid client option is provided', function () {
+            it('should not throw error, and set component severity to client value', function () {
+              expect(
+                () =>
+                  new MongoClient('mongodb://a/', {
+                    [loggerFeatureFlag]: true,
+                    mongodbLogComponentSeverities: { default: 'emergency' }
+                  })
+              ).to.not.throw(MongoAPIError);
+              const client = new MongoClient('mongodb://a/', {
+                [loggerFeatureFlag]: true,
+                mongodbLogComponentSeverities: { default: 'emergency' }
+              });
+              expect(client.mongoLogger.componentSeverities.default).to.equal('emergency');
+            });
+          });
         });
       });
-      context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
-        it('it stores value for maxDocumentLength correctly (client option value takes precedence)', function () {
-          process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = '155';
-          const client = new MongoClient('mongodb://a/', {
-            [loggerFeatureFlag]: true,
-            mongodbLogMaxDocumentLength: 290
+    });
+    describe('mongodbLogMaxDocumentLength', function () {
+      context('when mongodbLogMaxDocumentLength is in options', function () {
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+          it('should store value for maxDocumentLength correctly', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogMaxDocumentLength: 290
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
           });
-          expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
-          process.env['MONGODB_LOG_MAX_DOCUMENT_LENGTH'] = undefined;
+          it('should throw error for negative input', function () {
+            expect(
+              () =>
+                new MongoClient('mongodb://a/', {
+                  [loggerFeatureFlag]: true,
+                  mongodbLogMaxDocumentLength: -290
+                })
+            ).to.throw(MongoParseError);
+          });
+        });
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+          beforeEach(function () {
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
+          });
+
+          afterEach(function () {
+            delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
+          });
+
+          it('should store value for maxDocumentLength correctly (client option value takes precedence)', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true,
+              mongodbLogMaxDocumentLength: 290
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(290);
+          });
+          it('should throw error for negative input', function () {
+            expect(
+              () =>
+                new MongoClient('mongodb://a/', {
+                  [loggerFeatureFlag]: true,
+                  mongodbLogMaxDocumentLength: -290
+                })
+            ).to.throw(MongoParseError);
+          });
+        });
+      });
+      context('when mongodbLogMaxDocumentLength is not in options', function () {
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {
+          it('should store value for default maxDocumentLength correctly', function () {
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
+          });
+        });
+        context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is provided', function () {
+          afterEach(function () {
+            delete process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH;
+          });
+
+          it('should store value for maxDocumentLength correctly', function () {
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '155';
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(155);
+          });
+
+          it('should not throw error for negative MONGODB_MAX_DOCUMENT_LENGTH and set to default', function () {
+            process.env.MONGODB_LOG_MAX_DOCUMENT_LENGTH = '-14';
+            const client = new MongoClient('mongodb://a/', {
+              [loggerFeatureFlag]: true
+            });
+            expect(client.options.mongoLoggerOptions.maxDocumentLength).to.equal(1000);
+          });
         });
       });
     });
