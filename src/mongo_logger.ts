@@ -425,7 +425,11 @@ export function stringifyWithMaxLen(
   } else if (typeof value === 'function') {
     strToTruncate = value.toString();
   } else {
-    strToTruncate = EJSON.stringify(value, options);
+    try {
+      strToTruncate = EJSON.stringify(value, options);
+    } catch (e) {
+      strToTruncate = `Extended JSON serialization failed with: ${e.message}`;
+    }
   }
 
   // handle truncation that occurs in the middle of multi-byte codepoints
