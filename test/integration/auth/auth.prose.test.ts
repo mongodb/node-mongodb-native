@@ -305,7 +305,6 @@ describe('Authentication Spec Prose Tests', function () {
       );
     });
 
-    // todo(NODE-5621): fix the issue with unicode characters.
     describe('Step 4', function () {
       /**
        * Step 4
@@ -340,8 +339,14 @@ describe('Authentication Spec Prose Tests', function () {
       ];
 
       beforeEach(async function () {
-        utilClient = this.configuration.newClient();
+        utilClient = this.configuration.newClient(this.configuration.url());
         const db = utilClient.db('admin');
+
+        try {
+          await Promise.all(users.map(user => db.removeUser(user.username)));
+        } catch (err) {
+          /** We ensure that users are deleted. No action needed. */
+        }
 
         const createUserCommands = users.map(user => ({
           createUser: user.username,
@@ -354,33 +359,189 @@ describe('Authentication Spec Prose Tests', function () {
       });
 
       afterEach(async function () {
-        const db = utilClient.db('admin');
-        await Promise.all(users.map(user => db.removeUser(user.username)));
         await utilClient?.close();
+        await client?.close();
       });
 
-      for (const { username, password } of [
-        { username: 'IX', password: 'IX' },
-        { username: 'IX', password: 'I\u00ADX' },
-        { username: '\u2168', password: 'IV' },
-        { username: '\u2168', password: 'I\u00ADV' }
-      ]) {
-        it.skip(
-          `logs in with username "${username}" and password "${password}"`,
+      context('auth credentials in options', () => {
+        it('logs in with non-normalized username and password', metadata, async function () {
+          const options = {
+            auth: { username: 'IX', password: 'IX' },
+            authSource: 'admin',
+            authMechanism: 'SCRAM-SHA-256'
+          };
+
+          client = this.configuration.newClient({}, options);
+          const stats = await client.db('admin').stats();
+          expect(stats).to.exist;
+        });
+
+        it(
+          'logs in with non-normalized username and normalized password',
           metadata,
           async function () {
             const options = {
-              auth: { username, password },
+              auth: { username: 'IX', password: 'I\u00ADX' },
               authSource: 'admin',
               authMechanism: 'SCRAM-SHA-256'
             };
 
-            client = this.configuration.newClient(options);
+            client = this.configuration.newClient({}, options);
             const stats = await client.db('admin').stats();
             expect(stats).to.exist;
           }
-        ).skipReason = 'todo(NODE-5621): fix the issue with unicode characters.';
-      }
+        );
+
+        it(
+          'logs in with normalized username and non-normalized password',
+          metadata,
+          async function () {
+            const options = {
+              auth: { username: '\u2168', password: 'IV' },
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+
+            client = this.configuration.newClient({}, options);
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          }
+        );
+
+        it('logs in with normalized username and normalized password', metadata, async function () {
+          const options = {
+            auth: { username: '\u2168', password: 'I\u00ADV' },
+            authSource: 'admin',
+            authMechanism: 'SCRAM-SHA-256'
+          };
+
+          client = this.configuration.newClient({}, options);
+          const stats = await client.db('admin').stats();
+          expect(stats).to.exist;
+        });
+      });
+
+      context('auth credentials in url', () => {
+        context('encoded', () => {
+          it('logs in with not encoded username and password', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username: 'IX', password: 'IX' }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+
+          it('logs in with not encoded username and encoded password', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username: 'IX', password: 'I%C2%ADX' }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+
+          it('logs in with encoded username and not encoded password', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username: '%E2%85%A8', password: 'IV' }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+
+          it('logs in with encoded username and encoded password', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username: '%E2%85%A8', password: 'I%C2%ADV' }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+        });
+
+        context('normalized', () => {
+          it('logs in with non-normalized username and password', metadata, async function () {
+            const options = {
+              authSource: 'admin',
+              authMechanism: 'SCRAM-SHA-256'
+            };
+            client = this.configuration.newClient(
+              this.configuration.url({ username: 'IX', password: 'IX' }),
+              options
+            );
+            const stats = await client.db('admin').stats();
+            expect(stats).to.exist;
+          });
+
+          it(
+            'logs in with non-normalized username and normalized password',
+            metadata,
+            async function () {
+              const options = {
+                authSource: 'admin',
+                authMechanism: 'SCRAM-SHA-256'
+              };
+              client = this.configuration.newClient(
+                this.configuration.url({ username: 'IX', password: 'I\u00ADX' }),
+                options
+              );
+              const stats = await client.db('admin').stats();
+              expect(stats).to.exist;
+            }
+          );
+
+          it(
+            'logs in with normalized username and non-normalized password',
+            metadata,
+            async function () {
+              const options = {
+                authSource: 'admin',
+                authMechanism: 'SCRAM-SHA-256'
+              };
+              client = this.configuration.newClient(
+                this.configuration.url({ username: '\u2168', password: 'I\u00ADV' }),
+                options
+              );
+              const stats = await client.db('admin').stats();
+              expect(stats).to.exist;
+            }
+          );
+
+          it(
+            'logs in with normalized username and normalized password',
+            metadata,
+            async function () {
+              const options = {
+                authSource: 'admin',
+                authMechanism: 'SCRAM-SHA-256'
+              };
+              client = this.configuration.newClient(
+                this.configuration.url({ username: '\u2168', password: 'I\u00ADV' }),
+                options
+              );
+              const stats = await client.db('admin').stats();
+              expect(stats).to.exist;
+            }
+          );
+        });
+      });
     });
   });
 });
