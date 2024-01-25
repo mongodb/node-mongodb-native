@@ -90,7 +90,16 @@ const SKIP_TESTS = [
 
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress'
+  'Client side error when transaction is in progress',
+
+  // TODO(NODE-5855): Unskip Transactions Spec Unified Tests mongos-unpin.unpin
+  'unpin after TransientTransactionError error on commit',
+  'unpin on successful abort',
+  'unpin after non-transient error on abort',
+  'unpin after TransientTransactionError error on abort',
+  'unpin when a new transaction is started',
+  'unpin when a non-transaction write operation uses a session',
+  'unpin when a non-transaction read operation uses a session'
 ];
 
 describe('Transactions Spec Legacy Tests', function () {
