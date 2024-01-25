@@ -3991,8 +3991,7 @@ buildvariants:
     display_name: MONGODB-AWS Auth test
     run_on: ubuntu2004-large
     expansions:
-      NODE_LTS_VERSION: 12
-      NPM_VERSION: 8
+      NODE_LTS_VERSION: 20
     tasks:
       - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
       - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
