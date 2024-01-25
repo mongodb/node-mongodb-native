@@ -22,14 +22,15 @@ export type ServerSelector = (
  * Returns a server selector that selects for writable servers
  */
 export function writableServerSelector(): ServerSelector {
-  return (
+  return function writableServer(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[]
-  ): ServerDescription[] =>
-    latencyWindowReducer(
+  ): ServerDescription[] {
+    return latencyWindowReducer(
       topologyDescription,
       servers.filter((s: ServerDescription) => s.isWritable)
     );
+  };
 }
 
 /**
@@ -37,10 +38,10 @@ export function writableServerSelector(): ServerSelector {
  * if it is in a state that it can have commands sent to it.
  */
 export function sameServerSelector(description?: ServerDescription): ServerSelector {
-  return (
+  return function sameServerSelector(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[]
-  ): ServerDescription[] => {
+  ): ServerDescription[] {
     if (!description) return [];
     // Filter the servers to match the provided description only if
     // the type is not unknown.
@@ -265,11 +266,11 @@ export function readPreferenceServerSelector(readPreference: ReadPreference): Se
     throw new MongoInvalidArgumentError('Invalid read preference specified');
   }
 
-  return (
+  return function readPreferenceServers(
     topologyDescription: TopologyDescription,
     servers: ServerDescription[],
     deprioritized: ServerDescription[] = []
-  ): ServerDescription[] => {
+  ): ServerDescription[] {
     const commonWireVersion = topologyDescription.commonWireVersion;
     if (
       commonWireVersion &&
