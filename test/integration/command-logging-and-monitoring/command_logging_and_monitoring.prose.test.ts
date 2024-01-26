@@ -156,7 +156,7 @@ describe('Command Logging and Monitoring Prose Tests', function () {
     });
   });
 
-  context.skip('Truncation with multi-byte codepoints', function () {
+  context('Truncation with multi-byte codepoints', function () {
     /*
     A specific test case is not provided here due to the allowed variations in truncation logic
      as well as varying extended JSON whitespace usage.
@@ -216,11 +216,11 @@ describe('Command Logging and Monitoring Prose Tests', function () {
       );
 
       // multi-byte codepoint in middle of truncated string
-      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 1)).to.equal(
-        firstByteChar
-      );
-      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 1)).to.equal(
+      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 2)).to.equal(
         secondByteChar
+      );
+      expect(insertManyCommandStarted?.command.charCodeAt(maxDocLength - 3)).to.equal(
+        firstByteChar
       );
 
       const insertManyCommandSucceeded = writable.buffer[1];
@@ -230,5 +230,5 @@ describe('Command Logging and Monitoring Prose Tests', function () {
         maxDocLength + ELLIPSES_LENGTH
       );
     });
-  }).skipReason = 'todo(NODE-5839)';
+  });
 });
