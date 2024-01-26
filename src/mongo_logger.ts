@@ -423,7 +423,7 @@ export function stringifyWithMaxLen(
   if (typeof value === 'string') {
     strToTruncate = value;
   } else if (typeof value === 'function') {
-    strToTruncate = value.toString();
+    strToTruncate = value.name;
   } else {
     try {
       strToTruncate = EJSON.stringify(value, options);
