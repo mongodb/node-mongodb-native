@@ -468,10 +468,7 @@ async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Str
 }
 
 function connectionFailureError(type: 'error', cause: Error): MongoNetworkError;
-function connectionFailureError(
-  type: 'error' | 'close' | 'timeout' | 'cancel',
-  cause?: Error
-): MongoNetworkError;
+function connectionFailureError(type: 'close' | 'timeout' | 'cancel'): MongoNetworkError;
 function connectionFailureError(
   type: 'error' | 'close' | 'timeout' | 'cancel',
   cause?: Error

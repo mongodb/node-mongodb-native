@@ -586,11 +586,14 @@ describe('monitoring', function () {
   describe('Heartbeat duration', function () {
     let client: MongoClient;
     let serverHeartbeatFailed;
+    let sockets;
 
     beforeEach(async function () {
+      sockets = [];
       // Artificially make creating a connection take 200ms
       sinon.stub(net, 'createConnection').callsFake(function () {
         const socket = new net.Socket();
+        sockets.push(socket);
         setTimeout(() => socket.emit('connect'), 80);
         socket.on('data', () => socket.destroy(new Error('I am not real!')));
         return socket;
@@ -602,6 +605,8 @@ describe('monitoring', function () {
 
     afterEach(function () {
       sinon.restore();
+      for (const socket of sockets ?? []) socket.destroy();
+      sockets = undefined;
     });
 
     it('includes only the time to perform handshake', async function () {

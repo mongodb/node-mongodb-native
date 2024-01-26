@@ -94,7 +94,11 @@ const testSkipBeforeEachHook = async function () {
   }
 };
 
-// TODO: NODE-3891 - fix tests that are broken with auth enabled and remove this hook
+/**
+ * TODO: NODE-3891 - fix tests that are broken with auth enabled and remove this hook
+ * @param {{ skippedTests: string[] }} skippedTests - define list of tests to skip
+ * @returns
+ */
 const skipBrokenAuthTestBeforeEachHook = function ({ skippedTests } = { skippedTests: [] }) {
   return function () {
     if (process.env.AUTH === 'auth' && skippedTests.includes(this.currentTest.title)) {

@@ -287,15 +287,17 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
     );
 
-    // If we are using the streaming protocol then we immediately issue another 'started'
-    // event, otherwise the "check" is complete and return to the main monitor loop.
     if (isAwaitable) {
+      // If we are using the streaming protocol then we immediately issue another 'started'
+      // event, otherwise the "check" is complete and return to the main monitor loop
       monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_STARTED,
         monitor[kServer].topology.s.id,
         undefined,
         new ServerHeartbeatStartedEvent(monitor.address, true)
       );
+      // We have not actually sent an outgoing handshake, but when we get the next response we
+      // want the duration to reflect the time since we last heard from the server
       start = now();
     } else {
       monitor.rttPinger?.close();
@@ -335,6 +337,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
+    // Record new start time before sending handshake
     start = now();
 
     if (isAwaitable) {
@@ -357,6 +360,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   (async () => {
     const socket = await makeSocket(monitor.connectOptions);
     const connection = makeConnection(monitor.connectOptions, socket);
+    // The start time is after socket creation but before the handshake
     start = now();
     try {
       await performInitialHandshake(connection, monitor.connectOptions);

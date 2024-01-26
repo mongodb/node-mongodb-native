@@ -4,6 +4,7 @@ import {
   connect,
   Connection,
   type ConnectionOptions,
+  HostAddress,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
   MongoClient,
@@ -14,6 +15,16 @@ import {
 } from '../../mongodb';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
+
+const commonConnectOptions = {
+  id: 1,
+  generation: 1,
+  monitorCommands: false,
+  tls: false,
+  loadBalanced: false,
+  // Will be overridden by configuration options
+  hostAddress: HostAddress.fromString('127.0.0.1:1')
+};
 
 describe('Connection', function () {
   beforeEach(
@@ -34,6 +45,7 @@ describe('Connection', function () {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
+          ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} })
@@ -54,6 +66,7 @@ describe('Connection', function () {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
         const connectOptions: ConnectionOptions = {
+          ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
