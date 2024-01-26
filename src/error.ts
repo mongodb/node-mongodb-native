@@ -391,23 +391,6 @@ export class MongoAWSError extends MongoRuntimeError {
 }
 
 /**
- * A error generated when the user attempts to authenticate
- * via Azure, but fails.
- *
- * @public
- * @category Error
- */
-export class MongoAzureError extends MongoRuntimeError {
-  constructor(message: string) {
-    super(message);
-  }
-
-  override get name(): string {
-    return 'MongoAzureError';
-  }
-}
-
-/**
  * An error generated when a ChangeStream operation fails to execute.
  *
  * @public

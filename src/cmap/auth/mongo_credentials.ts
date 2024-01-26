@@ -1,14 +1,8 @@
 // Resolves the default auth mechanism according to
 // Resolves the default auth mechanism according to
 import type { Document } from '../../bson';
-import {
-  MongoAPIError,
-  MongoAzureError,
-  MongoInvalidArgumentError,
-  MongoMissingCredentialsError
-} from '../../error';
+import { MongoAPIError, MongoMissingCredentialsError } from '../../error';
 import { GSSAPICanonicalizationValue } from './gssapi';
-import type { OIDCRefreshFunction, OIDCRequestFunction } from './mongodb_oidc';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './providers';
 
 // https://github.com/mongodb/specifications/blob/master/source/auth/auth.rst
@@ -32,23 +26,6 @@ function getDefaultAuthMechanism(hello?: Document): AuthMechanism {
   return AuthMechanism.MONGODB_CR;
 }
 
-const ALLOWED_PROVIDER_NAMES: AuthMechanismProperties['PROVIDER_NAME'][] = ['aws', 'azure'];
-const ALLOWED_HOSTS_ERROR = 'Auth mechanism property ALLOWED_HOSTS must be an array of strings.';
-
-/** @internal */
-export const DEFAULT_ALLOWED_HOSTS = [
-  '*.mongodb.net',
-  '*.mongodb-dev.net',
-  '*.mongodbgov.net',
-  'localhost',
-  '127.0.0.1',
-  '::1'
-];
-
-/** Error for when the token audience is missing in the environment. */
-const TOKEN_AUDIENCE_MISSING_ERROR =
-  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
-
 /** @public */
 export interface AuthMechanismProperties extends Document {
   SERVICE_HOST?: string;
@@ -56,16 +33,6 @@ export interface AuthMechanismProperties extends Document {
   SERVICE_REALM?: string;
   CANONICALIZE_HOST_NAME?: GSSAPICanonicalizationValue;
   AWS_SESSION_TOKEN?: string;
-  /** @experimental */
-  REQUEST_TOKEN_CALLBACK?: OIDCRequestFunction;
-  /** @experimental */
-  REFRESH_TOKEN_CALLBACK?: OIDCRefreshFunction;
-  /** @experimental */
-  PROVIDER_NAME?: 'aws' | 'azure';
-  /** @experimental */
-  ALLOWED_HOSTS?: string[];
-  /** @experimental */
-  TOKEN_AUDIENCE?: string;
 }
 
 /** @public */
@@ -124,13 +91,6 @@ export class MongoCredentials {
       }
     }
 
-    if (this.mechanism === AuthMechanism.MONGODB_OIDC && !this.mechanismProperties.ALLOWED_HOSTS) {
-      this.mechanismProperties = {
-        ...this.mechanismProperties,
-        ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
-      };
-    }
-
     Object.freeze(this.mechanismProperties);
     Object.freeze(this);
   }
@@ -176,62 +136,6 @@ export class MongoCredentials {
       !this.username
     ) {
       throw new MongoMissingCredentialsError(`Username required for mechanism '${this.mechanism}'`);
-    }
-
-    if (this.mechanism === AuthMechanism.MONGODB_OIDC) {
-      if (this.username && this.mechanismProperties.PROVIDER_NAME) {
-        throw new MongoInvalidArgumentError(
-          `username and PROVIDER_NAME may not be used together for mechanism '${this.mechanism}'.`
-        );
-      }
-
-      if (
-        this.mechanismProperties.PROVIDER_NAME === 'azure' &&
-        !this.mechanismProperties.TOKEN_AUDIENCE
-      ) {
-        throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
-      }
-
-      if (
-        this.mechanismProperties.PROVIDER_NAME &&
-        !ALLOWED_PROVIDER_NAMES.includes(this.mechanismProperties.PROVIDER_NAME)
-      ) {
-        throw new MongoInvalidArgumentError(
-          `Currently only a PROVIDER_NAME in ${ALLOWED_PROVIDER_NAMES.join(
-            ','
-          )} is supported for mechanism '${this.mechanism}'.`
-        );
-      }
-
-      if (
-        this.mechanismProperties.REFRESH_TOKEN_CALLBACK &&
-        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
-      ) {
-        throw new MongoInvalidArgumentError(
-          `A REQUEST_TOKEN_CALLBACK must be provided when using a REFRESH_TOKEN_CALLBACK for mechanism '${this.mechanism}'`
-        );
-      }
-
-      if (
-        !this.mechanismProperties.PROVIDER_NAME &&
-        !this.mechanismProperties.REQUEST_TOKEN_CALLBACK
-      ) {
-        throw new MongoInvalidArgumentError(
-          `Either a PROVIDER_NAME or a REQUEST_TOKEN_CALLBACK must be specified for mechanism '${this.mechanism}'.`
-        );
-      }
-
-      if (this.mechanismProperties.ALLOWED_HOSTS) {
-        const hosts = this.mechanismProperties.ALLOWED_HOSTS;
-        if (!Array.isArray(hosts)) {
-          throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
-        }
-        for (const host of hosts) {
-          if (typeof host !== 'string') {
-            throw new MongoInvalidArgumentError(ALLOWED_HOSTS_ERROR);
-          }
-        }
-      }
     }
 
     if (AUTH_MECHS_AUTH_SRC_EXTERNAL.has(this.mechanism)) {
