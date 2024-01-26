@@ -19,14 +19,17 @@ import {
   CONNECTION_POOL_CREATED,
   CONNECTION_POOL_READY,
   CONNECTION_READY,
+  createStdioLogger,
   DEFAULT_MAX_DOCUMENT_LENGTH,
   type Log,
   type MongoDBLogWritable,
   MongoLogger,
   type MongoLoggerOptions,
+  parseSeverityFromString,
   SeverityLevel,
   stringifyWithMaxLen
 } from '../mongodb';
+import { sleep } from '../tools/utils';
 
 class BufferingStream extends Writable {
   buffer: any[] = [];
@@ -53,7 +56,7 @@ describe('meta tests for BufferingStream', function () {
   });
 });
 
-describe('class MongoLogger', function () {
+describe('class MongoLogger', async function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
       const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
@@ -63,7 +66,8 @@ describe('class MongoLogger', function () {
       const logger = new MongoLogger({
         componentSeverities,
         maxDocumentLength: 10,
-        logDestination: stream
+        logDestination: stream,
+        logDestinationIsStdErr: false
       });
 
       expect(logger).to.have.property('componentSeverities', componentSeverities);
@@ -81,7 +85,8 @@ describe('class MongoLogger', function () {
         } as { buffer: any[]; write: (log: Log) => void };
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
-          logDestination
+          logDestination,
+          logDestinationIsStdErr: false
         } as any);
 
         logger.error('command', 'Hello world!');
@@ -101,7 +106,8 @@ describe('class MongoLogger', function () {
 
         const logger = new MongoLogger({
           componentSeverities: { command: 'error' } as any,
-          logDestination
+          logDestination,
+          logDestinationIsStdErr: false
         } as any);
 
         logger.error('command', 'Hello world!');
@@ -644,7 +650,8 @@ describe('class MongoLogger', function () {
             componentSeverities: {
               topology: 'off'
             } as any,
-            logDestination: stream
+            logDestination: stream,
+            logDestinationIsStdErr: false
           } as any);
 
           logger[severityLevel]('topology', 'message');
@@ -658,7 +665,8 @@ describe('class MongoLogger', function () {
               componentSeverities: {
                 command: severityLevel
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             for (let i = index + 1; i < severities.length; i++) {
@@ -677,7 +685,8 @@ describe('class MongoLogger', function () {
               componentSeverities: {
                 command: severityLevel
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             // Calls all severity logging methods with a level less than or equal to what severityLevel
@@ -702,7 +711,8 @@ describe('class MongoLogger', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -718,7 +728,8 @@ describe('class MongoLogger', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -738,7 +749,8 @@ describe('class MongoLogger', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', obj);
@@ -756,7 +768,8 @@ describe('class MongoLogger', function () {
             const stream = new BufferingStream();
             const logger = new MongoLogger({
               componentSeverities: { command: severityLevel } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
 
             logger[severityLevel]('command', message);
@@ -776,7 +789,8 @@ describe('class MongoLogger', function () {
                 command: 'trace',
                 connection: 'trace'
               } as any,
-              logDestination: stream
+              logDestination: stream,
+              logDestinationIsStdErr: false
             } as any);
           });
 
@@ -1227,6 +1241,12 @@ describe('class MongoLogger', function () {
             });
           });
         });
+
+        context('when invalid severity is passed into parseSeverityFromString', function () {
+          it('should not throw', function () {
+            expect(parseSeverityFromString('notARealSeverityLevel')).to.equal(null);
+          });
+        });
       });
     }
   });
@@ -1248,13 +1268,35 @@ describe('class MongoLogger', function () {
 
     context('when maxDocumentLength is non-zero', function () {
       context('when document has length greater than maxDocumentLength', function () {
-        it('truncates ejson string to length of maxDocumentLength + 3', function () {
-          expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
-            DEFAULT_MAX_DOCUMENT_LENGTH + 3
-          );
+        context('when truncation does not occur mid-multibyte codepoint', function () {
+          it('truncates ejson string to length of maxDocumentLength + 3', function () {
+            expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.have.lengthOf(
+              DEFAULT_MAX_DOCUMENT_LENGTH + 3
+            );
+          });
         });
+
         it('ends with "..."', function () {
           expect(stringifyWithMaxLen(largeDoc, DEFAULT_MAX_DOCUMENT_LENGTH)).to.match(/^.*\.\.\.$/);
+        });
+
+        context('when truncation occurs mid-multibyte codepoint', function () {
+          const multiByteCodePoint = '\ud83d\ude0d'; // heart eyes emoji
+          context('when maxDocumentLength = 1 but greater than 0', function () {
+            it('should return an empty string', function () {
+              expect(stringifyWithMaxLen(multiByteCodePoint, 1, { relaxed: true })).to.equal('');
+            });
+          });
+
+          context('when maxDocumentLength > 1', function () {
+            it('should round down maxDocLength to previous codepoint', function () {
+              const randomStringMinusACodePoint = `random ${multiByteCodePoint}random random${multiByteCodePoint}`;
+              const randomString = `${randomStringMinusACodePoint}${multiByteCodePoint}`;
+              expect(
+                stringifyWithMaxLen(randomString, randomString.length - 1, { relaxed: true })
+              ).to.equal(`${randomStringMinusACodePoint}...`);
+            });
+          });
         });
       });
 
@@ -1269,12 +1311,240 @@ describe('class MongoLogger', function () {
             /^.*\.\.\./
           );
         });
-
         it('produces valid relaxed EJSON', function () {
           expect(() => {
             EJSON.parse(stringifyWithMaxLen(smallDoc, DEFAULT_MAX_DOCUMENT_LENGTH));
           }).to.not.throw();
         });
+      });
+
+      context('EJSON stringify invalid inputs', function () {
+        const errorInputs = [
+          {
+            name: 'Map with non-string keys',
+            input: new Map([
+              [1, 'one'],
+              [2, 'two'],
+              [3, 'three']
+            ])
+          },
+          {
+            name: 'Object with invalid _bsontype',
+            input: { _bsontype: 'i will never be a real bson type' }
+          }
+        ];
+        for (const errorInput of errorInputs) {
+          context(`when value is ${errorInput.name}`, function () {
+            it('should output default error message, with no error thrown', function () {
+              expect(stringifyWithMaxLen(errorInput.input, 40)).to.equal(
+                'Extended JSON serialization failed with:...'
+              );
+            });
+          });
+        }
+      });
+
+      context('when given function as input', function () {
+        it('should output function.name', function () {
+          expect(
+            stringifyWithMaxLen(function randomFunc() {
+              return 1;
+            }, DEFAULT_MAX_DOCUMENT_LENGTH)
+          ).to.equal('randomFunc');
+        });
+      });
+    });
+  });
+
+  describe('log', async function () {
+    let componentSeverities: MongoLoggerOptions['componentSeverities'];
+
+    beforeEach(function () {
+      componentSeverities = {
+        command: 'trace',
+        topology: 'trace',
+        serverSelection: 'trace',
+        connection: 'trace',
+        client: 'trace'
+      } as any;
+    });
+
+    describe('sync stream failure handling', function () {
+      context('when stream is not stderr', function () {
+        let stderrStub;
+
+        beforeEach(function () {
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        context('when stream is user defined and stream.write throws', function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', function () {
+            const stream = {
+              write(_log) {
+                throw Error('This writable always throws');
+              }
+            };
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: stream,
+              logDestinationIsStdErr: false
+            });
+            // print random message at the debug level
+            logger.debug('client', 'random message');
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws' }`
+            );
+
+            // logging is halted
+            logger.debug('client', 'random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
+          });
+        });
+      });
+    });
+    describe('async stream failure handling', async function () {
+      context('when stream is not stderr', function () {
+        let stderrStub;
+
+        beforeEach(function () {
+          stderrStub = sinon.stub(process.stderr);
+        });
+
+        afterEach(function () {
+          sinon.restore();
+        });
+
+        context('when stream user defined stream and stream.write throws async', async function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
+            const stream = {
+              async write(_log) {
+                await sleep(500);
+                throw Error('This writable always throws, but only after at least 500ms');
+              }
+            };
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: stream,
+              logDestinationIsStdErr: false
+            });
+            // print random message at the debug level
+            logger.debug('client', 'random message');
+
+            // before timeout resolves, no error
+            expect(stderrStub.write.getCall(0)).to.be.null;
+
+            // manually wait for timeout to end
+            await sleep(600);
+
+            // stderr now contains the error message
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws, but only after at least 500ms' }`
+            );
+
+            // no more logging in the future
+            logger.debug('client', 'random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
+          });
+        });
+
+        context('when stream is stdout and stdout.write throws', async function () {
+          it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
+            sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stdout),
+              logDestinationIsStdErr: false
+            });
+            logger.debug('client', 'random message');
+
+            // manually wait for promise to resolve (takes extra time with promisify)
+            await sleep(600);
+
+            let stderrStubCall = stderrStub.write.getCall(0).args[0];
+            stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
+            expect(stderrStubCall).to.equal(
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'I am stdout and do not work' }`
+            );
+
+            // logging is halted
+            logger.debug('client', 'random message 2');
+            const stderrStubCall2 = stderrStub.write.getCall(1);
+            expect(stderrStubCall2).to.be.null;
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
+          });
+        });
+      });
+
+      context('when stream is stderr', function () {
+        context('when stderr.write throws', function () {
+          beforeEach(function () {
+            sinon.stub(process.stderr, 'write').throws(new Error('fake stderr failure'));
+          });
+          afterEach(function () {
+            sinon.restore();
+          });
+
+          it('should not throw error and turn off severities', function () {
+            // print random message at the debug level
+            const logger = new MongoLogger({
+              componentSeverities,
+              maxDocumentLength: 1000,
+              logDestination: createStdioLogger(process.stderr),
+              logDestinationIsStdErr: true
+            });
+            expect(() => logger.debug('client', 'random message')).to.not.throw(Error);
+            expect(Object.keys(logger.componentSeverities).every(key => key === SeverityLevel.OFF));
+          });
+        });
+      });
+    });
+    context('when async stream has multiple logs with different timeouts', async function () {
+      it('should preserve their order', async function () {
+        const stream = {
+          buffer: [],
+          async write(log) {
+            if (log.message === 'longer timeout') {
+              await sleep(2000);
+            } else if (log.message === 'shorter timeout') {
+              await sleep(500);
+            }
+            this.buffer.push(log.message);
+          }
+        };
+        const logger = new MongoLogger({
+          componentSeverities,
+          maxDocumentLength: 1000,
+          logDestination: stream,
+          logDestinationIsStdErr: false
+        });
+
+        logger.debug('client', 'longer timeout');
+        logger.debug('client', 'shorter timeout');
+        logger.debug('client', 'no timeout');
+
+        expect(stream.buffer.length).to.equal(0);
+
+        await sleep(2100);
+        expect(stream.buffer).to.deep.equal(['longer timeout']);
+
+        await sleep(600);
+        expect(stream.buffer).to.deep.equal(['longer timeout', 'shorter timeout', 'no timeout']);
       });
     });
   });
