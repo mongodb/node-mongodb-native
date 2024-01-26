@@ -40,7 +40,6 @@ export { ChangeStreamCursor } from './cursor/change_stream_cursor';
 export {
   MongoAPIError,
   MongoAWSError,
-  MongoAzureError,
   MongoBatchReExecutionError,
   MongoChangeStreamError,
   MongoCompatibilityError,
@@ -207,13 +206,6 @@ export type {
   MongoCredentials,
   MongoCredentialsOptions
 } from './cmap/auth/mongo_credentials';
-export type {
-  IdPServerInfo,
-  IdPServerResponse,
-  OIDCCallbackContext,
-  OIDCRefreshFunction,
-  OIDCRequestFunction
-} from './cmap/auth/mongodb_oidc';
 export type {
   BinMsg,
   MessageHeader,

@@ -44,8 +44,7 @@ const WINDOWS_SKIP_TAGS = new Set([
   'atlas-connect',
   'auth',
   'load_balancer',
-  'socks5-csfle',
-  'oidc'
+  'socks5-csfle'
 ]);
 
 const TASKS = [];
@@ -187,23 +186,6 @@ TASKS.push(
       name: 'test-auth-ldap',
       tags: ['auth', 'ldap'],
       commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    },
-    {
-      name: 'test-auth-oidc',
-      tags: ['latest', 'replica_set', 'oidc'],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set',
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-oidc.json'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap oidc' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'setup oidc roles' },
-        { func: 'run oidc tests aws' }
-      ]
     },
     {
       name: 'test-socks5',
@@ -699,14 +681,6 @@ BUILD_VARIANTS.push({
   run_on: DEBIAN_OS,
   batchtime: 20160,
   tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
-});
-
-BUILD_VARIANTS.push({
-  name: 'ubuntu20-test-azure-oidc',
-  display_name: 'Azure OIDC',
-  run_on: UBUNTU_20_OS,
-  batchtime: 20160,
-  tasks: ['testazureoidc_task_group']
 });
 
 BUILD_VARIANTS.push({

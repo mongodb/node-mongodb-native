@@ -402,7 +402,6 @@ export function parseOptions(
     const isGssapi = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_GSSAPI;
     const isX509 = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_X509;
     const isAws = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_AWS;
-    const isOidc = mongoOptions.credentials.mechanism === AuthMechanism.MONGODB_OIDC;
     if (
       (isGssapi || isX509) &&
       allProvidedOptions.has('authSource') &&
@@ -415,7 +414,7 @@ export function parseOptions(
     }
 
     if (
-      !(isGssapi || isX509 || isAws || isOidc) &&
+      !(isGssapi || isX509 || isAws) &&
       mongoOptions.dbName &&
       !allProvidedOptions.has('authSource')
     ) {

@@ -5,7 +5,6 @@ import * as sinon from 'sinon';
 import {
   AUTH_MECHS_AUTH_SRC_EXTERNAL,
   AuthMechanism,
-  DEFAULT_ALLOWED_HOSTS,
   FEATURE_FLAGS,
   MongoAPIError,
   MongoClient,
@@ -212,88 +211,6 @@ describe('Connection String', function () {
     expect(options.readConcern.level).to.equal('local');
   });
 
-  context('when auth mechanism is MONGODB-OIDC', function () {
-    context('when ALLOWED_HOSTS is in the URI', function () {
-      it('raises an error', function () {
-        expect(() => {
-          parseOptions(
-            'mongodb://localhost/?authMechanismProperties=PROVIDER_NAME:aws,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC'
-          );
-        }).to.throw(
-          MongoParseError,
-          'Auth mechanism property ALLOWED_HOSTS is not allowed in the connection string.'
-        );
-      });
-    });
-
-    context('when ALLOWED_HOSTS is in the options', function () {
-      context('when it is an array of strings', function () {
-        const hosts = ['*.example.com'];
-
-        it('sets the allowed hosts property', function () {
-          const options = parseOptions(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
-            {
-              authMechanismProperties: {
-                ALLOWED_HOSTS: hosts
-              }
-            }
-          );
-          expect(options.credentials.mechanismProperties).to.deep.equal({
-            PROVIDER_NAME: 'aws',
-            ALLOWED_HOSTS: hosts
-          });
-        });
-      });
-
-      context('when it is not an array of strings', function () {
-        it('raises an error', function () {
-          expect(() => {
-            parseOptions(
-              'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
-              {
-                authMechanismProperties: {
-                  ALLOWED_HOSTS: [1, 2, 3]
-                }
-              }
-            );
-          }).to.throw(
-            MongoInvalidArgumentError,
-            'Auth mechanism property ALLOWED_HOSTS must be an array of strings.'
-          );
-        });
-      });
-    });
-
-    context('when ALLOWED_HOSTS is not in the options', function () {
-      it('sets the default value', function () {
-        const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
-        );
-        expect(options.credentials.mechanismProperties).to.deep.equal({
-          PROVIDER_NAME: 'aws',
-          ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
-        });
-      });
-    });
-
-    context('when TOKEN_AUDIENCE is in the properties', function () {
-      context('when it is a uri', function () {
-        const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:api%3A%2F%2Ftest'
-        );
-
-        it('parses the uri', function () {
-          expect(options.credentials.mechanismProperties).to.deep.equal({
-            PROVIDER_NAME: 'azure',
-            TOKEN_AUDIENCE: 'api://test',
-            ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
-          });
-        });
-      });
-    });
-  });
-
   it('should parse `authMechanismProperties`', function () {
     const options = parseOptions(
       'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true,SERVICE_HOST:example.com&authMechanism=GSSAPI'
@@ -497,7 +414,7 @@ describe('Connection String', function () {
     it('should validate authMechanism', function () {
       expect(() => parseOptions('mongodb://localhost/?authMechanism=DOGS')).to.throw(
         MongoParseError,
-        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509,MONGODB-OIDC, got DOGS'
+        'authMechanism one of MONGODB-AWS,MONGODB-CR,DEFAULT,GSSAPI,PLAIN,SCRAM-SHA-1,SCRAM-SHA-256,MONGODB-X509, got DOGS'
       );
     });
 
@@ -549,14 +466,11 @@ describe('Connection String', function () {
       it(`should set authSource to $external for ${mechanism} external mechanism`, async function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
         const mechanismProperties = {};
-        if (mechanism === AuthMechanism.MONGODB_OIDC) {
-          mechanismProperties.PROVIDER_NAME = 'aws';
-        }
 
         const credentials = new MongoCredentials({
           source: '$external',
           mechanism,
-          username: mechanism === AuthMechanism.MONGODB_OIDC ? undefined : 'username',
+          username: 'username',
           password: mechanism === AuthMechanism.MONGODB_X509 ? undefined : 'password',
           mechanismProperties: mechanismProperties
         });
