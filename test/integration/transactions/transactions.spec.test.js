@@ -1,5 +1,7 @@
 'use strict';
 
+import { gte } from 'semver';
+
 const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
@@ -90,16 +92,15 @@ const SKIP_TESTS = [
 
   // TODO(NODE-2034): Will be implemented as part of NODE-2034
   'Client side error in command starting transaction',
-  'Client side error when transaction is in progress',
+  'Client side error when transaction is in progress'
+];
 
+const LATEST_SKIP_TESTS = [
   // TODO(NODE-5855): Unskip Transactions Spec Unified Tests mongos-unpin.unpin
   'unpin after TransientTransactionError error on commit',
   'unpin on successful abort',
   'unpin after non-transient error on abort',
-  'unpin after TransientTransactionError error on abort',
-  'unpin when a new transaction is started',
-  'unpin when a non-transaction write operation uses a session',
-  'unpin when a non-transaction read operation uses a session'
+  'unpin after TransientTransactionError error on abort'
 ];
 
 describe('Transactions Spec Legacy Tests', function () {
@@ -122,8 +123,11 @@ describe('Transactions Spec Legacy Tests', function () {
     return testContext.setup(this.configuration);
   });
 
-  function testFilter(spec) {
-    return SKIP_TESTS.indexOf(spec.description) === -1;
+  function testFilter(spec, configuration) {
+    return (
+      SKIP_TESTS.indexOf(spec.description) === -1 &&
+      (!gte(configuration.version, '7.1.0') || LATEST_SKIP_TESTS.indexOf(spec.description) === -1)
+    );
   }
 
   generateTopologyTests(testSuites, testContext, testFilter);
