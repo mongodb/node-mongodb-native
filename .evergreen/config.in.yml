@@ -509,7 +509,7 @@ functions:
         working_dir: "src"
         script: |
           ${PREPARE_SHELL}
-          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS}\
+          NODE_LTS_VERSION=${NODE_LTS_VERSION} NPM_OPTIONS=${NPM_OPTIONS} NPM_VERSION=${NPM_VERSION}\
             bash ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
 
   "install aws-credential-providers":
