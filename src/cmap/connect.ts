@@ -16,7 +16,7 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { type Callback, HostAddress, ns } from '../utils';
+import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext, type AuthProvider } from './auth/auth_provider';
 import { GSSAPI } from './auth/gssapi';
 import { MongoCR } from './auth/mongocr';
@@ -55,27 +55,26 @@ export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
 /** @public */
 export type Stream = Socket | TLSSocket;
 
-export function connect(options: ConnectionOptions, callback: Callback<Connection>): void {
-  makeConnection({ ...options, existingSocket: undefined }, (err, socket) => {
-    if (err || !socket) {
-      return callback(err);
-    }
+export async function connect(options: ConnectionOptions): Promise<Connection> {
+  let connection: Connection | null = null;
+  try {
+    const socket = await makeSocket(options);
+    connection = makeConnection(options, socket);
+    await performInitialHandshake(connection, options);
+    return connection;
+  } catch (error) {
+    connection?.destroy({ force: false });
+    throw error;
+  }
+}
 
-    let ConnectionType = options.connectionType ?? Connection;
-    if (options.autoEncrypter) {
-      ConnectionType = CryptoConnection;
-    }
+export function makeConnection(options: ConnectionOptions, socket: Stream): Connection {
+  let ConnectionType = options.connectionType ?? Connection;
+  if (options.autoEncrypter) {
+    ConnectionType = CryptoConnection;
+  }
 
-    const connection = new ConnectionType(socket, options);
-
-    performInitialHandshake(connection, options).then(
-      () => callback(undefined, connection),
-      error => {
-        connection.destroy({ force: false });
-        callback(error);
-      }
-    );
-  });
+  return new ConnectionType(socket, options);
 }
 
 function checkSupportedServer(hello: Document, options: ConnectionOptions) {
@@ -103,7 +102,7 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
   return new MongoCompatibilityError(message);
 }
 
-async function performInitialHandshake(
+export async function performInitialHandshake(
   conn: Connection,
   options: ConnectionOptions
 ): Promise<void> {
@@ -329,11 +328,7 @@ function parseSslOptions(options: MakeConnectionOptions): TLSConnectionOpts {
   return result;
 }
 
-const SOCKET_ERROR_EVENT_LIST = ['error', 'close', 'timeout', 'parseError'] as const;
-type ErrorHandlerEventName = (typeof SOCKET_ERROR_EVENT_LIST)[number] | 'cancel';
-const SOCKET_ERROR_EVENTS = new Set(SOCKET_ERROR_EVENT_LIST);
-
-function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stream>) {
+export async function makeSocket(options: MakeConnectionOptions): Promise<Stream> {
   const useTLS = options.tls ?? false;
   const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
@@ -341,23 +336,13 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
-  const callback: Callback<Stream> = function (err, ret) {
-    if (err && socket) {
-      socket.destroy();
-    }
-
-    _callback(err, ret);
-  };
 
   if (options.proxyHost != null) {
     // Currently, only Socks5 is supported.
-    return makeSocks5Connection(
-      {
-        ...options,
-        connectTimeoutMS // Should always be present for Socks5
-      },
-      callback
-    );
+    return makeSocks5Connection({
+      ...options,
+      connectTimeoutMS // Should always be present for Socks5
+    });
   }
 
   if (useTLS) {
@@ -379,47 +364,41 @@ function makeConnection(options: MakeConnectionOptions, _callback: Callback<Stre
   socket.setTimeout(connectTimeoutMS);
   socket.setNoDelay(noDelay);
 
-  const connectEvent = useTLS ? 'secureConnect' : 'connect';
-  let cancellationHandler: (err: Error) => void;
-  function errorHandler(eventName: ErrorHandlerEventName) {
-    return (err: Error) => {
-      SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
-      if (cancellationHandler && options.cancellationToken) {
-        options.cancellationToken.removeListener('cancel', cancellationHandler);
-      }
+  let cancellationHandler: ((err: Error) => void) | null = null;
 
-      socket.removeListener(connectEvent, connectHandler);
-      callback(connectionFailureError(eventName, err));
-    };
-  }
-
-  function connectHandler() {
-    SOCKET_ERROR_EVENTS.forEach(event => socket.removeAllListeners(event));
-    if (cancellationHandler && options.cancellationToken) {
-      options.cancellationToken.removeListener('cancel', cancellationHandler);
-    }
-
-    if ('authorizationError' in socket) {
-      if (socket.authorizationError && rejectUnauthorized) {
-        // TODO(NODE-5192): wrap this with a MongoError subclass
-        return callback(socket.authorizationError);
-      }
-    }
-
-    socket.setTimeout(0);
-    callback(undefined, socket);
-  }
-
-  SOCKET_ERROR_EVENTS.forEach(event => socket.once(event, errorHandler(event)));
-  if (options.cancellationToken) {
-    cancellationHandler = errorHandler('cancel');
-    options.cancellationToken.once('cancel', cancellationHandler);
-  }
-
+  const { promise: connectedSocket, resolve, reject } = promiseWithResolvers<Stream>();
   if (existingSocket) {
-    process.nextTick(connectHandler);
+    resolve(socket);
   } else {
-    socket.once(connectEvent, connectHandler);
+    const connectEvent = useTLS ? 'secureConnect' : 'connect';
+    socket
+      .once(connectEvent, () => resolve(socket))
+      .once('error', error => reject(connectionFailureError('error', error)))
+      .once('timeout', () => reject(connectionFailureError('timeout')))
+      .once('close', () => reject(connectionFailureError('close')));
+
+    if (options.cancellationToken != null) {
+      cancellationHandler = () => reject(connectionFailureError('cancel'));
+      options.cancellationToken.once('cancel', cancellationHandler);
+    }
+  }
+
+  try {
+    socket = await connectedSocket;
+    return socket;
+  } catch (error) {
+    socket.destroy();
+    if ('authorizationError' in socket && socket.authorizationError != null && rejectUnauthorized) {
+      // TODO(NODE-5192): wrap this with a MongoError subclass
+      throw socket.authorizationError;
+    }
+    throw error;
+  } finally {
+    socket.setTimeout(0);
+    socket.removeAllListeners();
+    if (cancellationHandler != null) {
+      options.cancellationToken?.removeListener('cancel', cancellationHandler);
+    }
   }
 }
 
@@ -435,78 +414,68 @@ function loadSocks() {
   return socks;
 }
 
-function makeSocks5Connection(options: MakeConnectionOptions, callback: Callback<Stream>) {
+async function makeSocks5Connection(options: MakeConnectionOptions): Promise<Stream> {
   const hostAddress = HostAddress.fromHostPort(
     options.proxyHost ?? '', // proxyHost is guaranteed to set here
     options.proxyPort ?? 1080
   );
 
   // First, connect to the proxy server itself:
-  makeConnection(
-    {
+  const rawSocket = await makeSocket({
+    ...options,
+    hostAddress,
+    tls: false,
+    proxyHost: undefined
+  });
+
+  const destination = parseConnectOptions(options) as net.TcpNetConnectOpts;
+  if (typeof destination.host !== 'string' || typeof destination.port !== 'number') {
+    throw new MongoInvalidArgumentError('Can only make Socks5 connections to TCP hosts');
+  }
+
+  socks ??= loadSocks();
+
+  try {
+    // Then, establish the Socks5 proxy connection:
+    const { socket } = await socks.SocksClient.createConnection({
+      existing_socket: rawSocket,
+      timeout: options.connectTimeoutMS,
+      command: 'connect',
+      destination: {
+        host: destination.host,
+        port: destination.port
+      },
+      proxy: {
+        // host and port are ignored because we pass existing_socket
+        host: 'iLoveJavaScript',
+        port: 0,
+        type: 5,
+        userId: options.proxyUsername || undefined,
+        password: options.proxyPassword || undefined
+      }
+    });
+
+    // Finally, now treat the resulting duplex stream as the
+    // socket over which we send and receive wire protocol messages:
+    return await makeSocket({
       ...options,
-      hostAddress,
-      tls: false,
+      existingSocket: socket,
       proxyHost: undefined
-    },
-    (err, rawSocket) => {
-      if (err || !rawSocket) {
-        return callback(err);
-      }
-
-      const destination = parseConnectOptions(options) as net.TcpNetConnectOpts;
-      if (typeof destination.host !== 'string' || typeof destination.port !== 'number') {
-        return callback(
-          new MongoInvalidArgumentError('Can only make Socks5 connections to TCP hosts')
-        );
-      }
-
-      try {
-        socks ??= loadSocks();
-      } catch (error) {
-        return callback(error);
-      }
-
-      // Then, establish the Socks5 proxy connection:
-      socks.SocksClient.createConnection({
-        existing_socket: rawSocket,
-        timeout: options.connectTimeoutMS,
-        command: 'connect',
-        destination: {
-          host: destination.host,
-          port: destination.port
-        },
-        proxy: {
-          // host and port are ignored because we pass existing_socket
-          host: 'iLoveJavaScript',
-          port: 0,
-          type: 5,
-          userId: options.proxyUsername || undefined,
-          password: options.proxyPassword || undefined
-        }
-      }).then(
-        ({ socket }) => {
-          // Finally, now treat the resulting duplex stream as the
-          // socket over which we send and receive wire protocol messages:
-          makeConnection(
-            {
-              ...options,
-              existingSocket: socket,
-              proxyHost: undefined
-            },
-            callback
-          );
-        },
-        error => callback(connectionFailureError('error', error))
-      );
-    }
-  );
+    });
+  } catch (error) {
+    throw connectionFailureError('error', error);
+  }
 }
 
-function connectionFailureError(type: ErrorHandlerEventName, err: Error) {
+function connectionFailureError(type: 'error', cause: Error): MongoNetworkError;
+function connectionFailureError(type: 'close' | 'timeout' | 'cancel'): MongoNetworkError;
+function connectionFailureError(
+  type: 'error' | 'close' | 'timeout' | 'cancel',
+  cause?: Error
+): MongoNetworkError {
   switch (type) {
     case 'error':
-      return new MongoNetworkError(MongoError.buildErrorMessage(err), { cause: err });
+      return new MongoNetworkError(MongoError.buildErrorMessage(cause), { cause });
     case 'timeout':
       return new MongoNetworkTimeoutError('connection timed out');
     case 'close':

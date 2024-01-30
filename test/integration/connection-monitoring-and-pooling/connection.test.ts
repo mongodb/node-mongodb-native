@@ -1,11 +1,10 @@
-import { promisify } from 'node:util';
-
 import { expect } from 'chai';
 
 import {
   connect,
   Connection,
   type ConnectionOptions,
+  HostAddress,
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
   MongoClient,
@@ -16,6 +15,16 @@ import {
 } from '../../mongodb';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
 import { assert as test, setupDatabase } from '../shared';
+
+const commonConnectOptions = {
+  id: 1,
+  generation: 1,
+  monitorCommands: false,
+  tls: false,
+  loadBalanced: false,
+  // Will be overridden by configuration options
+  hostAddress: HostAddress.fromString('127.0.0.1:1')
+};
 
 describe('Connection', function () {
   beforeEach(
@@ -35,7 +44,8 @@ describe('Connection', function () {
     it('should execute a command against a server', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
-        const connectOptions: Partial<ConnectionOptions> = {
+        const connectOptions: ConnectionOptions = {
+          ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
           metadata: makeClientMetadata({ driverInfo: {} })
@@ -43,7 +53,7 @@ describe('Connection', function () {
 
         let conn;
         try {
-          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          conn = await connect(connectOptions);
           const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
           expect(hello).to.have.property('ok', 1);
         } finally {
@@ -55,7 +65,8 @@ describe('Connection', function () {
     it('should emit command monitoring events', {
       metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
       test: async function () {
-        const connectOptions: Partial<ConnectionOptions> = {
+        const connectOptions: ConnectionOptions = {
+          ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
@@ -64,7 +75,7 @@ describe('Connection', function () {
 
         let conn;
         try {
-          conn = await promisify(connect)(connectOptions as any as ConnectionOptions);
+          conn = await connect(connectOptions);
 
           const events: any[] = [];
           conn.on('commandStarted', event => events.push(event));

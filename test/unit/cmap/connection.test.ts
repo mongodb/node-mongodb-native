@@ -1,18 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
-import {
-  connect as driverConnectCb,
-  Connection,
-  isHello,
-  MongoNetworkTimeoutError,
-  ns
-} from '../../mongodb';
+import { connect, Connection, isHello, MongoNetworkTimeoutError, ns } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
-
-const connect = promisify(driverConnectCb);
 
 const connectionOptionsDefaults = {
   id: 0,

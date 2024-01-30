@@ -1,7 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { type Document, Long } from '../bson';
-import { connect } from '../cmap/connect';
+import { connect, makeConnection, makeSocket, performInitialHandshake } from '../cmap/connect';
 import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
@@ -235,7 +235,7 @@ function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion
 }
 
 function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
-  let start = now();
+  let start: number;
   let awaited: boolean;
   const topologyVersion = monitor[kServer].description.topologyVersion;
   const isAwaitable = useStreamingProtocol(monitor, topologyVersion);
@@ -287,15 +287,17 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       new ServerHeartbeatSucceededEvent(monitor.address, duration, hello, isAwaitable)
     );
 
-    // If we are using the streaming protocol then we immediately issue another 'started'
-    // event, otherwise the "check" is complete and return to the main monitor loop.
     if (isAwaitable) {
+      // If we are using the streaming protocol then we immediately issue another 'started'
+      // event, otherwise the "check" is complete and return to the main monitor loop
       monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_STARTED,
         monitor[kServer].topology.s.id,
         undefined,
         new ServerHeartbeatStartedEvent(monitor.address, true)
       );
+      // We have not actually sent an outgoing handshake, but when we get the next response we
+      // want the duration to reflect the time since we last heard from the server
       start = now();
     } else {
       monitor.rttPinger?.close();
@@ -335,6 +337,9 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       );
     }
 
+    // Record new start time before sending handshake
+    start = now();
+
     if (isAwaitable) {
       awaited = true;
       return connection.exhaustCommand(ns('admin.$cmd'), cmd, options, (error, hello) => {
@@ -352,37 +357,46 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   }
 
   // connecting does an implicit `hello`
-  connect(monitor.connectOptions, (err, conn) => {
-    if (err) {
-      monitor.connection = null;
-
-      awaited = false;
-      onHeartbeatFailed(err);
-      return;
+  (async () => {
+    const socket = await makeSocket(monitor.connectOptions);
+    const connection = makeConnection(monitor.connectOptions, socket);
+    // The start time is after socket creation but before the handshake
+    start = now();
+    try {
+      await performInitialHandshake(connection, monitor.connectOptions);
+      return connection;
+    } catch (error) {
+      connection.destroy({ force: false });
+      throw error;
     }
-
-    if (conn) {
+  })().then(
+    connection => {
       if (isInCloseState(monitor)) {
-        conn.destroy({ force: true });
+        connection.destroy({ force: true });
         return;
       }
 
-      monitor.connection = conn;
+      monitor.connection = connection;
       monitor.emitAndLogHeartbeat(
         Server.SERVER_HEARTBEAT_SUCCEEDED,
         monitor[kServer].topology.s.id,
-        conn.hello?.connectionId,
+        connection.hello?.connectionId,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
           calculateDurationInMs(start),
-          conn.hello,
-          useStreamingProtocol(monitor, conn.hello?.topologyVersion)
+          connection.hello,
+          useStreamingProtocol(monitor, connection.hello?.topologyVersion)
         )
       );
 
-      callback(undefined, conn.hello);
+      callback(undefined, connection.hello);
+    },
+    error => {
+      monitor.connection = null;
+      awaited = false;
+      onHeartbeatFailed(error);
     }
-  });
+  );
 }
 
 function monitorServer(monitor: Monitor) {
@@ -498,16 +512,15 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const connection = rttPinger.connection;
   if (connection == null) {
-    connect(options, (err, conn) => {
-      if (err) {
+    connect(options).then(
+      connection => {
+        measureAndReschedule(connection);
+      },
+      () => {
         rttPinger.connection = undefined;
         rttPinger[kRoundTripTime] = 0;
-        return;
       }
-
-      measureAndReschedule(conn);
-    });
-
+    );
     return;
   }
 

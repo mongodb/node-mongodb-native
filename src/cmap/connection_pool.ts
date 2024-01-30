@@ -710,8 +710,48 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
-    connect(connectOptions, (err, connection) => {
-      if (err || !connection) {
+    connect(connectOptions).then(
+      connection => {
+        // The pool might have closed since we started trying to create a connection
+        if (this[kPoolState] !== PoolState.ready) {
+          this[kPending]--;
+          connection.destroy({ force: true });
+          callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
+          return;
+        }
+
+        // forward all events from the connection to the pool
+        for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
+          connection.on(event, (e: any) => this.emit(event, e));
+        }
+
+        if (this.loadBalanced) {
+          connection.on(Connection.PINNED, pinType => this[kMetrics].markPinned(pinType));
+          connection.on(Connection.UNPINNED, pinType => this[kMetrics].markUnpinned(pinType));
+
+          const serviceId = connection.serviceId;
+          if (serviceId) {
+            let generation;
+            const sid = serviceId.toHexString();
+            if ((generation = this.serviceGenerations.get(sid))) {
+              connection.generation = generation;
+            } else {
+              this.serviceGenerations.set(sid, 0);
+              connection.generation = 0;
+            }
+          }
+        }
+
+        connection.markAvailable();
+        this.emitAndLog(
+          ConnectionPool.CONNECTION_READY,
+          new ConnectionReadyEvent(this, connection)
+        );
+
+        this[kPending]--;
+        callback(undefined, connection);
+      },
+      error => {
         this[kPending]--;
         this.emitAndLog(
           ConnectionPool.CONNECTION_CLOSED,
@@ -720,53 +760,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             { id: connectOptions.id, serviceId: undefined },
             'error',
             // TODO(NODE-5192): Remove this cast
-            err as MongoError
+            error as MongoError
           )
         );
-        if (err instanceof MongoNetworkError || err instanceof MongoServerError) {
-          err.connectionGeneration = connectOptions.generation;
+        if (error instanceof MongoNetworkError || error instanceof MongoServerError) {
+          error.connectionGeneration = connectOptions.generation;
         }
-        callback(err ?? new MongoRuntimeError('Connection creation failed without error'));
-        return;
+        callback(error ?? new MongoRuntimeError('Connection creation failed without error'));
       }
-
-      // The pool might have closed since we started trying to create a connection
-      if (this[kPoolState] !== PoolState.ready) {
-        this[kPending]--;
-        connection.destroy({ force: true });
-        callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
-        return;
-      }
-
-      // forward all events from the connection to the pool
-      for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
-        connection.on(event, (e: any) => this.emit(event, e));
-      }
-
-      if (this.loadBalanced) {
-        connection.on(Connection.PINNED, pinType => this[kMetrics].markPinned(pinType));
-        connection.on(Connection.UNPINNED, pinType => this[kMetrics].markUnpinned(pinType));
-
-        const serviceId = connection.serviceId;
-        if (serviceId) {
-          let generation;
-          const sid = serviceId.toHexString();
-          if ((generation = this.serviceGenerations.get(sid))) {
-            connection.generation = generation;
-          } else {
-            this.serviceGenerations.set(sid, 0);
-            connection.generation = 0;
-          }
-        }
-      }
-
-      connection.markAvailable();
-      this.emitAndLog(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
-
-      this[kPending]--;
-      callback(undefined, connection);
-      return;
-    });
+    );
   }
 
   private ensureMinPoolSize() {

@@ -497,9 +497,9 @@ export function now(): number {
 }
 
 /** @internal */
-export function calculateDurationInMs(started: number): number {
+export function calculateDurationInMs(started: number | undefined): number {
   if (typeof started !== 'number') {
-    throw new MongoInvalidArgumentError('Numeric value required to calculate duration');
+    return -1;
   }
 
   const elapsed = now() - started;
