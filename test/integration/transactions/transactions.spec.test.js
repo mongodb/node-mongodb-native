@@ -126,7 +126,7 @@ describe('Transactions Spec Legacy Tests', function () {
   function testFilter(spec, configuration) {
     return (
       SKIP_TESTS.indexOf(spec.description) === -1 &&
-      (!gte(configuration.version, '7.1.0') || LATEST_SKIP_TESTS.indexOf(spec.description) === -1)
+      (!gte(configuration.version, '7.9.9') || LATEST_SKIP_TESTS.indexOf(spec.description) === -1)
     );
   }
 
