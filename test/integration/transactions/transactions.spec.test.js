@@ -80,11 +80,22 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
+const LATEST_UNIFIED_SKIP_TESTS = [
+  'unpin after TransientTransactionError error on commit',
+  'unpin on successful abort',
+  'unpin after non-transient error on abort',
+  'unpin after TransientTransactionError error on abort'
+];
+
 describe('Transactions Spec Unified Tests', function () {
-  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), (test, ctx) =>
+    gte(ctx.version, '8.0.0') && LATEST_UNIFIED_SKIP_TESTS.includes(test.description)
+      ? 'TODO(NODE-5855): Unskip Transactions Spec Unified Tests mongos-unpin.unpin'
+      : false
+  );
 });
 
-const SKIP_TESTS = [
+const LEGACY_SKIP_TESTS = [
   // TODO(NODE-3943): Investigate these commit test failures
   // OLD COMMENT: commitTransaction retry seems to be swallowed by mongos in these two cases
   'commitTransaction retry fails on new mongos',
@@ -95,19 +106,11 @@ const SKIP_TESTS = [
   'Client side error when transaction is in progress'
 ];
 
-const LATEST_SKIP_TESTS = [
-  // TODO(NODE-5855): Unskip Transactions Spec Unified Tests mongos-unpin.unpin
-  'unpin after TransientTransactionError error on commit',
-  'unpin on successful abort',
-  'unpin after non-transient error on abort',
-  'unpin after TransientTransactionError error on abort'
-];
-
 describe('Transactions Spec Legacy Tests', function () {
   const testContext = new TransactionsRunnerContext();
   if (process.env.SERVERLESS) {
     // TODO(NODE-3550): these tests should pass on serverless but currently fail
-    SKIP_TESTS.push(
+    LEGACY_SKIP_TESTS.push(
       'abortTransaction only performs a single retry',
       'abortTransaction does not retry after Interrupted',
       'abortTransaction does not retry after WriteConcernError Interrupted',
@@ -123,11 +126,8 @@ describe('Transactions Spec Legacy Tests', function () {
     return testContext.setup(this.configuration);
   });
 
-  function testFilter(spec, configuration) {
-    return (
-      SKIP_TESTS.indexOf(spec.description) === -1 &&
-      (!gte(configuration.version, '7.9.9') || LATEST_SKIP_TESTS.indexOf(spec.description) === -1)
-    );
+  function testFilter(spec) {
+    return LEGACY_SKIP_TESTS.indexOf(spec.description) === -1;
   }
 
   generateTopologyTests(testSuites, testContext, testFilter);
