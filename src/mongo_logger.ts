@@ -728,6 +728,7 @@ export class MongoLogger {
   logDestination: MongoDBLogWritable;
   logDestinationIsStdErr: boolean;
   pendingLog: PromiseLike<unknown> | unknown = null;
+  willLog: any; //Record<MongoLoggableComponent, Record<SeverityLevel, boolean>>;
 
   /**
    * This method should be used when logging errors that do not have a public driver API for
@@ -760,10 +761,20 @@ export class MongoLogger {
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
     this.logDestinationIsStdErr = options.logDestinationIsStdErr;
+    this.willLog = this.createWillLog();
   }
 
-  willLog(severity: SeverityLevel, component: MongoLoggableComponent): boolean {
-    return compareSeverity(severity, this.componentSeverities[component]) <= 0;
+  createWillLog() {
+    const to_return = {};
+    console.log(Object.values(SEVERITY_LEVEL_MAP))
+    for (const component of Object.values(MongoLoggableComponent)) {
+      const componentSeverityNum = SEVERITY_LEVEL_MAP.getNumericSeverityLevel(this.componentSeverities[component]);
+      for (const severityLevel of Object.entries(SEVERITY_LEVEL_MAP)) {
+        
+      } 
+   
+    }
+    return to_return;
   }
 
   turnOffSeverities() {
