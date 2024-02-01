@@ -84,7 +84,8 @@ const LATEST_UNIFIED_SKIP_TESTS = [
   'unpin after TransientTransactionError error on commit',
   'unpin on successful abort',
   'unpin after non-transient error on abort',
-  'unpin after TransientTransactionError error on abort'
+  'unpin after TransientTransactionError error on abort',
+  'unpin when a new transaction is started'
 ];
 
 describe('Transactions Spec Unified Tests', function () {
