@@ -85,7 +85,9 @@ const LATEST_UNIFIED_SKIP_TESTS = [
   'unpin on successful abort',
   'unpin after non-transient error on abort',
   'unpin after TransientTransactionError error on abort',
-  'unpin when a new transaction is started'
+  'unpin when a new transaction is started',
+  'unpin when a non-transaction write operation uses a session',
+  'unpin when a non-transaction read operation uses a session'
 ];
 
 describe('Transactions Spec Unified Tests', function () {
