@@ -800,7 +800,10 @@ describe('MongoOptions', function () {
   context('loggingOptions', function () {
     const expectedLoggingObject = {
       maxDocumentLength: 20,
-      logDestination: new Writable()
+      logDestination: new Writable(),
+      componentSeverities: Object.fromEntries(
+        Object.values(MongoLoggableComponent).map(([value]) => [value, SeverityLevel.OFF])
+      )
     };
 
     before(() => {

@@ -7,7 +7,7 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers');
 const { promisify } = require('util');
-const { ns, isHello, MongoLoggableComponent } = require('../../mongodb');
+const { ns, isHello, MongoLoggableComponent, SeverityLevel } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
@@ -20,7 +20,12 @@ describe('Connection Pool', function () {
         mongoLogger: {
           debug: () => null,
           willLog: Object.fromEntries(
-            Object.values(MongoLoggableComponent).map(([value]) => [value, {}])
+            Object.values(MongoLoggableComponent).map(component => [
+              component,
+              Object.fromEntries(
+                Object.values(SeverityLevel).map(severityLevel => [severityLevel, false])
+              )
+            ])
           )
         }
       }
