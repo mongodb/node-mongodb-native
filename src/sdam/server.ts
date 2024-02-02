@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import type { Document } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
@@ -26,6 +24,7 @@ import {
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
+  MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
   MongoInvalidArgumentError,
@@ -48,6 +47,7 @@ import {
   makeStateMachine,
   maxWireVersion,
   type MongoDBNamespace,
+  promiseWithResolvers,
   supportsRetryableWrites
 } from '../utils';
 import {
@@ -115,7 +115,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
-  commandAsync: (ns: MongoDBNamespace, cmd: Document, options: CommandOptions) => Promise<Document>;
   monitor: Monitor | null;
 
   /** @event */
@@ -138,16 +137,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
-
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions,
-        // callback type defines Document result because result is never nullish when it succeeds, otherwise promise rejects
-        callback: (error: Error | undefined, result: Document) => void
-      ) => this.command(ns, cmd, options, callback as any)
-    );
 
     this.serverApi = options.serverApi;
 
@@ -378,6 +367,92 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       },
       callback
     );
+  }
+
+  async commandAsync(
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options: CommandOptions
+  ): Promise<Document> {
+    if (ns.db == null || typeof ns === 'string') {
+      throw new MongoInvalidArgumentError('Namespace must not be a string');
+    }
+
+    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
+      throw new MongoServerClosedError();
+    }
+
+    // Clone the options
+    const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
+
+    // There are cases where we need to flag the read preference not to get sent in
+    // the command, such as pre-5.0 servers attempting to perform an aggregate write
+    // with a non-primary read preference. In this case the effective read preference
+    // (primary) is not the same as the provided and must be removed completely.
+    if (finalOptions.omitReadPreference) {
+      delete finalOptions.readPreference;
+    }
+
+    const session = finalOptions.session;
+    let conn = session?.pinnedConnection;
+
+    // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
+    //       (and prevent them from being checked back in) at the point of operation execution.
+    //       This should be considered as part of the work for NODE-2882
+    // NOTE:
+    //       When incrementing operation count, it's important that we increment it before we
+    //       attempt to check out a connection from the pool.  This ensures that operations that
+    //       are waiting for a connection are included in the operation count.  Load balanced
+    //       mode will only ever have a single server, so the operation count doesn't matter.
+    //       Incrementing the operation count above the logic to handle load balanced mode would
+    //       require special logic to decrement it again, or would double increment (the load
+    //       balanced code makes a recursive call).  Instead, we increment the count after this
+    //       check.
+
+    if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
+      const { promise: checkedOutPromise, resolve, reject } = promiseWithResolvers<Connection>();
+
+      this.pool.checkOut((err, conn) => {
+        if (err || conn == null) {
+          reject(err);
+          return;
+        }
+        resolve(conn);
+      });
+      const checkedOut = await checkedOutPromise;
+
+      session.pin(checkedOut);
+      return this.commandAsync(ns, cmd, finalOptions);
+    }
+    this.incrementOperationCount();
+
+    // FIXME: Fix this
+    if (!conn) {
+      const { promise: connPromise, resolve, reject } = promiseWithResolvers<Connection>();
+      this.pool.checkOut((err, conn) => {
+        // don't callback with `err` here, we might want to act upon it inside `fn`
+        if (err || conn == null) {
+          reject(err);
+          return;
+        }
+
+        resolve(conn);
+      });
+
+      conn = await connPromise;
+    }
+
+    try {
+      return await conn.command(ns, cmd, finalOptions);
+    } catch (e) {
+      if (e instanceof MongoError && e.code === MONGODB_ERROR_CODES.Reauthenticate) {
+        conn = await this.pool.reauthenticateAsync(conn);
+      } else {
+        throw e;
+      }
+    }
+
+    return conn.command(ns, cmd, finalOptions);
   }
 
   /**

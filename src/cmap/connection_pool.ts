@@ -645,6 +645,31 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     );
   }
 
+  async reauthenticateAsync(connection: Connection): Promise<Connection> {
+    const authContext = connection.authContext;
+    if (!authContext) {
+      throw new MongoRuntimeError('No auth context found on connection.');
+    }
+    const credentials = authContext.credentials;
+    if (!credentials) {
+      throw new MongoMissingCredentialsError(
+        'Connection is missing credentials when asked to reauthenticate'
+      );
+    }
+
+    const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
+    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+
+    if (!provider) {
+      throw new MongoMissingCredentialsError(
+        `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
+      );
+    }
+
+    await provider.reauth(authContext);
+    return connection;
+  }
+
   /** Clear the min pool size timer */
   private clearMinPoolSizeTimer(): void {
     const minPoolSizeTimer = this[kMinPoolSizeTimer];
