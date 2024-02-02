@@ -45,6 +45,7 @@ describe('Feature Flags', () => {
     }
   });
 
+  // TODO(NODE-5672): Release Standardized Logger
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
@@ -74,7 +75,7 @@ describe('Feature Flags', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
             [loggerFeatureFlag]: true
           });
-          expect(client.mongoLogger.componentSeverities).to.have.property(
+          expect(client.mongoLogger?.componentSeverities).to.have.property(
             'command',
             SeverityLevel.EMERGENCY
           );
@@ -86,16 +87,11 @@ describe('Feature Flags', () => {
           process.env = {};
         });
 
-        it('does not enable logging for any component', () => {
+        it('does not create logger', () => {
           const client = new MongoClient('mongodb://localhost:27017', {
             [loggerFeatureFlag]: true
           });
-          for (const component of components) {
-            expect(client.mongoLogger.componentSeverities).to.have.property(
-              component,
-              SeverityLevel.OFF
-            );
-          }
+          expect(client.mongoLogger).to.not.exist;
         });
       });
     });
@@ -107,16 +103,11 @@ describe('Feature Flags', () => {
             process.env['MONGODB_LOG_COMMAND'] = SeverityLevel.EMERGENCY;
           });
 
-          it('does not enable logging', () => {
+          it('does not instantiate logger', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
               [loggerFeatureFlag]: featureFlagValue
             });
-            for (const component of components) {
-              expect(client.mongoLogger.componentSeverities).to.have.property(
-                component,
-                SeverityLevel.OFF
-              );
-            }
+            expect(client.mongoLogger).to.not.exist;
           });
         });
 
@@ -125,16 +116,11 @@ describe('Feature Flags', () => {
             process.env = {};
           });
 
-          it('does not enable logging', () => {
+          it('does not instantiate logger', () => {
             const client = new MongoClient('mongodb://localhost:27017', {
               [loggerFeatureFlag]: featureFlagValue
             });
-            for (const component of components) {
-              expect(client.mongoLogger.componentSeverities).to.have.property(
-                component,
-                SeverityLevel.OFF
-              );
-            }
+            expect(client.mongoLogger).to.not.exist;
           });
         });
       });
@@ -162,7 +148,7 @@ describe('Feature Flags', () => {
           [Symbol.for('@@mdb.internalLoggerConfig')]: undefined
         });
 
-        expect(client.mongoLogger.componentSeverities).to.have.property(
+        expect(client.mongoLogger?.componentSeverities).to.have.property(
           'command',
           SeverityLevel.EMERGENCY
         );
@@ -178,7 +164,7 @@ describe('Feature Flags', () => {
           }
         });
 
-        expect(client.mongoLogger.componentSeverities).to.have.property(
+        expect(client.mongoLogger?.componentSeverities).to.have.property(
           'command',
           SeverityLevel.ALERT
         );
