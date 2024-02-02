@@ -7,7 +7,7 @@ const sinon = require('sinon');
 const { expect } = require('chai');
 const { setImmediate } = require('timers');
 const { promisify } = require('util');
-const { ns, isHello } = require('../../mongodb');
+const { ns, isHello, MongoLoggableComponent } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
@@ -19,7 +19,9 @@ describe('Connection Pool', function () {
       client: {
         mongoLogger: {
           debug: () => null,
-          willLog: () => null
+          willLog: Object.fromEntries(
+            Object.values(MongoLoggableComponent).map(([value]) => [value, {}])
+          )
         }
       }
     }

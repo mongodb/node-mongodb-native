@@ -23,6 +23,7 @@ import {
   DEFAULT_MAX_DOCUMENT_LENGTH,
   type Log,
   type MongoDBLogWritable,
+  MongoLoggableComponent,
   MongoLogger,
   type MongoLoggerOptions,
   parseSeverityFromString,
@@ -113,6 +114,61 @@ describe('class MongoLogger', async function () {
         logger.error('command', 'Hello world!');
         expect(buffer).to.have.lengthOf(1);
       });
+    });
+
+    describe('willLog', function () {
+      const expectedWillLog = {};
+      const errorWillLogRow = {
+        off: true,
+        emergency: true,
+        alert: true,
+        critical: true,
+        error: true,
+        warn: false,
+        notice: false,
+        info: false,
+        debug: false,
+        trace: false
+      };
+      const debugWillLogRow = {
+        off: true,
+        emergency: true,
+        alert: true,
+        critical: true,
+        error: true,
+        warn: true,
+        notice: true,
+        info: true,
+        debug: true,
+        trace: false
+      };
+
+      for (const component of Object.values(MongoLoggableComponent)) {
+        context(`when component is ${component}`, function () {
+          it(`willLog[${component}] object should only return true for values <= its componentSeverity `, function () {
+            // generate component severities, set default severity to 'error' and relevant component severity to 'debug'
+            const componentSeverities = Object.fromEntries(
+              Object.entries(MongoLoggableComponent).map(([_key, value]) =>
+                value === component ? [value, 'debug'] : [value, 'error']
+              )
+            );
+
+            // create expected willLog
+            for (const component2 of Object.values(MongoLoggableComponent)) {
+              expectedWillLog[component2] =
+                component2 === component ? debugWillLogRow : errorWillLogRow;
+            }
+
+            const logger = new MongoLogger({
+              componentSeverities: componentSeverities,
+              logDestination: createStdioLogger(process.stderr),
+              logDestinationIsStdErr: true
+            } as any);
+
+            expect(logger.willLog).to.deep.equal(expectedWillLog);
+          });
+        });
+      }
     });
   });
 
