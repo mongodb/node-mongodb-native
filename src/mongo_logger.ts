@@ -769,12 +769,12 @@ export class MongoLogger {
 
   createWillLog() {
     for (const component of Object.values(MongoLoggableComponent)) {
-      this.willLog[component] = Object.fromEntries(
-        Object.entries(SeverityLevel).map(([_key, value]) => [
-          value as SeverityLevel,
-          compareSeverity(value, this.componentSeverities[component]) <= 0
-        ])
-      ) as Record<SeverityLevel, boolean>;
+      for (const severityLevel of Object.values(SeverityLevel)) {
+        this.willLog[component] = {
+          ...this.willLog[component],
+          [severityLevel]: compareSeverity(severityLevel, this.componentSeverities[component]) <= 0
+        };
+      }
     }
   }
 

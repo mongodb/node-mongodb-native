@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { MongoClient, type MongoLoggableComponent, SeverityLevel } from '../../mongodb';
+import { MongoClient, SeverityLevel } from '../../mongodb';
 
 describe('Feature Flags', () => {
   describe('@@mdb.skipPingOnConnect', () => {
@@ -49,13 +49,6 @@ describe('Feature Flags', () => {
   describe('@@mdb.enableMongoLogger', () => {
     let cachedEnv;
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
-    const components: Array<MongoLoggableComponent | 'default'> = [
-      'default',
-      'topology',
-      'serverSelection',
-      'connection',
-      'command'
-    ];
 
     before(() => {
       cachedEnv = process.env;
