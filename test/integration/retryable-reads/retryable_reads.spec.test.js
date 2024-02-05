@@ -3,7 +3,7 @@ const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-r
 const { loadSpecTests } = require('../../spec');
 const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
 
-describe.only('Retryable Reads (legacy)', function () {
+describe('Retryable Reads (legacy)', function () {
   const testContext = new TestRunnerContext();
   const testSuites = loadSpecTests(path.join('retryable-reads', 'legacy'));
 
