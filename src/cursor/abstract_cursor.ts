@@ -337,7 +337,7 @@ export abstract class AbstractCursor<
       const transform = options.transform;
       const readable = new ReadableCursorStream(this);
 
-      return readable.pipe(
+      const transformedStream = readable.pipe(
         new Transform({
           objectMode: true,
           highWaterMark: 1,
@@ -351,6 +351,12 @@ export abstract class AbstractCursor<
           }
         })
       );
+
+      // Bubble errors to transformed stream, because otherwise no way
+      // to handle this error.
+      readable.on('error', err => transformedStream.emit('error', err));
+
+      return transformedStream;
     }
 
     return new ReadableCursorStream(this);
