@@ -361,10 +361,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     this[kOptions] = parseOptions(url, this, options);
 
-    const shouldSetLogger =
-      Object.values(this[kOptions].mongoLoggerOptions.componentSeverities).filter(
-        value => value !== SeverityLevel.OFF
-      ).length !== 0;
+    const shouldSetLogger = Object.values(
+      this[kOptions].mongoLoggerOptions.componentSeverities
+    ).some(value => value !== SeverityLevel.OFF);
     this.mongoLogger = shouldSetLogger
       ? new MongoLogger(this[kOptions].mongoLoggerOptions)
       : undefined;
