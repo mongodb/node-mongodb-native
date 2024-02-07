@@ -19,14 +19,7 @@ describe('Connection Pool', function () {
       client: {
         mongoLogger: {
           debug: () => null,
-          willLog: Object.fromEntries(
-            Object.values(MongoLoggableComponent).map(component => [
-              component,
-              Object.fromEntries(
-                Object.values(SeverityLevel).map(severityLevel => [severityLevel, false])
-              )
-            ])
-          )
+          willLog: () => null
         }
       }
     }

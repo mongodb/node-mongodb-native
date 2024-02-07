@@ -115,61 +115,6 @@ describe('class MongoLogger', async function () {
         expect(buffer).to.have.lengthOf(1);
       });
     });
-
-    describe('willLog', function () {
-      const expectedWillLog = {};
-      const errorWillLogRow = {
-        off: true,
-        emergency: true,
-        alert: true,
-        critical: true,
-        error: true,
-        warn: false,
-        notice: false,
-        info: false,
-        debug: false,
-        trace: false
-      };
-      const debugWillLogRow = {
-        off: true,
-        emergency: true,
-        alert: true,
-        critical: true,
-        error: true,
-        warn: true,
-        notice: true,
-        info: true,
-        debug: true,
-        trace: false
-      };
-
-      for (const component of Object.values(MongoLoggableComponent)) {
-        context(`when component is ${component}`, function () {
-          it(`willLog[${component}] object should only return true for values <= its componentSeverity `, function () {
-            // generate component severities, set default severity to 'error' and relevant component severity to 'debug'
-            const componentSeverities = Object.fromEntries(
-              Object.entries(MongoLoggableComponent).map(([_key, value]) =>
-                value === component ? [value, 'debug'] : [value, 'error']
-              )
-            );
-
-            // create expected willLog
-            for (const component2 of Object.values(MongoLoggableComponent)) {
-              expectedWillLog[component2] =
-                component2 === component ? debugWillLogRow : errorWillLogRow;
-            }
-
-            const logger = new MongoLogger({
-              componentSeverities: componentSeverities,
-              logDestination: createStdioLogger(process.stderr),
-              logDestinationIsStdErr: true
-            } as any);
-
-            expect(logger.willLog).to.deep.equal(expectedWillLog);
-          });
-        });
-      }
-    });
   });
 
   describe('static #resolveOptions()', function () {
@@ -1603,5 +1548,71 @@ describe('class MongoLogger', async function () {
         expect(stream.buffer).to.deep.equal(['longer timeout', 'shorter timeout', 'no timeout']);
       });
     });
+  });
+
+  describe('willLog', function () {
+    const expectedWillLogResults = {};
+    const errorWillLogRow = {
+      off: true,
+      emergency: true,
+      alert: true,
+      critical: true,
+      error: true,
+      warn: false,
+      notice: false,
+      info: false,
+      debug: false,
+      trace: false
+    };
+    const debugWillLogRow = {
+      off: true,
+      emergency: true,
+      alert: true,
+      critical: true,
+      error: true,
+      warn: true,
+      notice: true,
+      info: true,
+      debug: true,
+      trace: false
+    };
+
+    let logger: MongoLogger;
+
+    for (const component of Object.values(MongoLoggableComponent)) {
+      context(`when component is ${component}`, function () {
+        beforeEach(function () {
+          // create expectedWillLogResults
+          for (const component2 of Object.values(MongoLoggableComponent)) {
+            expectedWillLogResults[component2] =
+              component2 === component ? debugWillLogRow : errorWillLogRow;
+          }
+
+          // generate component severities, set default severity to 'error' and relevant component severity to 'debug'
+          const componentSeverities = Object.fromEntries(
+            Object.entries(MongoLoggableComponent).map(([_key, value]) =>
+              value === component ? [value, 'debug'] : [value, 'error']
+            )
+          );
+
+          // create logger with relevant component severities
+          logger = new MongoLogger({
+            componentSeverities: componentSeverities,
+            logDestination: createStdioLogger(process.stderr),
+            logDestinationIsStdErr: true
+          } as any);
+        });
+
+        it(`willLog method should only return true for values <= its componentSeverity`, function () {
+          for (const component3 of Object.values(MongoLoggableComponent)) {
+            for (const severityLevel of Object.values(SeverityLevel)) {
+              expect(logger.willLog(component3, severityLevel)).to.equal(
+                expectedWillLogResults[component3][severityLevel]
+              );
+            }
+          }
+        });
+      });
+    }
   });
 });

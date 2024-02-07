@@ -280,7 +280,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       (this.monitorCommands ||
         (this.established &&
           !this.authContext?.reauthenticating &&
-          this.mongoLogger?.willLog[MongoLoggableComponent.COMMAND][SeverityLevel.DEBUG])) ??
+          this.mongoLogger?.willLog(MongoLoggableComponent.COMMAND, SeverityLevel.DEBUG))) ??
       false
     );
   }

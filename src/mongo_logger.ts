@@ -728,7 +728,7 @@ export class MongoLogger {
   logDestination: MongoDBLogWritable;
   logDestinationIsStdErr: boolean;
   pendingLog: PromiseLike<unknown> | unknown = null;
-  willLog: Record<MongoLoggableComponent, Record<SeverityLevel, boolean>>;
+  private severities: Record<MongoLoggableComponent, Record<SeverityLevel, boolean>>;
 
   /**
    * This method should be used when logging errors that do not have a public driver API for
@@ -761,26 +761,26 @@ export class MongoLogger {
     this.maxDocumentLength = options.maxDocumentLength;
     this.logDestination = options.logDestination;
     this.logDestinationIsStdErr = options.logDestinationIsStdErr;
-    this.willLog = this.createWillLog();
+    this.severities = this.createLoggingSeverities();
   }
 
-  createWillLog(): Record<MongoLoggableComponent, Record<SeverityLevel, boolean>> {
-    const willLog = Object();
+  createLoggingSeverities(): Record<MongoLoggableComponent, Record<SeverityLevel, boolean>> {
+    const severities = Object();
     for (const component of Object.values(MongoLoggableComponent)) {
-      willLog[component] = {};
+      severities[component] = {};
       for (const severityLevel of Object.values(SeverityLevel)) {
-        willLog[component][severityLevel] =
+        severities[component][severityLevel] =
           compareSeverity(severityLevel, this.componentSeverities[component]) <= 0;
       }
     }
-    return willLog;
+    return severities;
   }
 
   turnOffSeverities() {
     for (const component of Object.values(MongoLoggableComponent)) {
       this.componentSeverities[component] = SeverityLevel.OFF;
       for (const severityLevel of Object.values(SeverityLevel)) {
-        this.willLog[component][severityLevel] = false;
+        this.severities[component][severityLevel] = false;
       }
     }
   }
@@ -810,12 +810,16 @@ export class MongoLogger {
     this.pendingLog = null;
   }
 
+  willLog(component: MongoLoggableComponent, severity: SeverityLevel): boolean {
+    return this.severities[component][severity];
+  }
+
   private log(
     severity: SeverityLevel,
     component: MongoLoggableComponent,
     message: Loggable | string
   ): void {
-    if (!this.willLog[component][severity]) return;
+    if (!this.willLog(component, severity)) return;
 
     let logMessage: Log = { t: new Date(), c: component, s: severity };
     if (typeof message === 'string') {
