@@ -1616,5 +1616,3 @@ describe('class MongoLogger', async function () {
     }
   });
 });
-
-});

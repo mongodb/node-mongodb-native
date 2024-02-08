@@ -811,6 +811,7 @@ export class MongoLogger {
   }
 
   willLog(component: MongoLoggableComponent, severity: SeverityLevel): boolean {
+    if (severity === SeverityLevel.OFF) return false;
     return this.severities[component][severity];
   }
 
