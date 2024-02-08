@@ -473,17 +473,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
         if (!skipPingOnConnect && server && this.s.credentials) {
-          server.command(ns('admin.$cmd'), { ping: 1 }, {}, err => {
-            if (err) {
-              return exitWithError(err);
-            }
-
+          server.commandAsync(ns('admin.$cmd'), { ping: 1 }, {}).then(() => {
             stateTransition(this, STATE_CONNECTED);
             this.emit(Topology.OPEN, this);
             this.emit(Topology.CONNECT, this);
 
             callback?.(undefined, this);
-          });
+          }, exitWithError);
 
           return;
         }
