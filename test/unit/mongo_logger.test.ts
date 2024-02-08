@@ -1550,69 +1550,71 @@ describe('class MongoLogger', async function () {
     });
   });
 
-  describe('willLog', function () {
-    const expectedWillLogResults = {};
-    const errorWillLogRow = {
-      off: true,
-      emergency: true,
-      alert: true,
-      critical: true,
-      error: true,
-      warn: false,
-      notice: false,
-      info: false,
-      debug: false,
-      trace: false
-    };
-    const debugWillLogRow = {
-      off: true,
-      emergency: true,
-      alert: true,
-      critical: true,
-      error: true,
-      warn: true,
-      notice: true,
-      info: true,
-      debug: true,
-      trace: false
-    };
+  describe('#willLog', function () {
+    const severityLevels = Object.values(SeverityLevel);
+    for (const severityLevel of severityLevels) {
+      context(`when the severity level is ${severityLevel}`, function () {
+        let logger: MongoLogger;
+        let componentSeverities;
+        const components = Object.values(MongoLoggableComponent);
 
-    let logger: MongoLogger;
+        for (const component of components) {
+          context(`when ${component} severity level <= ${severityLevel}`, function () {
+            beforeEach(function () {
+              const index = severityLevels.indexOf(severityLevel);
+              componentSeverities = components.reduce((severities, value) => {
+                component === value
+                  ? (severities[component] = severityLevel)
+                  : (severities[value] =
+                      severityLevels[index + 1] === 'off'
+                        ? severityLevel
+                        : severityLevels[index + 1]);
+                return severities;
+              }, {});
+              logger = new MongoLogger({
+                componentSeverities: componentSeverities,
+                logDestination: createStdioLogger(process.stderr),
+                logDestinationIsStdErr: true
+              } as any);
+            });
 
-    for (const component of Object.values(MongoLoggableComponent)) {
-      context(`when component is ${component}`, function () {
-        beforeEach(function () {
-          // create expectedWillLogResults
-          for (const component2 of Object.values(MongoLoggableComponent)) {
-            expectedWillLogResults[component2] =
-              component2 === component ? debugWillLogRow : errorWillLogRow;
-          }
-
-          // generate component severities, set default severity to 'error' and relevant component severity to 'debug'
-          const componentSeverities = Object.fromEntries(
-            Object.entries(MongoLoggableComponent).map(([_key, value]) =>
-              value === component ? [value, 'debug'] : [value, 'error']
-            )
-          );
-
-          // create logger with relevant component severities
-          logger = new MongoLogger({
-            componentSeverities: componentSeverities,
-            logDestination: createStdioLogger(process.stderr),
-            logDestinationIsStdErr: true
-          } as any);
-        });
-
-        it(`willLog method should only return true for values <= its componentSeverity`, function () {
-          for (const component3 of Object.values(MongoLoggableComponent)) {
-            for (const severityLevel of Object.values(SeverityLevel)) {
-              expect(logger.willLog(component3, severityLevel)).to.equal(
-                expectedWillLogResults[component3][severityLevel]
-              );
+            if (severityLevel === 'off') {
+              it('returns false always for off', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.false;
+              });
+            } else {
+              it('returns true', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.true;
+              });
             }
-          }
-        });
+          });
+
+          context(`when ${component} severity level > ${severityLevel}`, function () {
+            if (severityLevel !== 'emergency') {
+              beforeEach(function () {
+                const index = severityLevels.indexOf(severityLevel);
+                componentSeverities = components.reduce((severities, value) => {
+                  component === value
+                    ? (severities[component] = severityLevels[index - 1])
+                    : (severities[value] = severityLevel);
+                  return severities;
+                }, {});
+                logger = new MongoLogger({
+                  componentSeverities: componentSeverities,
+                  logDestination: createStdioLogger(process.stderr),
+                  logDestinationIsStdErr: true
+                } as any);
+              });
+
+              it('returns false', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.false;
+              });
+            }
+          });
+        }
       });
     }
   });
+});
+
 });
