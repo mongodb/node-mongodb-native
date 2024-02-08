@@ -1,0 +1,658 @@
+# Test that all the operations go to the same mongos.
+#
+# In tests that don't include command-started events the assertion is implicit:
+# that all the read operations succeed. If the driver does not properly pin to
+# a single mongos then one of the operations in a transaction will eventually
+# be sent to a different mongos, which is unaware of the transaction, and the
+# mongos will return a command error. An example of such an error is:
+# {
+#   'ok': 0.0,
+#   'errmsg': 'cannot continue txnId -1 for session 28938f50-9d29-4ca5-8de5-ddaf261267c4 - 47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU= with txnId 1',
+#   'code': 251,
+#   'codeName': 'NoSuchTransaction',
+#   'errorLabels': ['TransientTransactionError']
+# }
+description: pin-mongos
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.1.8
+    # serverless proxy doesn't append error labels to errors in transactions
+    # caused by failpoints (CLOUDP-88216)
+    serverless: forbid
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: &data
+      - { _id: 1 }
+      - { _id: 2 }
+
+tests:
+  -
+    description: countDocuments
+    operations:
+      - &startTransaction
+        object: *session0
+        name: startTransaction
+      - &countDocuments
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: { _id: 2 }
+          session: *session0
+        expectResult: 1
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - &commitTransaction
+        object: *session0
+        name: commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: distinct
+    operations:
+      - *startTransaction
+      - &distinct
+        object: *collection0
+        name: distinct
+        arguments:
+          fieldName: _id
+          filter: {}
+          session: *session0
+        expectResult: [ 1, 2 ]
+      - *distinct
+      - *distinct
+      - *distinct
+      - *distinct
+      - *distinct
+      - *distinct
+      - *distinct
+      - *commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: find
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      - &find
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: 2 }
+          session: *session0
+        expectResult:
+          - { _id: 2 }
+      - *find
+      - *find
+      - *find
+      - *find
+      - *find
+      - *find
+      - *find
+      - *commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: insertOne
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 4 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 4 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 5 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 5 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 6 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 6 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 7 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 7 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 8 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 8 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 9 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 9 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 10 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 10 } }
+      - *commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+          - { _id: 4 }
+          - { _id: 5 }
+          - { _id: 6 }
+          - { _id: 7 }
+          - { _id: 8 }
+          - { _id: 9 }
+          - { _id: 10 }
+  -
+    description: 'mixed read write operations'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 3 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } }
+      - &countDocuments
+        object: *collection0
+        name: countDocuments
+        arguments:
+          filter: { _id: 3 }
+          session: *session0
+        expectResult: 1
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      - *countDocuments
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 4 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 4 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 5 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 5 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 6 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 6 } }
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          document: { _id: 7 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 7 } }
+      - *commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+          - { _id: 4 }
+          - { _id: 5 }
+          - { _id: 6 }
+          - { _id: 7 }
+  -
+    description: 'multiple commits'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertMany
+        arguments:
+          documents:
+            - { _id: 3 }
+            - { _id: 4 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches:
+            insertedIds:
+              $$unsetOrMatches:
+                '0': 3
+                '1': 4
+      # Session is pinned and remains pinned after successful commits
+      - &assertSessionPinned
+        object: testRunner
+        name: assertSessionPinned
+        arguments:
+          session: *session0
+      - *commitTransaction
+      - *assertSessionPinned
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *commitTransaction
+      - *assertSessionPinned
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+          - { _id: 4 }
+  -
+    description: 'remain pinned after non-transient error on commit'
+    # Note: test utilizes targetedFailPoint, which is incompatible with
+    # load-balanced and useMultipleMongoses:true
+    runOnRequirements:
+      - topologies: [ sharded ]
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertMany
+        arguments:
+          documents:
+            - { _id: 3 }
+            - { _id: 4 }
+          session: *session0
+        expectResult:
+          $$unsetOrMatches:
+            insertedIds:
+              $$unsetOrMatches:
+                '0': 3
+                '1': 4
+      - *assertSessionPinned
+      # Fail the commit with a non-transient error
+      -
+        object: testRunner
+        name: targetedFailPoint
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              errorCode: 51 # ManualInterventionRequired
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsOmit:
+            - TransientTransactionError
+          errorCode: 51
+      - *assertSessionPinned
+      # The next commit should succeed
+      -
+        object: *session0
+        name: commitTransaction
+      - *assertSessionPinned
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+          - { _id: 3 }
+          - { _id: 4 }
+  -
+    description: 'unpin after transient error within a transaction'
+    # Note: test utilizes targetedFailPoint, which is incompatible with
+    # load-balanced and useMultipleMongoses:true
+    runOnRequirements:
+      - topologies: [ sharded ]
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 3 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } }
+      # Enable the fail point only on the mongos that session0 is pinned to
+      -
+        object: testRunner
+        name: targetedFailPoint
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - insert
+              closeConnection: true
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 4 }
+        expectError:
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+      # Session unpins from the first mongos after the insert error and
+      # abortTransaction succeeds immediately on any mongos.
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 3 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 4 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+                recoveryToken: { $$exists: true }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+  # Applications should not run commitTransaction after transient errors but
+  # the transactions API allows it and this test confirms unpinning behavior.
+  # In a sharded cluster, a transient error within a transaction unpins the
+  # session. This way a subsequent abort can "succeed" immediately instead of
+  # blocking for serverSelectionTimeoutMS in the case the mongos went down.
+  # However since the abortTransaction helper ignores errors, this test uses
+  # commitTransaction to prove the session was unpinned.
+  -
+    description: 'unpin after transient error within a transaction and commit'
+    # Note: test utilizes targetedFailPoint, which is incompatible with
+    # load-balanced and useMultipleMongoses:true
+    runOnRequirements:
+      - topologies: [ sharded ]
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: true
+                uriOptions:
+                  # Increase heartbeatFrequencyMS to avoid the race condition where an in
+                  # flight heartbeat refreshes the first mongoes' SDAM state in between
+                  # the insert connection error and the single commit attempt.
+                  heartbeatFrequencyMS: 30000
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 3 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 3 } }
+      # Enable the fail point only on the Mongos that session0 is pinned to.
+      # Fail hello/legacy hello to prevent the heartbeat requested directly after the
+      # insert error from racing with server selection for the commit.
+      # Note: times: 7 is slightly artbitrary but it accounts for one failed
+      # insert and some SDAM heartbeats. A test runner will have multiple
+      # clients connected to this server so this fail point configuration
+      # is also racy.
+      -
+        object: testRunner
+        name: targetedFailPoint
+        arguments:
+          session: *session1
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 7 }
+            data:
+              failCommands:
+                - insert
+                - isMaster
+                - hello
+              closeConnection: true
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 4 }
+        expectError:
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+      # Session unpins from the first mongos after the insert error and
+      # commitTransaction selects the second mongos which is unaware of the
+      # transaction and therefore fails with NoSuchTransaction error. If this
+      # commit succeeds it indicates a bug, either:
+      # - the driver mistakenly remained pinned even after the insert error, or
+      # - the test client was initialized with a single mongos seed
+      #
+      # Note that the commit attempt should not select the original mongos
+      # because that server's SDAM state is reset by the connection error,
+      # heartbeatFrequencyMS is high, and subsequent heartbeats
+      # should fail.
+      -
+        object: *session1
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+          errorCodeName: NoSuchTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 3 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 4 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+                recoveryToken: { $$exists: true }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }

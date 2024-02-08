@@ -1,0 +1,1315 @@
+description: error-labels
+
+schemaVersion: '1.4'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    # serverless proxy doesn't append error labels to errors in transactions
+    # caused by failpoints (CLOUDP-88216)
+    serverless: forbid
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'DuplicateKey errors do not contain transient label'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertMany
+        arguments:
+          session: *session0
+          documents:
+            - { _id: 1 }
+            - { _id: 1 }
+        expectError:
+          errorLabelsOmit:
+            - TransientTransactionError
+            - UnknownTransactionCommitResult
+          # DuplicateKey error code included in the bulk write error message
+          # returned by the server
+          errorContains: E11000
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'NotWritablePrimary errors contain transient label'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - insert
+              errorCode: 10107 # NotWritablePrimary
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          # Note, the server will return the errorLabel in this case
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'WriteConflict errors contain transient label'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - insert
+              errorCode: 112 # WriteConflict
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          # Note, the server will return the errorLabel in this case
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'NoSuchTransaction errors contain transient label'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - insert
+              errorCode: 251 # NoSuchTransaction
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          # Note, the server will return the errorLabel in this case
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'NoSuchTransaction errors on commit contain transient label'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              errorCode: 251 # NoSuchTransaction
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          # Note, the server will return the errorLabel in this case
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'add TransientTransactionError label to connection errors, but do not add RetryableWriteError label'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 4 }
+            data:
+              failCommands:
+                - insert
+                - find
+                - aggregate
+                - distinct
+              closeConnection: true
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError: &transient_label_only
+          errorLabelsContain:
+            - TransientTransactionError
+          # While a connection error would normally be retryable, these are not because they occur within a transaction.
+          # Ensure the driver does not add the RetryableWriteError label to these errors.
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: {}
+          session: *session0
+        expectError: *transient_label_only
+      -
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline:
+            - { $project: { _id: 1 } }
+          session: *session0
+        expectError: *transient_label_only
+      -
+        object: *collection0
+        name: distinct
+        arguments:
+          fieldName: _id
+          filter: {}
+          session: *session0
+        expectError: *transient_label_only
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                find: *collection_name
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: find
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline:
+                  - { $project: { _id: 1 } }
+                cursor: {  }
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: aggregate
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                distinct: *collection_name
+                key: _id
+                lsid: { $$sessionLsid: *session0 }
+                readConcern: { $$exists: false }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: distinct
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'add RetryableWriteError and UnknownTransactionCommitResult labels to connection errors'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands:
+                - commitTransaction
+              closeConnection: true
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+          errorLabelsOmit:
+            - TransientTransactionError
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'do not add RetryableWriteError label to writeConcernError ShutdownInProgress that occurs within transaction'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - insert
+              writeConcernError:
+                code: 91
+                errmsg: 'Replication is being shut down'
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              writeConcernError:
+                code: 64 # WriteConcernFailed without wtimeout
+                errmsg: 'multiple errors reported'
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - UnknownTransactionCommitResult
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'add UnknownTransactionCommitResult label to writeConcernError WriteConcernFailed with wtimeout'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              writeConcernError:
+                code: 64
+                codeName: WriteConcernFailed
+                errmsg: 'waiting for replication timed out'
+                errInfo:
+                  wtimeout: true
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - UnknownTransactionCommitResult
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'omit UnknownTransactionCommitResult label from writeConcernError UnsatisfiableWriteConcern'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              writeConcernError:
+                code: 100 # UnsatisfiableWriteConcern
+                errmsg: 'Not enough data-bearing nodes'
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+            - UnknownTransactionCommitResult
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'omit UnknownTransactionCommitResult label from writeConcernError UnknownReplWriteConcern'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              writeConcernError:
+                code: 79 # UnknownReplWriteConcern
+                errmsg: "No write concern mode named 'blah' found in replica set configuration"
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsOmit:
+            - RetryableWriteConcern
+            - TransientTransactionError
+            - UnknownTransactionCommitResult
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'do not add UnknownTransactionCommitResult label to MaxTimeMSExpired inside transactions'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - aggregate
+              errorCode: 50 # MaxTimeMSExpired
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline:
+            - { $project: { _id: 1 } }
+          maxTimeMS: 60000
+          session: *session0
+        expectError:
+          errorLabelsOmit:
+            - RetryableWriteError
+            - UnknownTransactionCommitResult
+            - TransientTransactionError
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline:
+                  - { $project: { _id: 1 } }
+                cursor: {  }
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                autocommit: false
+                maxTimeMS: 60000
+              commandName: aggregate
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'add UnknownTransactionCommitResult label to MaxTimeMSExpired'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              errorCode: 50 # MaxTimeMSExpired
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+          maxCommitTimeMS: 60000
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - UnknownTransactionCommitResult
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'add UnknownTransactionCommitResult label to writeConcernError MaxTimeMSExpired'
+    operations:
+      -
+        object: testRunner
+        name: failPoint
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              writeConcernError:
+                code: 50 # MaxTimeMSExpired
+                errmsg: 'operation exceeded time limit'
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+          maxCommitTimeMS: 60000
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+        expectError:
+          errorLabelsContain:
+            - UnknownTransactionCommitResult
+          errorLabelsOmit:
+            - RetryableWriteError
+            - TransientTransactionError
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }

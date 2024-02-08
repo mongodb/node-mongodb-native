@@ -1,0 +1,655 @@
+# Assumes the default for transactions is the same as for all ops, tests
+# setting the writeConcern to "majority".
+description: write-concern
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    collection:
+      id: &collection_w0 collection_w0
+      database: *database0
+      collectionName: &collection_name test
+      collectionOptions:
+        writeConcern: { w: 0 }
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: &data
+      - { _id: 0 }
+
+tests:
+  -
+    description: 'commit with majority'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      - &commitTransaction
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - &insertOneEvent
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                <<: &transactionCommandArgs
+                  lsid: { $$sessionLsid: *session0 }
+                  txnNumber: { $numberLong: '1' }
+                  startTransaction: true
+                  autocommit: false
+                  readConcern: { $$exists: false }
+                  writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0 }
+          - { _id: 1 }
+  -
+    description: 'commit with default'
+    operations:
+      - &startTransaction
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: insert
+              databaseName: *database_name
+          - &commitWithDefaultWCEvent
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0 }
+          - { _id: 1 }
+  -
+    description: 'abort with majority'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: 'abort with default'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: 'start with unacknowledged write concern'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: 0
+        expectError:
+          isClientError: true
+          errorContains: 'transactions do not support unacknowledged write concern'
+  -
+    description: 'start with implicit unacknowledged write concern'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions: { w: 0 }
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+        expectError:
+          isClientError: true
+          errorContains: 'transactions do not support unacknowledged write concern'
+  -
+    description: 'unacknowledged write concern coll insertOne'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *insertOneEvent
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0 }
+          - { _id: 1 }
+  -
+    description: 'unacknowledged write concern coll insertMany'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: insertMany
+        arguments:
+          session: *session0
+          documents:
+            - { _id: 1 }
+            - { _id: 2 }
+        expectResult:
+          $$unsetOrMatches:
+            insertedIds:
+              $$unsetOrMatches:
+                '0': 1
+                '1': 2
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                  - { _id: 2 }
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: insert
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0 }
+          - { _id: 1 }
+          - { _id: 2 }
+  -
+    description: 'unacknowledged write concern coll bulkWrite'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: bulkWrite
+        arguments:
+          session: *session0
+          requests:
+            -
+              insertOne:
+                document: { _id: 1 }
+        expectResult:
+          deletedCount: 0
+          insertedCount: 1
+          insertedIds:
+            $$unsetOrMatches:
+              '0': 1
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {  }
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          - *insertOneEvent
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0 }
+          - { _id: 1 }
+  -
+    description: 'unacknowledged write concern coll deleteOne'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: deleteOne
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+        expectResult:
+          deletedCount: 1
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: { _id: 0 }
+                    limit: 1
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: delete
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'unacknowledged write concern coll deleteMany'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: deleteMany
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+        expectResult:
+          deletedCount: 1
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                delete: *collection_name
+                deletes:
+                  -
+                    q: { _id: 0 }
+                    limit: 0
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: delete
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'unacknowledged write concern coll updateOne'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: updateOne
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 0 }
+                    u: { $inc: { x: 1 } }
+                    upsert: true
+                    multi: { $$unsetOrMatches: false }
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: update
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0, x: 1 }
+  -
+    description: 'unacknowledged write concern coll updateMany'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: updateMany
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+          update: { $inc: { x: 1 } }
+          upsert: true
+        expectResult:
+          matchedCount: 1
+          modifiedCount: 1
+          upsertedCount: 0
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                update: *collection_name
+                updates:
+                  -
+                    q: { _id: 0 }
+                    u: { $inc: { x: 1 } }
+                    multi: true
+                    upsert: true
+                ordered: true
+                <<: *transactionCommandArgs
+              commandName: update
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0, x: 1 }
+  -
+    description: 'unacknowledged write concern coll findOneAndDelete'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: findOneAndDelete
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+        expectResult:
+          _id: 0
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query: { _id: 0 }
+                remove: true
+                <<: *transactionCommandArgs
+              commandName: findAndModify
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'unacknowledged write concern coll findOneAndReplace'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: findOneAndReplace
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+          replacement: { x: 1 }
+          returnDocument: Before
+        expectResult:
+          _id: 0
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query: { _id: 0 }
+                update: { x: 1 }
+                new: false
+                <<: *transactionCommandArgs
+              commandName: findAndModify
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0, x: 1 }
+  -
+    description: 'unacknowledged write concern coll findOneAndUpdate'
+    operations:
+      - *startTransaction
+      -
+        object: *collection_w0
+        name: findOneAndUpdate
+        arguments:
+          session: *session0
+          filter: { _id: 0 }
+          update: { $inc: { x: 1 } }
+          returnDocument: Before
+        expectResult:
+          _id: 0
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                findAndModify: *collection_name
+                query: { _id: 0 }
+                update: { $inc: { x: 1 } }
+                new: false
+                <<: *transactionCommandArgs
+              commandName: findAndModify
+              databaseName: *database_name
+          - *commitWithDefaultWCEvent
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 0, x: 1 }

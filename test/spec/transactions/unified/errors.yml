@@ -1,0 +1,187 @@
+description: errors
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+  -
+    session:
+      id: &session1 session1
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'start insert start'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: startTransaction
+        expectError:
+          isClientError: true
+          errorContains: 'transaction already in progress'
+      # Just to clean up
+      -
+        object: *session0
+        name: commitTransaction
+  -
+    description: 'start twice'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *session0
+        name: startTransaction
+        expectError:
+          isClientError: true
+          errorContains: 'transaction already in progress'
+  -
+    description: 'commit and start twice'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *session0
+        name: startTransaction
+        expectError:
+          isClientError: true
+          errorContains: 'transaction already in progress'
+  -
+    description: 'write conflict commit'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectError:
+          errorCodeName: WriteConflict
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: *session1
+        name: commitTransaction
+        expectError:
+          errorCodeName: NoSuchTransaction
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+  -
+    description: 'write conflict abort'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectError:
+          errorCodeName: WriteConflict
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+      -
+        object: *session0
+        name: commitTransaction
+      # Driver ignores "NoSuchTransaction" error
+      -
+        object: *session1
+        name: abortTransaction
