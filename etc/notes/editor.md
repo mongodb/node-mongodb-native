@@ -15,6 +15,8 @@ Here's a quick description of each:
 - `github.vscode-pull-request-github` - With this you can manage and make pull requests right from VSCode, even reviews can be done via the editor.
 - `eamodio.gitlens` - Gives spectacular insight into git history, has many helpful git navigation UI features.
 - `mongodb.mongodb-vscode` - Our VScode extension can be connected to your locally running MongoDB instance (to help debug tests, etc.)
+- `rbuckton.deoptexplorer-vscode` - De-opt explorer can visualize the results of running Node.js profiling results on top of your source code (Run things with `dexnode` for easy use!)
+- `ms-vscode.vscode-js-profile-flame` - Use this to monitor performance while running node, and if you have a `.cpuprofile` in the current workspace you can view a flamegraph visualization
 
 ```jsonc
 {
@@ -69,7 +71,9 @@ Here's a quick description of each:
             "hbenl.vscode-mocha-test-adapter",
             "github.vscode-pull-request-github",
             "mongodb.mongodb-vscode",
-            "eamodio.gitlens"
+            "eamodio.gitlens",
+            "rbuckton.deoptexplorer-vscode",
+            "ms-vscode.vscode-js-profile-flame",
         ],
         "unwantedRecommendations": [
             "esbenp.prettier-vscode"
