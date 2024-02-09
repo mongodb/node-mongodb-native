@@ -25,7 +25,8 @@ import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
   MongoLogger,
-  type MongoLoggerOptions
+  type MongoLoggerOptions,
+  SeverityLevel
 } from './mongo_logger';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
@@ -345,7 +346,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
   /** @internal */
   topology?: Topology;
   /** @internal */
-  override readonly mongoLogger: MongoLogger;
+  override readonly mongoLogger: MongoLogger | undefined;
   /** @internal */
   private connectionLock?: Promise<this>;
 
@@ -359,7 +360,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     super();
 
     this[kOptions] = parseOptions(url, this, options);
-    this.mongoLogger = new MongoLogger(this[kOptions].mongoLoggerOptions);
+
+    const shouldSetLogger = Object.values(
+      this[kOptions].mongoLoggerOptions.componentSeverities
+    ).some(value => value !== SeverityLevel.OFF);
+    this.mongoLogger = shouldSetLogger
+      ? new MongoLogger(this[kOptions].mongoLoggerOptions)
+      : undefined;
 
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
@@ -405,9 +412,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const srvHostIsCosmosDB = isHostMatch(COSMOS_DB_CHECK, this[kOptions].srvHost);
 
     if (documentDBHostnames.length !== 0 || srvHostIsDocumentDB) {
-      this.mongoLogger.info('client', DOCUMENT_DB_MSG);
+      this.mongoLogger?.info('client', DOCUMENT_DB_MSG);
     } else if (cosmosDBHostnames.length !== 0 || srvHostIsCosmosDB) {
-      this.mongoLogger.info('client', COSMOS_DB_MSG);
+      this.mongoLogger?.info('client', COSMOS_DB_MSG);
     }
   }
 

@@ -800,7 +800,10 @@ describe('MongoOptions', function () {
   context('loggingOptions', function () {
     const expectedLoggingObject = {
       maxDocumentLength: 20,
-      logDestination: new Writable()
+      logDestination: new Writable(),
+      componentSeverities: Object.fromEntries(
+        Object.values(MongoLoggableComponent).map(([value]) => [value, SeverityLevel.OFF])
+      )
     };
 
     before(() => {
@@ -1075,9 +1078,9 @@ describe('MongoOptions', function () {
               ).to.not.throw(MongoAPIError);
               const client = new MongoClient('mongodb://a/', {
                 [loggerFeatureFlag]: true,
-                mongodbLogComponentSeverities: {}
+                mongodbLogComponentSeverities: { client: 'error' } // dummy so logger doesn't turn on
               });
-              expect(client.mongoLogger.componentSeverities.default).to.equal('off');
+              expect(client.mongoLogger?.componentSeverities.command).to.equal('off');
             });
           });
           context('when valid client option is provided', function () {
@@ -1091,9 +1094,9 @@ describe('MongoOptions', function () {
               ).to.not.throw(MongoAPIError);
               const client = new MongoClient('mongodb://a/', {
                 [loggerFeatureFlag]: true,
-                mongodbLogComponentSeverities: { default: 'emergency' }
+                mongodbLogComponentSeverities: { command: 'emergency' }
               });
-              expect(client.mongoLogger.componentSeverities.default).to.equal('emergency');
+              expect(client.mongoLogger?.componentSeverities.command).to.equal('emergency');
             });
           });
         });

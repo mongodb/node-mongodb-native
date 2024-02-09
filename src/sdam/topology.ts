@@ -102,7 +102,7 @@ export type ServerSelectionCallback = Callback<Server>;
 export interface ServerSelectionRequest {
   serverSelector: ServerSelector;
   topologyDescription: TopologyDescription;
-  mongoLogger: MongoLogger;
+  mongoLogger: MongoLogger | undefined;
   transaction?: Transaction;
   startTime: number;
   callback: ServerSelectionCallback;
@@ -568,7 +568,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     options = { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS, ...options };
-    this.client.mongoLogger.debug(
+    this.client.mongoLogger?.debug(
       MongoLoggableComponent.SERVER_SELECTION,
       new ServerSelectionStartedEvent(selector, this.description, options.operationName)
     );
@@ -578,7 +578,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     const transaction = session && session.transaction;
 
     if (isSharded && transaction && transaction.server) {
-      this.client.mongoLogger.debug(
+      this.client.mongoLogger?.debug(
         MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionSucceededEvent(
           selector,
@@ -611,7 +611,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
         this.description
       );
-      this.client.mongoLogger.debug(
+      this.client.mongoLogger?.debug(
         MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionFailedEvent(
           selector,
@@ -896,7 +896,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
 
     if (!waitQueueMember[kCancelled]) {
       if (err) {
-        waitQueueMember.mongoLogger.debug(
+        waitQueueMember.mongoLogger?.debug(
           MongoLoggableComponent.SERVER_SELECTION,
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
@@ -943,7 +943,7 @@ function processWaitQueue(topology: Topology) {
         : serverDescriptions;
     } catch (e) {
       waitQueueMember.timeoutController.clear();
-      topology.client.mongoLogger.debug(
+      topology.client.mongoLogger?.debug(
         MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionFailedEvent(
           waitQueueMember.serverSelector,
@@ -959,7 +959,7 @@ function processWaitQueue(topology: Topology) {
     let selectedServer: Server | undefined;
     if (selectedDescriptions.length === 0) {
       if (!waitQueueMember.waitingLogged) {
-        topology.client.mongoLogger.info(
+        topology.client.mongoLogger?.info(
           MongoLoggableComponent.SERVER_SELECTION,
           new WaitingForSuitableServerEvent(
             waitQueueMember.serverSelector,
@@ -992,7 +992,7 @@ function processWaitQueue(topology: Topology) {
         'server selection returned a server description but the server was not found in the topology',
         topology.description
       );
-      topology.client.mongoLogger.debug(
+      topology.client.mongoLogger?.debug(
         MongoLoggableComponent.SERVER_SELECTION,
         new ServerSelectionFailedEvent(
           waitQueueMember.serverSelector,
@@ -1011,7 +1011,7 @@ function processWaitQueue(topology: Topology) {
 
     waitQueueMember.timeoutController.clear();
 
-    topology.client.mongoLogger.debug(
+    topology.client.mongoLogger?.debug(
       MongoLoggableComponent.SERVER_SELECTION,
       new ServerSelectionSucceededEvent(
         waitQueueMember.serverSelector,
