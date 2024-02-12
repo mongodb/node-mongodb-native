@@ -569,7 +569,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     options = { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS, ...options };
     if (
-      this.client.mongoLogger?.willLog(SeverityLevel.DEBUG, MongoLoggableComponent.SERVER_SELECTION)
+      this.client.mongoLogger?.willLog(MongoLoggableComponent.SERVER_SELECTION, SeverityLevel.DEBUG)
     ) {
       this.client.mongoLogger?.debug(
         MongoLoggableComponent.SERVER_SELECTION,
@@ -584,8 +584,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     if (isSharded && transaction && transaction.server) {
       if (
         this.client.mongoLogger?.willLog(
-          SeverityLevel.DEBUG,
-          MongoLoggableComponent.SERVER_SELECTION
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
         )
       ) {
         this.client.mongoLogger?.debug(
@@ -624,8 +624,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       );
       if (
         this.client.mongoLogger?.willLog(
-          SeverityLevel.DEBUG,
-          MongoLoggableComponent.SERVER_SELECTION
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
         )
       ) {
         this.client.mongoLogger?.debug(
@@ -916,8 +916,8 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
       if (err) {
         if (
           waitQueueMember.mongoLogger?.willLog(
-            SeverityLevel.DEBUG,
-            MongoLoggableComponent.SERVER_SELECTION
+            MongoLoggableComponent.SERVER_SELECTION,
+            SeverityLevel.DEBUG
           )
         ) {
           waitQueueMember.mongoLogger?.debug(
@@ -970,8 +970,8 @@ function processWaitQueue(topology: Topology) {
       waitQueueMember.timeoutController.clear();
       if (
         topology.client.mongoLogger?.willLog(
-          SeverityLevel.DEBUG,
-          MongoLoggableComponent.SERVER_SELECTION
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
         )
       ) {
         topology.client.mongoLogger?.debug(
@@ -993,8 +993,8 @@ function processWaitQueue(topology: Topology) {
       if (!waitQueueMember.waitingLogged) {
         if (
           topology.client.mongoLogger?.willLog(
-            SeverityLevel.INFORMATIONAL,
-            MongoLoggableComponent.SERVER_SELECTION
+            MongoLoggableComponent.SERVER_SELECTION,
+            SeverityLevel.INFORMATIONAL
           )
         ) {
           topology.client.mongoLogger?.info(
@@ -1033,8 +1033,8 @@ function processWaitQueue(topology: Topology) {
       );
       if (
         topology.client.mongoLogger?.willLog(
-          SeverityLevel.DEBUG,
-          MongoLoggableComponent.SERVER_SELECTION
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
         )
       ) {
         topology.client.mongoLogger?.debug(
@@ -1059,8 +1059,8 @@ function processWaitQueue(topology: Topology) {
 
     if (
       topology.client.mongoLogger?.willLog(
-        SeverityLevel.DEBUG,
-        MongoLoggableComponent.SERVER_SELECTION
+        MongoLoggableComponent.SERVER_SELECTION,
+        SeverityLevel.DEBUG
       )
     ) {
       topology.client.mongoLogger?.debug(
