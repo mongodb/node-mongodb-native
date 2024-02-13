@@ -54,7 +54,7 @@ describe('GetMoreOperation', function () {
         );
         const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
         const operation = new GetMoreOperation(namespace, cursorId, server, opts);
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___, cb) => cb());
+        const stub = sinon.stub(server, 'command').callsFake((_, __, ___) => {});
 
         const expectedGetMoreCommand = {
           getMore: cursorId,
@@ -104,7 +104,7 @@ describe('GetMoreOperation', function () {
 
       it('should build basic getMore command with cursorId and collection', async () => {
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, {});
-        const stub = sinon.stub(server, 'command').yieldsRight();
+        const stub = sinon.stub(server, 'command');
         await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
           getMore: cursorId,
@@ -117,7 +117,7 @@ describe('GetMoreOperation', function () {
           batchSize: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').yieldsRight();
+        const stub = sinon.stub(server, 'command');
         await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
@@ -130,7 +130,7 @@ describe('GetMoreOperation', function () {
           maxAwaitTimeMS: 234
         };
         const getMoreOperation = new GetMoreOperation(namespace, cursorId, server, options);
-        const stub = sinon.stub(server, 'command').yieldsRight();
+        const stub = sinon.stub(server, 'command');
         await getMoreOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,
@@ -188,7 +188,7 @@ describe('GetMoreOperation', function () {
               maxWireVersion: serverVersion
             };
             const operation = new GetMoreOperation(namespace, cursorId, server, optionsWithComment);
-            const stub = sinon.stub(server, 'command').yieldsRight();
+            const stub = sinon.stub(server, 'command');
             await operation.execute(server, undefined);
             expect(stub).to.have.been.calledOnceWith(namespace, getMore);
           });

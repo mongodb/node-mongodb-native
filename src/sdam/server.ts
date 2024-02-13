@@ -282,98 +282,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * Execute a command
    * @internal
    */
-  command(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions,
-    callback: Callback<Document>
-  ): void {
-    if (callback == null) {
-      throw new MongoInvalidArgumentError('Callback must be provided');
-    }
-
-    if (ns.db == null || typeof ns === 'string') {
-      throw new MongoInvalidArgumentError('Namespace must not be a string');
-    }
-
-    if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError());
-      return;
-    }
-
-    // Clone the options
-    const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
-
-    // There are cases where we need to flag the read preference not to get sent in
-    // the command, such as pre-5.0 servers attempting to perform an aggregate write
-    // with a non-primary read preference. In this case the effective read preference
-    // (primary) is not the same as the provided and must be removed completely.
-    if (finalOptions.omitReadPreference) {
-      delete finalOptions.readPreference;
-    }
-
-    const session = finalOptions.session;
-    const conn = session?.pinnedConnection;
-
-    // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
-    //       (and prevent them from being checked back in) at the point of operation execution.
-    //       This should be considered as part of the work for NODE-2882
-    // NOTE:
-    //       When incrementing operation count, it's important that we increment it before we
-    //       attempt to check out a connection from the pool.  This ensures that operations that
-    //       are waiting for a connection are included in the operation count.  Load balanced
-    //       mode will only ever have a single server, so the operation count doesn't matter.
-    //       Incrementing the operation count above the logic to handle load balanced mode would
-    //       require special logic to decrement it again, or would double increment (the load
-    //       balanced code makes a recursive call).  Instead, we increment the count after this
-    //       check.
-    if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
-      this.pool.checkOut((err, checkedOut) => {
-        if (err || checkedOut == null) {
-          if (callback) return callback(err);
-          return;
-        }
-
-        session.pin(checkedOut);
-        this.command(ns, cmd, finalOptions, callback);
-      });
-      return;
-    }
-
-    this.incrementOperationCount();
-
-    this.pool.withConnection(
-      conn,
-      (err, conn, cb) => {
-        if (err || !conn) {
-          this.decrementOperationCount();
-          if (!err) {
-            return cb(new MongoRuntimeError('Failed to create connection without error'));
-          }
-          if (!(err instanceof PoolClearedError)) {
-            this.handleError(err);
-          }
-          return cb(err);
-        }
-
-        const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-          this.decrementOperationCount();
-          cb(error, response);
-        });
-        conn.command(ns, cmd, finalOptions).then(
-          r => handler(undefined, r),
-          e => handler(e)
-        );
-      },
-      callback
-    );
-  }
-
-  async commandAsync(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions
-  ): Promise<Document> {
+  async command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
       throw new MongoInvalidArgumentError('Namespace must not be a string');
     }
@@ -422,37 +331,108 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       const checkedOut = await checkedOutPromise;
 
       session.pin(checkedOut);
-      return this.commandAsync(ns, cmd, finalOptions);
+      return this.command(ns, cmd, finalOptions);
     }
+
     this.incrementOperationCount();
 
-    // FIXME: Fix this
-    if (!conn) {
-      const { promise: connPromise, resolve, reject } = promiseWithResolvers<Connection>();
-      this.pool.checkOut((err, conn) => {
-        // don't callback with `err` here, we might want to act upon it inside `fn`
-        if (err || conn == null) {
-          reject(err);
-          return;
+    /*
+    const executeCommand: WithConnectionCallBack = (err, conn, cb) => {
+      if (err || !conn) {
+        this.decrementOperationCount();
+        if (!err) {
+          return cb(new MongoRuntimeError('Failed to create connection without error'));
+        }
+        if (!(err instanceof PoolClearedError)) {
+          this.handleError(err);
+        }
+        return cb(err);
+      }
+
+      const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
+        this.decrementOperationCount();
+        cb(error, response);
+      });
+      conn.command(ns, cmd, finalOptions).then(
+        r => handler(undefined, r),
+        e => handler(e)
+      );
+    };
+    */
+
+    const executeCommandAsync = async (err?: AnyError, conn?: Connection) => {
+      if (err || !conn) {
+        this.decrementOperationCount();
+        if (!err) throw new MongoRuntimeError('Failed to create connection without error');
+        if (!(err instanceof PoolClearedError)) this.handleError(err);
+
+        throw err;
+      }
+      const handler = makeAsyncOperationHandler<Document>(this, conn, cmd, finalOptions);
+
+      try {
+        const result = await conn.command(ns, cmd, finalOptions);
+        return await handler(undefined, result);
+      } catch (e) {
+        return await handler(e);
+      }
+    };
+    const shouldReauth = (e: AnyError): boolean => {
+      return e instanceof MongoError && e.code === MONGODB_ERROR_CODES.Reauthenticate;
+    };
+
+    // FIXME: This is where withConnection logic should go
+    if (conn) {
+      // send operation, possibly reauthenticating and return without checking back in
+      try {
+        return await executeCommandAsync(undefined, conn);
+      } catch (e) {
+        if (shouldReauth(e)) {
+          conn = await this.pool.reauthenticateAsync(conn);
+          return await executeCommandAsync(undefined, conn);
         }
 
-        resolve(conn);
-      });
-
-      conn = await connPromise;
-    }
-
-    try {
-      return await conn.command(ns, cmd, finalOptions);
-    } catch (e) {
-      if (e instanceof MongoError && e.code === MONGODB_ERROR_CODES.Reauthenticate) {
-        conn = await this.pool.reauthenticateAsync(conn);
-      } else {
         throw e;
       }
     }
 
-    return conn.command(ns, cmd, finalOptions);
+    // check out connection
+    const { promise: checkOutPromise, resolve, reject } = promiseWithResolvers<Connection>();
+    this.pool.checkOut((err, conn) => {
+      if (err) reject(err);
+      // There is no way to not error and get an undefined connection
+      else resolve(conn as Connection);
+    });
+
+    conn = await checkOutPromise;
+
+    let rv: Document;
+    // call executeCommandAsync with that checked out connection
+    try {
+      rv = await executeCommandAsync(undefined, conn);
+    } catch (e) {
+      // if it errors
+      if (conn) {
+        //   if connection is defined
+        //    reauthenticate
+        if (shouldReauth(e)) {
+          conn = await this.pool.reauthenticateAsync(conn);
+          rv = await executeCommandAsync(undefined, conn);
+        } else {
+          throw e;
+        }
+      } else {
+        //    throw the error
+        throw e;
+      }
+    }
+
+    // if connection exists
+    //  check connection back into pool
+    if (conn) {
+      this.pool.checkIn(conn);
+    }
+    return rv;
   }
 
   /**
@@ -584,26 +564,25 @@ function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
 }
 
-function makeOperationHandler(
+function makeAsyncOperationHandler<T>(
   server: Server,
   connection: Connection,
   cmd: Document,
-  options: CommandOptions | GetMoreOptions | undefined,
-  callback: Callback
-): Callback {
+  options: CommandOptions | GetMoreOptions | undefined
+): (error?: AnyError, result?: any) => Promise<T> {
   const session = options?.session;
-  return function handleOperationResult(error, result) {
+  return async function handleOperationResult(error, result) {
     // We should not swallow an error if it is present.
     if (error == null && result != null) {
-      return callback(undefined, result);
+      return result;
     }
 
     if (options != null && 'noResponse' in options && options.noResponse === true) {
-      return callback(undefined, null);
+      return null;
     }
 
     if (!error) {
-      return callback(new MongoUnexpectedServerResponseError('Empty response with no error'));
+      throw new MongoUnexpectedServerResponseError('Empty response with no error');
     }
 
     if (error.name === 'AbortError' && error.cause instanceof MongoError) {
@@ -612,11 +591,11 @@ function makeOperationHandler(
 
     if (!(error instanceof MongoError)) {
       // Node.js or some other error we have not special handling for
-      return callback(error);
+      throw error;
     }
 
     if (connectionIsStale(server.pool, connection)) {
-      return callback(error);
+      throw error;
     }
 
     if (error instanceof MongoNetworkError) {
@@ -659,6 +638,6 @@ function makeOperationHandler(
 
     server.handleError(error, connection);
 
-    return callback(error);
+    throw error;
   };
 }

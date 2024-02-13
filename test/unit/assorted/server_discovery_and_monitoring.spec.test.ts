@@ -342,7 +342,7 @@ async function executeSDAMTest(testData: SDAMTest) {
         const server = client.topology.s.servers.get(appError.address);
 
         // Run a dummy command to encounter the error
-        const res = promisify(server.command.bind(server))(ns('admin.$cmd'), { ping: 1 }, {});
+        const res = server.command.bind(server)(ns('admin.$cmd'), { ping: 1 }, {});
         const thrownError = await res.catch(error => error);
 
         // Restore the stub before asserting anything in case of errors

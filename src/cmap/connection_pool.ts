@@ -27,7 +27,14 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { type Callback, eachAsync, List, makeCounter, TimeoutController } from '../utils';
+import {
+  type Callback,
+  eachAsync,
+  List,
+  makeCounter,
+  promiseWithResolvers,
+  TimeoutController
+} from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -645,6 +652,56 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     );
   }
 
+  async withConnectionAsync(
+    conn: Connection | undefined,
+    fn: AsyncWithConnectionCallback
+  ): Promise<Connection> {
+    let result;
+    if (conn) {
+      // use the provided connection, and do _not_ check it in after execution
+      try {
+        result = await fn(undefined, conn);
+        return result;
+      } catch (fnErr) {
+        if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
+          conn = this.reauthenticateAsync(conn);
+        } else {
+          throw fnErr;
+        }
+      }
+    } else {
+      const { promise, resolve, reject } = promiseWithResolvers<Connection>();
+      this.checkOut((err, conn) => {
+        fn(err as MongoError, conn).then(
+          () => {
+            if (conn) this.checkIn(conn);
+          },
+          fnErr => {
+            if (conn) {
+              this.withReauthenticationAsync(fnErr, conn, fn).then(resolve, reject);
+            } else {
+              reject(fnErr);
+            }
+          }
+        );
+      });
+      return promise;
+    }
+  }
+
+  async withReauthenticationAsync(
+    fnErr: AnyError,
+    conn: Connection,
+    fn: AsyncWithConnectionCallback
+  ): Promise<Connection> {
+    if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
+      conn = await this.reauthenticateAsync(conn);
+      return fn(undefined, conn);
+    } else {
+      throw fnErr;
+    }
+  }
+
   async reauthenticateAsync(connection: Connection): Promise<Connection> {
     const authContext = connection.authContext;
     if (!authContext) {
@@ -667,6 +724,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     await provider.reauth(authContext);
+
     return connection;
   }
 
@@ -945,3 +1003,8 @@ export type WithConnectionCallback = (
   connection: Connection | undefined,
   callback: Callback<Connection>
 ) => void;
+
+type AsyncWithConnectionCallback = (
+  error: MongoError | undefined,
+  connection: Connection | undefined
+) => Promise<Connection>;
