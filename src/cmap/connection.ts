@@ -29,7 +29,6 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
-  abortable,
   BufferPool,
   calculateDurationInMs,
   type Callback,
@@ -37,6 +36,7 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   now,
+  promiseWithResolvers,
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
@@ -161,15 +161,14 @@ function streamIdentifier(stream: Stream, options: ConnectionOptions): string {
 export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public id: number | '<monitor>';
   public address: string;
-  public lastHelloMS?: number;
+  public lastHelloMS = -1;
   public serverApi?: ServerApi;
-  public helloOk?: boolean;
+  public helloOk = false;
   public authContext?: AuthContext;
   public delayedTimeoutId: NodeJS.Timeout | null = null;
   public generation: number;
   public readonly description: Readonly<StreamDescription>;
   /**
-   * @public
    * Represents if the connection has been established:
    *  - TCP handshake
    *  - TLS negotiated
@@ -180,15 +179,16 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   public established: boolean;
 
   private lastUseTime: number;
-  private socketTimeoutMS: number;
-  private monitorCommands: boolean;
-  private socket: Stream;
-  private controller: AbortController;
-  private messageStream: Readable;
-  private socketWrite: (buffer: Uint8Array) => Promise<void>;
   private clusterTime: Document | null = null;
-  /** @internal */
-  override mongoLogger: MongoLogger | undefined;
+
+  private readonly socketTimeoutMS: number;
+  private readonly monitorCommands: boolean;
+  private readonly socket: Stream;
+  private readonly controller: AbortController;
+  private readonly signal: AbortSignal;
+  private readonly messageStream: Readable;
+  private readonly socketWrite: (buffer: Uint8Array) => Promise<void>;
+  private readonly aborted: Promise<never>;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -221,7 +221,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.lastUseTime = now();
 
     this.socket = stream;
+
+    // TODO: Remove signal from connection layer
     this.controller = new AbortController();
+    const { signal } = this.controller;
+    this.signal = signal;
+    const { promise: aborted, reject } = promiseWithResolvers<never>();
+    aborted.then(undefined, () => null); // Prevent unhandled rejection
+    this.signal.addEventListener(
+      'abort',
+      function onAbort() {
+        reject(signal.reason);
+      },
+      { once: true }
+    );
+    this.aborted = aborted;
 
     this.messageStream = this.socket
       .on('error', this.onError.bind(this))
@@ -232,13 +246,13 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const socketWrite = promisify(this.socket.write.bind(this.socket));
     this.socketWrite = async buffer => {
-      return abortable(socketWrite(buffer), { signal: this.controller.signal });
+      return Promise.race([socketWrite(buffer), this.aborted]);
     };
   }
 
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
   public get closed(): boolean {
-    return this.controller.signal.aborted;
+    return this.signal.aborted;
   }
 
   public get hello() {
@@ -407,7 +421,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   private async *sendWire(message: WriteProtocolMessageType, options: CommandOptions) {
-    this.controller.signal.throwIfAborted();
+    this.throwIfAborted();
 
     if (typeof options.socketTimeoutMS === 'number') {
       this.socket.setTimeout(options.socketTimeoutMS);
@@ -426,7 +440,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         return;
       }
 
-      this.controller.signal.throwIfAborted();
+      this.throwIfAborted();
 
       for await (const response of this.readMany()) {
         this.socket.setTimeout(0);
@@ -447,7 +461,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         yield document;
-        this.controller.signal.throwIfAborted();
+        this.throwIfAborted();
 
         if (typeof options.socketTimeoutMS === 'number') {
           this.socket.setTimeout(options.socketTimeoutMS);
@@ -481,7 +495,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     let document;
     try {
-      this.controller.signal.throwIfAborted();
+      this.throwIfAborted();
       for await (document of this.sendWire(message, options)) {
         if (!Buffer.isBuffer(document) && document.writeConcernError) {
           throw new MongoWriteConcernError(document.writeConcernError, document);
@@ -511,7 +525,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         yield document;
-        this.controller.signal.throwIfAborted();
+        this.throwIfAborted();
       }
     } catch (error) {
       if (this.shouldEmitAndLogCommand) {
@@ -554,7 +568,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     command: Document,
     options: CommandOptions = {}
   ): Promise<Document> {
-    this.controller.signal.throwIfAborted();
+    this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options)) {
       return document;
     }
@@ -568,14 +582,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     replyListener: Callback
   ) {
     const exhaustLoop = async () => {
-      this.controller.signal.throwIfAborted();
+      this.throwIfAborted();
       for await (const reply of this.sendCommand(ns, command, options)) {
         replyListener(undefined, reply);
-        this.controller.signal.throwIfAborted();
+        this.throwIfAborted();
       }
       throw new MongoUnexpectedServerResponseError('Server ended moreToCome unexpectedly');
     };
     exhaustLoop().catch(replyListener);
+  }
+
+  private throwIfAborted() {
+    this.signal.throwIfAborted();
   }
 
   /**
@@ -611,7 +629,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
   private async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-    for await (const message of onData(this.messageStream, { signal: this.controller.signal })) {
+    for await (const message of onData(this.messageStream, { signal: this.signal })) {
       const response = await decompressResponse(message);
       yield response;
 
