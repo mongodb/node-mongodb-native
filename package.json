@@ -27,7 +27,8 @@
   "dependencies": {
     "@mongodb-js/saslprep": "^1.1.0",
     "bson": "^6.3.0",
-    "mongodb-connection-string-url": "^3.0.0"
+    "mongodb-connection-string-url": "^3.0.0",
+    "npm-check-updates": "^16.14.15"
   },
   "peerDependencies": {
     "@aws-sdk/credential-providers": "^3.188.0",
