@@ -120,7 +120,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       serverMonitoringMode: options.serverMonitoringMode
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
-    this.mongoLogger = this[kServer].topology.client.mongoLogger;
+    this.mongoLogger = this[kServer].topology.client?.mongoLogger;
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration

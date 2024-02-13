@@ -23,6 +23,7 @@ import {
   DEFAULT_MAX_DOCUMENT_LENGTH,
   type Log,
   type MongoDBLogWritable,
+  MongoLoggableComponent,
   MongoLogger,
   type MongoLoggerOptions,
   parseSeverityFromString,
@@ -1547,5 +1548,71 @@ describe('class MongoLogger', async function () {
         expect(stream.buffer).to.deep.equal(['longer timeout', 'shorter timeout', 'no timeout']);
       });
     });
+  });
+
+  describe('#willLog', function () {
+    const severityLevels = Object.values(SeverityLevel);
+    for (const severityLevel of severityLevels) {
+      context(`when the severity level is ${severityLevel}`, function () {
+        let logger: MongoLogger;
+        let componentSeverities;
+        const components = Object.values(MongoLoggableComponent);
+
+        for (const component of components) {
+          context(`when ${component} severity level <= ${severityLevel}`, function () {
+            beforeEach(function () {
+              const index = severityLevels.indexOf(severityLevel);
+              componentSeverities = components.reduce((severities, value) => {
+                component === value
+                  ? (severities[component] = severityLevel)
+                  : (severities[value] =
+                      severityLevels[index + 1] === 'off'
+                        ? severityLevel
+                        : severityLevels[index + 1]);
+                return severities;
+              }, {});
+              logger = new MongoLogger({
+                componentSeverities: componentSeverities,
+                logDestination: createStdioLogger(process.stderr),
+                logDestinationIsStdErr: true
+              } as any);
+            });
+
+            if (severityLevel === 'off') {
+              it('returns false always for off', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.false;
+              });
+            } else {
+              it('returns true', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.true;
+              });
+            }
+          });
+
+          context(`when ${component} severity level > ${severityLevel}`, function () {
+            if (severityLevel !== 'emergency') {
+              beforeEach(function () {
+                const index = severityLevels.indexOf(severityLevel);
+                componentSeverities = components.reduce((severities, value) => {
+                  component === value
+                    ? (severities[component] = severityLevels[index - 1])
+                    : (severities[value] = severityLevel);
+                  return severities;
+                }, {});
+                logger = new MongoLogger({
+                  componentSeverities: componentSeverities,
+                  logDestination: createStdioLogger(process.stderr),
+                  logDestinationIsStdErr: true
+                } as any);
+              });
+
+              it('returns false', function () {
+                expect(logger.willLog(component, severityLevel)).to.be.false;
+              });
+            }
+          });
+        }
+      });
+    }
   });
 });

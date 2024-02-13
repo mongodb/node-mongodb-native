@@ -251,7 +251,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kProcessingWaitQueue] = false;
 
-    this.mongoLogger = this[kServer].topology.client.mongoLogger;
+    this.mongoLogger = this[kServer].topology.client?.mongoLogger;
     this.component = 'connection';
 
     process.nextTick(() => {
