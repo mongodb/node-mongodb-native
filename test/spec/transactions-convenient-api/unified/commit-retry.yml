@@ -1,0 +1,271 @@
+description: commit-retry
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - minServerVersion: '4.0'
+    topologies: [ replicaset ]
+  - minServerVersion: 4.1.8
+    topologies: [ sharded, load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName withTransaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  -
+    description: commitTransaction succeeds after multiple connection errors
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ commitTransaction ]
+              closeConnection: true
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, wtimeout: 10000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, wtimeout: 10000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1 }
+  -
+    description: commitTransaction retry only overwrites write concern w option
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ commitTransaction ]
+              closeConnection: true
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+          writeConcern: { w: 2, journal: true, wtimeoutMS: 5000 }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                writeConcern: { w: 2, j: true, wtimeout: 5000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, j: true, wtimeout: 5000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, j: true, wtimeout: 5000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1 }
+  -
+    description: commit is not retried after MaxTimeMSExpired error
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ commitTransaction ]
+              errorCode: 50 # MaxTimeMSExpired
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+          maxCommitTimeMS: 60000
+        expectError:
+          errorCodeName: MaxTimeMSExpired
+          errorLabelsContain: ["UnknownTransactionCommitResult"]
+          errorLabelsOmit: ["TransientTransactionError"]
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                maxTimeMS: 60000
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        # In reality, the outcome of the commit is unknown but we fabricate
+        # the error with failCommand.errorCode which does not apply the commit
+        # operation.
+        documents: []

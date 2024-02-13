@@ -589,6 +589,7 @@ function attemptTransaction<T>(
   try {
     promise = fn(session);
   } catch (err) {
+    console.log('1', err);
     promise = Promise.reject(err);
   }
 
@@ -608,6 +609,7 @@ function attemptTransaction<T>(
       return attemptTransactionCommit(session, startTime, fn, result, options);
     },
     err => {
+      console.log('2', err);
       function maybeRetryOrThrow(err: MongoError): Promise<any> {
         if (
           err instanceof MongoError &&

@@ -404,6 +404,7 @@ function failOnMismatchedCount(
   actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
   expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[]
 ) {
+  console.log(actual, expected);
   const actualNames = actual.map(a => a.constructor.name);
   const expectedNames = expected.map(e => Object.keys(e)[0]);
   expect.fail(

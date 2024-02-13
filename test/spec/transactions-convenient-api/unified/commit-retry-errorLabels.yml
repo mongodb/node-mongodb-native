@@ -1,0 +1,118 @@
+description: commit-retry-errorLabels
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - minServerVersion: "4.3.1" # failCommand errorLabels option
+    topologies: [ replicaset, sharded, load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName withTransaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  -
+    description: commit is retried after commitTransaction UnknownTransactionCommitResult (NotWritablePrimary)
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 2 }
+            data:
+              failCommands: [ commitTransaction ]
+              errorCode: 10107 # NotWritablePrimary
+              errorLabels: ["RetryableWriteError"] # SPEC-1565
+              closeConnection: false
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, wtimeout: 10000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # commitTransaction applies w:majority on retries (SPEC-1185)
+                writeConcern: { w: majority, wtimeout: 10000 }
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1 }
