@@ -30,13 +30,13 @@
     "mongodb-connection-string-url": "^3.0.0"
   },
   "peerDependencies": {
-    "@aws-sdk/credential-providers": "^3.188.0",
-    "@mongodb-js/zstd": "^1.1.0",
+    "@aws-sdk/credential-providers": "^3.513.0",
+    "@mongodb-js/zstd": "^1.2.0",
     "gcp-metadata": "^5.2.0",
-    "kerberos": "^2.0.1",
+    "kerberos": "^2.1.0",
     "mongodb-client-encryption": ">=6.0.0 <7",
     "snappy": "^7.2.2",
-    "socks": "^2.7.1"
+    "socks": "^2.7.3"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/credential-providers": {
