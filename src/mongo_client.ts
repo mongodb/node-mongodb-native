@@ -6,12 +6,20 @@ import { promisify } from 'util';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
+import { type AuthProvider } from './cmap/auth/auth_provider';
+import { GSSAPI } from './cmap/auth/gssapi';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
   type MongoCredentials
 } from './cmap/auth/mongo_credentials';
+import { MongoCR } from './cmap/auth/mongocr';
+import { MongoDBAWS } from './cmap/auth/mongodb_aws';
+import { MongoDBOIDC } from './cmap/auth/mongodb_oidc';
+import { Plain } from './cmap/auth/plain';
 import { AuthMechanism } from './cmap/auth/providers';
+import { ScramSHA1, ScramSHA256 } from './cmap/auth/scram';
+import { X509 } from './cmap/auth/x509';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import type { ClientMetadata } from './cmap/handshake/client_metadata';
@@ -297,6 +305,7 @@ export interface MongoClientPrivate {
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
   /**
    * We keep a reference to the sessions that are acquired from the pool.
    * - used to track and close all sessions in client.close() (which is non-standard behavior)
@@ -371,6 +380,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
 
+    const authProviders = new Map<AuthMechanism | string, AuthProvider>([
+      [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
+      [AuthMechanism.MONGODB_CR, new MongoCR()],
+      [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
+      [AuthMechanism.MONGODB_OIDC, new MongoDBOIDC()],
+      [AuthMechanism.MONGODB_PLAIN, new Plain()],
+      [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
+      [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
+      [AuthMechanism.MONGODB_X509, new X509()]
+    ]);
+
     // The internal state
     this.s = {
       url,
@@ -380,6 +400,9 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
 
+      getAuthProvider(name: AuthMechanism | string) {
+        return authProviders.get(name);
+      },
       get options() {
         return client[kOptions];
       },

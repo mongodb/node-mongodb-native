@@ -183,6 +183,7 @@ describe('MONGODB-AWS', function () {
         calledWith: []
       }
     ];
+    let n = 0;
 
     for (const test of tests) {
       context(test.ctx, () => {
@@ -221,6 +222,7 @@ describe('MONGODB-AWS', function () {
           calledArguments = [];
           MongoDBAWS.credentialProvider = {
             fromNodeProviderChain(...args) {
+              n += 1;
               calledArguments = args;
               return credentialProvider.fromNodeProviderChain(...args);
             }
@@ -252,6 +254,24 @@ describe('MONGODB-AWS', function () {
           expect(result).to.be.a('number');
 
           expect(calledArguments).to.deep.equal(test.calledWith);
+        });
+
+        it('stores a provider instance per client after the first AWS auth attemp', async function () {
+          await client?.close();
+          await client?.connect();
+
+          const result = await client
+            .db('aws')
+            .collection('aws_test')
+            .estimatedDocumentCount()
+            .catch(error => error);
+
+          expect(result).to.not.be.instanceOf(MongoServerError);
+          expect(n).to.deep.equal(1);
+
+          expect(client).to.have.nested.property('s.getAuthProvider');
+          const provider = client.s.getAuthProvider('MONGODB-AWS');
+          expect(provider).to.be.instanceOf(MongoDBAWS);
         });
       });
     }

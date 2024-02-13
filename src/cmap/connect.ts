@@ -18,14 +18,7 @@ import {
 } from '../error';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext, type AuthProvider } from './auth/auth_provider';
-import { GSSAPI } from './auth/gssapi';
-import { MongoCR } from './auth/mongocr';
-import { MongoDBAWS } from './auth/mongodb_aws';
-import { MongoDBOIDC } from './auth/mongodb_oidc';
-import { Plain } from './auth/plain';
 import { AuthMechanism } from './auth/providers';
-import { ScramSHA1, ScramSHA256 } from './auth/scram';
-import { X509 } from './auth/x509';
 import {
   type CommandOptions,
   Connection,
@@ -40,27 +33,18 @@ import {
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
 
-/** @internal */
-export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
-  [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
-  [AuthMechanism.MONGODB_CR, new MongoCR()],
-  [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
-  [AuthMechanism.MONGODB_OIDC, new MongoDBOIDC()],
-  [AuthMechanism.MONGODB_PLAIN, new Plain()],
-  [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
-  [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
-  [AuthMechanism.MONGODB_X509, new X509()]
-]);
-
 /** @public */
 export type Stream = Socket | TLSSocket;
 
-export async function connect(options: ConnectionOptions): Promise<Connection> {
+export async function connect(
+  options: ConnectionOptions,
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined
+): Promise<Connection> {
   let connection: Connection | null = null;
   try {
     const socket = await makeSocket(options);
     connection = makeConnection(options, socket);
-    await performInitialHandshake(connection, options);
+    await performInitialHandshake(connection, options, getAuthProvider);
     return connection;
   } catch (error) {
     connection?.destroy({ force: false });
@@ -104,14 +88,15 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
 
 export async function performInitialHandshake(
   conn: Connection,
-  options: ConnectionOptions
+  options: ConnectionOptions,
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined
 ): Promise<void> {
   const credentials = options.credentials;
 
   if (credentials) {
     if (
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
-      !AUTH_PROVIDERS.get(credentials.mechanism)
+      !getAuthProvider(credentials.mechanism)
     ) {
       throw new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`);
     }
@@ -120,7 +105,7 @@ export async function performInitialHandshake(
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
 
-  const handshakeDoc = await prepareHandshakeDocument(authContext);
+  const handshakeDoc = await prepareHandshakeDocument(authContext, getAuthProvider);
 
   // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
   const handshakeOptions: CommandOptions = { ...options };
@@ -166,7 +151,7 @@ export async function performInitialHandshake(
     authContext.response = response;
 
     const resolvedCredentials = credentials.resolveAuthMechanism(response);
-    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    const provider = getAuthProvider(resolvedCredentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(
         `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
@@ -210,7 +195,8 @@ export interface HandshakeDocument extends Document {
  * This function is only exposed for testing purposes.
  */
 export async function prepareHandshakeDocument(
-  authContext: AuthContext
+  authContext: AuthContext,
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined
 ): Promise<HandshakeDocument> {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
@@ -232,7 +218,7 @@ export async function prepareHandshakeDocument(
     if (credentials.mechanism === AuthMechanism.MONGODB_DEFAULT && credentials.username) {
       handshakeDoc.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
 
-      const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256);
+      const provider = getAuthProvider(AuthMechanism.MONGODB_SCRAM_SHA256);
       if (!provider) {
         // This auth mechanism is always present.
         throw new MongoInvalidArgumentError(
@@ -241,7 +227,7 @@ export async function prepareHandshakeDocument(
       }
       return provider.prepare(handshakeDoc, authContext);
     }
-    const provider = AUTH_PROVIDERS.get(credentials.mechanism);
+    const provider = getAuthProvider(credentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
