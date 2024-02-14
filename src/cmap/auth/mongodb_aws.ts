@@ -85,6 +85,14 @@ export class MongoDBAWS extends AuthProvider {
       AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
       (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
 
+    console.log('awsRegionSettingsExist----------------------');
+    console.log(awsRegionSettingsExist);
+    console.log('----------------------');
+
+    console.log('useRegionalSts----------------------');
+    console.log(useRegionalSts);
+    console.log('----------------------');
+
     if ('fromNodeProviderChain' in MongoDBAWS.credentialProvider) {
       MongoDBAWS.provider =
         awsRegionSettingsExist && useRegionalSts
