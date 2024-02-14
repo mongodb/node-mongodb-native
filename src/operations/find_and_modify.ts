@@ -53,7 +53,6 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   let?: Document;
   /**
    * Return the ModifyResult instead of the modified document. Defaults to true
-   * but will default to false in the next major version.
    */
   includeResultMetadata?: boolean;
 }
@@ -78,7 +77,6 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   let?: Document;
   /**
    * Return the ModifyResult instead of the modified document. Defaults to true
-   * but will default to false in the next major version.
    */
   includeResultMetadata?: boolean;
 }
