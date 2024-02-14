@@ -338,42 +338,33 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     };
 
     // FIXME: This is where withConnection logic should go
-    if (conn) {
-      // send operation, possibly reauthenticating and return without checking back in
+    if (!conn) {
       try {
-        return await runCommand(conn);
+        conn = await this.pool.checkOut();
       } catch (e) {
-        if (shouldReauth(e)) {
-          conn = await this.pool.reauthenticateAsync(conn);
-          return await runCommand(conn);
-        }
+        if (!e) throw new MongoRuntimeError('Failed to create connection without error');
+        if (!(e instanceof PoolClearedError)) this.handleError(e);
+
         throw e;
       }
     }
 
-    // check out connection
+    // Reauth flow
+    let rv;
     try {
-      conn = await this.pool.checkOut();
+      rv = await runCommand(conn);
     } catch (e) {
-      if (!e) throw new MongoRuntimeError('Failed to create connection without error');
-      if (!(e instanceof PoolClearedError)) this.handleError(e);
-
-      throw e;
-    }
-    // call executeCommandAsync with that checked out connection
-    try {
-      return await runCommand(conn);
-    } catch (e) {
-      // if it errors
-      //    check if we should reauthenticate
       if (shouldReauth(e)) {
         conn = await this.pool.reauthenticateAsync(conn);
-        return await runCommand(conn);
+        rv = await runCommand(conn);
+      } else {
+        throw e;
       }
-      throw e;
     } finally {
       this.pool.checkIn(conn);
     }
+
+    return rv;
   }
 
   /**

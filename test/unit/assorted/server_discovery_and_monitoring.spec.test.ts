@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as sinon from 'sinon';
-import { promisify } from 'util';
 
 import {
   ConnectionPool,

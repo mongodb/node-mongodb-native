@@ -9,7 +9,6 @@ import {
   MongoErrorLabel,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  ns,
   ObjectId,
   Server,
   ServerDescription,

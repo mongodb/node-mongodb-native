@@ -54,7 +54,7 @@ describe('GetMoreOperation', function () {
         );
         const opts = { ...options, documentsReturnedIn: 'nextBatch', returnFieldSelector: null };
         const operation = new GetMoreOperation(namespace, cursorId, server, opts);
-        const stub = sinon.stub(server, 'command').callsFake((_, __, ___) => {});
+        const stub = sinon.stub(server, 'command').returns(Promise.resolve({}));
 
         const expectedGetMoreCommand = {
           getMore: cursorId,
