@@ -1,6 +1,6 @@
 'use strict';
 
-const { ConnectionPool } = require('../../mongodb');
+const { ConnectionPool, MongoError } = require('../../mongodb');
 const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');
@@ -69,7 +69,7 @@ describe('Connection Pool', function () {
     expect(closeEvent).have.property('reason').equal('error');
   });
 
-  it('should propagate socket timeouts to connections', function (done) {
+  it('should propagate socket timeouts to connections', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -87,18 +87,12 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    pool.withConnection(
-      (err, conn, cb) => {
-        expect(err).to.not.exist;
-        conn.command(ns('admin.$cmd'), { ping: 1 }, undefined, (err, result) => {
-          expect(err).to.exist;
-          expect(result).to.not.exist;
-          expect(err).to.match(/timed out/);
-          cb();
-        });
-      },
-      () => pool.close(done)
-    );
+    const conn = await pool.checkOut();
+    const maybeError = await conn.command(ns('admin.$cmd'), { ping: 1 }, undefined).catch(e => e);
+    expect(maybeError).to.be.instanceOf(MongoError);
+    expect(maybeError).to.match(/timed out/);
+
+    pool.checkIn(conn);
   });
 
   it('should clear timed out wait queue members if no connections are available', function (done) {
@@ -220,100 +214,6 @@ describe('Connection Pool', function () {
       clock.tick(100);
       expect(ensureSpy).to.have.callCount(4);
       expect(createConnStub).to.have.been.calledTwice;
-    });
-  });
-
-  describe('withConnection', function () {
-    it('should manage a connection for a successful operation', function (done) {
-      mockMongod.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.reply(mock.HELLO);
-        }
-      });
-
-      const pool = new ConnectionPool(stubServer, { hostAddress: mockMongod.hostAddress() });
-      pool.ready();
-
-      const callback = (err, result) => {
-        expect(err).to.not.exist;
-        expect(result).to.exist;
-        pool.close(done);
-      };
-
-      pool.withConnection((err, conn, cb) => {
-        expect(err).to.not.exist;
-
-        conn.command(
-          ns('$admin.cmd'),
-          { [LEGACY_HELLO_COMMAND]: 1 },
-          undefined,
-          (cmdErr, hello) => {
-            expect(cmdErr).to.not.exist;
-            cb(undefined, hello);
-          }
-        );
-      }, callback);
-    });
-
-    it('should allow user interaction with an error', function (done) {
-      mockMongod.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.connection.destroy();
-        }
-      });
-
-      const pool = new ConnectionPool(stubServer, {
-        waitQueueTimeoutMS: 200,
-        hostAddress: mockMongod.hostAddress()
-      });
-
-      pool.ready();
-
-      const callback = err => {
-        expect(err).to.exist;
-        expect(err).to.match(/closed/);
-        pool.close(done);
-      };
-
-      pool.withConnection(
-        undefined,
-        (err, conn, cb) => {
-          expect(err).to.exist;
-          expect(err).to.match(/closed/);
-          cb(err);
-        },
-        callback
-      );
-    });
-
-    it('should return an error to the original callback', function (done) {
-      mockMongod.setMessageHandler(request => {
-        const doc = request.document;
-        if (isHello(doc)) {
-          request.reply(mock.HELLO);
-        }
-      });
-
-      const pool = new ConnectionPool(stubServer, { hostAddress: mockMongod.hostAddress() });
-      pool.ready();
-
-      const callback = (err, result) => {
-        expect(err).to.exist;
-        expect(result).to.not.exist;
-        expect(err).to.match(/my great error/);
-        pool.close(done);
-      };
-
-      pool.withConnection(
-        undefined,
-        (err, conn, cb) => {
-          expect(err).to.not.exist;
-          cb(new Error('my great error'));
-        },
-        callback
-      );
     });
   });
 });
