@@ -193,6 +193,7 @@ describe('MONGODB-AWS', function () {
         calledWith: []
       }
     ];
+    let n = 0
 
     for (const test of tests) {
       context(test.ctx, () => {
@@ -232,6 +233,7 @@ describe('MONGODB-AWS', function () {
           MongoDBAWS.credentialProvider = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
+              n += 1;
               return credentialProvider.fromNodeProviderChain(...args);
             }
           };
@@ -260,6 +262,7 @@ describe('MONGODB-AWS', function () {
 
           expect(result).to.not.be.instanceOf(MongoServerError);
           expect(result).to.be.a('number');
+          expect(n).to.be.eql(1);
 
           expect(calledArguments).to.deep.equal(test.calledWith);
         });

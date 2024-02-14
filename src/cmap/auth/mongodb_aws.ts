@@ -4,7 +4,7 @@ import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4, getAwsCredentialProvider } from '../../deps';
+import { aws4, type AWSCredentials, getAwsCredentialProvider } from '../../deps';
 import {
   MongoAWSError,
   MongoCompatibilityError,
@@ -58,11 +58,41 @@ interface AWSSaslContinuePayload {
 
 export class MongoDBAWS extends AuthProvider {
   static credentialProvider: ReturnType<typeof getAwsCredentialProvider> | null = null;
+  static provider?: () => Promise<AWSCredentials>;
   randomBytesAsync: (size: number) => Promise<Buffer>;
 
   constructor() {
     super();
     this.randomBytesAsync = promisify(crypto.randomBytes);
+    MongoDBAWS.credentialProvider ??= getAwsCredentialProvider();
+
+    let { AWS_STS_REGIONAL_ENDPOINTS = '', AWS_REGION = '' } = process.env;
+    AWS_STS_REGIONAL_ENDPOINTS = AWS_STS_REGIONAL_ENDPOINTS.toLowerCase();
+    AWS_REGION = AWS_REGION.toLowerCase();
+
+    /** The option setting should work only for users who have explicit settings in their environment, the driver should not encode "defaults" */
+    const awsRegionSettingsExist =
+      AWS_REGION.length !== 0 && AWS_STS_REGIONAL_ENDPOINTS.length !== 0;
+
+    /**
+     * If AWS_STS_REGIONAL_ENDPOINTS is set to regional, users are opting into the new behavior of respecting the region settings
+     *
+     * If AWS_STS_REGIONAL_ENDPOINTS is set to legacy, then "old" regions need to keep using the global setting.
+     * Technically the SDK gets this wrong, it reaches out to 'sts.us-east-1.amazonaws.com' when it should be 'sts.amazonaws.com'.
+     * That is not our bug to fix here. We leave that up to the SDK.
+     */
+    const useRegionalSts =
+      AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
+      (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
+
+    if ('fromNodeProviderChain' in MongoDBAWS.credentialProvider) {
+      MongoDBAWS.provider =
+        awsRegionSettingsExist && useRegionalSts
+          ? MongoDBAWS.credentialProvider.fromNodeProviderChain({
+              clientConfig: { region: AWS_REGION }
+            })
+          : MongoDBAWS.credentialProvider.fromNodeProviderChain();
+    }
   }
 
   override async auth(authContext: AuthContext): Promise<void> {
@@ -198,11 +228,31 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
   }
 
-  MongoDBAWS.credentialProvider ??= getAwsCredentialProvider();
-
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if ('kModuleError' in MongoDBAWS.credentialProvider) {
+  if (MongoDBAWS.provider) {
+    /*
+     * Creates a credential provider that will attempt to find credentials from the
+     * following sources (listed in order of precedence):
+     *
+     * - Environment variables exposed via process.env
+     * - SSO credentials from token cache
+     * - Web identity token credentials
+     * - Shared credentials and config ini files
+     * - The EC2/ECS Instance Metadata Service
+     */
+    try {
+      const creds = await MongoDBAWS.provider();
+      return makeMongoCredentialsFromAWSTemp({
+        AccessKeyId: creds.accessKeyId,
+        SecretAccessKey: creds.secretAccessKey,
+        Token: creds.sessionToken,
+        Expiration: creds.expiration
+      });
+    } catch (error) {
+      throw new MongoAWSError(error.message);
+    }
+  } else {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
@@ -232,54 +282,6 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
     });
 
     return makeMongoCredentialsFromAWSTemp(creds);
-  } else {
-    let { AWS_STS_REGIONAL_ENDPOINTS = '', AWS_REGION = '' } = process.env;
-    AWS_STS_REGIONAL_ENDPOINTS = AWS_STS_REGIONAL_ENDPOINTS.toLowerCase();
-    AWS_REGION = AWS_REGION.toLowerCase();
-
-    /** The option setting should work only for users who have explicit settings in their environment, the driver should not encode "defaults" */
-    const awsRegionSettingsExist =
-      AWS_REGION.length !== 0 && AWS_STS_REGIONAL_ENDPOINTS.length !== 0;
-
-    /**
-     * If AWS_STS_REGIONAL_ENDPOINTS is set to regional, users are opting into the new behavior of respecting the region settings
-     *
-     * If AWS_STS_REGIONAL_ENDPOINTS is set to legacy, then "old" regions need to keep using the global setting.
-     * Technically the SDK gets this wrong, it reaches out to 'sts.us-east-1.amazonaws.com' when it should be 'sts.amazonaws.com'.
-     * That is not our bug to fix here. We leave that up to the SDK.
-     */
-    const useRegionalSts =
-      AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
-      (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
-
-    const provider =
-      awsRegionSettingsExist && useRegionalSts
-        ? MongoDBAWS.credentialProvider.fromNodeProviderChain({
-            clientConfig: { region: AWS_REGION }
-          })
-        : MongoDBAWS.credentialProvider.fromNodeProviderChain();
-
-    /*
-     * Creates a credential provider that will attempt to find credentials from the
-     * following sources (listed in order of precedence):
-     *
-     * - Environment variables exposed via process.env
-     * - SSO credentials from token cache
-     * - Web identity token credentials
-     * - Shared credentials and config ini files
-     * - The EC2/ECS Instance Metadata Service
-     */
-    try {
-      const creds = await provider();
-      return makeMongoCredentialsFromAWSTemp({
-        AccessKeyId: creds.accessKeyId,
-        SecretAccessKey: creds.secretAccessKey,
-        Token: creds.sessionToken,
-        Expiration: creds.expiration
-      });
-    } catch (error) {
-      throw new MongoAWSError(error.message);
-    }
   }
 }
 
