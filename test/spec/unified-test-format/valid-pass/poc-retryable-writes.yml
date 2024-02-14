@@ -2,10 +2,6 @@ description: "poc-retryable-writes"
 
 schemaVersion: "1.0"
 
-runOnRequirements:
-  - minServerVersion: "3.6"
-    topologies: [ replicaset ]
-
 createEntities:
   - client:
       id: &client0 client0
@@ -42,6 +38,9 @@ initialData:
 
 tests:
   - description: "FindOneAndUpdate is committed on first attempt"
+    runOnRequirements: &onPrimaryTransactionalWrite_requirements
+      - minServerVersion: "3.6"
+        topologies: [ replicaset ]
     operations:
       - name: failPoint
         object: testRunner
@@ -65,6 +64,7 @@ tests:
           - { _id: 2, x: 22 }
 
   - description: "FindOneAndUpdate is not committed on first attempt"
+    runOnRequirements: *onPrimaryTransactionalWrite_requirements
     operations:
       - name: failPoint
         object: testRunner
@@ -89,6 +89,7 @@ tests:
           - { _id: 2, x: 22 }
 
   - description: "FindOneAndUpdate is never committed"
+    runOnRequirements: *onPrimaryTransactionalWrite_requirements
     operations:
       - name: failPoint
         object: testRunner
@@ -113,13 +114,9 @@ tests:
           - { _id: 2, x: 22 }
 
   - description: "InsertMany succeeds after PrimarySteppedDown"
-    runOnRequirements: &failCommand_requirements
-      - minServerVersion: "4.0"
-        topologies: [ replicaset ]
-      - minServerVersion: "4.1.7"
-        # Original test uses "sharded", but retryable writes requires a sharded
-        # cluster backed by replica sets
-        topologies: [ sharded-replicaset ]
+    runOnRequirements:
+      - minServerVersion: "4.3.1" # failCommand errorLabels option
+        topologies: [ replicaset, sharded ]
     operations:
       - name: failPoint
         object: testRunner
@@ -131,7 +128,7 @@ tests:
             data:
               failCommands: [ insert ]
               errorCode: 189 # PrimarySteppedDown
-              errorLabels: [  RetryableWriteError ]
+              errorLabels: [ RetryableWriteError ]
       - name: insertMany
         object: *collection0
         arguments:
@@ -153,7 +150,11 @@ tests:
           - { _id: 4, x: 44 }
 
   - description: "InsertOne fails after connection failure when retryWrites option is false"
-    runOnRequirements: *failCommand_requirements
+    runOnRequirements: # failCommand
+      - minServerVersion: "4.0"
+        topologies: [ replicaset ]
+      - minServerVersion: "4.1.7"
+        topologies: [ sharded ]
     operations:
       - name: failPoint
         object: testRunner
@@ -181,7 +182,9 @@ tests:
           - { _id: 2, x: 22 }
 
   - description: "InsertOne fails after multiple retryable writeConcernErrors"
-    runOnRequirements: *failCommand_requirements
+    runOnRequirements:
+      - minServerVersion: "4.3.1" # failCommand errorLabels option
+        topologies: [ replicaset, sharded ]
     operations:
       - name: failPoint
         object: testRunner
@@ -192,6 +195,7 @@ tests:
             mode: { times: 2 }
             data:
               failCommands: [ insert ]
+              errorLabels: [ RetryableWriteError ]
               writeConcernError:
                 code: 91 # ShutdownInProgress
                 errmsg: "Replication is being shut down"
