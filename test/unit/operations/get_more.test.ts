@@ -202,7 +202,7 @@ describe('GetMoreOperation', function () {
         new ServerDescription('a:1'),
         {} as any
       );
-      sinon.stub(server, 'command').yieldsRight();
+      sinon.stub(server, 'command');
 
       it('should throw if the cursorId is undefined', async () => {
         const getMoreOperation = new GetMoreOperation(

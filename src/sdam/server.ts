@@ -30,7 +30,6 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
-  MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
   needsRetryableWriteLabel
@@ -315,56 +314,53 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       require special logic to decrement it again, or would double increment (the load
     //       balanced code makes a recursive call).  Instead, we increment the count after this
     //       check.
-
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       conn = await this.pool.checkOut();
       session.pin(conn);
       return this.command(ns, cmd, finalOptions);
     }
 
-    const runCommand = async (conn: Connection) => {
-      this.incrementOperationCount();
-      try {
-        return await conn.command(ns, cmd, finalOptions);
-      } catch (e) {
-        throw this.decorateAndHandleError(conn, cmd, finalOptions, e);
-      } finally {
-        this.decrementOperationCount();
-      }
-    };
-
-    const shouldReauth = (e: AnyError): boolean => {
-      return e instanceof MongoError && e.code === MONGODB_ERROR_CODES.Reauthenticate;
-    };
-
-    // FIXME: This is where withConnection logic should go
+    this.incrementOperationCount();
     if (!conn) {
       try {
         conn = await this.pool.checkOut();
-      } catch (e) {
-        if (!e) throw new MongoRuntimeError('Failed to create connection without error');
-        if (!(e instanceof PoolClearedError)) this.handleError(e);
+      } catch (checkoutError) {
+        if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
 
-        throw e;
+        throw checkoutError;
       }
     }
 
     // Reauth flow
-    let rv;
     try {
-      rv = await runCommand(conn);
-    } catch (e) {
-      if (shouldReauth(e)) {
+      return await this.executeCommand(conn, ns, cmd, finalOptions);
+    } catch (operationError) {
+      if (
+        operationError instanceof MongoError &&
+        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
+      ) {
         conn = await this.pool.reauthenticateAsync(conn);
-        rv = await runCommand(conn);
+        return await this.executeCommand(conn, ns, cmd, finalOptions);
       } else {
-        throw e;
+        throw operationError;
       }
     } finally {
       this.pool.checkIn(conn);
+      this.decrementOperationCount();
     }
+  }
 
-    return rv;
+  private async executeCommand(
+    conn: Connection,
+    ns: MongoDBNamespace,
+    cmd: Document,
+    options?: CommandOptions
+  ): Promise<Document> {
+    try {
+      return await conn.command(ns, cmd, options);
+    } catch (commandOptions) {
+      throw this.decorateAndHandleError(conn, cmd, options, commandOptions);
+    }
   }
 
   /**
@@ -415,6 +411,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
+  /**
+   * Ensure that error is properly decorated and internal state is updated before throwing
+   * @internal
+   */
   private decorateAndHandleError(
     connection: Connection,
     cmd: Document,

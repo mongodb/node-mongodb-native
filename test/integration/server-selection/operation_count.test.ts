@@ -103,9 +103,9 @@ describe('Server Operation Count Tests', function () {
         const server = Array.from(client.topology.s.servers.values())[0];
         expect(server.s.operationCount).to.equal(0);
 
-        sinon.stub(ConnectionPool.prototype, 'checkOut').callsFake(function (cb) {
-          cb(new Error('unable to checkout connection'), undefined);
-        });
+        sinon
+          .stub(ConnectionPool.prototype, 'checkOut')
+          .returns(Promise.reject(new Error('unable to checkout connection')));
         const commandSpy = sinon.spy(server, 'command');
 
         const error = await collection.findOne({ count: 1 }).catch(e => e);

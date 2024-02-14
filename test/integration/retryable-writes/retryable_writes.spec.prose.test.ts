@@ -278,15 +278,19 @@ describe('Retryable Writes Spec Prose', () => {
         const serverCommandStub = sinon.stub(Server.prototype, 'command');
         serverCommandStub
           .onCall(0)
-          .yieldsRight(
-            new MongoWriteConcernError({ errorLabels: ['RetryableWriteError'], code: 91 }, {})
+          .returns(
+            Promise.reject(
+              new MongoWriteConcernError({ errorLabels: ['RetryableWriteError'], code: 91 }, {})
+            )
           );
         serverCommandStub
           .onCall(1)
-          .yieldsRight(
-            new MongoWriteConcernError(
-              { errorLabels: ['RetryableWriteError', 'NoWritesPerformed'], errorCode: 10107 },
-              {}
+          .returns(
+            Promise.reject(
+              new MongoWriteConcernError(
+                { errorLabels: ['RetryableWriteError', 'NoWritesPerformed'], errorCode: 10107 },
+                {}
+              )
             )
           );
 

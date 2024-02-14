@@ -91,7 +91,7 @@ describe('class KillCursorsOperation', () => {
         server,
         options
       ) as any;
-      const stub = sinon.stub(server, 'command').yieldsRight();
+      const stub = sinon.stub(server, 'command').returns(Promise.resolve({}));
       await killCursorsOperation.execute(server, undefined);
       expect(stub).to.have.been.calledOnceWith(namespace, {
         killCursors: namespace.collection,
