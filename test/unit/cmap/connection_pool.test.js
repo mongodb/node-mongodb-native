@@ -58,7 +58,7 @@ describe('Connection Pool', function () {
     const events = [];
     pool.on('connectionClosed', event => events.push(event));
 
-    const conn = await promisify(pool.checkOut.bind(pool))();
+    const conn = await pool.checkOut();
     const error = await conn.command(ns('admin.$cmd'), { ping: 1 }, {}).catch(error => error);
 
     expect(error).to.be.instanceOf(Error);
@@ -117,11 +117,9 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    pool.checkOut((err, conn) => {
-      expect(err).to.not.exist;
+    pool.checkOut().then(conn => {
       expect(conn).to.exist;
-
-      pool.checkOut(err => {
+      pool.checkOut().then(expect.fail, err => {
         expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
 
         // We can only process the wait queue with `checkIn` and `checkOut`, so we
@@ -135,7 +133,7 @@ describe('Connection Pool', function () {
         setImmediate(() => expect(pool).property('waitQueueSize').to.equal(0));
         done();
       });
-    });
+    }, expect.fail);
   });
 
   describe('minPoolSize population', function () {

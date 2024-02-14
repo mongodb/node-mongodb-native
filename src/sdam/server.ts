@@ -47,7 +47,6 @@ import {
   makeStateMachine,
   maxWireVersion,
   type MongoDBNamespace,
-  promiseWithResolvers,
   supportsRetryableWrites
 } from '../utils';
 import {
@@ -319,18 +318,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       check.
 
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
-      const { promise: checkedOutPromise, resolve, reject } = promiseWithResolvers<Connection>();
-
-      this.pool.checkOut((err, conn) => {
-        if (err || conn == null) {
-          reject(err);
-          return;
-        }
-        resolve(conn);
-      });
-      const checkedOut = await checkedOutPromise;
-
-      session.pin(checkedOut);
+      conn = await this.pool.checkOut();
+      session.pin(conn);
       return this.command(ns, cmd, finalOptions);
     }
 
@@ -368,13 +357,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
         throw err;
       }
-      const handler = makeAsyncOperationHandler<Document>(this, conn, cmd, finalOptions);
-
       try {
         const result = await conn.command(ns, cmd, finalOptions);
-        return await handler(undefined, result);
+        return await this.operationHandler(conn, cmd, finalOptions, undefined, result);
       } catch (e) {
-        return await handler(e);
+        return await this.operationHandler(conn, cmd, finalOptions, e, undefined);
       }
     };
     const shouldReauth = (e: AnyError): boolean => {
@@ -397,14 +384,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     // check out connection
-    const { promise: checkOutPromise, resolve, reject } = promiseWithResolvers<Connection>();
-    this.pool.checkOut((err, conn) => {
-      if (err) reject(err);
-      // There is no way to not error and get an undefined connection
-      else resolve(conn as Connection);
-    });
-
-    conn = await checkOutPromise;
+    conn = await this.pool.checkOut();
 
     let rv: Document;
     // call executeCommandAsync with that checked out connection
@@ -481,6 +461,83 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         }
       }
     }
+  }
+
+  private async operationHandler<T = Document>(
+    connection: Connection,
+    cmd: Document,
+    options: CommandOptions | GetMoreOptions | undefined,
+    error?: AnyError,
+    result?: any
+  ): Promise<T> {
+    const session = options?.session;
+    // We should not swallow an error if it is present.
+    if (error == null && result != null) {
+      return result;
+    }
+
+    if (options != null && 'noResponse' in options && options.noResponse === true) {
+      return null as T;
+    }
+
+    if (!error) {
+      throw new MongoUnexpectedServerResponseError('Empty response with no error');
+    }
+
+    if (error.name === 'AbortError' && error.cause instanceof MongoError) {
+      error = error.cause;
+    }
+
+    if (!(error instanceof MongoError)) {
+      // Node.js or some other error we have not special handling for
+      throw error;
+    }
+
+    if (connectionIsStale(this.pool, connection)) {
+      throw error;
+    }
+
+    if (error instanceof MongoNetworkError) {
+      if (session && !session.hasEnded && session.serverSession) {
+        session.serverSession.isDirty = true;
+      }
+
+      // inActiveTransaction check handles commit and abort.
+      if (
+        inActiveTransaction(session, cmd) &&
+        !error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.TransientTransactionError);
+      }
+
+      if (
+        (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
+        supportsRetryableWrites(this) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+    } else {
+      if (
+        (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
+        needsRetryableWriteLabel(error, maxWireVersion(this)) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+    }
+
+    if (
+      session &&
+      session.isPinned &&
+      error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+    ) {
+      session.unpin({ force: true });
+    }
+
+    this.handleError(error, connection);
+
+    throw error;
   }
 
   /**
@@ -562,82 +619,4 @@ function inActiveTransaction(session: ClientSession | undefined, cmd: Document) 
  * does not check if the server supports retryable writes */
 function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
-}
-
-function makeAsyncOperationHandler<T>(
-  server: Server,
-  connection: Connection,
-  cmd: Document,
-  options: CommandOptions | GetMoreOptions | undefined
-): (error?: AnyError, result?: any) => Promise<T> {
-  const session = options?.session;
-  return async function handleOperationResult(error, result) {
-    // We should not swallow an error if it is present.
-    if (error == null && result != null) {
-      return result;
-    }
-
-    if (options != null && 'noResponse' in options && options.noResponse === true) {
-      return null;
-    }
-
-    if (!error) {
-      throw new MongoUnexpectedServerResponseError('Empty response with no error');
-    }
-
-    if (error.name === 'AbortError' && error.cause instanceof MongoError) {
-      error = error.cause;
-    }
-
-    if (!(error instanceof MongoError)) {
-      // Node.js or some other error we have not special handling for
-      throw error;
-    }
-
-    if (connectionIsStale(server.pool, connection)) {
-      throw error;
-    }
-
-    if (error instanceof MongoNetworkError) {
-      if (session && !session.hasEnded && session.serverSession) {
-        session.serverSession.isDirty = true;
-      }
-
-      // inActiveTransaction check handles commit and abort.
-      if (
-        inActiveTransaction(session, cmd) &&
-        !error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.TransientTransactionError);
-      }
-
-      if (
-        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
-        supportsRetryableWrites(server) &&
-        !inActiveTransaction(session, cmd)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-    } else {
-      if (
-        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
-        needsRetryableWriteLabel(error, maxWireVersion(server)) &&
-        !inActiveTransaction(session, cmd)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-    }
-
-    if (
-      session &&
-      session.isPinned &&
-      error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
-    ) {
-      session.unpin({ force: true });
-    }
-
-    server.handleError(error, connection);
-
-    throw error;
-  };
 }
