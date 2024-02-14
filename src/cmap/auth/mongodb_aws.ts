@@ -230,7 +230,11 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if (MongoDBAWS.provider) {
+  if (
+    MongoDBAWS.provider &&
+    MongoDBAWS.credentialProvider &&
+    !('kModuleError' in MongoDBAWS.credentialProvider)
+  ) {
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):

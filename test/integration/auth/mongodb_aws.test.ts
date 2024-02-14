@@ -193,7 +193,6 @@ describe('MONGODB-AWS', function () {
         calledWith: []
       }
     ];
-    let n = 0
 
     for (const test of tests) {
       context(test.ctx, () => {
@@ -201,6 +200,7 @@ describe('MONGODB-AWS', function () {
         let storedEnv;
         let calledArguments;
         let shouldSkip = false;
+        let n;
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
@@ -216,6 +216,7 @@ describe('MONGODB-AWS', function () {
           }
 
           client = this.configuration.newClient(process.env.MONGODB_URI);
+          n = 0;
 
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
