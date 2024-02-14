@@ -33,7 +33,6 @@ import {
   MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
-  MongoUnexpectedServerResponseError,
   needsRetryableWriteLabel
 } from '../error';
 import type { ServerApi } from '../mongo_client';
@@ -323,47 +322,17 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       return this.command(ns, cmd, finalOptions);
     }
 
-    this.incrementOperationCount();
-
-    /*
-    const executeCommand: WithConnectionCallBack = (err, conn, cb) => {
-      if (err || !conn) {
-        this.decrementOperationCount();
-        if (!err) {
-          return cb(new MongoRuntimeError('Failed to create connection without error'));
-        }
-        if (!(err instanceof PoolClearedError)) {
-          this.handleError(err);
-        }
-        return cb(err);
-      }
-
-      const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-        this.decrementOperationCount();
-        cb(error, response);
-      });
-      conn.command(ns, cmd, finalOptions).then(
-        r => handler(undefined, r),
-        e => handler(e)
-      );
-    };
-    */
-
-    const executeCommandAsync = async (err?: AnyError, conn?: Connection) => {
-      if (err || !conn) {
-        this.decrementOperationCount();
-        if (!err) throw new MongoRuntimeError('Failed to create connection without error');
-        if (!(err instanceof PoolClearedError)) this.handleError(err);
-
-        throw err;
-      }
+    const runCommand = async (conn: Connection) => {
+      this.incrementOperationCount();
       try {
-        const result = await conn.command(ns, cmd, finalOptions);
-        return await this.operationHandler(conn, cmd, finalOptions, undefined, result);
+        return await conn.command(ns, cmd, finalOptions);
       } catch (e) {
-        return await this.operationHandler(conn, cmd, finalOptions, e, undefined);
+        throw this.decorateAndHandleError(conn, cmd, finalOptions, e);
+      } finally {
+        this.decrementOperationCount();
       }
     };
+
     const shouldReauth = (e: AnyError): boolean => {
       return e instanceof MongoError && e.code === MONGODB_ERROR_CODES.Reauthenticate;
     };
@@ -372,47 +341,39 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     if (conn) {
       // send operation, possibly reauthenticating and return without checking back in
       try {
-        return await executeCommandAsync(undefined, conn);
+        return await runCommand(conn);
       } catch (e) {
         if (shouldReauth(e)) {
           conn = await this.pool.reauthenticateAsync(conn);
-          return await executeCommandAsync(undefined, conn);
+          return await runCommand(conn);
         }
-
         throw e;
       }
     }
 
     // check out connection
-    conn = await this.pool.checkOut();
+    try {
+      conn = await this.pool.checkOut();
+    } catch (e) {
+      if (!e) throw new MongoRuntimeError('Failed to create connection without error');
+      if (!(e instanceof PoolClearedError)) this.handleError(e);
 
-    let rv: Document;
+      throw e;
+    }
     // call executeCommandAsync with that checked out connection
     try {
-      rv = await executeCommandAsync(undefined, conn);
+      return await runCommand(conn);
     } catch (e) {
       // if it errors
-      if (conn) {
-        //   if connection is defined
-        //    reauthenticate
-        if (shouldReauth(e)) {
-          conn = await this.pool.reauthenticateAsync(conn);
-          rv = await executeCommandAsync(undefined, conn);
-        } else {
-          throw e;
-        }
-      } else {
-        //    throw the error
-        throw e;
+      //    check if we should reauthenticate
+      if (shouldReauth(e)) {
+        conn = await this.pool.reauthenticateAsync(conn);
+        return await runCommand(conn);
       }
-    }
-
-    // if connection exists
-    //  check connection back into pool
-    if (conn) {
+      throw e;
+    } finally {
       this.pool.checkIn(conn);
     }
-    return rv;
   }
 
   /**
@@ -463,27 +424,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
-  private async operationHandler<T = Document>(
+  private decorateAndHandleError(
     connection: Connection,
     cmd: Document,
     options: CommandOptions | GetMoreOptions | undefined,
-    error?: AnyError,
-    result?: any
-  ): Promise<T> {
+    error: AnyError
+  ): AnyError {
     const session = options?.session;
-    // We should not swallow an error if it is present.
-    if (error == null && result != null) {
-      return result;
-    }
-
-    if (options != null && 'noResponse' in options && options.noResponse === true) {
-      return null as T;
-    }
-
-    if (!error) {
-      throw new MongoUnexpectedServerResponseError('Empty response with no error');
-    }
-
     if (error.name === 'AbortError' && error.cause instanceof MongoError) {
       error = error.cause;
     }
@@ -537,7 +484,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     this.handleError(error, connection);
 
-    throw error;
+    return error;
   }
 
   /**
