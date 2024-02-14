@@ -58,7 +58,7 @@ interface AWSSaslContinuePayload {
 
 export class MongoDBAWS extends AuthProvider {
   static credentialProvider: ReturnType<typeof getAwsCredentialProvider> | null = null;
-  static provider?: () => Promise<AWSCredentials>;
+  provider?: () => Promise<AWSCredentials>;
   randomBytesAsync: (size: number) => Promise<Buffer>;
 
   constructor() {
@@ -85,16 +85,8 @@ export class MongoDBAWS extends AuthProvider {
       AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
       (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
 
-    console.log('awsRegionSettingsExist----------------------');
-    console.log(awsRegionSettingsExist);
-    console.log('----------------------');
-
-    console.log('useRegionalSts----------------------');
-    console.log(useRegionalSts);
-    console.log('----------------------');
-
     if ('fromNodeProviderChain' in MongoDBAWS.credentialProvider) {
-      MongoDBAWS.provider =
+      this.provider =
         awsRegionSettingsExist && useRegionalSts
           ? MongoDBAWS.credentialProvider.fromNodeProviderChain({
               clientConfig: { region: AWS_REGION }
@@ -121,7 +113,7 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     if (!authContext.credentials.username) {
-      authContext.credentials = await makeTempCredentials(authContext.credentials);
+      authContext.credentials = await makeTempCredentials(authContext.credentials, this.provider);
     }
 
     const { credentials } = authContext;
@@ -219,7 +211,10 @@ interface AWSTempCredentials {
   Expiration?: Date;
 }
 
-async function makeTempCredentials(credentials: MongoCredentials): Promise<MongoCredentials> {
+async function makeTempCredentials(
+  credentials: MongoCredentials,
+  provider?: () => Promise<AWSCredentials>
+): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
       throw new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials');
@@ -239,7 +234,7 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
   if (
-    MongoDBAWS.provider &&
+    provider &&
     MongoDBAWS.credentialProvider &&
     !('kModuleError' in MongoDBAWS.credentialProvider)
   ) {
@@ -254,7 +249,7 @@ async function makeTempCredentials(credentials: MongoCredentials): Promise<Mongo
      * - The EC2/ECS Instance Metadata Service
      */
     try {
-      const creds = await MongoDBAWS.provider();
+      const creds = await provider();
       return makeMongoCredentialsFromAWSTemp({
         AccessKeyId: creds.accessKeyId,
         SecretAccessKey: creds.secretAccessKey,
