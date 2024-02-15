@@ -154,7 +154,6 @@ describe('MONGODB-AWS', function () {
         },
         calledWith: []
       },
-
       {
         ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to regional and region is legacy',
         title: 'uses the region from the environment',
@@ -173,7 +172,6 @@ describe('MONGODB-AWS', function () {
         },
         calledWith: [{ clientConfig: { region: 'sa-east-1' } }]
       },
-
       {
         ctx: 'when AWS_STS_REGIONAL_ENDPOINTS is set to legacy and region is legacy',
         title: 'uses the region from the environment',
@@ -215,9 +213,6 @@ describe('MONGODB-AWS', function () {
             return this.skip();
           }
 
-          client = this.configuration.newClient(process.env.MONGODB_URI);
-          n = 0;
-
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
             delete process.env.AWS_STS_REGIONAL_ENDPOINTS;
@@ -230,7 +225,8 @@ describe('MONGODB-AWS', function () {
             process.env.AWS_REGION = test.env.AWS_REGION;
           }
 
-          calledArguments = [];
+          n = 0;
+
           MongoDBAWS.credentialProvider = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
@@ -238,6 +234,8 @@ describe('MONGODB-AWS', function () {
               return credentialProvider.fromNodeProviderChain(...args);
             }
           };
+
+          client = this.configuration.newClient(process.env.MONGODB_URI);
         });
 
         afterEach(() => {
@@ -263,7 +261,7 @@ describe('MONGODB-AWS', function () {
 
           expect(result).to.not.be.instanceOf(MongoServerError);
           expect(result).to.be.a('number');
-          // expect(n).to.be.eql(1);
+          expect(n).to.be.eql(1);
 
           expect(calledArguments).to.deep.equal(test.calledWith);
         });
