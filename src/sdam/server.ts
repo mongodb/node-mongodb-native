@@ -327,6 +327,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       } catch (checkoutError) {
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
 
+        this.decrementOperationCount();
         throw checkoutError;
       }
     }
