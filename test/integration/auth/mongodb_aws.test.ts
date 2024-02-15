@@ -67,7 +67,7 @@ describe('MONGODB-AWS', function () {
       .that.equals('');
   });
 
-  it('should store a provider instance per client', function () {
+  it('should store a MongoDBAWS provider instance per client', function () {
     client = this.configuration.newClient(this.configuration.url(), {
       authMechanismProperties: { AWS_SESSION_TOKEN: '' }
     });
@@ -264,6 +264,18 @@ describe('MONGODB-AWS', function () {
           expect(n).to.be.eql(1);
 
           expect(calledArguments).to.deep.equal(test.calledWith);
+        });
+
+        it('creates one aws provider pre MongoDBAWS instance', async function () {
+          await client.close();
+          await client.connect();
+          await client
+            .db('aws')
+            .collection('aws_test')
+            .estimatedDocumentCount()
+            .catch(error => error);
+
+          expect(n).to.be.eql(1);
         });
       });
     }
