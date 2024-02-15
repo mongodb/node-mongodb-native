@@ -857,6 +857,9 @@ export interface MongoOptions
   connectionType?: typeof Connection;
 
   /** @internal */
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
+
+  /** @internal */
   encrypter: Encrypter;
   /** @internal */
   userSpecifiedAuthSource: boolean;

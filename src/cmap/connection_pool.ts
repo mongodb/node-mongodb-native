@@ -702,7 +702,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       id: this[kConnectionCounter].next().value,
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
-      mongoLogger: this.mongoLogger
+      mongoLogger: this.mongoLogger,
+      getAuthProvider: this[kServer].topology.client.s?.getAuthProvider
     };
 
     this[kPending]++;
@@ -712,7 +713,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
-    connect(connectOptions, this[kServer].topology.client.s?.getAuthProvider).then(
+    connect(connectOptions).then(
       connection => {
         // The pool might have closed since we started trying to create a connection
         if (this[kPoolState] !== PoolState.ready) {

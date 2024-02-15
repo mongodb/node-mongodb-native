@@ -36,15 +36,12 @@ import {
 /** @public */
 export type Stream = Socket | TLSSocket;
 
-export async function connect(
-  options: ConnectionOptions,
-  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined
-): Promise<Connection> {
+export async function connect(options: ConnectionOptions): Promise<Connection> {
   let connection: Connection | null = null;
   try {
     const socket = await makeSocket(options);
     connection = makeConnection(options, socket);
-    await performInitialHandshake(connection, options, getAuthProvider);
+    await performInitialHandshake(connection, options);
     return connection;
   } catch (error) {
     connection?.destroy({ force: false });
@@ -88,15 +85,14 @@ function checkSupportedServer(hello: Document, options: ConnectionOptions) {
 
 export async function performInitialHandshake(
   conn: Connection,
-  options: ConnectionOptions,
-  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined
+  options: ConnectionOptions
 ): Promise<void> {
   const credentials = options.credentials;
 
   if (credentials) {
     if (
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
-      !getAuthProvider(credentials.mechanism)
+      !options.getAuthProvider(credentials.mechanism)
     ) {
       throw new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`);
     }
@@ -105,7 +101,7 @@ export async function performInitialHandshake(
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
 
-  const handshakeDoc = await prepareHandshakeDocument(authContext, getAuthProvider);
+  const handshakeDoc = await prepareHandshakeDocument(authContext, options.getAuthProvider);
 
   // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
   const handshakeOptions: CommandOptions = { ...options };
@@ -151,7 +147,7 @@ export async function performInitialHandshake(
     authContext.response = response;
 
     const resolvedCredentials = credentials.resolveAuthMechanism(response);
-    const provider = getAuthProvider(resolvedCredentials.mechanism);
+    const provider = options.getAuthProvider(resolvedCredentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(
         `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
@@ -176,6 +172,10 @@ export async function performInitialHandshake(
   conn.established = true;
 }
 
+/**
+ * HandshakeDocument used during authentication.
+ * @internal
+ */
 export interface HandshakeDocument extends Document {
   /**
    * @deprecated Use hello instead

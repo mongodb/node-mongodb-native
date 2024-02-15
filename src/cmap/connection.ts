@@ -40,8 +40,9 @@ import {
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
-import type { AuthContext } from './auth/auth_provider';
+import type { AuthContext, AuthProvider } from './auth/auth_provider';
 import type { MongoCredentials } from './auth/mongo_credentials';
+import { type AuthMechanism } from './auth/providers';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
@@ -117,6 +118,8 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
 }
 
 /** @internal */

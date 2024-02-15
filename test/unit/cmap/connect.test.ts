@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 
+import { Plain } from '../../../src/cmap/auth/plain';
 import {
   CancellationToken,
   type ClientMetadata,
@@ -22,7 +23,8 @@ const CONNECT_DEFAULTS = {
   generation: 1,
   monitorCommands: false,
   metadata: {} as ClientMetadata,
-  loadBalanced: false
+  loadBalanced: false,
+  getAuthProvider: () => new Plain()
 };
 
 describe('Connect Tests', function () {
