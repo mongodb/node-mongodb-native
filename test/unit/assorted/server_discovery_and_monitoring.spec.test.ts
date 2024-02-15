@@ -334,9 +334,9 @@ async function executeSDAMTest(testData: SDAMTest) {
       // phase with applicationErrors simulating error's from network, timeouts, server
       for (const appError of phase.applicationErrors) {
         // Stub will return appError to SDAM machinery
-        const withConnectionStub = sinon
-          .stub(ConnectionPool.prototype, 'withConnection')
-          .callsFake(withConnectionStubImpl(appError));
+        const checkOutStub = sinon
+          .stub(ConnectionPool.prototype, 'checkOut')
+          .callsFake(checkoutStubImpl(appError));
 
         const server = client.topology.s.servers.get(appError.address);
 
@@ -345,7 +345,7 @@ async function executeSDAMTest(testData: SDAMTest) {
         const thrownError = await res.catch(error => error);
 
         // Restore the stub before asserting anything in case of errors
-        withConnectionStub.restore();
+        checkOutStub.restore();
 
         const isApplicationError = error => {
           // These errors all come from the withConnection stub
@@ -404,15 +404,13 @@ async function executeSDAMTest(testData: SDAMTest) {
   }
 }
 
-function withConnectionStubImpl(appError) {
-  return function (conn, fn, callback) {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const connectionPool = this; // we are stubbing `withConnection` on the `ConnectionPool` class
+function checkoutStubImpl(appError) {
+  return async function () {
+    const connectionPool = this;
     const fakeConnection = {
       generation:
         typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
-
-      async command(_ns, _cmd, _options) {
+      async command(_, __, ___) {
         if (appError.type === 'network') {
           throw new MongoNetworkError('test generated');
         } else if (appError.type === 'timeout') {
@@ -424,16 +422,7 @@ function withConnectionStubImpl(appError) {
         }
       }
     };
-
-    fn(undefined, fakeConnection, (fnErr, result) => {
-      if (typeof callback === 'function') {
-        if (fnErr) {
-          callback(fnErr);
-        } else {
-          callback(undefined, result);
-        }
-      }
-    });
+    return fakeConnection;
   };
 }
 
