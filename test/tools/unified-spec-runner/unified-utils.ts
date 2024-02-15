@@ -146,12 +146,16 @@ export async function topologySatisfies(
 }
 
 export async function isAnyRequirementSatisfied(ctx, requirements, client) {
+  const skipTarget = ctx.currentTest || ctx.test;
+  const skipReasons = [];
   for (const requirement of requirements) {
     const met = await topologySatisfies(ctx, requirement, client);
     if (met) {
       return true;
     }
+    skipReasons.push(skipTarget.skipReason);
   }
+  skipTarget.skipReason = skipReasons.join(' OR ');
   return false;
 }
 
