@@ -311,13 +311,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       are waiting for a connection are included in the operation count.  Load balanced
     //       mode will only ever have a single server, so the operation count doesn't matter.
     //       Incrementing the operation count above the logic to handle load balanced mode would
-    //       require special logic to decrement it again, or would double increment (the load
-    //       balanced code makes a recursive call).  Instead, we increment the count after this
-    //       check.
+    //       require special logic to decrement it again, or would double increment. Instead, we
+    //       increment the count after this check.
     if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
       conn = await this.pool.checkOut();
       session.pin(conn);
-      return this.command(ns, cmd, finalOptions);
     }
 
     this.incrementOperationCount();
