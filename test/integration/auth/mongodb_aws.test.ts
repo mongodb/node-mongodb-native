@@ -266,7 +266,7 @@ describe('MONGODB-AWS', function () {
           expect(calledArguments).to.deep.equal(test.calledWith);
         });
 
-        it('creates one aws provider pre MongoDBAWS instance', async function () {
+        it('creates one AWS provider per client', async function () {
           await client.close();
           await client.connect();
           await client

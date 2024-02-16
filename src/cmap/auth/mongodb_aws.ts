@@ -57,7 +57,7 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
-  static credentialProvider: ReturnType<typeof getAwsCredentialProvider> | null = null;
+  static credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
   provider?: () => Promise<AWSCredentials>;
   randomBytesAsync: (size: number) => Promise<Buffer>;
 
@@ -233,11 +233,7 @@ async function makeTempCredentials(
 
   // Check if the AWS credential provider from the SDK is present. If not,
   // use the old method.
-  if (
-    provider &&
-    MongoDBAWS.credentialProvider &&
-    !('kModuleError' in MongoDBAWS.credentialProvider)
-  ) {
+  if (provider && !('kModuleError' in MongoDBAWS.credentialProvider)) {
     /*
      * Creates a credential provider that will attempt to find credentials from the
      * following sources (listed in order of precedence):
