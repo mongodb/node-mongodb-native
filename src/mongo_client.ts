@@ -405,7 +405,13 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       activeSessions: new Set(),
 
       getAuthProvider(name: AuthMechanism | string) {
-        return clientAuthProviders[name] || AUTH_PROVIDERS.get(name)?.();
+        if (!clientAuthProviders[name]) {
+          const provider = AUTH_PROVIDERS.get(name)?.();
+          if (provider) {
+            clientAuthProviders[name] = provider;
+          }
+        }
+        return clientAuthProviders[name];
       },
       get options() {
         return client[kOptions];
