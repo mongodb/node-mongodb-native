@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 
-import { Plain } from '../../../src/cmap/auth/plain';
 import {
   CancellationToken,
   type ClientMetadata,
@@ -12,6 +11,7 @@ import {
   LEGACY_HELLO_COMMAND,
   MongoCredentials,
   MongoNetworkError,
+  Plain,
   prepareHandshakeDocument
 } from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
