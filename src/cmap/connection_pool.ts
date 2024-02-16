@@ -544,6 +544,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     );
   }
 
+  /**
+   * @internal
+   * Reauthenticate a connection
+   */
   async reauthenticateAsync(connection: Connection): Promise<Connection> {
     const authContext = connection.authContext;
     if (!authContext) {
