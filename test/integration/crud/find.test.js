@@ -36,9 +36,7 @@ describe('Find', function () {
       const collection = db.collection('test_find_simple');
       const docs = [{ a: 2 }, { b: 3 }];
 
-      console.log('before insert');
       await collection.insert(docs, configuration.writeConcernMax());
-      console.log('after insert');
 
       const insertedDocs = await collection.find().toArray();
       expect(insertedDocs).to.have.length(2);
