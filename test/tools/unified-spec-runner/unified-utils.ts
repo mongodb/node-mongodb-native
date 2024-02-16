@@ -41,19 +41,6 @@ export async function topologySatisfies(
 
   let skipReason;
 
-  if (r.minServerVersion) {
-    const minVersion = patchVersion(r.minServerVersion);
-    ok &&= semverGte(config.version, minVersion);
-    if (!ok && skipReason == null) {
-      skipReason = `requires mongodb version greater than ${minVersion}`;
-    }
-  }
-  if (r.maxServerVersion) {
-    const maxVersion = patchVersion(r.maxServerVersion);
-    ok &&= semverLte(config.version, maxVersion);
-    if (!ok && skipReason == null) skipReason = `requires mongodb version less than ${maxVersion}`;
-  }
-
   if (r.topologies) {
     const topologyType = {
       Single: 'single',
@@ -80,6 +67,19 @@ export async function topologySatisfies(
         skipReason = `requires ${r.topologies} but discovered a ${topologyType} topology`;
       }
     }
+  }
+
+  if (r.minServerVersion) {
+    const minVersion = patchVersion(r.minServerVersion);
+    ok &&= semverGte(config.version, minVersion);
+    if (!ok && skipReason == null) {
+      skipReason = `requires mongodb version greater than ${minVersion}`;
+    }
+  }
+  if (r.maxServerVersion) {
+    const maxVersion = patchVersion(r.maxServerVersion);
+    ok &&= semverLte(config.version, maxVersion);
+    if (!ok && skipReason == null) skipReason = `requires mongodb version less than ${maxVersion}`;
   }
 
   if (r.serverParameters) {
@@ -146,12 +146,16 @@ export async function topologySatisfies(
 }
 
 export async function isAnyRequirementSatisfied(ctx, requirements, client) {
+  const skipTarget = ctx.currentTest || ctx.test;
+  const skipReasons = [];
   for (const requirement of requirements) {
     const met = await topologySatisfies(ctx, requirement, client);
     if (met) {
       return true;
     }
+    skipReasons.push(skipTarget.skipReason);
   }
+  skipTarget.skipReason = skipReasons.join(' OR ');
   return false;
 }
 
