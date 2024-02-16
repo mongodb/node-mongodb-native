@@ -349,6 +349,11 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
   }
 
+  /**
+   * Execute a command, catching and appropriately rewrapping thrown errors and updating internal
+   * state as appropriate
+   * @internal
+   */
   private async executeCommand(
     conn: Connection,
     ns: MongoDBNamespace,
