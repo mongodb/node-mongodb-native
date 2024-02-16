@@ -406,10 +406,10 @@ async function executeSDAMTest(testData: SDAMTest) {
 
 function checkoutStubImpl(appError) {
   return async function () {
-    const connectionPool = this;
+    const connectionPoolGeneration = this.generation;
     const fakeConnection = {
       generation:
-        typeof appError.generation === 'number' ? appError.generation : connectionPool.generation,
+        typeof appError.generation === 'number' ? appError.generation : connectionPoolGeneration,
       async command(_, __, ___) {
         if (appError.type === 'network') {
           throw new MongoNetworkError('test generated');
