@@ -328,7 +328,20 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /** @internal */
+
 const kOptions = Symbol('options');
+
+/** @internal */
+const AUTH_PROVIDERS = new Map<AuthMechanism | string, () => AuthProvider>([
+  [AuthMechanism.MONGODB_AWS, () => new MongoDBAWS()],
+  [AuthMechanism.MONGODB_CR, () => new MongoCR()],
+  [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
+  [AuthMechanism.MONGODB_OIDC, () => new MongoDBOIDC()],
+  [AuthMechanism.MONGODB_PLAIN, () => new Plain()],
+  [AuthMechanism.MONGODB_SCRAM_SHA1, () => new ScramSHA1()],
+  [AuthMechanism.MONGODB_SCRAM_SHA256, () => new ScramSHA256()],
+  [AuthMechanism.MONGODB_X509, () => new X509()]
+]);
 
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -380,16 +393,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
 
-    const authProviders = new Map<AuthMechanism | string, AuthProvider>([
-      [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
-      [AuthMechanism.MONGODB_CR, new MongoCR()],
-      [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
-      [AuthMechanism.MONGODB_OIDC, new MongoDBOIDC()],
-      [AuthMechanism.MONGODB_PLAIN, new Plain()],
-      [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
-      [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
-      [AuthMechanism.MONGODB_X509, new X509()]
-    ]);
+    const clientAuthProviders: { [authMechanism: AuthMechanism | string]: AuthProvider } = {};
 
     // The internal state
     this.s = {
@@ -401,7 +405,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       activeSessions: new Set(),
 
       getAuthProvider(name: AuthMechanism | string) {
-        return authProviders.get(name);
+        return clientAuthProviders[name] || AUTH_PROVIDERS.get(name)?.();
       },
       get options() {
         return client[kOptions];
