@@ -313,10 +313,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     //       Incrementing the operation count above the logic to handle load balanced mode would
     //       require special logic to decrement it again, or would double increment. Instead, we
     //       increment the count after this check.
-    if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
-      conn = await this.pool.checkOut();
-      session.pin(conn);
-    }
+
+    const connShouldBePinned =
+      this.loadBalanced && session != null && isPinnableCommand(cmd, session);
 
     this.incrementOperationCount();
     if (!conn) {
@@ -324,10 +323,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         conn = await this.pool.checkOut();
       } catch (checkoutError) {
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
-
         this.decrementOperationCount();
         throw checkoutError;
       }
+    }
+
+    if (connShouldBePinned && !session.isPinned) {
+      session.pin(conn);
     }
 
     // Reauth flow
@@ -344,8 +346,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         throw operationError;
       }
     } finally {
-      this.pool.checkIn(conn);
-      this.decrementOperationCount();
+      if (!connShouldBePinned) {
+        this.pool.checkIn(conn);
+        this.decrementOperationCount();
+      }
     }
   }
 
@@ -362,8 +366,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   ): Promise<Document> {
     try {
       return await conn.command(ns, cmd, options);
-    } catch (commandOptions) {
-      throw this.decorateAndHandleError(conn, cmd, options, commandOptions);
+    } catch (commandError) {
+      throw this.decorateAndHandleError(conn, cmd, options, commandError);
     }
   }
 
@@ -526,6 +530,7 @@ function isPinnableCommand(cmd: Document, session?: ClientSession): boolean {
   if (session) {
     return (
       session.inTransaction() ||
+      (session.transaction.isCommitted && 'commitTransaction' in cmd) ||
       'aggregate' in cmd ||
       'find' in cmd ||
       'getMore' in cmd ||
