@@ -67,13 +67,17 @@ describe('MONGODB-AWS', function () {
       .that.equals('');
   });
 
-  it('should store a MongoDBAWS provider instance per client', function () {
-    client = this.configuration.newClient(this.configuration.url(), {
-      authMechanismProperties: { AWS_SESSION_TOKEN: '' }
-    });
+  it('should store a MongoDBAWS provider instance per client', async function () {
+    client = this.configuration.newClient(process.env.MONGODB_URI);
 
-    expect(client).to.have.nested.property('s.getAuthProvider');
-    const provider = client.s.getAuthProvider('MONGODB-AWS');
+    await client
+      .db('aws')
+      .collection('aws_test')
+      .estimatedDocumentCount()
+      .catch(error => error);
+
+    expect(client).to.have.nested.property('s.authProviders');
+    const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
     expect(provider).to.be.instanceOf(MongoDBAWS);
   });
 
@@ -198,7 +202,7 @@ describe('MONGODB-AWS', function () {
         let storedEnv;
         let calledArguments;
         let shouldSkip = false;
-        let n;
+        let numberOfFromNodeProviderChainCalls;
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
@@ -225,12 +229,12 @@ describe('MONGODB-AWS', function () {
             process.env.AWS_REGION = test.env.AWS_REGION;
           }
 
-          n = 0;
+          numberOfFromNodeProviderChainCalls = 0;
 
           MongoDBAWS.credentialProvider = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
-              n += 1;
+              numberOfFromNodeProviderChainCalls += 1;
               return credentialProvider.fromNodeProviderChain(...args);
             }
           };
@@ -261,12 +265,11 @@ describe('MONGODB-AWS', function () {
 
           expect(result).to.not.be.instanceOf(MongoServerError);
           expect(result).to.be.a('number');
-          expect(n).to.be.eql(1);
 
           expect(calledArguments).to.deep.equal(test.calledWith);
         });
 
-        it('creates one AWS provider per client', async function () {
+        it('fromNodeProviderChain called once', async function () {
           await client.close();
           await client.connect();
           await client
@@ -275,7 +278,7 @@ describe('MONGODB-AWS', function () {
             .estimatedDocumentCount()
             .catch(error => error);
 
-          expect(n).to.be.eql(1);
+          expect(numberOfFromNodeProviderChainCalls).to.be.eql(1);
         });
       });
     }

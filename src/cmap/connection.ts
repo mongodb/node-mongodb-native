@@ -24,6 +24,7 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
@@ -40,9 +41,8 @@ import {
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
-import type { AuthContext, AuthProvider } from './auth/auth_provider';
+import type { AuthContext } from './auth/auth_provider';
 import type { MongoCredentials } from './auth/mongo_credentials';
-import { type AuthMechanism } from './auth/providers';
 import {
   CommandFailedEvent,
   CommandStartedEvent,
@@ -110,6 +110,8 @@ export interface ConnectionOptions
   /** @internal */
   connectionType?: any;
   credentials?: MongoCredentials;
+  /** @internal */
+  authProviders: MongoClientAuthProviders;
   connectTimeoutMS?: number;
   tls: boolean;
   noDelay?: boolean;
@@ -118,8 +120,6 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
-  /** @internal */
-  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
 }
 
 /** @internal */

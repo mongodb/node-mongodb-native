@@ -9,9 +9,9 @@ import {
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
+  MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
-  Plain,
   prepareHandshakeDocument
 } from '../../mongodb';
 import { genClusterTime } from '../../tools/common';
@@ -23,8 +23,7 @@ const CONNECT_DEFAULTS = {
   generation: 1,
   monitorCommands: false,
   metadata: {} as ClientMetadata,
-  loadBalanced: false,
-  getAuthProvider: () => new Plain()
+  loadBalanced: false
 };
 
 describe('Connect Tests', function () {
@@ -46,7 +45,8 @@ describe('Connect Tests', function () {
           source: 'admin',
           mechanism: 'PLAIN',
           mechanismProperties: {}
-        })
+        }),
+        authProviders: new MongoClientAuthProviders()
       };
     });
 

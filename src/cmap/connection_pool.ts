@@ -622,7 +622,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
-    const provider = this[kServer].topology.client?.s.getAuthProvider(
+    const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
       resolvedCredentials.mechanism
     );
     if (!provider) {
@@ -703,7 +703,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      getAuthProvider: this[kServer].topology.client.s?.getAuthProvider
+      authProviders: this[kServer].topology.client.s.authProviders
     };
 
     this[kPending]++;

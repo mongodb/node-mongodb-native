@@ -366,6 +366,7 @@ export type {
   SupportedTLSSocketOptions,
   WithSessionCallback
 } from './mongo_client';
+export { MongoClientAuthProviders } from './mongo_client_auth_providers';
 export type {
   Log,
   LogComponentSeveritiesClientOptions,

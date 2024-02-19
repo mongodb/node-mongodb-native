@@ -6,20 +6,12 @@ import { promisify } from 'util';
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
-import { type AuthProvider } from './cmap/auth/auth_provider';
-import { GSSAPI } from './cmap/auth/gssapi';
 import {
   type AuthMechanismProperties,
   DEFAULT_ALLOWED_HOSTS,
   type MongoCredentials
 } from './cmap/auth/mongo_credentials';
-import { MongoCR } from './cmap/auth/mongocr';
-import { MongoDBAWS } from './cmap/auth/mongodb_aws';
-import { MongoDBOIDC } from './cmap/auth/mongodb_oidc';
-import { Plain } from './cmap/auth/plain';
 import { AuthMechanism } from './cmap/auth/providers';
-import { ScramSHA1, ScramSHA256 } from './cmap/auth/scram';
-import { X509 } from './cmap/auth/x509';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
 import type { ClientMetadata } from './cmap/handshake/client_metadata';
@@ -29,6 +21,7 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
+import { MongoClientAuthProviders } from './mongo_client_auth_providers';
 import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
@@ -305,7 +298,7 @@ export interface MongoClientPrivate {
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
-  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
+  authProviders: MongoClientAuthProviders;
   /**
    * We keep a reference to the sessions that are acquired from the pool.
    * - used to track and close all sessions in client.close() (which is non-standard behavior)
@@ -330,18 +323,6 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 /** @internal */
 
 const kOptions = Symbol('options');
-
-/** @internal */
-const AUTH_PROVIDERS = new Map<AuthMechanism | string, () => AuthProvider>([
-  [AuthMechanism.MONGODB_AWS, () => new MongoDBAWS()],
-  [AuthMechanism.MONGODB_CR, () => new MongoCR()],
-  [AuthMechanism.MONGODB_GSSAPI, () => new GSSAPI()],
-  [AuthMechanism.MONGODB_OIDC, () => new MongoDBOIDC()],
-  [AuthMechanism.MONGODB_PLAIN, () => new Plain()],
-  [AuthMechanism.MONGODB_SCRAM_SHA1, () => new ScramSHA1()],
-  [AuthMechanism.MONGODB_SCRAM_SHA256, () => new ScramSHA256()],
-  [AuthMechanism.MONGODB_X509, () => new X509()]
-]);
 
 /**
  * The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -393,8 +374,6 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const client = this;
 
-    const clientAuthProviders: { [authMechanism: AuthMechanism | string]: AuthProvider } = {};
-
     // The internal state
     this.s = {
       url,
@@ -403,16 +382,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
+      authProviders: new MongoClientAuthProviders(),
 
-      getAuthProvider(name: AuthMechanism | string) {
-        if (!clientAuthProviders[name]) {
-          const provider = AUTH_PROVIDERS.get(name)?.();
-          if (provider) {
-            clientAuthProviders[name] = provider;
-          }
-        }
-        return clientAuthProviders[name];
-      },
       get options() {
         return client[kOptions];
       },
@@ -862,13 +833,10 @@ export interface MongoOptions
   proxyUsername?: string;
   proxyPassword?: string;
   serverMonitoringMode: ServerMonitoringMode;
-
   /** @internal */
   connectionType?: typeof Connection;
-
   /** @internal */
-  getAuthProvider: (name: AuthMechanism | string) => AuthProvider | undefined;
-
+  authProviders: MongoClientAuthProviders;
   /** @internal */
   encrypter: Encrypter;
   /** @internal */

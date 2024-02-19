@@ -8,6 +8,7 @@ import {
   LEGACY_HELLO_COMMAND,
   makeClientMetadata,
   MongoClient,
+  MongoClientAuthProviders,
   MongoServerError,
   ns,
   ServerHeartbeatStartedEvent,
@@ -23,7 +24,8 @@ const commonConnectOptions = {
   tls: false,
   loadBalanced: false,
   // Will be overridden by configuration options
-  hostAddress: HostAddress.fromString('127.0.0.1:1')
+  hostAddress: HostAddress.fromString('127.0.0.1:1'),
+  authProviders: new MongoClientAuthProviders()
 };
 
 describe('Connection', function () {
