@@ -76,7 +76,7 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
   /**
-   * Return the ModifyResult instead of the modified document. Defaults to true
+   * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
 }
