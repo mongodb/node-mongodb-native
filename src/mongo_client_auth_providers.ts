@@ -22,11 +22,21 @@ const AUTH_PROVIDERS = new Map<AuthMechanism | string, () => AuthProvider>([
 ]);
 
 /**
+ * Create a set of providers per client
+ * to avoid sharing the provider's cache between different clients.
  * @internal
  */
 export class MongoClientAuthProviders {
   private existingProviders: Map<AuthMechanism | string, AuthProvider> = new Map();
 
+  /**
+   * Get or create an authentication provider based on the provided mechanism.
+   * We don't want to create all providers at once, as some providers may not be used.
+   * @param name - The name of the provider to get or create.
+   * @returns The provider.
+   * @throws MongoInvalidArgumentError if the mechanism is not supported.
+   * @internal
+   */
   getOrCreateProvider(name: AuthMechanism | string): AuthProvider {
     const authProvider = this.existingProviders.get(name);
     if (authProvider) {
