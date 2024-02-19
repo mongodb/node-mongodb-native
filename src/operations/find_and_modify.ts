@@ -52,8 +52,7 @@ export interface FindOneAndReplaceOptions extends CommandOperationOptions {
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
   /**
-   * Return the ModifyResult instead of the modified document. Defaults to true
-   * but will default to false in the next major version.
+   * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
 }
@@ -77,8 +76,7 @@ export interface FindOneAndUpdateOptions extends CommandOperationOptions {
   /** Map of parameter names and values that can be accessed using $$var (requires MongoDB 5.0). */
   let?: Document;
   /**
-   * Return the ModifyResult instead of the modified document. Defaults to true
-   * but will default to false in the next major version.
+   * Return the ModifyResult instead of the modified document. Defaults to false
    */
   includeResultMetadata?: boolean;
 }
