@@ -3,17 +3,21 @@ import * as sinon from 'sinon';
 
 import {
   MIN_SECONDARY_WRITE_WIRE_VERSION,
+  MongoLogger,
   ObjectId,
   ReadPreference,
   readPreferenceServerSelector,
   sameServerSelector,
   secondaryWritableServerSelector,
   ServerDescription,
+  ServerSelectionEvent,
   TopologyDescription,
   TopologyType
 } from '../../mongodb';
+import * as mock from '../../tools/mongodb-mock/index';
+import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-describe('server selection', function () {
+describe('server selection', async function () {
   const primary = new ServerDescription('127.0.0.1:27017', {
     setName: 'test',
     isWritablePrimary: true,
@@ -602,6 +606,42 @@ describe('server selection', function () {
         expect(selectedAddresses.has(serverDescription1.address)).to.be.true;
         expect(selectedAddresses.has(serverDescription2.address)).to.be.false;
         expect(selectedAddresses.has(serverDescription3.address)).to.be.false;
+      });
+    });
+  });
+
+  describe('server selection logging feature flagging', async function () {
+    const topologyDescription = sinon.stub();
+
+    let mockServer;
+    let topology;
+
+    beforeEach(async () => {
+      mockServer = await mock.createServer();
+      topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
+    });
+
+    afterEach(async () => {
+      await mock.cleanup();
+    });
+
+    context('when willLog returns false', function () {
+      const original = Object.getPrototypeOf(ServerSelectionEvent);
+      let serverSelectionEventStub;
+      beforeEach(async () => {
+        sinon.stub(MongoLogger.prototype, 'willLog').callsFake((_v, _w) => false);
+        serverSelectionEventStub = sinon.stub();
+        Object.setPrototypeOf(ServerSelectionEvent, serverSelectionEventStub);
+      });
+
+      afterEach(async () => {
+        sinon.restore();
+        Object.setPrototypeOf(ServerSelectionEvent, original);
+      });
+
+      it('should not create server selection event instances', function () {
+        topology?.selectServer(topologyDescription, { operationName: 'test' }, v => v);
+        expect(serverSelectionEventStub.getCall(0)).to.be.null;
       });
     });
   });
