@@ -1283,36 +1283,6 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
 
-/**
- * Takes a promise and races it with a promise wrapping the abort event of the optionally provided signal.
- * The given promise is _always_ ordered before the signal's abort promise.
- * When given an already rejected promise and an already aborted signal, the promise's rejection takes precedence.
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/race
- *
- * @param promise - A promise to discard if the signal aborts
- * @param options - An options object carrying an optional signal
- */
-export async function abortable<T>(
-  promise: Promise<T>,
-  { signal }: { signal: AbortSignal }
-): Promise<T> {
-  const { promise: aborted, reject } = promiseWithResolvers<never>();
-
-  function rejectOnAbort() {
-    reject(signal.reason);
-  }
-
-  if (signal.aborted) rejectOnAbort();
-  else signal.addEventListener('abort', rejectOnAbort, { once: true });
-
-  try {
-    return await Promise.race([promise, aborted]);
-  } finally {
-    signal.removeEventListener('abort', rejectOnAbort);
-  }
-}
-
 export function promiseWithResolvers<T>() {
   let resolve!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
   let reject!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
