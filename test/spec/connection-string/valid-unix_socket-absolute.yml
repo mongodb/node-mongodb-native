@@ -24,6 +24,18 @@ tests:
         auth: ~
         options: ~
     -
+        description: "Unix domain socket (mixed case)"
+        uri: "mongodb://%2Ftmp%2FMongoDB-27017.sock"
+        valid: true
+        warning: false
+        hosts:
+            -
+                type: "unix"
+                host: "/tmp/MongoDB-27017.sock"
+                port: ~
+        auth: ~
+        options: ~
+    -
         description: "Unix domain socket (absolute path with spaces in path)"
         uri: "mongodb://%2Ftmp%2F %2Fmongodb-27017.sock"
         valid: true
