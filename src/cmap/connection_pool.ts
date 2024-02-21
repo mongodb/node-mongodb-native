@@ -561,7 +561,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
-    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
+      resolvedCredentials.mechanism
+    );
 
     if (!provider) {
       throw new MongoMissingCredentialsError(
