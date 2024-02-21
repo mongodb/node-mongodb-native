@@ -24,6 +24,7 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
@@ -109,6 +110,8 @@ export interface ConnectionOptions
   /** @internal */
   connectionType?: any;
   credentials?: MongoCredentials;
+  /** @internal */
+  authProviders: MongoClientAuthProviders;
   connectTimeoutMS?: number;
   tls: boolean;
   noDelay?: boolean;

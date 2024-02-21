@@ -34,6 +34,10 @@ export class AuthContext {
   }
 }
 
+/**
+ * Provider used during authentication.
+ * @internal
+ */
 export abstract class AuthProvider {
   /**
    * Prepare the handshake document before the initial handshake.

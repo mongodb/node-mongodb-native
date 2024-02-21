@@ -28,7 +28,7 @@ import {
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { type Callback, eachAsync, List, makeCounter, TimeoutController } from '../utils';
-import { AUTH_PROVIDERS, connect } from './connect';
+import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
   ConnectionCheckedInEvent,
@@ -622,7 +622,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       );
     }
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
-    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
+      resolvedCredentials.mechanism
+    );
     if (!provider) {
       return callback(
         new MongoMissingCredentialsError(
@@ -700,7 +702,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       id: this[kConnectionCounter].next().value,
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
-      mongoLogger: this.mongoLogger
+      mongoLogger: this.mongoLogger,
+      authProviders: this[kServer].topology.client.s.authProviders
     };
 
     this[kPending]++;

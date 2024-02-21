@@ -21,6 +21,7 @@ import { MONGO_CLIENT_EVENTS } from './constants';
 import { Db, type DbOptions } from './db';
 import type { Encrypter } from './encrypter';
 import { MongoInvalidArgumentError } from './error';
+import { MongoClientAuthProviders } from './mongo_client_auth_providers';
 import {
   type LogComponentSeveritiesClientOptions,
   type MongoDBLogWritable,
@@ -297,6 +298,7 @@ export interface MongoClientPrivate {
   bsonOptions: BSONSerializeOptions;
   namespace: MongoDBNamespace;
   hasBeenClosed: boolean;
+  authProviders: MongoClientAuthProviders;
   /**
    * We keep a reference to the sessions that are acquired from the pool.
    * - used to track and close all sessions in client.close() (which is non-standard behavior)
@@ -319,6 +321,7 @@ export type MongoClientEvents = Pick<TopologyEvents, (typeof MONGO_CLIENT_EVENTS
 };
 
 /** @internal */
+
 const kOptions = Symbol('options');
 
 /**
@@ -379,6 +382,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       hasBeenClosed: false,
       sessionPool: new ServerSessionPool(this),
       activeSessions: new Set(),
+      authProviders: new MongoClientAuthProviders(),
 
       get options() {
         return client[kOptions];
@@ -829,10 +833,10 @@ export interface MongoOptions
   proxyUsername?: string;
   proxyPassword?: string;
   serverMonitoringMode: ServerMonitoringMode;
-
   /** @internal */
   connectionType?: typeof Connection;
-
+  /** @internal */
+  authProviders: MongoClientAuthProviders;
   /** @internal */
   encrypter: Encrypter;
   /** @internal */
