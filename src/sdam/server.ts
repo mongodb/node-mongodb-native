@@ -340,7 +340,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        conn = await this.pool.reauthenticateAsync(conn);
+        conn = await this.pool.reauthenticate(conn);
         return await this.executeCommand(conn, ns, cmd, finalOptions);
       } else {
         throw operationError;
