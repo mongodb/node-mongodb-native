@@ -163,15 +163,6 @@
       "options": null
     },
     {
-      "description": "Missing delimiting slash between hosts and options",
-      "uri": "mongodb://example.com?w=1",
-      "valid": false,
-      "warning": null,
-      "hosts": null,
-      "auth": null,
-      "options": null
-    },
-    {
       "description": "Incomplete key value pair for option",
       "uri": "mongodb://example.com/?w",
       "valid": false,
