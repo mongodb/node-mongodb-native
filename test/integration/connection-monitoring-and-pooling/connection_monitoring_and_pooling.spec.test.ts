@@ -17,8 +17,7 @@ const LB_SKIP_TESTS: SkipDescription[] = [
   'clearing a paused pool emits no events',
   'after clear, cannot check out connections until pool ready',
   'readying a ready pool emits no events',
-  'error during minPoolSize population clears pool',
-  'Connections MUST be interrupted as soon as possible (interruptInUseConnections=true)'
+  'error during minPoolSize population clears pool'
 ].map(description => ({
   description,
   skipIfCondition: 'loadBalanced',
