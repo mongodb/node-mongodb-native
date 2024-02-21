@@ -322,8 +322,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       try {
         conn = await this.pool.checkOut();
       } catch (checkoutError) {
-        if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
         this.decrementOperationCount();
+        if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
         throw checkoutError;
       }
     }
@@ -346,9 +346,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
         throw operationError;
       }
     } finally {
+      this.decrementOperationCount();
       if (!connShouldBePinned) {
         this.pool.checkIn(conn);
-        this.decrementOperationCount();
       }
     }
   }
