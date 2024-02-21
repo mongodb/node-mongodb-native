@@ -9,6 +9,7 @@ import {
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
+  MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
   prepareHandshakeDocument
@@ -44,7 +45,8 @@ describe('Connect Tests', function () {
           source: 'admin',
           mechanism: 'PLAIN',
           mechanismProperties: {}
-        })
+        }),
+        authProviders: new MongoClientAuthProviders()
       };
     });
 
