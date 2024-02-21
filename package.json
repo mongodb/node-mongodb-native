@@ -36,7 +36,7 @@
     "kerberos": "^2.0.1",
     "mongodb-client-encryption": ">=6.0.0 <7",
     "snappy": "^7.2.2",
-    "socks": "^2.7.1"
+    "socks": "^2.7.3"
   },
   "peerDependenciesMeta": {
     "@aws-sdk/credential-providers": {
