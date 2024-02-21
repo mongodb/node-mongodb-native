@@ -1,7 +1,14 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { connect, Connection, isHello, MongoNetworkTimeoutError, ns } from '../../mongodb';
+import {
+  connect,
+  Connection,
+  isHello,
+  MongoClientAuthProviders,
+  MongoNetworkTimeoutError,
+  ns
+} from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import { getSymbolFrom } from '../../tools/utils';
 
@@ -32,7 +39,8 @@ describe('new Connection()', function () {
     const options = {
       ...connectionOptionsDefaults,
       connectionType: Connection,
-      hostAddress: server.hostAddress()
+      hostAddress: server.hostAddress(),
+      authProviders: new MongoClientAuthProviders()
     };
 
     const conn = await connect(options);
@@ -54,7 +62,8 @@ describe('new Connection()', function () {
     const options = {
       ...connectionOptionsDefaults,
       connectionType: Connection,
-      hostAddress: server.hostAddress()
+      hostAddress: server.hostAddress(),
+      authProviders: new MongoClientAuthProviders()
     };
 
     const conn = await connect(options);
@@ -76,7 +85,8 @@ describe('new Connection()', function () {
 
     const options = {
       hostAddress: server.hostAddress(),
-      ...connectionOptionsDefaults
+      ...connectionOptionsDefaults,
+      authProviders: new MongoClientAuthProviders()
     };
 
     const conn = await connect(options);
@@ -101,7 +111,8 @@ describe('new Connection()', function () {
 
     const options = {
       ...connectionOptionsDefaults,
-      hostAddress: server.hostAddress()
+      hostAddress: server.hostAddress(),
+      authProviders: new MongoClientAuthProviders()
     };
 
     const connection = await connect(options);
@@ -119,7 +130,8 @@ describe('new Connection()', function () {
     const options = {
       ...connectionOptionsDefaults,
       hostAddress: server.hostAddress(),
-      socketTimeoutMS: 50
+      socketTimeoutMS: 50,
+      authProviders: new MongoClientAuthProviders()
     };
 
     const error = await connect(options).catch(error => error);
