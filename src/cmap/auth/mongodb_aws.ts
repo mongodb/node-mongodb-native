@@ -1,6 +1,4 @@
-import * as crypto from 'crypto';
 import * as process from 'process';
-import { promisify } from 'util';
 
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
@@ -11,7 +9,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, maxWireVersion, ns, request } from '../../utils';
+import { ByteUtils, maxWireVersion, ns, randomBytes, request } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
@@ -59,11 +57,9 @@ interface AWSSaslContinuePayload {
 export class MongoDBAWS extends AuthProvider {
   static credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
   provider?: () => Promise<AWSCredentials>;
-  randomBytesAsync: (size: number) => Promise<Buffer>;
 
   constructor() {
     super();
-    this.randomBytesAsync = promisify(crypto.randomBytes);
     MongoDBAWS.credentialProvider ??= getAwsCredentialProvider();
 
     let { AWS_STS_REGIONAL_ENDPOINTS = '', AWS_REGION = '' } = process.env;
@@ -131,7 +127,7 @@ export class MongoDBAWS extends AuthProvider {
         : undefined;
 
     const db = credentials.source;
-    const nonce = await this.randomBytesAsync(32);
+    const nonce = await randomBytes(32);
 
     const saslStart = {
       saslStart: 1,

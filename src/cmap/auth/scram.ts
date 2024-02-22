@@ -1,6 +1,5 @@
 import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
-import { promisify } from 'util';
 
 import { Binary, type Document } from '../../bson';
 import {
@@ -8,7 +7,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ns } from '../../utils';
+import { ns, randomBytes } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -18,11 +17,10 @@ type CryptoMethod = 'sha1' | 'sha256';
 
 class ScramSHA extends AuthProvider {
   cryptoMethod: CryptoMethod;
-  randomBytesAsync: (size: number) => Promise<Buffer>;
+
   constructor(cryptoMethod: CryptoMethod) {
     super();
     this.cryptoMethod = cryptoMethod || 'sha1';
-    this.randomBytesAsync = promisify(crypto.randomBytes);
   }
 
   override async prepare(
@@ -35,7 +33,7 @@ class ScramSHA extends AuthProvider {
       throw new MongoMissingCredentialsError('AuthContext must provide credentials.');
     }
 
-    const nonce = await this.randomBytesAsync(24);
+    const nonce = await randomBytes(24);
     // store the nonce for later use
     authContext.nonce = nonce;
 
