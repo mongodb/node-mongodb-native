@@ -318,34 +318,28 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     try {
-      try {
-        return await conn.command(ns, cmd, finalOptions);
-      } catch (commandError) {
-        this.decorateCommandError(conn, cmd, finalOptions, commandError);
-      }
-    } catch (operationError) {
-      if (
-        operationError instanceof MongoError &&
-        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
-      ) {
+      let commandError: unknown;
+      for (let attempts = 0; attempts < 2; attempts++) {
         try {
-          await this.pool.reauthenticate(conn);
-          return await conn.command(ns, cmd, finalOptions);
-        } catch (commandError) {
-          this.decorateCommandError(conn, cmd, finalOptions, commandError);
+          return await conn.command(ns, cmd, options);
+        } catch (error: unknown) {
+          commandError = error;
+          if (
+            attempts === 0 &&
+            commandError instanceof MongoError &&
+            commandError.code === MONGODB_ERROR_CODES.Reauthenticate
+          ) {
+            await this.pool.reauthenticate(conn);
+          }
         }
-      } else {
-        throw operationError;
       }
+      throw this.decorateCommandError(conn, cmd, options, commandError);
     } finally {
       this.decrementOperationCount();
       if (session?.pinnedConnection !== conn) {
         this.pool.checkIn(conn);
       }
     }
-
-    // TS thinks this is reachable
-    throw 'a';
   }
 
   /**
@@ -405,25 +399,25 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     cmd: Document,
     options: CommandOptions | GetMoreOptions | undefined,
     error: unknown
-  ): never {
+  ): Error {
     if (typeof error !== 'object' || error == null || !('name' in error)) {
       throw new MongoRuntimeError('An unexpected error type: ' + typeof error);
     }
 
-    const session = options?.session;
     if (error.name === 'AbortError' && 'cause' in error && error.cause instanceof MongoError) {
       error = error.cause;
     }
 
     if (!(error instanceof MongoError)) {
       // Node.js or some other error we have not special handling for
-      throw error;
+      return error as Error;
     }
 
     if (connectionIsStale(this.pool, connection)) {
-      throw error;
+      return error;
     }
 
+    const session = options?.session;
     if (error instanceof MongoNetworkError) {
       if (session && !session.hasEnded && session.serverSession) {
         session.serverSession.isDirty = true;
@@ -464,7 +458,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     this.handleError(error, connection);
 
-    throw error;
+    return error;
   }
 
   /**
