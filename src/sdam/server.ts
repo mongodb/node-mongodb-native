@@ -318,22 +318,25 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     try {
-      let commandError: unknown;
-      for (let attempts = 0; attempts < 2; attempts++) {
-        try {
-          return await conn.command(ns, cmd, options);
-        } catch (error: unknown) {
-          commandError = error;
-          if (
-            attempts === 0 &&
-            commandError instanceof MongoError &&
-            commandError.code === MONGODB_ERROR_CODES.Reauthenticate
-          ) {
-            await this.pool.reauthenticate(conn);
-          }
-        }
+      try {
+        return await conn.command(ns, cmd, finalOptions);
+      } catch (commandError) {
+        throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
       }
-      throw this.decorateCommandError(conn, cmd, options, commandError);
+    } catch (operationError) {
+      if (
+        operationError instanceof MongoError &&
+        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
+      ) {
+        await this.pool.reauthenticate(conn);
+        try {
+          return await conn.command(ns, cmd, finalOptions);
+        } catch (commandError) {
+          throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
+        }
+      } else {
+        throw operationError;
+      }
     } finally {
       this.decrementOperationCount();
       if (session?.pinnedConnection !== conn) {
