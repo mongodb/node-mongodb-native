@@ -105,7 +105,7 @@ describe('Server Operation Count Tests', function () {
 
         sinon
           .stub(ConnectionPool.prototype, 'checkOut')
-          .returns(Promise.reject(new Error('unable to checkout connection')));
+          .rejects(new Error('unable to checkout connection'));
         const commandSpy = sinon.spy(server, 'command');
 
         const error = await collection.findOne({ count: 1 }).catch(e => e);
@@ -172,7 +172,7 @@ describe('Server Operation Count Tests', function () {
 
           sinon
             .stub(ConnectionPool.prototype, 'checkOut')
-            .returns(Promise.reject(new Error('unable to checkout connection')));
+            .rejects(new Error('unable to checkout connection'));
           const commandSpy = sinon.spy(server, 'command');
 
           const error = await collection.insertOne({ count: 1 }).catch(e => e);

@@ -33,7 +33,7 @@ describe('Non Server Retryable Writes', function () {
     { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
     async () => {
       const serverCommandStub = sinon.stub(Server.prototype, 'command');
-      serverCommandStub.onCall(0).returns(Promise.reject(new PoolClearedError('error')));
+      serverCommandStub.onCall(0).rejects(new PoolClearedError('error'));
       serverCommandStub
         .onCall(1)
         .returns(

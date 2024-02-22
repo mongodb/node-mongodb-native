@@ -548,7 +548,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * @internal
    * Reauthenticate a connection
    */
-  async reauthenticate(connection: Connection): Promise<Connection> {
+  async reauthenticate(connection: Connection): Promise<void> {
     const authContext = connection.authContext;
     if (!authContext) {
       throw new MongoRuntimeError('No auth context found on connection.');
@@ -573,7 +573,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     await provider.reauth(authContext);
 
-    return connection;
+    return;
   }
 
   /** Clear the min pool size timer */

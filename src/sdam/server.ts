@@ -30,6 +30,7 @@ import {
   MongoInvalidArgumentError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
+  MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
   needsRetryableWriteLabel
@@ -302,25 +303,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     const session = finalOptions.session;
     let conn = session?.pinnedConnection;
 
-    // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
-    //       (and prevent them from being checked back in) at the point of operation execution.
-    //       This should be considered as part of the work for NODE-2882
-    // NOTE:
-    //       When incrementing operation count, it's important that we increment it before we
-    //       attempt to check out a connection from the pool.  This ensures that operations that
-    //       are waiting for a connection are included in the operation count.  Load balanced
-    //       mode will only ever have a single server, so the operation count doesn't matter.
-    //       Incrementing the operation count above the logic to handle load balanced mode would
-    //       require special logic to decrement it again, or would double increment. Instead, we
-    //       increment the count after this check.
-
-    const connShouldBePinned =
-      this.loadBalanced && session != null && isPinnableCommand(cmd, session);
-
     this.incrementOperationCount();
-    if (!conn) {
+    if (conn == null) {
       try {
         conn = await this.pool.checkOut();
+        if (this.loadBalanced && isPinnableCommand(cmd, session)) {
+          session?.pin(conn);
+        }
       } catch (checkoutError) {
         this.decrementOperationCount();
         if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
@@ -328,47 +317,35 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       }
     }
 
-    if (connShouldBePinned && !session.isPinned) {
-      session.pin(conn);
-    }
-
-    // Reauth flow
     try {
-      return await this.executeCommand(conn, ns, cmd, finalOptions);
+      try {
+        return await conn.command(ns, cmd, finalOptions);
+      } catch (commandError) {
+        this.decorateCommandError(conn, cmd, finalOptions, commandError);
+      }
     } catch (operationError) {
       if (
         operationError instanceof MongoError &&
         operationError.code === MONGODB_ERROR_CODES.Reauthenticate
       ) {
-        conn = await this.pool.reauthenticate(conn);
-        return await this.executeCommand(conn, ns, cmd, finalOptions);
+        try {
+          await this.pool.reauthenticate(conn);
+          return await conn.command(ns, cmd, finalOptions);
+        } catch (commandError) {
+          this.decorateCommandError(conn, cmd, finalOptions, commandError);
+        }
       } else {
         throw operationError;
       }
     } finally {
       this.decrementOperationCount();
-      if (!connShouldBePinned) {
+      if (session?.pinnedConnection !== conn) {
         this.pool.checkIn(conn);
       }
     }
-  }
 
-  /**
-   * Execute a command, catching and appropriately rewrapping thrown errors and updating internal
-   * state as appropriate
-   * @internal
-   */
-  private async executeCommand(
-    conn: Connection,
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options?: CommandOptions
-  ): Promise<Document> {
-    try {
-      return await conn.command(ns, cmd, options);
-    } catch (commandError) {
-      throw this.decorateAndHandleError(conn, cmd, options, commandError);
-    }
+    // TS thinks this is reachable
+    throw 'a';
   }
 
   /**
@@ -423,14 +400,18 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * Ensure that error is properly decorated and internal state is updated before throwing
    * @internal
    */
-  private decorateAndHandleError(
+  private decorateCommandError(
     connection: Connection,
     cmd: Document,
     options: CommandOptions | GetMoreOptions | undefined,
-    error: AnyError
-  ): AnyError {
+    error: unknown
+  ): never {
+    if (typeof error !== 'object' || error == null || !('name' in error)) {
+      throw new MongoRuntimeError('An unexpected error type: ' + typeof error);
+    }
+
     const session = options?.session;
-    if (error.name === 'AbortError' && error.cause instanceof MongoError) {
+    if (error.name === 'AbortError' && 'cause' in error && error.cause instanceof MongoError) {
       error = error.cause;
     }
 
@@ -483,7 +464,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     this.handleError(error, connection);
 
-    return error;
+    throw error;
   }
 
   /**
