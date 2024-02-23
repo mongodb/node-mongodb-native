@@ -1,4 +1,4 @@
-import saslprep = require('@mongodb-js/saslprep');
+import { saslprep } from '@mongodb-js/saslprep';
 import * as crypto from 'crypto';
 import { promisify } from 'util';
 
