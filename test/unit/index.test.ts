@@ -69,6 +69,7 @@ const EXPECTED_EXPORTS = [
   'MongoBulkWriteError',
   'MongoChangeStreamError',
   'MongoClient',
+  'MongoClientAuthProviders',
   'MongoCompatibilityError',
   'MongoCursorExhaustedError',
   'MongoCursorInUseError',

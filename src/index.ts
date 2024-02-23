@@ -200,7 +200,7 @@ export type {
   ResumeToken,
   UpdateDescription
 } from './change_stream';
-export type { AuthContext } from './cmap/auth/auth_provider';
+export type { AuthContext, AuthProvider } from './cmap/auth/auth_provider';
 export type {
   AuthMechanismProperties,
   MongoCredentials,
@@ -217,6 +217,7 @@ export type {
   Response,
   WriteProtocolMessageType
 } from './cmap/commands';
+export type { HandshakeDocument } from './cmap/connect';
 export type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS, Stream } from './cmap/connect';
 export type {
   CommandOptions,
@@ -304,6 +305,7 @@ export type {
   SupportedTLSSocketOptions,
   WithSessionCallback
 } from './mongo_client';
+export { MongoClientAuthProviders } from './mongo_client_auth_providers';
 export type {
   Log,
   LogConvertible,

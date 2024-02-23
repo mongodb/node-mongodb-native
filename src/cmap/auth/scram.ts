@@ -1,5 +1,4 @@
 import * as crypto from 'crypto';
-import { promisify } from 'util';
 
 import { Binary, type Document } from '../../bson';
 import { saslprep } from '../../deps';
@@ -8,7 +7,7 @@ import {
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { emitWarning, ns } from '../../utils';
+import { emitWarning, ns, randomBytes } from '../../utils';
 import type { HandshakeDocument } from '../connect';
 import { type AuthContext, AuthProvider } from './auth_provider';
 import type { MongoCredentials } from './mongo_credentials';
@@ -18,11 +17,9 @@ type CryptoMethod = 'sha1' | 'sha256';
 
 class ScramSHA extends AuthProvider {
   cryptoMethod: CryptoMethod;
-  randomBytesAsync: (size: number) => Promise<Buffer>;
   constructor(cryptoMethod: CryptoMethod) {
     super();
     this.cryptoMethod = cryptoMethod || 'sha1';
-    this.randomBytesAsync = promisify(crypto.randomBytes);
   }
 
   override async prepare(
@@ -41,7 +38,7 @@ class ScramSHA extends AuthProvider {
       emitWarning('Warning: no saslprep library specified. Passwords will not be sanitized');
     }
 
-    const nonce = await this.randomBytesAsync(24);
+    const nonce = await randomBytes(24);
     // store the nonce for later use
     authContext.nonce = nonce;
 
