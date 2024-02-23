@@ -16,7 +16,6 @@ import {
   MongoRuntimeError,
   needsRetryableWriteLabel
 } from '../error';
-import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { HostAddress, ns, promiseWithResolvers } from '../utils';
 import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
@@ -102,7 +101,7 @@ export async function performInitialHandshake(
   const authContext = new AuthContext(conn, credentials, options);
   conn.authContext = authContext;
 
-  const handshakeDoc = await prepareHandshakeDocument(authContext, options.authProviders);
+  const handshakeDoc = await prepareHandshakeDocument(authContext);
 
   // @ts-expect-error: TODO(NODE-5141): The options need to be filtered properly, Connection options differ from Command options
   const handshakeOptions: CommandOptions = { ...options };
@@ -196,8 +195,7 @@ export interface HandshakeDocument extends Document {
  * This function is only exposed for testing purposes.
  */
 export async function prepareHandshakeDocument(
-  authContext: AuthContext,
-  authProviders: MongoClientAuthProviders
+  authContext: AuthContext
 ): Promise<HandshakeDocument> {
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
@@ -219,7 +217,9 @@ export async function prepareHandshakeDocument(
     if (credentials.mechanism === AuthMechanism.MONGODB_DEFAULT && credentials.username) {
       handshakeDoc.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
 
-      const provider = authProviders.getOrCreateProvider(AuthMechanism.MONGODB_SCRAM_SHA256);
+      const provider = authContext.options.authProviders.getOrCreateProvider(
+        AuthMechanism.MONGODB_SCRAM_SHA256
+      );
       if (!provider) {
         // This auth mechanism is always present.
         throw new MongoInvalidArgumentError(
@@ -228,7 +228,7 @@ export async function prepareHandshakeDocument(
       }
       return provider.prepare(handshakeDoc, authContext);
     }
-    const provider = authProviders.getOrCreateProvider(credentials.mechanism);
+    const provider = authContext.options.authProviders.getOrCreateProvider(credentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
