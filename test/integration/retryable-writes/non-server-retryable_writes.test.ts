@@ -33,11 +33,13 @@ describe('Non Server Retryable Writes', function () {
     { requires: { topology: 'replicaset', mongodb: '>=4.2.9' } },
     async () => {
       const serverCommandStub = sinon.stub(Server.prototype, 'command');
-      serverCommandStub.onCall(0).yieldsRight(new PoolClearedError('error'));
+      serverCommandStub.onCall(0).rejects(new PoolClearedError('error'));
       serverCommandStub
         .onCall(1)
-        .yieldsRight(
-          new MongoWriteConcernError({ errorLabels: ['NoWritesPerformed'], errorCode: 10107 }, {})
+        .returns(
+          Promise.reject(
+            new MongoWriteConcernError({ errorLabels: ['NoWritesPerformed'], errorCode: 10107 }, {})
+          )
         );
 
       const insertResult = await collection.insertOne({ _id: 1 }).catch(error => error);

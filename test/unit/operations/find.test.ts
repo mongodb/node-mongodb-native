@@ -41,7 +41,7 @@ describe('FindOperation', function () {
 
       it('should build basic find command with filter', async () => {
         const findOperation = new FindOperation(undefined, namespace, filter);
-        const stub = sinon.stub(server, 'command').yieldsRight();
+        const stub = sinon.stub(server, 'command').resolves({});
         await findOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(namespace, {
           find: namespace.collection,
@@ -54,7 +54,7 @@ describe('FindOperation', function () {
           oplogReplay: true
         };
         const findOperation = new FindOperation(undefined, namespace, {}, options);
-        const stub = sinon.stub(server, 'command').yieldsRight();
+        const stub = sinon.stub(server, 'command').resolves({});
         await findOperation.execute(server, undefined);
         expect(stub).to.have.been.calledOnceWith(
           namespace,

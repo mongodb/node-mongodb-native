@@ -28,7 +28,7 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
-    return server.commandAsync(this.ns, this.command, {
+    return server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
       session
@@ -54,7 +54,7 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
-    return server.commandAsync(this.ns, this.command, {
+    return server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
       session
