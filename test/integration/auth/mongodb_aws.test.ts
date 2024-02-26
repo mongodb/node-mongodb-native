@@ -5,7 +5,13 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, type MongoClient, MongoDBAWS, MongoServerError } from '../../mongodb';
+import {
+  MongoAWSError,
+  type MongoClient,
+  MongoDBAWS,
+  MongoMissingCredentialsError,
+  MongoServerError
+} from '../../mongodb';
 
 function awsSdk() {
   try {
@@ -79,6 +85,32 @@ describe('MONGODB-AWS', function () {
     expect(client).to.have.nested.property('s.authProviders');
     const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
     expect(provider).to.be.instanceOf(MongoDBAWS);
+  });
+
+  describe('with missing aws token', () => {
+    let awsSessionToken;
+
+    beforeEach(function () {
+      awsSessionToken = process.env.AWS_SESSION_TOKEN;
+      delete process.env.AWS_SESSION_TOKEN;
+    });
+
+    afterEach(async () => {
+      process.env.AWS_SESSION_TOKEN = awsSessionToken;
+    });
+
+    it('should not throw an exception when aws token is missing', async function () {
+      client = this.configuration.newClient(process.env.MONGODB_URI);
+
+      const result = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(error => error);
+
+      expect(result).to.not.be.instanceOf(MongoMissingCredentialsError);
+      expect(result).to.be.a('number');
+    });
   });
 
   describe('EC2 with missing credentials', () => {
@@ -279,30 +311,6 @@ describe('MONGODB-AWS', function () {
             .catch(error => error);
 
           expect(numberOfFromNodeProviderChainCalls).to.be.eql(1);
-        });
-
-        context('with missing aws token', () => {
-          let awsSessionToken;
-
-          beforeEach(function () {
-            awsSessionToken = process.env.AWS_SESSION_TOKEN;
-            delete process.env.AWS_SESSION_TOKEN;
-          });
-
-          afterEach(async () => {
-            process.env.AWS_SESSION_TOKEN = awsSessionToken;
-          });
-
-          it('should not throw an exception when aws token is missing', async function () {
-            const result = await client
-              .db('aws')
-              .collection('aws_test')
-              .estimatedDocumentCount()
-              .catch(error => error);
-
-            expect(result).to.not.be.instanceOf(MongoServerError);
-            expect(result).to.be.a('number');
-          });
         });
       });
     }

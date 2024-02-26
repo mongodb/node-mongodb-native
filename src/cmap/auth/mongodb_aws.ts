@@ -212,7 +212,7 @@ async function makeTempCredentials(
   provider?: () => Promise<AWSCredentials>
 ): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
-    if (!creds.AccessKeyId || !creds.SecretAccessKey || !creds.Token) {
+    if (!creds.AccessKeyId || !creds.SecretAccessKey) {
       throw new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials');
     }
 
