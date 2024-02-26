@@ -96,7 +96,7 @@ export class GetMoreOperation extends AbstractOperation {
       ...this.options
     };
 
-    return server.commandAsync(this.ns, getMoreCmd, commandOptions);
+    return server.command(this.ns, getMoreCmd, commandOptions);
   }
 }
 

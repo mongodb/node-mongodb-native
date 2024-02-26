@@ -1,14 +1,6 @@
 {
   "description": "poc-retryable-writes",
   "schemaVersion": "1.0",
-  "runOnRequirements": [
-    {
-      "minServerVersion": "3.6",
-      "topologies": [
-        "replicaset"
-      ]
-    }
-  ],
   "createEntities": [
     {
       "client": {
@@ -79,6 +71,14 @@
   "tests": [
     {
       "description": "FindOneAndUpdate is committed on first attempt",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -132,6 +132,14 @@
     },
     {
       "description": "FindOneAndUpdate is not committed on first attempt",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -188,6 +196,14 @@
     },
     {
       "description": "FindOneAndUpdate is never committed",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "3.6",
+          "topologies": [
+            "replicaset"
+          ]
+        }
+      ],
       "operations": [
         {
           "name": "failPoint",
@@ -245,15 +261,10 @@
       "description": "InsertMany succeeds after PrimarySteppedDown",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.0",
+          "minServerVersion": "4.3.1",
           "topologies": [
-            "replicaset"
-          ]
-        },
-        {
-          "minServerVersion": "4.1.7",
-          "topologies": [
-            "sharded-replicaset"
+            "replicaset",
+            "sharded"
           ]
         }
       ],
@@ -345,7 +356,7 @@
         {
           "minServerVersion": "4.1.7",
           "topologies": [
-            "sharded-replicaset"
+            "sharded"
           ]
         }
       ],
@@ -406,15 +417,10 @@
       "description": "InsertOne fails after multiple retryable writeConcernErrors",
       "runOnRequirements": [
         {
-          "minServerVersion": "4.0",
+          "minServerVersion": "4.3.1",
           "topologies": [
-            "replicaset"
-          ]
-        },
-        {
-          "minServerVersion": "4.1.7",
-          "topologies": [
-            "sharded-replicaset"
+            "replicaset",
+            "sharded"
           ]
         }
       ],
@@ -432,6 +438,9 @@
               "data": {
                 "failCommands": [
                   "insert"
+                ],
+                "errorLabels": [
+                  "RetryableWriteError"
                 ],
                 "writeConcernError": {
                   "code": 91,

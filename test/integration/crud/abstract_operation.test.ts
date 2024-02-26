@@ -351,9 +351,7 @@ describe('abstract operation', async function () {
             const subclassInstance = subclassCreator();
             const yieldDoc =
               subclassType.name === 'ProfilingLevelOperation' ? { ok: 1, was: 1 } : { ok: 1 };
-            const cmdCallerStub = sinon
-              .stub(Server.prototype, 'command')
-              .yieldsRight(undefined, yieldDoc);
+            const cmdCallerStub = sinon.stub(Server.prototype, 'command').resolves(yieldDoc);
             if (sameServerOnlyOperationSubclasses.includes(subclassType.name.toString())) {
               await subclassInstance.execute(constructorServer, client.session);
             } else {

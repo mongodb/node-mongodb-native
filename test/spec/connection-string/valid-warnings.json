@@ -63,6 +63,36 @@
       "options": {
         "wtimeoutms": 10
       }
+    },
+    {
+      "description": "Empty integer option values are ignored",
+      "uri": "mongodb://localhost/?maxIdleTimeMS=",
+      "valid": true,
+      "warning": true,
+      "hosts": [
+        {
+          "type": "hostname",
+          "host": "localhost",
+          "port": null
+        }
+      ],
+      "auth": null,
+      "options": null
+    },
+    {
+      "description": "Empty boolean option value are ignored",
+      "uri": "mongodb://localhost/?journal=",
+      "valid": true,
+      "warning": true,
+      "hosts": [
+        {
+          "type": "hostname",
+          "host": "localhost",
+          "port": null
+        }
+      ],
+      "auth": null,
+      "options": null
     }
   ]
 }

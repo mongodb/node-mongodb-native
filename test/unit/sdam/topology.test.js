@@ -99,13 +99,13 @@ describe('Topology (unit)', function () {
         topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 }, (err, result) => {
-            expect(result).to.not.exist;
-            expect(err).to.exist;
-            expect(err).to.match(/timed out/);
-
-            topology.close({}, done);
-          });
+          server
+            .command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 })
+            .then(expect.fail, err => {
+              expect(err).to.exist;
+              expect(err).to.match(/timed out/);
+              topology.close({}, done);
+            });
         });
       });
     });
@@ -212,8 +212,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
-            expect(result).to.not.exist;
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.true;
@@ -248,8 +247,7 @@ describe('Topology (unit)', function () {
           let poolCleared = false;
           topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
-            expect(result).to.not.exist;
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(poolCleared).to.be.false;
@@ -281,8 +279,7 @@ describe('Topology (unit)', function () {
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}, (err, result) => {
-            expect(result).to.not.exist;
+          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
             expect(err).to.exist;
             expect(err).to.eql(serverDescription.error);
             expect(server.description.type).to.equal('Unknown');

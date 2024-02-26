@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import type { Document } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
 import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
@@ -26,6 +24,7 @@ import {
   isNetworkErrorBeforeHandshake,
   isNodeShuttingDownError,
   isSDAMUnrecoverableError,
+  MONGODB_ERROR_CODES,
   MongoError,
   MongoErrorLabel,
   MongoInvalidArgumentError,
@@ -34,7 +33,6 @@ import {
   MongoRuntimeError,
   MongoServerClosedError,
   type MongoServerError,
-  MongoUnexpectedServerResponseError,
   needsRetryableWriteLabel
 } from '../error';
 import type { ServerApi } from '../mongo_client';
@@ -115,7 +113,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   pool: ConnectionPool;
   serverApi?: ServerApi;
   hello?: Document;
-  commandAsync: (ns: MongoDBNamespace, cmd: Document, options: CommandOptions) => Promise<Document>;
   monitor: Monitor | null;
 
   /** @event */
@@ -138,16 +135,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    */
   constructor(topology: Topology, description: ServerDescription, options: ServerOptions) {
     super();
-
-    this.commandAsync = promisify(
-      (
-        ns: MongoDBNamespace,
-        cmd: Document,
-        options: CommandOptions,
-        // callback type defines Document result because result is never nullish when it succeeds, otherwise promise rejects
-        callback: (error: Error | undefined, result: Document) => void
-      ) => this.command(ns, cmd, options, callback as any)
-    );
 
     this.serverApi = options.serverApi;
 
@@ -293,23 +280,13 @@ export class Server extends TypedEventEmitter<ServerEvents> {
    * Execute a command
    * @internal
    */
-  command(
-    ns: MongoDBNamespace,
-    cmd: Document,
-    options: CommandOptions,
-    callback: Callback<Document>
-  ): void {
-    if (callback == null) {
-      throw new MongoInvalidArgumentError('Callback must be provided');
-    }
-
+  async command(ns: MongoDBNamespace, cmd: Document, options: CommandOptions): Promise<Document> {
     if (ns.db == null || typeof ns === 'string') {
       throw new MongoInvalidArgumentError('Namespace must not be a string');
     }
 
     if (this.s.state === STATE_CLOSING || this.s.state === STATE_CLOSED) {
-      callback(new MongoServerClosedError());
-      return;
+      throw new MongoServerClosedError();
     }
 
     // Clone the options
@@ -324,60 +301,48 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     const session = finalOptions.session;
-    const conn = session?.pinnedConnection;
-
-    // NOTE: This is a hack! We can't retrieve the connections used for executing an operation
-    //       (and prevent them from being checked back in) at the point of operation execution.
-    //       This should be considered as part of the work for NODE-2882
-    // NOTE:
-    //       When incrementing operation count, it's important that we increment it before we
-    //       attempt to check out a connection from the pool.  This ensures that operations that
-    //       are waiting for a connection are included in the operation count.  Load balanced
-    //       mode will only ever have a single server, so the operation count doesn't matter.
-    //       Incrementing the operation count above the logic to handle load balanced mode would
-    //       require special logic to decrement it again, or would double increment (the load
-    //       balanced code makes a recursive call).  Instead, we increment the count after this
-    //       check.
-    if (this.loadBalanced && session && conn == null && isPinnableCommand(cmd, session)) {
-      this.pool.checkOut((err, checkedOut) => {
-        if (err || checkedOut == null) {
-          if (callback) return callback(err);
-          return;
-        }
-
-        session.pin(checkedOut);
-        this.command(ns, cmd, finalOptions, callback);
-      });
-      return;
-    }
+    let conn = session?.pinnedConnection;
 
     this.incrementOperationCount();
-
-    this.pool.withConnection(
-      conn,
-      (err, conn, cb) => {
-        if (err || !conn) {
-          this.decrementOperationCount();
-          if (!err) {
-            return cb(new MongoRuntimeError('Failed to create connection without error'));
-          }
-          if (!(err instanceof PoolClearedError)) {
-            this.handleError(err);
-          }
-          return cb(err);
+    if (conn == null) {
+      try {
+        conn = await this.pool.checkOut();
+        if (this.loadBalanced && isPinnableCommand(cmd, session)) {
+          session?.pin(conn);
         }
+      } catch (checkoutError) {
+        this.decrementOperationCount();
+        if (!(checkoutError instanceof PoolClearedError)) this.handleError(checkoutError);
+        throw checkoutError;
+      }
+    }
 
-        const handler = makeOperationHandler(this, conn, cmd, finalOptions, (error, response) => {
-          this.decrementOperationCount();
-          cb(error, response);
-        });
-        conn.command(ns, cmd, finalOptions).then(
-          r => handler(undefined, r),
-          e => handler(e)
-        );
-      },
-      callback
-    );
+    try {
+      try {
+        return await conn.command(ns, cmd, finalOptions);
+      } catch (commandError) {
+        throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
+      }
+    } catch (operationError) {
+      if (
+        operationError instanceof MongoError &&
+        operationError.code === MONGODB_ERROR_CODES.Reauthenticate
+      ) {
+        await this.pool.reauthenticate(conn);
+        try {
+          return await conn.command(ns, cmd, finalOptions);
+        } catch (commandError) {
+          throw this.decorateCommandError(conn, cmd, finalOptions, commandError);
+        }
+      } else {
+        throw operationError;
+      }
+    } finally {
+      this.decrementOperationCount();
+      if (session?.pinnedConnection !== conn) {
+        this.pool.checkIn(conn);
+      }
+    }
   }
 
   /**
@@ -429,6 +394,77 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   /**
+   * Ensure that error is properly decorated and internal state is updated before throwing
+   * @internal
+   */
+  private decorateCommandError(
+    connection: Connection,
+    cmd: Document,
+    options: CommandOptions | GetMoreOptions | undefined,
+    error: unknown
+  ): Error {
+    if (typeof error !== 'object' || error == null || !('name' in error)) {
+      throw new MongoRuntimeError('An unexpected error type: ' + typeof error);
+    }
+
+    if (error.name === 'AbortError' && 'cause' in error && error.cause instanceof MongoError) {
+      error = error.cause;
+    }
+
+    if (!(error instanceof MongoError)) {
+      // Node.js or some other error we have not special handling for
+      return error as Error;
+    }
+
+    if (connectionIsStale(this.pool, connection)) {
+      return error;
+    }
+
+    const session = options?.session;
+    if (error instanceof MongoNetworkError) {
+      if (session && !session.hasEnded && session.serverSession) {
+        session.serverSession.isDirty = true;
+      }
+
+      // inActiveTransaction check handles commit and abort.
+      if (
+        inActiveTransaction(session, cmd) &&
+        !error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.TransientTransactionError);
+      }
+
+      if (
+        (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
+        supportsRetryableWrites(this) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+    } else {
+      if (
+        (isRetryableWritesEnabled(this.topology) || isTransactionCommand(cmd)) &&
+        needsRetryableWriteLabel(error, maxWireVersion(this)) &&
+        !inActiveTransaction(session, cmd)
+      ) {
+        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
+      }
+    }
+
+    if (
+      session &&
+      session.isPinned &&
+      error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
+    ) {
+      session.unpin({ force: true });
+    }
+
+    this.handleError(error, connection);
+
+    return error;
+  }
+
+  /**
    * Decrement the operation count, returning the new count.
    */
   private decrementOperationCount(): number {
@@ -472,6 +508,7 @@ function isPinnableCommand(cmd: Document, session?: ClientSession): boolean {
   if (session) {
     return (
       session.inTransaction() ||
+      (session.transaction.isCommitted && 'commitTransaction' in cmd) ||
       'aggregate' in cmd ||
       'find' in cmd ||
       'getMore' in cmd ||
@@ -507,83 +544,4 @@ function inActiveTransaction(session: ClientSession | undefined, cmd: Document) 
  * does not check if the server supports retryable writes */
 function isRetryableWritesEnabled(topology: Topology) {
   return topology.s.options.retryWrites !== false;
-}
-
-function makeOperationHandler(
-  server: Server,
-  connection: Connection,
-  cmd: Document,
-  options: CommandOptions | GetMoreOptions | undefined,
-  callback: Callback
-): Callback {
-  const session = options?.session;
-  return function handleOperationResult(error, result) {
-    // We should not swallow an error if it is present.
-    if (error == null && result != null) {
-      return callback(undefined, result);
-    }
-
-    if (options != null && 'noResponse' in options && options.noResponse === true) {
-      return callback(undefined, null);
-    }
-
-    if (!error) {
-      return callback(new MongoUnexpectedServerResponseError('Empty response with no error'));
-    }
-
-    if (error.name === 'AbortError' && error.cause instanceof MongoError) {
-      error = error.cause;
-    }
-
-    if (!(error instanceof MongoError)) {
-      // Node.js or some other error we have not special handling for
-      return callback(error);
-    }
-
-    if (connectionIsStale(server.pool, connection)) {
-      return callback(error);
-    }
-
-    if (error instanceof MongoNetworkError) {
-      if (session && !session.hasEnded && session.serverSession) {
-        session.serverSession.isDirty = true;
-      }
-
-      // inActiveTransaction check handles commit and abort.
-      if (
-        inActiveTransaction(session, cmd) &&
-        !error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.TransientTransactionError);
-      }
-
-      if (
-        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
-        supportsRetryableWrites(server) &&
-        !inActiveTransaction(session, cmd)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-    } else {
-      if (
-        (isRetryableWritesEnabled(server.topology) || isTransactionCommand(cmd)) &&
-        needsRetryableWriteLabel(error, maxWireVersion(server)) &&
-        !inActiveTransaction(session, cmd)
-      ) {
-        error.addErrorLabel(MongoErrorLabel.RetryableWriteError);
-      }
-    }
-
-    if (
-      session &&
-      session.isPinned &&
-      error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)
-    ) {
-      session.unpin({ force: true });
-    }
-
-    server.handleError(error, connection);
-
-    return callback(error);
-  };
 }

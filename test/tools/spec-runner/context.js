@@ -143,23 +143,17 @@ class TestRunnerContext {
     return Promise.all(cleanupPromises).then(cleanup, cleanup);
   }
 
-  targetedFailPoint(options) {
+  async targetedFailPoint(options) {
     const session = options.session;
     const failPoint = options.failPoint;
     expect(session.isPinned).to.be.true;
 
-    return new Promise((resolve, reject) => {
-      const serverOrConnection = session.loadBalanced
-        ? session.pinnedConnection
-        : session.transaction.server;
+    const serverOrConnection = session.loadBalanced
+      ? session.pinnedConnection
+      : session.transaction.server;
 
-      serverOrConnection.command(ns('admin.$cmd'), failPoint, undefined, err => {
-        if (err) return reject(err);
-
-        this.appliedFailPoints.push(failPoint);
-        resolve();
-      });
-    });
+    await serverOrConnection.command(ns('admin.$cmd'), failPoint, {});
+    this.appliedFailPoints.push(failPoint);
   }
 
   enableFailPoint(failPoint) {

@@ -28,7 +28,7 @@ export class DropSearchIndexOperation extends AbstractOperation<void> {
     }
 
     try {
-      await server.commandAsync(namespace, command, { session });
+      await server.command(namespace, command, { session });
     } catch (error) {
       const isNamespaceNotFoundError =
         error instanceof MongoServerError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound;
