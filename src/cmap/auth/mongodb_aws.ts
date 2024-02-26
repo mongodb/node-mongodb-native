@@ -116,6 +116,7 @@ export class MongoDBAWS extends AuthProvider {
 
     const accessKeyId = credentials.username;
     const secretAccessKey = credentials.password;
+    // Allow the user to specify an AWS session token for authentication with temporary credentials.
     const sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
 
     // If all three defined, include sessionToken, else include username and pass, else no credentials
@@ -129,6 +130,8 @@ export class MongoDBAWS extends AuthProvider {
     const db = credentials.source;
     const nonce = await randomBytes(32);
 
+    // All messages between MongoDB clients and servers are sent as BSON objects
+    // in the payload field of saslStart and saslContinue.
     const saslStart = {
       saslStart: 1,
       mechanism: 'MONGODB-AWS',
@@ -212,6 +215,7 @@ async function makeTempCredentials(
   provider?: () => Promise<AWSCredentials>
 ): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
+    // The AWS session token (creds.Token) may or may not be set.
     if (!creds.AccessKeyId || !creds.SecretAccessKey) {
       throw new MongoMissingCredentialsError('Could not obtain temporary MONGODB-AWS credentials');
     }
