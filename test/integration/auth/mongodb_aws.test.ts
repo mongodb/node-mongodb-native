@@ -67,20 +67,6 @@ describe('MONGODB-AWS', function () {
       .that.equals('');
   });
 
-  it('should not throw an exception when aws token is missing', async function () {
-    client = this.configuration.newClient(process.env.MONGODB_URI, {
-      authMechanismProperties: { AWS_SESSION_TOKEN: '' }
-    });
-    const result = await client
-      .db('aws')
-      .collection('aws_test')
-      .estimatedDocumentCount()
-      .catch(error => error);
-
-    expect(result).to.not.be.instanceOf(MongoServerError);
-    expect(result).to.be.a('number');
-  });
-
   it('should store a MongoDBAWS provider instance per client', async function () {
     client = this.configuration.newClient(process.env.MONGODB_URI);
 
@@ -93,6 +79,32 @@ describe('MONGODB-AWS', function () {
     expect(client).to.have.nested.property('s.authProviders');
     const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
     expect(provider).to.be.instanceOf(MongoDBAWS);
+  });
+
+  describe('with missing aws token', () => {
+    let awsSessionToken;
+
+    beforeEach(function () {
+      awsSessionToken = process.env.AWS_SESSION_TOKEN;
+      delete process.env.AWS_SESSION_TOKEN;
+    });
+
+    afterEach(async () => {
+      process.env.AWS_SESSION_TOKEN = awsSessionToken;
+    });
+
+    it('should not throw an exception when aws token is missing', async function () {
+      client = this.configuration.newClient(process.env.MONGODB_URI);
+
+      const result = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(error => error);
+
+      expect(result).to.not.be.instanceOf(MongoServerError);
+      expect(result).to.be.a('number');
+    });
   });
 
   describe('EC2 with missing credentials', () => {
