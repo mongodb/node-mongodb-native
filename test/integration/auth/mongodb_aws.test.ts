@@ -108,8 +108,11 @@ describe('MONGODB-AWS', function () {
         .estimatedDocumentCount()
         .catch(error => error);
 
+      // We check only for the MongoMissingCredentialsError
+      // and do check for the MongoServerError as the error or numeric result
+      // that can be returned depending on different types of environments
+      // getting credentials from different sources.
       expect(result).to.not.be.instanceOf(MongoMissingCredentialsError);
-      expect(result).to.be.a('number');
     });
   });
 
