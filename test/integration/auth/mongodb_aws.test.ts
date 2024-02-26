@@ -67,6 +67,20 @@ describe('MONGODB-AWS', function () {
       .that.equals('');
   });
 
+  it('should not throw an exception when aws token is missing', async function () {
+    client = this.configuration.newClient(process.env.MONGODB_URI, {
+      authMechanismProperties: { AWS_SESSION_TOKEN: '' }
+    });
+    const result = await client
+      .db('aws')
+      .collection('aws_test')
+      .estimatedDocumentCount()
+      .catch(error => error);
+
+    expect(result).to.not.be.instanceOf(MongoServerError);
+    expect(result).to.be.a('number');
+  });
+
   it('should store a MongoDBAWS provider instance per client', async function () {
     client = this.configuration.newClient(process.env.MONGODB_URI);
 
