@@ -28,10 +28,11 @@ tests:
         arguments: 
           models: []
         expectError:
-          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
-          # against an Atlas cluster and the expectError will be removed.
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
           isError: true
-          errorContains: Search index commands are only supported with Atlas
+          errorContains: Atlas
     expectEvents:
       - client: *client0
         events:
@@ -49,10 +50,11 @@ tests:
         arguments:
           models: [ { definition: &definition { mappings: { dynamic: true } } } ]
         expectError:
-          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
-          # against an Atlas cluster and the expectError will be removed.
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
           isError: true
-          errorContains: Search index commands are only supported with Atlas
+          errorContains: Atlas
     expectEvents:
       - client: *client0
         events:
@@ -69,10 +71,11 @@ tests:
         arguments: 
           models: [ { definition: &definition { mappings: { dynamic: true } } , name: 'test index' } ]
         expectError:
-          # Search indexes are only available on 7.0+ atlas clusters.  DRIVERS-2630 will add e2e testing 
-          # against an Atlas cluster and the expectError will be removed.
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
           isError: true
-          errorContains: Search index commands are only supported with Atlas
+          errorContains: Atlas
     expectEvents:
       - client: *client0
         events:
