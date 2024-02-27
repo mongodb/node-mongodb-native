@@ -31,6 +31,21 @@
       "options": null
     },
     {
+      "description": "Unix domain socket (mixed case)",
+      "uri": "mongodb://rel%2FMongoDB-27017.sock",
+      "valid": true,
+      "warning": false,
+      "hosts": [
+        {
+          "type": "unix",
+          "host": "rel/MongoDB-27017.sock",
+          "port": null
+        }
+      ],
+      "auth": null,
+      "options": null
+    },
+    {
       "description": "Unix domain socket (relative path with spaces)",
       "uri": "mongodb://rel%2F %2Fmongodb-27017.sock",
       "valid": true,

@@ -1196,7 +1196,9 @@ describe('MongoClient', function () {
         client.s.authProviders.getOrCreateProvider('NOT_SUPPORTED');
       } catch (error) {
         expect(error).to.be.an.instanceof(MongoInvalidArgumentError);
+        return;
       }
+      expect.fail('missed exception');
     });
   });
 });

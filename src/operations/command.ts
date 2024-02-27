@@ -152,6 +152,6 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       cmd = decorateWithExplain(cmd, this.explain);
     }
 
-    return server.commandAsync(this.ns, cmd, options);
+    return server.command(this.ns, cmd, options);
   }
 }

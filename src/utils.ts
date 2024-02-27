@@ -4,6 +4,7 @@ import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
 import { URL } from 'url';
+import { promisify } from 'util';
 
 import { type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
@@ -1292,3 +1293,5 @@ export function promiseWithResolvers<T>() {
   });
   return { promise, resolve, reject } as const;
 }
+
+export const randomBytes = promisify(crypto.randomBytes);

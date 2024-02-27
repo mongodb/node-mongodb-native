@@ -15,3 +15,16 @@ tests:
             db: "admin"
         options:
             authmechanism: "MONGODB-CR"
+    -
+        description: "Missing delimiting slash between hosts and options"
+        uri: "mongodb://example.com?tls=true"
+        valid: true
+        warning: false
+        hosts:
+            -
+                type: "hostname"
+                host: "example.com"
+                port: ~
+        auth: ~
+        options:
+              tls: true

@@ -368,22 +368,24 @@ describe('MongoErrors', () => {
         topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
-            let _err;
-            try {
-              expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-              expect(err.result).to.exist;
-              expect(err.result).to.have.property('ok', 1);
-              expect(err.result).to.not.have.property('errmsg');
-              expect(err.result).to.not.have.property('code');
-              expect(err.result).to.not.have.property('codeName');
-              expect(err.result).to.have.property('writeConcernError');
-            } catch (e) {
-              _err = e;
-            } finally {
-              cleanup(_err);
-            }
-          });
+          server
+            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+            .then(expect.fail, err => {
+              let _err;
+              try {
+                expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+                expect(err.result).to.exist;
+                expect(err.result).to.have.property('ok', 1);
+                expect(err.result).to.not.have.property('errmsg');
+                expect(err.result).to.not.have.property('code');
+                expect(err.result).to.not.have.property('codeName');
+                expect(err.result).to.have.property('writeConcernError');
+              } catch (e) {
+                _err = e;
+              } finally {
+                cleanup(_err);
+              }
+            });
         });
       });
     });
@@ -409,20 +411,22 @@ describe('MongoErrors', () => {
         topology.selectServer('primary', {}, (err, server) => {
           expect(err).to.not.exist;
 
-          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {}, err => {
-            let _err;
-            try {
-              expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-              expect(err.result).to.exist;
-              expect(err.result.writeConcernError).to.deep.equal(
-                RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
-              );
-            } catch (e) {
-              _err = e;
-            } finally {
-              cleanup(_err);
-            }
-          });
+          server
+            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+            .then(expect.fail, err => {
+              let _err;
+              try {
+                expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+                expect(err.result).to.exist;
+                expect(err.result.writeConcernError).to.deep.equal(
+                  RAW_USER_WRITE_CONCERN_ERROR_INFO.writeConcernError
+                );
+              } catch (e) {
+                _err = e;
+              } finally {
+                cleanup(_err);
+              }
+            });
         });
       });
     });

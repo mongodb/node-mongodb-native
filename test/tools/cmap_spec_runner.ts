@@ -185,9 +185,7 @@ const compareInputToSpec = (input, expected, message) => {
 
 const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   checkOut: async function (op) {
-    const connection: Connection = await promisify(ConnectionPool.prototype.checkOut).call(
-      threadContext.pool
-    );
+    const connection: Connection = await ConnectionPool.prototype.checkOut.call(threadContext.pool);
     if (op.label != null) {
       threadContext.connections.set(op.label, connection);
     } else {

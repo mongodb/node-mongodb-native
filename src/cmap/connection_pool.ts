@@ -17,8 +17,7 @@ import {
 } from '../constants';
 import {
   type AnyError,
-  MONGODB_ERROR_CODES,
-  MongoError,
+  type MongoError,
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoNetworkError,
@@ -27,7 +26,14 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { type Callback, eachAsync, List, makeCounter, TimeoutController } from '../utils';
+import {
+  type Callback,
+  eachAsync,
+  List,
+  makeCounter,
+  promiseWithResolvers,
+  TimeoutController
+} from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -100,7 +106,8 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
 
 /** @internal */
 export interface WaitQueueMember {
-  callback: Callback<Connection>;
+  resolve: (conn: Connection) => void;
+  reject: (err: AnyError) => void;
   timeoutController: TimeoutController;
   [kCancelled]?: boolean;
 }
@@ -350,7 +357,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  checkOut(callback: Callback<Connection>): void {
+  async checkOut(): Promise<Connection> {
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -358,8 +365,10 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
 
+    const { promise, resolve, reject } = promiseWithResolvers<Connection>();
     const waitQueueMember: WaitQueueMember = {
-      callback,
+      resolve,
+      reject,
       timeoutController: new TimeoutController(waitQueueTimeoutMS)
     };
     waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
@@ -370,7 +379,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
         new ConnectionCheckOutFailedEvent(this, 'timeout')
       );
-      waitQueueMember.callback(
+      waitQueueMember.reject(
         new WaitQueueTimeoutError(
           this.loadBalanced
             ? this.waitQueueErrorMetrics()
@@ -382,6 +391,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
+
+    return promise;
   }
 
   /**
@@ -534,115 +545,35 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /**
-   * Runs a lambda with an implicitly checked out connection, checking that connection back in when the lambda
-   * has completed by calling back.
-   *
-   * NOTE: please note the required signature of `fn`
-   *
-   * @remarks When in load balancer mode, connections can be pinned to cursors or transactions.
-   *   In these cases we pass the connection in to this method to ensure it is used and a new
-   *   connection is not checked out.
-   *
-   * @param conn - A pinned connection for use in load balancing mode.
-   * @param fn - A function which operates on a managed connection
-   * @param callback - The original callback
+   * @internal
+   * Reauthenticate a connection
    */
-  withConnection(
-    conn: Connection | undefined,
-    fn: WithConnectionCallback,
-    callback: Callback<Connection>
-  ): void {
-    if (conn) {
-      // use the provided connection, and do _not_ check it in after execution
-      fn(undefined, conn, (fnErr, result) => {
-        if (fnErr) {
-          return this.withReauthentication(fnErr, conn, fn, callback);
-        }
-        callback(undefined, result);
-      });
-      return;
-    }
-
-    this.checkOut((err, conn) => {
-      // don't callback with `err` here, we might want to act upon it inside `fn`
-      fn(err as MongoError, conn, (fnErr, result) => {
-        if (fnErr) {
-          if (conn) {
-            this.withReauthentication(fnErr, conn, fn, callback);
-          } else {
-            callback(fnErr);
-          }
-        } else {
-          callback(undefined, result);
-        }
-
-        if (conn) {
-          this.checkIn(conn);
-        }
-      });
-    });
-  }
-
-  private withReauthentication(
-    fnErr: AnyError,
-    conn: Connection,
-    fn: WithConnectionCallback,
-    callback: Callback<Connection>
-  ) {
-    if (fnErr instanceof MongoError && fnErr.code === MONGODB_ERROR_CODES.Reauthenticate) {
-      this.reauthenticate(conn, fn, (error, res) => {
-        if (error) {
-          return callback(error);
-        }
-        callback(undefined, res);
-      });
-    } else {
-      callback(fnErr);
-    }
-  }
-
-  /**
-   * Reauthenticate on the same connection and then retry the operation.
-   */
-  private reauthenticate(
-    connection: Connection,
-    fn: WithConnectionCallback,
-    callback: Callback
-  ): void {
+  async reauthenticate(connection: Connection): Promise<void> {
     const authContext = connection.authContext;
     if (!authContext) {
-      return callback(new MongoRuntimeError('No auth context found on connection.'));
+      throw new MongoRuntimeError('No auth context found on connection.');
     }
     const credentials = authContext.credentials;
     if (!credentials) {
-      return callback(
-        new MongoMissingCredentialsError(
-          'Connection is missing credentials when asked to reauthenticate'
-        )
+      throw new MongoMissingCredentialsError(
+        'Connection is missing credentials when asked to reauthenticate'
       );
     }
+
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
     const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
       resolvedCredentials.mechanism
     );
+
     if (!provider) {
-      return callback(
-        new MongoMissingCredentialsError(
-          `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
-        )
+      throw new MongoMissingCredentialsError(
+        `Reauthenticate failed due to no auth provider for ${credentials.mechanism}`
       );
     }
-    provider.reauth(authContext).then(
-      () => {
-        fn(undefined, connection, (fnErr, fnResult) => {
-          if (fnErr) {
-            return callback(fnErr);
-          }
-          callback(undefined, fnResult);
-        });
-      },
-      error => callback(error)
-    );
+
+    await provider.reauth(authContext);
+
+    return;
   }
 
   /** Clear the min pool size timer */
@@ -841,7 +772,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         );
         waitQueueMember.timeoutController.clear();
         this[kWaitQueue].shift();
-        waitQueueMember.callback(error);
+        waitQueueMember.reject(error);
         continue;
       }
 
@@ -863,7 +794,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         waitQueueMember.timeoutController.clear();
 
         this[kWaitQueue].shift();
-        waitQueueMember.callback(undefined, connection);
+        waitQueueMember.resolve(connection);
       }
     }
 
@@ -889,16 +820,17 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
               // TODO(NODE-5192): Remove this cast
               new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
             );
+            waitQueueMember.reject(err);
           } else if (connection) {
             this[kCheckedOut].add(connection);
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection)
             );
+            waitQueueMember.resolve(connection);
           }
 
           waitQueueMember.timeoutController.clear();
-          waitQueueMember.callback(err, connection);
         }
         process.nextTick(() => this.processWaitQueue());
       });
