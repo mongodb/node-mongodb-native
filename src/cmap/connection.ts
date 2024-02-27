@@ -57,7 +57,7 @@ import {
   type WriteProtocolMessageType
 } from './commands';
 import type { Stream } from './connect';
-import type { ClientMetadata } from './handshake/client_metadata';
+import type { ClientMetadata, LimitedSizeDocument } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
@@ -118,6 +118,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+   /** @internal */
+   internalMetadata: LimitedSizeDocument;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }

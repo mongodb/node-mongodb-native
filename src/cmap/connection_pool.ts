@@ -234,7 +234,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       minPoolSizeCheckFrequencyMS: options.minPoolSizeCheckFrequencyMS ?? 100,
       autoEncrypter: options.autoEncrypter,
-      metadata: options.metadata
+      metadata: options.metadata,
     });
 
     if (this.options.minPoolSize > this.options.maxPoolSize) {
@@ -634,7 +634,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders
+      authProviders: this[kServer].topology.client.s.authProviders,
     };
 
     this[kPending]++;

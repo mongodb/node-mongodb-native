@@ -1,3 +1,4 @@
+import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as process from 'process';
 
@@ -91,8 +92,14 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'driverInfo'>;
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
 export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMetadata {
-  const metadataDocument = new LimitedSizeDocument(512);
+  let metadataDocument = new LimitedSizeDocument(512);
+  metadataDocument = addNonEnvClientMetadata(options, metadataDocument);
+  metadataDocument = addFAASOnlyEnvClientMetadata(metadataDocument);
+  return metadataDocument.toObject();
+}
 
+
+export function addNonEnvClientMetadata(options: MakeClientMetadataOptions, metadataDocument: LimitedSizeDocument): LimitedSizeDocument {
   const { appName = '' } = options;
   // Add app name first, it must be sent
   if (appName.length > 0) {
@@ -142,6 +149,10 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
     }
   }
 
+  return metadataDocument;
+}
+
+function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): LimitedSizeDocument {
   const faasEnv = getFAASEnv();
   if (faasEnv != null) {
     if (!metadataDocument.ifItFitsItSits('env', faasEnv)) {
@@ -152,8 +163,50 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       }
     }
   }
+  return metadataDocument;
+}
 
-  return metadataDocument.toObject();
+
+let isDocker: boolean;
+export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocument) {
+  const faasEnv = getFAASEnv();
+  
+  async function getContainerMetadata() {
+    const containerMetadata: Record<string, any> = {};
+    if (isDocker !== false && isDocker !== true) {
+      try {
+        await fs.access('/.dockerenv');
+        isDocker = true;
+      } catch {
+        isDocker = false;
+      }
+    }
+    const isKubernetes = process.env.KUBERNETES_SERVICE_HOST ? true : false;
+  
+    if (isDocker || isKubernetes) {
+      if (isDocker) {
+        containerMetadata['runtime'] = 'docker';
+      }
+      if (isKubernetes) {
+        containerMetadata['orchestrator'] = 'kubernetes';
+      }
+    }
+    return containerMetadata;
+  }
+
+  const containerMetadata = await getContainerMetadata();
+  const envMetadata = faasEnv ? faasEnv.set('container', containerMetadata) : containerMetadata;
+
+  if (envMetadata != null) {
+    if (!metadataDocument.ifItFitsItSits('env', envMetadata)) {
+      for (const key of envMetadata.keys()) {
+        envMetadata.delete(key);
+        if (envMetadata.size === 0) break;
+        if (metadataDocument.ifItFitsItSits('env', envMetadata)) break;
+      }
+    }
+  }
+  return metadataDocument;
 }
 
 /**
