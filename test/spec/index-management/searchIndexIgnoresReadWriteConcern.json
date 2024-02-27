@@ -1,0 +1,252 @@
+{
+  "description": "search index operations ignore read and write concern",
+  "schemaVersion": "1.4",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "uriOptions": {
+          "readConcernLevel": "local",
+          "w": 1
+        },
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "database0"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "collection0"
+      }
+    }
+  ],
+  "runOnRequirements": [
+    {
+      "minServerVersion": "7.0.0",
+      "topologies": [
+        "replicaset",
+        "load-balanced",
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "tests": [
+    {
+      "description": "createSearchIndex ignores read and write concern",
+      "operations": [
+        {
+          "name": "createSearchIndex",
+          "object": "collection0",
+          "arguments": {
+            "model": {
+              "definition": {
+                "mappings": {
+                  "dynamic": true
+                }
+              }
+            }
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "Atlas"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createSearchIndexes": "collection0",
+                  "indexes": [
+                    {
+                      "definition": {
+                        "mappings": {
+                          "dynamic": true
+                        }
+                      }
+                    }
+                  ],
+                  "$db": "database0",
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "createSearchIndexes ignores read and write concern",
+      "operations": [
+        {
+          "name": "createSearchIndexes",
+          "object": "collection0",
+          "arguments": {
+            "models": []
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "Atlas"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createSearchIndexes": "collection0",
+                  "indexes": [],
+                  "$db": "database0",
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "dropSearchIndex ignores read and write concern",
+      "operations": [
+        {
+          "name": "dropSearchIndex",
+          "object": "collection0",
+          "arguments": {
+            "name": "test index"
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "Atlas"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "dropSearchIndex": "collection0",
+                  "name": "test index",
+                  "$db": "database0",
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "listSearchIndexes ignores read and write concern",
+      "operations": [
+        {
+          "name": "listSearchIndexes",
+          "object": "collection0",
+          "expectError": {
+            "isError": true,
+            "errorContains": "Atlas"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "aggregate": "collection0",
+                  "pipeline": [
+                    {
+                      "$listSearchIndexes": {}
+                    }
+                  ],
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "updateSearchIndex ignores the read and write concern",
+      "operations": [
+        {
+          "name": "updateSearchIndex",
+          "object": "collection0",
+          "arguments": {
+            "name": "test index",
+            "definition": {}
+          },
+          "expectError": {
+            "isError": true,
+            "errorContains": "Atlas"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "updateSearchIndex": "collection0",
+                  "name": "test index",
+                  "definition": {},
+                  "$db": "database0",
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "readConcern": {
+                    "$$exists": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
