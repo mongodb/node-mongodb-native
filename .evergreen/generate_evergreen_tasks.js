@@ -1,7 +1,6 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const semver = require('semver');
-const { mongoshTasks } = require('./generate_mongosh_tasks');
 
 const {
   MONGODB_VERSIONS,
@@ -10,14 +9,8 @@ const {
   LOWEST_LTS,
   LATEST_LTS,
   TOPOLOGIES,
-  AWS_AUTH_VERSIONS,
-  TLS_VERSIONS,
   DEFAULT_OS,
-  WINDOWS_OS,
-  MACOS_OS,
-  UBUNTU_OS,
-  UBUNTU_20_OS,
-  DEBIAN_OS
+  WINDOWS_OS
 } = require('./ci_matrix_constants');
 
 const OPERATING_SYSTEMS = [
@@ -82,7 +75,7 @@ function generateVersionTopologyMatrix() {
   function* _generate() {
     for (const mongoVersion of MONGODB_VERSIONS) {
       for (const topology of TOPOLOGIES) {
-        yield { mongoVersion, topology };
+        yield { mongoVersion, topology, tags: ['csfle'] };
       }
     }
   }
@@ -91,139 +84,13 @@ function generateVersionTopologyMatrix() {
 }
 
 const BASE_TASKS = generateVersionTopologyMatrix().map(makeTask);
-const AUTH_DISABLED_TASKS = generateVersionTopologyMatrix().map(test =>
-  makeTask({ ...test, auth: 'noauth', tags: ['noauth'] })
-);
-
-BASE_TASKS.push({
-  name: `test-latest-server-v1-api`,
-  tags: ['latest', 'server', 'v1-api'],
-  commands: [
-    updateExpansions({
-      VERSION: 'latest',
-      TOPOLOGY: 'server',
-      REQUIRE_API_VERSION: '1',
-      MONGODB_API_VERSION: '1',
-      AUTH: 'auth'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    { func: 'bootstrap kms servers' },
-    { func: 'run tests' }
-  ]
-});
 
 // manually added tasks
 TASKS.push(
   ...[
     {
-      name: 'test-atlas-connectivity',
-      tags: ['atlas-connect'],
-      commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
-    },
-    {
-      name: 'test-atlas-data-lake',
-      commands: [
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongohoused' },
-        { func: 'run data lake tests' }
-      ]
-    },
-    {
-      name: 'test-5.0-load-balanced',
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
-      commands: [
-        updateExpansions({
-          VERSION: '5.0',
-          TOPOLOGY: 'sharded_cluster',
-          AUTH: 'auth',
-          LOAD_BALANCER: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'start-load-balancer' },
-        { func: 'run-lb-tests' },
-        { func: 'stop-load-balancer' }
-      ]
-    },
-    {
-      name: 'test-6.0-load-balanced',
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
-      commands: [
-        updateExpansions({
-          VERSION: '6.0',
-          TOPOLOGY: 'sharded_cluster',
-          AUTH: 'auth',
-          LOAD_BALANCER: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'start-load-balancer' },
-        { func: 'run-lb-tests' },
-        { func: 'stop-load-balancer' }
-      ]
-    },
-    {
-      name: 'test-latest-load-balanced',
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'sharded_cluster',
-          AUTH: 'auth',
-          LOAD_BALANCER: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'start-load-balancer' },
-        { func: 'run-lb-tests' },
-        { func: 'stop-load-balancer' }
-      ]
-    },
-    {
-      name: 'test-auth-kerberos',
-      tags: ['auth', 'kerberos'],
-      commands: [{ func: 'install dependencies' }, { func: 'run kerberos tests' }]
-    },
-    {
-      name: 'test-auth-ldap',
-      tags: ['auth', 'ldap'],
-      commands: [{ func: 'install dependencies' }, { func: 'run ldap tests' }]
-    },
-    {
-      name: 'test-auth-oidc',
-      tags: ['latest', 'replica_set', 'oidc'],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set',
-          AUTH: 'auth',
-          ORCHESTRATION_FILE: 'auth-oidc.json'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap oidc' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'setup oidc roles' },
-        { func: 'run oidc tests aws' }
-      ]
-    },
-    {
-      name: 'test-socks5',
-      tags: [],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'bootstrap kms servers' },
-        { func: 'run socks5 tests' }
-      ]
-    },
-    {
       name: 'test-socks5-csfle',
-      tags: ['socks5-csfle'],
+      tags: ['socks5-csfle', 'csfle'],
       commands: [
         updateExpansions({
           VERSION: 'latest',
@@ -235,153 +102,9 @@ TASKS.push(
         { func: 'bootstrap kms servers' },
         { func: 'run socks5 tests' }
       ]
-    },
-    {
-      name: 'test-socks5-tls',
-      tags: [],
-      commands: [
-        updateExpansions({
-          SSL: 'ssl',
-          VERSION: 'latest',
-          TOPOLOGY: 'replica_set'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'run socks5 tests' }
-      ]
     }
   ]
 );
-
-for (const compressor of ['zstd', 'snappy']) {
-  TASKS.push({
-    name: `test-${compressor}-compression`,
-    tags: ['latest', compressor],
-    commands: [
-      updateExpansions({
-        VERSION: 'latest',
-        TOPOLOGY: 'replica_set',
-        AUTH: 'auth',
-        COMPRESSOR: compressor
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'run-compression-tests' }
-    ]
-  });
-}
-
-const AWS_LAMBDA_HANDLER_TASKS = [];
-// Add task for testing lambda example without aws auth.
-AWS_LAMBDA_HANDLER_TASKS.push({
-  name: 'test-lambda-example',
-  tags: ['latest', 'lambda'],
-  commands: [
-    updateExpansions({
-      NPM_VERSION: 9,
-      VERSION: 'rapid',
-      TOPOLOGY: 'server'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    { func: 'run lambda handler example tests' }
-  ]
-});
-
-// Add task for testing lambda example with aws auth.
-AWS_LAMBDA_HANDLER_TASKS.push({
-  name: 'test-lambda-aws-auth-example',
-  tags: ['latest', 'lambda'],
-  commands: [
-    updateExpansions({
-      NPM_VERSION: 9,
-      VERSION: 'rapid',
-      AUTH: 'auth',
-      ORCHESTRATION_FILE: 'auth-aws.json',
-      TOPOLOGY: 'server'
-    }),
-    { func: 'install dependencies' },
-    { func: 'bootstrap mongo-orchestration' },
-    { func: 'add aws auth variables to file' },
-    { func: 'setup aws env' },
-    { func: 'run lambda handler example tests with aws auth' }
-  ]
-});
-
-for (const VERSION of TLS_VERSIONS) {
-  TASKS.push({
-    name: `test-tls-support-${VERSION}`,
-    tags: ['tls-support'],
-    commands: [
-      updateExpansions({
-        VERSION,
-        SSL: 'ssl',
-        TOPOLOGY: 'server'
-        // TODO: NODE-3891 - fix tests broken when AUTH enabled
-        // AUTH: 'auth'
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'run tls tests' }
-    ]
-  });
-}
-
-const AWS_AUTH_TASKS = [];
-
-for (const VERSION of AWS_AUTH_VERSIONS) {
-  const name = ex => `aws-${VERSION}-auth-test-${ex.split(' ').join('-')}`;
-  const awsFuncs = [
-    { func: 'run aws auth test with regular aws credentials' },
-    { func: 'run aws auth test with assume role credentials' },
-    { func: 'run aws auth test with aws EC2 credentials' },
-    { func: 'run aws auth test with aws credentials as environment variables' },
-    { func: 'run aws auth test with aws credentials and session token as environment variables' },
-    { func: 'run aws ECS auth test' },
-    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset' },
-    { func: 'run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set' }
-  ];
-
-  const awsTasks = awsFuncs.map(fn => ({
-    name: name(fn.func),
-    commands: [
-      updateExpansions({
-        VERSION,
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }),
-      { func: 'install dependencies' },
-      { func: 'install aws-credential-providers' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'add aws auth variables to file' },
-      { func: 'setup aws env' },
-      { ...fn }
-    ]
-  }));
-
-  const awsNoPeerDependenciesTasks = awsFuncs.map(fn => ({
-    name: `${name(fn.func)}-no-peer-dependencies`,
-    commands: [
-      updateExpansions({
-        VERSION: VERSION,
-        AUTH: 'auth',
-        ORCHESTRATION_FILE: 'auth-aws.json',
-        TOPOLOGY: 'server'
-      }),
-      { func: 'install dependencies' },
-      { func: 'bootstrap mongo-orchestration' },
-      { func: 'add aws auth variables to file' },
-      { func: 'setup aws env' },
-      { ...fn }
-    ]
-  }));
-
-  const allAwsTasks = awsTasks.concat(awsNoPeerDependenciesTasks);
-
-  TASKS.push(...allAwsTasks);
-  AWS_AUTH_TASKS.push(...allAwsTasks.map(t => t.name));
-}
 
 const BUILD_VARIANTS = [];
 
@@ -418,7 +141,14 @@ for (const {
       expansions.CLIENT_ENCRYPTION = true;
     }
 
-    BUILD_VARIANTS.push({ name, display_name, run_on, expansions, tasks: taskNames });
+    BUILD_VARIANTS.push({
+      name,
+      display_name,
+      run_on,
+      expansions,
+      tasks: taskNames,
+      tags: ['csfle']
+    });
   }
 
   const configureLatestNodeSmokeTest = os.match(/^rhel/);
@@ -445,7 +175,7 @@ const MONGOCRYPTD_CSFLE_TASKS = MONGODB_VERSIONS.filter(
 ).map(mongoVersion => {
   return {
     name: `test-${mongoVersion}-csfle-mongocryptd`,
-    tags: [mongoVersion, 'sharded_cluster'],
+    tags: [mongoVersion, 'sharded_cluster', 'csfle'],
     commands: [
       updateExpansions({
         VERSION: mongoVersion,
@@ -478,17 +208,6 @@ for (const nodeVersion of [LOWEST_LTS, LATEST_LTS]) {
   });
 }
 
-BUILD_VARIANTS.push({
-  name: MACOS_OS,
-  display_name: `MacOS 11 Node${LATEST_LTS}`,
-  run_on: MACOS_OS,
-  expansions: {
-    NODE_LTS_VERSION: LATEST_LTS,
-    CLIENT_ENCRYPTION: true
-  },
-  tasks: ['test-rapid-server']
-});
-
 // singleton build variant for linting
 SINGLETON_TASKS.push(
   ...[
@@ -503,104 +222,15 @@ SINGLETON_TASKS.push(
         { func: 'install dependencies' },
         { func: 'run unit tests' }
       ]
-    },
-    {
-      name: 'run-lint-checks',
-      tags: ['run-lint-checks'],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9
-        }),
-        { func: 'install dependencies' },
-        { func: 'run lint checks' }
-      ]
-    },
-    ...Array.from(makeTypescriptTasks())
+    }
   ]
 );
-
-function* makeTypescriptTasks() {
-  for (const TS_VERSION of ['next', 'current', '4.1.6']) {
-    // 4.1.6 can consume the public API but not compile the driver
-    if (TS_VERSION !== '4.1.6' && TS_VERSION !== 'next') {
-      yield {
-        name: `compile-driver-typescript-${TS_VERSION}`,
-        tags: [`compile-driver-typescript-${TS_VERSION}`],
-        commands: [
-          updateExpansions({
-            NODE_LTS_VERSION: LOWEST_LTS,
-            NPM_VERSION: 9,
-            TS_VERSION
-          }),
-          { func: 'install dependencies' },
-          { func: 'compile driver' }
-        ]
-      };
-    }
-
-    yield {
-      name: `check-types-typescript-${TS_VERSION}`,
-      tags: [`check-types-typescript-${TS_VERSION}`],
-      commands: [
-        updateExpansions({
-          NODE_LTS_VERSION: LOWEST_LTS,
-          NPM_VERSION: 9,
-          TS_VERSION
-        }),
-        { func: 'install dependencies' },
-        { func: 'check types' }
-      ]
-    };
-  }
-  return {
-    name: 'run-typescript-next',
-    tags: ['run-typescript-next'],
-    commands: [
-      updateExpansions({
-        NODE_LTS_VERSION: LOWEST_LTS,
-        NPM_VERSION: 9
-      }),
-      { func: 'install dependencies' },
-      { func: 'run typescript next' }
-    ]
-  };
-}
 
 BUILD_VARIANTS.push({
   name: 'lint',
   display_name: 'lint',
   run_on: DEFAULT_OS,
-  tasks: [
-    'run-unit-tests',
-    'run-lint-checks',
-    ...Array.from(makeTypescriptTasks()).map(({ name }) => name)
-  ]
-});
-
-BUILD_VARIANTS.push({
-  name: 'generate-combined-coverage',
-  display_name: 'Generate Combined Coverage',
-  run_on: DEFAULT_OS,
-  tasks: ['download-and-merge-coverage']
-});
-
-BUILD_VARIANTS.push({
-  name: 'mongosh_integration_tests',
-  display_name: 'mongosh integration tests',
-  run_on: UBUNTU_OS,
-  tasks: mongoshTasks.map(({ name }) => name)
-});
-
-// special case for MONGODB-AWS authentication
-BUILD_VARIANTS.push({
-  name: 'ubuntu2004-test-mongodb-aws',
-  display_name: 'MONGODB-AWS Auth test',
-  run_on: UBUNTU_20_OS,
-  expansions: {
-    NODE_LTS_VERSION: LATEST_LTS
-  },
-  tasks: AWS_AUTH_TASKS
+  tasks: ['run-unit-tests']
 });
 
 const oneOffFuncAsTasks = [];
@@ -611,7 +241,7 @@ for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
     oneOffFuncAsTasks.push({
       name: `run-custom-csfle-tests-${version}-${ref === 'master' ? ref : 'pinned-commit'}`,
-      tags: ['run-custom-dependency-tests'],
+      tags: ['run-custom-dependency-tests', 'csfle'],
       commands: [
         updateExpansions({
           NODE_LTS_VERSION: LOWEST_LTS,
@@ -629,24 +259,13 @@ for (const version of ['5.0', 'rapid', 'latest']) {
   }
 }
 
-const coverageTask = {
-  name: 'download and merge coverage'.split(' ').join('-'),
-  tags: [],
-  commands: [
-    {
-      func: 'download and merge coverage'
-    }
-  ],
-  depends_on: [{ name: '*', variant: '*', status: '*', patch_optional: true }]
-};
-
-SINGLETON_TASKS.push(coverageTask);
 SINGLETON_TASKS.push(...oneOffFuncAsTasks);
 
 BUILD_VARIANTS.push({
   name: 'rhel8-custom-dependency-tests',
   display_name: 'Custom Dependency Version Test',
   run_on: DEFAULT_OS,
+  tags: ['csfle'],
   tasks: oneOffFuncAsTasks.map(({ name }) => name)
 });
 
@@ -655,64 +274,11 @@ BUILD_VARIANTS.push({
   name: 'rhel8-test-serverless',
   display_name: 'Serverless Test',
   run_on: DEFAULT_OS,
+  tags: ['csfle'],
   expansions: {
     NODE_LTS_VERSION: LOWEST_LTS
   },
   tasks: ['serverless_task_group']
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-gcp-kms',
-  display_name: 'GCP KMS Test',
-  run_on: DEBIAN_OS,
-  tasks: ['test_gcpkms_task_group', 'test-gcpkms-fail-task']
-});
-
-BUILD_VARIANTS.push({
-  name: 'debian11-test-azure-kms',
-  display_name: 'Azure KMS Test',
-  run_on: DEBIAN_OS,
-  batchtime: 20160,
-  tasks: ['test_azurekms_task_group', 'test-azurekms-fail-task']
-});
-
-BUILD_VARIANTS.push({
-  name: 'ubuntu20-test-azure-oidc',
-  display_name: 'Azure OIDC',
-  run_on: UBUNTU_20_OS,
-  batchtime: 20160,
-  tasks: ['testazureoidc_task_group']
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-atlas',
-  display_name: 'Atlas Cluster Tests',
-  run_on: DEFAULT_OS,
-  tasks: ['test_atlas_task_group']
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-no-auth-tests',
-  display_name: 'No Auth Tests',
-  run_on: DEFAULT_OS,
-  expansions: {
-    CLIENT_ENCRYPTION: true
-  },
-  tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-lambda',
-  display_name: 'AWS Lambda handler tests',
-  run_on: DEFAULT_OS,
-  tasks: ['test-lambda-example', 'test-lambda-aws-auth-example']
-});
-
-BUILD_VARIANTS.push({
-  name: 'rhel8-test-search-indexes',
-  display_name: 'Search Index Tests',
-  run_on: DEFAULT_OS,
-  tasks: ['test_atlas_task_group_search_indexes']
 });
 
 // TODO(NODE-4575): unskip zstd and snappy on node 16
@@ -736,10 +302,7 @@ fileData.tasks = (fileData.tasks || [])
   .concat(BASE_TASKS)
   .concat(TASKS)
   .concat(SINGLETON_TASKS)
-  .concat(AUTH_DISABLED_TASKS)
-  .concat(AWS_LAMBDA_HANDLER_TASKS)
-  .concat(MONGOCRYPTD_CSFLE_TASKS)
-  .concat(mongoshTasks);
+  .concat(MONGOCRYPTD_CSFLE_TASKS);
 
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);
 

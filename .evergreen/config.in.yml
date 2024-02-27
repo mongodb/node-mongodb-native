@@ -1127,33 +1127,11 @@ functions:
 
 tasks:
   - name: "test-serverless"
-    tags: ["serverless"]
+    tags: ["serverless", "csfle"]
     commands:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: "run serverless tests"
-
-  - name: run-spec-benchmark-tests-node-18-server-6.0
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - { key: NODE_LTS_VERSION, value: v18.16.0 }
-            - { key: NPM_VERSION, value: "9" }
-            - { key: VERSION, value: v6.0-perf }
-            - { key: TOPOLOGY, value: server }
-            - { key: AUTH, value: noauth }
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
 
   - name: "test-gcpkms-task"
     commands:
@@ -1522,9 +1500,3 @@ post:
 
 ignore:
   - "*.md"
-buildvariants:
-  - name: performance-tests
-    display_name: Performance Test
-    run_on: rhel90-dbx-perf-large
-    tasks:
-      - run-spec-benchmark-tests-node-18-server-6.0

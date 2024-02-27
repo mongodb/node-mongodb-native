@@ -1066,31 +1066,11 @@ tasks:
   - name: test-serverless
     tags:
       - serverless
+      - csfle
     commands:
       - func: install dependencies
       - func: bootstrap kms servers
       - func: run serverless tests
-  - name: run-spec-benchmark-tests-node-18-server-6.0
-    tags:
-      - run-spec-benchmark-tests
-      - performance
-    exec_timeout_secs: 3600
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: v18.16.0}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: v6.0-perf}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run spec driver benchmarks
-      - command: perf.send
-        params:
-          file: src/results.json
   - name: test-gcpkms-task
     commands:
       - command: expansions.update
@@ -1250,6 +1230,7 @@ tasks:
     tags:
       - latest
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1267,6 +1248,7 @@ tasks:
     tags:
       - latest
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1284,6 +1266,7 @@ tasks:
     tags:
       - latest
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1301,6 +1284,7 @@ tasks:
     tags:
       - rapid
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1318,6 +1302,7 @@ tasks:
     tags:
       - rapid
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1335,6 +1320,7 @@ tasks:
     tags:
       - rapid
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1352,6 +1338,7 @@ tasks:
     tags:
       - '7.0'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1369,6 +1356,7 @@ tasks:
     tags:
       - '7.0'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1386,6 +1374,7 @@ tasks:
     tags:
       - '7.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1403,6 +1392,7 @@ tasks:
     tags:
       - '6.0'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1420,6 +1410,7 @@ tasks:
     tags:
       - '6.0'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1437,6 +1428,7 @@ tasks:
     tags:
       - '6.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1454,6 +1446,7 @@ tasks:
     tags:
       - '5.0'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1471,6 +1464,7 @@ tasks:
     tags:
       - '5.0'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1488,6 +1482,7 @@ tasks:
     tags:
       - '5.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1505,6 +1500,7 @@ tasks:
     tags:
       - '4.4'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1522,6 +1518,7 @@ tasks:
     tags:
       - '4.4'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1539,6 +1536,7 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1556,6 +1554,7 @@ tasks:
     tags:
       - '4.2'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1573,6 +1572,7 @@ tasks:
     tags:
       - '4.2'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1590,6 +1590,7 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1607,6 +1608,7 @@ tasks:
     tags:
       - '4.0'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1624,6 +1626,7 @@ tasks:
     tags:
       - '4.0'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1641,6 +1644,7 @@ tasks:
     tags:
       - '4.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1658,6 +1662,7 @@ tasks:
     tags:
       - '3.6'
       - server
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1675,6 +1680,7 @@ tasks:
     tags:
       - '3.6'
       - replica_set
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1692,6 +1698,7 @@ tasks:
     tags:
       - '3.6'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1705,142 +1712,10 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
-  - name: test-latest-server-v1-api
-    tags:
-      - latest
-      - server
-      - v1-api
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: server}
-            - {key: REQUIRE_API_VERSION, value: '1'}
-            - {key: MONGODB_API_VERSION, value: '1'}
-            - {key: AUTH, value: auth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-atlas-connectivity
-    tags:
-      - atlas-connect
-    commands:
-      - func: install dependencies
-      - func: run atlas tests
-  - name: test-atlas-data-lake
-    commands:
-      - func: install dependencies
-      - func: bootstrap mongohoused
-      - func: run data lake tests
-  - name: test-5.0-load-balanced
-    tags:
-      - latest
-      - sharded_cluster
-      - load_balancer
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: auth}
-            - {key: LOAD_BALANCER, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: start-load-balancer
-      - func: run-lb-tests
-      - func: stop-load-balancer
-  - name: test-6.0-load-balanced
-    tags:
-      - latest
-      - sharded_cluster
-      - load_balancer
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: auth}
-            - {key: LOAD_BALANCER, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: start-load-balancer
-      - func: run-lb-tests
-      - func: stop-load-balancer
-  - name: test-latest-load-balanced
-    tags:
-      - latest
-      - sharded_cluster
-      - load_balancer
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: auth}
-            - {key: LOAD_BALANCER, value: 'true'}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: start-load-balancer
-      - func: run-lb-tests
-      - func: stop-load-balancer
-  - name: test-auth-kerberos
-    tags:
-      - auth
-      - kerberos
-    commands:
-      - func: install dependencies
-      - func: run kerberos tests
-  - name: test-auth-ldap
-    tags:
-      - auth
-      - ldap
-    commands:
-      - func: install dependencies
-      - func: run ldap tests
-  - name: test-auth-oidc
-    tags:
-      - latest
-      - replica_set
-      - oidc
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-oidc.json}
-      - func: install dependencies
-      - func: bootstrap oidc
-      - func: bootstrap mongo-orchestration
-      - func: setup oidc roles
-      - func: run oidc tests aws
-  - name: test-socks5
-    tags: []
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run socks5 tests
   - name: test-socks5-csfle
     tags:
       - socks5-csfle
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -1853,1122 +1728,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run socks5 tests
-  - name: test-socks5-tls
-    tags: []
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: SSL, value: ssl}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run socks5 tests
-  - name: test-zstd-compression
-    tags:
-      - latest
-      - zstd
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: COMPRESSOR, value: zstd}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run-compression-tests
-  - name: test-snappy-compression
-    tags:
-      - latest
-      - snappy
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: auth}
-            - {key: COMPRESSOR, value: snappy}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run-compression-tests
-  - name: test-tls-support-latest
-    tags:
-      - tls-support
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: test-tls-support-6.0
-    tags:
-      - tls-support
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: test-tls-support-5.0
-    tags:
-      - tls-support
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: test-tls-support-4.4
-    tags:
-      - tls-support
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: test-tls-support-4.2
-    tags:
-      - tls-support
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.2'}
-            - {key: SSL, value: ssl}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run tls tests
-  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: >-
-      aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: latest}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-6.0-auth-test-run-aws-ECS-auth-test
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: >-
-      aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: >-
-      aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '6.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-5.0-auth-test-run-aws-ECS-auth-test
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: >-
-      aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: >-
-      aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '5.0'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-4.4-auth-test-run-aws-ECS-auth-test
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: install aws-credential-providers
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with regular aws credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with assume role credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws EC2 credentials
-  - name: aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials as environment variables
-  - name: >-
-      aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test with aws credentials and session token as environment variables
-  - name: aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws ECS auth test
-  - name: >-
-      aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME unset
-  - name: aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: VERSION, value: '4.4'}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run aws auth test AssumeRoleWithWebIdentity with AWS_ROLE_SESSION_NAME set
   - name: run-unit-tests
     tags:
       - run-unit-tests
@@ -2981,82 +1740,10 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
       - func: install dependencies
       - func: run unit tests
-  - name: run-lint-checks
-    tags:
-      - run-lint-checks
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-      - func: install dependencies
-      - func: run lint checks
-  - name: check-types-typescript-next
-    tags:
-      - check-types-typescript-next
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: next}
-      - func: install dependencies
-      - func: check types
-  - name: compile-driver-typescript-current
-    tags:
-      - compile-driver-typescript-current
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: current}
-      - func: install dependencies
-      - func: compile driver
-  - name: check-types-typescript-current
-    tags:
-      - check-types-typescript-current
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: current}
-      - func: install dependencies
-      - func: check types
-  - name: check-types-typescript-4.1.6
-    tags:
-      - check-types-typescript-4.1.6
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NODE_LTS_VERSION, value: '16'}
-            - {key: NPM_VERSION, value: '9'}
-            - {key: TS_VERSION, value: 4.1.6}
-      - func: install dependencies
-      - func: check types
-  - name: download-and-merge-coverage
-    tags: []
-    commands:
-      - func: download and merge coverage
-    depends_on:
-      - name: '*'
-        variant: '*'
-        status: '*'
-        patch_optional: true
   - name: run-custom-csfle-tests-5.0-pinned-commit
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3074,6 +1761,7 @@ tasks:
   - name: run-custom-csfle-tests-5.0-master
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3091,6 +1779,7 @@ tasks:
   - name: run-custom-csfle-tests-rapid-pinned-commit
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3108,6 +1797,7 @@ tasks:
   - name: run-custom-csfle-tests-rapid-master
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3125,6 +1815,7 @@ tasks:
   - name: run-custom-csfle-tests-latest-pinned-commit
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3142,6 +1833,7 @@ tasks:
   - name: run-custom-csfle-tests-latest-master
     tags:
       - run-custom-dependency-tests
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3156,530 +1848,11 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run custom csfle tests
-  - name: test-latest-server-noauth
-    tags:
-      - latest
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-latest-replica_set-noauth
-    tags:
-      - latest
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-latest-sharded_cluster-noauth
-    tags:
-      - latest
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: latest}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-rapid-server-noauth
-    tags:
-      - rapid
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-rapid-replica_set-noauth
-    tags:
-      - rapid
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-rapid-sharded_cluster-noauth
-    tags:
-      - rapid
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-7.0-server-noauth
-    tags:
-      - '7.0'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-7.0-replica_set-noauth
-    tags:
-      - '7.0'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-7.0-sharded_cluster-noauth
-    tags:
-      - '7.0'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '7.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-6.0-server-noauth
-    tags:
-      - '6.0'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '6.0'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-6.0-replica_set-noauth
-    tags:
-      - '6.0'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '6.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-6.0-sharded_cluster-noauth
-    tags:
-      - '6.0'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '6.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-5.0-server-noauth
-    tags:
-      - '5.0'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-5.0-replica_set-noauth
-    tags:
-      - '5.0'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-5.0-sharded_cluster-noauth
-    tags:
-      - '5.0'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '5.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.4-server-noauth
-    tags:
-      - '4.4'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.4'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.4-replica_set-noauth
-    tags:
-      - '4.4'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.4'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.4-sharded_cluster-noauth
-    tags:
-      - '4.4'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.4'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.2-server-noauth
-    tags:
-      - '4.2'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.2-replica_set-noauth
-    tags:
-      - '4.2'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.2-sharded_cluster-noauth
-    tags:
-      - '4.2'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.2'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.0-server-noauth
-    tags:
-      - '4.0'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.0'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.0-replica_set-noauth
-    tags:
-      - '4.0'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.0'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-4.0-sharded_cluster-noauth
-    tags:
-      - '4.0'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '4.0'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-3.6-server-noauth
-    tags:
-      - '3.6'
-      - server
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '3.6'}
-            - {key: TOPOLOGY, value: server}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-3.6-replica_set-noauth
-    tags:
-      - '3.6'
-      - replica_set
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '3.6'}
-            - {key: TOPOLOGY, value: replica_set}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-3.6-sharded_cluster-noauth
-    tags:
-      - '3.6'
-      - sharded_cluster
-      - noauth
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: '3.6'}
-            - {key: TOPOLOGY, value: sharded_cluster}
-            - {key: AUTH, value: noauth}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: bootstrap kms servers
-      - func: run tests
-  - name: test-lambda-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: run lambda handler example tests
-  - name: test-lambda-aws-auth-example
-    tags:
-      - latest
-      - lambda
-    commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - {key: NPM_VERSION, value: '9'}
-            - {key: VERSION, value: rapid}
-            - {key: AUTH, value: auth}
-            - {key: ORCHESTRATION_FILE, value: auth-aws.json}
-            - {key: TOPOLOGY, value: server}
-      - func: install dependencies
-      - func: bootstrap mongo-orchestration
-      - func: add aws auth variables to file
-      - func: setup aws env
-      - func: run lambda handler example tests with aws auth
   - name: test-latest-csfle-mongocryptd
     tags:
       - latest
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3697,6 +1870,7 @@ tasks:
     tags:
       - rapid
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3714,6 +1888,7 @@ tasks:
     tags:
       - '7.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3731,6 +1906,7 @@ tasks:
     tags:
       - '6.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3748,6 +1924,7 @@ tasks:
     tags:
       - '5.0'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3765,6 +1942,7 @@ tasks:
     tags:
       - '4.4'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3782,6 +1960,7 @@ tasks:
     tags:
       - '4.2'
       - sharded_cluster
+      - csfle
     commands:
       - command: expansions.update
         type: setup
@@ -3795,88 +1974,6 @@ tasks:
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
       - func: run tests
-  - name: run-mongosh-browser-runtime-electron
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: browser-runtime-electron
-  - name: run-mongosh-cli-repl
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: cli-repl
-  - name: run-mongosh-connectivity-tests
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: connectivity-tests
-  - name: run-mongosh-mongosh
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: mongosh
-  - name: run-mongosh-node-runtime-worker-thread
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: node-runtime-worker-thread
-  - name: run-mongosh-service-provider-server
-    tags:
-      - run-mongosh-integration-tests
-    depends_on: compile-mongosh
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh tests for package
-        vars:
-          mongosh_package: service-provider-server
-  - name: compile-mongosh
-    tags:
-      - run-mongosh-integration-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: compile mongosh
-  - name: verify-mongosh-scopes
-    tags:
-      - run-mongosh-integration-tests
-    commands:
-      - func: install dependencies
-        vars:
-          NODE_LTS_VERSION: 16
-      - func: run mongosh package scope test
 task_groups:
   - name: serverless_task_group
     setup_group_can_fail_task: true
@@ -4066,11 +2163,6 @@ post:
 ignore:
   - '*.md'
 buildvariants:
-  - name: performance-tests
-    display_name: Performance Test
-    run_on: rhel90-dbx-perf-large
-    tasks:
-      - run-spec-benchmark-tests-node-18-server-6.0
   - name: rhel80-large-gallium
     display_name: rhel8 Node16
     run_on: rhel80-large
@@ -4106,23 +2198,9 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-auth-oidc
-      - test-socks5
       - test-socks5-csfle
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: rhel80-large-hydrogen
     display_name: rhel8 Node18
     run_on: rhel80-large
@@ -4158,23 +2236,9 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-auth-oidc
-      - test-socks5
       - test-socks5-csfle
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: rhel80-large-Node20
     display_name: rhel8 Node20
     run_on: rhel80-large
@@ -4210,23 +2274,9 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-auth-oidc
-      - test-socks5
       - test-socks5-csfle
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: rhel80-large-node-latest
     display_name: rhel8 Node Latest
     run_on: rhel80-large
@@ -4261,23 +2311,7 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-connectivity
-      - test-atlas-data-lake
-      - test-5.0-load-balanced
-      - test-6.0-load-balanced
-      - test-latest-load-balanced
-      - test-auth-kerberos
-      - test-auth-ldap
-      - test-auth-oidc
-      - test-socks5
       - test-socks5-csfle
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
   - name: windows-vsCurrent-large-gallium
     display_name: Windows Node16
     run_on: windows-vsCurrent-large
@@ -4312,15 +2346,8 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-data-lake
-      - test-socks5
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: windows-vsCurrent-large-hydrogen
     display_name: Windows Node18
     run_on: windows-vsCurrent-large
@@ -4355,15 +2382,8 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-data-lake
-      - test-socks5
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: windows-vsCurrent-large-Node20
     display_name: Windows Node20
     run_on: windows-vsCurrent-large
@@ -4398,15 +2418,8 @@ buildvariants:
       - test-3.6-server
       - test-3.6-replica_set
       - test-3.6-sharded_cluster
-      - test-latest-server-v1-api
-      - test-atlas-data-lake
-      - test-socks5
-      - test-socks5-tls
-      - test-tls-support-latest
-      - test-tls-support-6.0
-      - test-tls-support-5.0
-      - test-tls-support-4.4
-      - test-tls-support-4.2
+    tags:
+      - csfle
   - name: rhel8-node16-test-csfle-mongocryptd
     display_name: rhel 8 Node16 test mongocryptd
     run_on: rhel80-large
@@ -4439,126 +2452,16 @@ buildvariants:
       - test-5.0-csfle-mongocryptd
       - test-4.4-csfle-mongocryptd
       - test-4.2-csfle-mongocryptd
-  - name: macos-1100
-    display_name: MacOS 11 Node20
-    run_on: macos-1100
-    expansions:
-      NODE_LTS_VERSION: 20
-      CLIENT_ENCRYPTION: true
-    tasks:
-      - test-rapid-server
   - name: lint
     display_name: lint
     run_on: rhel80-large
     tasks:
       - run-unit-tests
-      - run-lint-checks
-      - check-types-typescript-next
-      - compile-driver-typescript-current
-      - check-types-typescript-current
-      - check-types-typescript-4.1.6
-  - name: generate-combined-coverage
-    display_name: Generate Combined Coverage
-    run_on: rhel80-large
-    tasks:
-      - download-and-merge-coverage
-  - name: mongosh_integration_tests
-    display_name: mongosh integration tests
-    run_on: ubuntu1804-large
-    tasks:
-      - run-mongosh-browser-runtime-electron
-      - run-mongosh-cli-repl
-      - run-mongosh-connectivity-tests
-      - run-mongosh-mongosh
-      - run-mongosh-node-runtime-worker-thread
-      - run-mongosh-service-provider-server
-      - compile-mongosh
-      - verify-mongosh-scopes
-  - name: ubuntu2004-test-mongodb-aws
-    display_name: MONGODB-AWS Auth test
-    run_on: ubuntu2004-small
-    expansions:
-      NODE_LTS_VERSION: 20
-    tasks:
-      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials
-      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-      - aws-latest-auth-test-run-aws-ECS-auth-test
-      - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-      - aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-latest-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-      - aws-latest-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-latest-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
-      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-      - aws-6.0-auth-test-run-aws-ECS-auth-test
-      - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-      - aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-6.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-      - >-
-        aws-6.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-      - aws-6.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-6.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials
-      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-      - aws-5.0-auth-test-run-aws-ECS-auth-test
-      - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-      - aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-5.0-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-      - >-
-        aws-5.0-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-      - aws-5.0-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-5.0-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials
-      - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables
-      - aws-4.4-auth-test-run-aws-ECS-auth-test
-      - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset
-      - aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set
-      - aws-4.4-auth-test-run-aws-auth-test-with-regular-aws-credentials-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-auth-test-with-assume-role-credentials-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-EC2-credentials-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-as-environment-variables-no-peer-dependencies
-      - >-
-        aws-4.4-auth-test-run-aws-auth-test-with-aws-credentials-and-session-token-as-environment-variables-no-peer-dependencies
-      - aws-4.4-auth-test-run-aws-ECS-auth-test-no-peer-dependencies
-      - >-
-        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-unset-no-peer-dependencies
-      - >-
-        aws-4.4-auth-test-run-aws-auth-test-AssumeRoleWithWebIdentity-with-AWS_ROLE_SESSION_NAME-set-no-peer-dependencies
   - name: rhel8-custom-dependency-tests
     display_name: Custom Dependency Version Test
     run_on: rhel80-large
+    tags:
+      - csfle
     tasks:
       - run-custom-csfle-tests-5.0-pinned-commit
       - run-custom-csfle-tests-5.0-master
@@ -4569,75 +2472,9 @@ buildvariants:
   - name: rhel8-test-serverless
     display_name: Serverless Test
     run_on: rhel80-large
+    tags:
+      - csfle
     expansions:
       NODE_LTS_VERSION: 16
     tasks:
       - serverless_task_group
-  - name: rhel8-test-gcp-kms
-    display_name: GCP KMS Test
-    run_on: debian11-small
-    tasks:
-      - test_gcpkms_task_group
-      - test-gcpkms-fail-task
-  - name: debian11-test-azure-kms
-    display_name: Azure KMS Test
-    run_on: debian11-small
-    batchtime: 20160
-    tasks:
-      - test_azurekms_task_group
-      - test-azurekms-fail-task
-  - name: ubuntu20-test-azure-oidc
-    display_name: Azure OIDC
-    run_on: ubuntu2004-small
-    batchtime: 20160
-    tasks:
-      - testazureoidc_task_group
-  - name: rhel8-test-atlas
-    display_name: Atlas Cluster Tests
-    run_on: rhel80-large
-    tasks:
-      - test_atlas_task_group
-  - name: rhel8-no-auth-tests
-    display_name: No Auth Tests
-    run_on: rhel80-large
-    expansions:
-      CLIENT_ENCRYPTION: true
-    tasks:
-      - test-latest-server-noauth
-      - test-latest-replica_set-noauth
-      - test-latest-sharded_cluster-noauth
-      - test-rapid-server-noauth
-      - test-rapid-replica_set-noauth
-      - test-rapid-sharded_cluster-noauth
-      - test-7.0-server-noauth
-      - test-7.0-replica_set-noauth
-      - test-7.0-sharded_cluster-noauth
-      - test-6.0-server-noauth
-      - test-6.0-replica_set-noauth
-      - test-6.0-sharded_cluster-noauth
-      - test-5.0-server-noauth
-      - test-5.0-replica_set-noauth
-      - test-5.0-sharded_cluster-noauth
-      - test-4.4-server-noauth
-      - test-4.4-replica_set-noauth
-      - test-4.4-sharded_cluster-noauth
-      - test-4.2-server-noauth
-      - test-4.2-replica_set-noauth
-      - test-4.2-sharded_cluster-noauth
-      - test-4.0-server-noauth
-      - test-4.0-replica_set-noauth
-      - test-4.0-sharded_cluster-noauth
-      - test-3.6-server-noauth
-      - test-3.6-replica_set-noauth
-      - test-3.6-sharded_cluster-noauth
-  - name: rhel8-test-lambda
-    display_name: AWS Lambda handler tests
-    run_on: rhel80-large
-    tasks:
-      - test-lambda-example
-      - test-lambda-aws-auth-example
-  - name: rhel8-test-search-indexes
-    display_name: Search Index Tests
-    run_on: rhel80-large
-    tasks:
-      - test_atlas_task_group_search_indexes
