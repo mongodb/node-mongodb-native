@@ -168,14 +168,16 @@ function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): Li
 
 
 let isDocker: boolean;
+let dockerPromise: any;
 export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocument) {
   const faasEnv = getFAASEnv();
   
   async function getContainerMetadata() {
     const containerMetadata: Record<string, any> = {};
-    if (isDocker !== false && isDocker !== true) {
+    if (isDocker == null) {
+      dockerPromise ??= fs.access('/.dockerenv');
       try {
-        await fs.access('/.dockerenv');
+        await dockerPromise;
         isDocker = true;
       } catch {
         isDocker = false;
@@ -195,8 +197,8 @@ export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocum
   }
 
   const containerMetadata = await getContainerMetadata();
-  const envMetadata = faasEnv ? faasEnv.set('container', containerMetadata) : containerMetadata;
-
+  const envMetadata = faasEnv ?? new Map();
+  envMetadata.set('container', containerMetadata);
   if (envMetadata != null) {
     if (!metadataDocument.ifItFitsItSits('env', envMetadata)) {
       for (const key of envMetadata.keys()) {
