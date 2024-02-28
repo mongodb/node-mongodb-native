@@ -39,9 +39,9 @@ interface UrlOptions {
   useMultipleMongoses?: boolean;
   /** Parameters for configuring a proxy connection */
   proxyURIParams?: ProxyParams;
-  /** Host to overwrite that is provided in url */
+  /** Host overwriting the one provided in the url. */
   host?: string;
-  /** Port to overwrite that is provided in url */
+  /** Port overwriting the one provided in the url. */
   port?: number;
 }
 
