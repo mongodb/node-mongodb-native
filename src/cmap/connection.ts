@@ -118,8 +118,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
-   /** @internal */
-   internalMetadata: LimitedSizeDocument;
+  /** @internal */
+  internalMetadata: LimitedSizeDocument;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }

@@ -25,7 +25,7 @@ import {
   type ConnectionOptions,
   CryptoConnection
 } from './connection';
-import { type ClientMetadata, addAllEnvClientMetadata } from './handshake/client_metadata';
+import { addAllEnvClientMetadata, type ClientMetadata } from './handshake/client_metadata';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,

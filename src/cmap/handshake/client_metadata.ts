@@ -98,8 +98,11 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   return metadataDocument.toObject();
 }
 
-
-export function addNonEnvClientMetadata(options: MakeClientMetadataOptions, metadataDocument: LimitedSizeDocument): LimitedSizeDocument {
+/** @internal */
+export function addNonEnvClientMetadata(
+  options: MakeClientMetadataOptions,
+  metadataDocument: LimitedSizeDocument
+): LimitedSizeDocument {
   const { appName = '' } = options;
   // Add app name first, it must be sent
   if (appName.length > 0) {
@@ -152,6 +155,7 @@ export function addNonEnvClientMetadata(options: MakeClientMetadataOptions, meta
   return metadataDocument;
 }
 
+/** @internal */
 function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): LimitedSizeDocument {
   const faasEnv = getFAASEnv();
   if (faasEnv != null) {
@@ -166,12 +170,12 @@ function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): Li
   return metadataDocument;
 }
 
-
 let isDocker: boolean;
 let dockerPromise: any;
+/** @internal */
 export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocument) {
   const faasEnv = getFAASEnv();
-  
+
   async function getContainerMetadata() {
     const containerMetadata: Record<string, any> = {};
     if (isDocker == null) {
@@ -184,7 +188,7 @@ export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocum
       }
     }
     const isKubernetes = process.env.KUBERNETES_SERVICE_HOST ? true : false;
-  
+
     if (isDocker || isKubernetes) {
       if (isDocker) {
         containerMetadata['runtime'] = 'docker';

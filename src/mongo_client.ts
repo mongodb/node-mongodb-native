@@ -899,7 +899,7 @@ export interface MongoOptions
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
 
   /**
-   * @internal 
+   * @internal
    * Metadata as BSON bytes.
    * Does not contain any environment information.
    */
