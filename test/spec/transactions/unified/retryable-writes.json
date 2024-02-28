@@ -1,0 +1,468 @@
+{
+  "description": "retryable-writes",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "increment txnNumber",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 2
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 2
+              }
+            }
+          }
+        },
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 4
+              },
+              {
+                "_id": 5
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 4,
+                  "1": 5
+                }
+              }
+            }
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 2
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "2"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "afterClusterTime": {
+                      "$$exists": true
+                    }
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "3"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "3"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "abortTransaction",
+                "databaseName": "admin"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 4
+                    },
+                    {
+                      "_id": 5
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "4"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 4
+            },
+            {
+              "_id": 5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "writes are not retried",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "failPoint",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 1
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "abortTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+description: reads
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: &data
+      - { _id: 1 }
+      - { _id: 2 }
+      - { _id: 3 }
+      - { _id: 4 }
+
+tests:
+  -
+    description: 'collection readConcern without transaction'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - collection:
+                id: &collection1 collection1
+                database: *database0
+                collectionName: *collection_name
+                collectionOptions:
+                  readConcern: { level: majority }
+      -
+        object: *collection1
+        name: find
+        arguments:
+          filter: {}
+          session: *session0
+        expectResult: *data
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                find: *collection_name
+                readConcern:
+                  level: majority
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $$exists: false }
+                startTransaction: { $$exists: false }
+                autocommit: { $$exists: false }
+              commandName: find
+              databaseName: *database_name
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: *data
+  -
+    description: find
+    operations:
+      - &startTransaction
+        object: *session0
+        name: startTransaction
+      - &find
+        object: *collection0
+        name: find
+        arguments:
+          batchSize: 3
+          filter: {}
+          session: *session0
+        expectResult: *data
+      - *find
+      - &commitTransaction
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                find: *collection_name
+                batchSize: 3
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+              commandName: find
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection_name
+                batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: getMore
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                find: *collection_name
+                batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: find
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection_name
+                batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: getMore
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: aggregate
+    operations:
+      - *startTransaction
+      - &aggregate
+        object: *collection0
+        name: aggregate
+        arguments:
+          pipeline:
+            - { $project: { _id: 1 } }
+          batchSize: 3
+          session: *session0
+        expectResult: *data
+      - *aggregate
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline:
+                  - { $project: { _id: 1 } }
+                cursor:
+                  batchSize: 3
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+              commandName: aggregate
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection_name
+                batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: getMore
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                aggregate: *collection_name
+                pipeline:
+                  - { $project: { _id: 1 } }
+                cursor:
+                  batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: aggregate
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                getMore: { $$type: [ int, long ] }
+                collection: *collection_name
+                batchSize: 3
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+              commandName: getMore
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: distinct
+    operations:
+      - *startTransaction
+      -
+        object: *collection0
+        name: distinct
+        arguments:
+          fieldName: _id
+          filter: {}
+          session: *session0
+        expectResult: [ 1, 2, 3, 4]
+      - *commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                distinct: *collection_name
+                key: _id
+                lsid: { $$sessionLsid: *session0 }
+                readConcern: { $$exists: false }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: distinct
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                readConcern: { $$exists: false }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome: *outcome

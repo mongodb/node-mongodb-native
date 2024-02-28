@@ -106,8 +106,7 @@ tests:
           - commandStartedEvent:
               command:
                 abortTransaction: 1
-                lsid:
-                  $$sessionLsid: *session0
+                lsid: { $$sessionLsid: *session0 }
               commandName: abortTransaction
               databaseName: admin
 
