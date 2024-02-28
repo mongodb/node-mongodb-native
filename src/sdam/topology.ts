@@ -4,7 +4,7 @@ import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
 import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
-import type { ClientMetadata, LimitedSizeDocument } from '../cmap/handshake/client_metadata';
+import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
   CLOSE,
@@ -158,7 +158,6 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   directConnection: boolean;
   loadBalanced: boolean;
   metadata: ClientMetadata;
-  internalMetadata: LimitedSizeDocument;
   serverMonitoringMode: ServerMonitoringMode;
   /** MongoDB server API version */
   serverApi?: ServerApi;

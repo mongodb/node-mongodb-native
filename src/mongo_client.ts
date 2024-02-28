@@ -14,7 +14,7 @@ import {
 import { AuthMechanism } from './cmap/auth/providers';
 import type { LEGAL_TCP_SOCKET_OPTIONS, LEGAL_TLS_SOCKET_OPTIONS } from './cmap/connect';
 import type { Connection } from './cmap/connection';
-import type { ClientMetadata, LimitedSizeDocument } from './cmap/handshake/client_metadata';
+import type { ClientMetadata } from './cmap/handshake/client_metadata';
 import type { CompressorName } from './cmap/wire_protocol/compression';
 import { parseOptions, resolveSRVRecord } from './connection_string';
 import { MONGO_CLIENT_EVENTS } from './constants';
@@ -897,11 +897,4 @@ export interface MongoOptions
    * TODO: NODE-5671 - remove internal flag
    */
   mongodbLogPath?: 'stderr' | 'stdout' | MongoDBLogWritable;
-
-  /**
-   * @internal
-   * Metadata as BSON bytes.
-   * Does not contain any environment information.
-   */
-  internalMetadata: LimitedSizeDocument;
 }

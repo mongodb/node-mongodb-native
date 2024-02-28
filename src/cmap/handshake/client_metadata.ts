@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, Int32 } from '../../bson';
+import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 
@@ -72,13 +72,13 @@ export class LimitedSizeDocument {
     return true;
   }
 
-  toObject(): ClientMetadata {
+  toObject(): Document {
     return BSON.deserialize(BSON.serialize(this.document), {
       promoteLongs: false,
       promoteBuffers: false,
       promoteValues: false,
       useBigInt64: false
-    }) as ClientMetadata;
+    });
   }
 }
 
@@ -92,17 +92,8 @@ type MakeClientMetadataOptions = Pick<MongoOptions, 'appName' | 'driverInfo'>;
  * 4. Truncate `platform`. -- special we do not truncate this field
  */
 export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMetadata {
-  let metadataDocument = new LimitedSizeDocument(512);
-  metadataDocument = addNonEnvClientMetadata(options, metadataDocument);
-  metadataDocument = addFAASOnlyEnvClientMetadata(metadataDocument);
-  return metadataDocument.toObject();
-}
+  const metadataDocument = new LimitedSizeDocument(512);
 
-/** @internal */
-export function addNonEnvClientMetadata(
-  options: MakeClientMetadataOptions,
-  metadataDocument: LimitedSizeDocument
-): LimitedSizeDocument {
   const { appName = '' } = options;
   // Add app name first, it must be sent
   if (appName.length > 0) {
@@ -152,11 +143,6 @@ export function addNonEnvClientMetadata(
     }
   }
 
-  return metadataDocument;
-}
-
-/** @internal */
-function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): LimitedSizeDocument {
   const faasEnv = getFAASEnv();
   if (faasEnv != null) {
     if (!metadataDocument.ifItFitsItSits('env', faasEnv)) {
@@ -167,15 +153,13 @@ function addFAASOnlyEnvClientMetadata(metadataDocument: LimitedSizeDocument): Li
       }
     }
   }
-  return metadataDocument;
+  return metadataDocument.toObject() as ClientMetadata;
 }
 
 let isDocker: boolean;
 let dockerPromise: any;
 /** @internal */
-export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocument) {
-  const faasEnv = getFAASEnv();
-
+export async function addContainerMetadata(originalMetadata: ClientMetadata) {
   async function getContainerMetadata() {
     const containerMetadata: Record<string, any> = {};
     if (isDocker == null) {
@@ -189,30 +173,33 @@ export async function addAllEnvClientMetadata(metadataDocument: LimitedSizeDocum
     }
     const isKubernetes = process.env.KUBERNETES_SERVICE_HOST ? true : false;
 
-    if (isDocker || isKubernetes) {
-      if (isDocker) {
-        containerMetadata['runtime'] = 'docker';
-      }
-      if (isKubernetes) {
-        containerMetadata['orchestrator'] = 'kubernetes';
-      }
-    }
+    if (isDocker) containerMetadata['runtime'] = 'docker';
+    if (isKubernetes) containerMetadata['orchestrator'] = 'kubernetes';
+
     return containerMetadata;
   }
 
   const containerMetadata = await getContainerMetadata();
-  const envMetadata = faasEnv ?? new Map();
-  envMetadata.set('container', containerMetadata);
-  if (envMetadata != null) {
-    if (!metadataDocument.ifItFitsItSits('env', envMetadata)) {
-      for (const key of envMetadata.keys()) {
-        envMetadata.delete(key);
-        if (envMetadata.size === 0) break;
-        if (metadataDocument.ifItFitsItSits('env', envMetadata)) break;
+  if (Object.keys(containerMetadata).length === 0) return originalMetadata;
+
+  const extendedMetadata = new LimitedSizeDocument(512);
+  const envMetadata = { ...originalMetadata?.env, container: containerMetadata };
+
+  for (const [key, val] of Object.entries(originalMetadata)) {
+    if (key !== 'env') {
+      extendedMetadata.ifItFitsItSits(key, val);
+    } else {
+      if (!extendedMetadata.ifItFitsItSits('env', envMetadata)) {
+        extendedMetadata.ifItFitsItSits('env', val);
       }
     }
   }
-  return metadataDocument;
+
+  if (!('env' in originalMetadata)) {
+    extendedMetadata.ifItFitsItSits('env', envMetadata);
+  }
+
+  return extendedMetadata.toObject();
 }
 
 /**

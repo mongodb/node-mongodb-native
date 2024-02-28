@@ -5,7 +5,7 @@ import { URLSearchParams } from 'url';
 import type { Document } from './bson';
 import { MongoCredentials } from './cmap/auth/mongo_credentials';
 import { AUTH_MECHS_AUTH_SRC_EXTERNAL, AuthMechanism } from './cmap/auth/providers';
-import { LimitedSizeDocument, addNonEnvClientMetadata, makeClientMetadata } from './cmap/handshake/client_metadata';
+import { makeClientMetadata } from './cmap/handshake/client_metadata';
 import { Compressor, type CompressorName } from './cmap/wire_protocol/compression';
 import { Encrypter } from './encrypter';
 import {
@@ -544,7 +544,6 @@ export function parseOptions(
   );
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
-  mongoOptions.internalMetadata = addNonEnvClientMetadata(mongoOptions, new LimitedSizeDocument(512));
 
   return mongoOptions;
 }

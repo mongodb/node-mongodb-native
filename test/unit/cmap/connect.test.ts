@@ -26,7 +26,7 @@ const CONNECT_DEFAULTS = {
   loadBalanced: false
 };
 
-describe('Connect Tests', function () {
+describe('Connect Tests', async function () {
   context('when PLAIN auth enabled', () => {
     const test: {
       server?: any;
@@ -185,9 +185,48 @@ describe('Connect Tests', function () {
     expect(error).to.be.instanceOf(MongoNetworkError);
   });
 
-  context('prepareHandshakeDocument', () => {
+  context('prepareHandshakeDocument', async () => {
+    context('when container is present', async () => {
+      const authContext = {
+        connection: {},
+        options: { ...CONNECT_DEFAULTS }
+      };
+
+      context('when only kubernetes is present', async () => {
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+        });
+
+        afterEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = '';
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should not have 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env).to.not.have.property('name');
+        });
+      });
+    });
+
+    context('when container nor FAAS env is not present', async () => {
+      const authContext = {
+        connection: {},
+        options: { ...CONNECT_DEFAULTS }
+      };
+
+      it(`should not have 'env' property in client`, async () => {
+        const handshakeDocument = await prepareHandshakeDocument(authContext);
+        expect(handshakeDocument.client).to.not.have.property('env');
+      });
+    });
+
     context('when serverApi.version is present', () => {
-      const options = {};
+      const options = { ...CONNECT_DEFAULTS };
       const authContext = {
         connection: { serverApi: { version: '1' } },
         options
@@ -200,7 +239,7 @@ describe('Connect Tests', function () {
     });
 
     context('when serverApi is not present', () => {
-      const options = {};
+      const options = { ...CONNECT_DEFAULTS };
       const authContext = {
         connection: {},
         options
@@ -216,7 +255,7 @@ describe('Connect Tests', function () {
       context('when loadBalanced is not set as an option', () => {
         const authContext = {
           connection: {},
-          options: {}
+          options: { ...CONNECT_DEFAULTS }
         };
 
         it('does not set loadBalanced on the handshake document', async () => {
@@ -238,7 +277,7 @@ describe('Connect Tests', function () {
       context('when loadBalanced is set to false', () => {
         const authContext = {
           connection: {},
-          options: { loadBalanced: false }
+          options: { ...CONNECT_DEFAULTS, loadBalanced: false }
         };
 
         it('does not set loadBalanced on the handshake document', async () => {
@@ -260,7 +299,7 @@ describe('Connect Tests', function () {
       context('when loadBalanced is set to true', () => {
         const authContext = {
           connection: {},
-          options: { loadBalanced: true }
+          options: { ...CONNECT_DEFAULTS, loadBalanced: true }
         };
 
         it('sets loadBalanced on the handshake document', async () => {

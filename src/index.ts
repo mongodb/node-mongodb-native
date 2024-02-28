@@ -287,11 +287,7 @@ export type {
   WaitQueueMember,
   WithConnectionCallback
 } from './cmap/connection_pool';
-export type {
-  ClientMetadata,
-  ClientMetadataOptions,
-  LimitedSizeDocument
-} from './cmap/handshake/client_metadata';
+export type { ClientMetadata, ClientMetadataOptions } from './cmap/handshake/client_metadata';
 export type { ConnectionPoolMetrics } from './cmap/metrics';
 export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_description';
 export type { CompressorName } from './cmap/wire_protocol/compression';
