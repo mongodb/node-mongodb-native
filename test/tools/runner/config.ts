@@ -39,6 +39,10 @@ interface UrlOptions {
   useMultipleMongoses?: boolean;
   /** Parameters for configuring a proxy connection */
   proxyURIParams?: ProxyParams;
+  /** Host to overwrite that is provided in url */
+  host?: string;
+  /** Port to overwrite that is provided in url */
+  port?: number;
 }
 
 function convertToConnStringMap(obj: Record<string, any>) {
@@ -173,11 +177,13 @@ export class TestConfiguration {
     const queryOptions = urlOrQueryOptions || {};
 
     // Fall back.
-    let dbHost = serverOptions.host || this.options.host;
+    let dbHost = queryOptions.host || this.options.host;
     if (dbHost.indexOf('.sock') !== -1) {
       dbHost = qs.escape(dbHost);
     }
-    const dbPort = serverOptions.port || this.options.port;
+    delete queryOptions.host;
+    const dbPort = queryOptions.port || this.options.port;
+    delete queryOptions.port;
 
     if (this.options.authMechanism && !serverOptions.authMechanism) {
       Object.assign(queryOptions, {

@@ -27,7 +27,8 @@ import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client'
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { ReadPreferenceLike } from '../read_preference';
+import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   BufferPool,
@@ -363,6 +364,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let cmd = { ...command };
 
     const readPreference = getReadPreference(options);
+
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
@@ -394,16 +396,26 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       cmd.$clusterTime = clusterTime;
     }
 
-    if (
-      isSharded(this) &&
-      !this.supportsOpMsg &&
-      readPreference &&
-      readPreference.mode !== 'primary'
+    // For mongos and load balancers in 'primary' mode, drivers MUST NOT set $readPreference.
+    if ((isSharded(this) || this.description.loadBalanced) && readPreference?.mode !== 'primary') {
+      // When sending a read operation via OP_QUERY and any $readPreference modifie is used,
+      // the query MUST be provided using the $query modifier.
+      cmd = this.supportsOpMsg
+        ? { ...cmd, $readPreference: readPreference.toJSON() }
+        : {
+            $query: cmd,
+            $readPreference: readPreference.toJSON()
+          };
+    } else if (
+      this.supportsOpMsg &&
+      this.description.type !== ServerType.Standalone &&
+      options.session?.clientOptions?.directConnection === true
     ) {
-      cmd = {
-        $query: cmd,
-        $readPreference: readPreference.toJSON()
-      };
+      // For standalone, drivers MUST NOT set $readPreference.
+      cmd.$readPreference =
+        readPreference?.mode === 'primary'
+          ? ReadPreference.primaryPreferred.toJSON()
+          : readPreference.toJSON();
     }
 
     const commandOptions = {
@@ -412,8 +424,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       checkKeys: false,
       // This value is not overridable
       secondaryOk: readPreference.secondaryOk(),
-      ...options,
-      readPreference // ensure we pass in ReadPreference instance
+      ...options
     };
 
     const message = this.supportsOpMsg

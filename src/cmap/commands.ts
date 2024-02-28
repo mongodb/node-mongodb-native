@@ -51,7 +51,6 @@ export interface OpQueryOptions extends CommandOptions {
   requestId?: number;
   moreToCome?: boolean;
   exhaustAllowed?: boolean;
-  readPreference?: ReadPreference;
 }
 
 /**************************************************************
@@ -77,7 +76,6 @@ export class OpQueryRequest {
   awaitData: boolean;
   exhaust: boolean;
   partial: boolean;
-  documentsReturnedIn?: string;
 
   constructor(public databaseName: string, public query: Document, options: OpQueryOptions) {
     // Basic options needed to be passed in
@@ -502,10 +500,6 @@ export class OpMsgRequest {
 
     // Basic options
     this.command.$db = databaseName;
-
-    if (options.readPreference && options.readPreference.mode !== ReadPreference.PRIMARY) {
-      this.command.$readPreference = options.readPreference.toJSON();
-    }
 
     // Ensure empty options
     this.options = options ?? {};
