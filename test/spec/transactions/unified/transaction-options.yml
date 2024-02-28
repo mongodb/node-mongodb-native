@@ -1,0 +1,1116 @@
+description: transaction-options
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'no transaction options set'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+      # Now test abort
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: &outcome
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'transaction options inherited from client'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readConcernLevel: local
+                  w: 1
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: local
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+                maxTimeMS: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: local
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+                maxTimeMS: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'transaction options inherited from defaultTransactionOptions'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - session:
+                id: &session1 session1
+                client: *client0
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readConcern: { level: majority }
+                    writeConcern: { w: 1 }
+                    maxCommitTimeMS: 60000
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'startTransaction options override defaults'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readConcernLevel: local
+                  w: 1
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readConcern: { level: snapshot }
+                    writeConcern: { w: 1 }
+                    maxCommitTimeMS: 30000
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readConcern:
+            level: majority
+          writeConcern:
+            w: majority
+          maxCommitTimeMS: 60000
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readConcern:
+            level: majority
+          writeConcern:
+            w: majority
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: majority
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: majority
+                maxTimeMS: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'defaultTransactionOptions override client options'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readConcernLevel: local
+                  w: 1
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readConcern: { level: majority }
+                    writeConcern: { w: majority }
+                    maxCommitTimeMS: 60000
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: majority
+                maxTimeMS: 60000
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: majority
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+                maxTimeMS: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: majority
+                maxTimeMS: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'readConcern local in defaultTransactionOptions'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  w: 1
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readConcern: { level: local }
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: local
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: local
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern:
+                  w: 1
+              commandName: abortTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'client writeConcern ignored for bulk'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  w: majority
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: 1
+      -
+        object: *collection1
+        name: bulkWrite
+        arguments:
+          requests:
+            -
+              insertOne:
+                document: { _id: 1 }
+          session: *session1
+        expectResult:
+          deletedCount: 0
+          insertedCount: 1
+          insertedIds:
+            $$unsetOrMatches:
+              '0': 1
+          matchedCount: 0
+          modifiedCount: 0
+          upsertedCount: 0
+          upsertedIds: {  }
+      -
+        object: *session1
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                # No writeConcern
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: 1
+              commandName: commitTransaction
+              databaseName: admin
+    outcome: *outcome
+  -
+    description: 'readPreference inherited from client'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readPreference: secondary
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection1
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectError:
+          errorContains: 'read preference in a transaction must be primary'
+      -
+        object: *session1
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'readPreference inherited from defaultTransactionOptions'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readPreference: primary
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readPreference: { mode: secondary }
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection1
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectError:
+          errorContains: 'read preference in a transaction must be primary'
+      -
+        object: *session1
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'startTransaction overrides readPreference'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions:
+                  readPreference: primary
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: *collection_name
+            - session:
+                id: &session1 session1
+                client: *client1
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readPreference: { mode: primary }
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readPreference:
+            mode: secondary
+      -
+        object: *collection1
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection1
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectError:
+          errorContains: 'read preference in a transaction must be primary'
+      -
+        object: *session1
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }

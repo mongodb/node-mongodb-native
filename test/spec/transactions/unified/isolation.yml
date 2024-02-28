@@ -1,0 +1,174 @@
+# Test snapshot isolation.
+# This test doesn't check contents of command-started events.
+description: isolation
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+  -
+    session:
+      id: &session1 session1
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'one transaction'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session0
+          filter: { _id: 1 }
+        expectResult:
+          - { _id: 1 }
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectResult: []
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: 1 }
+        expectResult: []
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectResult:
+          - { _id: 1 }
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: 1 }
+        expectResult:
+          - { _id: 1 }
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'two transactions'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *session1
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session0
+          filter: { _id: 1 }
+        expectResult:
+          - { _id: 1 }
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectResult: []
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: 1 }
+        expectResult: []
+      -
+        object: *session0
+        name: commitTransaction
+      # Snapshot isolation in session1, not read-committed.
+      -
+        object: *collection0
+        name: find
+        arguments:
+          session: *session1
+          filter: { _id: 1 }
+        expectResult: []
+      -
+        object: *collection0
+        name: find
+        arguments:
+          filter: { _id: 1 }
+        expectResult:
+          - { _id: 1 }
+      -
+        object: *session1
+        name: commitTransaction
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }

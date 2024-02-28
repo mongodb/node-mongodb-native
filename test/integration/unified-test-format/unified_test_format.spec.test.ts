@@ -24,6 +24,20 @@ const filter: TestFilter = ({ description }) => {
   }
 
   if (
+    [
+      'withTransaction and no transaction options set',
+      'withTransaction inherits transaction options from client',
+      'withTransaction inherits transaction options from defaultTransactionOptions',
+      'withTransaction explicit transaction options',
+      'remain pinned after non-transient Interrupted error on insertOne',
+      'unpin after transient error within a transaction',
+      'remain pinned after non-transient Interrupted error on insertOne'
+    ].includes(description)
+  ) {
+    return 'TODO(DRIVERS-2816): fix migration conflict in transaction tests';
+  }
+
+  if (
     process.env.AUTH === 'auth' &&
     [
       'FindOneAndUpdate is committed on first attempt',
