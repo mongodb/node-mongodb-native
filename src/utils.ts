@@ -3,6 +3,7 @@ import type { SrvRecord } from 'dns';
 import * as http from 'http';
 import * as url from 'url';
 import { URL } from 'url';
+import { promisify } from 'util';
 
 import { type Document, ObjectId, resolveBSONOptions } from './bson';
 import type { Connection } from './cmap/connection';
@@ -1317,3 +1318,5 @@ export async function request(
     req.end();
   });
 }
+
+export const randomBytes = promisify(crypto.randomBytes);

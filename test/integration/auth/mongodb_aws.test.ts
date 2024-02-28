@@ -67,6 +67,20 @@ describe('MONGODB-AWS', function () {
       .that.equals('');
   });
 
+  it('should store a MongoDBAWS provider instance per client', async function () {
+    client = this.configuration.newClient(process.env.MONGODB_URI);
+
+    await client
+      .db('aws')
+      .collection('aws_test')
+      .estimatedDocumentCount()
+      .catch(error => error);
+
+    expect(client).to.have.nested.property('s.authProviders');
+    const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
+    expect(provider).to.be.instanceOf(MongoDBAWS);
+  });
+
   describe('EC2 with missing credentials', () => {
     let client;
 
@@ -190,6 +204,7 @@ describe('MONGODB-AWS', function () {
         let storedEnv;
         let calledArguments;
         let shouldSkip = false;
+        let numberOfFromNodeProviderChainCalls;
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
@@ -204,8 +219,6 @@ describe('MONGODB-AWS', function () {
             return this.skip();
           }
 
-          client = this.configuration.newClient(process.env.MONGODB_URI);
-
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
             delete process.env.AWS_STS_REGIONAL_ENDPOINTS;
@@ -218,13 +231,17 @@ describe('MONGODB-AWS', function () {
             process.env.AWS_REGION = test.env.AWS_REGION;
           }
 
-          calledArguments = [];
+          numberOfFromNodeProviderChainCalls = 0;
+
           MongoDBAWS.credentialProvider = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
+              numberOfFromNodeProviderChainCalls += 1;
               return credentialProvider.fromNodeProviderChain(...args);
             }
           };
+
+          client = this.configuration.newClient(process.env.MONGODB_URI);
         });
 
         afterEach(() => {
@@ -252,6 +269,18 @@ describe('MONGODB-AWS', function () {
           expect(result).to.be.a('number');
 
           expect(calledArguments).to.deep.equal(test.calledWith);
+        });
+
+        it('fromNodeProviderChain called once', async function () {
+          await client.close();
+          await client.connect();
+          await client
+            .db('aws')
+            .collection('aws_test')
+            .estimatedDocumentCount()
+            .catch(error => error);
+
+          expect(numberOfFromNodeProviderChainCalls).to.be.eql(1);
         });
       });
     }

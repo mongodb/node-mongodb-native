@@ -15,6 +15,7 @@ import {
   type HostAddress,
   isHello,
   type MessageStream,
+  MongoClientAuthProviders,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoRuntimeError,
@@ -31,7 +32,8 @@ const connectionOptionsDefaults = {
   monitorCommands: false,
   tls: false,
   metadata: undefined,
-  loadBalanced: false
+  loadBalanced: false,
+  authProviders: new MongoClientAuthProviders()
 };
 
 /**
@@ -446,7 +448,8 @@ describe('new Connection()', function () {
         generation: 1,
         monitorCommands: false,
         metadata: {} as ClientMetadata,
-        loadBalanced: false
+        loadBalanced: false,
+        authProviders: new MongoClientAuthProviders()
       };
       let server;
       let connectOptions;

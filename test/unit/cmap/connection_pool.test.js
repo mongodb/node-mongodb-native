@@ -10,6 +10,7 @@ const { ns, isHello } = require('../../mongodb');
 const { LEGACY_HELLO_COMMAND } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
+const { MongoClientAuthProviders } = require('../../mongodb');
 
 describe('Connection Pool', function () {
   let mockMongod;
@@ -18,6 +19,9 @@ describe('Connection Pool', function () {
       client: {
         mongoLogger: {
           debug: () => null
+        },
+        s: {
+          authProviders: new MongoClientAuthProviders()
         }
       }
     }

@@ -17,14 +17,8 @@ import {
   needsRetryableWriteLabel
 } from '../error';
 import { type Callback, HostAddress, ns } from '../utils';
-import { AuthContext, type AuthProvider } from './auth/auth_provider';
-import { GSSAPI } from './auth/gssapi';
-import { MongoCR } from './auth/mongocr';
-import { MongoDBAWS } from './auth/mongodb_aws';
-import { Plain } from './auth/plain';
+import { AuthContext } from './auth/auth_provider';
 import { AuthMechanism } from './auth/providers';
-import { ScramSHA1, ScramSHA256 } from './auth/scram';
-import { X509 } from './auth/x509';
 import {
   type CommandOptions,
   Connection,
@@ -38,17 +32,6 @@ import {
   MIN_SUPPORTED_SERVER_VERSION,
   MIN_SUPPORTED_WIRE_VERSION
 } from './wire_protocol/constants';
-
-/** @internal */
-export const AUTH_PROVIDERS = new Map<AuthMechanism | string, AuthProvider>([
-  [AuthMechanism.MONGODB_AWS, new MongoDBAWS()],
-  [AuthMechanism.MONGODB_CR, new MongoCR()],
-  [AuthMechanism.MONGODB_GSSAPI, new GSSAPI()],
-  [AuthMechanism.MONGODB_PLAIN, new Plain()],
-  [AuthMechanism.MONGODB_SCRAM_SHA1, new ScramSHA1()],
-  [AuthMechanism.MONGODB_SCRAM_SHA256, new ScramSHA256()],
-  [AuthMechanism.MONGODB_X509, new X509()]
-]);
 
 /** @public */
 export type Stream = Socket | TLSSocket;
@@ -110,7 +93,7 @@ async function performInitialHandshake(
   if (credentials) {
     if (
       !(credentials.mechanism === AuthMechanism.MONGODB_DEFAULT) &&
-      !AUTH_PROVIDERS.get(credentials.mechanism)
+      !options.authProviders.getOrCreateProvider(credentials.mechanism)
     ) {
       throw new MongoInvalidArgumentError(`AuthMechanism '${credentials.mechanism}' not supported`);
     }
@@ -165,7 +148,7 @@ async function performInitialHandshake(
     authContext.response = response;
 
     const resolvedCredentials = credentials.resolveAuthMechanism(response);
-    const provider = AUTH_PROVIDERS.get(resolvedCredentials.mechanism);
+    const provider = options.authProviders.getOrCreateProvider(resolvedCredentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(
         `No AuthProvider for ${resolvedCredentials.mechanism} defined.`
@@ -186,6 +169,10 @@ async function performInitialHandshake(
   }
 }
 
+/**
+ * HandshakeDocument used during authentication.
+ * @internal
+ */
 export interface HandshakeDocument extends Document {
   /**
    * @deprecated Use hello instead
@@ -227,7 +214,9 @@ export async function prepareHandshakeDocument(
     if (credentials.mechanism === AuthMechanism.MONGODB_DEFAULT && credentials.username) {
       handshakeDoc.saslSupportedMechs = `${credentials.source}.${credentials.username}`;
 
-      const provider = AUTH_PROVIDERS.get(AuthMechanism.MONGODB_SCRAM_SHA256);
+      const provider = authContext.options.authProviders.getOrCreateProvider(
+        AuthMechanism.MONGODB_SCRAM_SHA256
+      );
       if (!provider) {
         // This auth mechanism is always present.
         throw new MongoInvalidArgumentError(
@@ -236,7 +225,7 @@ export async function prepareHandshakeDocument(
       }
       return provider.prepare(handshakeDoc, authContext);
     }
-    const provider = AUTH_PROVIDERS.get(credentials.mechanism);
+    const provider = authContext.options.authProviders.getOrCreateProvider(credentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }

@@ -23,6 +23,7 @@ import {
   MongoWriteConcernError
 } from '../error';
 import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client';
+import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
@@ -120,6 +121,8 @@ export interface ConnectionOptions
   /** @internal */
   connectionType?: typeof Connection;
   credentials?: MongoCredentials;
+  /** @internal */
+  authProviders: MongoClientAuthProviders;
   connectTimeoutMS?: number;
   tls: boolean;
   /** @deprecated - Will not be able to turn off in the future. */

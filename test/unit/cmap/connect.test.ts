@@ -10,6 +10,7 @@ import {
   HostAddress,
   isHello,
   LEGACY_HELLO_COMMAND,
+  MongoClientAuthProviders,
   MongoCredentials,
   MongoNetworkError,
   prepareHandshakeDocument
@@ -45,7 +46,8 @@ describe('Connect Tests', function () {
           source: 'admin',
           mechanism: 'PLAIN',
           mechanismProperties: {}
-        })
+        }),
+        authProviders: new MongoClientAuthProviders()
       };
     });
 
@@ -207,7 +209,9 @@ describe('Connect Tests', function () {
 
   context('prepareHandshakeDocument', () => {
     context('when serverApi.version is present', () => {
-      const options = {};
+      const options = {
+        authProviders: new MongoClientAuthProviders()
+      };
       const authContext = {
         connection: { serverApi: { version: '1' } },
         options
@@ -222,7 +226,9 @@ describe('Connect Tests', function () {
     context('when serverApi is not present', () => {
       const options = {};
       const authContext = {
-        connection: {},
+        connection: {
+          authProviders: new MongoClientAuthProviders()
+        },
         options
       };
 
@@ -235,7 +241,9 @@ describe('Connect Tests', function () {
     context('loadBalanced option', () => {
       context('when loadBalanced is not set as an option', () => {
         it('does not set loadBalanced on the handshake document', async () => {
-          const options = {};
+          const options = {
+            authProviders: new MongoClientAuthProviders()
+          };
           const authContext = {
             connection: {},
             options
@@ -248,7 +256,8 @@ describe('Connect Tests', function () {
       context('when loadBalanced is set to false', () => {
         it('does not set loadBalanced on the handshake document', async () => {
           const options = {
-            loadBalanced: false
+            loadBalanced: false,
+            authProviders: new MongoClientAuthProviders()
           };
           const authContext = {
             connection: {},
@@ -262,7 +271,8 @@ describe('Connect Tests', function () {
       context('when loadBalanced is set to true', () => {
         it('does set loadBalanced on the handshake document', async () => {
           const options = {
-            loadBalanced: true
+            loadBalanced: true,
+            authProviders: new MongoClientAuthProviders()
           };
           const authContext = {
             connection: {},

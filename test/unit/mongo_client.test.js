@@ -8,12 +8,17 @@ const { ReadConcern } = require('../mongodb');
 const { WriteConcern } = require('../mongodb');
 const { ReadPreference } = require('../mongodb');
 const { MongoCredentials } = require('../mongodb');
-const { MongoClient, MongoParseError, ServerApiVersion } = require('../mongodb');
+const {
+  MongoClient,
+  MongoParseError,
+  ServerApiVersion,
+  MongoInvalidArgumentError
+} = require('../mongodb');
 const { MongoLogger } = require('../mongodb');
 const sinon = require('sinon');
 const { Writable } = require('stream');
 
-describe('MongoOptions', function () {
+describe('MongoClient', function () {
   it('MongoClient should always freeze public options', function () {
     const client = new MongoClient('mongodb://localhost:27017');
     expect(client.options).to.be.frozen;
@@ -874,6 +879,19 @@ describe('MongoOptions', function () {
     it('assigns the parsed options to the mongoLoggerOptions option', function () {
       const client = new MongoClient('mongodb://localhost:27017');
       expect(client.options).to.have.property('mongoLoggerOptions').to.equal(expectedLoggingObject);
+    });
+  });
+
+  context('getAuthProvider', function () {
+    it('throws MongoInvalidArgumentError if provided authMechanism is not supported', function () {
+      const client = new MongoClient('mongodb://localhost:27017');
+      try {
+        client.s.authProviders.getOrCreateProvider('NOT_SUPPORTED');
+      } catch (error) {
+        expect(error).to.be.an.instanceof(MongoInvalidArgumentError);
+        return;
+      }
+      expect.fail('missed exception');
     });
   });
 });
