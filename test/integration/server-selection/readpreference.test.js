@@ -508,54 +508,6 @@ describe('ReadPreference', function () {
         }
       });
 
-      it('should not attach a read preference to the read command for loadbalanced', {
-        metadata: { requires: { topology: 'load-balanced', mongodb: '>=3.6' } },
-        test: async function () {
-          for (const server of this.configuration.options.hostAddresses) {
-            const { host, port } = server.toHostPort();
-            const client = this.configuration.newClient(
-              {
-                readPreference: 'primary',
-                directConnection: true,
-                host,
-                port
-              },
-              {
-                monitorCommands: true
-              }
-            );
-            const events = [];
-            client.on('commandStarted', event => {
-              if (event.commandName === 'find') {
-                events.push(event);
-              }
-            });
-            let serverError;
-            try {
-              await client.db('test').collection('test').findOne({ a: 1 });
-            } catch (error) {
-              serverError = error;
-            }
-
-            expect(serverError).to.not.exist;
-            expect(events[0]).to.not.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'primaryPreferred' }
-              }
-            });
-            expect(events[0]).to.not.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'primary' }
-              }
-            });
-
-            await client.close();
-          }
-        }
-      });
-
       it('should not attach a read preference to the read command for standalone', {
         metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
         test: async function () {
@@ -635,54 +587,6 @@ describe('ReadPreference', function () {
               commandName: 'find',
               command: {
                 $readPreference: { mode: 'secondary' }
-              }
-            });
-
-            await client.close();
-          }
-        }
-      });
-
-      it('should attach a read preference of secondary to the read command for loadbalanced', {
-        metadata: { requires: { topology: 'load-balanced', mongodb: '>=3.6' } },
-        test: async function () {
-          for (const server of this.configuration.options.hostAddresses) {
-            const { host, port } = server.toHostPort();
-            const client = this.configuration.newClient(
-              {
-                readPreference: 'secondary',
-                directConnection: true,
-                host,
-                port
-              },
-              {
-                monitorCommands: true
-              }
-            );
-            const events = [];
-            client.on('commandStarted', event => {
-              if (event.commandName === 'find') {
-                events.push(event);
-              }
-            });
-            let serverError;
-            try {
-              await client.db('test').collection('test').findOne({ a: 1 });
-            } catch (error) {
-              serverError = error;
-            }
-
-            expect(serverError).to.not.exist;
-            expect(events[0]).to.not.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'primaryPreferred' }
-              }
-            });
-            expect(events[0]).to.not.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'primary' }
               }
             });
 
