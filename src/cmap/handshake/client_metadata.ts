@@ -157,46 +157,55 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
 }
 
 let isDocker: boolean;
-let dockerPromise: any;
+let dockerPromise: Promise<void>;
 /** @internal */
-export async function addContainerMetadata(originalMetadata: ClientMetadata) {
-  async function getContainerMetadata() {
-    const containerMetadata: Record<string, any> = {};
-    if (isDocker == null) {
-      dockerPromise ??= fs.access('/.dockerenv');
-      try {
-        await dockerPromise;
-        isDocker = true;
-      } catch {
-        isDocker = false;
-      }
+async function getContainerMetadata() {
+  const containerMetadata: Record<string, any> = {};
+  if (isDocker == null) {
+    dockerPromise ??= fs.access('/.dockerenv');
+    try {
+      await dockerPromise;
+      isDocker = true;
+    } catch {
+      isDocker = false;
     }
-    const isKubernetes = process.env.KUBERNETES_SERVICE_HOST ? true : false;
-
-    if (isDocker) containerMetadata['runtime'] = 'docker';
-    if (isKubernetes) containerMetadata['orchestrator'] = 'kubernetes';
-
-    return containerMetadata;
   }
 
+  const { KUBERNETES_SERVICE_HOST = '' } = process.env;
+  const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
+
+  if (isDocker) containerMetadata.runtime = 'docker';
+  if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
+
+  return containerMetadata;
+}
+
+/**
+ * @internal
+ * Re-add each metadata value.
+ * Attempt to add new env container metadata, but keep old data if it does not fit.
+ */
+export async function addContainerMetadata(originalMetadata: ClientMetadata) {
   const containerMetadata = await getContainerMetadata();
   if (Object.keys(containerMetadata).length === 0) return originalMetadata;
 
   const extendedMetadata = new LimitedSizeDocument(512);
-  const envMetadata = { ...originalMetadata?.env, container: containerMetadata };
+
+  const extendedEnvMetadata = { ...originalMetadata?.env, container: containerMetadata };
 
   for (const [key, val] of Object.entries(originalMetadata)) {
     if (key !== 'env') {
       extendedMetadata.ifItFitsItSits(key, val);
     } else {
-      if (!extendedMetadata.ifItFitsItSits('env', envMetadata)) {
+      if (!extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata)) {
+        // add in old data if newer / extended metadata does not fit
         extendedMetadata.ifItFitsItSits('env', val);
       }
     }
   }
 
   if (!('env' in originalMetadata)) {
-    extendedMetadata.ifItFitsItSits('env', envMetadata);
+    extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata);
   }
 
   return extendedMetadata.toObject();

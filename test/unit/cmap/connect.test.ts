@@ -26,7 +26,7 @@ const CONNECT_DEFAULTS = {
   loadBalanced: false
 };
 
-describe('Connect Tests', async function () {
+describe('Connect Tests', function () {
   context('when PLAIN auth enabled', () => {
     const test: {
       server?: any;
@@ -185,20 +185,22 @@ describe('Connect Tests', async function () {
     expect(error).to.be.instanceOf(MongoNetworkError);
   });
 
-  context('prepareHandshakeDocument', async () => {
-    context('when container is present', async () => {
-      const authContext = {
-        connection: {},
-        options: { ...CONNECT_DEFAULTS }
-      };
+  describe('prepareHandshakeDocument', () => {
+    describe('client environment (containers and FAAS)', () => {
+      const cachedEnv = process.env;
 
-      context('when only kubernetes is present', async () => {
+      context('when only kubernetes is present', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS }
+        };
+
         beforeEach(() => {
           process.env.KUBERNETES_SERVICE_HOST = 'I exist';
         });
 
         afterEach(() => {
-          process.env.KUBERNETES_SERVICE_HOST = '';
+          process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
         });
 
         it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
@@ -211,17 +213,67 @@ describe('Connect Tests', async function () {
           expect(handshakeDocument.client.env).to.not.have.property('name');
         });
       });
-    });
 
-    context('when container nor FAAS env is not present', async () => {
-      const authContext = {
-        connection: {},
-        options: { ...CONNECT_DEFAULTS }
-      };
+      context('when kubernetes and FAAS are both present', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS, metadata: { env: { name: 'aws.lambda' } } }
+        };
 
-      it(`should not have 'env' property in client`, async () => {
-        const handshakeDocument = await prepareHandshakeDocument(authContext);
-        expect(handshakeDocument.client).to.not.have.property('env');
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+        });
+
+        afterEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should still have properly set 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+        });
+      });
+
+      context('when container nor FAAS env is not present (empty string case)', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS }
+        };
+
+        context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
+          beforeEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = '';
+          });
+
+          afterEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+
+        context('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
+          beforeEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = '';
+          });
+
+          afterEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
       });
     });
 
