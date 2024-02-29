@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ReadPreference, Topology } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
 
-describe.only('ReadPreference', function () {
+describe('ReadPreference', function () {
   let client;
   let events;
 
