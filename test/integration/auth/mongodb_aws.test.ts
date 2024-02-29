@@ -5,7 +5,13 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, type MongoClient, MongoDBAWS, MongoServerError } from '../../mongodb';
+import {
+  MongoAWSError,
+  type MongoClient,
+  MongoDBAWS,
+  MongoMissingCredentialsError,
+  MongoServerError
+} from '../../mongodb';
 
 function awsSdk() {
   try {
