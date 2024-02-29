@@ -121,6 +121,7 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  dierctConnection?: boolean;
 }
 
 /** @internal */
@@ -277,6 +278,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this.description.loadBalanced;
   }
 
+  public get directConnection(): boolean {
+    return this.description.directConnection;
+  }
+
   public get idleTime(): number {
     return calculateDurationInMs(this.lastUseTime);
   }
@@ -361,10 +366,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   private prepareCommand(db: string, command: Document, options: CommandOptions) {
-    let cmd = { ...command };
-
+    const cmd = { ...command };
     const readPreference = getReadPreference(options);
-
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
@@ -391,31 +394,33 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       throw new MongoCompatibilityError('Current topology does not support sessions');
     }
 
-    // if we have a known cluster time, gossip it
+    // if we have a known cluster time, gossip it.
     if (clusterTime) {
       cmd.$clusterTime = clusterTime;
     }
 
-    // For mongos and load balancers in 'primary' mode, drivers MUST NOT set $readPreference.
-    if ((isSharded(this) || this.description.loadBalanced) && readPreference?.mode !== 'primary') {
-      // When sending a read operation via OP_QUERY and any $readPreference modifie is used,
-      // the query MUST be provided using the $query modifier.
-      cmd = this.supportsOpMsg
-        ? { ...cmd, $readPreference: readPreference.toJSON() }
-        : {
-            $query: cmd,
-            $readPreference: readPreference.toJSON()
-          };
-    } else if (
-      this.supportsOpMsg &&
-      this.description.type !== ServerType.Standalone &&
-      options.session?.clientOptions?.directConnection === true
-    ) {
-      // For standalone, drivers MUST NOT set $readPreference.
-      cmd.$readPreference =
-        readPreference?.mode === 'primary'
-          ? ReadPreference.primaryPreferred.toJSON()
-          : readPreference.toJSON();
+    // Driver does not use legacy hello for anything other than the first handshake
+    // (we do not support servers that only speak OP_QUERY),
+    // therefore $readPreference is not relevant for servers that do not support OP_MSG.
+
+    // For standalone, drivers MUST NOT set $readPreference.
+    if (this.supportsOpMsg && this.description.type !== ServerType.Standalone) {
+      // For mongos and load balancers with a direct connection and 'primary' mode,
+      // drivers MUST NOT set $readPreference.
+      if (isSharded(this) || this.description.loadBalanced) {
+        if (this.description.directConnection !== true || readPreference?.mode !== 'primary') {
+          cmd.$readPreference = readPreference.toJSON();
+        }
+      } else {
+        // For all other types with a direct connection, if the read preference is 'primary'
+        // (driver sets 'primary' as default if no read preference is configured),
+        // the $readPreference MUST be set to 'primaryPreferred'
+        // to ensure that any server type can handle the request.
+        cmd.$readPreference =
+          this.description.directConnection !== true || readPreference?.mode !== 'primary'
+            ? readPreference.toJSON()
+            : ReadPreference.primaryPreferred.toJSON();
+      }
     }
 
     const commandOptions = {

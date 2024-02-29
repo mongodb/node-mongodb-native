@@ -100,6 +100,8 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
   waitQueueTimeoutMS: number;
   /** If we are in load balancer mode. */
   loadBalanced: boolean;
+  /** If topology contains only a single server of any type. */
+  directConnection: boolean;
   /** @internal */
   minPoolSizeCheckFrequencyMS?: number;
 }
@@ -634,7 +636,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders
+      authProviders: this[kServer].topology.client.s.authProviders,
+      dierctConnection: this[kServer].topology.client.options.directConnection === true
     };
 
     this[kPending]++;
