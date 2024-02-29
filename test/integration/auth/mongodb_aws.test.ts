@@ -81,6 +81,35 @@ describe('MONGODB-AWS', function () {
     expect(provider).to.be.instanceOf(MongoDBAWS);
   });
 
+  describe('with missing aws token', () => {
+    let awsSessionToken;
+
+    beforeEach(function () {
+      awsSessionToken = process.env.AWS_SESSION_TOKEN;
+      delete process.env.AWS_SESSION_TOKEN;
+    });
+
+    afterEach(async () => {
+      process.env.AWS_SESSION_TOKEN = awsSessionToken;
+    });
+
+    it('should not throw an exception when aws token is missing', async function () {
+      client = this.configuration.newClient(process.env.MONGODB_URI);
+
+      const result = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(error => error);
+
+      // We check only for the MongoMissingCredentialsError
+      // and do check for the MongoServerError as the error or numeric result
+      // that can be returned depending on different types of environments
+      // getting credentials from different sources.
+      expect(result).to.not.be.instanceOf(MongoMissingCredentialsError);
+    });
+  });
+
   describe('EC2 with missing credentials', () => {
     let client;
 
