@@ -65,23 +65,119 @@
 <section class="tsd-panel tsd-member tsd-is-external"><a id="constructor" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>constructor</span><a href="#constructor" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><g stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" id="icon-anchor"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5"></path><path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5"></path></g></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
-<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
 <li class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>Create an ObjectId type</p>
+<div class="tsd-comment tsd-typography"><p>Create ObjectId from a number.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">inputId</span>: <span class="tsd-signature-type">number</span></h5>
+<div class="tsd-comment tsd-typography"><p>A number.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography">
+<h4>Deprecated</h4><p>Instead, use <code>static createFromTime()</code> to set a numeric value for the new ObjectId.</p>
+</div><aside class="tsd-sources">
+<p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#constructor">constructor</a></p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1002</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-1"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create ObjectId from a 24 character hex string.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">inputId</span>: <span class="tsd-signature-type">string</span></h5>
+<div class="tsd-comment tsd-typography"><p>A 24 character hex string.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Overrides BSONValue.constructor</p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1008</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-2"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create ObjectId from the BSON ObjectId type.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">inputId</span>: <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h5>
+<div class="tsd-comment tsd-typography"><p>The BSON ObjectId type.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Overrides BSONValue.constructor</p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1014</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-3"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create ObjectId from the object type that has the toHexString method.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">inputId</span>: <a href="../interfaces/BSON.ObjectIdLike.html" class="tsd-signature-type tsd-kind-interface">ObjectIdLike</a></h5>
+<div class="tsd-comment tsd-typography"><p>The ObjectIdLike type.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Overrides BSONValue.constructor</p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1020</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-4"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-4" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Create ObjectId from a 12 byte binary Buffer.</p>
+</div>
+<div class="tsd-parameters">
+<h4 class="tsd-parameters-title">Parameters</h4>
+<ul class="tsd-parameter-list">
+<li>
+<h5><span class="tsd-kind-parameter">inputId</span>: <span class="tsd-signature-type ">Uint8Array</span></h5>
+<div class="tsd-comment tsd-typography"><p>A 12 byte binary Buffer.</p>
+</div>
+<div class="tsd-comment tsd-typography"></div></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Overrides BSONValue.constructor</p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1026</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-5"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-5" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>To generate a new ObjectId, use ObjectId() with no argument.</p>
+</div>
+<h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
+<div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
+<p>Overrides BSONValue.constructor</p>
+<ul>
+<li>Defined in node_modules/bson/bson.d.ts:1028</li></ul></aside></li>
+<li class="tsd-signature tsd-anchor-link" id="constructor.new_ObjectId-6"><span class="tsd-kind-constructor-signature">new <wbr/>Object<wbr/>Id</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">inputId</span><span class="tsd-signature-symbol">?</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><a href="#constructor.new_ObjectId-6" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></li>
+<li class="tsd-description">
+<div class="tsd-comment tsd-typography"><p>Implementation overload.</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
 <li>
 <h5><code class="tsd-tag ts-flagOptional">Optional</code> <span class="tsd-kind-parameter">inputId</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type ">Uint8Array</span><span class="tsd-signature-symbol"> | </span><a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a><span class="tsd-signature-symbol"> | </span><a href="../interfaces/BSON.ObjectIdLike.html" class="tsd-signature-type tsd-kind-interface">ObjectIdLike</a></h5>
-<div class="tsd-comment tsd-typography"><p>Can be a 24 character hex string, 12 byte binary Buffer, or a number.</p>
+<div class="tsd-comment tsd-typography"><p>All input types that are used in the constructor implementation.</p>
 </div>
 <div class="tsd-comment tsd-typography"></div></li></ul></div>
 <h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
-<p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#constructor">constructor</a></p>
+<p>Overrides BSONValue.constructor</p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1001</li></ul></aside></li></ul></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:1034</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Properties</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="cacheHexString" class="tsd-anchor"></a>
@@ -111,7 +207,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Uint8Array</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1006</li></ul></aside></li></ul></section></section>
+<li>Defined in node_modules/bson/bson.d.ts:1039</li></ul></aside></li></ul></section></section>
 <section class="tsd-panel-group tsd-member-group">
 <h2>Methods</h2>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="equals" class="tsd-anchor"></a>
@@ -132,7 +228,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1030</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1063</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="getTimestamp" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>get<wbr/>Timestamp</span><a href="#getTimestamp" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -143,7 +239,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Date</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1032</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1065</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="inspect" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>inspect</span><a href="#inspect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -165,7 +261,7 @@
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <p>Overrides <a href="BSON.BSONValue.html">BSONValue</a>.<a href="BSON.BSONValue.html#inspect">inspect</a></p>
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1060</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1094</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toHexString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>Hex<wbr/>String</span><a href="#toHexString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -176,7 +272,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1009</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1042</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toJSON" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>toJSON</span><a href="#toJSON" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -187,7 +283,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1023</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1056</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="toString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><span>to<wbr/>String</span><a href="#toString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -206,7 +302,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1021</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1054</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="createFromBase64" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>create<wbr/>From<wbr/>Base64</span><a href="#createFromBase64" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -222,7 +318,7 @@
 <h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1047</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1081</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="createFromHexString" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>create<wbr/>From<wbr/>Hex<wbr/>String</span><a href="#createFromHexString" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -241,7 +337,7 @@
 <h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1045</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1079</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="createFromTime" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>create<wbr/>From<wbr/>Time</span><a href="#createFromTime" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -260,7 +356,7 @@
 <h4 class="tsd-returns-title">Returns <a href="BSON.ObjectId.html" class="tsd-signature-type tsd-kind-class">ObjectId</a></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1039</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1073</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="generate" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>generate</span><a href="#generate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -279,7 +375,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type ">Uint8Array</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1016</li></ul></aside></li></ul></section>
+<li>Defined in node_modules/bson/bson.d.ts:1049</li></ul></aside></li></ul></section>
 <section class="tsd-panel tsd-member tsd-is-external"><a id="isValid" class="tsd-anchor"></a>
 <h3 class="tsd-anchor-link"><code class="tsd-tag ts-flagStatic">Static</code> <span>is<wbr/>Valid</span><a href="#isValid" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="#icon-anchor"></use></svg></a></h3>
 <ul class="tsd-signatures tsd-is-external">
@@ -298,7 +394,7 @@
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
 <div class="tsd-comment tsd-typography"></div><aside class="tsd-sources">
 <ul>
-<li>Defined in node_modules/bson/bson.d.ts:1052</li></ul></aside></li></ul></section></section></div>
+<li>Defined in node_modules/bson/bson.d.ts:1086</li></ul></aside></li></ul></section></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
