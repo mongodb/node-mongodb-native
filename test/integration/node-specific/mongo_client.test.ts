@@ -373,6 +373,14 @@ describe('class MongoClient', function () {
     }
   });
 
+  it('can call close() concurrently', async function () {
+    const client = this.configuration.newClient();
+    await client.connect();
+    // Ensure topology is opened before trying to close
+    await client.db().command({ hello: 1 });
+    await Promise.all([client.close(), client.close()]);
+  });
+
   context('explict #connect()', () => {
     let client: MongoClient;
     beforeEach(function () {
