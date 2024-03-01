@@ -77,6 +77,7 @@ export class TestConfiguration {
     proxyURIParams?: ProxyParams;
   };
   serverApi: ServerApi;
+  activeResources: number;
 
   constructor(private uri: string, private context: Record<string, any>) {
     const url = new ConnectionString(uri);

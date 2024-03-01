@@ -735,7 +735,9 @@ export function expectErrorCheck(
   }
 
   if (expected.errorContains != null) {
-    expect(error.message, expectMessage).to.include(expected.errorContains);
+    expect(error.message.toLowerCase(), expectMessage.toLowerCase()).to.include(
+      expected.errorContains.toLowerCase()
+    );
   }
 
   if (expected.errorCode != null) {

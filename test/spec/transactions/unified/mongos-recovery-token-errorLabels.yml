@@ -1,0 +1,136 @@
+description: mongos-recovery-token-errorLabels
+
+schemaVersion: '1.4'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.3.1 # failCommand errorLabels option
+    # serverless proxy doesn't use recovery tokens
+    serverless: forbid
+    # Note: test utilizes targetedFailPoint, which is incompatible with
+    # load-balanced and useMultipleMongoses:true
+    topologies: [ sharded ]
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'commitTransaction retry succeeds on new mongos'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: majority
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      # Enable the fail point only on the mongos that session0 is pinned to
+      -
+        object: testRunner
+        name: targetedFailPoint
+        arguments:
+          session: *session0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands:
+                - commitTransaction
+              errorLabels:
+                - RetryableWriteError
+              writeConcernError:
+                code: 91
+                errmsg: 'Replication is being shut down'
+      # The client sees a retryable writeConcernError on the first
+      # commitTransaction due to the fail point but it actually succeeds on the
+      # server (SERVER-39346). The retry will succeed both on a new mongos and
+      # on the original.
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern:
+                  w: majority
+                recoveryToken: { $$exists: true }
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                # commitTransaction applies w:majority on retries
+                writeConcern:
+                  w: majority
+                  wtimeout: 10000
+                recoveryToken: { $$exists: true }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }

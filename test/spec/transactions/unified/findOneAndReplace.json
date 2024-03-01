@@ -1,0 +1,352 @@
+{
+  "description": "findOneAndReplace",
+  "schemaVersion": "1.9",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        },
+        {
+          "_id": 3
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "findOneAndReplace",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 3
+            },
+            "replacement": {
+              "x": 1
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 3
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 4
+            },
+            "replacement": {
+              "x": 1
+            },
+            "upsert": true,
+            "returnDocument": "After"
+          },
+          "expectResult": {
+            "_id": 4,
+            "x": 1
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 3
+                  },
+                  "update": {
+                    "x": 1
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 4
+                  },
+                  "update": {
+                    "x": 1
+                  },
+                  "new": true,
+                  "upsert": true,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3,
+              "x": 1
+            },
+            {
+              "_id": 4,
+              "x": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "collection writeConcern ignored for findOneAndReplace",
+      "operations": [
+        {
+          "object": "testRunner",
+          "name": "createEntities",
+          "arguments": {
+            "entities": [
+              {
+                "collection": {
+                  "id": "collection_wc_majority",
+                  "database": "database0",
+                  "collectionName": "test",
+                  "collectionOptions": {
+                    "writeConcern": {
+                      "w": "majority"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          }
+        },
+        {
+          "object": "collection_wc_majority",
+          "name": "findOneAndReplace",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 3
+            },
+            "replacement": {
+              "x": 1
+            },
+            "returnDocument": "Before"
+          },
+          "expectResult": {
+            "_id": 3
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "findAndModify": "test",
+                  "query": {
+                    "_id": 3
+                  },
+                  "update": {
+                    "x": 1
+                  },
+                  "new": false,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "findAndModify",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "writeConcern": {
+                    "w": "majority"
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

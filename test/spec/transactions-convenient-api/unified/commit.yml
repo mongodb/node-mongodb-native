@@ -1,0 +1,199 @@
+description: commit
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  - minServerVersion: '4.0'
+    topologies: [ replicaset ]
+  - minServerVersion: 4.1.8
+    topologies: [ sharded, load-balanced ]
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: true
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &databaseName withTransaction-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collectionName test
+  - session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  - collectionName: *collectionName
+    databaseName: *databaseName
+    documents: []
+
+tests:
+  -
+    description: withTransaction commits after callback returns
+    operations:
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 2 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }
+  -
+    # In this scenario, the callback commits the transaction originally started
+    # by withTransaction and starts a second transaction before returning. Since
+    # withTransaction only examines the session's state, it should commit that
+    # second transaction after the callback returns.
+    description: withTransaction commits after callback returns (second transaction)
+    operations:
+      - name: withTransaction
+        object: *session0
+        arguments:
+          callback:
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 1 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+            - name: commitTransaction
+              object: *session0
+            - name: startTransaction
+              object: *session0
+            - name: insertOne
+              object: *collection0
+              arguments:
+                session: *session0
+                document: { _id: 2 }
+              expectResult:
+                $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "1" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          - commandStartedEvent:
+              command:
+                insert: *collectionName
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session0 }
+                # second transaction will be causally consistent with the first
+                readConcern: { afterClusterTime: { $$exists: true } }
+                # txnNumber is incremented for the second transaction
+                txnNumber: { $numberLong: "2" }
+                startTransaction: true
+                autocommit: false
+                # omitted fields
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *databaseName
+          - commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: "2" }
+                autocommit: false
+                # omitted fields
+                readConcern: { $$exists: false }
+                startTransaction: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      - collectionName: *collectionName
+        databaseName: *databaseName
+        documents:
+          - { _id: 1 }
+          - { _id: 2 }

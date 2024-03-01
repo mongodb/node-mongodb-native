@@ -4,7 +4,7 @@ schemaVersion: '1.4'
 
 runOnRequirements:
   - minServerVersion: '4.2'
-    topologies: [ sharded-replicaset ]
+    topologies: [ sharded ]
 
 createEntities:
   - client:
@@ -35,9 +35,13 @@ _yamlAnchors:
 tests:
   - description: unpin after TransientTransactionError error on commit
     runOnRequirements:
+      -
         # serverless proxy doesn't append error labels to errors in transactions
         # caused by failpoints (CLOUDP-88216)
-      - serverless: "forbid"
+        serverless: "forbid"
+        # Note: test utilizes targetedFailPoint, which is incompatible with
+        # load-balanced and useMultipleMongoses:true
+        topologies: [ sharded ]
     operations:
       - &startTransaction
         name: startTransaction
@@ -87,9 +91,13 @@ tests:
 
   - description: unpin after non-transient error on abort
     runOnRequirements:
+      -
         # serverless proxy doesn't append error labels to errors in transactions
         # caused by failpoints (CLOUDP-88216)
-      - serverless: "forbid"
+        serverless: "forbid"
+        # Note: test utilizes targetedFailPoint, which is incompatible with
+        # load-balanced and useMultipleMongoses:true
+        topologies: [ sharded ]
     operations:
       - *startTransaction
       - *insertOne
@@ -112,6 +120,11 @@ tests:
       - *abortTransaction
 
   - description: unpin after TransientTransactionError error on abort
+    runOnRequirements:
+      -
+        # Note: test utilizes targetedFailPoint, which is incompatible with
+        # load-balanced and useMultipleMongoses:true
+        topologies: [ sharded ]
     operations:
       - *startTransaction
       - *insertOne

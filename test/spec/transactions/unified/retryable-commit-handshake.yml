@@ -105,8 +105,7 @@ tests:
           - commandStartedEvent:
               command:
                 commitTransaction: 1
-                lsid:
-                  $$sessionLsid: *session0
+                lsid: { $$sessionLsid: *session0 }
               commandName: commitTransaction
               databaseName: admin
 

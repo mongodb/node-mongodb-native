@@ -1,0 +1,155 @@
+description: transaction-options-repl
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'readConcern snapshot in startTransaction options'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - session:
+                id: &session1 session1
+                client: *client0
+                sessionOptions:
+                  defaultTransactionOptions:
+                    readConcern: { level: majority }
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readConcern:
+            level: snapshot
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session1
+        name: commitTransaction
+      # Now test abort
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readConcern:
+            level: snapshot
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session1
+          document: { _id: 2 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 2 } }
+      -
+        object: *session1
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: snapshot
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 2 }
+                ordered: true
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                readConcern:
+                  level: snapshot
+                  afterClusterTime: { $$exists: true }
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                readConcern: { $$exists: false }
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }

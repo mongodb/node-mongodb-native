@@ -1,0 +1,202 @@
+description: create-index
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: 4.3.4
+    topologies:
+      - replicaset
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+tests:
+  -
+    description: 'create index on a non-existing collection'
+    operations:
+      -
+        object: *database0
+        name: dropCollection
+        arguments:
+          collection: *collection_name
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: createIndex
+        arguments:
+          session: *session0
+          name: &index_name t_1
+          keys:
+            x: 1
+      -
+        object: testRunner
+        name: assertIndexNotExists
+        arguments:
+          databaseName: *database_name
+          collectionName: *collection_name
+          indexName: *index_name
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: testRunner
+        name: assertIndexExists
+        arguments:
+          databaseName: *database_name
+          collectionName: *collection_name
+          indexName: *index_name
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                drop: *collection_name
+                writeConcern: { $$exists: false }
+              commandName: drop
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                createIndexes: *collection_name
+                indexes:
+                  -
+                    name: *index_name
+                    key:
+                      x: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: createIndexes
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+  -
+    description: 'create index on a collection created within the same transaction'
+    operations:
+      -
+        object: *database0
+        name: dropCollection
+        arguments:
+          collection: *collection_name
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *database0
+        name: createCollection
+        arguments:
+          session: *session0
+          collection: *collection_name
+      -
+        object: *collection0
+        name: createIndex
+        arguments:
+          session: *session0
+          name: *index_name
+          keys:
+            x: 1
+      -
+        object: testRunner
+        name: assertIndexNotExists
+        arguments:
+          databaseName: *database_name
+          collectionName: *collection_name
+          indexName: *index_name
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: testRunner
+        name: assertIndexExists
+        arguments:
+          databaseName: *database_name
+          collectionName: *collection_name
+          indexName: *index_name
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                drop: *collection_name
+                writeConcern: { $$exists: false }
+              commandName: drop
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                create: *collection_name
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: create
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                createIndexes: *collection_name
+                indexes:
+                  -
+                    name: *index_name
+                    key:
+                      x: 1
+                lsid: { $$sessionLsid: *session0 }
+                writeConcern: { $$exists: false }
+              commandName: createIndexes
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
