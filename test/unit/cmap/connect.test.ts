@@ -26,7 +26,7 @@ const CONNECT_DEFAULTS = {
   loadBalanced: false
 };
 
-describe.only('Connect Tests', function () {
+describe('Connect Tests', function () {
   context('when PLAIN auth enabled', () => {
     const test: {
       server?: any;
