@@ -26,7 +26,7 @@ const CONNECT_DEFAULTS = {
   loadBalanced: false
 };
 
-describe('Connect Tests', function () {
+describe.only('Connect Tests', function () {
   context('when PLAIN auth enabled', () => {
     const test: {
       server?: any;
@@ -200,7 +200,11 @@ describe('Connect Tests', function () {
         });
 
         afterEach(() => {
-          process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
         });
 
         it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
@@ -225,7 +229,11 @@ describe('Connect Tests', function () {
         });
 
         afterEach(() => {
-          process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
         });
 
         it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
@@ -247,11 +255,17 @@ describe('Connect Tests', function () {
 
         context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
           beforeEach(() => {
-            process.env.KUBERNETES_SERVICE_HOST = '';
+            delete process.env.KUBERNETES_SERVICE_HOST;
           });
 
           afterEach(() => {
-            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+            afterEach(() => {
+              if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+                process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+              } else {
+                delete process.env.KUBERNETES_SERVICE_HOST;
+              }
+            });
           });
 
           it(`should not have 'env' property in client`, async () => {
@@ -266,7 +280,11 @@ describe('Connect Tests', function () {
           });
 
           afterEach(() => {
-            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+            if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+              process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+            } else {
+              delete process.env.KUBERNETES_SERVICE_HOST;
+            }
           });
 
           it(`should not have 'env' property in client`, async () => {
