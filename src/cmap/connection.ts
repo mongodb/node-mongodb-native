@@ -405,8 +405,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     // For standalone, drivers MUST NOT set $readPreference.
     if (this.supportsOpMsg && this.description.type !== ServerType.Standalone) {
-      // For mongos and load balancers with a direct connection and 'primary' mode,
-      // drivers MUST NOT set $readPreference.
+      // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
       if (isSharded(this) || this.description.loadBalanced) {
         if (readPreference?.mode !== 'primary') {
           cmd.$readPreference = readPreference.toJSON();
