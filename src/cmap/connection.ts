@@ -408,7 +408,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       // For mongos and load balancers with a direct connection and 'primary' mode,
       // drivers MUST NOT set $readPreference.
       if (isSharded(this) || this.description.loadBalanced) {
-        if (this.description.directConnection !== true && readPreference?.mode !== 'primary') {
+        if (readPreference?.mode !== 'primary') {
           cmd.$readPreference = readPreference.toJSON();
         }
       } else {
