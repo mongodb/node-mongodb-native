@@ -1,0 +1,483 @@
+description: abort
+
+schemaVersion: '1.3'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: abort
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern:
+                  afterClusterTime: { $$exists: true }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '2' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'implicit abort'
+    operations:
+      # Start a transaction but don't commit - the driver calls abortTransaction from ClientSession.endSession()
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      # The original legacy test relied on the test runner to call endSession after all operations. Since the unified
+      # test runner has no such behavior, we manually call endSession as the last operation.
+      -
+        object: *session0
+        name: endSession
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'two aborts'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+      -
+        object: *session0
+        name: abortTransaction
+        expectError:
+          errorContains: 'cannot call abortTransaction twice'
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'abort without start'
+    operations:
+      -
+        object: *session0
+        name: abortTransaction
+        expectError:
+          errorContains: 'no transaction started'
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'abort directly after no-op commit'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *session0
+        name: commitTransaction
+      # Error calling abort after no-op commit
+      -
+        object: *session0
+        name: abortTransaction
+        expectError:
+          errorContains: 'Cannot call abortTransaction after calling commitTransaction'
+    expectEvents:
+      -
+        client: *client0
+        events: []
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'abort directly after commit'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: commitTransaction
+      -
+        object: *session0
+        name: abortTransaction
+        expectError:
+          errorContains: 'Cannot call abortTransaction after calling commitTransaction'
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents:
+          - { _id: 1 }
+  -
+    description: 'abort ignores TransactionAborted'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      # Abort the server transaction with a duplicate key error
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          errorLabelsOmit:
+            - TransientTransactionError
+            - UnknownTransactionCommitResult
+          # DuplicateKey error code included in the bulk write error message returned by the server
+          errorContains: E11000
+      # Make sure the server aborted the transaction
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectError:
+          errorCodeName: NoSuchTransaction
+          errorLabelsContain:
+            - TransientTransactionError
+          errorLabelsOmit:
+            - UnknownTransactionCommitResult
+      # abortTransaction must ignore the TransactionAborted and succeed
+      -
+        object: *session0
+        name: abortTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                ordered: true
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                abortTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: abortTransaction
+              databaseName: admin
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []
+  -
+    description: 'abort does not apply writeConcern'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          writeConcern:
+            w: 10
+      -
+        object: *collection0
+        name: insertOne
+        arguments:
+          session: *session0
+          document: { _id: 1 }
+        expectResult:
+          $$unsetOrMatches: { insertedId: { $$unsetOrMatches: 1 } }
+      -
+        object: *session0
+        name: abortTransaction
+        # No write concern error
+    outcome:
+      -
+        collectionName: *collection_name
+        databaseName: *database_name
+        documents: []

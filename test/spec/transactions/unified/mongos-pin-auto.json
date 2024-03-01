@@ -1,0 +1,5180 @@
+{
+  "description": "mongos-pin-auto",
+  "schemaVersion": "1.4",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded"
+      ],
+      "serverless": "forbid"
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": true,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": [
+        {
+          "_id": 1
+        },
+        {
+          "_id": 2
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "description": "remain pinned after non-transient Interrupted error on insertOne",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "targetedFailPoint",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
+            ],
+            "errorCodeName": "Interrupted"
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 4
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "recoveryToken": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient error within a transaction",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "targetedFailPoint",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 3
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "insert": "test",
+                  "documents": [
+                    {
+                      "_id": 4
+                    }
+                  ],
+                  "ordered": true,
+                  "readConcern": {
+                    "$$exists": false
+                  },
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "insert",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "abortTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  },
+                  "recoveryToken": {
+                    "$$exists": true
+                  }
+                },
+                "commandName": "abortTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on insertOne insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on insertMany insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "documents": [
+              {
+                "_id": 4
+              },
+              {
+                "_id": 5
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on updateOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on replaceOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on updateMany update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            },
+            "update": {
+              "$set": {
+                "z": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on deleteOne delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on deleteMany delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on findOneAndDelete findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on findOneAndUpdate findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on findOneAndReplace findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on bulkWrite insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on bulkWrite update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on bulkWrite delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on find find",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on countDocuments aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on aggregate aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "pipeline": []
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on distinct distinct",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "distinct"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "fieldName": "_id",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "remain pinned after non-transient Interrupted error on runCommand insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 11601
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "session": "session0",
+            "commandName": "insert",
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
+            }
+          },
+          "expectError": {
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionPinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on insertOne insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on insertOne insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "insertOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 4
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on insertMany insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "documents": [
+              {
+                "_id": 4
+              },
+              {
+                "_id": 5
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on insertMany insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "insertMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "documents": [
+              {
+                "_id": 4
+              },
+              {
+                "_id": 5
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on updateOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on updateOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "updateOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on replaceOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on replaceOne update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "replaceOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on updateMany update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            },
+            "update": {
+              "$set": {
+                "z": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on updateMany update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "updateMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            },
+            "update": {
+              "$set": {
+                "z": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on deleteOne delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on deleteOne delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on deleteMany delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on deleteMany delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteMany",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": {
+                "$gte": 1
+              }
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on findOneAndDelete findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on findOneAndDelete findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndDelete",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on findOneAndUpdate findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on findOneAndUpdate findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on findOneAndReplace findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on findOneAndReplace findAndModify",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "findAndModify"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndReplace",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            },
+            "replacement": {
+              "y": 1
+            },
+            "returnDocument": "Before"
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on bulkWrite insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on bulkWrite insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "insertOne": {
+                  "document": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on bulkWrite update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on bulkWrite update",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "update"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "updateOne": {
+                  "filter": {
+                    "_id": 1
+                  },
+                  "update": {
+                    "$set": {
+                      "x": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on bulkWrite delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on bulkWrite delete",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "bulkWrite",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "requests": [
+              {
+                "deleteOne": {
+                  "filter": {
+                    "_id": 1
+                  }
+                }
+              }
+            ]
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on find find",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on find find",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "find"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "find",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on countDocuments aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on countDocuments aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "countDocuments",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on aggregate aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "pipeline": []
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on aggregate aggregate",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "aggregate"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "aggregate",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "pipeline": []
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on distinct distinct",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "distinct"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "fieldName": "_id",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on distinct distinct",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "distinct"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "distinct",
+          "object": "collection0",
+          "arguments": {
+            "session": "session0",
+            "fieldName": "_id",
+            "filter": {}
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient connection error on runCommand insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "closeConnection": true
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "session": "session0",
+            "commandName": "insert",
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "unpin after transient ShutdownInProgress error on runCommand insert",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 3
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 3
+              }
+            }
+          }
+        },
+        {
+          "name": "targetedFailPoint",
+          "object": "testRunner",
+          "arguments": {
+            "session": "session0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "insert"
+                ],
+                "errorCode": 91
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database0",
+          "arguments": {
+            "session": "session0",
+            "commandName": "insert",
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
+            }
+          },
+          "expectError": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ]
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertSessionUnpinned",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

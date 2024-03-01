@@ -1,0 +1,254 @@
+description: run-command
+
+schemaVersion: '1.9'
+
+runOnRequirements:
+  -
+    minServerVersion: '4.0'
+    topologies:
+      - replicaset
+  -
+    minServerVersion: 4.1.8
+    topologies:
+      - sharded
+      - load-balanced
+
+createEntities:
+  -
+    client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      observeEvents:
+        - commandStartedEvent
+  -
+    database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database_name transaction-tests
+  -
+    collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection_name test
+  -
+    session:
+      id: &session0 session0
+      client: *client0
+
+initialData:
+  -
+    collectionName: *collection_name
+    databaseName: *database_name
+    documents: []
+
+tests:
+  -
+    description: 'run command with default read preference'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *database0
+        name: runCommand
+        arguments:
+          session: *session0
+          command:
+            insert: *collection_name
+            documents:
+              - { _id: 1 }
+          commandName: insert
+        expectResult:
+          'n': 1
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+  -
+    description: 'run command with secondary read preference in client option and primary read preference in transaction options'
+    operations:
+      -
+        object: testRunner
+        name: createEntities
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                useMultipleMongoses: false
+                uriOptions: { readPreference: secondary }
+                observeEvents:
+                  - commandStartedEvent
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: *database_name
+            - session:
+                id: &session1 session1
+                client: *client1
+      -
+        object: *session1
+        name: startTransaction
+        arguments:
+          readPreference:
+            mode: primary
+      -
+        object: *database1
+        name: runCommand
+        arguments:
+          session: *session1
+          command:
+            insert: *collection_name
+            documents:
+              - { _id: 1 }
+          commandName: insert
+        expectResult:
+          'n': 1
+      -
+        object: *session1
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client1
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session1 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+  -
+    description: 'run command with explicit primary read preference'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *database0
+        name: runCommand
+        arguments:
+          session: *session0
+          command:
+            insert: *collection_name
+            documents:
+              - { _id: 1 }
+          readPreference:
+            mode: primary
+          commandName: insert
+        expectResult:
+          'n': 1
+      -
+        object: *session0
+        name: commitTransaction
+    expectEvents:
+      -
+        client: *client0
+        events:
+          -
+            commandStartedEvent:
+              command:
+                insert: *collection_name
+                documents:
+                  - { _id: 1 }
+                readConcern: { $$exists: false }
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: true
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: insert
+              databaseName: *database_name
+          -
+            commandStartedEvent:
+              command:
+                commitTransaction: 1
+                lsid: { $$sessionLsid: *session0 }
+                txnNumber: { $numberLong: '1' }
+                startTransaction: { $$exists: false }
+                autocommit: false
+                writeConcern: { $$exists: false }
+              commandName: commitTransaction
+              databaseName: admin
+  -
+    description: 'run command fails with explicit secondary read preference'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+      -
+        object: *database0
+        name: runCommand
+        arguments:
+          session: *session0
+          command:
+            find: *collection_name
+          readPreference:
+            mode: secondary
+          commandName: find
+        expectError:
+          errorContains: 'read preference in a transaction must be primary'
+  -
+    description: 'run command fails with secondary read preference from transaction options'
+    operations:
+      -
+        object: *session0
+        name: startTransaction
+        arguments:
+          readPreference:
+            mode: secondary
+      -
+        object: *database0
+        name: runCommand
+        arguments:
+          session: *session0
+          command:
+            find: *collection_name
+          commandName: find
+        expectError:
+          errorContains: 'read preference in a transaction must be primary'

@@ -497,7 +497,7 @@ operations.set('replaceOne', async ({ entities, operation }) => {
 
 operations.set('startTransaction', async ({ entities, operation }) => {
   const session = entities.getEntity('session', operation.object);
-  session.startTransaction();
+  session.startTransaction(operation.arguments);
 });
 
 operations.set('targetedFailPoint', async ({ entities, operation }) => {
@@ -905,8 +905,13 @@ export async function executeOperationAndCheck(
   const opFunc = operations.get(operation.name);
   expect(opFunc, `Unknown operation: ${operation.name}`).to.exist;
 
-  if (operation.arguments?.session) {
-    operation.arguments.session = entities.getEntity('session', operation.arguments.session);
+  if (operation.arguments && operation.arguments.session) {
+    // The session could need to be either pulled from the entity map or in the case where
+    // we've recursively called this function it may already be present and going back to
+    // the map with an object instead of a string will fail.
+    if (typeof operation.arguments.session === 'string') {
+      operation.arguments.session = entities.getEntity('session', operation.arguments.session);
+    }
   }
 
   let result;

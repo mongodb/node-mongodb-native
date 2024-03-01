@@ -1,0 +1,728 @@
+{
+  "description": "read-pref",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.0",
+      "topologies": [
+        "replicaset"
+      ]
+    },
+    {
+      "minServerVersion": "4.1.8",
+      "topologies": [
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection_rp_primary",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection_rp_secondary",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "default readPreference",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              },
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1,
+                  "1": 2,
+                  "2": 3,
+                  "3": 4
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "aggregate",
+          "arguments": {
+            "session": "session0",
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": 1
+                }
+              },
+              {
+                "$count": "count"
+              }
+            ]
+          },
+          "expectResult": [
+            {
+              "count": 1
+            }
+          ]
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "find",
+          "arguments": {
+            "batchSize": 3,
+            "filter": {},
+            "session": "session0"
+          },
+          "expectResult": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "expectResult": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "primary readPreference",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "readPreference": {
+              "mode": "primary"
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              },
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1,
+                  "1": 2,
+                  "2": 3,
+                  "3": 4
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "aggregate",
+          "arguments": {
+            "session": "session0",
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": 1
+                }
+              },
+              {
+                "$count": "count"
+              }
+            ]
+          },
+          "expectResult": [
+            {
+              "count": 1
+            }
+          ]
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "find",
+          "arguments": {
+            "batchSize": 3,
+            "filter": {},
+            "session": "session0"
+          },
+          "expectResult": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        },
+        {
+          "object": "collection_rp_secondary",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "expectResult": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "secondary readPreference",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              },
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1,
+                  "1": 2,
+                  "2": 3,
+                  "3": 4
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "session": "session0",
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": 1
+                }
+              },
+              {
+                "$count": "count"
+              }
+            ]
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "find",
+          "arguments": {
+            "batchSize": 3,
+            "filter": {},
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "primaryPreferred readPreference",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "readPreference": {
+              "mode": "primaryPreferred"
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              },
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1,
+                  "1": 2,
+                  "2": 3,
+                  "3": 4
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "session": "session0",
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": 1
+                }
+              },
+              {
+                "$count": "count"
+              }
+            ]
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "find",
+          "arguments": {
+            "batchSize": 3,
+            "filter": {},
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "nearest readPreference",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "readPreference": {
+              "mode": "nearest"
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertMany",
+          "arguments": {
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 2
+              },
+              {
+                "_id": 3
+              },
+              {
+                "_id": 4
+              }
+            ],
+            "session": "session0"
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedIds": {
+                "$$unsetOrMatches": {
+                  "0": 1,
+                  "1": 2,
+                  "2": 3,
+                  "3": 4
+                }
+              }
+            }
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "session": "session0",
+            "pipeline": [
+              {
+                "$match": {
+                  "_id": 1
+                }
+              },
+              {
+                "$count": "count"
+              }
+            ]
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "find",
+          "arguments": {
+            "batchSize": 3,
+            "filter": {},
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "collection_rp_primary",
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "expectError": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "abortTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": []
+        }
+      ]
+    },
+    {
+      "description": "secondary write only",
+      "operations": [
+        {
+          "object": "session0",
+          "name": "startTransaction",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            }
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "insertOne",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "expectResult": {
+            "$$unsetOrMatches": {
+              "insertedId": {
+                "$$unsetOrMatches": 1
+              }
+            }
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        }
+      ],
+      "outcome": [
+        {
+          "collectionName": "test",
+          "databaseName": "transaction-tests",
+          "documents": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

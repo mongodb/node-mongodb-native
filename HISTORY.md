@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.0](https://github.com/mongodb/node-mongodb-native/compare/v6.3.0...v6.4.0) (2024-02-29)
+
+
+### Features
+
+* **NODE-3449:** Add serverConnectionId to Command Monitoring Spec ([735f7aa](https://github.com/mongodb/node-mongodb-native/commit/735f7aa17c2403044c015c0eb0fc7e4be08c0983))
+* **NODE-3470:** retry selects another mongos ([#3963](https://github.com/mongodb/node-mongodb-native/issues/3963)) ([84959ee](https://github.com/mongodb/node-mongodb-native/commit/84959ee27135abd04e4009b0adfebc7889d9139f))
+* **NODE-3689:** require hello command for connection handshake to use OP_MSG disallowing OP_QUERY ([#3938](https://github.com/mongodb/node-mongodb-native/issues/3938)) ([ce7df0f](https://github.com/mongodb/node-mongodb-native/commit/ce7df0f79ed764d4a36caf1562cea4f5015c0ea6))
+* **NODE-4686:** Add log messages to CLAM ([#3955](https://github.com/mongodb/node-mongodb-native/issues/3955)) ([e3bfa30](https://github.com/mongodb/node-mongodb-native/commit/e3bfa30eefe6b0a79141b32029d8e44d426275d6))
+* **NODE-4687:** Add logging to server selection ([#3946](https://github.com/mongodb/node-mongodb-native/issues/3946)) ([7f3ce0b](https://github.com/mongodb/node-mongodb-native/commit/7f3ce0bb8d4173739e5a3ffe9041dd11b28f9b08))
+* **NODE-4719:** add SDAM Logging Spec ([#3940](https://github.com/mongodb/node-mongodb-native/issues/3940)) ([a3c0298](https://github.com/mongodb/node-mongodb-native/commit/a3c02983bc9cead125373d86a5c47cf8f4e40f9e))
+* **NODE-4847:** Add config error handling to logging ([#3970](https://github.com/mongodb/node-mongodb-native/issues/3970)) ([8f7bb59](https://github.com/mongodb/node-mongodb-native/commit/8f7bb593cbd1b2cd69c76702dbd1125479d1055a))
+* **NODE-5717:** make ExceededTimeLimit retryable reads error ([#3947](https://github.com/mongodb/node-mongodb-native/issues/3947)) ([106ab09](https://github.com/mongodb/node-mongodb-native/commit/106ab092d0fe184509551c55b6b0fe817fa6ba21))
+* **NODE-5885:** upgrade BSON to `^6.3.0` ([#3983](https://github.com/mongodb/node-mongodb-native/issues/3983)) ([9401d09](https://github.com/mongodb/node-mongodb-native/commit/9401d09af4def8bfbeff65e70863be5d13b3dd61))
+* **NODE-5939:** Implement 6.x: cache the AWS credentials provider in the MONGODB-AWS auth logic ([#3991](https://github.com/mongodb/node-mongodb-native/issues/3991)) ([e0a37e5](https://github.com/mongodb/node-mongodb-native/commit/e0a37e594919d173762b0c64a24bb0291b159fa5))
+* **NODE-5978:** upgrade BSON to ^6.4.0 ([#4007](https://github.com/mongodb/node-mongodb-native/issues/4007)) ([90f2f70](https://github.com/mongodb/node-mongodb-native/commit/90f2f70ba61e598fd3c69c1e2a5ae4297fe8f333))
+
+
+### Bug Fixes
+
+* **NODE-5127:** implement reject kmsRequest on server close ([#3964](https://github.com/mongodb/node-mongodb-native/issues/3964)) ([568e05f](https://github.com/mongodb/node-mongodb-native/commit/568e05fdc3d78882e925e8e799aca6fb86c88295))
+* **NODE-5609:** node driver omits base64 padding in sasl-continue command ([#3975](https://github.com/mongodb/node-mongodb-native/issues/3975)) ([b7d28d3](https://github.com/mongodb/node-mongodb-native/commit/b7d28d3135fa298d693aa22d2f1713054c5b0751))
+* **NODE-5765:** change type for countDocuments ([#3932](https://github.com/mongodb/node-mongodb-native/issues/3932)) ([22cae0f](https://github.com/mongodb/node-mongodb-native/commit/22cae0fbc0ad4043e27210577427870b8ec287f5))
+* **NODE-5791:** type error with $addToSet in bulkWrite ([#3953](https://github.com/mongodb/node-mongodb-native/issues/3953)) ([b93d405](https://github.com/mongodb/node-mongodb-native/commit/b93d405275c3a8ce6b1eba0af335ffb2a309e34e))
+* **NODE-5818:** Add feature flagging to server selection logging ([#3974](https://github.com/mongodb/node-mongodb-native/issues/3974)) ([55203ef](https://github.com/mongodb/node-mongodb-native/commit/55203ef53d085518fd0acaf4b23d4a987cf6736d))
+* **NODE-5839:** support for multibyte code-points in stringifyWithMaxLen ([#3979](https://github.com/mongodb/node-mongodb-native/issues/3979)) ([aed1cf0](https://github.com/mongodb/node-mongodb-native/commit/aed1cf0d2b1083e24997e49bfe7f5416e944466e))
+* **NODE-5840:** heartbeat duration includes socket creation ([#3973](https://github.com/mongodb/node-mongodb-native/issues/3973)) ([a42039b](https://github.com/mongodb/node-mongodb-native/commit/a42039b9d03f1fc4d58f6edc641a839bc0364cd2))
+* **NODE-5901:** propagate errors to transformed stream in cursor ([#3985](https://github.com/mongodb/node-mongodb-native/issues/3985)) ([ecfc615](https://github.com/mongodb/node-mongodb-native/commit/ecfc6157786360832d1afb4294d76f83a90a9d70))
+* **NODE-5944:** make AWS session token optional ([#4002](https://github.com/mongodb/node-mongodb-native/issues/4002)) ([f26de76](https://github.com/mongodb/node-mongodb-native/commit/f26de764c7ee5034992ec5978175fc50f29fc690))
+
+
+### Performance Improvements
+
+* **NODE-5771:** improve new connection ([#3948](https://github.com/mongodb/node-mongodb-native/issues/3948)) ([a4776cf](https://github.com/mongodb/node-mongodb-native/commit/a4776cfe638c4e51cb690e43b941153d4f36a30a))
+* **NODE-5854:** Conditional logger instantiation and precompute willLog perf fix ([#3984](https://github.com/mongodb/node-mongodb-native/issues/3984)) ([a63fbc2](https://github.com/mongodb/node-mongodb-native/commit/a63fbc2a98a2b0ed88bfe2cd5f59e9feee97820b))
+* **NODE-5928:** consolidate signal use and abort promise wrap ([#3992](https://github.com/mongodb/node-mongodb-native/issues/3992)) ([38742c2](https://github.com/mongodb/node-mongodb-native/commit/38742c2849d00e6a6070329b5c6a19704f40eb89))
+
 ## [6.3.0](https://github.com/mongodb/node-mongodb-native/compare/v6.2.0...v6.3.0) (2023-11-15)
 
 

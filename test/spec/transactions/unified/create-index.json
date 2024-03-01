@@ -1,0 +1,313 @@
+{
+  "description": "create-index",
+  "schemaVersion": "1.3",
+  "runOnRequirements": [
+    {
+      "minServerVersion": "4.3.4",
+      "topologies": [
+        "replicaset",
+        "sharded",
+        "load-balanced"
+      ]
+    }
+  ],
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false,
+        "observeEvents": [
+          "commandStartedEvent"
+        ]
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "transaction-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    },
+    {
+      "session": {
+        "id": "session0",
+        "client": "client0"
+      }
+    }
+  ],
+  "initialData": [
+    {
+      "collectionName": "test",
+      "databaseName": "transaction-tests",
+      "documents": []
+    }
+  ],
+  "tests": [
+    {
+      "description": "create index on a non-existing collection",
+      "operations": [
+        {
+          "object": "database0",
+          "name": "dropCollection",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "collection0",
+          "name": "createIndex",
+          "arguments": {
+            "session": "session0",
+            "name": "t_1",
+            "keys": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertIndexNotExists",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "t_1"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        },
+        {
+          "object": "testRunner",
+          "name": "assertIndexExists",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "t_1"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test",
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "drop",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "test",
+                  "indexes": [
+                    {
+                      "name": "t_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "createIndexes",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "create index on a collection created within the same transaction",
+      "operations": [
+        {
+          "object": "database0",
+          "name": "dropCollection",
+          "arguments": {
+            "collection": "test"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "startTransaction"
+        },
+        {
+          "object": "database0",
+          "name": "createCollection",
+          "arguments": {
+            "session": "session0",
+            "collection": "test"
+          }
+        },
+        {
+          "object": "collection0",
+          "name": "createIndex",
+          "arguments": {
+            "session": "session0",
+            "name": "t_1",
+            "keys": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "object": "testRunner",
+          "name": "assertIndexNotExists",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "t_1"
+          }
+        },
+        {
+          "object": "session0",
+          "name": "commitTransaction"
+        },
+        {
+          "object": "testRunner",
+          "name": "assertIndexExists",
+          "arguments": {
+            "databaseName": "transaction-tests",
+            "collectionName": "test",
+            "indexName": "t_1"
+          }
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client0",
+          "events": [
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "drop": "test",
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "drop",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "create": "test",
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": true,
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "create",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "createIndexes": "test",
+                  "indexes": [
+                    {
+                      "name": "t_1",
+                      "key": {
+                        "x": 1
+                      }
+                    }
+                  ],
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "createIndexes",
+                "databaseName": "transaction-tests"
+              }
+            },
+            {
+              "commandStartedEvent": {
+                "command": {
+                  "commitTransaction": 1,
+                  "lsid": {
+                    "$$sessionLsid": "session0"
+                  },
+                  "txnNumber": {
+                    "$numberLong": "1"
+                  },
+                  "startTransaction": {
+                    "$$exists": false
+                  },
+                  "autocommit": false,
+                  "writeConcern": {
+                    "$$exists": false
+                  }
+                },
+                "commandName": "commitTransaction",
+                "databaseName": "admin"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
