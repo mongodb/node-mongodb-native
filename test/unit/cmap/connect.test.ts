@@ -200,7 +200,7 @@ describe('Connect Tests', function () {
         });
 
         afterEach(() => {
-          if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
             process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
           } else {
             delete process.env.KUBERNETES_SERVICE_HOST;
@@ -229,7 +229,7 @@ describe('Connect Tests', function () {
         });
 
         afterEach(() => {
-          if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
             process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
           } else {
             delete process.env.KUBERNETES_SERVICE_HOST;
@@ -260,7 +260,7 @@ describe('Connect Tests', function () {
 
           afterEach(() => {
             afterEach(() => {
-              if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+              if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
                 process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
               } else {
                 delete process.env.KUBERNETES_SERVICE_HOST;
@@ -280,7 +280,7 @@ describe('Connect Tests', function () {
           });
 
           afterEach(() => {
-            if (cachedEnv.KUBERNETES_SERVICE_HOST) {
+            if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
               process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
             } else {
               delete process.env.KUBERNETES_SERVICE_HOST;
