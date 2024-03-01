@@ -1,7 +1,7 @@
 import type { BSONSerializeOptions, Document, Long } from '../bson';
 import * as BSON from '../bson';
 import { MongoInvalidArgumentError, MongoRuntimeError } from '../error';
-import { ReadPreference } from '../read_preference';
+import { type ReadPreference } from '../read_preference';
 import type { ClientSession } from '../sessions';
 import type { CommandOptions } from './connection';
 import {
