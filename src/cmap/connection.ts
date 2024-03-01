@@ -406,19 +406,22 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     // For standalone, drivers MUST NOT set $readPreference.
     if (this.supportsOpMsg && this.description.type !== ServerType.Standalone) {
       // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
-      if (isSharded(this) || this.description.loadBalanced) {
-        if (readPreference?.mode !== 'primary') {
-          cmd.$readPreference = readPreference.toJSON();
-        }
-      } else {
-        // For all other types with a direct connection, if the read preference is 'primary'
-        // (driver sets 'primary' as default if no read preference is configured),
-        // the $readPreference MUST be set to 'primaryPreferred'
-        // to ensure that any server type can handle the request.
-        cmd.$readPreference =
-          this.description.directConnection !== true || readPreference?.mode !== 'primary'
-            ? readPreference.toJSON()
-            : ReadPreference.primaryPreferred.toJSON();
+      // For all other types with a direct connection, if the read preference is 'primary'
+      // (driver sets 'primary' as default if no read preference is configured),
+      // the $readPreference MUST be set to 'primaryPreferred'
+      // to ensure that any server type can handle the request.
+      if (
+        !isSharded(this) &&
+        !this.description.loadBalanced &&
+        this.description.directConnection === true &&
+        readPreference?.mode === 'primary'
+      ) {
+        cmd.$readPreference = ReadPreference.primaryPreferred.toJSON();
+      } else if (readPreference?.mode !== 'primary') {
+        // For mode 'primary', drivers MUST NOT set $readPreference.
+        // For all other read preference modes (i.e. 'secondary', 'primaryPreferred', ...),
+        // drivers MUST set $readPreference
+        cmd.$readPreference = readPreference.toJSON();
       }
     }
 
