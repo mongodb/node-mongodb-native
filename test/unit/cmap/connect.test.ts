@@ -207,7 +207,116 @@ describe('Connect Tests', function () {
     });
   });
 
-  context('prepareHandshakeDocument', () => {
+  describe('prepareHandshakeDocument', () => {
+    describe('client environment (containers and FAAS)', () => {
+      const cachedEnv = process.env;
+
+      context('when only kubernetes is present', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS }
+        };
+
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+        });
+
+        afterEach(() => {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should not have 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env).to.not.have.property('name');
+        });
+      });
+
+      context('when kubernetes and FAAS are both present', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS, metadata: { env: { name: 'aws.lambda' } } }
+        };
+
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+        });
+
+        afterEach(() => {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should still have properly set 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+        });
+      });
+
+      context('when container nor FAAS env is not present (empty string case)', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS }
+        };
+
+        context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
+          beforeEach(() => {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          });
+
+          afterEach(() => {
+            afterEach(() => {
+              if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+                process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+              } else {
+                delete process.env.KUBERNETES_SERVICE_HOST;
+              }
+            });
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+
+        context('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
+          beforeEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = '';
+          });
+
+          afterEach(() => {
+            if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+              process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+            } else {
+              delete process.env.KUBERNETES_SERVICE_HOST;
+            }
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+      });
+    });
+
     context('when serverApi.version is present', () => {
       const options = {
         authProviders: new MongoClientAuthProviders()

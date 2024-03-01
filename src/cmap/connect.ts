@@ -25,7 +25,7 @@ import {
   type ConnectionOptions,
   CryptoConnection
 } from './connection';
-import type { ClientMetadata } from './handshake/client_metadata';
+import { addContainerMetadata } from './handshake/client_metadata';
 import {
   MAX_SUPPORTED_SERVER_VERSION,
   MAX_SUPPORTED_WIRE_VERSION,
@@ -180,7 +180,7 @@ export interface HandshakeDocument extends Document {
   ismaster?: boolean;
   hello?: boolean;
   helloOk?: boolean;
-  client: ClientMetadata;
+  client: Document;
   compression: string[];
   saslSupportedMechs?: string;
   loadBalanced?: boolean;
@@ -197,11 +197,12 @@ export async function prepareHandshakeDocument(
   const options = authContext.options;
   const compressors = options.compressors ? options.compressors : [];
   const { serverApi } = authContext.connection;
+  const clientMetadata = await addContainerMetadata(options.metadata);
 
   const handshakeDoc: HandshakeDocument = {
     [serverApi?.version ? 'hello' : LEGACY_HELLO_COMMAND]: 1,
     helloOk: true,
-    client: options.metadata,
+    client: clientMetadata,
     compression: compressors
   };
 
