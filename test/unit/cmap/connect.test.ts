@@ -216,6 +216,22 @@ describe('Connect Tests', function () {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument.client.env).to.not.have.property('name');
         });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not 'env' property in client`, async () => {
+            let longAppName = '';
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            for (let i = 0; i < 493; i++) {
+              longAppName += 's';
+            }
+            const longAuthContext = {
+              connection: {},
+              options: { ...CONNECT_DEFAULTS, metadata: { appName: longAppName } }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
       });
 
       context('when kubernetes and FAAS are both present', () => {
@@ -244,6 +260,28 @@ describe('Connect Tests', function () {
         it(`should still have properly set 'name' property in client.env `, async () => {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+        });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not have 'container' property in client.env`, async () => {
+            let longAppName = '';
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            for (let i = 0; i < 485; i++) {
+              longAppName += 's';
+            }
+            const longAuthContext = {
+              connection: {},
+              options: {
+                ...CONNECT_DEFAULTS,
+                metadata: {
+                  appName: longAppName,
+                  env: { name: 'aws.lambda' }
+                }
+              }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
         });
       });
 
