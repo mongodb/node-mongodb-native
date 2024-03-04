@@ -219,11 +219,8 @@ describe('Connect Tests', function () {
 
         context('when 512 byte size limit is exceeded', async () => {
           it(`should not 'env' property in client`, async () => {
-            let longAppName = '';
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
-            for (let i = 0; i < 493; i++) {
-              longAppName += 's';
-            }
+            const longAppName = 's'.repeat(493);
             const longAuthContext = {
               connection: {},
               options: { ...CONNECT_DEFAULTS, metadata: { appName: longAppName } }
@@ -264,11 +261,8 @@ describe('Connect Tests', function () {
 
         context('when 512 byte size limit is exceeded', async () => {
           it(`should not have 'container' property in client.env`, async () => {
-            let longAppName = '';
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
-            for (let i = 0; i < 485; i++) {
-              longAppName += 's';
-            }
+            const longAppName = 's'.repeat(447);
             const longAuthContext = {
               connection: {},
               options: {
@@ -280,7 +274,8 @@ describe('Connect Tests', function () {
               }
             };
             const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
-            expect(handshakeDocument.client).to.not.have.property('env');
+            expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+            expect(handshakeDocument.client.env).to.not.have.property('container');
           });
         });
       });
