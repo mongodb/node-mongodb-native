@@ -1239,7 +1239,7 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: '5.0'}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
+            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1275,7 +1275,7 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: rapid}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
+            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
@@ -1311,7 +1311,7 @@ tasks:
             - {key: NPM_VERSION, value: '9'}
             - {key: VERSION, value: latest}
             - {key: TOPOLOGY, value: replica_set}
-            - {key: CSFLE_GIT_REF, value: 974a4614f8c1c3786e5e39fa63568d83f4f69ebd}
+            - {key: CSFLE_GIT_REF, value: 51e172622a0ddf2bf761e4d1e26ca267359086dd}
       - func: install dependencies
       - func: bootstrap mongo-orchestration
       - func: bootstrap kms servers
