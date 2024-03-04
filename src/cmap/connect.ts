@@ -375,10 +375,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     return socket;
   } catch (error) {
     socket.destroy();
-    if ('authorizationError' in socket && socket.authorizationError != null && rejectUnauthorized) {
-      // TODO(NODE-5192): wrap this with a MongoError subclass
-      throw socket.authorizationError;
-    }
     throw error;
   } finally {
     socket.setTimeout(0);
