@@ -493,8 +493,16 @@ describe('ReadPreference', function () {
             try {
               const admin = client.db().admin();
               serverStatus = await admin.serverStatus();
+
+              console.log('serverStatus.repl----------------------');
+              console.log(serverStatus.repl);
+              console.log('----------------------');
             } catch (serverStatusError) {
               expect(serverStatusError).to.not.exist;
+
+              console.log('serverStatusError----------------------');
+              console.log(serverStatusError);
+              console.log('----------------------');
             }
 
             if (serverStatus.repl.ismaster) {
