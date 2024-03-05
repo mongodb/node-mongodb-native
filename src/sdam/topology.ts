@@ -494,41 +494,35 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Close this topology */
-  close(options: CloseOptions): void;
-  close(options: CloseOptions, callback: Callback): void;
-  close(options?: CloseOptions, callback?: Callback): void {
+  close(options?: CloseOptions): void {
     options = options ?? { force: false };
 
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
-      return callback?.();
+      return;
     }
 
-    const destroyedServers = Array.from(this.s.servers.values(), server => {
-      return promisify(destroyServer)(server, this, { force: !!options?.force });
-    });
+    for (const server of this.s.servers.values()) {
+      destroyServer(server, this, { force: !!options?.force });
+    }
 
-    Promise.all(destroyedServers)
-      .then(() => {
-        this.s.servers.clear();
+    this.s.servers.clear();
 
-        stateTransition(this, STATE_CLOSING);
+    stateTransition(this, STATE_CLOSING);
 
-        drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
-        drainTimerQueue(this.s.connectionTimers);
+    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
+    drainTimerQueue(this.s.connectionTimers);
 
-        if (this.s.srvPoller) {
-          this.s.srvPoller.stop();
-          this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
-        }
+    if (this.s.srvPoller) {
+      this.s.srvPoller.stop();
+      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
+    }
 
-        this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
+    this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
-        stateTransition(this, STATE_CLOSED);
+    stateTransition(this, STATE_CLOSED);
 
-        // emit an event for close
-        this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
-      })
-      .finally(() => callback?.());
+    // emit an event for close
+    this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
   }
 
   /**

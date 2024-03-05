@@ -41,7 +41,6 @@ import type { GetMoreOptions } from '../operations/get_more';
 import type { ClientSession } from '../sessions';
 import { isTransactionCommand } from '../transactions';
 import {
-  type Callback,
   type EventEmitterWithState,
   makeStateMachine,
   maxWireVersion,
@@ -236,18 +235,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   /** Destroy the server connection */
-  destroy(options?: DestroyOptions, callback?: Callback): void {
-    if (typeof options === 'function') {
-      callback = options;
-      options = { force: false };
-    }
+  destroy(options?: DestroyOptions): void {
     options = Object.assign({}, { force: false }, options);
 
     if (this.s.state === STATE_CLOSED) {
-      if (typeof callback === 'function') {
-        callback();
-      }
-
       return;
     }
 
@@ -257,13 +248,9 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.monitor?.close();
     }
 
-    this.pool.close(options, err => {
-      stateTransition(this, STATE_CLOSED);
-      this.emit('closed');
-      if (typeof callback === 'function') {
-        callback(err);
-      }
-    });
+    this.pool.close(options);
+    stateTransition(this, STATE_CLOSED);
+    this.emit('closed');
   }
 
   /**
