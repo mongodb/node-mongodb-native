@@ -628,19 +628,19 @@ describe('server selection', async function () {
     context('when willLog returns false', function () {
       const original = Object.getPrototypeOf(ServerSelectionEvent);
       let serverSelectionEventStub;
-      beforeEach(async () => {
+      beforeEach(() => {
         sinon.stub(MongoLogger.prototype, 'willLog').callsFake((_v, _w) => false);
         serverSelectionEventStub = sinon.stub();
         Object.setPrototypeOf(ServerSelectionEvent, serverSelectionEventStub);
       });
 
-      afterEach(async () => {
+      afterEach(() => {
         sinon.restore();
         Object.setPrototypeOf(ServerSelectionEvent, original);
       });
 
-      it('should not create server selection event instances', function () {
-        topology?.selectServer(topologyDescription, { operationName: 'test' }, v => v);
+      it('should not create server selection event instances', async function () {
+        await topology?.selectServer(topologyDescription, { operationName: 'test' });
         expect(serverSelectionEventStub.getCall(0)).to.be.null;
       });
     });

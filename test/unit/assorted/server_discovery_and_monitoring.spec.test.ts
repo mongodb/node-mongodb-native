@@ -207,12 +207,11 @@ describe('Server Discovery and Monitoring (spec)', function () {
         topologySelectServers = sinon
           .stub(Topology.prototype, 'selectServer')
 
-          .callsFake(function (selector, options, callback) {
+          .callsFake(function (selector, options) {
             topologySelectServers.restore();
 
             const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
-            // @ts-expect-error: stub doesn't need to be a full server
-            callback(undefined, fakeServer);
+            return Promise.resolve(fakeServer);
           });
       });
 

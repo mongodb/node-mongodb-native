@@ -102,11 +102,11 @@ function executeServerSelectionTest(testDefinition, testDone) {
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon
     .stub(Topology.prototype, 'selectServer')
-    .callsFake(function (selector, options, callback) {
+    .callsFake(function (selector, options) {
       topologySelectServers.restore();
 
       const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
-      callback(undefined, fakeServer);
+      return Promise.resolve(fakeServer);
     });
 
   function done(err) {
@@ -149,56 +149,54 @@ function executeServerSelectionTest(testDefinition, testDone) {
     }
 
     // default to serverSelectionTimeoutMS of `100` for unit tests
-    topology.selectServer(selector, { serverSelectionTimeoutMS: 50 }, (err, server) => {
-      // are we expecting an error?
-      if (testDefinition.error) {
-        if (!err) {
-          return done(new Error('Expected an error, but found none!'));
+    topology.selectServer(selector, { serverSelectionTimeoutMS: 50 }).then(
+      server => {
+        if (testDefinition.error) return done(new Error('Expected an error, but found none!'));
+        if (expectedServers.length === 0 && server !== null) {
+          return done(new Error('Found server, but expected none!'));
         }
 
-        return done();
-      }
+        const selectedServerDescription = server.description;
 
-      if (err) {
+        try {
+          const expectedServerArray = expectedServers.filter(
+            s => s.address === selectedServerDescription.address
+          );
+
+          if (!expectedServerArray.length) {
+            return done(new Error('No suitable servers found!'));
+          }
+
+          if (expectedServerArray.length > 1) {
+            return done(new Error('This test does not support multiple expected servers'));
+          }
+
+          for (const [prop, value] of Object.entries(expectedServerArray[0])) {
+            if (prop === 'hosts') {
+              // we dynamically modify this prop during sever selection
+              continue;
+            }
+            expect(selectedServerDescription[prop]).to.deep.equal(
+              value,
+              `Mismatched selected server "${prop}"`
+            );
+          }
+          done();
+        } catch (e) {
+          done(e);
+        }
+      },
+      err => {
+        // are we expecting an error?
+        if (testDefinition.error) {
+          return done();
+        }
+
         // this is another expected error case
         if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
         return done(err);
       }
-
-      if (expectedServers.length === 0 && server !== null) {
-        return done(new Error('Found server, but expected none!'));
-      }
-
-      const selectedServerDescription = server.description;
-
-      try {
-        const expectedServerArray = expectedServers.filter(
-          s => s.address === selectedServerDescription.address
-        );
-
-        if (!expectedServerArray.length) {
-          return done(new Error('No suitable servers found!'));
-        }
-
-        if (expectedServerArray.length > 1) {
-          return done(new Error('This test does not support multiple expected servers'));
-        }
-
-        for (const [prop, value] of Object.entries(expectedServerArray[0])) {
-          if (prop === 'hosts') {
-            // we dynamically modify this prop during sever selection
-            continue;
-          }
-          expect(selectedServerDescription[prop]).to.deep.equal(
-            value,
-            `Mismatched selected server "${prop}"`
-          );
-        }
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
+    );
   });
 }
 

@@ -386,9 +386,7 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', {}, (err, server) => {
-          expect(err).to.not.exist;
-
+        topology.selectServer('primary', {}).then(server => {
           server
             .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
             .then(expect.fail, err => {
@@ -407,7 +405,7 @@ describe('MongoErrors', () => {
                 cleanup(_err);
               }
             });
-        });
+        }, expect.fail);
       });
     });
 
@@ -432,9 +430,7 @@ describe('MongoErrors', () => {
           return cleanup(err);
         }
 
-        topology.selectServer('primary', {}, (err, server) => {
-          expect(err).to.not.exist;
-
+        topology.selectServer('primary', {}).then(server => {
           server
             .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
             .then(expect.fail, err => {
@@ -451,7 +447,7 @@ describe('MongoErrors', () => {
                 cleanup(_err);
               }
             });
-        });
+        }, expect.fail);
       });
     });
   });
