@@ -119,6 +119,8 @@ export interface ConnectionOptions
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
   /** @internal */
+  extendedMetadata: Promise<Document>;
+  /** @internal */
   mongoLogger?: MongoLogger | undefined;
 }
 
