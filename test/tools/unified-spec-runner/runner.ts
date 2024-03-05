@@ -113,6 +113,9 @@ async function runUnifiedTest(
       return ctx.skip();
     }
 
+    const ping = await utilClient.db().admin().command({ ping: 1 });
+    const clusterTime = ping.$clusterTime;
+
     // If initialData is specified, for each collectionData therein the test runner MUST drop the
     // collection and insert the specified documents (if any) using a "majority" write concern. If no
     // documents are specified, the test runner MUST create the collection with a "majority" write concern.
@@ -161,7 +164,11 @@ async function runUnifiedTest(
     }
 
     trace('createEntities');
-    entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
+    entities = await EntitiesMap.createEntities(
+      ctx.configuration,
+      clusterTime,
+      unifiedSuite.createEntities
+    );
 
     // Workaround for SERVER-39704:
     // test runners MUST execute a non-transactional distinct command on
