@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ReadPreference, Topology } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
 
-describe.only('ReadPreference', function () {
+describe('ReadPreference', function () {
   let client;
   let events;
 
@@ -463,6 +463,10 @@ describe.only('ReadPreference', function () {
       it('should attach a read preference of primaryPreferred to the read command for replicaset', {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
+          if (this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
+            return this.skip();
+          }
+
           let checkedPrimary = false;
 
           for (const server of this.configuration.options.hostAddresses) {
@@ -489,15 +493,7 @@ describe.only('ReadPreference', function () {
             try {
               const admin = client.db().admin();
               serverStatus = await admin.serverStatus();
-
-              console.log('serverStatus.repl----------------------');
-              console.log(serverStatus.repl);
-              console.log('----------------------');
             } catch (serverStatusError) {
-
-              console.log('serverStatusError----------------------');
-              console.log(serverStatusError);
-              console.log('----------------------');
               expect(serverStatusError).to.not.exist;
             }
 
