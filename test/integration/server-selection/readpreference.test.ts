@@ -463,6 +463,8 @@ describe('ReadPreference', function () {
       it('should attach a read preference of primaryPreferred to the read command for replicaset', {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
+          let checkedPrimary = false;
+
           for (const server of this.configuration.options.hostAddresses) {
             const { host, port } = server.toHostPort();
             const client = this.configuration.newClient(
@@ -482,23 +484,39 @@ describe('ReadPreference', function () {
                 events.push(event);
               }
             });
-            let serverError;
+            let serverStatus;
+
             try {
-              await client.db('test').collection('test').findOne({ a: 1 });
-            } catch (error) {
-              serverError = error;
+              const admin = client.db().admin();
+              serverStatus = await admin.serverStatus();
+            } catch (serverStatusError) {
+              expect(serverStatusError).to.not.exist;
             }
 
-            expect(serverError).to.not.exist;
-            expect(events[0]).to.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'primaryPreferred' }
+            if (serverStatus.repl.ismaster) {
+              let serverError;
+
+              try {
+                await client.db('test').collection('test').findOne({ a: 1 });
+              } catch (error) {
+                serverError = error;
               }
-            });
+
+              expect(serverError).to.not.exist;
+              expect(events[0]).to.containSubset({
+                commandName: 'find',
+                command: {
+                  $readPreference: { mode: 'primaryPreferred' }
+                }
+              });
+
+              checkedPrimary = true;
+            }
 
             await client.close();
           }
+
+          expect(checkedPrimary).to.be.equal(true);
         }
       });
 
@@ -550,6 +568,8 @@ describe('ReadPreference', function () {
       it('should attach a read preference of secondary to the read command for replicaset', {
         metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
         test: async function () {
+          let checkedSecondary = false;
+
           for (const server of this.configuration.options.hostAddresses) {
             const { host, port } = server.toHostPort();
             const client = this.configuration.newClient(
@@ -569,23 +589,39 @@ describe('ReadPreference', function () {
                 events.push(event);
               }
             });
-            let serverError;
+            let serverStatus;
+
             try {
-              await client.db('test').collection('test').findOne({ a: 1 });
-            } catch (error) {
-              serverError = error;
+              const admin = client.db().admin();
+              serverStatus = await admin.serverStatus();
+            } catch (serverStatusError) {
+              expect(serverStatusError).to.not.exist;
             }
 
-            expect(serverError).to.not.exist;
-            expect(events[0]).to.containSubset({
-              commandName: 'find',
-              command: {
-                $readPreference: { mode: 'secondary' }
+            if (serverStatus.repl.secondary) {
+              let serverError;
+
+              try {
+                await client.db('test').collection('test').findOne({ a: 1 });
+              } catch (error) {
+                serverError = error;
               }
-            });
+
+              expect(serverError).to.not.exist;
+              expect(events[0]).to.containSubset({
+                commandName: 'find',
+                command: {
+                  $readPreference: { mode: 'secondary' }
+                }
+              });
+
+              checkedSecondary = true;
+            }
 
             await client.close();
           }
+
+          expect(checkedSecondary).to.be.equal(true);
         }
       });
 
