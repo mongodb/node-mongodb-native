@@ -44,6 +44,7 @@ import {
   makeStateMachine,
   now,
   ns,
+  promiseWithResolvers,
   shuffle,
   TimeoutController
 } from '../utils';
@@ -105,7 +106,8 @@ export interface ServerSelectionRequest {
   mongoLogger: MongoLogger | undefined;
   transaction?: Transaction;
   startTime: number;
-  callback: ServerSelectionCallback;
+  resolve: (server: Server) => void;
+  reject: (reason?: any) => void;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
   operationName: string;
@@ -238,11 +240,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @event */
   static readonly TIMEOUT = TIMEOUT;
 
-  selectServerAsync: (
-    selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions
-  ) => Promise<Server>;
-
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
@@ -254,14 +251,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     super();
 
     this.client = client;
-    this.selectServerAsync = promisify(
-      (
-        selector: string | ReadPreference | ServerSelector,
-        options: SelectServerOptions,
-        callback: (e: Error, r: Server) => void
-      ) => this.selectServer(selector, options, callback as any)
-    );
-
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
@@ -464,15 +453,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = { operationName: 'ping', ...options };
-    this.selectServer(
-      readPreferenceServerSelector(readPreference),
-      selectServerOptions,
-      (err, server) => {
-        if (err) {
-          this.close();
-          return exitWithError(err);
-        }
 
+    this.selectServer(readPreferenceServerSelector(readPreference), selectServerOptions).then(
+      server => {
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
         if (!skipPingOnConnect && server && this.s.credentials) {
           server.command(ns('admin.$cmd'), { ping: 1 }, {}).then(() => {
@@ -491,6 +474,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         this.emit(Topology.CONNECT, this);
 
         callback?.(undefined, this);
+      },
+      error => {
+        return this.close({ force: false }, () => exitWithError(error));
       }
     );
   }
@@ -533,11 +519,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @param callback - The callback used to indicate success or failure
    * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
-  selectServer(
+  async selectServer(
     selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions,
-    callback: Callback<Server>
-  ): void {
+    options: SelectServerOptions
+  ): Promise<Server> {
     let serverSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
@@ -588,16 +573,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      callback(undefined, transaction.server);
-      return;
+      return transaction.server;
     }
 
+    const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
       mongoLogger: this.client.mongoLogger,
       transaction,
-      callback,
+      resolve,
+      reject,
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
       startTime: now(),
       operationName: options.operationName,
@@ -628,13 +614,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      waitQueueMember.callback(timeoutError);
+      waitQueueMember.reject(timeoutError);
     });
 
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
-  }
 
+    return serverPromise;
+  }
   /**
    * Update the internal TopologyDescription with a ServerDescription
    *
@@ -911,7 +898,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
           );
         }
       }
-      waitQueueMember.callback(err);
+      waitQueueMember.reject(err);
     }
   }
 }
@@ -964,7 +951,7 @@ function processWaitQueue(topology: Topology) {
           )
         );
       }
-      waitQueueMember.callback(e);
+      waitQueueMember.reject(e);
       continue;
     }
 
@@ -1027,7 +1014,7 @@ function processWaitQueue(topology: Topology) {
           )
         );
       }
-      waitQueueMember.callback(error);
+      waitQueueMember.reject(error);
       return;
     }
     const transaction = waitQueueMember.transaction;
@@ -1053,7 +1040,7 @@ function processWaitQueue(topology: Topology) {
         )
       );
     }
-    waitQueueMember.callback(undefined, selectedServer);
+    waitQueueMember.resolve(selectedServer);
   }
 
   if (topology[kWaitQueue].length > 0) {
