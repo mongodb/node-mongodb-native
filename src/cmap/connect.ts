@@ -319,7 +319,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   const useTLS = options.tls ?? false;
   const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
-  const rejectUnauthorized = options.rejectUnauthorized ?? true;
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
@@ -375,10 +374,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
     return socket;
   } catch (error) {
     socket.destroy();
-    if ('authorizationError' in socket && socket.authorizationError != null && rejectUnauthorized) {
-      // TODO(NODE-5192): wrap this with a MongoError subclass
-      throw socket.authorizationError;
-    }
     throw error;
   } finally {
     socket.setTimeout(0);
