@@ -366,7 +366,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   private prepareCommand(db: string, command: Document, options: CommandOptions) {
-    const cmd = { ...command };
+    let cmd = { ...command };
     const readPreference = getReadPreference(options);
     const session = options?.session;
 
@@ -399,24 +399,28 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       cmd.$clusterTime = clusterTime;
     }
 
-    // Driver does not use legacy hello for anything other than the first handshake
-    // (we do not support servers that only speak OP_QUERY),
-    // therefore $readPreference is not relevant for servers that do not support OP_MSG.
-
     // For standalone, drivers MUST NOT set $readPreference.
-    if (this.supportsOpMsg && this.description.type !== ServerType.Standalone) {
-      // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
-      // For all other types with a direct connection, if the read preference is 'primary'
-      // (driver sets 'primary' as default if no read preference is configured),
-      // the $readPreference MUST be set to 'primaryPreferred'
-      // to ensure that any server type can handle the request.
+    if (this.description.type !== ServerType.Standalone) {
       if (
         !isSharded(this) &&
         !this.description.loadBalanced &&
+        this.supportsOpMsg &&
         this.description.directConnection === true &&
         readPreference?.mode === 'primary'
       ) {
+        // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
+        // For all other types with a direct connection, if the read preference is 'primary'
+        // (driver sets 'primary' as default if no read preference is configured),
+        // the $readPreference MUST be set to 'primaryPreferred'
+        // to ensure that any server type can handle the request.
         cmd.$readPreference = ReadPreference.primaryPreferred.toJSON();
+      } else if (isSharded(this) && !this.supportsOpMsg && readPreference?.mode !== 'primary') {
+        // When sending a read operation via OP_QUERY and the $readPreference modifier,
+        // the query MUST be provided using the $query modifier.
+        cmd = {
+          $query: cmd,
+          $readPreference: readPreference.toJSON()
+        };
       } else if (readPreference?.mode !== 'primary') {
         // For mode 'primary', drivers MUST NOT set $readPreference.
         // For all other read preference modes (i.e. 'secondary', 'primaryPreferred', ...),

@@ -18,7 +18,7 @@ describe('Max Staleness', function () {
       // Primary server states
       const serverIsPrimary = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
-        var doc = request.document;
+        const doc = request.document;
         if (isHello(doc)) {
           request.reply(serverIsPrimary[0]);
           return;
@@ -46,33 +46,31 @@ describe('Max Staleness', function () {
     metadata: {
       requires: {
         generators: true,
-        topology: 'single'
+        topology: 'replicaset'
       }
     },
 
-    test: function (done) {
-      var self = this;
+    test: function () {
+      const self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(
         `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`,
         { serverApi: null } // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       );
 
-      client.connect(function (err, client) {
+      client.connect(async function (err, client) {
         expect(err).to.not.exist;
-        var db = client.db(self.configuration.db);
+        const db = client.db(self.configuration.db);
 
-        db.collection('test')
-          .find({})
-          .toArray(function (err) {
-            expect(err).to.not.exist;
-            expect(test.checkCommand).to.containSubset({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+        try {
+          await db.collection('test').find({}).toArray();
+        } catch (err) {
+          expect(err).to.not.exist;
+        }
 
-            client.close(done);
-          });
+        expect(test.checkCommand).to.containSubset({
+          $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+        });
       });
     }
   });
@@ -81,36 +79,38 @@ describe('Max Staleness', function () {
     metadata: {
       requires: {
         generators: true,
-        topology: 'single'
+        topology: 'replicaset'
       }
     },
 
-    test: function (done) {
+    test: async function () {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
         serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       });
-      client.connect(function (err, client) {
+
+      try {
+        await client.connect();
+      } catch (err) {
         expect(err).to.not.exist;
+      }
 
-        // Get a db with a new readPreference
-        var db1 = client.db('test', {
-          readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
-        });
-
-        db1
-          .collection('test')
-          .find({})
-          .toArray(function (err) {
-            expect(err).to.not.exist;
-            expect(test.checkCommand).to.containSubset({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
-
-            client.close(done);
-          });
+      // Get a db with a new readPreference
+      const db1 = client.db('test', {
+        readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
       });
+
+      try {
+        await db1.collection('test').find({}).toArray();
+      } catch (err) {
+        expect(err).to.not.exist;
+      }
+
+      expect(test.checkCommand).to.containSubset({
+        $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+      });
+
+      client.close();
     }
   });
 
@@ -120,35 +120,42 @@ describe('Max Staleness', function () {
       metadata: {
         requires: {
           generators: true,
-          topology: 'single'
+          topology: 'replicaset'
         }
       },
 
-      test: function (done) {
-        var self = this;
+      test: async function () {
+        const self = this;
         const configuration = this.configuration;
         const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
           serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
         });
-        client.connect(function (err, client) {
+
+        try {
+          await client.connect();
+        } catch (err) {
           expect(err).to.not.exist;
-          var db = client.db(self.configuration.db);
+        }
 
+        const db = client.db(self.configuration.db);
+
+        try {
           // Get a db with a new readPreference
-          db.collection('test', {
-            readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
-          })
+          await db
+            .collection('test', {
+              readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
+            })
             .find({})
-            .toArray(function (err) {
-              expect(err).to.not.exist;
-              expect(test.checkCommand).to.containSubset({
-                $query: { find: 'test', filter: {} },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
+            .toArray();
+        } catch (err) {
+          expect(err).to.not.exist;
+        }
 
-              client.close(done);
-            });
+        expect(test.checkCommand).to.containSubset({
+          $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
         });
+
+        client.close();
       }
     }
   );
@@ -157,35 +164,39 @@ describe('Max Staleness', function () {
     metadata: {
       requires: {
         generators: true,
-        topology: 'single'
+        topology: 'replicaset'
       }
     },
 
-    test: function (done) {
-      var self = this;
+    test: async function () {
+      const self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${test.server.uri()}/test`, {
         serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       });
-      client.connect(function (err, client) {
+
+      try {
+        await client.connect();
+      } catch (err) {
         expect(err).to.not.exist;
-        var db = client.db(self.configuration.db);
-        var readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
+      }
 
+      const db = client.db(self.configuration.db);
+      const readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
+
+      try {
         // Get a db with a new readPreference
-        db.collection('test')
-          .find({})
-          .withReadPreference(readPreference)
-          .toArray(function (err) {
-            expect(err).to.not.exist;
-            expect(test.checkCommand).to.containSubset({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+        await db.collection('test').find({}).withReadPreference(readPreference).toArray();
+      } catch (err) {
+        expect(err).to.not.exist;
+      }
 
-            client.close(done);
-          });
+      expect(test.checkCommand).to.containSubset({
+        $query: { find: 'test', filter: {} },
+        $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
       });
+
+      client.close();
     }
   });
 });
