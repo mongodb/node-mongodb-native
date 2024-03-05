@@ -443,9 +443,8 @@ describe('class MongoLogger', async function () {
                 const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
 
-                expect(stderrStub.write).to.have.been.calledOnceWith(
-                  inspect(log, { breakLength: Infinity, compact: true })
-                );
+                const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
               });
             }
           }
@@ -465,9 +464,8 @@ describe('class MongoLogger', async function () {
                 const log: Log = { t: new Date(), c: 'command', s: 'error' };
                 options.logDestination.write(log);
 
-                expect(stderrStub.write).to.have.been.calledOnceWith(
-                  inspect(log, { breakLength: Infinity, compact: true })
-                );
+                const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
               });
             }
           }
@@ -512,9 +510,8 @@ describe('class MongoLogger', async function () {
                   const log: Log = { t: new Date(), c: 'command', s: 'error' };
                   options.logDestination.write(log);
 
-                  expect(stderrStub.write).to.have.been.calledOnceWith(
-                    inspect(log, { breakLength: Infinity, compact: true })
-                  );
+                  const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                  expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
                 });
               }
             }
@@ -536,9 +533,8 @@ describe('class MongoLogger', async function () {
                     const log: Log = { t: new Date(), c: 'command', s: 'error' };
                     options.logDestination.write(log);
 
-                    expect(stderrStub.write).to.have.been.calledOnceWith(
-                      inspect(log, { breakLength: Infinity, compact: true })
-                    );
+                    const logLine = inspect(log, { breakLength: Infinity, compact: true });
+                    expect(stderrStub.write).to.have.been.calledOnceWith(`${logLine}\n`);
                   });
                 }
               }
@@ -1399,9 +1395,8 @@ describe('class MongoLogger', async function () {
             logger.debug('client', 'random message');
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
-            expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws' }`
-            );
+            const expectedLogLine1 = `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws' }`;
+            expect(stderrStubCall).to.equal(`${expectedLogLine1}\n`);
 
             // logging is halted
             logger.debug('client', 'random message 2');
@@ -1450,9 +1445,8 @@ describe('class MongoLogger', async function () {
             // stderr now contains the error message
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
-            expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws, but only after at least 500ms' }`
-            );
+            const expectedLogLine1 = `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'This writable always throws, but only after at least 500ms' }`;
+            expect(stderrStubCall).to.equal(`${expectedLogLine1}\n`);
 
             // no more logging in the future
             logger.debug('client', 'random message 2');
@@ -1480,7 +1474,7 @@ describe('class MongoLogger', async function () {
             let stderrStubCall = stderrStub.write.getCall(0).args[0];
             stderrStubCall = stderrStubCall.slice(stderrStubCall.search('c:'));
             expect(stderrStubCall).to.equal(
-              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'I am stdout and do not work' }`
+              `c: 'client', s: 'error', message: 'User input for mongodbLogPath is now invalid. Logging is halted.', error: 'I am stdout and do not work' }\n`
             );
 
             // logging is halted
