@@ -2,7 +2,6 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { promisify } from 'util';
 
 import {
   ReadPreference,

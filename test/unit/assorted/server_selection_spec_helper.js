@@ -100,14 +100,12 @@ function executeServerSelectionTest(testDefinition, testDone) {
   const topology = topologyWithPlaceholderClient(seedData.seedlist, topologyOptions);
   // Each test will attempt to connect by doing server selection. We want to make the first
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
-  let topologySelectServers = sinon
-    .stub(Topology.prototype, 'selectServer')
-    .callsFake(function (selector, options) {
-      topologySelectServers.restore();
+  let topologySelectServers = sinon.stub(Topology.prototype, 'selectServer').callsFake(function () {
+    topologySelectServers.restore();
 
-      const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
-      return Promise.resolve(fakeServer);
-    });
+    const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
+    return Promise.resolve(fakeServer);
+  });
 
   function done(err) {
     topology.close();

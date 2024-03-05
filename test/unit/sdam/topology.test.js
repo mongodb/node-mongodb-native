@@ -448,7 +448,7 @@ describe('Topology (unit)', function () {
       // satisfy the initial connect, then restore the original method
       const selectServer = this.sinon
         .stub(Topology.prototype, 'selectServer')
-        .callsFake(function (selector, options) {
+        .callsFake(function () {
           const server = Array.from(this.s.servers.values())[0];
           selectServer.restore();
           return Promise.resolve(server);
@@ -496,7 +496,7 @@ describe('Topology (unit)', function () {
         const topology = topologyWithPlaceholderClient('someserver:27019');
         const selectServer = this.sinon
           .stub(Topology.prototype, 'selectServer')
-          .callsFake(async function (selector, options) {
+          .callsFake(async function () {
             const server = Array.from(this.s.servers.values())[0];
             selectServer.restore();
             return server;
