@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ReadPreference, Topology } from '../../mongodb';
 import { assert as test, setupDatabase } from '../shared';
 
-describe('ReadPreference', function () {
+describe.only('ReadPreference', function () {
   let client;
   let events;
 
@@ -489,7 +489,15 @@ describe('ReadPreference', function () {
             try {
               const admin = client.db().admin();
               serverStatus = await admin.serverStatus();
+
+              console.log('serverStatus.repl----------------------');
+              console.log(serverStatus.repl);
+              console.log('----------------------');
             } catch (serverStatusError) {
+
+              console.log('serverStatusError----------------------');
+              console.log(serverStatusError);
+              console.log('----------------------');
               expect(serverStatusError).to.not.exist;
             }
 
