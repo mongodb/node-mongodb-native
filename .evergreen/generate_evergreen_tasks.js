@@ -18,7 +18,7 @@ function updateExpansions(expansions) {
 
 const csfleTasks = [];
 
-const FLE_PINNED_COMMIT = '974a4614f8c1c3786e5e39fa63568d83f4f69ebd';
+const FLE_PINNED_COMMIT = '51e172622a0ddf2bf761e4d1e26ca267359086dd';
 
 for (const version of ['5.0', 'rapid', 'latest']) {
   for (const ref of [FLE_PINNED_COMMIT, 'master']) {
