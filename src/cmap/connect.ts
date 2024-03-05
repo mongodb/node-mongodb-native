@@ -319,7 +319,6 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
   const useTLS = options.tls ?? false;
   const noDelay = options.noDelay ?? true;
   const connectTimeoutMS = options.connectTimeoutMS ?? 30000;
-  const rejectUnauthorized = options.rejectUnauthorized ?? true;
   const existingSocket = options.existingSocket;
 
   let socket: Stream;
