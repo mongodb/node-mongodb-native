@@ -157,18 +157,16 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
 }
 
 let isDocker: boolean;
-let dockerPromise: Promise<void>;
+let dockerPromise: Promise<boolean>;
 /** @internal */
 async function getContainerMetadata() {
   const containerMetadata: Record<string, any> = {};
   if (isDocker == null) {
-    dockerPromise ??= fs.access('/.dockerenv');
-    try {
-      await dockerPromise;
-      isDocker = true;
-    } catch {
-      isDocker = false;
-    }
+    dockerPromise ??= fs.access('/.dockerenv').then(
+      () => true,
+      () => false
+    );
+    isDocker = await dockerPromise;
   }
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
