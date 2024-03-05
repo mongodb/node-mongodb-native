@@ -22,6 +22,7 @@ import {
   TOPOLOGY_OPENING
 } from '../constants';
 import {
+  type AnyError,
   MongoCompatibilityError,
   type MongoDriverError,
   MongoError,
@@ -107,7 +108,7 @@ export interface ServerSelectionRequest {
   transaction?: Transaction;
   startTime: number;
   resolve: (server: Server) => void;
-  reject: (reason?: any) => void;
+  reject: (error?: AnyError) => void;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
   operationName: string;
