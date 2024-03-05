@@ -88,15 +88,17 @@ describe('MONGODB-AWS', function () {
   });
 
   describe('with missing aws token', () => {
-    let awsSessionToken;
+    let awsSessionToken: string | undefined;
 
-    beforeEach(function () {
+    beforeEach(() => {
       awsSessionToken = process.env.AWS_SESSION_TOKEN;
       delete process.env.AWS_SESSION_TOKEN;
     });
 
-    afterEach(async () => {
-      process.env.AWS_SESSION_TOKEN = awsSessionToken;
+    afterEach(() => {
+      if (awsSessionToken != null) {
+        process.env.AWS_SESSION_TOKEN = awsSessionToken;
+      }
     });
 
     it('should not throw an exception when aws token is missing', async function () {
