@@ -544,7 +544,10 @@ export function parseOptions(
   );
 
   mongoOptions.metadata = makeClientMetadata(mongoOptions);
-  mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata);
+
+  mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).catch(() => {
+    /* rejections will be handled later */
+  });
 
   return mongoOptions;
 }
