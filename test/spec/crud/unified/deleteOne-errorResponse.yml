@@ -1,0 +1,46 @@
+description: "deleteOne-errorResponse"
+
+schemaVersion: "1.12"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+tests:
+  # Some drivers may still need to skip this test because the CRUD spec does not
+  # prescribe how drivers should formulate a WriteException beyond collecting a
+  # write or write concern error.
+  - description: "delete operations support errorResponse assertions"
+    runOnRequirements:
+      - minServerVersion: "4.0.0"
+        topologies: [ single, replicaset ]
+      - minServerVersion: "4.2.0"
+        topologies: [ sharded ]
+    operations:
+      - name: failPoint
+        object: testRunner
+        arguments:
+          client: *client0
+          failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+              failCommands: [ delete ]
+              errorCode: &errorCode 8 # UnknownError
+      - name: deleteOne
+        object: *collection0
+        arguments:
+          filter: { _id: 1 }
+        expectError:
+          errorCode: *errorCode
+          errorResponse:
+            code: *errorCode
