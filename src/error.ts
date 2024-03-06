@@ -200,6 +200,7 @@ export class MongoError extends Error {
  * @category Error
  */
 export class MongoServerError extends MongoError {
+  /** Raw error result document returned by server. */
   errorResponse?: ErrorDescription;
   codeName?: string;
   writeConcernError?: Document;
