@@ -425,6 +425,10 @@ describe('CRUD spec v1', function () {
   }
 });
 
+// The Node driver does not have a Collection.modifyCollection helper.
+const SKIPPED_TESTS = ['findOneAndUpdate document validation errInfo is accessible'];
 describe('CRUD unified', function () {
-  runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')));
+  runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')), ({ description }) =>
+    SKIPPED_TESTS.includes(description) ? `the Node driver does not have a collMod helper.` : false
+  );
 });

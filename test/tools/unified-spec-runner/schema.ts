@@ -368,6 +368,7 @@ export interface ExpectedError {
   errorLabelsContain?: string[];
   errorLabelsOmit?: string[];
   expectResult?: unknown;
+  errorResponse?: Document;
 }
 
 export interface ExpectedLogMessage {
