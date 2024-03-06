@@ -45,7 +45,7 @@ operations.set('createEntities', async ({ entities, operation, testConfig }) => 
   if (!operation.arguments?.entities) {
     throw new Error('encountered createEntities operation without entities argument');
   }
-  await EntitiesMap.createEntities(testConfig, operation.arguments.entities!, entities);
+  await EntitiesMap.createEntities(testConfig, null, operation.arguments.entities!, entities);
 });
 
 operations.set('abortTransaction', async ({ entities, operation }) => {
