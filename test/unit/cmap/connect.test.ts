@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { promisify } from 'util';
 
 import {
+  addContainerMetadata,
   CancellationToken,
   type ClientMetadata,
   connect,
@@ -24,6 +25,7 @@ const CONNECT_DEFAULTS = {
   generation: 1,
   monitorCommands: false,
   metadata: {} as ClientMetadata,
+  extendedMetadata: addContainerMetadata({} as ClientMetadata),
   loadBalanced: false
 };
 
@@ -212,13 +214,17 @@ describe('Connect Tests', function () {
       const cachedEnv = process.env;
 
       context('when only kubernetes is present', () => {
-        const authContext = {
-          connection: {},
-          options: { ...CONNECT_DEFAULTS }
-        };
+        let authContext;
 
         beforeEach(() => {
           process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+          authContext = {
+            connection: {},
+            options: {
+              ...CONNECT_DEFAULTS,
+              extendedMetadata: addContainerMetadata({} as ClientMetadata)
+            }
+          };
         });
 
         afterEach(() => {
@@ -227,6 +233,7 @@ describe('Connect Tests', function () {
           } else {
             delete process.env.KUBERNETES_SERVICE_HOST;
           }
+          authContext = {};
         });
 
         it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
@@ -238,16 +245,36 @@ describe('Connect Tests', function () {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument.client.env).to.not.have.property('name');
         });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not 'env' property in client`, async () => {
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            const longAppName = 's'.repeat(493);
+            const longAuthContext = {
+              connection: {},
+              options: {
+                ...CONNECT_DEFAULTS,
+                extendedMetadata: addContainerMetadata({ appName: longAppName })
+              }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
       });
 
       context('when kubernetes and FAAS are both present', () => {
-        const authContext = {
-          connection: {},
-          options: { ...CONNECT_DEFAULTS, metadata: { env: { name: 'aws.lambda' } } }
-        };
+        let authContext;
 
         beforeEach(() => {
           process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+          authContext = {
+            connection: {},
+            options: {
+              ...CONNECT_DEFAULTS,
+              extendedMetadata: addContainerMetadata({ env: { name: 'aws.lambda' } })
+            }
+          };
         });
 
         afterEach(() => {
@@ -256,6 +283,7 @@ describe('Connect Tests', function () {
           } else {
             delete process.env.KUBERNETES_SERVICE_HOST;
           }
+          authContext = {};
         });
 
         it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
@@ -266,6 +294,26 @@ describe('Connect Tests', function () {
         it(`should still have properly set 'name' property in client.env `, async () => {
           const handshakeDocument = await prepareHandshakeDocument(authContext);
           expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+        });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not have 'container' property in client.env`, async () => {
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            const longAppName = 's'.repeat(447);
+            const longAuthContext = {
+              connection: {},
+              options: {
+                ...CONNECT_DEFAULTS,
+                extendedMetadata: {
+                  appName: longAppName,
+                  env: { name: 'aws.lambda' }
+                } as unknown as Promise<Document>
+              }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+            expect(handshakeDocument.client.env).to.not.have.property('container');
+          });
         });
       });
 

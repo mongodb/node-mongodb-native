@@ -757,6 +757,8 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /** @internal */
+  extendedMetadata: Promise<Document>;
   /**
    * @deprecated This option will be removed in the next major version.
    */
