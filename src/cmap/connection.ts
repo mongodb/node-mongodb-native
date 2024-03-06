@@ -1,6 +1,5 @@
 import { type Readable, Transform, type TransformCallback } from 'stream';
 import { clearTimeout, setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document, ObjectId } from '../bson';
 import type { AutoEncrypter } from '../client-side-encryption/auto_encrypter';
@@ -182,18 +181,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    * Once connection is established, command logging can log events (if enabled)
    */
   public established: boolean;
+  /** Indicates that the connection (including underlying TCP socket) has been closed. */
+  public closed = false;
 
   private lastUseTime: number;
   private clusterTime: Document | null = null;
+  private error: Error | null = null;
+  private dataEvents: AsyncGenerator<Buffer, void, void> | null = null;
 
   private readonly socketTimeoutMS: number;
   private readonly monitorCommands: boolean;
   private readonly socket: Stream;
-  private readonly controller: AbortController;
-  private readonly signal: AbortSignal;
   private readonly messageStream: Readable;
-  private readonly socketWrite: (buffer: Uint8Array) => Promise<void>;
-  private readonly aborted: Promise<never>;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -213,6 +212,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   constructor(stream: Stream, options: ConnectionOptions) {
     super();
 
+    this.socket = stream;
     this.id = options.id;
     this.address = streamIdentifier(stream, options);
     this.socketTimeoutMS = options.socketTimeoutMS ?? 0;
@@ -225,39 +225,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.generation = options.generation;
     this.lastUseTime = now();
 
-    this.socket = stream;
-
-    // TODO: Remove signal from connection layer
-    this.controller = new AbortController();
-    const { signal } = this.controller;
-    this.signal = signal;
-    const { promise: aborted, reject } = promiseWithResolvers<never>();
-    aborted.then(undefined, () => null); // Prevent unhandled rejection
-    this.signal.addEventListener(
-      'abort',
-      function onAbort() {
-        reject(signal.reason);
-      },
-      { once: true }
-    );
-    this.aborted = aborted;
-
     this.messageStream = this.socket
       .on('error', this.onError.bind(this))
       .pipe(new SizedMessageTransform({ connection: this }))
       .on('error', this.onError.bind(this));
     this.socket.on('close', this.onClose.bind(this));
     this.socket.on('timeout', this.onTimeout.bind(this));
-
-    const socketWrite = promisify(this.socket.write.bind(this.socket));
-    this.socketWrite = async buffer => {
-      return Promise.race([socketWrite(buffer), this.aborted]);
-    };
-  }
-
-  /** Indicates that the connection (including underlying TCP socket) has been closed. */
-  public get closed(): boolean {
-    return this.signal.aborted;
   }
 
   public get hello() {
@@ -357,7 +330,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
 
     this.socket.destroy();
-    this.controller.abort(error);
+    if (error) {
+      this.error = error;
+      this.dataEvents?.throw(error).then(undefined, () => null); // squash unhandled rejection
+    }
+    this.closed = true;
     this.emit(Connection.CLOSE);
   }
 
@@ -598,7 +575,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   }
 
   private throwIfAborted() {
-    this.signal.throwIfAborted();
+    if (this.error) throw this.error;
   }
 
   /**
@@ -621,7 +598,18 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
-    return this.socketWrite(buffer);
+    if (this.socket.write(buffer)) return;
+
+    const { promise: drained, resolve, reject } = promiseWithResolvers<void>();
+    const onDrain = () => resolve();
+    const onError = (error: Error) => reject(error);
+
+    this.socket.once('drain', onDrain).once('error', onError);
+    try {
+      return await drained;
+    } finally {
+      this.socket.off('drain', onDrain).off('error', onError);
+    }
   }
 
   /**
@@ -634,13 +622,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
   private async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
-    for await (const message of onData(this.messageStream, { signal: this.signal })) {
-      const response = await decompressResponse(message);
-      yield response;
+    try {
+      this.dataEvents = this.dataEvents = onData(this.messageStream);
+      for await (const message of this.dataEvents) {
+        const response = await decompressResponse(message);
+        yield response;
 
-      if (!response.moreToCome) {
-        return;
+        if (!response.moreToCome) {
+          return;
+        }
       }
+    } finally {
+      this.dataEvents = null;
+      this.throwIfAborted();
     }
   }
 }
