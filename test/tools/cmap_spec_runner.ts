@@ -205,8 +205,8 @@ const getTestOpDefinitions = (threadContext: ThreadContext) => ({
   clear: function ({ interruptInUseConnections }: { interruptInUseConnections: boolean }) {
     return threadContext.pool.clear({ interruptInUseConnections });
   },
-  close: async function () {
-    return await promisify(ConnectionPool.prototype.close).call(threadContext.pool);
+  close: function () {
+    return ConnectionPool.prototype.close.call(threadContext.pool);
   },
   ready: function () {
     return threadContext.pool.ready();
@@ -328,28 +328,20 @@ export class ThreadContext {
 
   closePool() {
     this.#server.pool = this.#originalServerPool;
-    return new Promise(resolve => {
-      ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
-      this.pool.close(resolve);
-    });
+    ALL_POOL_EVENTS.forEach(ev => this.pool.removeAllListeners(ev));
+    this.pool.close();
   }
 
   async tearDown() {
     if (this.pool) {
-      await this.closePool();
+      this.closePool();
     }
     const connectionsToDestroy = Array.from(this.orphans).concat(
       Array.from(this.connections.values())
     );
-    const promises = connectionsToDestroy.map(conn => {
-      return new Promise<void>((resolve, reject) =>
-        conn.destroy({ force: true }, err => {
-          if (err) return reject(err);
-          resolve();
-        })
-      );
-    });
-    await Promise.all(promises);
+    for (const conn of connectionsToDestroy) {
+      conn.destroy();
+    }
     this.poolEventsEventEmitter.removeAllListeners();
   }
 }
