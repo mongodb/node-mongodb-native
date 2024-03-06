@@ -160,8 +160,15 @@ async function runUnifiedTest(
       }
     }
 
+    const ping = await utilClient.db().admin().command({ ping: 1 });
+    const clusterTime = ping.$clusterTime;
+
     trace('createEntities');
-    entities = await EntitiesMap.createEntities(ctx.configuration, unifiedSuite.createEntities);
+    entities = await EntitiesMap.createEntities(
+      ctx.configuration,
+      clusterTime,
+      unifiedSuite.createEntities
+    );
 
     // Workaround for SERVER-39704:
     // test runners MUST execute a non-transactional distinct command on
