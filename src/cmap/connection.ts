@@ -623,7 +623,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    */
   private async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
     try {
-      this.dataEvents = this.dataEvents = onData(this.messageStream);
+      this.dataEvents = onData(this.messageStream);
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
         yield response;
