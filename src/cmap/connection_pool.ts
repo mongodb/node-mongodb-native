@@ -500,13 +500,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   /** Close the pool */
-  close(_options?: CloseOptions): void {
-    let options = _options as CloseOptions;
-    if (typeof options === 'function') {
-      options = {};
-    }
-
-    options = Object.assign({ force: false }, options);
+  close(): void {
     if (this.closed) {
       return;
     }
@@ -583,7 +577,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionClosedEvent(this, connection, reason)
     );
     // destroy the connection
-    process.nextTick(() => connection.destroy());
+    connection.destroy();
   }
 
   private connectionIsStale(connection: Connection) {

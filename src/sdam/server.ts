@@ -1,6 +1,6 @@
 import type { Document } from '../bson';
 import { type AutoEncrypter } from '../client-side-encryption/auto_encrypter';
-import { type CommandOptions, Connection, type DestroyOptions } from '../cmap/connection';
+import { type CommandOptions, Connection } from '../cmap/connection';
 import {
   ConnectionPool,
   type ConnectionPoolEvents,
@@ -235,9 +235,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   }
 
   /** Destroy the server connection */
-  destroy(options?: DestroyOptions): void {
-    options = Object.assign({}, { force: false }, options);
-
+  destroy(): void {
     if (this.s.state === STATE_CLOSED) {
       return;
     }
@@ -248,7 +246,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.monitor?.close();
     }
 
-    this.pool.close(options);
+    this.pool.close();
     stateTransition(this, STATE_CLOSED);
     this.emit('closed');
   }

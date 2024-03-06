@@ -2,8 +2,8 @@ import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
-import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import type { ConnectionEvents } from '../cmap/connection';
+import type { ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
@@ -468,7 +468,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       selectServerOptions,
       (err, server) => {
         if (err) {
-          return this.close({ force: false }, () => exitWithError(err));
+          this.close();
+          exitWithError(err);
         }
 
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
@@ -494,15 +495,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Close this topology */
-  close(options?: CloseOptions): void {
-    options = options ?? { force: false };
-
+  close(): void {
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
       return;
     }
 
     for (const server of this.s.servers.values()) {
-      destroyServer(server, this, { force: !!options?.force });
+      destroyServer(server, this);
     }
 
     this.s.servers.clear();
@@ -766,30 +765,20 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 }
 
 /** Destroys a server, and removes all event listeners from the instance */
-function destroyServer(
-  server: Server,
-  topology: Topology,
-  options?: DestroyOptions,
-  callback?: Callback
-) {
-  options = options ?? { force: false };
+function destroyServer(server: Server, topology: Topology) {
   for (const event of LOCAL_SERVER_EVENTS) {
     server.removeAllListeners(event);
   }
 
-  server.destroy(options, () => {
-    topology.emitAndLog(
-      Topology.SERVER_CLOSED,
-      new ServerClosedEvent(topology.s.id, server.description.address)
-    );
+  server.destroy();
+  topology.emitAndLog(
+    Topology.SERVER_CLOSED,
+    new ServerClosedEvent(topology.s.id, server.description.address)
+  );
 
-    for (const event of SERVER_RELAY_EVENTS) {
-      server.removeAllListeners(event);
-    }
-    if (typeof callback === 'function') {
-      callback();
-    }
-  });
+  for (const event of SERVER_RELAY_EVENTS) {
+    server.removeAllListeners(event);
+  }
 }
 
 /** Predicts the TopologyType from options */
