@@ -1,7 +1,8 @@
+import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as process from 'process';
 
-import { BSON, Int32 } from '../../bson';
+import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
 
@@ -71,13 +72,13 @@ export class LimitedSizeDocument {
     return true;
   }
 
-  toObject(): ClientMetadata {
+  toObject(): Document {
     return BSON.deserialize(BSON.serialize(this.document), {
       promoteLongs: false,
       promoteBuffers: false,
       promoteValues: false,
       useBigInt64: false
-    }) as ClientMetadata;
+    });
   }
 }
 
@@ -152,8 +153,57 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
       }
     }
   }
+  return metadataDocument.toObject() as ClientMetadata;
+}
 
-  return metadataDocument.toObject();
+let dockerPromise: Promise<boolean>;
+/** @internal */
+async function getContainerMetadata() {
+  const containerMetadata: Record<string, any> = {};
+  dockerPromise ??= fs.access('/.dockerenv').then(
+    () => true,
+    () => false
+  );
+  const isDocker = await dockerPromise;
+
+  const { KUBERNETES_SERVICE_HOST = '' } = process.env;
+  const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;
+
+  if (isDocker) containerMetadata.runtime = 'docker';
+  if (isKubernetes) containerMetadata.orchestrator = 'kubernetes';
+
+  return containerMetadata;
+}
+
+/**
+ * @internal
+ * Re-add each metadata value.
+ * Attempt to add new env container metadata, but keep old data if it does not fit.
+ */
+export async function addContainerMetadata(originalMetadata: ClientMetadata) {
+  const containerMetadata = await getContainerMetadata();
+  if (Object.keys(containerMetadata).length === 0) return originalMetadata;
+
+  const extendedMetadata = new LimitedSizeDocument(512);
+
+  const extendedEnvMetadata = { ...originalMetadata?.env, container: containerMetadata };
+
+  for (const [key, val] of Object.entries(originalMetadata)) {
+    if (key !== 'env') {
+      extendedMetadata.ifItFitsItSits(key, val);
+    } else {
+      if (!extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata)) {
+        // add in old data if newer / extended metadata does not fit
+        extendedMetadata.ifItFitsItSits('env', val);
+      }
+    }
+  }
+
+  if (!('env' in originalMetadata)) {
+    extendedMetadata.ifItFitsItSits('env', extendedEnvMetadata);
+  }
+
+  return extendedMetadata.toObject();
 }
 
 /**

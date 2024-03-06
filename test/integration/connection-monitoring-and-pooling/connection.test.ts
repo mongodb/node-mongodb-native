@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 
 import {
+  addContainerMetadata,
   connect,
   Connection,
   type ConnectionOptions,
@@ -50,7 +51,8 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
@@ -72,7 +74,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
