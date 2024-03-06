@@ -68,8 +68,15 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
     throw new MongoAPIError('URI must include hostname, domain name, and tld');
   }
 
-  // Resolve the SRV record and use the result as the list of hosts to connect to.
+  // Asynchronously start TXT resolution so that we do not have to wait until
+  // the SRV record is resolved before starting a second DNS query.
   const lookupAddress = options.srvHost;
+  const txtResolutionPromise = dns.promises.resolveTxt(lookupAddress);
+  txtResolutionPromise.catch(() => {
+    /* rejections will be handled later */
+  });
+
+  // Resolve the SRV record and use the result as the list of hosts to connect to.
   const addresses = await dns.promises.resolveSrv(
     `_${options.srvServiceName}._tcp.${lookupAddress}`
   );
@@ -88,10 +95,10 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
 
   validateLoadBalancedOptions(hostAddresses, options, true);
 
-  // Resolve TXT record and add options from there if they exist.
+  // Use the result of resolving the TXT record and add options from there if they exist.
   let record;
   try {
-    record = await dns.promises.resolveTxt(lookupAddress);
+    record = await txtResolutionPromise;
   } catch (error) {
     if (error.code !== 'ENODATA' && error.code !== 'ENOTFOUND') {
       throw error;
