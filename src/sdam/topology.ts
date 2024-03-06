@@ -469,7 +469,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       (err, server) => {
         if (err) {
           this.close();
-          exitWithError(err);
+          return exitWithError(err);
         }
 
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
