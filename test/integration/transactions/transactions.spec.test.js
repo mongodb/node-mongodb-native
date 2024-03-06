@@ -1,6 +1,6 @@
 'use strict';
 
-import { gte } from 'semver';
+const { gte } = require('semver');
 
 const path = require('path');
 const { expect } = require('chai');
