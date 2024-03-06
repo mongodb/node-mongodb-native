@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { EventEmitter } from 'events';
 import { clearTimeout, setTimeout } from 'timers';
-import { promisify } from 'util';
 
 import {
   CMAP_EVENTS,
