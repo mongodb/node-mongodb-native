@@ -115,7 +115,8 @@ describe('Polling Srv Records for Mongos Discovery', () => {
 
     afterEach(function (done) {
       if (context.topology) {
-        context.topology.close({}, done);
+        context.topology.close();
+        done();
       } else {
         done();
       }
