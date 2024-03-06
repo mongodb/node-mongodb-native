@@ -552,7 +552,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       try {
         await promisify(callback => this.topology?.connect(options, callback))();
       } catch (error) {
-        this.topology?.close({ force: true });
+        this.topology?.close();
         throw error;
       }
     };

@@ -361,7 +361,7 @@ describe('MongoErrors', () => {
         // cleanup the server before calling done
         const cleanup = err => {
           topology.close();
-          done();
+          done(err);
         };
 
         if (err) {
