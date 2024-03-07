@@ -16,7 +16,7 @@ type PendingPromises = Omit<
  * https://nodejs.org/api/events.html#eventsonemitter-eventname-options
  *
  * Returns an AsyncIterator that iterates each 'data' event emitted from emitter.
- * It will reject upon an error event or if the provided signal is aborted.
+ * It will reject upon an error event.
  */
 export function onData(emitter: EventEmitter) {
   // Setup pending events and pending promise lists
