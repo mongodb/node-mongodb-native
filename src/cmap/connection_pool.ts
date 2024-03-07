@@ -232,8 +232,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       maxIdleTimeMS: options.maxIdleTimeMS ?? 0,
       waitQueueTimeoutMS: options.waitQueueTimeoutMS ?? 0,
       minPoolSizeCheckFrequencyMS: options.minPoolSizeCheckFrequencyMS ?? 100,
-      autoEncrypter: options.autoEncrypter,
-      metadata: options.metadata
+      autoEncrypter: options.autoEncrypter
     });
 
     if (this.options.minPoolSize > this.options.maxPoolSize) {
