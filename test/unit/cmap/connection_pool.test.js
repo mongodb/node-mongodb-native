@@ -23,7 +23,9 @@ describe('Connection Pool', function () {
         s: {
           authProviders: new MongoClientAuthProviders()
         },
-        options: {}
+        options: {
+          extendedMetadata: {}
+        }
       }
     }
   };

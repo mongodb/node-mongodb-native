@@ -828,6 +828,8 @@ export interface MongoOptions
   dbName: string;
   metadata: ClientMetadata;
   /** @internal */
+  extendedMetadata: Promise<Document>;
+  /** @internal */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;
   proxyPort?: number;

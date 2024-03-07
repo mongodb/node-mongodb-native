@@ -7,6 +7,7 @@ import {
   ChangeStream,
   ClientEncryption,
   ClientSession,
+  type ClusterTime,
   Collection,
   type CommandFailedEvent,
   type CommandStartedEvent,
@@ -556,6 +557,7 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
 
   static async createEntities(
     config: TestConfiguration,
+    clusterTime: ClusterTime | null,
     entities?: EntityDescription[],
     entityMap?: EntitiesMap
   ): Promise<EntitiesMap> {
@@ -627,6 +629,10 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
           }
         }
         const session = client.startSession(options);
+        // Advance the session cluster time. See DRIVERS-2816.
+        if (clusterTime) {
+          session.advanceClusterTime(clusterTime);
+        }
         map.set(entity.session.id, session);
       } else if ('bucket' in entity) {
         const db = map.getEntity('db', entity.bucket.database);
