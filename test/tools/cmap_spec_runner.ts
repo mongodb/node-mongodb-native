@@ -4,6 +4,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { promisify } from 'util';
 
 import {
+  addContainerMetadata,
   CMAP_EVENTS,
   type Connection,
   ConnectionPool,
@@ -369,6 +370,7 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   }
 
   const metadata = makeClientMetadata({ appName: poolOptions.appName, driverInfo: {} });
+  const extendedMetadata = addContainerMetadata(metadata);
   delete poolOptions.appName;
 
   const operations = test.operations;
@@ -380,7 +382,12 @@ async function runCmapTest(test: CmapTest, threadContext: ThreadContext) {
   const mainThread = threadContext.getThread(MAIN_THREAD_KEY);
   mainThread.start();
 
-  threadContext.createPool({ ...poolOptions, metadata, minPoolSizeCheckFrequencyMS });
+  threadContext.createPool({
+    ...poolOptions,
+    metadata,
+    extendedMetadata,
+    minPoolSizeCheckFrequencyMS
+  });
   // yield control back to the event loop so that the ConnectionPoolCreatedEvent
   // has a chance to be fired before any synchronously-emitted events from
   // the queued operations

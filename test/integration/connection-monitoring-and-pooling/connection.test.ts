@@ -1,6 +1,11 @@
 import { expect } from 'chai';
+import { type EventEmitter, once } from 'events';
+import * as sinon from 'sinon';
+import { setTimeout } from 'timers';
 
 import {
+  addContainerMetadata,
+  Binary,
   connect,
   Connection,
   type ConnectionOptions,
@@ -14,7 +19,9 @@ import {
   ServerHeartbeatStartedEvent,
   Topology
 } from '../../mongodb';
+import * as mock from '../../tools/mongodb-mock/index';
 import { skipBrokenAuthTestBeforeEachHook } from '../../tools/runner/hooks/configuration';
+import { getSymbolFrom, sleep } from '../../tools/utils';
 import { assert as test, setupDatabase } from '../shared';
 
 const commonConnectOptions = {
@@ -50,7 +57,8 @@ describe('Connection', function () {
           ...commonConnectOptions,
           connectionType: Connection,
           ...this.configuration.options,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
@@ -72,7 +80,8 @@ describe('Connection', function () {
           connectionType: Connection,
           ...this.configuration.options,
           monitorCommands: true,
-          metadata: makeClientMetadata({ driverInfo: {} })
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
         };
 
         let conn;
@@ -196,6 +205,84 @@ describe('Connection', function () {
 
       client.connect();
     });
+
+    context(
+      'when a large message is written to the socket',
+      { requires: { topology: 'single', auth: 'disabled' } },
+      () => {
+        let client, mockServer: import('../../tools/mongodb-mock/src/server').MockServer;
+
+        beforeEach(async function () {
+          mockServer = await mock.createServer();
+
+          mockServer
+            .addMessageHandler('insert', req => {
+              setTimeout(() => {
+                req.reply({ ok: 1 });
+              }, 800);
+            })
+            .addMessageHandler('hello', req => {
+              req.reply(Object.assign({}, mock.HELLO));
+            })
+            .addMessageHandler(LEGACY_HELLO_COMMAND, req => {
+              req.reply(Object.assign({}, mock.HELLO));
+            });
+
+          client = new MongoClient(`mongodb://${mockServer.uri()}`, {
+            minPoolSize: 1,
+            maxPoolSize: 1
+          });
+        });
+
+        afterEach(async function () {
+          await client.close();
+          mockServer.destroy();
+          sinon.restore();
+        });
+
+        it('waits for an async drain event because the write was buffered', async () => {
+          const connectionReady = once(client, 'connectionReady');
+          await client.connect();
+          await connectionReady;
+
+          // Get the only connection
+          const pool = [...client.topology.s.servers.values()][0].pool;
+
+          const connections = pool[getSymbolFrom(pool, 'connections')];
+          expect(connections).to.have.lengthOf(1);
+
+          const connection = connections.first();
+          const socket: EventEmitter = connection.socket;
+
+          // Spy on the socket event listeners
+          const addedListeners: string[] = [];
+          const removedListeners: string[] = [];
+          socket
+            .on('removeListener', name => removedListeners.push(name))
+            .on('newListener', name => addedListeners.push(name));
+
+          // Make server sockets block
+          for (const s of mockServer.sockets) s.pause();
+
+          const insert = client
+            .db('test')
+            .collection('test')
+            // Anything above 16Kb should work I think (10mb to be extra sure)
+            .insertOne({ a: new Binary(Buffer.alloc(10 * (2 ** 10) ** 2), 127) });
+
+          // Sleep a bit and unblock server sockets
+          await sleep(10);
+          for (const s of mockServer.sockets) s.resume();
+
+          // Let the operation finish
+          await insert;
+
+          // Ensure that we used the drain event for this write
+          expect(addedListeners).to.deep.equal(['drain', 'error']);
+          expect(removedListeners).to.deep.equal(['drain', 'error']);
+        });
+      }
+    );
 
     context('when connecting with a username and password', () => {
       let utilClient: MongoClient;

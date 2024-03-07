@@ -852,9 +852,8 @@ describe('MongoClient', function () {
             });
             const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
             client.options.mongoLoggerOptions.logDestination.write(log);
-            expect(stderrStub.write).calledWith(
-              inspect(log, { breakLength: Infinity, compact: true })
-            );
+            const logLine = inspect(log, { breakLength: Infinity, compact: true });
+            expect(stderrStub.write).calledWith(`${logLine}\n`);
           });
         });
 
@@ -882,9 +881,8 @@ describe('MongoClient', function () {
             });
             const log = { t: new Date(), c: 'constructorStdOut', s: 'error' };
             client.options.mongoLoggerOptions.logDestination.write(log);
-            expect(stdoutStub.write).calledWith(
-              inspect(log, { breakLength: Infinity, compact: true })
-            );
+            const logLine = inspect(log, { breakLength: Infinity, compact: true });
+            expect(stdoutStub.write).calledWith(`${logLine}\n`);
           });
         });
 
@@ -939,9 +937,8 @@ describe('MongoClient', function () {
           });
           const log = { t: new Date(), c: 'constructorStdErr', s: 'error' };
           client.options.mongoLoggerOptions.logDestination.write(log);
-          expect(stderrStub.write).calledWith(
-            inspect(log, { breakLength: Infinity, compact: true })
-          );
+          const logLine = inspect(log, { breakLength: Infinity, compact: true });
+          expect(stderrStub.write).calledWith(`${logLine}\n`);
         });
       });
     });

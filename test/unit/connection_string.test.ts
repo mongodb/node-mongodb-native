@@ -896,7 +896,8 @@ describe('Connection String', function () {
         });
         const log: Log = { t: new Date(), c: 'ConnectionStringStdErr', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stderrStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+        const logLine = inspect(log, { breakLength: Infinity, compact: true });
+        expect(stderrStub.write).calledWith(`${logLine}\n`);
       });
     });
 
@@ -907,7 +908,8 @@ describe('Connection String', function () {
         });
         const log: Log = { t: new Date(), c: 'ConnectionStringStdOut', s: 'error' };
         client.options.mongoLoggerOptions.logDestination.write(log);
-        expect(stdoutStub.write).calledWith(inspect(log, { breakLength: Infinity, compact: true }));
+        const logLine = inspect(log, { breakLength: Infinity, compact: true });
+        expect(stdoutStub.write).calledWith(`${logLine}\n`);
       });
     });
 
