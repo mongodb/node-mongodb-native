@@ -281,7 +281,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.lastUseTime = now();
   }
 
-  public onError(error?: Error) {
+  public onError(error: Error) {
     this.cleanup(error);
   }
 
@@ -324,18 +324,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * This method does nothing if the connection is already closed.
    */
-  private cleanup(error?: Error): void {
+  private cleanup(error: Error): void {
     if (this.closed) {
       return;
     }
 
     this.socket.destroy();
-    if (error) {
-      this.error = error;
-      this.dataEvents?.throw(error).then(undefined, () => null); // squash unhandled rejection
-    } else {
-      this.dataEvents?.return().then(undefined, () => null); // squash unhandled rejection
-    }
+    this.error = error;
+    this.dataEvents?.throw(error).then(undefined, () => null); // squash unhandled rejection
     this.closed = true;
     this.emit(Connection.CLOSE);
   }
