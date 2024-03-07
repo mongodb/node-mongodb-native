@@ -1,0 +1,15 @@
+description: "expectedError-errorResponse-type"
+
+schemaVersion: "1.12"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+
+tests:
+  - description: "foo"
+    operations:
+      - name: "foo"
+        object: *client0
+        expectError:
+          errorResponse: 0
