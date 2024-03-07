@@ -124,7 +124,7 @@ export interface ConnectionOptions
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
   /** @internal */
-  directConnection?: boolean;
+  directConnection: boolean;
 }
 
 /** @internal */
