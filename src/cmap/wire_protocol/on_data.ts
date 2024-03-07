@@ -16,11 +16,9 @@ type PendingPromises = Omit<
  * https://nodejs.org/api/events.html#eventsonemitter-eventname-options
  *
  * Returns an AsyncIterator that iterates each 'data' event emitted from emitter.
- * It will reject upon an error event or if the provided signal is aborted.
+ * It will reject upon an error event.
  */
-export function onData(emitter: EventEmitter, options: { signal: AbortSignal }) {
-  const signal = options.signal;
-
+export function onData(emitter: EventEmitter) {
   // Setup pending events and pending promise lists
   /**
    * When the caller has not yet called .next(), we store the
@@ -89,18 +87,7 @@ export function onData(emitter: EventEmitter, options: { signal: AbortSignal }) 
   emitter.on('data', eventHandler);
   emitter.on('error', errorHandler);
 
-  if (signal.aborted) {
-    // If the signal is aborted, set up the first .next() call to be a rejection
-    queueMicrotask(abortListener);
-  } else {
-    signal.addEventListener('abort', abortListener, { once: true });
-  }
-
   return iterator;
-
-  function abortListener() {
-    errorHandler(signal.reason);
-  }
 
   function eventHandler(value: Buffer) {
     const promise = unconsumedPromises.shift();
@@ -119,7 +106,6 @@ export function onData(emitter: EventEmitter, options: { signal: AbortSignal }) 
     // Adding event handlers
     emitter.off('data', eventHandler);
     emitter.off('error', errorHandler);
-    signal.removeEventListener('abort', abortListener);
     finished = true;
     const doneResult = { value: undefined, done: finished } as const;
 
