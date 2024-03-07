@@ -36,7 +36,7 @@ import {
   maxWireVersion,
   type MongoDBNamespace,
   now,
-  promiseWithResolvers,
+  once,
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
@@ -333,6 +333,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     if (error) {
       this.error = error;
       this.dataEvents?.throw(error).then(undefined, () => null); // squash unhandled rejection
+    } else {
+      this.dataEvents?.return().then(undefined, () => null); // squash unhandled rejection
     }
     this.closed = true;
     this.emit(Connection.CLOSE);
@@ -599,17 +601,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const buffer = Buffer.concat(await finalCommand.toBin());
 
     if (this.socket.write(buffer)) return;
-
-    const { promise: drained, resolve, reject } = promiseWithResolvers<void>();
-    const onDrain = () => resolve();
-    const onError = (error: Error) => reject(error);
-
-    this.socket.once('drain', onDrain).once('error', onError);
-    try {
-      return await drained;
-    } finally {
-      this.socket.off('drain', onDrain).off('error', onError);
-    }
+    return once(this.socket, 'drain');
   }
 
   /**

@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
+import { type EventEmitter } from 'events';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
@@ -1295,3 +1296,27 @@ export function promiseWithResolvers<T>() {
 }
 
 export const randomBytes = promisify(crypto.randomBytes);
+
+/**
+ * Replicates the events.once helper.
+ *
+ * Removes unused signal logic and It **only** supports 0 or 1 argument events.
+ *
+ * @param ee - An event emitter that may emit `ev`
+ * @param name - An event name to wait for
+ */
+export async function once<T>(ee: EventEmitter, name: string): Promise<T> {
+  const { promise, resolve, reject } = promiseWithResolvers<T>();
+  const onEvent = (data: T) => resolve(data);
+  const onError = (error: Error) => reject(error);
+
+  ee.once(name, onEvent).once('error', onError);
+  try {
+    const res = await promise;
+    ee.off('error', onError);
+    return res;
+  } catch (error) {
+    ee.off(name, onEvent);
+    throw error;
+  }
+}
