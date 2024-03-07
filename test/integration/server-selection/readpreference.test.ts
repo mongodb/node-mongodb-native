@@ -431,7 +431,7 @@ describe('ReadPreference', function () {
   });
 
   it('should respect readPreference from uri', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    metadata: { requires: { topology: 'replicaset' } },
     test: async function () {
       const client = this.configuration.newClient({
         readPreference: 'secondary',
@@ -458,12 +458,13 @@ describe('ReadPreference', function () {
     }
   });
 
-  context('when connecting to a secondary in a replica set with a direct connection', () => {
+  context('when connecting to a secondary in a replica set with a direct connection', function () {
     context('when readPreference is primary', () => {
       it('should attach a read preference of primaryPreferred to the read command for replicaset', {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        metadata: { requires: { topology: 'replicaset' } },
         test: async function () {
           if (this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
+            this.skipReason = 'This test is supposed to run on the replicaset with primary';
             return this.skip();
           }
 
@@ -488,44 +489,26 @@ describe('ReadPreference', function () {
                 events.push(event);
               }
             });
-            let serverStatus;
 
-            try {
-              const admin = client.db().admin();
-              serverStatus = await admin.serverStatus();
-            } catch (serverStatusError) {
-              expect(serverStatusError).to.not.exist;
-            }
+            const admin = client.db().admin();
+            const serverStatus = await admin.serverStatus();
 
             if (server.toString() === serverStatus.repl.primary) {
-              let serverError;
-
-              try {
-                await client.db('test').collection('test').findOne({ a: 1 });
-              } catch (error) {
-                serverError = error;
-              }
-
-              expect(serverError).to.not.exist;
-              expect(events[0]).to.containSubset({
-                commandName: 'find',
-                command: {
-                  $readPreference: { mode: 'primaryPreferred' }
-                }
+              await client.db('test').collection('test').findOne({ a: 1 });
+              expect(events[0]).to.have.property('commandName', 'find');
+              expect(events[0]).to.have.deep.nested.property('command.$readPreference', {
+                mode: 'primaryPreferred'
               });
-
               checkedPrimary = true;
             }
-
             await client.close();
           }
-
           expect(checkedPrimary).to.be.equal(true);
         }
       });
 
       it('should not attach a read preference to the read command for standalone', {
-        metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
+        metadata: { requires: { topology: 'single' } },
         test: async function () {
           const client = this.configuration.newClient(
             {
@@ -542,27 +525,9 @@ describe('ReadPreference', function () {
               events.push(event);
             }
           });
-          let serverError;
-          try {
-            await client.db('test').collection('test').findOne({ a: 1 });
-          } catch (error) {
-            serverError = error;
-          }
-
-          expect(serverError).to.not.exist;
-          expect(events[0]).to.not.containSubset({
-            commandName: 'find',
-            command: {
-              $readPreference: { mode: 'primaryPreferred' }
-            }
-          });
-          expect(events[0]).to.not.containSubset({
-            commandName: 'find',
-            command: {
-              $readPreference: { mode: 'primary' }
-            }
-          });
-
+          await client.db('test').collection('test').findOne({ a: 1 });
+          expect(events[0]).to.have.property('commandName', 'find');
+          expect(events[0]).to.not.have.deep.nested.property('command.$readPreference');
           await client.close();
         }
       });
@@ -570,7 +535,7 @@ describe('ReadPreference', function () {
 
     context('when readPreference is secondary', () => {
       it('should attach a read preference of secondary to the read command for replicaset', {
-        metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+        metadata: { requires: { topology: 'replicaset' } },
         test: async function () {
           let checkedSecondary = false;
 
@@ -593,44 +558,26 @@ describe('ReadPreference', function () {
                 events.push(event);
               }
             });
-            let serverStatus;
 
-            try {
-              const admin = client.db().admin();
-              serverStatus = await admin.serverStatus();
-            } catch (serverStatusError) {
-              expect(serverStatusError).to.not.exist;
-            }
+            const admin = client.db().admin();
+            const serverStatus = await admin.serverStatus();
 
             if (serverStatus.repl.secondary) {
-              let serverError;
-
-              try {
-                await client.db('test').collection('test').findOne({ a: 1 });
-              } catch (error) {
-                serverError = error;
-              }
-
-              expect(serverError).to.not.exist;
-              expect(events[0]).to.containSubset({
-                commandName: 'find',
-                command: {
-                  $readPreference: { mode: 'secondary' }
-                }
+              await client.db('test').collection('test').findOne({ a: 1 });
+              expect(events[0]).to.have.property('commandName', 'find');
+              expect(events[0]).to.have.deep.nested.property('command.$readPreference', {
+                mode: 'secondary'
               });
-
               checkedSecondary = true;
             }
-
             await client.close();
           }
-
           expect(checkedSecondary).to.be.equal(true);
         }
       });
 
       it('should not attach a read preference to the read command for standalone', {
-        metadata: { requires: { topology: 'single', mongodb: '>=3.6' } },
+        metadata: { requires: { topology: 'single' } },
         test: async function () {
           const client = this.configuration.newClient(
             {
@@ -647,21 +594,9 @@ describe('ReadPreference', function () {
               events.push(event);
             }
           });
-          let serverError;
-          try {
-            await client.db('test').collection('test').findOne({ a: 1 });
-          } catch (error) {
-            serverError = error;
-          }
-
-          expect(serverError).to.not.exist;
-          expect(events[0]).to.not.containSubset({
-            commandName: 'find',
-            command: {
-              $readPreference: { mode: 'secondary' }
-            }
-          });
-
+          await client.db('test').collection('test').findOne({ a: 1 });
+          expect(events[0]).to.have.property('commandName', 'find');
+          expect(events[0]).to.not.have.deep.nested.property('command.$readPreference');
           await client.close();
         }
       });

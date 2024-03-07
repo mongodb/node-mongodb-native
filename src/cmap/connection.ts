@@ -121,7 +121,8 @@ export interface ConnectionOptions
   metadata: ClientMetadata;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
-  dierctConnection?: boolean;
+  /** @internal */
+  directConnection?: boolean;
 }
 
 /** @internal */

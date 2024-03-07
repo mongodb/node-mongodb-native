@@ -50,7 +50,7 @@ describe('Max Staleness', function () {
       }
     },
 
-    test: function () {
+    test: async function () {
       const self = this;
       const configuration = this.configuration;
       const client = configuration.newClient(
@@ -58,20 +58,13 @@ describe('Max Staleness', function () {
         { serverApi: null } // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       );
 
-      client.connect(async function (err, client) {
-        expect(err).to.not.exist;
-        const db = client.db(self.configuration.db);
-
-        try {
-          await db.collection('test').find({}).toArray();
-        } catch (err) {
-          expect(err).to.not.exist;
-        }
-
-        expect(test.checkCommand).to.containSubset({
-          $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-        });
+      await client.connect();
+      const db = client.db(self.configuration.db);
+      await db.collection('test').find({}).toArray();
+      expect(test.checkCommand).to.containSubset({
+        $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
       });
+      await client.close();
     }
   });
 
@@ -89,28 +82,17 @@ describe('Max Staleness', function () {
         serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       });
 
-      try {
-        await client.connect();
-      } catch (err) {
-        expect(err).to.not.exist;
-      }
+      await client.connect();
 
       // Get a db with a new readPreference
       const db1 = client.db('test', {
         readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
       });
-
-      try {
-        await db1.collection('test').find({}).toArray();
-      } catch (err) {
-        expect(err).to.not.exist;
-      }
-
+      await db1.collection('test').find({}).toArray();
       expect(test.checkCommand).to.containSubset({
         $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
       });
-
-      client.close();
+      await client.close();
     }
   });
 
@@ -131,31 +113,20 @@ describe('Max Staleness', function () {
           serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
         });
 
-        try {
-          await client.connect();
-        } catch (err) {
-          expect(err).to.not.exist;
-        }
-
+        await client.connect();
         const db = client.db(self.configuration.db);
 
-        try {
-          // Get a db with a new readPreference
-          await db
-            .collection('test', {
-              readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
-            })
-            .find({})
-            .toArray();
-        } catch (err) {
-          expect(err).to.not.exist;
-        }
-
+        // Get a db with a new readPreference
+        await db
+          .collection('test', {
+            readPreference: new ReadPreference('secondary', null, { maxStalenessSeconds: 250 })
+          })
+          .find({})
+          .toArray();
         expect(test.checkCommand).to.containSubset({
           $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
         });
-
-        client.close();
+        await client.close();
       }
     }
   );
@@ -175,28 +146,18 @@ describe('Max Staleness', function () {
         serverApi: null // TODO(NODE-3807): remove resetting serverApi when the usage of mongodb mock server is removed
       });
 
-      try {
-        await client.connect();
-      } catch (err) {
-        expect(err).to.not.exist;
-      }
-
+      await client.connect();
       const db = client.db(self.configuration.db);
       const readPreference = new ReadPreference('secondary', null, { maxStalenessSeconds: 250 });
 
-      try {
-        // Get a db with a new readPreference
-        await db.collection('test').find({}).withReadPreference(readPreference).toArray();
-      } catch (err) {
-        expect(err).to.not.exist;
-      }
+      // Get a db with a new readPreference
+      await db.collection('test').find({}).withReadPreference(readPreference).toArray();
 
       expect(test.checkCommand).to.containSubset({
         $query: { find: 'test', filter: {} },
         $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
       });
-
-      client.close();
+      await client.close();
     }
   });
 });
