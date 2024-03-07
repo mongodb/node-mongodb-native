@@ -5,7 +5,13 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
-import { MongoAWSError, type MongoClient, MongoDBAWS, MongoServerError } from '../../mongodb';
+import {
+  MongoAWSError,
+  type MongoClient,
+  MongoDBAWS,
+  MongoMissingCredentialsError,
+  MongoServerError
+} from '../../mongodb';
 
 function awsSdk() {
   try {
@@ -79,6 +85,37 @@ describe('MONGODB-AWS', function () {
     expect(client).to.have.nested.property('s.authProviders');
     const provider = client.s.authProviders.getOrCreateProvider('MONGODB-AWS');
     expect(provider).to.be.instanceOf(MongoDBAWS);
+  });
+
+  describe('with missing aws token', () => {
+    let awsSessionToken: string | undefined;
+
+    beforeEach(() => {
+      awsSessionToken = process.env.AWS_SESSION_TOKEN;
+      delete process.env.AWS_SESSION_TOKEN;
+    });
+
+    afterEach(() => {
+      if (awsSessionToken != null) {
+        process.env.AWS_SESSION_TOKEN = awsSessionToken;
+      }
+    });
+
+    it('should not throw an exception when aws token is missing', async function () {
+      client = this.configuration.newClient(process.env.MONGODB_URI);
+
+      const result = await client
+        .db('aws')
+        .collection('aws_test')
+        .estimatedDocumentCount()
+        .catch(error => error);
+
+      // We check only for the MongoMissingCredentialsError
+      // and do check for the MongoServerError as the error or numeric result
+      // that can be returned depending on different types of environments
+      // getting credentials from different sources.
+      expect(result).to.not.be.instanceOf(MongoMissingCredentialsError);
+    });
   });
 
   describe('EC2 with missing credentials', () => {
