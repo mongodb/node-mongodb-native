@@ -170,7 +170,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.monitor.on(event, (e: any) => this.emit(event, e));
     }
 
-    this.monitor.on('resetServer', (error: MongoError) => markServerUnknown(this, error));
+    this.monitor.on('resetServer', (error: MongoServerError) => markServerUnknown(this, error));
     this.monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
@@ -354,7 +354,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       // clear for the specific service id.
       if (!this.loadBalanced) {
         error.addErrorLabel(MongoErrorLabel.ResetPool);
-        markServerUnknown(this, error);
+        markServerUnknown(this, error as MongoServerError);
       } else if (connection) {
         this.pool.clear({ serviceId: connection.serviceId });
       }
@@ -370,7 +370,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
             if (shouldClearPool) {
               error.addErrorLabel(MongoErrorLabel.ResetPool);
             }
-            markServerUnknown(this, error);
+            markServerUnknown(this, error as MongoServerError);
             process.nextTick(() => this.requestCheck());
           }
         }

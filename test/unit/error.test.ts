@@ -113,6 +113,24 @@ describe('MongoErrors', () => {
       expect(err.message).to.equal(errorMessage);
       expect(err.someData).to.equal(12345);
     });
+    context('errorResponse property', function () {
+      it(`should set errorResponse to raw results document passed in`, function () {
+        const errorDoc = { message: 'A test error', someData: 12345 };
+        const err = new MongoServerError(errorDoc);
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.errorResponse).to.deep.equal(errorDoc);
+      });
+      it(`should not construct enumerated key 'errorResponse' if present`, function () {
+        const errorDoc = {
+          message: 'A test error',
+          errorResponse: 'I will not be an enumerated key'
+        };
+        const err = new MongoServerError(errorDoc);
+        expect(err).to.be.an.instanceof(Error);
+        expect(err.errorResponse).to.deep.equal(errorDoc);
+        expect(err.errorResponse?.errorResponse).to.deep.equal('I will not be an enumerated key');
+      });
+    });
   });
 
   describe('MongoNetworkError#constructor', () => {

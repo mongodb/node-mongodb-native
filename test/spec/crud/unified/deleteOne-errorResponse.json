@@ -1,0 +1,82 @@
+{
+  "description": "deleteOne-errorResponse",
+  "schemaVersion": "1.12",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "useMultipleMongoses": false
+      }
+    },
+    {
+      "database": {
+        "id": "database0",
+        "client": "client0",
+        "databaseName": "crud-tests"
+      }
+    },
+    {
+      "collection": {
+        "id": "collection0",
+        "database": "database0",
+        "collectionName": "test"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "delete operations support errorResponse assertions",
+      "runOnRequirements": [
+        {
+          "minServerVersion": "4.0.0",
+          "topologies": [
+            "single",
+            "replicaset"
+          ]
+        },
+        {
+          "minServerVersion": "4.2.0",
+          "topologies": [
+            "sharded"
+          ]
+        }
+      ],
+      "operations": [
+        {
+          "name": "failPoint",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client0",
+            "failPoint": {
+              "configureFailPoint": "failCommand",
+              "mode": {
+                "times": 1
+              },
+              "data": {
+                "failCommands": [
+                  "delete"
+                ],
+                "errorCode": 8
+              }
+            }
+          }
+        },
+        {
+          "name": "deleteOne",
+          "object": "collection0",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "expectError": {
+            "errorCode": 8,
+            "errorResponse": {
+              "code": 8
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+description: "modifyCollection-errorResponse"
+
+schemaVersion: "1.12"
+
+createEntities:
+  - client:
+      id: &client0 client0
+      observeEvents: [ commandStartedEvent ]
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name collMod-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 1 }
+      - { _id: 2, x: 1 }
+
+tests:
+  - description: "modifyCollection prepareUnique violations are accessible"
+    runOnRequirements:
+      - minServerVersion: "5.2" # SERVER-61158
+    operations:
+      - name: createIndex
+        object: *collection0
+        arguments:
+          keys: { x: 1 }
+      - name: modifyCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          index:
+            keyPattern: { x: 1 }
+            prepareUnique: true
+      - name: insertOne
+        object: *collection0
+        arguments:
+          document: { _id: 3, x: 1 }
+        expectError:
+          errorCode: 11000 # DuplicateKey
+      - name: modifyCollection
+        object: *database0
+        arguments:
+          collection: *collection0Name
+          index:
+            keyPattern: { x: 1 }
+            unique: true
+        expectError:
+          isClientError: false
+          errorCode: 359 # CannotConvertIndexToUnique
+          errorResponse:
+            violations:
+               - { ids: [ 1, 2 ] }

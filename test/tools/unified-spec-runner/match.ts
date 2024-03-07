@@ -771,4 +771,8 @@ export function expectErrorCheck(
   if (expected.expectResult != null) {
     resultCheck(error, expected.expectResult as any, entities);
   }
+
+  if (expected.errorResponse != null) {
+    resultCheck(error, expected.errorResponse, entities);
+  }
 }
