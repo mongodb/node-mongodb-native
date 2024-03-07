@@ -200,6 +200,8 @@ export class MongoError extends Error {
  * @category Error
  */
 export class MongoServerError extends MongoError {
+  /** Raw error result document returned by server. */
+  errorResponse: ErrorDescription;
   codeName?: string;
   writeConcernError?: Document;
   errInfo?: Document;
@@ -223,9 +225,17 @@ export class MongoServerError extends MongoError {
       this[kErrorLabels] = new Set(message.errorLabels);
     }
 
+    this.errorResponse = message;
+
     for (const name in message) {
-      if (name !== 'errorLabels' && name !== 'errmsg' && name !== 'message')
+      if (
+        name !== 'errorLabels' &&
+        name !== 'errmsg' &&
+        name !== 'message' &&
+        name !== 'errorResponse'
+      ) {
         this[name] = message[name];
+      }
     }
   }
 
