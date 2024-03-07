@@ -17,7 +17,6 @@ export interface StreamDescriptionOptions {
   compressors?: CompressorName[];
   logicalSessionTimeoutMinutes?: number;
   loadBalanced: boolean;
-  directConnection: boolean;
 }
 
 /** @public */
@@ -33,7 +32,6 @@ export class StreamDescription {
   compressor?: CompressorName;
   logicalSessionTimeoutMinutes?: number;
   loadBalanced: boolean;
-  directConnection: boolean;
 
   __nodejs_mock_server__?: boolean;
 
@@ -57,7 +55,6 @@ export class StreamDescription {
         ? options.compressors
         : [];
     this.serverConnectionId = null;
-    this.directConnection = !!options?.directConnection;
   }
 
   receiveResponse(response: Document | null): void {
