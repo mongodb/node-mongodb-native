@@ -123,12 +123,6 @@ export interface ConnectionOptions
   mongoLogger?: MongoLogger | undefined;
 }
 
-/** @internal */
-export interface DestroyOptions {
-  /** Force the destruction. */
-  force: boolean;
-}
-
 /** @public */
 export type ConnectionEvents = {
   commandStarted(event: CommandStartedEvent): void;
