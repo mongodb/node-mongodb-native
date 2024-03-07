@@ -1,7 +1,5 @@
 'use strict';
 
-const { gte } = require('semver');
-
 const path = require('path');
 const { expect } = require('chai');
 const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
@@ -80,7 +78,7 @@ class TransactionsRunnerContext extends TestRunnerContext {
   }
 }
 
-const LATEST_UNIFIED_SKIP_TESTS = [
+const UNIFIED_SKIP_TESTS = [
   'unpin after TransientTransactionError error on commit',
   'unpin on successful abort',
   'unpin after non-transient error on abort',
@@ -91,8 +89,8 @@ const LATEST_UNIFIED_SKIP_TESTS = [
 ];
 
 describe('Transactions Spec Unified Tests', function () {
-  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), (test, ctx) =>
-    gte(ctx.version, '8.0.0') && LATEST_UNIFIED_SKIP_TESTS.includes(test.description)
+  runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), test =>
+    UNIFIED_SKIP_TESTS.includes(test.description)
       ? 'TODO(NODE-5855): Unskip Transactions Spec Unified Tests mongos-unpin.unpin'
       : false
   );
