@@ -425,7 +425,7 @@ describe('CRUD spec v1', function () {
   }
 });
 
-// The Node driver does not have a Collection.modifyCollection helper.
+// TODO(NODE-5998) - The Node driver UTR does not have a Collection.modifyCollection helper.
 const SKIPPED_TESTS = ['findOneAndUpdate document validation errInfo is accessible'];
 describe('CRUD unified', function () {
   runUnifiedSuite(loadSpecTests(path.join('crud', 'unified')), ({ description }) =>
