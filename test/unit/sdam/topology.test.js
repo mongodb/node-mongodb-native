@@ -1,5 +1,4 @@
 'use strict';
-test / unit / sdam / topolo;
 
 const { clearTimeout } = require('timers');
 const mock = require('../../tools/mongodb-mock/index');
