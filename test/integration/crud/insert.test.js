@@ -92,7 +92,7 @@ describe('crud - insert', function () {
     it('insertOne() generates _ids using the pkFactory', async function () {
       await collection.insertOne({ name: 'john doe' });
       const result = await collection.findOne({ name: 'john doe' });
-      expect(result).to.have.property('_id').to.be.instanceOf(Double);
+      expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
     });
   });
 

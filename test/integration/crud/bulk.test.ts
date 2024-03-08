@@ -113,25 +113,25 @@ describe('Bulk', function () {
       it('insertMany() generates _ids using the pkFactory', async function () {
         await collection.insertMany([{ name: 'john doe' }]);
         const result = await collection.findOne({ name: 'john doe' });
-        expect(result).to.have.property('_id').to.be.instanceOf(Double);
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
       });
 
       it('bulkWrite() generates _ids using the pkFactory', async function () {
         await collection.bulkWrite([{ insertOne: { document: { name: 'john doe' } } }]);
         const result = await collection.findOne({ name: 'john doe' });
-        expect(result).to.have.property('_id').to.be.instanceOf(Double);
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
       });
 
       it('ordered bulk operations generate _ids using pkFactory', async function () {
         await collection.initializeOrderedBulkOp().insert({ name: 'john doe' }).execute();
         const result = await collection.findOne({ name: 'john doe' });
-        expect(result).to.have.property('_id').to.be.instanceOf(Double);
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
       });
 
       it('unordered bulk operations generate _ids using pkFactory', async function () {
         await collection.initializeUnorderedBulkOp().insert({ name: 'john doe' }).execute();
         const result = await collection.findOne({ name: 'john doe' });
-        expect(result).to.have.property('_id').to.be.instanceOf(Double);
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
       });
 
       it('bulkOperation.raw() with the legacy syntax (no nested document field) generates _ids using pkFactory', async function () {
@@ -141,7 +141,7 @@ describe('Bulk', function () {
           .raw({ insertOne: { name: 'john doe' } })
           .execute();
         const result = await collection.findOne({ name: 'john doe' });
-        expect(result).to.have.property('_id').to.be.instanceOf(Double);
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
       });
     });
 
