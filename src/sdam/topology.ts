@@ -477,7 +477,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         callback?.(undefined, this);
       },
       error => {
-        return this.close({ force: false }, () => exitWithError(error));
+        this.close();
+        return exitWithError(error);
       }
     );
   }
