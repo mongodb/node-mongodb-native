@@ -8,6 +8,7 @@ import { getEncryptExtraOptions } from '../../tools/utils';
 import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
 // eslint-disable-next-line no-restricted-modules
 import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { MongoClient } from '../../mongodb';
 
 describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
@@ -100,8 +101,6 @@ describe('Client Side Encryption Prose Corpus Test', function () {
     'altname_kmip'
   ]);
 
-  let client;
-
   function assertion(clientEncryption, _key, expected, actual) {
     if (typeof expected === 'string') {
       expect(actual).to.equal(expected);
@@ -151,36 +150,27 @@ describe('Client Side Encryption Prose Corpus Test', function () {
 
   installNodeDNSWorkaroundHooks();
 
-  before(function () {
+  let client: MongoClient;
+
+  beforeEach(async function () {
     // 1. Create a MongoClient without encryption enabled (referred to as ``client``).
     client = this.configuration.newClient();
 
-    return Promise.resolve()
-      .then(() => client.connect())
-      .then(() => {
-        // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
-        const keyDb = client.db(keyVaultDbName);
-        return Promise.resolve()
-          .then(() => keyDb.dropCollection(keyVaultCollName))
-          .catch(() => {})
-          .then(() => keyDb.collection(keyVaultCollName))
-          .then(keyColl =>
-            keyColl.insertMany([
-              corpusKeyLocal,
-              corpusKeyAws,
-              corpusKeyAzure,
-              corpusKeyGcp,
-              corpusKeyKmip
-            ])
-          );
-      });
+    await client.connect();
+    // 3. Using ``client``, drop the collection ``keyvault.datakeys``. Insert the documents `corpus/corpus-key-local.json <../corpus/corpus-key-local.json>`_ and `corpus/corpus-key-aws.json <../corpus/corpus-key-aws.json>`_.
+    const keyDb = client.db(keyVaultDbName);
+    await keyDb.dropCollection(keyVaultCollName);
+    const keyColl = keyDb.collection(keyVaultCollName);
+    await keyColl.insertMany([
+      corpusKeyLocal,
+      corpusKeyAws,
+      corpusKeyAzure,
+      corpusKeyGcp,
+      corpusKeyKmip
+    ]);
   });
 
-  after(function () {
-    if (client) {
-      return client.close();
-    }
-  });
+  afterEach(() => client?.close());
 
   function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema) {
     let clientEncrypted, clientEncryption;
