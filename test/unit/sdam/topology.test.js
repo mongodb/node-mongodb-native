@@ -470,7 +470,8 @@ describe('Topology (unit)', function () {
             // occurs `requestCheck` will be called for an immediate check.
             expect(requestCheck).property('callCount').to.equal(1);
 
-            topology.close({}, done);
+            topology.close();
+            done();
           });
       });
     });
@@ -483,11 +484,12 @@ describe('Topology (unit)', function () {
       });
 
       topology.close();
-      topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 }, err => {
-        expect(err).to.exist;
-        expect(err).to.match(/Topology is closed/);
-        done();
-      });
+      topology
+        .selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 })
+        .then(expect.fail, err => {
+          expect(err).to.match(/Topology is closed/);
+          done();
+        });
     });
 
     describe('waitQueue', function () {
