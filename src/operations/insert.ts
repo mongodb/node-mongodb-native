@@ -131,7 +131,7 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     const writeConcern = WriteConcern.fromOptions(options);
     const bulkWriteOperation = new BulkWriteOperation(
       coll,
-      maybeAddIdToDocuments(coll, this.docs, options).map(document => ({
+      this.docs.map(document => ({
         insertOne: { document }
       })),
       options

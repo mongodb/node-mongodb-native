@@ -71,6 +71,31 @@ describe('crud - insert', function () {
     await client.close();
   });
 
+  describe('when a pkFactory is set on the client', function () {
+    let client;
+    const pkFactory = {
+      count: 0,
+      createPk: function () {
+        return new Double(this.count++);
+      }
+    };
+    let collection;
+
+    beforeEach(async function () {
+      client = this.configuration.newClient({}, { pkFactory, promoteValues: false });
+      collection = client.db('integration').collection('pk_factory_tests');
+      await collection.deleteMany({});
+    });
+
+    afterEach(() => client.close());
+
+    it('insertOne() generates _ids using the pkFactory', async function () {
+      await collection.insertOne({ name: 'john doe' });
+      const result = await collection.findOne({ name: 'john doe' });
+      expect(result).to.have.property('_id').to.be.instanceOf(Double);
+    });
+  });
+
   it('Should correctly execute Collection.prototype.insertOne', function (done) {
     const configuration = this.configuration;
     let url = configuration.url();
@@ -135,6 +160,7 @@ describe('crud - insert', function () {
     it('insertMany returns the insertedIds and we can look up the documents', async function () {
       const db = client.db();
       const collection = db.collection('test_multiple_insert');
+      await collection.deleteMany({});
       const docs = [{ a: 1 }, { a: 2 }];
 
       const r = await collection.insertMany(docs);
@@ -839,6 +865,7 @@ describe('crud - insert', function () {
 
       const db = client.db();
       const collection = db.collection('Should_correctly_insert_object_with_timestamps');
+      await collection.deleteMany({});
 
       const { insertedId } = await collection.insertOne(doc);
       expect(insertedId.equals(doc._id)).to.be.true;
@@ -1700,7 +1727,7 @@ describe('crud - insert', function () {
           try {
             db.collection(k.toString());
             test.fail(false);
-          } catch (err) { } // eslint-disable-line
+          } catch (err) {} // eslint-disable-line
 
           client.close(done);
         });

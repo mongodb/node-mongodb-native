@@ -144,6 +144,7 @@ describe('Bulk', function () {
         expect(result).to.have.property('_id').to.be.instanceOf(Double);
       });
     });
+
     describe('#insertMany()', function () {
       context('when passed an invalid docs argument', function () {
         it('should throw a MongoInvalidArgument error', async function () {

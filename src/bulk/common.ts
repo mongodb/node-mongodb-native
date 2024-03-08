@@ -1097,7 +1097,7 @@ export abstract class BulkOperationBase {
       const forceServerObjectId = this.shouldForceServerObjectId();
       const document =
         op.insertOne && op.insertOne.document == null
-          ? // NOTE: provided for legacy support, but this is a malformed operation
+          ? // TODO(NODE-6003): remove support for omitting the `documents` subdocument in bulk inserts
             (op.insertOne as Document)
           : op.insertOne.document;
 
@@ -1266,15 +1266,10 @@ export abstract class BulkOperationBase {
   ): this;
 
   private shouldForceServerObjectId(): boolean {
-    if (typeof this.s.options.forceServerObjectId === 'boolean') {
-      return this.s.options.forceServerObjectId;
-    }
-
-    if (typeof this.s.collection.s.db.options?.forceServerObjectId === 'boolean') {
-      return this.s.collection.s.db.options?.forceServerObjectId;
-    }
-
-    return false;
+    return (
+      this.s.options.forceServerObjectId === true ||
+      this.s.collection.s.db.options?.forceServerObjectId === true
+    );
   }
 }
 
