@@ -1,16 +1,17 @@
 // The corpus test exhaustively enumerates all ways to encrypt all BSON value types. Note, the test data includes BSON binary subtype 4 (or standard UUID), which MUST be decoded and encoded as subtype 4. Run the test as follows.
 
-import * as fs from 'fs';
-import * as path from 'path';
 import { EJSON } from 'bson';
 import { expect } from 'chai';
-import { getEncryptExtraOptions } from '../../tools/utils';
-import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
-// eslint-disable-next-line no-restricted-modules
-import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
-import { MongoClient, WriteConcern } from '../../mongodb';
+import * as fs from 'fs';
+import * as path from 'path';
 
-describe.only('Client Side Encryption Prose Corpus Test', function () {
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { ClientEncryption } from '../../../src/client-side-encryption/client_encryption';
+import { type MongoClient, WriteConcern } from '../../mongodb';
+import { installNodeDNSWorkaroundHooks } from '../../tools/runner/hooks/configuration';
+import { getEncryptExtraOptions } from '../../tools/utils';
+
+describe('Client Side Encryption Prose Corpus Test', function () {
   const metadata = {
     requires: {
       mongodb: '>=4.2.0',
