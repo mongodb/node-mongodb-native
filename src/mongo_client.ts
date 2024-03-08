@@ -86,7 +86,7 @@ export interface Auth {
 
 /** @public */
 export interface PkFactory {
-  createPk(): any; // TODO: when js-bson is typed, function should return some BSON type
+  createPk(): any;
 }
 
 /** @public */
@@ -826,6 +826,8 @@ export interface MongoOptions
   writeConcern: WriteConcern;
   dbName: string;
   metadata: ClientMetadata;
+  /** @internal */
+  extendedMetadata: Promise<Document>;
   /** @internal */
   autoEncrypter?: AutoEncrypter;
   proxyHost?: string;

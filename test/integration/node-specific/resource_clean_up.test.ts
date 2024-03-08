@@ -1,5 +1,8 @@
+import * as v8 from 'node:v8';
+
 import { expect } from 'chai';
 
+import { sleep } from '../../tools/utils';
 import { runScript } from './resource_tracking_script_builder';
 
 /**
@@ -84,6 +87,36 @@ describe('Driver Resources', () => {
           `expected no MongoClients in the heapsnapshot, found ${clients.length}`
         ).to.equal(0);
       });
+    });
+  });
+
+  context('when 100s of operations are executed and complete', () => {
+    beforeEach(function () {
+      if (this.currentTest && typeof v8.queryObjects !== 'function') {
+        this.currentTest.skipReason = 'Test requires v8.queryObjects API to count Promises';
+        this.currentTest?.skip();
+      }
+    });
+
+    let client;
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+    });
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    it('does not leave behind additional promises', async () => {
+      const test = client.db('test').collection('test');
+      const promiseCountBefore = v8.queryObjects(Promise, { format: 'count' });
+      for (let i = 0; i < 100; i++) {
+        await test.findOne();
+      }
+      await sleep(10);
+      const promiseCountAfter = v8.queryObjects(Promise, { format: 'count' });
+
+      expect(promiseCountAfter).to.be.within(promiseCountBefore - 5, promiseCountBefore + 5);
     });
   });
 });
