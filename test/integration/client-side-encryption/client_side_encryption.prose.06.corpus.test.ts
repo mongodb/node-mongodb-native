@@ -172,64 +172,54 @@ describe('Client Side Encryption Prose Corpus Test', function () {
 
   afterEach(() => client?.close());
 
-  function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema) {
-    let clientEncrypted, clientEncryption;
-    beforeEach(function () {
-      return Promise.resolve()
-        .then(() => {
-          // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
-          const dataDb = client.db(dataDbName);
-          return Promise.resolve()
-            .then(() => dataDb.dropCollection(dataCollName))
-            .catch(() => {})
-            .then(() =>
-              dataDb.createCollection(dataCollName, {
-                validator: { $jsonSchema: corpusSchema }
-              })
-            );
-        })
-        .then(() => {
-          // 4. Create the following:
-          //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
-          //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
-          //    Configure both objects with ``aws`` and the ``local`` KMS providers as follows:
-          //    .. code:: javascript
-          //       {
-          //           "aws": { <AWS credentials> },
-          //           "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
-          //       }
-          //    Where LOCAL_MASTERKEY is the following base64:
-          //    .. code:: javascript
-          //       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
-          //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
-          const tlsOptions = {
-            kmip: {
-              tlsCAFile: process.env.KMIP_TLS_CA_FILE,
-              tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
-            }
-          };
-          const extraOptions = getEncryptExtraOptions();
-          const autoEncryption = {
-            keyVaultNamespace,
-            kmsProviders,
-            tlsOptions,
-            extraOptions
-          };
-          if (useClientSideSchema) {
-            autoEncryption.schemaMap = {
-              [dataNamespace]: corpusSchema
-            };
-          }
-          clientEncrypted = this.configuration.newClient({}, { autoEncryption });
+  function defineCorpusTests(corpus, corpusEncryptedExpected, useClientSideSchema: boolean) {
+    let clientEncrypted: MongoClient, clientEncryption: ClientEncryption;
+    beforeEach(async function () {
+      // 2. Using ``client``, drop and create the collection ``db.coll`` configured with the included JSON schema `corpus/corpus-schema.json <../corpus/corpus-schema.json>`_.
+      const dataDb = client.db(dataDbName);
+      await dataDb.dropCollection(dataCollName);
+      await dataDb.createCollection(dataCollName, {
+        validator: { $jsonSchema: corpusSchema }
+      });
+      // 4. Create the following:
+      //    - A MongoClient configured with auto encryption (referred to as ``client_encrypted``)
+      //    - A ``ClientEncryption`` object (referred to as ``client_encryption``)
+      //    Configure both objects with ``aws`` and the ``local`` KMS providers as follows:
+      //    .. code:: javascript
+      //       {
+      //           "aws": { <AWS credentials> },
+      //           "local": { "key": <base64 decoding of LOCAL_MASTERKEY> }
+      //       }
+      //    Where LOCAL_MASTERKEY is the following base64:
+      //    .. code:: javascript
+      //       Mng0NCt4ZHVUYUJCa1kxNkVyNUR1QURhZ2h2UzR2d2RrZzh0cFBwM3R6NmdWMDFBMUN3YkQ5aXRRMkhGRGdQV09wOGVNYUMxT2k3NjZKelhaQmRCZGJkTXVyZG9uSjFk
+      //    Configure both objects with ``keyVaultNamespace`` set to ``keyvault.datakeys``.
+      const tlsOptions = {
+        kmip: {
+          tlsCAFile: process.env.KMIP_TLS_CA_FILE,
+          tlsCertificateKeyFile: process.env.KMIP_TLS_CERT_FILE
+        }
+      };
+      const extraOptions = getEncryptExtraOptions();
+      const autoEncryption = {
+        keyVaultNamespace,
+        kmsProviders,
+        tlsOptions,
+        extraOptions
+      };
+      if (useClientSideSchema) {
+        autoEncryption.schemaMap = {
+          [dataNamespace]: corpusSchema
+        };
+      }
+      clientEncrypted = this.configuration.newClient({}, { autoEncryption });
 
-          return clientEncrypted.connect().then(() => {
-            clientEncryption = new ClientEncryption(client, {
-              keyVaultNamespace,
-              kmsProviders,
-              tlsOptions
-            });
-          });
-        });
+      await clientEncrypted.connect();
+      clientEncryption = new ClientEncryption(client, {
+        keyVaultNamespace,
+        kmsProviders,
+        tlsOptions
+      });
     });
 
     afterEach(() => clientEncrypted.close());
