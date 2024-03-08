@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';
