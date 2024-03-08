@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { promisify } from 'util';
 
 import {
+  addContainerMetadata,
   CancellationToken,
   type ClientMetadata,
   connect,
@@ -24,6 +25,7 @@ const CONNECT_DEFAULTS = {
   generation: 1,
   monitorCommands: false,
   metadata: {} as ClientMetadata,
+  extendedMetadata: addContainerMetadata({} as ClientMetadata),
   loadBalanced: false
 };
 
@@ -207,7 +209,162 @@ describe('Connect Tests', function () {
     });
   });
 
-  context('prepareHandshakeDocument', () => {
+  describe('prepareHandshakeDocument', () => {
+    describe('client environment (containers and FAAS)', () => {
+      const cachedEnv = process.env;
+
+      context('when only kubernetes is present', () => {
+        let authContext;
+
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+          authContext = {
+            connection: {},
+            options: {
+              ...CONNECT_DEFAULTS,
+              extendedMetadata: addContainerMetadata({} as ClientMetadata)
+            }
+          };
+        });
+
+        afterEach(() => {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
+          authContext = {};
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should not have 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env).to.not.have.property('name');
+        });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not 'env' property in client`, async () => {
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            const longAppName = 's'.repeat(493);
+            const longAuthContext = {
+              connection: {},
+              options: {
+                ...CONNECT_DEFAULTS,
+                extendedMetadata: addContainerMetadata({ appName: longAppName })
+              }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+      });
+
+      context('when kubernetes and FAAS are both present', () => {
+        let authContext;
+
+        beforeEach(() => {
+          process.env.KUBERNETES_SERVICE_HOST = 'I exist';
+          authContext = {
+            connection: {},
+            options: {
+              ...CONNECT_DEFAULTS,
+              extendedMetadata: addContainerMetadata({ env: { name: 'aws.lambda' } })
+            }
+          };
+        });
+
+        afterEach(() => {
+          if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+            process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+          } else {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          }
+          authContext = {};
+        });
+
+        it(`should include { orchestrator: 'kubernetes'} in client.env.container`, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.container.orchestrator).to.equal('kubernetes');
+        });
+
+        it(`should still have properly set 'name' property in client.env `, async () => {
+          const handshakeDocument = await prepareHandshakeDocument(authContext);
+          expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+        });
+
+        context('when 512 byte size limit is exceeded', async () => {
+          it(`should not have 'container' property in client.env`, async () => {
+            // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
+            const longAppName = 's'.repeat(447);
+            const longAuthContext = {
+              connection: {},
+              options: {
+                ...CONNECT_DEFAULTS,
+                extendedMetadata: {
+                  appName: longAppName,
+                  env: { name: 'aws.lambda' }
+                } as unknown as Promise<Document>
+              }
+            };
+            const handshakeDocument = await prepareHandshakeDocument(longAuthContext);
+            expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
+            expect(handshakeDocument.client.env).to.not.have.property('container');
+          });
+        });
+      });
+
+      context('when container nor FAAS env is not present (empty string case)', () => {
+        const authContext = {
+          connection: {},
+          options: { ...CONNECT_DEFAULTS }
+        };
+
+        context('when process.env.KUBERNETES_SERVICE_HOST = undefined', () => {
+          beforeEach(() => {
+            delete process.env.KUBERNETES_SERVICE_HOST;
+          });
+
+          afterEach(() => {
+            afterEach(() => {
+              if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+                process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+              } else {
+                delete process.env.KUBERNETES_SERVICE_HOST;
+              }
+            });
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+
+        context('when process.env.KUBERNETES_SERVICE_HOST is an empty string', () => {
+          beforeEach(() => {
+            process.env.KUBERNETES_SERVICE_HOST = '';
+          });
+
+          afterEach(() => {
+            if (cachedEnv.KUBERNETES_SERVICE_HOST != null) {
+              process.env.KUBERNETES_SERVICE_HOST = cachedEnv.KUBERNETES_SERVICE_HOST;
+            } else {
+              delete process.env.KUBERNETES_SERVICE_HOST;
+            }
+          });
+
+          it(`should not have 'env' property in client`, async () => {
+            const handshakeDocument = await prepareHandshakeDocument(authContext);
+            expect(handshakeDocument.client).to.not.have.property('env');
+          });
+        });
+      });
+    });
+
     context('when serverApi.version is present', () => {
       const options = {
         authProviders: new MongoClientAuthProviders()

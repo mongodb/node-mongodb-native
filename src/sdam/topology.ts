@@ -143,6 +143,7 @@ export interface TopologyOptions extends BSONSerializeOptions, ServerOptions {
   directConnection: boolean;
   loadBalanced: boolean;
   metadata: ClientMetadata;
+  extendedMetadata: Promise<Document>;
   /** MongoDB server API version */
   serverApi?: ServerApi;
   [featureFlag: symbol]: any;

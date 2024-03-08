@@ -133,6 +133,8 @@ export interface ConnectionOptions
   socketTimeoutMS?: number;
   cancellationToken?: CancellationToken;
   metadata: ClientMetadata;
+  /** @internal */
+  extendedMetadata: Promise<Document>;
 }
 
 /** @internal */
