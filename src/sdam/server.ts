@@ -369,7 +369,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       // clear for the specific service id.
       if (!this.loadBalanced) {
         error.addErrorLabel(MongoErrorLabel.ResetPool);
-        markServerUnknown(this, error as MongoServerError);
+        markServerUnknown(this, error);
       } else if (connection) {
         this.pool.clear({ serviceId: connection.serviceId });
       }
@@ -385,7 +385,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
             if (shouldClearPool) {
               error.addErrorLabel(MongoErrorLabel.ResetPool);
             }
-            markServerUnknown(this, error as MongoServerError);
+            markServerUnknown(this, error);
             process.nextTick(() => this.requestCheck());
           }
         }
@@ -488,7 +488,7 @@ function calculateRoundTripTime(oldRtt: number, duration: number): number {
   return alpha * duration + (1 - alpha) * oldRtt;
 }
 
-function markServerUnknown(server: Server, error?: MongoServerError) {
+function markServerUnknown(server: Server, error?: MongoError) {
   // Load balancer servers can never be marked unknown.
   if (server.loadBalanced) {
     return;

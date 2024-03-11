@@ -1,6 +1,6 @@
 import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { MongoRuntimeError, type MongoServerError } from '../error';
+import { MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
@@ -307,13 +307,13 @@ export class TopologyDescription {
     );
   }
 
-  get error(): MongoServerError | null {
+  get error(): MongoError | null {
     const descriptionsWithError = Array.from(this.servers.values()).filter(
       (sd: ServerDescription) => sd.error
     );
 
     if (descriptionsWithError.length > 0) {
-      return descriptionsWithError[0].error as MongoServerError;
+      return descriptionsWithError[0].error;
     }
 
     return null;

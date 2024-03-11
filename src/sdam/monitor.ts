@@ -5,7 +5,7 @@ import { connect, makeConnection, makeSocket, performInitialHandshake } from '..
 import type { Connection, ConnectionOptions } from '../cmap/connection';
 import { getFAASEnv } from '../cmap/handshake/client_metadata';
 import { LEGACY_HELLO_COMMAND } from '../constants';
-import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
+import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError, MongoServerError } from '../error';
 import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Callback, EventEmitterWithState } from '../utils';
@@ -258,7 +258,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     );
 
     const error = !(err instanceof MongoError)
-      ? new MongoError(MongoError.buildErrorMessage(err), { cause: err })
+      ? new MongoServerError({ errmsg: MongoError.buildErrorMessage(err), cause: err })
       : err;
     error.addErrorLabel(MongoErrorLabel.ResetPool);
     if (error instanceof MongoNetworkTimeoutError) {
