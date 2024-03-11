@@ -938,10 +938,12 @@ export class ChangeStream<
         .selectServer(this.cursor.readPreference, {
           operationName: 'reconnect topology in change stream'
         })
-        .catch(serverSelectionError => {
-          if (serverSelectionError) return this._closeEmitterModeWithError(changeStreamError);
-          this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-        });
+        .then(
+          () => {
+            this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+          },
+          () => this._closeEmitterModeWithError(changeStreamError)
+        );
     } else {
       this._closeEmitterModeWithError(changeStreamError);
     }
