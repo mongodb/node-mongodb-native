@@ -399,17 +399,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Initiate server connect */
-  connect(callback: Callback): void;
-  connect(options: ConnectOptions, callback: Callback): void;
-  connect(options?: ConnectOptions | Callback, callback?: Callback): void {
-    if (typeof options === 'function') (callback = options), (options = {});
+  async connect(options?: ConnectOptions): Promise<Topology> {
     options = options ?? {};
     if (this.s.state === STATE_CONNECTED) {
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+      return this;
     }
 
     stateTransition(this, STATE_CONNECTING);
@@ -447,38 +440,44 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
-    const exitWithError = (error: Error) =>
-      callback ? callback(error) : this.emit(Topology.ERROR, error);
+    const exitWithError = (error: Error) => {
+      this.emit(Topology.ERROR, error);
+      throw error;
+    };
 
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = { operationName: 'ping', ...options };
+    try {
+      const server = await this.selectServer(
+        readPreferenceServerSelector(readPreference),
+        selectServerOptions
+      );
 
-    this.selectServer(readPreferenceServerSelector(readPreference), selectServerOptions).then(
-      server => {
-        const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
-        if (!skipPingOnConnect && server && this.s.credentials) {
-          server.command(ns('admin.$cmd'), { ping: 1 }, {}).then(() => {
-            stateTransition(this, STATE_CONNECTED);
-            this.emit(Topology.OPEN, this);
-            this.emit(Topology.CONNECT, this);
+      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      if (!skipPingOnConnect && server && this.s.credentials) {
+        try {
+          await server.command(ns('admin.$cmd'), { ping: 1 }, {});
+          stateTransition(this, STATE_CONNECTED);
+          this.emit(Topology.OPEN, this);
+          this.emit(Topology.CONNECT, this);
 
-            callback?.(undefined, this);
-          }, exitWithError);
-
-          return;
+          return this;
+        } catch (error) {
+          exitWithError(error);
         }
 
-        stateTransition(this, STATE_CONNECTED);
-        this.emit(Topology.OPEN, this);
-        this.emit(Topology.CONNECT, this);
-
-        callback?.(undefined, this);
-      },
-      error => {
-        this.close();
-        return exitWithError(error);
+        return this;
       }
-    );
+
+      stateTransition(this, STATE_CONNECTED);
+      this.emit(Topology.OPEN, this);
+      this.emit(Topology.CONNECT, this);
+
+      return this;
+    } catch (error) {
+      this.close();
+      return exitWithError(error);
+    }
   }
 
   /** Close this topology */
