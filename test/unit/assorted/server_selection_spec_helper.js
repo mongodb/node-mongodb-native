@@ -110,7 +110,8 @@ function executeServerSelectionTest(testDefinition, testDone) {
     });
 
   function done(err) {
-    topology.close({}, e => testDone(e || err));
+    topology.close();
+    testDone(err);
   }
 
   topology.connect(err => {

@@ -159,7 +159,7 @@ describe('class RTTPinger', () => {
       await client?.close();
     });
 
-    it('destroys the connection with force=true', async function () {
+    it('destroys the connection', async function () {
       await client.connect();
       const rttPingers = await getRTTPingers(client);
 
@@ -172,7 +172,7 @@ describe('class RTTPinger', () => {
 
       expect(spies).to.have.lengthOf.at.least(1);
       for (const spy of spies) {
-        expect(spy).to.have.been.calledWithExactly({ force: true });
+        expect(spy).to.have.been.calledOnce;
       }
     });
   });
