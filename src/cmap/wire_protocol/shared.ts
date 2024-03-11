@@ -13,12 +13,8 @@ export interface ReadPreferenceOption {
 }
 
 export function getReadPreference(options?: ReadPreferenceOption): ReadPreference {
-  // Default to command version of the readPreference
+  // Default to command version of the readPreference.
   let readPreference = options?.readPreference ?? ReadPreference.primary;
-  // If we have an option readPreference override the command one
-  if (options?.readPreference) {
-    readPreference = options.readPreference;
-  }
 
   if (typeof readPreference === 'string') {
     readPreference = ReadPreference.fromString(readPreference);
@@ -43,7 +39,7 @@ export function isSharded(topologyOrServer?: Topology | Server | Connection): bo
   }
 
   // NOTE: This is incredibly inefficient, and should be removed once command construction
-  //       happens based on `Server` not `Topology`.
+  // happens based on `Server` not `Topology`.
   if (topologyOrServer.description && topologyOrServer.description instanceof TopologyDescription) {
     const servers: ServerDescription[] = Array.from(topologyOrServer.description.servers.values());
     return servers.some((server: ServerDescription) => server.type === ServerType.Mongos);
