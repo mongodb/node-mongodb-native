@@ -135,14 +135,14 @@ describe('URI', function () {
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
         connectStub.restore();
-        done();
+        return Promise.resolve();
       }
 
       const topologyPrototype = Topology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
       const client = this.configuration.newClient(uri);
-      client.connect();
+      client.connect().finally(client.close).finally(done);
     }
   });
 });
