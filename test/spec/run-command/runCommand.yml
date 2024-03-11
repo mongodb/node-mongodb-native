@@ -119,7 +119,7 @@ tests:
   - description: attaches the provided $readPreference to given command
     runOnRequirements:
       # Exclude single topology, which is most likely a standalone server
-      - topologies: [ replicaset, sharded-replicaset, load-balanced, sharded ]
+      - topologies: [ replicaset, load-balanced, sharded ]
     operations:
       - name: runCommand
         object: *db
@@ -250,7 +250,7 @@ tests:
       - minServerVersion: "4.0"
         topologies: [ replicaset ]
       - minServerVersion: "4.2"
-        topologies: [ sharded-replicaset, load-balanced ]
+        topologies: [ sharded, load-balanced ]
     operations:
       - name: withTransaction
         object: *session

@@ -22,7 +22,7 @@ export interface StreamDescriptionOptions {
 /** @public */
 export class StreamDescription {
   address: string;
-  type: string;
+  type: ServerType;
   minWireVersion?: number;
   maxWireVersion?: number;
   maxBsonObjectSize: number;

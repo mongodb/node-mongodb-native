@@ -25,12 +25,6 @@ const filter = ({ description }) => {
     return 'TODO(DRIVERS-1847): Skipped pending a decision made on DRIVERS-1847';
   }
 
-  if (description === 'errors during the initial connection hello are ignored') {
-    // This test is skipped because it assumes drivers attempt connections on the first operation,
-    // but Node has a connect() method that is called before the first operation is ever run.
-    return 'TODO(NODE-2149): Refactor connect()';
-  }
-
   if (
     process.env.AUTH === 'auth' &&
     [

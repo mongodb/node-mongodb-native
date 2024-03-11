@@ -86,7 +86,7 @@ export interface Auth {
 
 /** @public */
 export interface PkFactory {
-  createPk(): any; // TODO: when js-bson is typed, function should return some BSON type
+  createPk(): any;
 }
 
 /** @public */
@@ -814,6 +814,7 @@ export interface MongoOptions
   readPreference: ReadPreference;
   readConcern: ReadConcern;
   loadBalanced: boolean;
+  directConnection: boolean;
   serverApi: ServerApi;
   compressors: CompressorName[];
   writeConcern: WriteConcern;

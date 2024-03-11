@@ -35,7 +35,8 @@ class MockServer {
           debug: function (_v: any, _x: any) {
             return;
           }
-        }
+        },
+        options: {}
       }
     };
   }
