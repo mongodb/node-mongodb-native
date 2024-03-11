@@ -341,6 +341,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
   private prepareCommand(db: string, command: Document, options: CommandOptions) {
     let cmd = { ...command };
+
     const readPreference = getReadPreference(options);
     const session = options?.session;
 
@@ -368,7 +369,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       throw new MongoCompatibilityError('Current topology does not support sessions');
     }
 
-    // if we have a known cluster time, gossip it.
+    // if we have a known cluster time, gossip it
     if (clusterTime) {
       cmd.$clusterTime = clusterTime;
     }
