@@ -613,16 +613,18 @@ describe('server selection', async function () {
   describe('server selection logging feature flagging', async function () {
     let mockServer;
     let topology;
+    let address;
 
     beforeEach(async () => {
-      mockServer = await mock.createServer(27017, 'localhost');
+      mockServer = await mock.createServer(undefined, 'localhost');
       topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
-      // NOTE: This is done to ensure that that processWaitQueueMember doesn't throw due to an
-      // invalid state
+      // NOTE: This is done to ensure that that processWaitQueueMember doesn't throw due to the
+      // topology being in an invalid state
+      address = `localhost:${mockServer.port}`;
       topology.s.state = 'connected';
-      topology.s.servers.set('localhost:27017', mockServer);
+      topology.s.servers.set(address, mockServer);
       topology.s.description.servers = new Map([
-        [mockServer.address(), new ServerDescription('localhost:27017')]
+        [address, new ServerDescription(mockServer.hostAddress())]
       ]);
     });
 
@@ -645,7 +647,7 @@ describe('server selection', async function () {
       });
 
       it('should not create server selection event instances', async function () {
-        await topology?.selectServer(() => [new ServerDescription('localhost:27017')], {
+        await topology?.selectServer(() => [new ServerDescription(address)], {
           operationName: 'test'
         });
         expect(serverSelectionEventStub.getCall(0)).to.be.null;

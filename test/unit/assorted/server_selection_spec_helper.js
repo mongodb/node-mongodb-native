@@ -112,9 +112,7 @@ function executeServerSelectionTest(testDefinition, testDone) {
     testDone(err);
   }
 
-  topology.connect(err => {
-    expect(err).to.not.exist;
-
+  topology.connect().then(() => {
     // Update topologies with server descriptions.
     topologyDescription.servers.forEach(server => {
       const serverDescription = serverDescriptionFromDefinition(server, seedData.hosts);
@@ -195,7 +193,7 @@ function executeServerSelectionTest(testDefinition, testDone) {
         return done(err);
       }
     );
-  });
+  }, expect.fail);
 }
 
 module.exports = { executeServerSelectionTest, serverDescriptionFromDefinition };

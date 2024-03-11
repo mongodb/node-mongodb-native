@@ -144,11 +144,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       } as TopologyOptions);
       const topology = context.topology;
 
-      topology.connect({}, err => {
-        if (err) {
-          return done(err);
-        }
-
+      topology.connect({}).then(() => {
         try {
           expect(topology.description).to.have.property('type', TopologyType.Sharded);
           const servers = Array.from(topology.description.servers.keys());
@@ -167,7 +163,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
         } catch (e) {
           done(e);
         }
-      });
+      }, done);
     }
 
     // The addition of a new DNS record:

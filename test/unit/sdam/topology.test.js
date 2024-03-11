@@ -93,9 +93,7 @@ describe('Topology (unit)', function () {
       });
 
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect(err => {
-        expect(err).to.not.exist;
-
+      topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
           server
             .command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 })
@@ -106,7 +104,7 @@ describe('Topology (unit)', function () {
               done();
             });
         }, expect.fail);
-      });
+      }, expect.fail);
     });
   });
 
@@ -150,8 +148,7 @@ describe('Topology (unit)', function () {
               secondMockServer.hostAddress()
             ]);
 
-            topology.connect(err => {
-              expect(err).to.not.exist;
+            topology.connect().then(_ => {
               sinon.stub(topology.s.servers, 'get').callsFake(() => {
                 return undefined;
               });
@@ -159,7 +156,7 @@ describe('Topology (unit)', function () {
                 expect(err).to.be.instanceOf(MongoServerSelectionError);
                 done();
               });
-            });
+            }, expect.fail);
           });
         });
         context('when the topology originally contained more than one server', function () {
@@ -169,8 +166,7 @@ describe('Topology (unit)', function () {
               secondMockServer.hostAddress()
             ]);
 
-            topology.connect(err => {
-              expect(err).to.not.exist;
+            topology.connect().then(() => {
               sinon.stub(topology.s.servers, 'get').callsFake(() => {
                 return undefined;
               });
@@ -178,7 +174,7 @@ describe('Topology (unit)', function () {
                 expect(err).to.be.instanceOf(MongoServerSelectionError);
                 done();
               });
-            });
+            }, expect.fail);
           });
         });
       }
@@ -197,9 +193,7 @@ describe('Topology (unit)', function () {
       });
 
       topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect(err => {
-        expect(err).to.not.exist;
-
+      topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -214,7 +208,7 @@ describe('Topology (unit)', function () {
             done();
           });
         }, expect.fail);
-      });
+      }, expect.fail);
     });
 
     it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
@@ -230,9 +224,7 @@ describe('Topology (unit)', function () {
       });
 
       const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect(err => {
-        expect(err).to.not.exist;
-
+      topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -248,7 +240,7 @@ describe('Topology (unit)', function () {
             done();
           });
         }, expect.fail);
-      });
+      }, expect.fail);
     });
 
     it('should set server to unknown on non-timeout network error', function (done) {
@@ -264,9 +256,7 @@ describe('Topology (unit)', function () {
       });
 
       topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect(err => {
-        expect(err).to.not.exist;
-
+      topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
           let serverDescription;
           server.on('descriptionReceived', sd => (serverDescription = sd));
@@ -278,7 +268,7 @@ describe('Topology (unit)', function () {
             done();
           });
         }, expect.fail);
-      });
+      }, expect.fail);
     });
 
     it('should encounter a server selection timeout on garbled server responses', function (done) {
@@ -456,9 +446,10 @@ describe('Topology (unit)', function () {
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
+        return Promise.resolve();
       });
 
-      topology.connect(() => {
+      topology.connect().then(() => {
         topology
           .selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
           .then(expect.fail, err => {
@@ -518,9 +509,7 @@ describe('Topology (unit)', function () {
         //     returning their value
         //   - verify that 10 callbacks were called
 
-        topology.connect(async err => {
-          expect(err).to.not.exist;
-
+        topology.connect().then(async () => {
           let preventSelection = true;
           const anySelector = td => {
             if (preventSelection) return [];
@@ -544,7 +533,7 @@ describe('Topology (unit)', function () {
           completed++;
 
           expect(completed).to.equal(toSelect);
-        });
+        }, expect.fail);
       });
     });
   });
