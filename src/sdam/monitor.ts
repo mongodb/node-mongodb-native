@@ -214,7 +214,7 @@ function resetMonitorState(monitor: Monitor) {
 
   monitor[kCancellationToken].emit('cancel');
 
-  monitor.connection?.destroy({ force: true });
+  monitor.connection?.destroy();
   monitor.connection = null;
 }
 
@@ -247,7 +247,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   );
 
   function onHeartbeatFailed(err: Error) {
-    monitor.connection?.destroy({ force: true });
+    monitor.connection?.destroy();
     monitor.connection = null;
 
     monitor.emitAndLogHeartbeat(
@@ -366,13 +366,13 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       await performInitialHandshake(connection, monitor.connectOptions);
       return connection;
     } catch (error) {
-      connection.destroy({ force: false });
+      connection.destroy();
       throw error;
     }
   })().then(
     connection => {
       if (isInCloseState(monitor)) {
-        connection.destroy({ force: true });
+        connection.destroy();
         return;
       }
 
@@ -479,7 +479,7 @@ export class RTTPinger {
     this.closed = true;
     clearTimeout(this[kMonitorId]);
 
-    this.connection?.destroy({ force: true });
+    this.connection?.destroy();
     this.connection = undefined;
   }
 }
@@ -495,7 +495,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   function measureAndReschedule(conn?: Connection) {
     if (rttPinger.closed) {
-      conn?.destroy({ force: true });
+      conn?.destroy();
       return;
     }
 
@@ -529,7 +529,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
   connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
     () => measureAndReschedule(),
     () => {
-      rttPinger.connection?.destroy({ force: true });
+      rttPinger.connection?.destroy();
       rttPinger.connection = undefined;
       rttPinger[kRoundTripTime] = 0;
       return;

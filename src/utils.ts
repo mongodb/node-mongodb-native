@@ -386,46 +386,6 @@ export function maxWireVersion(topologyOrServer?: Connection | Topology | Server
   return 0;
 }
 
-/**
- * Applies the function `eachFn` to each item in `arr`, in parallel.
- * @internal
- *
- * @param arr - An array of items to asynchronously iterate over
- * @param eachFn - A function to call on each item of the array. The callback signature is `(item, callback)`, where the callback indicates iteration is complete.
- * @param callback - The callback called after every item has been iterated
- */
-export function eachAsync<T = Document>(
-  arr: T[],
-  eachFn: (item: T, callback: (err?: AnyError) => void) => void,
-  callback: Callback
-): void {
-  arr = arr || [];
-
-  let idx = 0;
-  let awaiting = 0;
-  for (idx = 0; idx < arr.length; ++idx) {
-    awaiting++;
-    eachFn(arr[idx], eachCallback);
-  }
-
-  if (awaiting === 0) {
-    callback();
-    return;
-  }
-
-  function eachCallback(err?: AnyError) {
-    awaiting--;
-    if (err) {
-      callback(err);
-      return;
-    }
-
-    if (idx === arr.length && awaiting <= 0) {
-      callback();
-    }
-  }
-}
-
 /** @internal */
 export function arrayStrictEqual(arr: unknown[], arr2: unknown[]): boolean {
   if (!Array.isArray(arr) || !Array.isArray(arr2)) {

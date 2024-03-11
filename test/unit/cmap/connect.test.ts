@@ -128,7 +128,7 @@ describe('Connect Tests', function () {
     });
 
     afterEach(async () => {
-      connection.destroy({ force: true });
+      connection.destroy();
       await mock.cleanup();
     });
 

@@ -2,8 +2,8 @@ import { promisify } from 'util';
 
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
-import type { ConnectionEvents, DestroyOptions } from '../cmap/connection';
-import type { CloseOptions, ConnectionPoolEvents } from '../cmap/connection_pool';
+import type { ConnectionEvents } from '../cmap/connection';
+import type { ConnectionPoolEvents } from '../cmap/connection_pool';
 import type { ClientMetadata } from '../cmap/handshake/client_metadata';
 import { DEFAULT_OPTIONS, FEATURE_FLAGS } from '../connection_string';
 import {
@@ -469,7 +469,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       selectServerOptions,
       (err, server) => {
         if (err) {
-          return this.close({ force: false }, () => exitWithError(err));
+          this.close();
+          return exitWithError(err);
         }
 
         const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
@@ -495,41 +496,33 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Close this topology */
-  close(options: CloseOptions): void;
-  close(options: CloseOptions, callback: Callback): void;
-  close(options?: CloseOptions, callback?: Callback): void {
-    options = options ?? { force: false };
-
+  close(): void {
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
-      return callback?.();
+      return;
     }
 
-    const destroyedServers = Array.from(this.s.servers.values(), server => {
-      return promisify(destroyServer)(server, this, { force: !!options?.force });
-    });
+    for (const server of this.s.servers.values()) {
+      destroyServer(server, this);
+    }
 
-    Promise.all(destroyedServers)
-      .then(() => {
-        this.s.servers.clear();
+    this.s.servers.clear();
 
-        stateTransition(this, STATE_CLOSING);
+    stateTransition(this, STATE_CLOSING);
 
-        drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
-        drainTimerQueue(this.s.connectionTimers);
+    drainWaitQueue(this[kWaitQueue], new MongoTopologyClosedError());
+    drainTimerQueue(this.s.connectionTimers);
 
-        if (this.s.srvPoller) {
-          this.s.srvPoller.stop();
-          this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
-        }
+    if (this.s.srvPoller) {
+      this.s.srvPoller.stop();
+      this.s.srvPoller.removeListener(SrvPoller.SRV_RECORD_DISCOVERY, this.s.detectSrvRecords);
+    }
 
-        this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
+    this.removeListener(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
 
-        stateTransition(this, STATE_CLOSED);
+    stateTransition(this, STATE_CLOSED);
 
-        // emit an event for close
-        this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
-      })
-      .finally(() => callback?.());
+    // emit an event for close
+    this.emitAndLog(Topology.TOPOLOGY_CLOSED, new TopologyClosedEvent(this.s.id));
   }
 
   /**
@@ -773,30 +766,20 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 }
 
 /** Destroys a server, and removes all event listeners from the instance */
-function destroyServer(
-  server: Server,
-  topology: Topology,
-  options?: DestroyOptions,
-  callback?: Callback
-) {
-  options = options ?? { force: false };
+function destroyServer(server: Server, topology: Topology) {
   for (const event of LOCAL_SERVER_EVENTS) {
     server.removeAllListeners(event);
   }
 
-  server.destroy(options, () => {
-    topology.emitAndLog(
-      Topology.SERVER_CLOSED,
-      new ServerClosedEvent(topology.s.id, server.description.address)
-    );
+  server.destroy();
+  topology.emitAndLog(
+    Topology.SERVER_CLOSED,
+    new ServerClosedEvent(topology.s.id, server.description.address)
+  );
 
-    for (const event of SERVER_RELAY_EVENTS) {
-      server.removeAllListeners(event);
-    }
-    if (typeof callback === 'function') {
-      callback();
-    }
-  });
+  for (const event of SERVER_RELAY_EVENTS) {
+    server.removeAllListeners(event);
+  }
 }
 
 /** Predicts the TopologyType from options */

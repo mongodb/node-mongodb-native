@@ -43,7 +43,7 @@ export async function connect(options: ConnectionOptions): Promise<Connection> {
     await performInitialHandshake(connection, options);
     return connection;
   } catch (error) {
-    connection?.destroy({ force: false });
+    connection?.destroy();
     throw error;
   }
 }

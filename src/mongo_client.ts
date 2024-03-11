@@ -552,7 +552,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
       try {
         await promisify(callback => this.topology?.connect(options, callback))();
       } catch (error) {
-        this.topology?.close({ force: true });
+        this.topology?.close();
         throw error;
       }
     };
@@ -614,19 +614,12 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     const topology = this.topology;
     this.topology = undefined;
 
-    await new Promise<void>((resolve, reject) => {
-      topology.close({ force }, error => {
-        if (error) return reject(error);
-        const { encrypter } = this[kOptions];
-        if (encrypter) {
-          return encrypter.closeCallback(this, force, error => {
-            if (error) return reject(error);
-            resolve();
-          });
-        }
-        resolve();
-      });
-    });
+    topology.close();
+
+    const { encrypter } = this[kOptions];
+    if (encrypter) {
+      await encrypter.close(this, force);
+    }
   }
 
   /**
