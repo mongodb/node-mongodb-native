@@ -940,7 +940,9 @@ class ReadableCursorStream extends Readable {
         //       working on 4.4 servers because the error emitted on failover was "interrupted at
         //       shutdown" while on 5.0+ it is "The server is in quiesce mode and will shut down".
         //       See NODE-4475.
-        return this.destroy(err);
+        if (!this._cursor.isDead) {
+          return this.destroy(err);
+        }
       }
     );
   }
