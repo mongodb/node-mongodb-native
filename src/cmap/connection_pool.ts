@@ -118,9 +118,7 @@ export const PoolState = Object.freeze({
   closed: 'closed'
 } as const);
 
-/** @public
- * @deprecated This interface is deprecated and will be removed in a future release as it is not used
- * in the driver */
+/** @public */
 export interface CloseOptions {
   force?: boolean;
 }
