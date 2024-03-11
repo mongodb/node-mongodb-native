@@ -1,6 +1,6 @@
 import type { ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
-import { MongoError, MongoRuntimeError } from '../error';
+import { type MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
 import { ServerType, TopologyType } from './common';
 import { ServerDescription } from './server_description';
