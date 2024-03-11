@@ -85,6 +85,8 @@ export interface CommandOptions extends BSONSerializeOptions {
   willRetryWrite?: boolean;
 
   writeConcern?: WriteConcern;
+
+  directConnection?: boolean;
 }
 
 /** @public */
@@ -123,8 +125,6 @@ export interface ConnectionOptions
   extendedMetadata: Promise<Document>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
-  /** @internal */
-  directConnection: boolean;
 }
 
 /** @internal */
@@ -281,10 +281,6 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return this.description.loadBalanced;
   }
 
-  public get directConnection(): boolean {
-    return this.description.directConnection;
-  }
-
   public get idleTime(): number {
     return calculateDurationInMs(this.lastUseTime);
   }
@@ -408,7 +404,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         !isSharded(this) &&
         !this.description.loadBalanced &&
         this.supportsOpMsg &&
-        this.description.directConnection === true &&
+        options.directConnection === true &&
         readPreference?.mode === 'primary'
       ) {
         // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
