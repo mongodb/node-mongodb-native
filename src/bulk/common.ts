@@ -1,6 +1,6 @@
 import { promisify } from 'util';
 
-import { type BSONSerializeOptions, type Document, ObjectId, resolveBSONOptions } from '../bson';
+import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
 import type { Collection } from '../collection';
 import {
   type AnyError,
@@ -12,6 +12,7 @@ import {
 } from '../error';
 import type { Filter, OneOrMore, OptionalId, UpdateFilter, WithoutId } from '../mongo_types';
 import type { CollationOptions, CommandOperationOptions } from '../operations/command';
+import { maybeAddIdToDocuments } from '../operations/common_functions';
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -917,7 +918,7 @@ export abstract class BulkOperationBase {
    * Create a new OrderedBulkOperation or UnorderedBulkOperation instance
    * @internal
    */
-  constructor(collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
+  constructor(private collection: Collection, options: BulkWriteOptions, isOrdered: boolean) {
     // determine whether bulkOperation is ordered or unordered
     this.isOrdered = isOrdered;
 
@@ -1032,9 +1033,9 @@ export abstract class BulkOperationBase {
    * ```
    */
   insert(document: Document): BulkOperationBase {
-    if (document._id == null && !shouldForceServerObjectId(this)) {
-      document._id = new ObjectId();
-    }
+    maybeAddIdToDocuments(this.collection, document, {
+      forceServerObjectId: this.shouldForceServerObjectId()
+    });
 
     return this.addToOperationsList(BatchType.INSERT, document);
   }
@@ -1093,21 +1094,16 @@ export abstract class BulkOperationBase {
       throw new MongoInvalidArgumentError('Operation must be an object with an operation key');
     }
     if ('insertOne' in op) {
-      const forceServerObjectId = shouldForceServerObjectId(this);
-      if (op.insertOne && op.insertOne.document == null) {
-        // NOTE: provided for legacy support, but this is a malformed operation
-        if (forceServerObjectId !== true && (op.insertOne as Document)._id == null) {
-          (op.insertOne as Document)._id = new ObjectId();
-        }
+      const forceServerObjectId = this.shouldForceServerObjectId();
+      const document =
+        op.insertOne && op.insertOne.document == null
+          ? // TODO(NODE-6003): remove support for omitting the `documents` subdocument in bulk inserts
+            (op.insertOne as Document)
+          : op.insertOne.document;
 
-        return this.addToOperationsList(BatchType.INSERT, op.insertOne);
-      }
+      maybeAddIdToDocuments(this.collection, document, { forceServerObjectId });
 
-      if (forceServerObjectId !== true && op.insertOne.document._id == null) {
-        op.insertOne.document._id = new ObjectId();
-      }
-
-      return this.addToOperationsList(BatchType.INSERT, op.insertOne.document);
+      return this.addToOperationsList(BatchType.INSERT, document);
     }
 
     if ('replaceOne' in op || 'updateOne' in op || 'updateMany' in op) {
@@ -1268,6 +1264,13 @@ export abstract class BulkOperationBase {
     batchType: BatchType,
     document: Document | UpdateStatement | DeleteStatement
   ): this;
+
+  private shouldForceServerObjectId(): boolean {
+    return (
+      this.s.options.forceServerObjectId === true ||
+      this.s.collection.s.db.options?.forceServerObjectId === true
+    );
+  }
 }
 
 Object.defineProperty(BulkOperationBase.prototype, 'length', {
@@ -1276,18 +1279,6 @@ Object.defineProperty(BulkOperationBase.prototype, 'length', {
     return this.s.currentIndex;
   }
 });
-
-function shouldForceServerObjectId(bulkOperation: BulkOperationBase): boolean {
-  if (typeof bulkOperation.s.options.forceServerObjectId === 'boolean') {
-    return bulkOperation.s.options.forceServerObjectId;
-  }
-
-  if (typeof bulkOperation.s.collection.s.db.options?.forceServerObjectId === 'boolean') {
-    return bulkOperation.s.collection.s.db.options?.forceServerObjectId;
-  }
-
-  return false;
-}
 
 function isInsertBatch(batch: Batch): boolean {
   return batch.batchType === BatchType.INSERT;

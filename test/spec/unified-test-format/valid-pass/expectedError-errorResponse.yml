@@ -1,0 +1,39 @@
+description: "expectedError-errorResponse"
+
+schemaVersion: "1.12"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name test
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name coll0
+
+tests:
+  - description: "Unsupported command"
+    operations:
+      - name: runCommand
+        object: *database0
+        arguments:
+          commandName: unsupportedCommand
+          command: { unsupportedCommand: 1 }
+        expectError:
+          # Avoid asserting the exact error since it may vary by server version
+          errorResponse:
+            errmsg: { $$type: "string" }
+
+  - description: "Unsupported query operator"
+    operations:
+      - name: find
+        object: *collection0
+        arguments:
+          filter: { $unsupportedQueryOperator: 1 }
+        expectError:
+          # Avoid asserting the exact error since it may vary by server version
+          errorResponse:
+            errmsg: { $$type: "string" }

@@ -1,0 +1,42 @@
+description: "aggregate-merge-errorResponse"
+
+schemaVersion: "1.12"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: &database0Name crud-tests
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: &collection0Name test
+
+initialData: &initialData
+  - collectionName: *collection0Name
+    databaseName: *database0Name
+    documents:
+      - { _id: 1, x: 1 }
+      - { _id: 2, x: 1 }
+
+tests:
+  - description: "aggregate $merge DuplicateKey error is accessible"
+    runOnRequirements:
+      - minServerVersion: "5.1" # SERVER-59097
+        # Exclude sharded topologies since the aggregate command fails with
+        # IllegalOperation(20) instead of DuplicateKey(11000)
+        topologies: [ single, replicaset ]
+    operations:
+      - name: aggregate
+        object: *database0
+        arguments:
+          pipeline:
+            - { $documents: [ { _id: 2, x: 1 } ] }
+            - { $merge: { into: *collection0Name, whenMatched: "fail" } }
+        expectError:
+          errorCode: 11000 # DuplicateKey
+          errorResponse:
+            keyPattern: { _id: 1 }
+            keyValue: { _id: 2 }

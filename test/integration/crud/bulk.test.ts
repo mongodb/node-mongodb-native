@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 
 import {
   type Collection,
+  Double,
   Long,
   MongoBatchReExecutionError,
   MongoBulkWriteError,
@@ -65,16 +66,85 @@ describe('Bulk', function () {
       context('when called with a valid operation', function () {
         it('should not throw a MongoInvalidArgument error', async function () {
           try {
-            client.db('test').collection('test').initializeUnorderedBulkOp().raw({ insertOne: {} });
+            client
+              .db('test')
+              .collection('test')
+              .initializeUnorderedBulkOp()
+              .raw({ insertOne: { document: {} } });
           } catch (error) {
             expect(error).not.to.exist;
           }
         });
       });
+
+      it('supports the legacy specification (no nested document field)', async function () {
+        await client
+          .db('test')
+          .collection('test')
+          .initializeUnorderedBulkOp()
+          // @ts-expect-error Not allowed in TS, but allowed for legacy compat
+          .raw({ insertOne: { name: 'john doe' } })
+          .execute();
+        const result = await client.db('test').collection('test').findOne({ name: 'john doe' });
+        expect(result).to.exist;
+      });
     });
   });
 
   describe('Collection', function () {
+    describe('when a pkFactory is set on the client', function () {
+      let client: MongoClient;
+      const pkFactory = {
+        count: 0,
+        createPk: function () {
+          return new Double(this.count++);
+        }
+      };
+      let collection: Collection;
+
+      beforeEach(async function () {
+        client = this.configuration.newClient({}, { pkFactory, promoteValues: false });
+        collection = client.db('integration').collection('pk_factory_tests');
+        await collection.deleteMany({});
+      });
+
+      afterEach(() => client.close());
+
+      it('insertMany() generates _ids using the pkFactory', async function () {
+        await collection.insertMany([{ name: 'john doe' }]);
+        const result = await collection.findOne({ name: 'john doe' });
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
+      });
+
+      it('bulkWrite() generates _ids using the pkFactory', async function () {
+        await collection.bulkWrite([{ insertOne: { document: { name: 'john doe' } } }]);
+        const result = await collection.findOne({ name: 'john doe' });
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
+      });
+
+      it('ordered bulk operations generate _ids using pkFactory', async function () {
+        await collection.initializeOrderedBulkOp().insert({ name: 'john doe' }).execute();
+        const result = await collection.findOne({ name: 'john doe' });
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
+      });
+
+      it('unordered bulk operations generate _ids using pkFactory', async function () {
+        await collection.initializeUnorderedBulkOp().insert({ name: 'john doe' }).execute();
+        const result = await collection.findOne({ name: 'john doe' });
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
+      });
+
+      it('bulkOperation.raw() with the legacy syntax (no nested document field) generates _ids using pkFactory', async function () {
+        await collection
+          .initializeOrderedBulkOp()
+          // @ts-expect-error Not allowed by TS, but still permitted.
+          .raw({ insertOne: { name: 'john doe' } })
+          .execute();
+        const result = await collection.findOne({ name: 'john doe' });
+        expect(result).to.have.property('_id').to.have.property('_bsontype').to.equal('Double');
+      });
+    });
+
     describe('#insertMany()', function () {
       context('when passed an invalid docs argument', function () {
         it('should throw a MongoInvalidArgument error', async function () {
