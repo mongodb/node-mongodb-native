@@ -1,16 +1,12 @@
-'use strict';
+import { expect } from 'chai';
 
-const { ReadPreference } = require('../../mongodb');
-const { Topology } = require('../../mongodb');
-const chai = require('chai');
-chai.use(require('chai-subset'));
-
-const { assert: test, setupDatabase } = require('../shared');
-
-const expect = chai.expect;
+import { ReadPreference, Topology } from '../../mongodb';
+import { assert as test, setupDatabase } from '../shared';
 
 describe('ReadPreference', function () {
   let client;
+  let events;
+
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
   });
@@ -27,20 +23,19 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Set read preference
-        var collection = db.collection('read_pref_1', {
+        const collection = db.collection('read_pref_1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
         // Save checkout function
-        var command = client.topology.command;
+        const command = client.topology.command;
         // Set up our checker method
-        client.topology.command = function () {
-          var args = Array.prototype.slice.call(arguments, 0);
+        client.topology.command = function (...args) {
           if (args[0] === 'integration_tests.$cmd') {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
@@ -63,20 +58,19 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Set read preference
-        var collection = db.collection('read_pref_1', {
+        const collection = db.collection('read_pref_1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
         // Save checkout function
-        var command = client.topology.command;
+        const command = client.topology.command;
         // Set up our checker method
-        client.topology.command = function () {
-          var args = Array.prototype.slice.call(arguments, 0);
+        client.topology.command = function (...args) {
           if (args[0] === 'integration_tests.$cmd') {
             test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
@@ -114,18 +108,17 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      const configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1, readPreference: 'secondary' },
         { maxPoolSize: 1 }
       );
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         // Save checkout function
-        var command = client.topology.command;
+        const command = client.topology.command;
         // Set up our checker method
-        client.topology.command = function () {
-          var args = Array.prototype.slice.call(arguments, 0);
+        client.topology.command = function (...args) {
           if (args[0] === 'integration_tests.$cmd') {
             test.equal(ReadPreference.SECONDARY, args[2].readPreference.mode);
           }
@@ -136,8 +129,7 @@ describe('ReadPreference', function () {
         db.command({ dbStats: true }, function (err) {
           expect(err).to.not.exist;
 
-          client.topology.command = function () {
-            var args = Array.prototype.slice.call(arguments, 0);
+          client.topology.command = function (...args) {
             if (args[0] === 'integration_tests.$cmd') {
               test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
             }
@@ -159,13 +151,13 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Create read preference object.
-        var mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
+        const mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
         db.command({ dbStats: true }, { readPreference: mySecondaryPreferred }, function (err) {
           expect(err).to.not.exist;
           client.close(done);
@@ -178,13 +170,13 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Create read preference object.
-        var mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
+        const mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
         db.listCollections({}, { readPreference: mySecondaryPreferred }).toArray(function (err) {
           expect(err).to.not.exist;
           client.close(done);
@@ -197,14 +189,14 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
         // Create read preference object.
-        var mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
-        var cursor = db.collection('test').find({}, { readPreference: mySecondaryPreferred });
+        const mySecondaryPreferred = { mode: 'secondaryPreferred', tags: [] };
+        const cursor = db.collection('test').find({}, { readPreference: mySecondaryPreferred });
         cursor.toArray(function (err) {
           expect(err).to.not.exist;
           client.close(done);
@@ -217,12 +209,12 @@ describe('ReadPreference', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
       client.connect(function (err, client) {
-        var db = client.db(configuration.db);
+        const db = client.db(configuration.db);
         expect(err).to.not.exist;
-        var cursor = db
+        const cursor = db
           .collection('test', { readPreference: ReadPreference.SECONDARY_PREFERRED })
           .listIndexes();
         test.equal(cursor.readPreference.mode, 'secondaryPreferred');
@@ -247,15 +239,15 @@ describe('ReadPreference', function () {
 
   context('hedge', function () {
     it('should set hedge using [find option & empty hedge]', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: function (done) {
-        const events = [];
+        events = [];
         client.on('commandStarted', event => {
           if (event.commandName === 'find') {
             events.push(event);
           }
         });
-        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
+        const rp = new ReadPreference(ReadPreference.SECONDARY, undefined, { hedge: {} });
         client
           .db(this.configuration.db)
           .collection('test')
@@ -270,15 +262,15 @@ describe('ReadPreference', function () {
     });
 
     it('should set hedge using [.withReadPreference & empty hedge] ', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: function (done) {
-        const events = [];
+        events = [];
         client.on('commandStarted', event => {
           if (event.commandName === 'find') {
             events.push(event);
           }
         });
-        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: {} });
+        const rp = new ReadPreference(ReadPreference.SECONDARY, undefined, { hedge: {} });
         client
           .db(this.configuration.db)
           .collection('test')
@@ -294,15 +286,17 @@ describe('ReadPreference', function () {
     });
 
     it('should set hedge using [.withReadPreference & enabled hedge] ', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: function (done) {
-        const events = [];
+        events = [];
         client.on('commandStarted', event => {
           if (event.commandName === 'find') {
             events.push(event);
           }
         });
-        const rp = new ReadPreference(ReadPreference.SECONDARY, null, { hedge: { enabled: true } });
+        const rp = new ReadPreference(ReadPreference.SECONDARY, undefined, {
+          hedge: { enabled: true }
+        });
         client
           .db(this.configuration.db)
           .collection('test')
@@ -318,15 +312,15 @@ describe('ReadPreference', function () {
     });
 
     it('should set hedge using [.withReadPreference & disabled hedge] ', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: function (done) {
-        const events = [];
+        events = [];
         client.on('commandStarted', event => {
           if (event.commandName === 'find') {
             events.push(event);
           }
         });
-        const rp = new ReadPreference(ReadPreference.SECONDARY, null, {
+        const rp = new ReadPreference(ReadPreference.SECONDARY, undefined, {
           hedge: { enabled: false }
         });
         client
@@ -344,15 +338,15 @@ describe('ReadPreference', function () {
     });
 
     it('should set hedge using [.withReadPreference & undefined hedge] ', {
-      metadata: { requires: { mongodb: '>=3.6.0' } },
+      metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6.0' } },
       test: function (done) {
-        const events = [];
+        events = [];
         client.on('commandStarted', event => {
           if (event.commandName === 'find') {
             events.push(event);
           }
         });
-        const rp = new ReadPreference(ReadPreference.SECONDARY, null);
+        const rp = new ReadPreference(ReadPreference.SECONDARY);
         client
           .db(this.configuration.db)
           .collection('test')
@@ -437,13 +431,13 @@ describe('ReadPreference', function () {
   });
 
   it('should respect readPreference from uri', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>=3.6' } },
+    metadata: { requires: { topology: 'replicaset' } },
     test: async function () {
       const client = this.configuration.newClient({
         readPreference: 'secondary',
         monitorCommands: true
       });
-      const events = [];
+      events = [];
       client.on('commandStarted', event => {
         if (event.commandName === 'find') {
           events.push(event);
@@ -462,5 +456,150 @@ describe('ReadPreference', function () {
 
       await client.close();
     }
+  });
+
+  context('when connecting to a secondary in a replica set with a direct connection', function () {
+    context('when readPreference is primary', () => {
+      it('should attach a read preference of primaryPreferred to the read command for replicaset', {
+        metadata: { requires: { topology: 'replicaset' } },
+        test: async function () {
+          if (this.configuration.topologyType !== 'ReplicaSetWithPrimary') {
+            this.skipReason = 'This test is supposed to run on the replicaset with primary';
+            return this.skip();
+          }
+
+          let checkedPrimary = false;
+
+          for (const server of this.configuration.options.hostAddresses) {
+            const { host, port } = server.toHostPort();
+            const client = this.configuration.newClient(
+              {
+                readPreference: 'primary',
+                directConnection: true,
+                host,
+                port
+              },
+              {
+                monitorCommands: true
+              }
+            );
+            events = [];
+            client.on('commandStarted', event => {
+              if (event.commandName === 'find') {
+                events.push(event);
+              }
+            });
+
+            const admin = client.db().admin();
+            const serverStatus = await admin.serverStatus();
+
+            if (server.toString() === serverStatus.repl.primary) {
+              await client.db('test').collection('test').findOne({ a: 1 });
+              expect(events[0]).to.have.property('commandName', 'find');
+              expect(events[0]).to.have.deep.nested.property('command.$readPreference', {
+                mode: 'primaryPreferred'
+              });
+              checkedPrimary = true;
+            }
+            await client.close();
+          }
+          expect(checkedPrimary).to.be.equal(true);
+        }
+      });
+
+      it('should not attach a read preference to the read command for standalone', {
+        metadata: { requires: { topology: 'single' } },
+        test: async function () {
+          const client = this.configuration.newClient(
+            {
+              readPreference: 'primary',
+              directConnection: true
+            },
+            {
+              monitorCommands: true
+            }
+          );
+          events = [];
+          client.on('commandStarted', event => {
+            if (event.commandName === 'find') {
+              events.push(event);
+            }
+          });
+          await client.db('test').collection('test').findOne({ a: 1 });
+          expect(events[0]).to.have.property('commandName', 'find');
+          expect(events[0]).to.not.have.deep.nested.property('command.$readPreference');
+          await client.close();
+        }
+      });
+    });
+
+    context('when readPreference is secondary', () => {
+      it('should attach a read preference of secondary to the read command for replicaset', {
+        metadata: { requires: { topology: 'replicaset' } },
+        test: async function () {
+          let checkedSecondary = false;
+
+          for (const server of this.configuration.options.hostAddresses) {
+            const { host, port } = server.toHostPort();
+            const client = this.configuration.newClient(
+              {
+                readPreference: 'secondary',
+                directConnection: true,
+                host,
+                port
+              },
+              {
+                monitorCommands: true
+              }
+            );
+            events = [];
+            client.on('commandStarted', event => {
+              if (event.commandName === 'find') {
+                events.push(event);
+              }
+            });
+
+            const admin = client.db().admin();
+            const serverStatus = await admin.serverStatus();
+
+            if (serverStatus.repl.secondary) {
+              await client.db('test').collection('test').findOne({ a: 1 });
+              expect(events[0]).to.have.property('commandName', 'find');
+              expect(events[0]).to.have.deep.nested.property('command.$readPreference', {
+                mode: 'secondary'
+              });
+              checkedSecondary = true;
+            }
+            await client.close();
+          }
+          expect(checkedSecondary).to.be.equal(true);
+        }
+      });
+
+      it('should not attach a read preference to the read command for standalone', {
+        metadata: { requires: { topology: 'single' } },
+        test: async function () {
+          const client = this.configuration.newClient(
+            {
+              readPreference: 'secondary',
+              directConnection: true
+            },
+            {
+              monitorCommands: true
+            }
+          );
+          events = [];
+          client.on('commandStarted', event => {
+            if (event.commandName === 'find') {
+              events.push(event);
+            }
+          });
+          await client.db('test').collection('test').findOne({ a: 1 });
+          expect(events[0]).to.have.property('commandName', 'find');
+          expect(events[0]).to.not.have.deep.nested.property('command.$readPreference');
+          await client.close();
+        }
+      });
+    });
   });
 });

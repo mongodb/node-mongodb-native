@@ -43,11 +43,21 @@ export async function indexInformation(
   return info;
 }
 
-export function prepareDocs(
+export function maybeAddIdToDocuments(
   coll: Collection,
   docs: Document[],
   options: { forceServerObjectId?: boolean }
-): Document[] {
+): Document[];
+export function maybeAddIdToDocuments(
+  coll: Collection,
+  docs: Document,
+  options: { forceServerObjectId?: boolean }
+): Document;
+export function maybeAddIdToDocuments(
+  coll: Collection,
+  docOrDocs: Document[] | Document,
+  options: { forceServerObjectId?: boolean }
+): Document[] | Document {
   const forceServerObjectId =
     typeof options.forceServerObjectId === 'boolean'
       ? options.forceServerObjectId
@@ -55,14 +65,15 @@ export function prepareDocs(
 
   // no need to modify the docs if server sets the ObjectId
   if (forceServerObjectId === true) {
-    return docs;
+    return docOrDocs;
   }
 
-  return docs.map(doc => {
+  const transform = (doc: Document): Document => {
     if (doc._id == null) {
       doc._id = coll.s.pkFactory.createPk();
     }
 
     return doc;
-  });
+  };
+  return Array.isArray(docOrDocs) ? docOrDocs.map(transform) : transform(docOrDocs);
 }

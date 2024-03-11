@@ -9,7 +9,7 @@ import type { MongoDBNamespace } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
-import { prepareDocs } from './common_functions';
+import { maybeAddIdToDocuments } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
@@ -69,7 +69,7 @@ export interface InsertOneResult<TSchema = Document> {
 
 export class InsertOneOperation extends InsertOperation {
   constructor(collection: Collection, doc: Document, options: InsertOneOptions) {
-    super(collection.s.namespace, prepareDocs(collection, [doc], options), options);
+    super(collection.s.namespace, maybeAddIdToDocuments(collection, [doc], options), options);
   }
 
   override async execute(
@@ -131,7 +131,9 @@ export class InsertManyOperation extends AbstractOperation<InsertManyResult> {
     const writeConcern = WriteConcern.fromOptions(options);
     const bulkWriteOperation = new BulkWriteOperation(
       coll,
-      prepareDocs(coll, this.docs, options).map(document => ({ insertOne: { document } })),
+      this.docs.map(document => ({
+        insertOne: { document }
+      })),
       options
     );
 
