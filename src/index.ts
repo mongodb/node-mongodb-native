@@ -275,7 +275,6 @@ export type {
   Connection,
   ConnectionEvents,
   ConnectionOptions,
-  DestroyOptions,
   ProxyOptions
 } from './cmap/connection';
 export type {

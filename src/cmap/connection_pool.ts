@@ -28,7 +28,6 @@ import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import {
   type Callback,
-  eachAsync,
   List,
   makeCounter,
   promiseWithResolvers,
@@ -493,25 +492,16 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   private interruptInUseConnections(minGeneration: number) {
     for (const connection of this[kCheckedOut]) {
       if (connection.generation <= minGeneration) {
-        this.checkIn(connection);
         connection.onError(new PoolClearedOnNetworkError(this));
+        this.checkIn(connection);
       }
     }
   }
 
   /** Close the pool */
-  close(callback: Callback<void>): void;
-  close(options: CloseOptions, callback: Callback<void>): void;
-  close(_options?: CloseOptions | Callback<void>, _cb?: Callback<void>): void {
-    let options = _options as CloseOptions;
-    const callback = (_cb ?? _options) as Callback<void>;
-    if (typeof options === 'function') {
-      options = {};
-    }
-
-    options = Object.assign({ force: false }, options);
+  close(): void {
     if (this.closed) {
-      return callback();
+      return;
     }
 
     // immediately cancel any in-flight connections
@@ -526,21 +516,15 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this.clearMinPoolSizeTimer();
     this.processWaitQueue();
 
-    eachAsync<Connection>(
-      this[kConnections].toArray(),
-      (conn, cb) => {
-        this.emitAndLog(
-          ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(this, conn, 'poolClosed')
-        );
-        conn.destroy({ force: !!options.force }, cb);
-      },
-      err => {
-        this[kConnections].clear();
-        this.emitAndLog(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
-        callback(err);
-      }
-    );
+    for (const conn of this[kConnections]) {
+      this.emitAndLog(
+        ConnectionPool.CONNECTION_CLOSED,
+        new ConnectionClosedEvent(this, conn, 'poolClosed')
+      );
+      conn.destroy();
+    }
+    this[kConnections].clear();
+    this.emitAndLog(ConnectionPool.CONNECTION_POOL_CLOSED, new ConnectionPoolClosedEvent(this));
   }
 
   /**
@@ -592,7 +576,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionClosedEvent(this, connection, reason)
     );
     // destroy the connection
-    process.nextTick(() => connection.destroy({ force: false }));
+    connection.destroy();
   }
 
   private connectionIsStale(connection: Connection) {
@@ -648,7 +632,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
         // The pool might have closed since we started trying to create a connection
         if (this[kPoolState] !== PoolState.ready) {
           this[kPending]--;
-          connection.destroy({ force: true });
+          connection.destroy();
           callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
           return;
         }

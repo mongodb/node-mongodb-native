@@ -126,12 +126,6 @@ export interface ConnectionOptions
   mongoLogger?: MongoLogger | undefined;
 }
 
-/** @internal */
-export interface DestroyOptions {
-  /** Force the destruction. */
-  force: boolean;
-}
-
 /** @public */
 export type ConnectionEvents = {
   commandStarted(event: CommandStartedEvent): void;
@@ -301,13 +295,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }, 1).unref(); // No need for this timer to hold the event loop open
   }
 
-  public destroy(options: DestroyOptions, callback?: Callback): void {
+  public destroy(): void {
     if (this.closed) {
-      if (typeof callback === 'function') process.nextTick(callback);
       return;
-    }
-    if (typeof callback === 'function') {
-      this.once('close', () => process.nextTick(() => callback()));
     }
 
     // load balanced mode requires that these listeners remain on the connection
