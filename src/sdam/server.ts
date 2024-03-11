@@ -290,7 +290,10 @@ export class Server extends TypedEventEmitter<ServerEvents> {
     }
 
     // Clone the options
-    const finalOptions = Object.assign({}, options, { wireProtocolCommand: false });
+    const finalOptions = Object.assign({}, options, {
+      wireProtocolCommand: false,
+      directConnection: this.topology.s.options.directConnection
+    });
 
     // There are cases where we need to flag the read preference not to get sent in
     // the command, such as pre-5.0 servers attempting to perform an aggregate write

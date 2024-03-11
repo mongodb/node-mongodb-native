@@ -26,7 +26,8 @@ import type { ServerApi, SupportedNodeConnectionOptions } from '../mongo_client'
 import { type MongoClientAuthProviders } from '../mongo_client_auth_providers';
 import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mongo_logger';
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { ReadPreferenceLike } from '../read_preference';
+import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
+import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   BufferPool,
@@ -83,6 +84,8 @@ export interface CommandOptions extends BSONSerializeOptions {
   willRetryWrite?: boolean;
 
   writeConcern?: WriteConcern;
+
+  directConnection?: boolean;
 }
 
 /** @public */
@@ -371,16 +374,34 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       cmd.$clusterTime = clusterTime;
     }
 
-    if (
-      isSharded(this) &&
-      !this.supportsOpMsg &&
-      readPreference &&
-      readPreference.mode !== 'primary'
-    ) {
-      cmd = {
-        $query: cmd,
-        $readPreference: readPreference.toJSON()
-      };
+    // For standalone, drivers MUST NOT set $readPreference.
+    if (this.description.type !== ServerType.Standalone) {
+      if (
+        !isSharded(this) &&
+        !this.description.loadBalanced &&
+        this.supportsOpMsg &&
+        options.directConnection === true &&
+        readPreference?.mode === 'primary'
+      ) {
+        // For mongos and load balancers with 'primary' mode, drivers MUST NOT set $readPreference.
+        // For all other types with a direct connection, if the read preference is 'primary'
+        // (driver sets 'primary' as default if no read preference is configured),
+        // the $readPreference MUST be set to 'primaryPreferred'
+        // to ensure that any server type can handle the request.
+        cmd.$readPreference = ReadPreference.primaryPreferred.toJSON();
+      } else if (isSharded(this) && !this.supportsOpMsg && readPreference?.mode !== 'primary') {
+        // When sending a read operation via OP_QUERY and the $readPreference modifier,
+        // the query MUST be provided using the $query modifier.
+        cmd = {
+          $query: cmd,
+          $readPreference: readPreference.toJSON()
+        };
+      } else if (readPreference?.mode !== 'primary') {
+        // For mode 'primary', drivers MUST NOT set $readPreference.
+        // For all other read preference modes (i.e. 'secondary', 'primaryPreferred', ...),
+        // drivers MUST set $readPreference
+        cmd.$readPreference = readPreference.toJSON();
+      }
     }
 
     const commandOptions = {
@@ -389,8 +410,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       checkKeys: false,
       // This value is not overridable
       secondaryOk: readPreference.secondaryOk(),
-      ...options,
-      readPreference // ensure we pass in ReadPreference instance
+      ...options
     };
 
     const message = this.supportsOpMsg

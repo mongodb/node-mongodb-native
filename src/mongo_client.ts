@@ -821,6 +821,7 @@ export interface MongoOptions
   readPreference: ReadPreference;
   readConcern: ReadConcern;
   loadBalanced: boolean;
+  directConnection: boolean;
   serverApi: ServerApi;
   compressors: CompressorName[];
   writeConcern: WriteConcern;
