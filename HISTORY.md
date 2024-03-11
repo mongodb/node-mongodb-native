@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.5.0](https://github.com/mongodb/node-mongodb-native/compare/v6.4.0...v6.5.0) (2024-03-11)
+
+
+### Features
+
+* **NODE-5968:** container and Kubernetes awareness in client metadata ([#4005](https://github.com/mongodb/node-mongodb-native/issues/4005)) ([28b7040](https://github.com/mongodb/node-mongodb-native/commit/28b70408d0153e6b1118f3dd9cfbcfa30abe29f0))
+* **NODE-5988:** Provide access to raw results doc on MongoServerError ([#4016](https://github.com/mongodb/node-mongodb-native/issues/4016)) ([c023242](https://github.com/mongodb/node-mongodb-native/commit/c02324218db18e7c51f5b775f35edacc084762b0))
+* **NODE-6008:** deprecate CloseOptions interface ([#4030](https://github.com/mongodb/node-mongodb-native/issues/4030)) ([f6cd8d9](https://github.com/mongodb/node-mongodb-native/commit/f6cd8d991b8dc8ca6d28964e46839c79727de669))
+
+
+### Bug Fixes
+
+* **NODE-5636:** generate _ids using pkFactory in bulk write operations ([#4025](https://github.com/mongodb/node-mongodb-native/issues/4025)) ([fbb5059](https://github.com/mongodb/node-mongodb-native/commit/fbb505906cc171ae01279025d42f6ea1c3e7e299))
+* **NODE-5981:** read preference not applied to commands properly ([#4010](https://github.com/mongodb/node-mongodb-native/issues/4010)) ([937c9c8](https://github.com/mongodb/node-mongodb-native/commit/937c9c890b6ad9be04823702b1b92b548ef4de9b))
+* **NODE-5985:** throw Nodejs' certificate expired error when TLS fails to connect instead of `CERT_HAS_EXPIRED` ([#4014](https://github.com/mongodb/node-mongodb-native/issues/4014)) ([057c223](https://github.com/mongodb/node-mongodb-native/commit/057c223f13a0d129aa9efc01ba3c9b48271e7b97))
+* **NODE-5993:** memory leak in the `Connection` class ([#4022](https://github.com/mongodb/node-mongodb-native/issues/4022)) ([69de253](https://github.com/mongodb/node-mongodb-native/commit/69de2537314fe25a5c3fa83f73235cfa7e7f729d))
+
+
+### Performance Improvements
+
+* **NODE-5986:** parallelize SRV/TXT resolution ([#4012](https://github.com/mongodb/node-mongodb-native/issues/4012)) ([eab8f23](https://github.com/mongodb/node-mongodb-native/commit/eab8f2338622218a1e57121a31cad493f462931b))
+
 ## [6.4.0](https://github.com/mongodb/node-mongodb-native/compare/v6.3.0...v6.4.0) (2024-02-29)
 
 
