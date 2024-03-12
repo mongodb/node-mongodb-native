@@ -216,6 +216,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   client!: MongoClient;
 
+  /** @internal */
+  private connectionLock?: Promise<Topology>;
+
   /** @event */
   static readonly SERVER_OPENING = SERVER_OPENING;
   /** @event */
@@ -339,6 +342,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
     }
+    this.connectionLock = undefined;
   }
 
   private detectShardedTopology(event: TopologyDescriptionChangedEvent) {
@@ -400,6 +404,22 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Initiate server connect */
   async connect(options?: ConnectOptions): Promise<Topology> {
+    if (this.connectionLock) {
+      return this.connectionLock;
+    }
+
+    try {
+      this.connectionLock = this._connect(options);
+      await this.connectionLock;
+    } finally {
+      // release
+      this.connectionLock = undefined;
+    }
+
+    return this;
+  }
+
+  private async _connect(options?: ConnectOptions): Promise<Topology> {
     options = options ?? {};
     if (this.s.state === STATE_CONNECTED) {
       return this;
