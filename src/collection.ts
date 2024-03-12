@@ -24,7 +24,6 @@ import type {
 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
-import type { IndexInformationOptions } from './operations/common_functions';
 import { CountOperation, type CountOptions } from './operations/count';
 import { CountDocumentsOperation, type CountDocumentsOptions } from './operations/count_documents';
 import {
@@ -49,15 +48,15 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import {
-  CreateIndexesOperation,
-  type CreateIndexesOptions,
-  type DropIndexesOptions,
-  DropIndexOperation,
-  type IndexDescription,
-  type IndexSpecification,
-  type ListIndexesOptions
+import type {
+  CreateIndexesOptions,
+  DropIndexesOptions,
+  IndexDescription,
+  IndexInformationOptions,
+  IndexSpecification,
+  ListIndexesOptions
 } from './operations/indexes';
+import { CreateIndexesOperation, DropIndexOperation } from './operations/indexes';
 import {
   InsertManyOperation,
   type InsertManyResult,

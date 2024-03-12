@@ -2,6 +2,7 @@ import type { Document } from '../bson';
 import type { Collection } from '../collection';
 import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
+import { type ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
@@ -69,6 +70,13 @@ export type IndexSpecification = OneOrMore<
   | { [key: string]: IndexDirection }
   | Map<string, IndexDirection>
 >;
+
+/** @public */
+export interface IndexInformationOptions {
+  full?: boolean;
+  readPreference?: ReadPreference;
+  session?: ClientSession;
+}
 
 /** @public */
 export interface IndexDescription

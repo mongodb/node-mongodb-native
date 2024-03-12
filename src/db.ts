@@ -11,7 +11,6 @@ import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
-import type { IndexInformationOptions } from './operations/common_functions';
 import {
   CreateCollectionOperation,
   type CreateCollectionOptions
@@ -23,7 +22,11 @@ import {
   type DropDatabaseOptions
 } from './operations/drop';
 import { executeOperation } from './operations/execute_operation';
-import { type CreateIndexesOptions, type IndexSpecification } from './operations/indexes';
+import type {
+  CreateIndexesOptions,
+  IndexInformationOptions,
+  IndexSpecification
+} from './operations/indexes';
 import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 import { ProfilingLevelOperation, type ProfilingLevelOptions } from './operations/profiling_level';
 import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
