@@ -683,11 +683,13 @@ export class Collection<TSchema extends Document = Document> {
     options?: IndexInformationOptions
   ): Promise<boolean> {
     const indexNames: string[] = [indexes].flat();
-    const allIndexes: string[] = await this.listIndexes(options)
-      .map(({ name }) => name)
-      .toArray();
+    const allIndexes: Set<string> = new Set(
+      await this.listIndexes(options)
+        .map(({ name }) => name)
+        .toArray()
+    );
 
-    return setDifference(indexNames, allIndexes).size === 0;
+    return indexNames.every(name => allIndexes.has(name));
   }
 
   /**
@@ -696,12 +698,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    const resolvedOptions: IndexInformationOptions = {
-      readPreference: options?.readPreference,
-      session: options?.session,
-      full: false
-    };
-    return this.indexes(resolvedOptions);
+    return this.indexes({ ...options, full: options?.full ?? false });
   }
 
   /**
@@ -807,7 +804,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
     const indexes = await this.listIndexes(options).toArray();
-    const full = options?.full === true;
+    const full = options?.full ?? true === true;
     if (full) {
       return indexes;
     }
