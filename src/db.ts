@@ -25,7 +25,6 @@ import {
 import { executeOperation } from './operations/execute_operation';
 import {
   type CreateIndexesOptions,
-  CreateIndexOperation,
   IndexInformationOperation,
   type IndexSpecification
 } from './operations/indexes';
@@ -426,10 +425,7 @@ export class Db {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ): Promise<string> {
-    return executeOperation(
-      this.client,
-      new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options))
-    );
+    return this.collection(name).createIndex(indexSpec, options);
   }
 
   /**

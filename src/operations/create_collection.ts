@@ -10,7 +10,7 @@ import type { PkFactory } from '../mongo_client';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { CommandOperation, type CommandOperationOptions } from './command';
-import { CreateIndexOperation } from './indexes';
+import { CreateIndexesOperation } from './indexes';
 import { Aspect, defineAspects } from './operation';
 
 const ILLEGAL_COMMAND_FIELDS = new Set([
@@ -167,7 +167,14 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
     if (encryptedFields) {
       // Create the required index for queryable encryption support.
-      const createIndexOp = new CreateIndexOperation(db, name, { __safeContent__: 1 }, {});
+      // We could use `this.db.collection(name).createIndex()` to create the index,
+      // but we can use the same session & server to avoid an extra server selection.
+      const createIndexOp = CreateIndexesOperation.fromIndexSpecification(
+        db,
+        name,
+        { __safeContent__: 1 },
+        {}
+      );
       await createIndexOp.execute(server, session);
     }
 

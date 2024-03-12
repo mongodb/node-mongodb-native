@@ -204,14 +204,12 @@ export class IndexesOperation extends AbstractOperation<Document[]> {
 }
 
 /** @internal */
-export class CreateIndexesOperation<
-  T extends string | string[] = string[]
-> extends CommandOperation<T> {
+export class CreateIndexesOperation extends CommandOperation<string[]> {
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
 
-  constructor(
+  private constructor(
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
@@ -239,11 +237,34 @@ export class CreateIndexesOperation<
     });
   }
 
+  static fromIndexDescriptionArray(
+    parent: OperationParent,
+    collectionName: string,
+    indexes: IndexDescription[],
+    options?: CreateIndexesOptions
+  ): CreateIndexesOperation {
+    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+  }
+
+  static fromIndexSpecification(
+    parent: OperationParent,
+    collectionName: string,
+    indexSpec: IndexSpecification,
+    options?: CreateIndexesOptions
+  ): CreateIndexesOperation {
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      [makeIndexSpec(indexSpec, options)],
+      options
+    );
+  }
+
   override get commandName() {
     return 'createIndexes';
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -266,61 +287,7 @@ export class CreateIndexesOperation<
     await super.executeCommand(server, session, cmd);
 
     const indexNames = indexes.map(index => index.name || '');
-    return indexNames as T;
-  }
-}
-
-/** @internal */
-export class CreateIndexOperation extends CreateIndexesOperation<string> {
-  constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
-  ) {
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
-    const indexNames = await super.execute(server, session);
-    return indexNames[0];
-  }
-}
-
-/** @internal */
-export class EnsureIndexOperation extends CreateIndexOperation {
-  db: Db;
-
-  constructor(
-    db: Db,
-    collectionName: string,
-    indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
-  ) {
-    super(db, collectionName, indexSpec, options);
-
-    this.readPreference = ReadPreference.primary;
-    this.db = db;
-    this.collectionName = collectionName;
-  }
-
-  override get commandName() {
-    return 'listIndexes';
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
-    const indexName = this.indexes[0].name;
-    const indexes = await this.db
-      .collection(this.collectionName)
-      .listIndexes({ session })
-      .toArray()
-      .catch(error => {
-        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound)
-          return [];
-        throw error;
-      });
-    if (indexName && indexes.some(index => index.name === indexName)) return indexName;
-    return super.execute(server, session);
+    return indexNames;
   }
 }
 
@@ -470,6 +437,4 @@ defineAspects(ListIndexesOperation, [
   Aspect.CURSOR_CREATING
 ]);
 defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);

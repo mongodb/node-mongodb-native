@@ -147,21 +147,10 @@ describe('abstract operation', async function () {
         correctCommandName: 'listIndexes'
       },
       {
-        subclassCreator: () => new mongodb.CreateIndexesOperation(db, 'bar', [{ key: { a: 1 } }]),
+        subclassCreator: () =>
+          mongodb.CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
         subclassType: mongodb.CreateIndexesOperation,
         correctCommandName: 'createIndexes'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.CreateIndexOperation(db, 'collectionName', 'indexDescription'),
-        subclassType: mongodb.CreateIndexOperation,
-        correctCommandName: 'createIndexes'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.EnsureIndexOperation(db, 'collectionName', 'indexDescription'),
-        subclassType: mongodb.EnsureIndexOperation,
-        correctCommandName: 'listIndexes'
       },
       {
         subclassCreator: () => new mongodb.DropIndexOperation(collection, 'a', {}),

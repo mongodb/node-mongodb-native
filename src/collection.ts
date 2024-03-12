@@ -52,7 +52,6 @@ import {
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
-  CreateIndexOperation,
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
@@ -575,15 +574,17 @@ export class Collection<TSchema extends Document = Document> {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ): Promise<string> {
-    return executeOperation(
+    const indexes = await executeOperation(
       this.client,
-      new CreateIndexOperation(
+      CreateIndexesOperation.fromIndexSpecification(
         this as TODO_NODE_3286,
         this.collectionName,
         indexSpec,
         resolveOptions(this, options)
       )
     );
+
+    return indexes[0];
   }
 
   /**
@@ -623,7 +624,7 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<string[]> {
     return executeOperation(
       this.client,
-      new CreateIndexesOperation(
+      CreateIndexesOperation.fromIndexDescriptionArray(
         this as TODO_NODE_3286,
         this.collectionName,
         indexSpecs,
