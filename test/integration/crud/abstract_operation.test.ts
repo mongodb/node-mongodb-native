@@ -19,7 +19,6 @@ describe('abstract operation', async function () {
       'OptionsOperation',
       'IsCappedOperation',
       'BulkWriteOperation',
-      'IndexExistsOperation',
       'IndexOperation',
       'CollectionsOperation',
       'IndexInformationOperation'
@@ -155,11 +154,6 @@ describe('abstract operation', async function () {
       {
         subclassCreator: () => new mongodb.ListIndexesOperation(collection, {}),
         subclassType: mongodb.ListIndexesOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
-        subclassCreator: () => new mongodb.IndexExistsOperation(collection, 'a', {}),
-        subclassType: mongodb.IndexExistsOperation,
         correctCommandName: 'listIndexes'
       },
       {

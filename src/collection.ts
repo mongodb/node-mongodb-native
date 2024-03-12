@@ -55,7 +55,6 @@ import {
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
-  IndexExistsOperation,
   IndexInformationOperation,
   type IndexSpecification,
   type ListIndexesOptions
@@ -91,7 +90,8 @@ import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
   normalizeHintField,
-  resolveOptions
+  resolveOptions,
+  setDifference
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
@@ -684,10 +684,12 @@ export class Collection<TSchema extends Document = Document> {
     indexes: string | string[],
     options?: IndexInformationOptions
   ): Promise<boolean> {
-    return executeOperation(
-      this.client,
-      new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options))
-    );
+    const indexNames: Set<string> = new Set([indexes].flat());
+    const allIndexes: string[] = await this.listIndexes(options)
+      .map(({ name }) => name)
+      .toArray();
+
+    return setDifference(indexNames, allIndexes).size === 0;
   }
 
   /**

@@ -338,43 +338,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
 }
 
 /** @internal */
-export class IndexExistsOperation extends AbstractOperation<boolean> {
-  override options: IndexInformationOptions;
-  collection: Collection;
-  indexes: string | string[];
-
-  constructor(
-    collection: Collection,
-    indexes: string | string[],
-    options: IndexInformationOptions
-  ) {
-    super(options);
-    this.options = options;
-    this.collection = collection;
-    this.indexes = indexes;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
-    const coll = this.collection;
-    const indexes = this.indexes;
-
-    const info = await indexInformation(coll.s.db, coll.collectionName, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session
-    });
-    // Let's check for the index names
-    if (!Array.isArray(indexes)) return info[indexes] != null;
-    // All keys found return true
-    return indexes.every(indexName => info[indexName] != null);
-  }
-}
-
-/** @internal */
 export class IndexInformationOperation extends AbstractOperation<Document> {
   override options: IndexInformationOptions;
   db: Db;
