@@ -2327,15 +2327,11 @@ describe('Find', function () {
 
         let selectedServer;
         const topology = client.topology;
-        const selectServerStub = sinon.stub(topology, 'selectServer').callsFake(function () {
+        const selectServerStub = sinon.stub(topology, 'selectServer').callsFake(async function () {
           const args = Array.prototype.slice.call(arguments);
-          const originalCallback = args.pop();
-          args.push((err, server) => {
-            selectedServer = server;
-            originalCallback(err, server);
-          });
-
-          return topology.selectServer.wrappedMethod.apply(this, args);
+          const server = topology.selectServer.wrappedMethod.apply(this, args);
+          selectedServer = await server;
+          return selectedServer;
         });
 
         const collection = client.db().collection('test_read_preference');
