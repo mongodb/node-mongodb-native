@@ -23,11 +23,7 @@ import {
   type DropDatabaseOptions
 } from './operations/drop';
 import { executeOperation } from './operations/execute_operation';
-import {
-  type CreateIndexesOptions,
-  IndexInformationOperation,
-  type IndexSpecification
-} from './operations/indexes';
+import { type CreateIndexesOptions, type IndexSpecification } from './operations/indexes';
 import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 import { ProfilingLevelOperation, type ProfilingLevelOptions } from './operations/profiling_level';
 import { RemoveUserOperation, type RemoveUserOptions } from './operations/remove_user';
@@ -476,10 +472,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new IndexInformationOperation(this, name, resolveOptions(this, options))
-    );
+    return this.collection(name).indexInformation(resolveOptions(this, options));
   }
 
   /**

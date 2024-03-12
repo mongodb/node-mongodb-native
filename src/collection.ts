@@ -55,7 +55,6 @@ import {
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
-  IndexInformationOperation,
   type IndexSpecification,
   type ListIndexesOptions
 } from './operations/indexes';
@@ -684,7 +683,7 @@ export class Collection<TSchema extends Document = Document> {
     indexes: string | string[],
     options?: IndexInformationOptions
   ): Promise<boolean> {
-    const indexNames: Set<string> = new Set([indexes].flat());
+    const indexNames: string[] = [indexes].flat();
     const allIndexes: string[] = await this.listIndexes(options)
       .map(({ name }) => name)
       .toArray();
@@ -698,10 +697,12 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new IndexInformationOperation(this.s.db, this.collectionName, resolveOptions(this, options))
-    );
+    const resolvedOptions: IndexInformationOptions = {
+      readPreference: options?.readPreference,
+      session: options?.session,
+      full: false
+    };
+    return this.indexes(resolvedOptions);
   }
 
   /**
@@ -806,7 +807,19 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
-    return this.listIndexes(options).toArray();
+    const indexes = await this.listIndexes(options).toArray();
+    const full = options?.full === true;
+    if (full) {
+      return indexes;
+    }
+
+    const info: Record<string, Array<[string, unknown]>> = {};
+    for (const { name, key } of indexes) {
+      info[name] = Object.entries(key);
+    }
+
+    // @ts-expect-error The return type is broken
+    return info;
   }
 
   /**

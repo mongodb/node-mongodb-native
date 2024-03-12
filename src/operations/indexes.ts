@@ -1,9 +1,7 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { Db } from '../db';
-import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoError } from '../error';
+import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
-import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
@@ -13,8 +11,7 @@ import {
   type CommandOperationOptions,
   type OperationParent
 } from './command';
-import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -334,35 +331,6 @@ export class ListIndexesOperation extends CommandOperation<Document> {
     }
 
     return super.executeCommand(server, session, command);
-  }
-}
-
-/** @internal */
-export class IndexInformationOperation extends AbstractOperation<Document> {
-  override options: IndexInformationOptions;
-  db: Db;
-  name: string;
-
-  constructor(db: Db, name: string, options?: IndexInformationOptions) {
-    super(options);
-    this.options = options ?? {};
-    this.db = db;
-    this.name = name;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
-    const db = this.db;
-    const name = this.name;
-
-    return indexInformation(db, name, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session
-    });
   }
 }
 

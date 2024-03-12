@@ -20,8 +20,7 @@ describe('abstract operation', async function () {
       'IsCappedOperation',
       'BulkWriteOperation',
       'IndexOperation',
-      'CollectionsOperation',
-      'IndexInformationOperation'
+      'CollectionsOperation'
     ];
 
     const sameServerOnlyOperationSubclasses = ['GetMoreOperation', 'KillCursorsOperation'];
@@ -154,11 +153,6 @@ describe('abstract operation', async function () {
       {
         subclassCreator: () => new mongodb.ListIndexesOperation(collection, {}),
         subclassType: mongodb.ListIndexesOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
-        subclassCreator: () => new mongodb.IndexInformationOperation(db, 'a', {}),
-        subclassType: mongodb.IndexInformationOperation,
         correctCommandName: 'listIndexes'
       },
       {
