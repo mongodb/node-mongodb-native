@@ -148,7 +148,7 @@ describe('Topology (unit)', function () {
               secondMockServer.hostAddress()
             ]);
 
-            topology.connect().then(()  => {
+            topology.connect().then(() => {
               sinon.stub(topology.s.servers, 'get').callsFake(() => {
                 return undefined;
               });
