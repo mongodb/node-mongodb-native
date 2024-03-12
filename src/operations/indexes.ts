@@ -176,34 +176,6 @@ function makeIndexSpec(
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractOperation<Document[]> {
-  override options: IndexInformationOptions;
-  collection: Collection;
-
-  constructor(collection: Collection, options: IndexInformationOptions) {
-    super(options);
-    this.options = options;
-    this.collection = collection;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
-    const coll = this.collection;
-    const options = this.options;
-
-    return indexInformation(coll.s.db, coll.collectionName, {
-      full: true,
-      ...options,
-      readPreference: this.readPreference,
-      session
-    });
-  }
-}
-
-/** @internal */
 export class CreateIndexesOperation extends CommandOperation<string[]> {
   override options: CreateIndexesOptions;
   collectionName: string;

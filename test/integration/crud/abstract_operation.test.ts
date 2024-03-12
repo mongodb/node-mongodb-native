@@ -142,11 +142,6 @@ describe('abstract operation', async function () {
         correctCommandName: 'getMore'
       },
       {
-        subclassCreator: () => new mongodb.IndexesOperation(collection, {}),
-        subclassType: mongodb.IndexesOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
         subclassCreator: () =>
           mongodb.CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
         subclassType: mongodb.CreateIndexesOperation,

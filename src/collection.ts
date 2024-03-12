@@ -55,7 +55,6 @@ import {
   type DropIndexesOptions,
   DropIndexOperation,
   type IndexDescription,
-  IndexesOperation,
   IndexExistsOperation,
   IndexInformationOperation,
   type IndexSpecification,
@@ -805,10 +804,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
-    return executeOperation(
-      this.client,
-      new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    return this.listIndexes(options).toArray();
   }
 
   /**
