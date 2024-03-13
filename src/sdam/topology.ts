@@ -106,7 +106,7 @@ export interface ServerSelectionRequest {
   transaction?: Transaction;
   startTime: number;
   resolve: (server: Server) => void;
-  reject: (error?: AnyError) => void;
+  reject: (error: AnyError) => void;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
   operationName: string;
@@ -889,7 +889,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverError) {
+function drainWaitQueue(queue: List<ServerSelectionRequest>, err: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {
@@ -899,23 +899,21 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
     waitQueueMember.timeoutController.clear();
 
     if (!waitQueueMember[kCancelled]) {
-      if (err) {
-        if (
-          waitQueueMember.mongoLogger?.willLog(
-            MongoLoggableComponent.SERVER_SELECTION,
-            SeverityLevel.DEBUG
+      if (
+        waitQueueMember.mongoLogger?.willLog(
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
+        )
+      ) {
+        waitQueueMember.mongoLogger?.debug(
+          MongoLoggableComponent.SERVER_SELECTION,
+          new ServerSelectionFailedEvent(
+            waitQueueMember.serverSelector,
+            waitQueueMember.topologyDescription,
+            err,
+            waitQueueMember.operationName
           )
-        ) {
-          waitQueueMember.mongoLogger?.debug(
-            MongoLoggableComponent.SERVER_SELECTION,
-            new ServerSelectionFailedEvent(
-              waitQueueMember.serverSelector,
-              waitQueueMember.topologyDescription,
-              err,
-              waitQueueMember.operationName
-            )
-          );
-        }
+        );
       }
       waitQueueMember.reject(err);
     }

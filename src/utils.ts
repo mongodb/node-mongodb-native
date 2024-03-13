@@ -1245,9 +1245,13 @@ export function isHostMatch(match: RegExp, host?: string): boolean {
   return host && match.test(host.toLowerCase()) ? true : false;
 }
 
-export function promiseWithResolvers<T>() {
-  let resolve!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[0];
-  let reject!: Parameters<ConstructorParameters<typeof Promise<T>>[0]>[1];
+export function promiseWithResolvers<T>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (error: Error) => void;
+} {
+  let resolve!: (value: T) => void;
+  let reject!: (error: Error) => void;
   const promise = new Promise<T>(function withResolversExecutor(promiseResolve, promiseReject) {
     resolve = promiseResolve;
     reject = promiseReject;
