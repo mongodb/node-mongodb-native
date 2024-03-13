@@ -878,7 +878,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: List<ServerSelectionRequest>, err: MongoDriverError) {
+function drainWaitQueue(queue: List<ServerSelectionRequest>, drainError: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {
@@ -899,12 +899,12 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err: MongoDriverErr
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             waitQueueMember.topologyDescription,
-            err,
+            drainError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.reject(err);
+      waitQueueMember.reject(drainError);
     }
   }
 }
@@ -939,7 +939,7 @@ function processWaitQueue(topology: Topology) {
             previousServer ? [previousServer] : []
           )
         : serverDescriptions;
-    } catch (serverSelectionError) {
+    } catch (selectorError) {
       waitQueueMember.timeoutController.clear();
       if (
         topology.client.mongoLogger?.willLog(
@@ -952,12 +952,12 @@ function processWaitQueue(topology: Topology) {
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            serverSelectionError,
+            selectorError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.reject(serverSelectionError);
+      waitQueueMember.reject(selectorError);
       continue;
     }
 
