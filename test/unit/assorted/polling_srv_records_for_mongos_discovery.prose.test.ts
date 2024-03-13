@@ -144,7 +144,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       } as TopologyOptions);
       const topology = context.topology;
 
-      topology.connect({}).then(() => {
+      return topology.connect({}).then(() => {
         try {
           expect(topology.description).to.have.property('type', TopologyType.Sharded);
           const servers = Array.from(topology.description.servers.keys());
