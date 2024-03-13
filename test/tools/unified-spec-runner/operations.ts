@@ -896,6 +896,15 @@ operations.set('createSearchIndexes', async ({ entities, operation }) => {
   return collection.createSearchIndexes(models);
 });
 
+operations.set('modifyCollection', async ({ entities, operation }) => {
+  const db = entities.getEntity('db', operation.object);
+  const command = {
+    collMod: operation.arguments?.collection,
+    validator: operation.arguments?.validator
+  };
+  return db.command(command, {});
+});
+
 export async function executeOperationAndCheck(
   operation: OperationDescription,
   entities: EntitiesMap,
