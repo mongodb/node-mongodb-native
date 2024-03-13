@@ -130,12 +130,12 @@ describe('URI', function () {
   it('should generate valid credentials with X509', {
     metadata: { requires: { topology: 'single' } },
     test: function () {
-      function validateConnect(options) {
+      async function validateConnect(options) {
         expect(options).to.have.property('credentials');
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
         connectStub.restore();
-        return Promise.resolve();
+        return;
       }
 
       const topologyPrototype = Topology.prototype;
