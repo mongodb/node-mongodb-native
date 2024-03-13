@@ -430,29 +430,33 @@ describe('Topology (unit)', function () {
       this.sinon.restore();
     });
 
-    it('should schedule monitoring if no suitable server is found', function (done) {
+    it('should schedule monitoring if no suitable server is found', function () {
       const topology = topologyWithPlaceholderClient('someserver:27019');
       const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
 
       // satisfy the initial connect, then restore the original method
       const selectServer = this.sinon
         .stub(Topology.prototype, 'selectServer')
-        .callsFake(function () {
+        .callsFake(async function () {
           const server = Array.from(this.s.servers.values())[0];
           selectServer.restore();
-          return Promise.resolve(server);
+          return server;
         });
 
       this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
-        return Promise.resolve();
+        return;
       });
 
-      topology.connect().then(() => {
-        topology
-          .selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
-          .then(expect.fail, err => {
+      return topology
+        .connect()
+        .then(topology =>
+          topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
+        )
+        .then(
+          () => expect.fail('expected error'),
+          err => {
             expect(err).to.exist;
             expect(err).to.match(/Server selection timed out/);
             expect(err).to.have.property('reason');
@@ -462,9 +466,11 @@ describe('Topology (unit)', function () {
             expect(requestCheck).property('callCount').to.equal(1);
 
             topology.close();
-            done();
-          });
-      });
+          }
+        )
+        .finally(() => {
+          topology.close();
+        });
     });
 
     it('should disallow selection when the topology is explicitly closed', function (done) {
