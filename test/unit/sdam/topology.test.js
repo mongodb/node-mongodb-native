@@ -484,13 +484,19 @@ describe('Topology (unit)', function () {
     });
 
     describe('waitQueue', function () {
+      let selectServer;
+      let topology;
+      afterEach(() => {
+        selectServer.restore();
+        topology.close();
+      });
+
       it('should process all wait queue members, including selection with errors', async function () {
-        const topology = topologyWithPlaceholderClient('someserver:27019');
-        const selectServer = this.sinon
+        topology = topologyWithPlaceholderClient('someserver:27019');
+        selectServer = this.sinon
           .stub(Topology.prototype, 'selectServer')
           .callsFake(async function () {
             const server = Array.from(this.s.servers.values())[0];
-            selectServer.restore();
             return server;
           });
 
@@ -509,31 +515,30 @@ describe('Topology (unit)', function () {
         //     returning their value
         //   - verify that 10 callbacks were called
 
-        topology.connect().then(async () => {
-          let preventSelection = true;
-          const anySelector = td => {
-            if (preventSelection) return [];
-            const server = Array.from(td.servers.values())[0];
-            return [server];
-          };
+        await topology.connect();
 
-          const failingSelector = () => {
-            if (preventSelection) return [];
-            throw new TypeError('bad news!');
-          };
+        let preventSelection = true;
+        const anySelector = td => {
+          if (preventSelection) return [];
+          const server = Array.from(td.servers.values())[0];
+          return [server];
+        };
 
-          preventSelection = true;
-          for (let i = 0; i < toSelect - 1; ++i) {
-            await topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, {});
-            completed++;
-          }
+        const failingSelector = () => {
+          if (preventSelection) return [];
+          throw new TypeError('bad news!');
+        };
 
-          preventSelection = false;
-          await topology.selectServer(anySelector, {});
+        preventSelection = true;
+        for (let i = 0; i < toSelect - 1; ++i) {
+          await topology.selectServer(i % 5 === 0 ? failingSelector : anySelector, {});
           completed++;
+        }
+        preventSelection = false;
+        await topology.selectServer(anySelector, {});
+        completed++;
 
-          expect(completed).to.equal(toSelect);
-        }, expect.fail);
+        expect(completed).to.equal(toSelect);
       });
     });
   });

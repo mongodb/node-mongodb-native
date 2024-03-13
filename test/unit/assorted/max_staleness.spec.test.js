@@ -47,8 +47,8 @@ describe('Max Staleness (spec)', function () {
   Object.keys(specTests).forEach(specTestName => {
     describe(specTestName, () => {
       specTests[specTestName].forEach(testData => {
-        it(testData.description, function (done) {
-          executeServerSelectionTest(testData, done);
+        it(testData.description, async function () {
+          return executeServerSelectionTest(testData);
         });
       });
     });

@@ -138,7 +138,7 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
   const selectedServers: Server[] = [];
 
   for (let i = 0; i < test.iterations; ++i) {
-    const server: Server = await topology.selectServer.bind(topology)(ReadPreference.NEAREST, {});
+    const server: Server = await topology.selectServer(ReadPreference.NEAREST, {});
     selectedServers.push(server);
   }
 

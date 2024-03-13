@@ -365,7 +365,7 @@ describe('MongoErrors', () => {
       replSet.connect();
     }
 
-    it('should expose a user command writeConcern error like a normal WriteConcernError', function (done) {
+    it('should expose a user command writeConcern error like a normal WriteConcernError', function () {
       test.primaryServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -374,39 +374,32 @@ describe('MongoErrors', () => {
           setTimeout(() => request.reply(RAW_USER_WRITE_CONCERN_ERROR));
         }
       });
+      const replSet = topologyWithPlaceholderClient(
+        [test.primaryServer.hostAddress(), test.firstSecondaryServer.hostAddress()],
+        { replicaSet: 'rs' } as TopologyOptions
+      );
 
-      makeAndConnectReplSet((err, topology) => {
-        // cleanup the server before calling done
-        const cleanup = err => {
-          topology.close();
-          done(err);
-        };
-
-        if (err) {
-          return cleanup(err);
-        }
-
-        topology.selectServer('primary', {}).then(server => {
-          server
-            .command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
-            .then(expect.fail, err => {
-              let _err;
-              try {
-                expect(err).to.be.an.instanceOf(MongoWriteConcernError);
-                expect(err.result).to.exist;
-                expect(err.result).to.have.property('ok', 1);
-                expect(err.result).to.not.have.property('errmsg');
-                expect(err.result).to.not.have.property('code');
-                expect(err.result).to.not.have.property('codeName');
-                expect(err.result).to.have.property('writeConcernError');
-              } catch (e) {
-                _err = e;
-              } finally {
-                cleanup(_err);
-              }
-            });
-        }, expect.fail);
-      });
+      replSet
+        .connect()
+        .then(topology => topology.selectServer('primary', {}))
+        .then(server =>
+          server.command(ns('db1'), Object.assign({}, RAW_USER_WRITE_CONCERN_CMD), {})
+        )
+        .then(
+          () => expect.fail('expected command to fail'),
+          err => {
+            expect(err).to.be.an.instanceOf(MongoWriteConcernError);
+            expect(err.result).to.exist;
+            expect(err.result).to.have.property('ok', 1);
+            expect(err.result).to.not.have.property('errmsg');
+            expect(err.result).to.not.have.property('code');
+            expect(err.result).to.not.have.property('codeName');
+            expect(err.result).to.have.property('writeConcernError');
+          }
+        )
+        .finally(() => {
+          replSet.close();
+        });
     });
 
     it('should propagate writeConcernError.errInfo ', function (done) {

@@ -129,7 +129,7 @@ describe('URI', function () {
 
   it('should generate valid credentials with X509', {
     metadata: { requires: { topology: 'single' } },
-    test: function (done) {
+    test: function () {
       function validateConnect(options) {
         expect(options).to.have.property('credentials');
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
