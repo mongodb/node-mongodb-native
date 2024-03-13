@@ -460,11 +460,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
-    const exitWithError = (error: Error) => {
-      this.emit(Topology.ERROR, error);
-      throw error;
-    };
-
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = { operationName: 'ping', ...options };
     try {
@@ -475,16 +470,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
       if (!skipPingOnConnect && server && this.s.credentials) {
-        try {
-          await server.command(ns('admin.$cmd'), { ping: 1 }, {});
-          stateTransition(this, STATE_CONNECTED);
-          this.emit(Topology.OPEN, this);
-          this.emit(Topology.CONNECT, this);
-
-          return this;
-        } catch (error) {
-          exitWithError(error);
-        }
+        await server.command(ns('admin.$cmd'), { ping: 1 }, {});
+        stateTransition(this, STATE_CONNECTED);
+        this.emit(Topology.OPEN, this);
+        this.emit(Topology.CONNECT, this);
 
         return this;
       }
@@ -496,7 +485,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       return this;
     } catch (error) {
       this.close();
-      return exitWithError(error);
+      throw error;
     }
   }
 
@@ -950,7 +939,7 @@ function processWaitQueue(topology: Topology) {
             previousServer ? [previousServer] : []
           )
         : serverDescriptions;
-    } catch (e) {
+    } catch (serverSelectionError) {
       waitQueueMember.timeoutController.clear();
       if (
         topology.client.mongoLogger?.willLog(
@@ -963,12 +952,12 @@ function processWaitQueue(topology: Topology) {
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            e,
+            serverSelectionError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.reject(e);
+      waitQueueMember.reject(serverSelectionError);
       continue;
     }
 
@@ -1011,7 +1000,7 @@ function processWaitQueue(topology: Topology) {
     }
 
     if (!selectedServer) {
-      const error = new MongoServerSelectionError(
+      const serverSelectionError = new MongoServerSelectionError(
         'server selection returned a server description but the server was not found in the topology',
         topology.description
       );
@@ -1026,12 +1015,12 @@ function processWaitQueue(topology: Topology) {
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            error,
+            serverSelectionError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.reject(error);
+      waitQueueMember.reject(serverSelectionError);
       return;
     }
     const transaction = waitQueueMember.transaction;
