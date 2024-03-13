@@ -488,6 +488,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Close this topology */
   close(): void {
+    const previousDescription = this.s.description;
+
     if (this.s.state === STATE_CLOSED || this.s.state === STATE_CLOSING) {
       return;
     }
