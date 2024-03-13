@@ -3,5 +3,13 @@
     "src/index.ts"
   ],
   "excludeInternal": true,
-  "out": "etc/docs/build"
+  "out": "etc/docs/build",
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": true,
+    "@alpha": false,
+    "@beta": false
+  }
 }
