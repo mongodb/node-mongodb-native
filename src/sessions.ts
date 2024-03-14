@@ -435,7 +435,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Starts a transaction and runs a provided function, ensuring the commitTransaction is always attempted when all operations run in the function have completed.
    *
-   * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by await-ing all operations in such a way that rejections are propagated to the returned promise.
+   * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by `await`-ing all operations in such a way that rejections are propagated to the returned promise.
    *
    * @remarks
    * This function:
