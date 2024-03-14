@@ -2,6 +2,7 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
+import * as semver from 'semver';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
@@ -125,6 +126,14 @@ const readEncryptedFieldsFile = (dataType: string): Promise<string> =>
 
 describe('Range Explicit Encryption', function () {
   installNodeDNSWorkaroundHooks();
+
+  beforeEach(async function () {
+    if (semver.gte('7.999.999', this.configuration.version)) {
+      if (this.currentTest)
+        this.currentTest.skipReason = 'TODO(NODE-5908): skip rangePreview tests on server 8.0+';
+      return this.currentTest?.skip();
+    }
+  });
 
   let clientEncryption;
   let keyId;
