@@ -171,7 +171,7 @@ async function executeServerSelectionTest(testDefinition) {
     }
     return;
   } catch (err) {
-    // are we expecting an error?
+    // if we are expecting and error, immediately succeed
     if (testDefinition.error) {
       return;
     }
