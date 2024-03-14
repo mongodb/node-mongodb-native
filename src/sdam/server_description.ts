@@ -1,5 +1,5 @@
 import { type Document, Long, type ObjectId } from '../bson';
-import { type MongoError, MongoRuntimeError, type MongoServerError } from '../error';
+import { type MongoError, MongoRuntimeError } from '../error';
 import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
@@ -31,7 +31,7 @@ export type TagSet = { [key: string]: string };
 /** @internal */
 export interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
-  error?: MongoServerError;
+  error?: MongoError;
 
   /** The round trip time to ping this server (in ms) */
   roundTripTime?: number;
