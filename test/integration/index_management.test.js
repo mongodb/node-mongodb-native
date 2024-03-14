@@ -459,48 +459,25 @@ describe('Indexes', function () {
     }
   });
 
-  it('shouldCorrectlyCreateAndUseSparseIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('shouldCorrectlyCreateAndUseSparseIndex', async function () {
+    const db = client.db(this.configuration.db);
+    await db.createCollection('create_and_use_sparse_index_test');
+    const collection = db.collection('create_and_use_sparse_index_test');
+    await collection.createIndex({ title: 1 }, { sparse: true, writeConcern: { w: 1 } });
+    await collection.insertMany(
+      [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
+      this.configuration.writeConcernMax()
+    );
+    const items = await collection
+      .find({ title: { $ne: null } })
+      .sort({ title: 1 })
+      .toArray();
+    expect(items).to.have.lengthOf(1);
+    expect(items[0]).to.have.property('name', 'Sarah');
 
-    test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      db.createCollection('create_and_use_sparse_index_test', function (err) {
-        expect(err).to.not.exist;
-        const collection = db.collection('create_and_use_sparse_index_test');
-        collection.createIndex(
-          { title: 1 },
-          { sparse: true, writeConcern: { w: 1 } },
-          function (err) {
-            expect(err).to.not.exist;
-            collection.insert(
-              [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-                collection
-                  .find({ title: { $ne: null } })
-                  .sort({ title: 1 })
-                  .toArray(function (err, items) {
-                    test.equal(1, items.length);
-                    test.equal('Sarah', items[0].name);
-
-                    // Fetch the info for the indexes
-                    collection.indexInformation({ full: true }, function (err, indexInfo) {
-                      expect(err).to.not.exist;
-                      test.equal(2, indexInfo.length);
-                      client.close(done);
-                    });
-                  });
-              }
-            );
-          }
-        );
-      });
-    }
+    // Fetch the info for the indexes
+    const indexInfo = await collection.indexInformation({ full: true });
+    expect(indexInfo).to.have.lengthOf(2);
   });
 
   it('shouldCorrectlyHandleGeospatialIndexes', {
