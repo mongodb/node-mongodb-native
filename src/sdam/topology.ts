@@ -403,16 +403,12 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   /** Initiate server connect */
   async connect(options?: ConnectOptions): Promise<Topology> {
-    if (this.connectionLock) {
-      return this.connectionLock;
-    }
-
+    this.connectionLock ??= this._connect(options);
     try {
-      this.connectionLock = this._connect(options);
-      await this.connectionLock;
+    	await this.connectionLock;
+    	return this;
     } finally {
-      // release
-      this.connectionLock = undefined;
+    	this.connectionLock = undefined;
     }
 
     return this;
