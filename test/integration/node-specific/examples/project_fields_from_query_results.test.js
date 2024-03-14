@@ -219,4 +219,45 @@ describe('examples(project-fields-from-query):', function () {
       });
     }
   });
+
+  it('Aggregation Projection Example 1', {
+    metadata: { requires: { topology: ['single'], mongodb: '>= 2.8.0' } },
+    test: async function () {
+      //  Start Aggregation Projection Example 1
+      const cursor = db
+        .collection('inventory')
+        .find()
+        .project({
+          _id: 0,
+          item: 1,
+          status: {
+            $switch: {
+              branches: [
+                {
+                  case: { $eq: ['$status', 'A'] },
+                  then: 'Available'
+                },
+                {
+                  case: { $eq: ['$status', 'D'] },
+                  then: 'Discontinued'
+                }
+              ],
+              default: 'No status found'
+            }
+          },
+          area: {
+            $concat: [{ $toString: { $multiply: ['$size.h', '$size.w'] } }, ' ', '$size.uom']
+          },
+          reportNumber: { $literal: 1 }
+        });
+      //  End Aggregation Projection Example 1
+      const docs = await cursor.toArray();
+      docs.forEach(function (doc) {
+        expect(doc).to.have.all.keys(['item', 'status', 'area', 'reportNumber']);
+        expect(doc).to.not.have.property('_id');
+        expect(doc.area).to.be.a('string');
+        expect(doc.reportNumber).to.equal(1);
+      });
+    }
+  });
 });
