@@ -446,6 +446,15 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
+   * 
+   * If a command inside this function fails:
+   * - It may cause the transaction on the server to be aborted. 
+   * - This situation is normally handled transparently by the driver. 
+   * - However, if the application catches such an error and does not re-raise it, the driver will not be able to determine whether the transaction was aborted or not. 
+   * - The driver will then retry the transaction indefinitely.
+   * 
+   * To avoid this situation, the application must not silently handle errors within this function.
+   * If the application needs to handle errors within, it must await all operations such that if an operation is rejected, the rejection becomes the rejection of the function passed into withTransaction.
    *
    * @param fn - callback to run within a transaction
    * @param options - optional settings for the transaction
