@@ -1,26 +1,35 @@
-'use strict';
+import { expect } from 'chai';
+import { once } from 'events';
+import * as net from 'net';
+import { type AddressInfo } from 'net';
+import { coerce, type SemVer } from 'semver';
+import * as sinon from 'sinon';
+import { clearTimeout } from 'timers';
 
-const { clearTimeout } = require('timers');
-const mock = require('../../tools/mongodb-mock/index');
-const { expect } = require('chai');
-const sinon = require('sinon');
-const net = require('net');
-const { MongoClient, MongoServerSelectionError, ReadPreference } = require('../../mongodb');
-const { Topology } = require('../../mongodb');
-const { Server } = require('../../mongodb');
-const { ns, makeClientMetadata, isHello } = require('../../mongodb');
-const { TopologyDescriptionChangedEvent } = require('../../mongodb');
-const { TopologyDescription } = require('../../mongodb');
-const { TopologyType } = require('../../mongodb');
-const { SrvPoller, SrvPollingEvent } = require('../../mongodb');
-const { getSymbolFrom, topologyWithPlaceholderClient } = require('../../tools/utils');
-const { LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE } = require('../../mongodb');
-const { coerce } = require('semver');
+import {
+  isHello,
+  LEGACY_NOT_WRITABLE_PRIMARY_ERROR_MESSAGE,
+  makeClientMetadata,
+  MongoClient,
+  MongoServerSelectionError,
+  ns,
+  ReadPreference,
+  Server,
+  SrvPoller,
+  SrvPollingEvent,
+  Topology,
+  TopologyDescription,
+  TopologyDescriptionChangedEvent,
+  TopologyType
+} from '../../mongodb';
+import * as mock from '../../tools/mongodb-mock/index';
+import { getSymbolFrom, topologyWithPlaceholderClient } from '../../tools/utils';
 
 describe('Topology (unit)', function () {
   let client, topology;
 
   afterEach(async () => {
+    sinon.restore();
     if (client) {
       await client.close();
     }
@@ -32,23 +41,24 @@ describe('Topology (unit)', function () {
 
   describe('client metadata', function () {
     let mockServer;
-    before(() => mock.createServer().then(server => (mockServer = server)));
+    before(async () => {
+      mockServer = await mock.createServer();
+    });
     after(() => mock.cleanup());
 
-    it('should correctly pass appname', function (done) {
-      const server = topologyWithPlaceholderClient([`localhost:27017`], {
+    it('should correctly pass appname', function () {
+      const server: Topology = topologyWithPlaceholderClient([`localhost:27017`], {
         metadata: makeClientMetadata({
           appName: 'My application name',
           driverInfo: {}
         })
       });
 
-      expect(server.clientMetadata.application.name).to.equal('My application name');
-      done();
+      expect(server.clientMetadata?.application.name).to.equal('My application name');
     });
 
     it('should report the correct platform in client metadata', async function () {
-      const helloRequests = [];
+      const helloRequests: any[] = [];
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -76,7 +86,7 @@ describe('Topology (unit)', function () {
 
   describe('black holes', function () {
     let mockServer;
-    beforeEach(() => mock.createServer().then(server => (mockServer = server)));
+    beforeEach(async () => (mockServer = await mock.createServer()));
     afterEach(() => mock.cleanup());
 
     it('should time out operations against servers that have been blackholed', function (done) {
@@ -92,17 +102,18 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
+      const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
       topology.connect().then(() => {
         topology.selectServer('primary', {}).then(server => {
-          server
-            .command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 })
-            .then(expect.fail, err => {
+          server.command(ns('admin.$cmd'), { ping: 1 }, { socketTimeoutMS: 250 }).then(
+            () => expect.fail('expected command to fail'),
+            err => {
               expect(err).to.exist;
               expect(err).to.match(/timed out/);
               topology.close();
               done();
-            });
+            }
+          );
         }, expect.fail);
       }, expect.fail);
     });
@@ -112,8 +123,8 @@ describe('Topology (unit)', function () {
     let mockServer;
     let secondMockServer;
     beforeEach(async () => {
-      await mock.createServer().then(server => (mockServer = server));
-      await mock.createServer().then(server => (secondMockServer = server));
+      mockServer = await mock.createServer();
+      secondMockServer = await mock.createServer();
     });
     afterEach(async () => {
       await mock.cleanup();
@@ -142,45 +153,47 @@ describe('Topology (unit)', function () {
           });
         });
         context('when the topology originally only contained one server', function () {
-          it('returns a MongoServerSelectionError', function (done) {
-            topology = topologyWithPlaceholderClient([
-              mockServer.hostAddress(),
-              secondMockServer.hostAddress()
-            ]);
+          it('returns a MongoServerSelectionError', async function () {
+            topology = topologyWithPlaceholderClient(
+              [mockServer.hostAddress(), secondMockServer.hostAddress()],
+              {}
+            );
 
-            topology.connect().then(() => {
-              sinon.stub(topology.s.servers, 'get').callsFake(() => {
-                return undefined;
-              });
-              topology.selectServer('primary', {}).then(expect.fail, err => {
-                expect(err).to.be.instanceOf(MongoServerSelectionError);
-                done();
-              });
-            }, expect.fail);
+            await topology.connect();
+            sinon.stub(topology.s.servers, 'get').callsFake(() => {
+              return undefined;
+            });
+            try {
+              await topology.selectServer('primary', {});
+            } catch (err) {
+              expect(err).to.be.instanceOf(MongoServerSelectionError);
+            }
           });
         });
-        context('when the topology originally contained more than one server', function () {
-          it('returns a MongoServerSelectionError', function (done) {
-            topology = topologyWithPlaceholderClient([
-              mockServer.hostAddress(),
-              secondMockServer.hostAddress()
-            ]);
 
-            topology.connect().then(() => {
-              sinon.stub(topology.s.servers, 'get').callsFake(() => {
-                return undefined;
-              });
-              topology.selectServer('primary', {}).then(expect.fail, err => {
-                expect(err).to.be.instanceOf(MongoServerSelectionError);
-                done();
-              });
-            }, expect.fail);
+        context('when the topology originally contained more than one server', function () {
+          it('returns a MongoServerSelectionError', async function () {
+            topology = topologyWithPlaceholderClient(
+              [mockServer.hostAddress(), secondMockServer.hostAddress()],
+              {}
+            );
+
+            await topology.connect();
+            sinon.stub(topology.s.servers, 'get').callsFake(() => {
+              return undefined;
+            });
+            try {
+              await topology.selectServer('primary', {});
+              expect.fail('expected server selection to fail');
+            } catch (err) {
+              expect(err).to.be.instanceOf(MongoServerSelectionError);
+            }
           });
         });
       }
     );
 
-    it('should set server to unknown and reset pool on `node is recovering` error', function (done) {
+    it('should set server to unknown and reset pool on `node is recovering` error', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -192,26 +205,26 @@ describe('Topology (unit)', function () {
         }
       });
 
-      topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect().then(() => {
-        topology.selectServer('primary', {}).then(server => {
-          let serverDescription;
-          server.on('descriptionReceived', sd => (serverDescription = sd));
+      topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
+      await topology.connect();
+      const server = await topology.selectServer('primary', {});
 
-          let poolCleared = false;
-          topology.on('connectionPoolCleared', () => (poolCleared = true));
+      let serverDescription;
+      server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
-            expect(err).to.exist;
-            expect(err).to.eql(serverDescription.error);
-            expect(poolCleared).to.be.true;
-            done();
-          });
-        }, expect.fail);
-      }, expect.fail);
+      let poolCleared = false;
+      topology.on('connectionPoolCleared', () => (poolCleared = true));
+
+      try {
+        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
+        expect.fail('expected command to fail');
+      } catch (err) {
+        expect(err).to.eql(serverDescription.error);
+        expect(poolCleared).to.be.true;
+      }
     });
 
-    it('should set server to unknown and NOT reset pool on stepdown errors', function (done) {
+    it('should set server to unknown and NOT reset pool on stepdown errors', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -223,27 +236,26 @@ describe('Topology (unit)', function () {
         }
       });
 
-      const topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect().then(() => {
-        topology.selectServer('primary', {}).then(server => {
-          let serverDescription;
-          server.on('descriptionReceived', sd => (serverDescription = sd));
+      const topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
+      await topology.connect();
+      const server = await topology.selectServer('primary', {});
+      let serverDescription;
+      server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          let poolCleared = false;
-          topology.on('connectionPoolCleared', () => (poolCleared = true));
+      let poolCleared = false;
+      topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
-            expect(err).to.exist;
-            expect(err).to.eql(serverDescription.error);
-            expect(poolCleared).to.be.false;
-            topology.close();
-            done();
-          });
-        }, expect.fail);
-      }, expect.fail);
+      try {
+        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
+        expect.fail('expected command to fail');
+      } catch (err) {
+        expect(err).to.eql(serverDescription.error);
+        expect(poolCleared).to.be.false;
+        topology.close();
+      }
     });
 
-    it('should set server to unknown on non-timeout network error', function (done) {
+    it('should set server to unknown on non-timeout network error', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -255,26 +267,25 @@ describe('Topology (unit)', function () {
         }
       });
 
-      topology = topologyWithPlaceholderClient(mockServer.hostAddress());
-      topology.connect().then(() => {
-        topology.selectServer('primary', {}).then(server => {
-          let serverDescription;
-          server.on('descriptionReceived', sd => (serverDescription = sd));
+      topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
+      await topology.connect();
+      const server = await topology.selectServer('primary', {});
+      let serverDescription;
+      server.on('descriptionReceived', sd => (serverDescription = sd));
 
-          server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(expect.fail, err => {
-            expect(err).to.exist;
-            expect(err).to.eql(serverDescription.error);
-            expect(server.description.type).to.equal('Unknown');
-            done();
-          });
-        }, expect.fail);
-      }, expect.fail);
+      try {
+        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
+        expect.fail('expected command to fail');
+      } catch (err) {
+        expect(err).to.eql(serverDescription.error);
+        expect(server.description.type).to.equal('Unknown');
+      }
     });
 
-    it('should encounter a server selection timeout on garbled server responses', function (done) {
+    it('should encounter a server selection timeout on garbled server responses', function () {
       const test = this.test;
 
-      const { major } = coerce(process.version);
+      const { major } = coerce(process.version) as SemVer;
       test.skipReason =
         major === 18 || major === 20
           ? 'TODO(NODE-5666): fix failing unit tests on Node18'
@@ -283,40 +294,24 @@ describe('Topology (unit)', function () {
       if (test.skipReason) this.skip();
 
       const server = net.createServer();
-      const p = Promise.resolve();
-      let unexpectedError, expectedError;
-      server.listen(0, 'localhost', 2, () => {
+      server.listen(0, 'localhost', 2, async () => {
         server.on('connection', c => c.on('data', () => c.write('garbage_data')));
-        const { address, port } = server.address();
+        const { address, port } = server.address() as AddressInfo;
         const client = new MongoClient(`mongodb://${address}:${port}`, {
           serverSelectionTimeoutMS: 1000
         });
-        p.then(() =>
-          client
-            .connect()
-            .then(() => {
-              unexpectedError = new Error('Expected a server selection error but got none');
-            })
-            .catch(error => {
-              expectedError = error;
-            })
-            .then(() => {
-              server.close();
-              return client.close(err => {
-                if (!unexpectedError) {
-                  unexpectedError = err;
-                }
-              });
-            })
-            .finally(() => {
-              if (unexpectedError) {
-                return done(unexpectedError);
-              }
-              if (expectedError) {
-                return done();
-              }
-            })
-        );
+        try {
+          await client.connect();
+          expect.fail('Expected a server selection error but got none');
+        } catch (err) {
+          expect(err).to.be.instanceOf(MongoServerSelectionError);
+          expect(err)
+            .to.have.property('message')
+            .that.matches(/Server selection timed out/);
+        }
+
+        server.close();
+        await client.close();
       });
     });
 
@@ -366,29 +361,29 @@ describe('Topology (unit)', function () {
           expect(topologyChangeListeners[0]).to.equal(topology.s.detectShardedTopology);
         });
 
-        it('should emit topologyDescriptionChange event', function () {
-          topology.once(Topology.TOPOLOGY_DESCRIPTION_CHANGED, ev => {
-            // The first event we get here is caused by the srv record discovery event below
-            expect(ev).to.have.nested.property('newDescription.servers');
-            expect(ev.newDescription.servers.get('fake:2'))
-              .to.be.a('object')
-              .with.property('address', 'fake:2');
-          });
+        it('should emit topologyDescriptionChange event', async function () {
+          const p = once(topology, Topology.TOPOLOGY_DESCRIPTION_CHANGED);
 
           topology.s.srvPoller.emit(
             SrvPoller.SRV_RECORD_DISCOVERY,
             new SrvPollingEvent([{ priority: 1, weight: 1, port: 2, name: 'fake' }])
           );
+
+          const [ev] = await p;
+          // The first event we get here is caused by the srv record discovery event below
+          expect(ev).to.have.nested.property('newDescription.servers');
+          expect(ev.newDescription.servers.get('fake:2'))
+            .to.be.a('object')
+            .with.property('address', 'fake:2');
         });
 
-        it('should clean up listeners on close', function (done) {
+        it('should clean up listeners on close', function () {
           topology.s.state = 'connected'; // fake state to test clean up logic
           topology.close();
           const srvPollerListeners = topology.s.srvPoller.listeners(SrvPoller.SRV_RECORD_DISCOVERY);
           expect(srvPollerListeners).to.have.lengthOf(0);
           const topologyChangeListeners = topology.listeners(Topology.TOPOLOGY_DESCRIPTION_CHANGED);
           expect(topologyChangeListeners).to.have.lengthOf(0);
-          done();
         });
       });
 
@@ -422,20 +417,12 @@ describe('Topology (unit)', function () {
   });
 
   describe('selectServer()', function () {
-    beforeEach(function () {
-      this.sinon = sinon.createSandbox();
-    });
-
-    afterEach(function () {
-      this.sinon.restore();
-    });
-
-    it('should schedule monitoring if no suitable server is found', function () {
-      const topology = topologyWithPlaceholderClient('someserver:27019');
-      const requestCheck = this.sinon.stub(Server.prototype, 'requestCheck');
+    it('should schedule monitoring if no suitable server is found', async function () {
+      const topology = topologyWithPlaceholderClient('someserver:27019', {});
+      const requestCheck = sinon.stub(Server.prototype, 'requestCheck');
 
       // satisfy the initial connect, then restore the original method
-      const selectServer = this.sinon
+      const selectServer = sinon
         .stub(Topology.prototype, 'selectServer')
         .callsFake(async function () {
           const server = Array.from(this.s.servers.values())[0];
@@ -443,50 +430,43 @@ describe('Topology (unit)', function () {
           return server;
         });
 
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
+      sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
         return;
       });
 
-      return topology
-        .connect()
-        .then(topology =>
-          topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
-        )
-        .then(
-          () => expect.fail('expected error'),
-          err => {
-            expect(err).to.exist;
-            expect(err).to.match(/Server selection timed out/);
-            expect(err).to.have.property('reason');
-
-            // When server is created `connect` is called on the monitor. When server selection
-            // occurs `requestCheck` will be called for an immediate check.
-            expect(requestCheck).property('callCount').to.equal(1);
-
-            topology.close();
-          }
-        )
-        .finally(() => {
-          topology.close();
-        });
+      await topology.connect();
+      try {
+        await topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 });
+        expect.fail('expected server selection to fail');
+      } catch (err) {
+        expect(err).to.exist;
+        expect(err).to.match(/Server selection timed out/);
+        expect(err).to.have.property('reason');
+        // When server is created `connect` is called on the monitor. When server selection
+        // occurs `requestCheck` will be called for an immediate check.
+        expect(requestCheck).to.have.been.calledOnce;
+      } finally {
+        topology.close();
+      }
     });
 
-    it('should disallow selection when the topology is explicitly closed', function (done) {
-      const topology = topologyWithPlaceholderClient('someserver:27019');
-      this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
+    it('should disallow selection when the topology is explicitly closed', async function () {
+      const topology = topologyWithPlaceholderClient('someserver:27019', {});
+      sinon.stub(Server.prototype, 'connect').callsFake(function () {
         this.s.state = 'connected';
         this.emit('connect');
       });
 
       topology.close();
-      topology
-        .selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 })
-        .then(expect.fail, err => {
-          expect(err).to.match(/Topology is closed/);
-          done();
-        });
+
+      try {
+        await topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 });
+        expect.fail('expected server selection to fail');
+      } catch (err) {
+        expect(err).to.match(/Topology is closed/);
+      }
     });
 
     describe('waitQueue', function () {
@@ -498,15 +478,13 @@ describe('Topology (unit)', function () {
       });
 
       it('should process all wait queue members, including selection with errors', async function () {
-        topology = topologyWithPlaceholderClient('someserver:27019');
-        selectServer = this.sinon
-          .stub(Topology.prototype, 'selectServer')
-          .callsFake(async function () {
-            const server = Array.from(this.s.servers.values())[0];
-            return server;
-          });
+        topology = topologyWithPlaceholderClient('someserver:27019', {});
+        selectServer = sinon.stub(Topology.prototype, 'selectServer').callsFake(async function () {
+          const server = Array.from(this.s.servers.values())[0];
+          return server;
+        });
 
-        this.sinon.stub(Server.prototype, 'connect').callsFake(function () {
+        sinon.stub(Server.prototype, 'connect').callsFake(function () {
           this.s.state = 'connected';
           this.emit('connect');
         });
