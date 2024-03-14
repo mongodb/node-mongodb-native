@@ -435,7 +435,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   /**
    * Starts a transaction and runs a provided function, ensuring the commitTransaction is always attempted when all operations run in the function have completed.
    *
-   * **IMPORTANT:** This method requires the user to return a Promise, and `await` all operations.
+   * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by await-ing all operations in such a way that rejections are propagated to the returned promise.
    *
    * @remarks
    * This function:
@@ -450,7 +450,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * If a command inside this function fails:
    * - It may cause the transaction on the server to be aborted.
    * - This situation is normally handled transparently by the driver.
-   * - However, if the application catches such an error and does not re-raise it, the driver will not be able to determine whether the transaction was aborted or not.
+   * - However, if the application catches such an error and does not rethrow it, the driver will not be able to determine whether the transaction was aborted or not.
    * - The driver will then retry the transaction indefinitely.
    *
    * To avoid this situation, the application must not silently handle errors within this function.
