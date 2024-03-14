@@ -457,7 +457,6 @@ describe('Topology (unit)', function () {
           () => null,
           e => e
         );
-      expect.fail('expected server selection to fail');
       expect(err).to.match(/Topology is closed/);
     });
 
