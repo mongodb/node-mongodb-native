@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
+import { once } from 'events';
 import { coerce } from 'semver';
 import * as sinon from 'sinon';
 
@@ -10,15 +11,14 @@ import {
   SrvPoller,
   type SrvPollerOptions,
   SrvPollingEvent,
+  type Topology,
   type TopologyOptions,
-  TopologyType,
-  Topology
+  TopologyType
 } from '../../mongodb';
 import * as mock from '../../tools/mongodb-mock/index';
 import type { MockServer } from '../../tools/mongodb-mock/src/server';
 import { processTick, topologyWithPlaceholderClient } from '../../tools/utils';
 import { createTimerSandbox } from '../timer_sandbox';
-import { once } from 'events';
 
 /*
     The SRV Prose Tests make use of the following REAL DNS records.
@@ -75,16 +75,6 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       };
     }
 
-    function tryDone(done, handle) {
-      process.nextTick(() => {
-        try {
-          handle();
-          done();
-        } catch (e) {
-          done(e);
-        }
-      });
-    }
     class FakeSrvPoller extends SrvPoller {
       start() {
         return;
@@ -152,7 +142,7 @@ describe('Polling Srv Records for Mongos Discovery', () => {
       expect(servers).to.deep.equal(srvAddresses(recordSets[0]));
       process.nextTick(() => srvPoller.trigger(recordSets[1]));
 
-      await once(topology, 'topologyDescriptionChanged')
+      await once(topology, 'topologyDescriptionChanged');
 
       const server = Array.from(topology.description.servers.keys());
       expect(server).to.deep.equal(srvAddresses(recordSets[1]));

@@ -154,20 +154,17 @@ describe('Topology (unit)', function () {
         });
         context('when the topology originally only contained one server', function () {
           it('returns a MongoServerSelectionError', async function () {
-            topology = topologyWithPlaceholderClient(
-              [mockServer.hostAddress(), secondMockServer.hostAddress()],
-              {}
-            );
+            topology = topologyWithPlaceholderClient([mockServer.hostAddress()], {});
 
             await topology.connect();
             sinon.stub(topology.s.servers, 'get').callsFake(() => {
               return undefined;
             });
-            try {
-              await topology.selectServer('primary', {});
-            } catch (err) {
-              expect(err).to.be.instanceOf(MongoServerSelectionError);
-            }
+            const err = await topology.selectServer('primary', {}).then(
+              () => null,
+              e => e
+            );
+            expect(err).to.be.instanceOf(MongoServerSelectionError);
           });
         });
 
@@ -182,12 +179,11 @@ describe('Topology (unit)', function () {
             sinon.stub(topology.s.servers, 'get').callsFake(() => {
               return undefined;
             });
-            try {
-              await topology.selectServer('primary', {});
-              expect.fail('expected server selection to fail');
-            } catch (err) {
-              expect(err).to.be.instanceOf(MongoServerSelectionError);
-            }
+            const err = await topology.selectServer('primary', {}).then(
+              () => null,
+              e => e
+            );
+            expect(err).to.be.instanceOf(MongoServerSelectionError);
           });
         });
       }
@@ -215,13 +211,12 @@ describe('Topology (unit)', function () {
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-      try {
-        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
-        expect.fail('expected command to fail');
-      } catch (err) {
-        expect(err).to.eql(serverDescription.error);
-        expect(poolCleared).to.be.true;
-      }
+      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
+        () => null,
+        e => e
+      );
+      expect(err).to.eql(serverDescription.error);
+      expect(poolCleared).to.be.true;
     });
 
     it('should set server to unknown and NOT reset pool on stepdown errors', async function () {
@@ -245,14 +240,13 @@ describe('Topology (unit)', function () {
       let poolCleared = false;
       topology.on('connectionPoolCleared', () => (poolCleared = true));
 
-      try {
-        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
-        expect.fail('expected command to fail');
-      } catch (err) {
-        expect(err).to.eql(serverDescription.error);
-        expect(poolCleared).to.be.false;
-        topology.close();
-      }
+      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
+        () => null,
+        e => e
+      );
+      expect(err).to.eql(serverDescription.error);
+      expect(poolCleared).to.be.false;
+      topology.close();
     });
 
     it('should set server to unknown on non-timeout network error', async function () {
@@ -273,13 +267,12 @@ describe('Topology (unit)', function () {
       let serverDescription;
       server.on('descriptionReceived', sd => (serverDescription = sd));
 
-      try {
-        await server.command(ns('test.test'), { insert: { a: 42 } }, {});
-        expect.fail('expected command to fail');
-      } catch (err) {
-        expect(err).to.eql(serverDescription.error);
-        expect(server.description.type).to.equal('Unknown');
-      }
+      const err = await server.command(ns('test.test'), { insert: { a: 42 } }, {}).then(
+        () => null,
+        e => e
+      );
+      expect(err).to.eql(serverDescription.error);
+      expect(server.description.type).to.equal('Unknown');
     });
 
     it('should encounter a server selection timeout on garbled server responses', function () {
@@ -300,15 +293,14 @@ describe('Topology (unit)', function () {
         const client = new MongoClient(`mongodb://${address}:${port}`, {
           serverSelectionTimeoutMS: 1000
         });
-        try {
-          await client.connect();
-          expect.fail('Expected a server selection error but got none');
-        } catch (err) {
-          expect(err).to.be.instanceOf(MongoServerSelectionError);
-          expect(err)
-            .to.have.property('message')
-            .that.matches(/Server selection timed out/);
-        }
+        const err = await client.connect().then(
+          () => null,
+          e => e
+        );
+        expect(err).to.be.instanceOf(MongoServerSelectionError);
+        expect(err)
+          .to.have.property('message')
+          .that.matches(/Server selection timed out/);
 
         server.close();
         await client.close();
@@ -316,7 +308,6 @@ describe('Topology (unit)', function () {
     });
 
     describe('srv event listeners', function () {
-      /** @type {Topology} */
       let topology;
 
       beforeEach(() => {
@@ -437,19 +428,18 @@ describe('Topology (unit)', function () {
       });
 
       await topology.connect();
-      try {
-        await topology.selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 });
-        expect.fail('expected server selection to fail');
-      } catch (err) {
-        expect(err).to.exist;
-        expect(err).to.match(/Server selection timed out/);
-        expect(err).to.have.property('reason');
-        // When server is created `connect` is called on the monitor. When server selection
-        // occurs `requestCheck` will be called for an immediate check.
-        expect(requestCheck).to.have.been.calledOnce;
-      } finally {
-        topology.close();
-      }
+      const err = await topology
+        .selectServer(ReadPreference.secondary, { serverSelectionTimeoutMS: 1000 })
+        .then(
+          () => null,
+          e => e
+        );
+      expect(err).to.match(/Server selection timed out/);
+      expect(err).to.have.property('reason');
+      // When server is created `connect` is called on the monitor. When server selection
+      // occurs `requestCheck` will be called for an immediate check.
+      expect(requestCheck).to.have.been.calledOnce;
+      topology.close();
     });
 
     it('should disallow selection when the topology is explicitly closed', async function () {
@@ -461,12 +451,14 @@ describe('Topology (unit)', function () {
 
       topology.close();
 
-      try {
-        await topology.selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 });
-        expect.fail('expected server selection to fail');
-      } catch (err) {
-        expect(err).to.match(/Topology is closed/);
-      }
+      const err = await topology
+        .selectServer(ReadPreference.primary, { serverSelectionTimeoutMS: 2000 })
+        .then(
+          () => null,
+          e => e
+        );
+      expect.fail('expected server selection to fail');
+      expect(err).to.match(/Topology is closed/);
     });
 
     describe('waitQueue', function () {
