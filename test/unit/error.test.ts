@@ -379,7 +379,7 @@ describe('MongoErrors', () => {
         { replicaSet: 'rs' } as TopologyOptions
       );
 
-      replSet
+      return replSet
         .connect()
         .then(topology => topology.selectServer('primary', {}))
         .then(server =>
