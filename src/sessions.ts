@@ -438,22 +438,21 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * **IMPORTANT:** This method requires the function passed in to return a Promise. That promise must be made by `await`-ing all operations in such a way that rejections are propagated to the returned promise.
    *
    * @remarks
-   * This function:
-   * - If all operations successfully complete and the `commitTransaction` operation is successful, then this function will return the result of the provided function.
-   * - If the transaction is unable to complete or an error is thrown from within the provided function, then this function will throw an error.
+   * - If all operations successfully complete and the `commitTransaction` operation is successful, then the provided function will return the result of the provided function.
+   * - If the transaction is unable to complete or an error is thrown from within the provided function, then the provided function will throw an error.
    *   - If the transaction is manually aborted within the provided function it will not throw.
-   * - May be called multiple times if the driver needs to attempt to retry the operations.
+   * - If the driver needs to attempt to retry the operations, the provided function may be called multiple times.
    *
    * Checkout a descriptive example here:
    * @see https://www.mongodb.com/blog/post/quick-start-nodejs--mongodb--how-to-implement-transactions
    *
-   * If a command inside this function fails:
+   * If a command inside withTransaction fails:
    * - It may cause the transaction on the server to be aborted.
    * - This situation is normally handled transparently by the driver.
    * - However, if the application catches such an error and does not rethrow it, the driver will not be able to determine whether the transaction was aborted or not.
    * - The driver will then retry the transaction indefinitely.
    *
-   * To avoid this situation, the application must not silently handle errors within this function.
+   * To avoid this situation, the application must not silently handle errors within the provided function.
    * If the application needs to handle errors within, it must await all operations such that if an operation is rejected it becomes the rejection of the callback function passed into withTransaction.
    *
    * @param fn - callback to run within a transaction
