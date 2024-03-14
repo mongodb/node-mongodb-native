@@ -1,8 +1,7 @@
-'use strict';
-const { expect } = require('chai');
+import { expect } from 'chai';
 
-const { assert: test, setupDatabase } = require('./shared');
-const shared = require('../tools/contexts');
+import shared from '../tools/contexts';
+import { assert as test, setupDatabase } from './shared';
 
 describe('Indexes', function () {
   let client;
@@ -29,7 +28,7 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 5 });
       // Create an index
       client
@@ -51,7 +50,7 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
       const client = configuration.newClient({ maxPoolSize: 5 });
 
       // Create an index
@@ -72,9 +71,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('test_index_information', function (err, collection) {
         collection.insertMany([{ a: 1 }], configuration.writeConcernMax(), function (err) {
           expect(err).to.not.exist;
@@ -97,7 +96,7 @@ describe('Indexes', function () {
                 test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
                 db.indexInformation(collection.collectionName, function (err, collectionInfo2) {
-                  var count1 = Object.keys(collectionInfo).length,
+                  const count1 = Object.keys(collectionInfo).length,
                     count2 = Object.keys(collectionInfo2).length;
 
                   // Tests
@@ -126,9 +125,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('test_multiple_index_cols', function (err, collection) {
         collection.insert({ a: 1 }, function (err) {
           expect(err).to.not.exist;
@@ -146,7 +145,7 @@ describe('Indexes', function () {
               test.equal('a_-1_b_1_c_-1', indexName);
               // Let's fetch the index information
               db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-                var count1 = Object.keys(collectionInfo).length;
+                const count1 = Object.keys(collectionInfo).length;
 
                 // Test
                 test.equal(2, count1);
@@ -176,9 +175,9 @@ describe('Indexes', function () {
     metadata: { requires: { topology: 'single' } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // Create a non-unique index and test inserts
       db.createCollection('test_unique_index', function (err, collection) {
         db.createIndex(
@@ -229,9 +228,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // Create a non-unique index and test inserts
       db.createCollection('test_index_on_subfield', function (err, collection) {
         collection.insert(
@@ -379,9 +378,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('test_distinct_queries', function (err, collection) {
         collection.insert(
           [
@@ -415,9 +414,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('test_ensure_index', function (err, collection) {
         expect(err).to.not.exist;
         // Create an index on the collection
@@ -491,9 +490,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('geospatial_index_test', function (err) {
         expect(err).to.not.exist;
         const collection = db.collection('geospatial_index_test');
@@ -525,9 +524,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection('geospatial_index_altered_test', function (err) {
         expect(err).to.not.exist;
         const collection = db.collection('geospatial_index_altered_test');
@@ -568,9 +567,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection(
         'shouldThrowDuplicateKeyErrorWhenCreatingIndex',
         function (err, collection) {
@@ -597,9 +596,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.createCollection(
         'shouldThrowDuplicateKeyErrorWhenDriverInStrictMode',
         function (err, collection) {
@@ -626,9 +625,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // Establish connection to db
       db.createCollection(
         'shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex',
@@ -662,9 +661,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // Establish connection to db
       db.createCollection(
         'shouldCorrectlyCreateAnIndexWithOverridenName',
@@ -691,9 +690,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
 
       db.collection('indexcontext').createIndex(
         shared.object,
@@ -719,10 +718,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('should_throw_error_due_to_duplicates');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('should_throw_error_due_to_duplicates');
       collection.insert(
         [{ a: 1 }, { a: 1 }, { a: 1 }],
         configuration.writeConcernMax(),
@@ -748,10 +747,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('should_correctly_drop_index');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('should_correctly_drop_index');
       collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
         expect(err).to.not.exist;
 
@@ -777,10 +776,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('should_correctly_apply_hint');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('should_correctly_apply_hint');
       collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
         expect(err).to.not.exist;
 
@@ -810,10 +809,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('should_correctly_set_language_override');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('should_correctly_set_language_override');
       collection.insert(
         [{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }],
         function (err) {
@@ -827,7 +826,7 @@ describe('Indexes', function () {
 
               collection.indexInformation({ full: true }, function (err, indexInformation) {
                 expect(err).to.not.exist;
-                for (var i = 0; i < indexInformation.length; i++) {
+                for (let i = 0; i < indexInformation.length; i++) {
                   if (indexInformation[i].name === 'language_override_index')
                     test.equal(indexInformation[i].language_override, 'langua');
                 }
@@ -847,9 +846,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('testListIndexes').createIndex({ a: 1 }, function (err) {
         expect(err).to.not.exist;
 
@@ -872,9 +871,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('testListIndexes_2').createIndex({ a: 1 }, function (err) {
         expect(err).to.not.exist;
 
@@ -897,9 +896,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('ensureIndexWithNestedStyleIndex').createIndex({ 'c.d': 1 }, function (err) {
         expect(err).to.not.exist;
 
@@ -920,9 +919,9 @@ describe('Indexes', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('createIndexes').createIndexes(
         [{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }],
         function (err, r) {
@@ -933,9 +932,9 @@ describe('Indexes', function () {
             .listIndexes()
             .toArray(function (err, docs) {
               expect(err).to.not.exist;
-              var keys = {};
+              const keys = {};
 
-              for (var i = 0; i < docs.length; i++) {
+              for (let i = 0; i < docs.length; i++) {
                 keys[docs[i].name] = true;
               }
 
@@ -953,9 +952,9 @@ describe('Indexes', function () {
     metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('createIndexes').createIndexes([{ key: { a: 1 } }], function (err, r) {
         expect(err).to.not.exist;
         expect(r).to.deep.equal(['a_1']);
@@ -964,9 +963,9 @@ describe('Indexes', function () {
           .listIndexes()
           .toArray(function (err, docs) {
             expect(err).to.not.exist;
-            var keys = {};
+            const keys = {};
 
-            for (var i = 0; i < docs.length; i++) {
+            for (let i = 0; i < docs.length; i++) {
               keys[docs[i].name] = true;
             }
 
@@ -985,9 +984,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       db.collection('text_index').createIndex(
         { '$**': 'text' },
         { name: 'TextIndex' },
@@ -1010,10 +1009,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var started = [];
-      var succeeded = [];
-      var client = configuration.newClient(configuration.writeConcernMax(), {
+      const configuration = this.configuration;
+      const started = [];
+      const succeeded = [];
+      const client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1,
         monitorCommands: true
       });
@@ -1026,7 +1025,7 @@ describe('Indexes', function () {
         if (event.commandName === 'createIndexes') succeeded.push(event);
       });
 
-      var db = client.db(configuration.db);
+      const db = client.db(configuration.db);
 
       db.collection('partialIndexes').createIndex(
         { a: 1 },
@@ -1049,16 +1048,16 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // Can't use $exists: false in partial filter expression, see
       // https://jira.mongodb.org/browse/SERVER-17853
-      var opts = { partialFilterExpression: { a: { $exists: false } } };
+      const opts = { partialFilterExpression: { a: { $exists: false } } };
       db.collection('partialIndexes').createIndex({ a: 1 }, opts, function (err) {
         test.ok(err);
         test.equal(err.code, 67);
-        var msg = "key $exists must not start with '$'";
+        const msg = "key $exists must not start with '$'";
         test.ok(err.toString().indexOf(msg) === -1);
 
         client.close(done);
@@ -1072,10 +1071,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('embedded_key_indes');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('embedded_key_indes');
 
       collection.insertMany(
         [
@@ -1104,10 +1103,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('embedded_key_indes_1');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('embedded_key_indes_1');
       collection.createIndex(
         { 'key.external_id': 1, 'key.type': 1 },
         { unique: true, sparse: true, name: 'indexname' },
@@ -1126,10 +1125,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('embedded_key_indes_2');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('embedded_key_indes_2');
       collection.insertMany(
         [
           {
@@ -1161,9 +1160,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // insert a doc
       db.collection('messed_up_index').createIndex(
         { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
@@ -1186,10 +1185,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('messed_up_options');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('messed_up_options');
 
       collection.createIndex(
         { 'a.one': 1, 'a.two': 1 },
@@ -1221,10 +1220,10 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
-      var collection = db.collection('messed_up_options');
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
+      const collection = db.collection('messed_up_options');
 
       collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' }, function (err) {
         expect(err).to.not.exist;
@@ -1245,9 +1244,9 @@ describe('Indexes', function () {
     },
 
     test: function (done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      var db = client.db(configuration.db);
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
+      const db = client.db(configuration.db);
       // insert a doc
       db.collection('messed_up_index_2').createIndex(
         { 'accessControl.get': 1 },
