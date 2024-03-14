@@ -19,7 +19,7 @@ data: [
 encrypted_fields: {'fields': [{'keyId': {'$binary': {'base64': 'EjRWeBI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedIndexed', 'bsonType': 'string', 'queries': {'queryType': 'equality', 'contention': {'$numberLong': '0'}}}, {'keyId': {'$binary': {'base64': 'q83vqxI0mHYSNBI0VniQEg==', 'subType': '04'}}, 'path': 'encryptedUnindexed', 'bsonType': 'string'}]}
 key_vault_data: []
 tests:
-  - description: "FLE2 encrypt fails with mising key"
+  - description: "FLE2 encrypt fails with missing key"
     clientOptions:
       autoEncryptOpts:
         kmsProviders:
@@ -30,7 +30,7 @@ tests:
           document: { _id: 1, encryptedIndexed: "123" }
         result:
           errorContains: "not all keys requested were satisfied"
-  - description: "FLE2 decrypt fails with mising key"
+  - description: "FLE2 decrypt fails with missing key"
     clientOptions:
       autoEncryptOpts:
         kmsProviders:
