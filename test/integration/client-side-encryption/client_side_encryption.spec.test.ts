@@ -25,7 +25,6 @@ const skippedAuthTests = [
   'deleteOne with deterministic encryption',
   'deleteMany with deterministic encryption',
   'distinct with deterministic encryption',
-  'Explain a find with deterministic encryption',
   'Find with deterministic encryption',
   'Find with $in with deterministic encryption',
   'findOneAndReplace with deterministic encryption',
