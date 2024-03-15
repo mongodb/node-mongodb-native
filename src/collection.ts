@@ -88,8 +88,7 @@ import {
   DEFAULT_PK_FACTORY,
   MongoDBCollectionNamespace,
   normalizeHintField,
-  resolveOptions,
-  setDifference
+  resolveOptions
 } from './utils';
 import { WriteConcern, type WriteConcernOptions } from './write_concern';
 
