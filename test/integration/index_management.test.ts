@@ -1,273 +1,146 @@
 import { expect } from 'chai';
 
-import shared from '../tools/contexts';
+import {
+  type Collection,
+  type CommandStartedEvent,
+  type CommandSucceededEvent,
+  type Db,
+  type MongoClient,
+  MongoServerError
+} from '../mongodb';
 import { assert as test, setupDatabase } from './shared';
 
 describe('Indexes', function () {
-  let client;
-  let db;
+  let client: MongoClient;
+  let db: Db;
+  let collection: Collection;
 
   before(function () {
     return setupDatabase(this.configuration);
   });
 
-  beforeEach(function () {
-    client = this.configuration.newClient();
-    db = client.db();
+  beforeEach(async function () {
+    client = this.configuration.newClient({}, { monitorCommands: true });
+    db = client.db('indexes_test_db');
+    collection = await db.createCollection('indexes_test_coll', { w: 1 });
   });
 
   afterEach(async function () {
+    await db.dropDatabase({ writeConcern: { w: 1 } }).catch(() => null);
     await client.close();
   });
 
-  it('Should correctly execute createIndex', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient({ maxPoolSize: 5 });
-      // Create an index
-      client
-        .db(configuration.db)
-        .createIndex('promiseCollectionCollections1', { a: 1 })
-        .then(function (r) {
-          test.ok(r != null);
-
-          client.close(done);
-        });
-    }
+  it('Should correctly execute createIndex', async function () {
+    // Create an index
+    const response = await db.createIndex('promiseCollectionCollections1', { a: 1 }, { w: 1 });
+    expect(response).to.exist;
   });
 
-  it('Should correctly execute ensureIndex using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
+  it('shouldCorrectlyExtractIndexInformation', async function () {
+    const collection = await db.createCollection('test_index_information');
+    await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient({ maxPoolSize: 5 });
+    // Create an index on the collection
+    const indexName = await db.createIndex(
+      collection.collectionName,
+      'a',
+      this.configuration.writeConcernMax()
+    );
+    expect(indexName).to.equal('a_1');
 
-      // Create an index
-      client
-        .db(configuration.db)
-        .createIndex('promiseCollectionCollections2', { a: 1 })
-        .then(function (r) {
-          test.ok(r != null);
+    // Let's fetch the index information
+    const collectionInfo = await db.indexInformation(collection.collectionName);
+    test.ok(collectionInfo['_id_'] != null);
+    test.equal('_id', collectionInfo['_id_'][0][0]);
+    test.ok(collectionInfo['a_1'] != null);
+    test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
-          client.close(done);
-        });
-    }
+    const collectionInfo2 = await db.indexInformation(collection.collectionName);
+    const count1 = Object.keys(collectionInfo).length,
+      count2 = Object.keys(collectionInfo2).length;
+
+    // Tests
+    test.ok(count2 >= count1);
+    test.ok(collectionInfo2['_id_'] != null);
+    test.equal('_id', collectionInfo2['_id_'][0][0]);
+    test.ok(collectionInfo2['a_1'] != null);
+    test.deepEqual([['a', 1]], collectionInfo2['a_1']);
+    test.ok(collectionInfo[indexName] != null);
+    test.deepEqual([['a', 1]], collectionInfo[indexName]);
   });
 
-  it('shouldCorrectlyExtractIndexInformation', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('shouldCorrectlyHandleMultipleColumnIndexes', async function () {
+    await collection.insert({ a: 1 });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('test_index_information', function (err, collection) {
-        collection.insertMany([{ a: 1 }], configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
+    const indexName = await db.createIndex(
+      collection.collectionName,
+      [
+        ['a', -1],
+        ['b', 1],
+        ['c', -1]
+      ],
+      this.configuration.writeConcernMax()
+    );
+    test.equal('a_-1_b_1_c_-1', indexName);
+    // Let's fetch the index information
+    const collectionInfo = await db.indexInformation(collection.collectionName);
+    const count1 = Object.keys(collectionInfo).length;
 
-          // Create an index on the collection
-          db.createIndex(
-            collection.collectionName,
-            'a',
-            configuration.writeConcernMax(),
-            function (err, indexName) {
-              expect(err).to.not.exist;
-              test.equal('a_1', indexName);
+    // Test
+    test.equal(2, count1);
+    test.ok(collectionInfo[indexName] != null);
+    test.deepEqual(
+      [
+        ['a', -1],
+        ['b', 1],
+        ['c', -1]
+      ],
+      collectionInfo[indexName]
+    );
+  });
 
-              // Let's fetch the index information
-              db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-                expect(err).to.not.exist;
-                test.ok(collectionInfo['_id_'] != null);
-                test.equal('_id', collectionInfo['_id_'][0][0]);
-                test.ok(collectionInfo['a_1'] != null);
-                test.deepEqual([['a', 1]], collectionInfo['a_1']);
-
-                db.indexInformation(collection.collectionName, function (err, collectionInfo2) {
-                  const count1 = Object.keys(collectionInfo).length,
-                    count2 = Object.keys(collectionInfo2).length;
-
-                  // Tests
-                  test.ok(count2 >= count1);
-                  test.ok(collectionInfo2['_id_'] != null);
-                  test.equal('_id', collectionInfo2['_id_'][0][0]);
-                  test.ok(collectionInfo2['a_1'] != null);
-                  test.deepEqual([['a', 1]], collectionInfo2['a_1']);
-                  test.ok(collectionInfo[indexName] != null);
-                  test.deepEqual([['a', 1]], collectionInfo[indexName]);
-
-                  // Let's close the db
-                  client.close(done);
-                });
-              });
-            }
-          );
-        });
+  it('shouldCorrectlyHandleUniqueIndex', async function () {
+    await db.createCollection('test_unique_index');
+    await db.createIndex(collection.collectionName, 'hello', this.configuration.writeConcernMax());
+    // Insert some docs
+    await collection.insertMany(
+      [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
+      this.configuration.writeConcernMax()
+    );
+    // Create a unique index and test that insert fails
+    {
+      const collection = await db.createCollection('test_unique_index2');
+      await db.createIndex(collection.collectionName, 'hello', {
+        unique: true,
+        writeConcern: { w: 1 }
       });
+      // Insert some docs
+      const err = await collection
+        .insertMany(
+          [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
+          this.configuration.writeConcernMax()
+        )
+        .catch(e => e);
+      expect(err).to.be.instanceOf(Error).to.have.property('code', 11000);
     }
   });
 
-  it('shouldCorrectlyHandleMultipleColumnIndexes', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
+  it('shouldCorrectlyCreateSubfieldIndex', async function () {
+    await collection.insertMany(
+      [{ hello: { a: 4, b: 5 } }, { hello: { a: 7, b: 2 } }, { hello: { a: 4, b: 10 } }],
+      this.configuration.writeConcernMax()
+    );
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('test_multiple_index_cols', function (err, collection) {
-        collection.insert({ a: 1 }, function (err) {
-          expect(err).to.not.exist;
-          // Create an index on the collection
-          db.createIndex(
-            collection.collectionName,
-            [
-              ['a', -1],
-              ['b', 1],
-              ['c', -1]
-            ],
-            configuration.writeConcernMax(),
-            function (err, indexName) {
-              expect(err).to.not.exist;
-              test.equal('a_-1_b_1_c_-1', indexName);
-              // Let's fetch the index information
-              db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-                const count1 = Object.keys(collectionInfo).length;
-
-                // Test
-                test.equal(2, count1);
-                test.ok(collectionInfo[indexName] != null);
-                test.deepEqual(
-                  [
-                    ['a', -1],
-                    ['b', 1],
-                    ['c', -1]
-                  ],
-                  collectionInfo[indexName]
-                );
-
-                // Let's close the db
-                client.close(done);
-              });
-            }
-          );
-        });
-      });
-    }
-  });
-
-  it('shouldCorrectlyHandleUniqueIndex', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { topology: 'single' } },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // Create a non-unique index and test inserts
-      db.createCollection('test_unique_index', function (err, collection) {
-        db.createIndex(
-          collection.collectionName,
-          'hello',
-          configuration.writeConcernMax(),
-          function (err) {
-            expect(err).to.not.exist;
-            // Insert some docs
-            collection.insert(
-              [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
-              configuration.writeConcernMax(),
-              function (err) {
-                expect(err).to.not.exist;
-
-                // Create a unique index and test that insert fails
-                db.createCollection('test_unique_index2', function (err, collection) {
-                  db.createIndex(
-                    collection.collectionName,
-                    'hello',
-                    { unique: true, writeConcern: { w: 1 } },
-                    function (err) {
-                      expect(err).to.not.exist;
-                      // Insert some docs
-                      collection.insert(
-                        [{ hello: 'world' }, { hello: 'mike' }, { hello: 'world' }],
-                        configuration.writeConcernMax(),
-                        function (err) {
-                          test.ok(err != null);
-                          test.equal(11000, err.code);
-                          client.close(done);
-                        }
-                      );
-                    }
-                  );
-                });
-              }
-            );
-          }
-        );
-      });
-    }
-  });
-
-  it('shouldCorrectlyCreateSubfieldIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // Create a non-unique index and test inserts
-      db.createCollection('test_index_on_subfield', function (err, collection) {
-        collection.insert(
-          [{ hello: { a: 4, b: 5 } }, { hello: { a: 7, b: 2 } }, { hello: { a: 4, b: 10 } }],
-          configuration.writeConcernMax(),
-          function (err) {
-            expect(err).to.not.exist;
-
-            // Create a unique subfield index and test that insert fails
-            db.createCollection('test_index_on_subfield2', function (err, collection) {
-              db.createIndex(
-                collection.collectionName,
-                'hello_a',
-                { writeConcern: { w: 1 }, unique: true },
-                function (err) {
-                  expect(err).to.not.exist;
-
-                  collection.insert(
-                    [
-                      { hello: { a: 4, b: 5 } },
-                      { hello: { a: 7, b: 2 } },
-                      { hello: { a: 4, b: 10 } }
-                    ],
-                    configuration.writeConcernMax(),
-                    function (err) {
-                      // Assert that we have erros
-                      test.ok(err != null);
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            });
-          }
-        );
-      });
-    }
+    // Create a unique subfield index and test that insert fails
+    const collection2 = await db.createCollection('test_index_on_subfield2');
+    await collection2.createIndex('hello_a', { writeConcern: { w: 1 }, unique: true });
+    const err = await collection2
+      .insertMany(
+        [{ hello: { a: 4, b: 5 } }, { hello: { a: 7, b: 2 } }, { hello: { a: 4, b: 10 } }],
+        this.configuration.writeConcernMax()
+      )
+      .catch(e => e);
+    expect(err).to.be.instanceOf(Error);
   });
 
   context('when dropIndexes succeeds', function () {
@@ -372,89 +245,26 @@ describe('Indexes', function () {
     });
   });
 
-  it('shouldCorrectlyHandleDistinctIndexes', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('test_distinct_queries', function (err, collection) {
-        collection.insert(
-          [
-            { a: 0, b: { c: 'a' } },
-            { a: 1, b: { c: 'b' } },
-            { a: 1, b: { c: 'c' } },
-            { a: 2, b: { c: 'a' } },
-            { a: 3 },
-            { a: 3 }
-          ],
-          configuration.writeConcernMax(),
-          function (err) {
-            expect(err).to.not.exist;
-            collection.distinct('a', function (err, docs) {
-              test.deepEqual([0, 1, 2, 3], docs.sort());
-
-              collection.distinct('b.c', function (err, docs) {
-                test.deepEqual(['a', 'b', 'c'], docs.sort());
-                client.close(done);
-              });
-            });
-          }
-        );
-      });
+  it('shouldCorrectlyHandleDistinctIndexes', async function () {
+    await collection.insertMany(
+      [
+        { a: 0, b: { c: 'a' } },
+        { a: 1, b: { c: 'b' } },
+        { a: 1, b: { c: 'c' } },
+        { a: 2, b: { c: 'a' } },
+        { a: 3 },
+        { a: 3 }
+      ],
+      this.configuration.writeConcernMax()
+    );
+    {
+      const docs = await collection.distinct('a');
+      expect(docs.sort()).to.deep.equal([0, 1, 2, 3]);
     }
-  });
 
-  it('shouldCorrectlyExecuteEnsureIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('test_ensure_index', function (err, collection) {
-        expect(err).to.not.exist;
-        // Create an index on the collection
-        db.createIndex(
-          collection.collectionName,
-          'a',
-          configuration.writeConcernMax(),
-          function (err, indexName) {
-            expect(err).to.not.exist;
-            test.equal('a_1', indexName);
-            // Let's fetch the index information
-            db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-              test.ok(collectionInfo['_id_'] != null);
-              test.equal('_id', collectionInfo['_id_'][0][0]);
-              test.ok(collectionInfo['a_1'] != null);
-              test.deepEqual([['a', 1]], collectionInfo['a_1']);
-
-              db.createIndex(
-                collection.collectionName,
-                'a',
-                configuration.writeConcernMax(),
-                function (err, indexName) {
-                  test.equal('a_1', indexName);
-                  // Let's fetch the index information
-                  db.indexInformation(collection.collectionName, function (err, collectionInfo) {
-                    test.ok(collectionInfo['_id_'] != null);
-                    test.equal('_id', collectionInfo['_id_'][0][0]);
-                    test.ok(collectionInfo['a_1'] != null);
-                    test.deepEqual([['a', 1]], collectionInfo['a_1']);
-                    // Let's close the db
-                    client.close(done);
-                  });
-                }
-              );
-            });
-          }
-        );
-      });
+    {
+      const docs = await collection.distinct('b.c');
+      expect(docs.sort()).to.deep.equal(['a', 'b', 'c']);
     }
   });
 
@@ -479,785 +289,264 @@ describe('Indexes', function () {
     expect(indexInfo).to.have.lengthOf(2);
   });
 
-  it('shouldCorrectlyHandleGeospatialIndexes', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: {
-        mongodb: '>2.6.0',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+  it('shouldCorrectlyHandleGeospatialIndexes', async function () {
+    await collection.createIndex({ loc: '2d' }, this.configuration.writeConcernMax());
+    await collection.insertOne({ loc: [-100, 100] }, this.configuration.writeConcernMax());
+
+    const err = await collection
+      .insertOne({ loc: [200, 200] }, this.configuration.writeConcernMax())
+      .catch(e => e);
+    test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+    test.ok(err.errmsg.indexOf('-180') !== -1);
+    test.ok(err.errmsg.indexOf('180') !== -1);
+  });
+
+  it('shouldCorrectlyHandleGeospatialIndexesAlteredRange', async function () {
+    await collection.createIndex({ loc: '2d' }, { min: 0, max: 1024, writeConcern: { w: 1 } });
+    await collection.insertOne({ loc: [100, 100] }, this.configuration.writeConcernMax());
+    await collection.insertOne({ loc: [200, 200] }, this.configuration.writeConcernMax());
+    const err = await collection
+      .insertOne({ loc: [-200, -200] }, this.configuration.writeConcernMax())
+      .catch(e => e);
+    test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+    test.ok(err.errmsg.indexOf('0') !== -1);
+    test.ok(err.errmsg.indexOf('1024') !== -1);
+  });
+
+  it('shouldThrowDuplicateKeyErrorWhenCreatingIndex', async function () {
+    await collection.insertMany([{ a: 1 }, { a: 1 }], this.configuration.writeConcernMax());
+    const err = await collection
+      .createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } })
+      .catch(e => e);
+    expect(err).to.exist;
+  });
+
+  it('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', async function () {
+    await collection.insertMany([{ a: 1 }, { a: 1 }], this.configuration.writeConcernMax());
+    const err = await collection
+      .createIndex({ a: 1 }, { unique: true, writeConcern: { w: 1 } })
+      .catch(e => e);
+    expect(err)
+      .to.be.instanceOf(MongoServerError)
+      .to.match(/duplicate key error/);
+  });
+
+  it('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', async function () {
+    await collection.createIndex({ loc: '2d' }, { min: 200, max: 1400, writeConcern: { w: 1 } });
+    await collection.insertOne({ loc: [600, 600] }, this.configuration.writeConcernMax());
+  });
+
+  it('Should correctly create an index with overriden name', async function () {
+    await collection.createIndex('name', { name: 'myfunky_name' });
+
+    // Fetch full index information
+    const indexInformation = await collection.indexInformation({ full: false });
+    expect(indexInformation).to.have.property('myfunky_name');
+  });
+
+  it('should correctly return error message when applying unique index to duplicate documents', async function () {
+    await collection.insertMany(
+      [{ a: 1 }, { a: 1 }, { a: 1 }],
+      this.configuration.writeConcernMax()
+    );
+
+    const err = await collection
+      .createIndex({ a: 1 }, { writeConcern: { w: 1 }, unique: true })
+      .catch(e => e);
+    expect(err)
+      .to.be.instanceOf(MongoServerError)
+      .to.match(/duplicate key error/);
+  });
+
+  it('should correctly drop index with no callback', async function () {
+    await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
+
+    await collection.createIndex({ a: 1 }, { writeConcern: this.configuration.writeConcernMax() });
+    await collection.dropIndex('a_1');
+  });
+
+  it('should correctly apply hint to find', async function () {
+    await collection.insertMany([{ a: 1 }], this.configuration.writeConcernMax());
+
+    await collection.createIndex({ a: 1 }, { writeConcern: this.configuration.writeConcernMax() });
+    await collection.indexInformation({ full: false });
+
+    const [doc] = await collection.find({}, { hint: 'a_1' }).toArray();
+    expect(doc.a).to.equal(1);
+  });
+
+  it('should correctly set language_override option', async function () {
+    await collection.insertMany([{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }]);
+
+    await collection.createIndex(
+      { text: 'text' },
+      { language_override: 'langua', name: 'language_override_index' }
+    );
+
+    const indexInformation = await collection.indexInformation({ full: true });
+    for (let i = 0; i < indexInformation.length; i++) {
+      if (indexInformation[i].name === 'language_override_index')
+        test.equal(indexInformation[i].language_override, 'langua');
+    }
+  });
+
+  it('should correctly use listIndexes to retrieve index list', async function () {
+    await db.collection('testListIndexes').createIndex({ a: 1 });
+
+    const indexes = await db.collection('testListIndexes').listIndexes().toArray();
+    expect(indexes).to.have.lengthOf(2);
+  });
+
+  it('should correctly use listIndexes to retrieve index list using hasNext', async function () {
+    await db.collection('testListIndexes_2').createIndex({ a: 1 });
+
+    const result = await db.collection('testListIndexes_2').listIndexes().hasNext();
+    expect(result).to.be.true;
+  });
+
+  it('should correctly ensureIndex for nested style index name c.d', async function () {
+    await db.collection('ensureIndexWithNestedStyleIndex').createIndex({ 'c.d': 1 });
+
+    // Get the list of indexes
+    const indexes = await db.collection('ensureIndexWithNestedStyleIndex').listIndexes().toArray();
+    expect(indexes).to.have.lengthOf(2);
+  });
+
+  it('should correctly execute createIndexes with multiple indexes', async function () {
+    const r = await db
+      .collection('createIndexes')
+      .createIndexes([{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }]);
+    expect(r).to.deep.equal(['a_1', 'hello1']);
+
+    const docs = await db.collection('createIndexes').listIndexes().toArray();
+    const keys = {};
+
+    for (let i = 0; i < docs.length; i++) {
+      keys[docs[i].name] = true;
+    }
+
+    test.ok(keys['a_1']);
+    test.ok(keys['hello1']);
+  });
+
+  it('should correctly execute createIndexes with one index', async function () {
+    const r = await db.collection('createIndexes').createIndexes([{ key: { a: 1 } }]);
+    expect(r).to.deep.equal(['a_1']);
+
+    await collection.indexExists('a_1');
+  });
+
+  it('shouldCorrectlyCreateTextIndex', async function () {
+    const r = await collection.createIndex({ '$**': 'text' }, { name: 'TextIndex' });
+    expect(r).to.equal('TextIndex');
+  });
+
+  it('should correctly pass partialIndexes through to createIndexCommand', async function () {
+    const configuration = this.configuration;
+    const started: Array<CommandStartedEvent> = [];
+    const succeeded: Array<CommandSucceededEvent> = [];
+
+    client.on('commandStarted', function (event) {
+      if (event.commandName === 'createIndexes') started.push(event);
+    });
+
+    client.on('commandSucceeded', function (event) {
+      if (event.commandName === 'createIndexes') succeeded.push(event);
+    });
+
+    const db = client.db(configuration.db);
+
+    await db
+      .collection('partialIndexes')
+      .createIndex({ a: 1 }, { partialFilterExpression: { a: 1 } });
+    expect(started[0].command.indexes[0].partialFilterExpression).to.deep.equal({ a: 1 });
+  });
+
+  it('should not retry partial index expression error', async function () {
+    // Can't use $exists: false in partial filter expression, see
+    // https://jira.mongodb.org/browse/SERVER-17853
+    const opts = { partialFilterExpression: { a: { $exists: false } } };
+    const err = await db
+      .collection('partialIndexes')
+      .createIndex({ a: 1 }, opts)
+      .catch(e => e);
+    expect(err).to.be.instanceOf(Error).to.have.property('code', 67);
+  });
+
+  it('should correctly create index on embedded key', async function () {
+    await collection.insertMany([
+      {
+        a: { a: 1 }
+      },
+      {
+        a: { a: 2 }
       }
-    },
+    ]);
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('geospatial_index_test', function (err) {
-        expect(err).to.not.exist;
-        const collection = db.collection('geospatial_index_test');
-        collection.createIndex({ loc: '2d' }, configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
-          collection.insert({ loc: [-100, 100] }, configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function (err) {
-              test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-              test.ok(err.errmsg.indexOf('-180') !== -1);
-              test.ok(err.errmsg.indexOf('180') !== -1);
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
+    await collection.createIndex({ 'a.a': 1 });
   });
 
-  it('shouldCorrectlyHandleGeospatialIndexesAlteredRange', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: {
-        mongodb: '>2.6.0',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+  it('should correctly create index using . keys', async function () {
+    await collection.createIndex(
+      { 'key.external_id': 1, 'key.type': 1 },
+      { unique: true, sparse: true, name: 'indexname' }
+    );
+  });
+
+  it('error on duplicate key index', async function () {
+    await collection.insertMany([
+      {
+        key: { external_id: 1, type: 1 }
+      },
+      {
+        key: { external_id: 1, type: 1 }
       }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('geospatial_index_altered_test', function (err) {
-        expect(err).to.not.exist;
-        const collection = db.collection('geospatial_index_altered_test');
-        collection.createIndex(
-          { loc: '2d' },
-          { min: 0, max: 1024, writeConcern: { w: 1 } },
-          function (err) {
-            expect(err).to.not.exist;
-            collection.insert({ loc: [100, 100] }, configuration.writeConcernMax(), function (err) {
-              expect(err).to.not.exist;
-              collection.insert(
-                { loc: [200, 200] },
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  collection.insert(
-                    { loc: [-200, -200] },
-                    configuration.writeConcernMax(),
-                    function (err) {
-                      test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
-                      test.ok(err.errmsg.indexOf('0') !== -1);
-                      test.ok(err.errmsg.indexOf('1024') !== -1);
-                      client.close(done);
-                    }
-                  );
-                }
-              );
-            });
-          }
-        );
-      });
-    }
-  });
-
-  it('shouldThrowDuplicateKeyErrorWhenCreatingIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection(
-        'shouldThrowDuplicateKeyErrorWhenCreatingIndex',
-        function (err, collection) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            collection.createIndex(
-              { a: 1 },
-              { unique: true, writeConcern: { w: 1 } },
-              function (err) {
-                test.ok(err != null);
-                client.close(done);
-              }
-            );
-          });
-        }
-      );
-    }
-  });
-
-  it('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection(
-        'shouldThrowDuplicateKeyErrorWhenDriverInStrictMode',
-        function (err, collection) {
-          collection.insert([{ a: 1 }, { a: 1 }], configuration.writeConcernMax(), function (err) {
-            expect(err).to.not.exist;
-
-            collection.createIndex(
-              { a: 1 },
-              { unique: true, writeConcern: { w: 1 } },
-              function (err) {
-                test.ok(err != null);
-                client.close(done);
-              }
-            );
-          });
-        }
-      );
-    }
-  });
-
-  it('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // Establish connection to db
-      db.createCollection(
-        'shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex',
-        function (err, collection) {
-          expect(err).to.not.exist;
-
-          collection.createIndex(
-            { loc: '2d' },
-            { min: 200, max: 1400, writeConcern: { w: 1 } },
-            function (err) {
-              expect(err).to.not.exist;
-
-              collection.insert(
-                { loc: [600, 600] },
-                configuration.writeConcernMax(),
-                function (err) {
-                  expect(err).to.not.exist;
-                  client.close(done);
-                }
-              );
-            }
-          );
-        }
-      );
-    }
-  });
-
-  it('Should correctly create an index with overriden name', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // Establish connection to db
-      db.createCollection(
-        'shouldCorrectlyCreateAnIndexWithOverridenName',
-        function (err, collection) {
-          expect(err).to.not.exist;
-
-          collection.createIndex('name', { name: 'myfunky_name' }, function (err) {
-            expect(err).to.not.exist;
-
-            // Fetch full index information
-            collection.indexInformation({ full: false }, function (err, indexInformation) {
-              test.ok(indexInformation['myfunky_name'] != null);
-              client.close(done);
-            });
-          });
-        }
-      );
-    }
-  });
-
-  it('should handle index declarations using objects from other contexts', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-
-      db.collection('indexcontext').createIndex(
-        shared.object,
-        { background: true },
-        function (err) {
-          expect(err).to.not.exist;
-          db.collection('indexcontext').createIndex(
-            shared.array,
-            { background: true },
-            function (err) {
-              expect(err).to.not.exist;
-              client.close(done);
-            }
-          );
-        }
-      );
-    }
-  });
-
-  it('should correctly return error message when applying unique index to duplicate documents', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('should_throw_error_due_to_duplicates');
-      collection.insert(
-        [{ a: 1 }, { a: 1 }, { a: 1 }],
-        configuration.writeConcernMax(),
-        function (err) {
-          expect(err).to.not.exist;
-
-          collection.createIndex(
-            { a: 1 },
-            { writeConcern: { w: 1 }, unique: true },
-            function (err) {
-              test.ok(err != null);
-              client.close(done);
-            }
-          );
-        }
-      );
-    }
-  });
-
-  it('should correctly drop index with no callback', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('should_correctly_drop_index');
-      collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
-        expect(err).to.not.exist;
-
-        collection.createIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
-          collection
-            .dropIndex('a_1')
-            .then(() => {
-              client.close(done);
-            })
-            .catch(err => {
-              client.close();
-              done(err);
-            });
-        });
-      });
-    }
-  });
-
-  it('should correctly apply hint to find', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('should_correctly_apply_hint');
-      collection.insert([{ a: 1 }], configuration.writeConcernMax(), function (err) {
-        expect(err).to.not.exist;
-
-        collection.createIndex({ a: 1 }, configuration.writeConcernMax(), function (err) {
-          expect(err).to.not.exist;
-
-          collection.indexInformation({ full: false }, function (err) {
-            expect(err).to.not.exist;
-
-            collection.find({}, { hint: 'a_1' }).toArray(function (err, docs) {
-              expect(err).to.not.exist;
-              test.equal(1, docs[0].a);
-              client.close(done);
-            });
-          });
-        });
-      });
-    }
-  });
-
-  it('should correctly set language_override option', {
-    metadata: {
-      requires: {
-        mongodb: '>=2.6.0',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('should_correctly_set_language_override');
-      collection.insert(
-        [{ text: 'Lorem ipsum dolor sit amet.', langua: 'italian' }],
-        function (err) {
-          expect(err).to.not.exist;
-
-          collection.createIndex(
-            { text: 'text' },
-            { language_override: 'langua', name: 'language_override_index' },
-            function (err) {
-              expect(err).to.not.exist;
-
-              collection.indexInformation({ full: true }, function (err, indexInformation) {
-                expect(err).to.not.exist;
-                for (let i = 0; i < indexInformation.length; i++) {
-                  if (indexInformation[i].name === 'language_override_index')
-                    test.equal(indexInformation[i].language_override, 'langua');
-                }
-
-                client.close(done);
-              });
-            }
-          );
-        }
-      );
-    }
-  });
-
-  it('should correctly use listIndexes to retrieve index list', {
-    metadata: {
-      requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('testListIndexes').createIndex({ a: 1 }, function (err) {
-        expect(err).to.not.exist;
-
-        // Get the list of indexes
-        db.collection('testListIndexes')
-          .listIndexes()
-          .toArray(function (err, indexes) {
-            expect(err).to.not.exist;
-            test.equal(2, indexes.length);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('should correctly use listIndexes to retrieve index list using hasNext', {
-    metadata: {
-      requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('testListIndexes_2').createIndex({ a: 1 }, function (err) {
-        expect(err).to.not.exist;
-
-        // Get the list of indexes
-        db.collection('testListIndexes_2')
-          .listIndexes()
-          .hasNext(function (err, result) {
-            expect(err).to.not.exist;
-            test.equal(true, result);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('should correctly ensureIndex for nested style index name c.d', {
-    metadata: {
-      requires: { mongodb: '>=2.4.0', topology: ['single', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('ensureIndexWithNestedStyleIndex').createIndex({ 'c.d': 1 }, function (err) {
-        expect(err).to.not.exist;
-
-        // Get the list of indexes
-        db.collection('ensureIndexWithNestedStyleIndex')
-          .listIndexes()
-          .toArray(function (err, indexes) {
-            expect(err).to.not.exist;
-            test.equal(2, indexes.length);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('should correctly execute createIndexes with multiple indexes', {
-    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('createIndexes').createIndexes(
-        [{ key: { a: 1 } }, { key: { b: 1 }, name: 'hello1' }],
-        function (err, r) {
-          expect(err).to.not.exist;
-          expect(r).to.deep.equal(['a_1', 'hello1']);
-
-          db.collection('createIndexes')
-            .listIndexes()
-            .toArray(function (err, docs) {
-              expect(err).to.not.exist;
-              const keys = {};
-
-              for (let i = 0; i < docs.length; i++) {
-                keys[docs[i].name] = true;
-              }
-
-              test.ok(keys['a_1']);
-              test.ok(keys['hello1']);
-
-              client.close(done);
-            });
-        }
-      );
-    }
-  });
-
-  it('should correctly execute createIndexes with one index', {
-    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single'] } },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('createIndexes').createIndexes([{ key: { a: 1 } }], function (err, r) {
-        expect(err).to.not.exist;
-        expect(r).to.deep.equal(['a_1']);
-
-        db.collection('createIndexes')
-          .listIndexes()
-          .toArray(function (err, docs) {
-            expect(err).to.not.exist;
-            const keys = {};
-
-            for (let i = 0; i < docs.length; i++) {
-              keys[docs[i].name] = true;
-            }
-
-            test.ok(keys['a_1']);
-            test.ok(keys['hello1']);
-
-            client.close(done);
-          });
-      });
-    }
-  });
-
-  it('shouldCorrectlyCreateTextIndex', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.collection('text_index').createIndex(
-        { '$**': 'text' },
-        { name: 'TextIndex' },
-        function (err, r) {
-          expect(err).to.not.exist;
-          test.equal('TextIndex', r);
-          // Let's close the db
-          client.close(done);
-        }
-      );
-    }
-  });
-
-  it('should correctly pass partialIndexes through to createIndexCommand', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>=3.1.8'
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const started = [];
-      const succeeded = [];
-      const client = configuration.newClient(configuration.writeConcernMax(), {
-        maxPoolSize: 1,
-        monitorCommands: true
-      });
-
-      client.on('commandStarted', function (event) {
-        if (event.commandName === 'createIndexes') started.push(event);
-      });
-
-      client.on('commandSucceeded', function (event) {
-        if (event.commandName === 'createIndexes') succeeded.push(event);
-      });
-
-      const db = client.db(configuration.db);
-
-      db.collection('partialIndexes').createIndex(
-        { a: 1 },
-        { partialFilterExpression: { a: 1 } },
-        function (err) {
-          expect(err).to.not.exist;
-          test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
-          client.close(done);
-        }
-      );
-    }
-  });
-
-  it('should not retry partial index expression error', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded'],
-        mongodb: '>=3.1.8'
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // Can't use $exists: false in partial filter expression, see
-      // https://jira.mongodb.org/browse/SERVER-17853
-      const opts = { partialFilterExpression: { a: { $exists: false } } };
-      db.collection('partialIndexes').createIndex({ a: 1 }, opts, function (err) {
-        test.ok(err);
-        test.equal(err.code, 67);
-        const msg = "key $exists must not start with '$'";
-        test.ok(err.toString().indexOf(msg) === -1);
-
-        client.close(done);
-      });
-    }
-  });
-
-  it('should correctly create index on embedded key', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('embedded_key_indes');
-
-      collection.insertMany(
-        [
-          {
-            a: { a: 1 }
-          },
-          {
-            a: { a: 2 }
-          }
-        ],
-        function (err) {
-          expect(err).to.not.exist;
-
-          collection.createIndex({ 'a.a': 1 }, function (err) {
-            expect(err).to.not.exist;
-            client.close(done);
-          });
-        }
-      );
-    }
-  });
-
-  it('should correctly create index using . keys', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('embedded_key_indes_1');
-      collection.createIndex(
+    ]);
+    const err = await collection
+      .createIndex(
         { 'key.external_id': 1, 'key.type': 1 },
-        { unique: true, sparse: true, name: 'indexname' },
-        function (err) {
-          expect(err).to.not.exist;
+        { unique: true, sparse: true, name: 'indexname' }
+      )
+      .catch(e => e);
 
-          client.close(done);
-        }
-      );
-    }
+    expect(err).to.be.instanceOf(Error).to.have.property('code', 11000);
   });
 
-  it('error on duplicate key index', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('embedded_key_indes_2');
-      collection.insertMany(
-        [
-          {
-            key: { external_id: 1, type: 1 }
-          },
-          {
-            key: { external_id: 1, type: 1 }
-          }
-        ],
-        function (err) {
-          expect(err).to.not.exist;
-          collection.createIndex(
-            { 'key.external_id': 1, 'key.type': 1 },
-            { unique: true, sparse: true, name: 'indexname' },
-            function (err) {
-              test.equal(11000, err.code);
-
-              client.close(done);
-            }
-          );
-        }
-      );
-    }
+  it('should correctly create Index with sub element', async function () {
+    await collection.createIndex(
+      { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
+      this.configuration.writeConcernMax()
+    );
   });
 
-  it('should correctly create Index with sub element', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // insert a doc
-      db.collection('messed_up_index').createIndex(
-        { temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 },
-        configuration.writeConcernMax(),
-        function (err) {
-          expect(err).to.not.exist;
-
-          client.close(done);
-        }
-      );
-    }
-  });
-
-  it('should correctly fail detect error code 85 when performing createIndex', {
-    metadata: {
+  it(
+    'should correctly fail detect error code 85 when performing createIndex',
+    {
       requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>=3.0.0 <=4.8.0'
+        mongodb: '<=4.8.0'
       }
     },
+    async function () {
+      await collection.createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false });
 
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('messed_up_options');
-
-      collection.createIndex(
-        { 'a.one': 1, 'a.two': 1 },
-        { name: 'n1', sparse: false },
-        function (err) {
-          expect(err).to.not.exist;
-
-          collection.createIndex(
-            { 'a.one': 1, 'a.two': 1 },
-            { name: 'n2', sparse: true },
-            function (err) {
-              test.ok(err);
-              test.equal(85, err.code);
-
-              client.close(done);
-            }
-          );
-        }
-      );
+      const err = collection
+        .createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', sparse: true })
+        .catch(e => e);
+      expect(err).to.be.instanceOf(Error).to.have.property('code', 85);
     }
+  );
+
+  it('should correctly fail by detecting error code 86 when performing createIndex', async function () {
+    await collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' });
+    const err = await collection
+      .createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' })
+      .catch(err => err);
+
+    expect(err).to.be.instanceOf(Error).to.have.property('code', 86);
   });
 
-  it('should correctly fail by detecting error code 86 when performing createIndex', {
-    metadata: {
-      requires: {
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
-        mongodb: '>=3.0.0'
-      }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      const collection = db.collection('messed_up_options');
-
-      collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' }, function (err) {
-        expect(err).to.not.exist;
-
-        collection.createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' }, function (err) {
-          test.ok(err);
-          test.equal(86, err.code);
-
-          client.close(done);
-        });
-      });
-    }
-  });
-
-  it('should correctly create Index with sub element running in background', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      // insert a doc
-      db.collection('messed_up_index_2').createIndex(
-        { 'accessControl.get': 1 },
-        { background: true },
-        function (err) {
-          expect(err).to.not.exist;
-
-          client.close(done);
-        }
-      );
-    }
+  it('should correctly create Index with sub element running in background', async function () {
+    await collection.createIndex({ 'accessControl.get': 1 }, { background: true });
   });
 
   context('commitQuorum', function () {
@@ -1270,123 +559,103 @@ describe('Indexes', function () {
       await client.close();
     });
 
-    function throwErrorTest(testCommand) {
+    function throwErrorTest(testCommand: (db: Db, collection: Collection) => Promise<any>) {
       return {
         metadata: { requires: { mongodb: '<4.4' } },
-        test: function (done) {
+        test: async function () {
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
-          testCommand(db, collection, (err, result) => {
-            expect(err).to.exist;
-            expect(err.message).to.equal(
-              'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
-            );
-            expect(result).to.not.exist;
-            done();
-          });
+          const err = await testCommand(db, collection).catch(e => e);
+          expect(err.message).to.equal(
+            'Option `commitQuorum` for `createIndexes` not supported on servers < 4.4'
+          );
         }
       };
     }
     it(
       'should throw an error if commitQuorum specified on db.createIndex',
-      throwErrorTest((db, collection, cb) =>
-        db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' }, cb)
+      throwErrorTest((db, collection) =>
+        db.createIndex(collection.collectionName, 'a', { commitQuorum: 'all' })
       )
     );
     it(
       'should throw an error if commitQuorum specified on collection.createIndex',
-      throwErrorTest((db, collection, cb) =>
-        collection.createIndex('a', { commitQuorum: 'all' }, cb)
-      )
+      throwErrorTest((db, collection) => collection.createIndex('a', { commitQuorum: 'all' }))
     );
     it(
       'should throw an error if commitQuorum specified on collection.createIndexes',
-      throwErrorTest((db, collection, cb) =>
-        collection.createIndexes(
-          [{ key: { a: 1 } }, { key: { b: 1 } }],
-          { commitQuorum: 'all' },
-          cb
-        )
+      throwErrorTest((db, collection) =>
+        collection.createIndexes([{ key: { a: 1 } }, { key: { b: 1 } }], { commitQuorum: 'all' })
       )
     );
 
-    function commitQuorumTest(testCommand) {
+    function commitQuorumTest(
+      testCommand: (db: Db, collection: Collection) => Promise<unknown>
+    ): any {
       return {
         metadata: { requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] } },
-        test: function (done) {
-          const events = [];
+        test: async function () {
+          const events: CommandStartedEvent[] = [];
           client.on('commandStarted', event => {
             if (event.commandName === 'createIndexes') events.push(event);
           });
 
           const db = client.db('test');
           const collection = db.collection('commitQuorum');
-          collection.insertOne({ a: 1 }, function (err) {
-            expect(err).to.not.exist;
-            testCommand(db, collection, err => {
-              expect(err).to.not.exist;
+          await collection.insertOne({ a: 1 });
+          await testCommand(db, collection);
 
-              expect(events).to.be.an('array').with.lengthOf(1);
-              expect(events[0]).nested.property('command.commitQuorum').to.equal(0);
-              collection.drop(err => {
-                expect(err).to.not.exist;
-                done();
-              });
-            });
+          expect(events).to.be.an('array').with.lengthOf(1);
+          expect(events[0]).nested.property('command.commitQuorum').to.equal(0);
+          await collection.drop(err => {
+            expect(err).to.not.exist;
           });
         }
       };
     }
     it(
       'should run command with commitQuorum if specified on db.createIndex',
-      commitQuorumTest((db, collection, cb) =>
-        db.createIndex(
-          collection.collectionName,
-          'a',
-          { writeConcern: { w: 'majority' }, commitQuorum: 0 },
-          cb
-        )
+      commitQuorumTest((db, collection) =>
+        db.createIndex(collection.collectionName, 'a', {
+          // @ts-expect-error revaluate this?
+          writeConcern: { w: 'majority' },
+          commitQuorum: 0
+        })
       )
     );
     it(
       'should run command with commitQuorum if specified on collection.createIndex',
-      commitQuorumTest((db, collection, cb) =>
-        collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 }, cb)
+      commitQuorumTest((db, collection) =>
+        // @ts-expect-error revaluate this?
+        collection.createIndex('a', { writeConcern: { w: 'majority' }, commitQuorum: 0 })
       )
     );
     it(
       'should run command with commitQuorum if specified on collection.createIndexes',
-      commitQuorumTest((db, collection, cb) =>
-        collection.createIndexes(
-          [{ key: { a: 1 } }],
-          { writeConcern: { w: 'majority' }, commitQuorum: 0 },
-          cb
-        )
+      commitQuorumTest((db, collection) =>
+        collection.createIndexes([{ key: { a: 1 } }], {
+          // @ts-expect-error revaluate this?
+          writeConcern: { w: 'majority' },
+          commitQuorum: 0
+        })
       )
     );
   });
 
-  it('should create index hidden', {
-    metadata: { requires: { mongodb: '>=4.4', topology: 'single' } },
-    test: function (done) {
-      const configuration = this.configuration;
-      const client = configuration.newClient(configuration.writeConcernMax(), { maxPoolSize: 1 });
-      const db = client.db(configuration.db);
-      db.createCollection('hidden_index_collection', (err, collection) => {
-        expect(err).to.not.exist;
-        collection.createIndex('a', { hidden: true }, (err, index) => {
-          expect(err).to.not.exist;
-          expect(index).to.equal('a_1');
-          collection.listIndexes().toArray((err, indexes) => {
-            expect(err).to.not.exist;
-            expect(indexes).to.deep.equal([
-              { v: 2, key: { _id: 1 }, name: '_id_' },
-              { v: 2, key: { a: 1 }, name: 'a_1', hidden: true }
-            ]);
-            client.close(done);
-          });
-        });
-      });
+  it(
+    'should create index hidden',
+    {
+      requires: { mongodb: '>=4.4', topology: 'single' }
+    },
+    async function () {
+      const collection = await db.createCollection('hidden_index_collection');
+      const indexName = await collection.createIndex('a', { hidden: true });
+      expect(indexName).to.equal('a_1');
+      const indexes = await collection.listIndexes().toArray();
+      expect(indexes).to.deep.equal([
+        { v: 2, key: { _id: 1 }, name: '_id_' },
+        { v: 2, key: { a: 1 }, name: 'a_1', hidden: true }
+      ]);
     }
-  });
+  );
 });
