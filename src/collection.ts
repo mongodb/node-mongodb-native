@@ -811,7 +811,7 @@ export class Collection<TSchema extends Document = Document> {
       info[name] = Object.entries(key);
     }
 
-    // @ts-expect-error The return type is broken
+    // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
     return info;
   }
 
