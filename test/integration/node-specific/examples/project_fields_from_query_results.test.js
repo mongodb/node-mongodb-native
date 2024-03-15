@@ -252,12 +252,12 @@ describe('examples(project-fields-from-query):', function () {
         });
       //  End Aggregation Projection Example 1
       const docs = await cursor.toArray();
-      docs.forEach(function (doc) {
+      for (const doc of docs) {
         expect(doc).to.have.all.keys(['item', 'status', 'area', 'reportNumber']);
         expect(doc).to.not.have.property('_id');
         expect(doc.area).to.be.a('string');
         expect(doc.reportNumber).to.equal(1);
-      });
+      }
     }
   });
 });
