@@ -48,7 +48,7 @@ tests:
           command_name: find
       - command_started_event:
           command:
-            getMore: { $$type: "long" }
+            getMore: { $$type: [ int, long ] }
             collection: *collection_name
             batchSize: 2
           command_name: getMore
