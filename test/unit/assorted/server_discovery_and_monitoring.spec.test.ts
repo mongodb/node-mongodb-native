@@ -206,13 +206,11 @@ describe('Server Discovery and Monitoring (spec)', function () {
         // call to `selectServers` call a fake, and then immediately restore the original behavior.
         topologySelectServers = sinon
           .stub(Topology.prototype, 'selectServer')
-
-          .callsFake(function (selector, options, callback) {
+          .callsFake(async function (_selector, _options) {
             topologySelectServers.restore();
 
             const fakeServer = { s: { state: 'connected' }, removeListener: () => true };
-            // @ts-expect-error: stub doesn't need to be a full server
-            callback(undefined, fakeServer);
+            return fakeServer;
           });
       });
 

@@ -611,14 +611,21 @@ describe('server selection', async function () {
   });
 
   describe('server selection logging feature flagging', async function () {
-    const topologyDescription = sinon.stub();
-
     let mockServer;
     let topology;
+    let address;
 
     beforeEach(async () => {
-      mockServer = await mock.createServer();
+      mockServer = await mock.createServer(undefined, 'localhost');
       topology = topologyWithPlaceholderClient(mockServer.hostAddress(), {});
+      // NOTE: This is done to ensure that that processWaitQueueMember doesn't throw due to the
+      // topology being in an invalid state
+      address = `localhost:${mockServer.port}`;
+      topology.s.state = 'connected';
+      topology.s.servers.set(address, mockServer);
+      topology.s.description.servers = new Map([
+        [address, new ServerDescription(mockServer.hostAddress())]
+      ]);
     });
 
     afterEach(async () => {
@@ -628,19 +635,21 @@ describe('server selection', async function () {
     context('when willLog returns false', function () {
       const original = Object.getPrototypeOf(ServerSelectionEvent);
       let serverSelectionEventStub;
-      beforeEach(async () => {
+      beforeEach(() => {
         sinon.stub(MongoLogger.prototype, 'willLog').callsFake((_v, _w) => false);
         serverSelectionEventStub = sinon.stub();
         Object.setPrototypeOf(ServerSelectionEvent, serverSelectionEventStub);
       });
 
-      afterEach(async () => {
+      afterEach(() => {
         sinon.restore();
         Object.setPrototypeOf(ServerSelectionEvent, original);
       });
 
-      it('should not create server selection event instances', function () {
-        topology?.selectServer(topologyDescription, { operationName: 'test' }, v => v);
+      it('should not create server selection event instances', async function () {
+        await topology?.selectServer(() => [new ServerDescription(address)], {
+          operationName: 'test'
+        });
         expect(serverSelectionEventStub.getCall(0)).to.be.null;
       });
     });

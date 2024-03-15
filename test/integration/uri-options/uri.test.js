@@ -129,20 +129,20 @@ describe('URI', function () {
 
   it('should generate valid credentials with X509', {
     metadata: { requires: { topology: 'single' } },
-    test: function (done) {
-      function validateConnect(options) {
+    test: function () {
+      async function validateConnect(options) {
         expect(options).to.have.property('credentials');
         expect(options.credentials.mechanism).to.eql('MONGODB-X509');
 
         connectStub.restore();
-        done();
+        return;
       }
 
       const topologyPrototype = Topology.prototype;
       const connectStub = sinon.stub(topologyPrototype, 'connect').callsFake(validateConnect);
       const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
       const client = this.configuration.newClient(uri);
-      client.connect();
+      return client.connect().finally(() => client.close());
     }
   });
 });

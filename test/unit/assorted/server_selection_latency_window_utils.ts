@@ -2,7 +2,6 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { promisify } from 'util';
 
 import {
   ReadPreference,
@@ -139,10 +138,7 @@ export async function runServerSelectionLatencyWindowTest(test: ServerSelectionL
   const selectedServers: Server[] = [];
 
   for (let i = 0; i < test.iterations; ++i) {
-    const server: Server = await promisify(topology.selectServer.bind(topology))(
-      ReadPreference.NEAREST,
-      {}
-    );
+    const server: Server = await topology.selectServer(ReadPreference.NEAREST, {});
     selectedServers.push(server);
   }
 
