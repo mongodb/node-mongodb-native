@@ -683,13 +683,11 @@ export class Collection<TSchema extends Document = Document> {
     options?: IndexInformationOptions
   ): Promise<boolean> {
     const indexNames: string[] = [indexes].flat();
-    const allIndexes: Set<string> = new Set(
-      await this.listIndexes(options)
-        .map(({ name }) => name)
-        .toArray()
-    );
+    const allIndexes: string[] = await this.listIndexes(options)
+      .map(({ name }) => name)
+      .toArray();
 
-    return indexNames.every(name => allIndexes.has(name));
+    return indexNames.every(name => allIndexes.includes(name));
   }
 
   /**
@@ -804,7 +802,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
     const indexes = await this.listIndexes(options).toArray();
-    const full = options?.full ?? true === true;
+    const full = options?.full ?? true;
     if (full) {
       return indexes;
     }

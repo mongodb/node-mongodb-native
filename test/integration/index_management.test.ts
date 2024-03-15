@@ -286,14 +286,10 @@ describe('Indexes', function () {
   });
 
   context('when dropIndexes fails', function () {
-    let collection;
-
     beforeEach(async function () {
-      collection = await db.createCollection('test_drop_indexes');
-      await collection.insert({ a: 1 });
+      await collection.insertOne({ a: 1 });
       // Create an index on the collection
-      await db.createIndex(collection.collectionName, 'a');
-      /**@type {import('../tools/utils').FailPoint} */
+      await collection.createIndex('a');
       await client
         .db()
         .admin()
@@ -309,22 +305,18 @@ describe('Indexes', function () {
         });
     });
 
-    afterEach(async function () {
-      await db.dropCollection('test_drop_indexes');
-    });
-
-    it('should return false', {
-      metadata: {
+    it(
+      'should return false',
+      {
         requires: {
           mongodb: '>4.0'
         }
       },
-
-      test: async function () {
+      async function () {
         const result = await collection.dropIndexes();
         expect(result).to.equal(false);
       }
-    });
+    );
   });
 
   context('indexExists', function () {
