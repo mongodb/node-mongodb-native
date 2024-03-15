@@ -128,7 +128,7 @@ describe('Range Explicit Encryption', function () {
   installNodeDNSWorkaroundHooks();
 
   beforeEach(async function () {
-    if (semver.gte('7.999.999', this.configuration.version)) {
+    if (semver.gte(this.configuration.version, '7.999.999')) {
       if (this.currentTest)
         this.currentTest.skipReason = 'TODO(NODE-5908): skip rangePreview tests on server 8.0+';
       return this.currentTest?.skip();
