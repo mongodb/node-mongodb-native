@@ -12,7 +12,6 @@ import {
 } from '../error';
 import type { Filter, OneOrMore, OptionalId, UpdateFilter, WithoutId } from '../mongo_types';
 import type { CollationOptions, CommandOperationOptions } from '../operations/command';
-import { maybeAddIdToDocuments } from '../operations/common_functions';
 import { DeleteOperation, type DeleteStatement, makeDeleteStatement } from '../operations/delete';
 import { executeOperation } from '../operations/execute_operation';
 import { InsertOperation } from '../operations/insert';
@@ -21,6 +20,7 @@ import { makeUpdateStatement, UpdateOperation, type UpdateStatement } from '../o
 import type { Server } from '../sdam/server';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { maybeAddIdToDocuments } from '../utils';
 import {
   applyRetryableWrites,
   type Callback,

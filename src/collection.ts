@@ -573,7 +573,7 @@ export class Collection<TSchema extends Document = Document> {
     const indexes = await executeOperation(
       this.client,
       CreateIndexesOperation.fromIndexSpecification(
-        this as TODO_NODE_3286,
+        this,
         this.collectionName,
         indexSpec,
         resolveOptions(this, options)
@@ -621,7 +621,7 @@ export class Collection<TSchema extends Document = Document> {
     return executeOperation(
       this.client,
       CreateIndexesOperation.fromIndexDescriptionArray(
-        this as TODO_NODE_3286,
+        this,
         this.collectionName,
         indexSpecs,
         resolveOptions(this, { ...options, maxTimeMS: undefined })
@@ -681,7 +681,7 @@ export class Collection<TSchema extends Document = Document> {
     indexes: string | string[],
     options?: IndexInformationOptions
   ): Promise<boolean> {
-    const indexNames: string[] = [indexes].flat();
+    const indexNames: string[] = Array.isArray(indexes) ? indexes : [indexes];
     const allIndexes: string[] = await this.listIndexes(options)
       .map(({ name }) => name)
       .toArray();
@@ -806,13 +806,12 @@ export class Collection<TSchema extends Document = Document> {
       return indexes;
     }
 
-    const info: Record<string, Array<[string, unknown]>> = {};
-    for (const { name, key } of indexes) {
-      info[name] = Object.entries(key);
-    }
+    const object: Record<string, Array<[string, unknown]>> = Object.fromEntries(
+      indexes.map(({ name, key }) => [name, Object.entries(key)])
+    );
 
     // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
-    return info;
+    return object;
   }
 
   /**

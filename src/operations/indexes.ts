@@ -73,6 +73,24 @@ export type IndexSpecification = OneOrMore<
 
 /** @public */
 export interface IndexInformationOptions {
+  /**
+   * When `true`, an array of index descriptions is returned.
+   * When `false`, the driver returns an object that with keys corresponding to index names with values
+   * corresponding to the entries of the indexes' key.
+   *
+   * For example, the given the following indexes:
+   * ```
+   * [ { name: 'a_1', key: { a: 1 } }, { name: 'b_1_c_1' , key: { b: 1, c: 1 } }]
+   * ```
+   *
+   * When `full` is `true`, the above array is returned.  When `full` is `false`, the following is returned:
+   * ```
+   * {
+   *   'a_1': [['a', 1]],
+   *   'b_1_c_1': [['b', 1], ['c', 1]],
+   * }
+   * ```
+   */
   full?: boolean;
   readPreference?: ReadPreference;
   session?: ClientSession;
