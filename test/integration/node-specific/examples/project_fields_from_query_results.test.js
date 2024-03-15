@@ -221,7 +221,7 @@ describe('examples(project-fields-from-query):', function () {
   });
 
   it('Aggregation Projection Example 1', {
-    metadata: { requires: { topology: ['single'], mongodb: '>= 4.4.0' } },
+    metadata: { requires: { mongodb: '>= 4.4.0' } },
     test: async function () {
       //  Start Aggregation Projection Example 1
       const cursor = db
