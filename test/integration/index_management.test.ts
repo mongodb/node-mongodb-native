@@ -70,7 +70,7 @@ describe('Indexes', function () {
   });
 
   it('shouldCorrectlyHandleMultipleColumnIndexes', async function () {
-    await collection.insert({ a: 1 });
+    await collection.insertOne({ a: 1 });
 
     const indexName = await db.createIndex(
       collection.collectionName,
@@ -97,6 +97,124 @@ describe('Indexes', function () {
       ],
       collectionInfo[indexName]
     );
+  });
+
+  describe('Collection.indexes()', function () {
+    beforeEach(() => collection.createIndex({ age: 1 }));
+    afterEach(() => collection.dropIndexes());
+
+    context('when `full` is not provided', () => {
+      it('returns an array of indexes', async function () {
+        const indexes = await collection.indexes();
+        expect(indexes).to.be.a('array');
+      });
+    });
+
+    context('when `full` is set to `true`', () => {
+      it('returns an array of indexes', async function () {
+        const indexes = await collection.indexes({ full: true });
+        expect(indexes).to.be.a('array');
+      });
+    });
+
+    context('when `full` is set to `false`', () => {
+      it('returns a document mapping key to index definition', async function () {
+        const indexes = await collection.indexes({ full: false });
+        expect(indexes).to.be.a('object');
+        expect(indexes)
+          .to.have.property('age_1')
+          .to.deep.equal([['age', 1]]);
+      });
+    });
+  });
+
+  describe('Collection.indexInformation()', function () {
+    beforeEach(() => collection.createIndex({ age: 1 }));
+    afterEach(() => collection.dropIndexes());
+
+    context('when `full` is not provided', () => {
+      it('defaults to `false` and returns a document', async function () {
+        const indexes = await collection.indexInformation();
+        expect(indexes).to.be.a('object');
+        expect(indexes)
+          .to.have.property('age_1')
+          .to.deep.equal([['age', 1]]);
+      });
+    });
+
+    context('when `full` is set to `true`', () => {
+      it('returns an array of indexes', async function () {
+        const indexes = await collection.indexInformation({ full: true });
+        expect(indexes).to.be.a('array');
+      });
+    });
+
+    context('when `full` is set to `false`', () => {
+      it('returns a document mapping key to index definition', async function () {
+        const indexes = await collection.indexInformation({ full: false });
+        expect(indexes).to.be.a('object');
+        expect(indexes)
+          .to.have.property('age_1')
+          .to.deep.equal([['age', 1]]);
+      });
+    });
+  });
+
+  describe('Collection.indexExists()', function () {
+    beforeEach(() => collection.createIndex({ age: 1 }));
+    afterEach(() => collection.dropIndexes());
+
+    context('when provided a string index name', () => {
+      it('returns true when the index exists', async () => {
+        expect(await collection.indexExists('age_1')).to.be.true;
+      });
+
+      it('returns false when the index does not exist', async () => {
+        expect(await collection.indexExists('name_1')).to.be.false;
+      });
+    });
+
+    context('when provided an array of index names', () => {
+      it('returns true when all indexes exists', async () => {
+        expect(await collection.indexExists(['age_1'])).to.be.true;
+      });
+
+      it('returns false when the none of the indexes exist', async () => {
+        expect(await collection.indexExists(['name_1'])).to.be.false;
+      });
+
+      it('returns false when only some of hte indexes exist', async () => {
+        expect(await collection.indexExists(['name_1', 'age_1'])).to.be.false;
+      });
+    });
+    context('when `full` is true', () => {
+      // These tests are broken!
+      it('returns true when all indexes exists', async () => {
+        expect(await collection.indexExists(['age_1'], { full: true })).to.be.true;
+      });
+
+      it('returns false when the none of the indexes exist', async () => {
+        expect(await collection.indexExists(['name_1'], { full: true })).to.be.false;
+      });
+
+      it('returns false when only some of hte indexes exist', async () => {
+        expect(await collection.indexExists(['name_1', 'age_1'], { full: true })).to.be.false;
+      });
+    });
+
+    context('when `full` is false', () => {
+      it('returns true when all indexes exists', async () => {
+        expect(await collection.indexExists(['age_1'], { full: false })).to.be.true;
+      });
+
+      it('returns false when the none of the indexes exist', async () => {
+        expect(await collection.indexExists(['name_1'], { full: false })).to.be.false;
+      });
+
+      it('returns false when only some of hte indexes exist', async () => {
+        expect(await collection.indexExists(['name_1', 'age_1'], { full: false })).to.be.false;
+      });
+    });
   });
 
   it('shouldCorrectlyHandleUniqueIndex', async function () {
@@ -529,7 +647,7 @@ describe('Indexes', function () {
     async function () {
       await collection.createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', sparse: false });
 
-      const err = collection
+      const err = await collection
         .createIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', sparse: true })
         .catch(e => e);
       expect(err).to.be.instanceOf(Error).to.have.property('code', 85);
