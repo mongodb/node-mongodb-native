@@ -6,7 +6,8 @@
         "replicaset",
         "sharded",
         "load-balanced"
-      ]
+      ],
+      "maxServerVersion": "7.99.99"
     }
   ],
   "database_name": "default",
