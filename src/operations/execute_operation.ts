@@ -139,7 +139,7 @@ export async function executeOperation<
     selector = readPreference;
   }
 
-  const server = await topology.selectServerAsync(selector, {
+  const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName
   });
@@ -244,7 +244,7 @@ async function retryOperation<
   }
 
   // select a new server, and attempt to retry the operation
-  const server = await topology.selectServerAsync(selector, {
+  const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
     previousServer

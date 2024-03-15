@@ -80,7 +80,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, testDone) {
+async function executeServerSelectionTest(testDefinition) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -102,104 +102,84 @@ function executeServerSelectionTest(testDefinition, testDone) {
   // call to `selectServers` call a fake, and then immediately restore the original behavior.
   let topologySelectServers = sinon
     .stub(Topology.prototype, 'selectServer')
-    .callsFake(function (selector, options, callback) {
+    .callsFake(async function () {
       topologySelectServers.restore();
 
       const fakeServer = { s: { state: 'connected' }, removeListener: () => {} };
-      callback(undefined, fakeServer);
+      return fakeServer;
     });
 
-  function done(err) {
-    topology.close();
-    testDone(err);
+  await topology.connect();
+  topologyDescription.servers.forEach(server => {
+    const serverDescription = serverDescriptionFromDefinition(server, seedData.hosts);
+    topology.serverUpdateHandler(serverDescription);
+  });
+
+  let selector;
+  if (testDefinition.operation === 'write') {
+    selector = ServerSelectors.writableServerSelector();
+  } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
+    try {
+      const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
+      selector = ServerSelectors.readPreferenceServerSelector(readPreference);
+    } catch (e) {
+      if (testDefinition.error) return;
+      throw e;
+    }
+  } else {
+    throw new Error('received neither read nor write, and did not receive a read preference');
   }
 
-  topology.connect(err => {
-    expect(err).to.not.exist;
+  // expectations
+  let expectedServers;
+  if (!testDefinition.error) {
+    expectedServers = testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s));
+  }
 
-    // Update topologies with server descriptions.
-    topologyDescription.servers.forEach(server => {
-      const serverDescription = serverDescriptionFromDefinition(server, seedData.hosts);
-      topology.serverUpdateHandler(serverDescription);
-    });
+  // default to serverSelectionTimeoutMS of `100` for unit tests
+  try {
+    const server = await topology.selectServer(selector, { serverSelectionTimeoutMS: 50 });
 
-    let selector;
-    if (testDefinition.operation === 'write') {
-      selector = ServerSelectors.writableServerSelector();
-    } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
-      try {
-        const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
-        selector = ServerSelectors.readPreferenceServerSelector(readPreference);
-      } catch (e) {
-        if (testDefinition.error) return done();
-        return done(e);
-      }
-    } else {
-      return done(
-        new Error('received neither read nor write, and did not receive a read preference')
-      );
+    if (testDefinition.error) throw new Error('Expected an error, but found none!');
+    if (expectedServers.length === 0 && server !== null) {
+      throw new Error('Found server, but expected none!');
     }
 
-    // expectations
-    let expectedServers;
-    if (!testDefinition.error) {
-      expectedServers = testDefinition.in_latency_window.map(s =>
-        serverDescriptionFromDefinition(s)
-      );
+    const selectedServerDescription = server.description;
+
+    const expectedServerArray = expectedServers.filter(
+      s => s.address === selectedServerDescription.address
+    );
+
+    if (!expectedServerArray.length) {
+      throw new Error('No suitable servers found!');
     }
 
-    // default to serverSelectionTimeoutMS of `100` for unit tests
-    topology.selectServer(selector, { serverSelectionTimeoutMS: 50 }, (err, server) => {
-      // are we expecting an error?
-      if (testDefinition.error) {
-        if (!err) {
-          return done(new Error('Expected an error, but found none!'));
-        }
+    if (expectedServerArray.length > 1) {
+      throw new Error('This test does not support multiple expected servers');
+    }
 
-        return done();
+    for (const [prop, value] of Object.entries(expectedServerArray[0])) {
+      if (prop === 'hosts') {
+        // we dynamically modify this prop during sever selection
+        continue;
       }
+      expect(selectedServerDescription[prop]).to.deep.equal(
+        value,
+        `Mismatched selected server "${prop}"`
+      );
+    }
+    return;
+  } catch (err) {
+    // if we are expecting and error, immediately succeed
+    if (testDefinition.error) {
+      return;
+    }
 
-      if (err) {
-        // this is another expected error case
-        if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return done();
-        return done(err);
-      }
-
-      if (expectedServers.length === 0 && server !== null) {
-        return done(new Error('Found server, but expected none!'));
-      }
-
-      const selectedServerDescription = server.description;
-
-      try {
-        const expectedServerArray = expectedServers.filter(
-          s => s.address === selectedServerDescription.address
-        );
-
-        if (!expectedServerArray.length) {
-          return done(new Error('No suitable servers found!'));
-        }
-
-        if (expectedServerArray.length > 1) {
-          return done(new Error('This test does not support multiple expected servers'));
-        }
-
-        for (const [prop, value] of Object.entries(expectedServerArray[0])) {
-          if (prop === 'hosts') {
-            // we dynamically modify this prop during sever selection
-            continue;
-          }
-          expect(selectedServerDescription[prop]).to.deep.equal(
-            value,
-            `Mismatched selected server "${prop}"`
-          );
-        }
-        done();
-      } catch (e) {
-        done(e);
-      }
-    });
-  });
+    // this is another expected error case
+    if (expectedServers.length === 0 && err instanceof MongoServerSelectionError) return;
+    throw err;
+  }
 }
 
 module.exports = { executeServerSelectionTest, serverDescriptionFromDefinition };

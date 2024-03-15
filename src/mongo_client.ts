@@ -1,7 +1,6 @@
 import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
-import { promisify } from 'util';
 
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
@@ -550,7 +549,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
 
     const topologyConnect = async () => {
       try {
-        await promisify(callback => this.topology?.connect(options, callback))();
+        await this.topology?.connect(options);
       } catch (error) {
         this.topology?.close();
         throw error;

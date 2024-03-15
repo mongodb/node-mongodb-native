@@ -1,5 +1,3 @@
-import { promisify } from 'util';
-
 import type { BSONSerializeOptions, Document } from '../bson';
 import type { MongoCredentials } from '../cmap/auth/mongo_credentials';
 import type { ConnectionEvents } from '../cmap/connection';
@@ -44,6 +42,7 @@ import {
   makeStateMachine,
   now,
   ns,
+  promiseWithResolvers,
   shuffle,
   TimeoutController
 } from '../utils';
@@ -105,7 +104,8 @@ export interface ServerSelectionRequest {
   mongoLogger: MongoLogger | undefined;
   transaction?: Transaction;
   startTime: number;
-  callback: ServerSelectionCallback;
+  resolve: (server: Server) => void;
+  reject: (error: MongoError) => void;
   [kCancelled]?: boolean;
   timeoutController: TimeoutController;
   operationName: string;
@@ -215,6 +215,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
   client!: MongoClient;
 
+  /** @internal */
+  private connectionLock?: Promise<Topology>;
+
   /** @event */
   static readonly SERVER_OPENING = SERVER_OPENING;
   /** @event */
@@ -238,11 +241,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   /** @event */
   static readonly TIMEOUT = TIMEOUT;
 
-  selectServerAsync: (
-    selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions
-  ) => Promise<Server>;
-
   /**
    * @param seedlist - a list of HostAddress instances to connect to
    */
@@ -254,14 +252,6 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     super();
 
     this.client = client;
-    this.selectServerAsync = promisify(
-      (
-        selector: string | ReadPreference | ServerSelector,
-        options: SelectServerOptions,
-        callback: (e: Error, r: Server) => void
-      ) => this.selectServer(selector, options, callback as any)
-    );
-
     // Options should only be undefined in tests, MongoClient will always have defined options
     options = options ?? {
       hosts: [HostAddress.fromString('localhost:27017')],
@@ -351,6 +341,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
       this.on(Topology.TOPOLOGY_DESCRIPTION_CHANGED, this.s.detectShardedTopology);
     }
+    this.connectionLock = undefined;
   }
 
   private detectShardedTopology(event: TopologyDescriptionChangedEvent) {
@@ -411,17 +402,22 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
   }
 
   /** Initiate server connect */
-  connect(callback: Callback): void;
-  connect(options: ConnectOptions, callback: Callback): void;
-  connect(options?: ConnectOptions | Callback, callback?: Callback): void {
-    if (typeof options === 'function') (callback = options), (options = {});
+  async connect(options?: ConnectOptions): Promise<Topology> {
+    this.connectionLock ??= this._connect(options);
+    try {
+      await this.connectionLock;
+      return this;
+    } finally {
+      this.connectionLock = undefined;
+    }
+
+    return this;
+  }
+
+  private async _connect(options?: ConnectOptions): Promise<Topology> {
     options = options ?? {};
     if (this.s.state === STATE_CONNECTED) {
-      if (typeof callback === 'function') {
-        callback();
-      }
-
-      return;
+      return this;
     }
 
     stateTransition(this, STATE_CONNECTING);
@@ -459,40 +455,33 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     }
 
-    const exitWithError = (error: Error) =>
-      callback ? callback(error) : this.emit(Topology.ERROR, error);
-
     const readPreference = options.readPreference ?? ReadPreference.primary;
     const selectServerOptions = { operationName: 'ping', ...options };
-    this.selectServer(
-      readPreferenceServerSelector(readPreference),
-      selectServerOptions,
-      (err, server) => {
-        if (err) {
-          this.close();
-          return exitWithError(err);
-        }
+    try {
+      const server = await this.selectServer(
+        readPreferenceServerSelector(readPreference),
+        selectServerOptions
+      );
 
-        const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
-        if (!skipPingOnConnect && server && this.s.credentials) {
-          server.command(ns('admin.$cmd'), { ping: 1 }, {}).then(() => {
-            stateTransition(this, STATE_CONNECTED);
-            this.emit(Topology.OPEN, this);
-            this.emit(Topology.CONNECT, this);
-
-            callback?.(undefined, this);
-          }, exitWithError);
-
-          return;
-        }
-
+      const skipPingOnConnect = this.s.options[Symbol.for('@@mdb.skipPingOnConnect')] === true;
+      if (!skipPingOnConnect && server && this.s.credentials) {
+        await server.command(ns('admin.$cmd'), { ping: 1 }, {});
         stateTransition(this, STATE_CONNECTED);
         this.emit(Topology.OPEN, this);
         this.emit(Topology.CONNECT, this);
 
-        callback?.(undefined, this);
+        return this;
       }
-    );
+
+      stateTransition(this, STATE_CONNECTED);
+      this.emit(Topology.OPEN, this);
+      this.emit(Topology.CONNECT, this);
+
+      return this;
+    } catch (error) {
+      this.close();
+      throw error;
+    }
   }
 
   /** Close this topology */
@@ -533,11 +522,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
    * @param callback - The callback used to indicate success or failure
    * @returns An instance of a `Server` meeting the criteria of the predicate provided
    */
-  selectServer(
+  async selectServer(
     selector: string | ReadPreference | ServerSelector,
-    options: SelectServerOptions,
-    callback: Callback<Server>
-  ): void {
+    options: SelectServerOptions
+  ): Promise<Server> {
     let serverSelector;
     if (typeof selector !== 'function') {
       if (typeof selector === 'string') {
@@ -588,16 +576,17 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      callback(undefined, transaction.server);
-      return;
+      return transaction.server;
     }
 
+    const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
       mongoLogger: this.client.mongoLogger,
       transaction,
-      callback,
+      resolve,
+      reject,
       timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
       startTime: now(),
       operationName: options.operationName,
@@ -628,13 +617,14 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           )
         );
       }
-      waitQueueMember.callback(timeoutError);
+      waitQueueMember.reject(timeoutError);
     });
 
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
-  }
 
+    return serverPromise;
+  }
   /**
    * Update the internal TopologyDescription with a ServerDescription
    *
@@ -883,7 +873,7 @@ function updateServers(topology: Topology, incomingServerDescription?: ServerDes
   }
 }
 
-function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverError) {
+function drainWaitQueue(queue: List<ServerSelectionRequest>, drainError: MongoDriverError) {
   while (queue.length) {
     const waitQueueMember = queue.shift();
     if (!waitQueueMember) {
@@ -893,25 +883,23 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, err?: MongoDriverEr
     waitQueueMember.timeoutController.clear();
 
     if (!waitQueueMember[kCancelled]) {
-      if (err) {
-        if (
-          waitQueueMember.mongoLogger?.willLog(
-            MongoLoggableComponent.SERVER_SELECTION,
-            SeverityLevel.DEBUG
+      if (
+        waitQueueMember.mongoLogger?.willLog(
+          MongoLoggableComponent.SERVER_SELECTION,
+          SeverityLevel.DEBUG
+        )
+      ) {
+        waitQueueMember.mongoLogger?.debug(
+          MongoLoggableComponent.SERVER_SELECTION,
+          new ServerSelectionFailedEvent(
+            waitQueueMember.serverSelector,
+            waitQueueMember.topologyDescription,
+            drainError,
+            waitQueueMember.operationName
           )
-        ) {
-          waitQueueMember.mongoLogger?.debug(
-            MongoLoggableComponent.SERVER_SELECTION,
-            new ServerSelectionFailedEvent(
-              waitQueueMember.serverSelector,
-              waitQueueMember.topologyDescription,
-              err,
-              waitQueueMember.operationName
-            )
-          );
-        }
+        );
       }
-      waitQueueMember.callback(err);
+      waitQueueMember.reject(drainError);
     }
   }
 }
@@ -946,7 +934,7 @@ function processWaitQueue(topology: Topology) {
             previousServer ? [previousServer] : []
           )
         : serverDescriptions;
-    } catch (e) {
+    } catch (selectorError) {
       waitQueueMember.timeoutController.clear();
       if (
         topology.client.mongoLogger?.willLog(
@@ -959,12 +947,12 @@ function processWaitQueue(topology: Topology) {
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            e,
+            selectorError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.callback(e);
+      waitQueueMember.reject(selectorError);
       continue;
     }
 
@@ -1007,7 +995,7 @@ function processWaitQueue(topology: Topology) {
     }
 
     if (!selectedServer) {
-      const error = new MongoServerSelectionError(
+      const serverSelectionError = new MongoServerSelectionError(
         'server selection returned a server description but the server was not found in the topology',
         topology.description
       );
@@ -1022,12 +1010,12 @@ function processWaitQueue(topology: Topology) {
           new ServerSelectionFailedEvent(
             waitQueueMember.serverSelector,
             topology.description,
-            error,
+            serverSelectionError,
             waitQueueMember.operationName
           )
         );
       }
-      waitQueueMember.callback(error);
+      waitQueueMember.reject(serverSelectionError);
       return;
     }
     const transaction = waitQueueMember.transaction;
@@ -1053,7 +1041,7 @@ function processWaitQueue(topology: Topology) {
         )
       );
     }
-    waitQueueMember.callback(undefined, selectedServer);
+    waitQueueMember.resolve(selectedServer);
   }
 
   if (topology[kWaitQueue].length > 0) {

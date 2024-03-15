@@ -934,14 +934,16 @@ export class ChangeStream<
       this.cursor.close().catch(() => null);
 
       const topology = getTopology(this.parent);
-      topology.selectServer(
-        this.cursor.readPreference,
-        { operationName: 'reconnect topology in change stream' },
-        serverSelectionError => {
-          if (serverSelectionError) return this._closeEmitterModeWithError(changeStreamError);
-          this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
-        }
-      );
+      topology
+        .selectServer(this.cursor.readPreference, {
+          operationName: 'reconnect topology in change stream'
+        })
+        .then(
+          () => {
+            this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
+          },
+          () => this._closeEmitterModeWithError(changeStreamError)
+        );
     } else {
       this._closeEmitterModeWithError(changeStreamError);
     }
@@ -966,7 +968,7 @@ export class ChangeStream<
     await this.cursor.close().catch(() => null);
     const topology = getTopology(this.parent);
     try {
-      await topology.selectServerAsync(this.cursor.readPreference, {
+      await topology.selectServer(this.cursor.readPreference, {
         operationName: 'reconnect topology in change stream'
       });
       this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
