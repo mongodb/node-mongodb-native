@@ -680,7 +680,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async indexExists(
     indexes: string | string[],
-    options?: IndexInformationOptions
+    options?: Omit<IndexInformationOptions, 'full'>
   ): Promise<boolean> {
     const indexNames: string[] = Array.isArray(indexes) ? indexes : [indexes];
     const allIndexes: Set<string> = new Set(

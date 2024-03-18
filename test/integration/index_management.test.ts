@@ -187,34 +187,6 @@ describe('Indexes', function () {
         expect(await collection.indexExists(['name_1', 'age_1'])).to.be.false;
       });
     });
-    context('when `full` is true', () => {
-      // These tests are broken!
-      it('returns true when all indexes exists', async () => {
-        expect(await collection.indexExists(['age_1'], { full: true })).to.be.true;
-      });
-
-      it('returns false when the none of the indexes exist', async () => {
-        expect(await collection.indexExists(['name_1'], { full: true })).to.be.false;
-      });
-
-      it('returns false when only some of hte indexes exist', async () => {
-        expect(await collection.indexExists(['name_1', 'age_1'], { full: true })).to.be.false;
-      });
-    });
-
-    context('when `full` is false', () => {
-      it('returns true when all indexes exists', async () => {
-        expect(await collection.indexExists(['age_1'], { full: false })).to.be.true;
-      });
-
-      it('returns false when the none of the indexes exist', async () => {
-        expect(await collection.indexExists(['name_1'], { full: false })).to.be.false;
-      });
-
-      it('returns false when only some of hte indexes exist', async () => {
-        expect(await collection.indexExists(['name_1', 'age_1'], { full: false })).to.be.false;
-      });
-    });
   });
 
   it('shouldCorrectlyHandleUniqueIndex', async function () {
