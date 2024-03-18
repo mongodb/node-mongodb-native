@@ -678,10 +678,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param indexes - One or more index names to check.
    * @param options - Optional settings for the command
    */
-  async indexExists(
-    indexes: string | string[],
-    options?: Omit<IndexInformationOptions, 'full'>
-  ): Promise<boolean> {
+  async indexExists(indexes: string | string[], options?: ListIndexesOptions): Promise<boolean> {
     const indexNames: string[] = Array.isArray(indexes) ? indexes : [indexes];
     const allIndexes: Set<string> = new Set(
       await this.listIndexes(options)

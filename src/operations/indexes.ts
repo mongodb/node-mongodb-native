@@ -1,8 +1,8 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
+import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
 import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
-import { type ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
@@ -72,7 +72,7 @@ export type IndexSpecification = OneOrMore<
 >;
 
 /** @public */
-export interface IndexInformationOptions {
+export interface IndexInformationOptions extends ListIndexesOptions {
   /**
    * When `true`, an array of index descriptions is returned.
    * When `false`, the driver returns an object that with keys corresponding to index names with values
@@ -92,8 +92,6 @@ export interface IndexInformationOptions {
    * ```
    */
   full?: boolean;
-  readPreference?: ReadPreference;
-  session?: ClientSession;
 }
 
 /** @public */
@@ -314,10 +312,7 @@ export class DropIndexOperation extends CommandOperation<Document> {
 }
 
 /** @public */
-export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
-  /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
-  batchSize?: number;
-}
+export type ListIndexesOptions = AbstractCursorOptions;
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<Document> {
