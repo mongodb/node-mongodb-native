@@ -167,10 +167,11 @@ function isSingleIndexTuple(t: unknown): t is [string, IndexDirection] {
   return Array.isArray(t) && t.length === 2 && isIndexDirection(t[1]);
 }
 
-function makeIndexSpec(
-  indexSpec: IndexSpecification,
-  options?: CreateIndexesOptions
-): IndexDescription {
+/**
+ * Converts an `IndexSpecification`, which can be specified in multiple formats, into a
+ * valid `key` for the createIndexes command.
+ */
+function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string, IndexDirection> {
   const key: Map<string, IndexDirection> = new Map();
 
   const indexSpecs =
@@ -193,14 +194,46 @@ function makeIndexSpec(
     }
   }
 
-  return { ...options, key };
+  return key;
 }
+
+/**
+ * Receives an index description and returns a modified index description which has had invalid options removed
+ * from the description and has mapped the `version` option to the `v` option.
+ */
+function resolveIndexDescription(
+  description: IndexDescription
+): Omit<ResolvedIndexDescription, 'key'> {
+  const validProvidedOptions = Object.entries({ ...description }).filter(([optionName]) =>
+    VALID_INDEX_OPTIONS.has(optionName)
+  );
+
+  return Object.fromEntries(
+    // we support the `version` option, but the `createIndexes` command expects it to be the `v`
+    validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
+  );
+}
+
+/**
+ * @internal
+ *
+ * Internally, the driver represents index description keys with `Map`s to preserve key ordering.
+ * We don't require users to specify maps, so we transform user provided descriptions into
+ * "resolved" by converting the `key` into a JS `Map`, if it isn't already a map.
+ *
+ * Additionally, we support the `version` option, but the `createIndexes` command uses the field `v`
+ * to specify the index version so we map the value of `version` to `v`, if provided.
+ */
+type ResolvedIndexDescription = Omit<IndexDescription, 'key' | 'version'> & {
+  key: Map<string, IndexDirection>;
+  v?: IndexDescription['version'];
+};
 
 /** @internal */
 export class CreateIndexesOperation extends CommandOperation<string[]> {
   override options: CreateIndexesOptions;
   collectionName: string;
-  indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
+  indexes: ReadonlyArray<ResolvedIndexDescription>;
 
   private constructor(
     parent: OperationParent,
@@ -212,16 +245,12 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
 
     this.options = options ?? {};
     this.collectionName = collectionName;
-    this.indexes = indexes.map(userIndex => {
+    this.indexes = indexes.map((userIndex: IndexDescription): ResolvedIndexDescription => {
       // Ensure the key is a Map to preserve index key ordering
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
       const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
-      const validIndexOptions = Object.fromEntries(
-        Object.entries({ ...userIndex }).filter(([optionName]) =>
-          VALID_INDEX_OPTIONS.has(optionName)
-        )
-      );
+      const validIndexOptions = resolveIndexDescription(userIndex);
       return {
         ...validIndexOptions,
         name,
@@ -243,14 +272,11 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
     parent: OperationParent,
     collectionName: string,
     indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
+    options: CreateIndexesOptions = {}
   ): CreateIndexesOperation {
-    return new CreateIndexesOperation(
-      parent,
-      collectionName,
-      [makeIndexSpec(indexSpec, options)],
-      options
-    );
+    const key = constructIndexDescriptionMap(indexSpec);
+    const description: IndexDescription = { ...options, key };
+    return new CreateIndexesOperation(parent, collectionName, [description], options);
   }
 
   override get commandName() {
