@@ -15,19 +15,13 @@ import { LEGACY_HELLO_COMMAND, MongoClient } from '../mongodb';
  */
 
 describe('Atlas Connectivity', function () {
-  if (process.env.ATLAS_CONNECTIVITY == null) {
-    console.error(
-      'skipping atlas connectivity tests, ATLAS_CONNECTIVITY environment variable is not defined'
-    );
+  const { ATLAS_CONNECTIVITY = '' } = process.env;
+  if (ATLAS_CONNECTIVITY === '') throw new Error('ATLAS_CONNECTIVITY not defined in env');
 
-    return;
-  }
+  const CONFIGS: Record<string, [normalUri: string, srvUri: string]> =
+    JSON.parse(ATLAS_CONNECTIVITY);
 
-  const CONFIGS: Record<string, [normalUri: string, srvUri: string]> = JSON.parse(
-    process.env.ATLAS_CONNECTIVITY
-  );
-
-  let client;
+  let client: MongoClient;
 
   afterEach(async function () {
     await client.close();
