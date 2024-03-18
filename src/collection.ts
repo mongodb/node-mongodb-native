@@ -52,6 +52,7 @@ import type {
   CreateIndexesOptions,
   DropIndexesOptions,
   IndexDescription,
+  IndexDirection,
   IndexInformationOptions,
   IndexSpecification,
   ListIndexesOptions
@@ -682,11 +683,12 @@ export class Collection<TSchema extends Document = Document> {
     options?: IndexInformationOptions
   ): Promise<boolean> {
     const indexNames: string[] = Array.isArray(indexes) ? indexes : [indexes];
-    const allIndexes: string[] = await this.listIndexes(options)
-      .map(({ name }) => name)
-      .toArray();
-
-    return indexNames.every(name => allIndexes.includes(name));
+    const allIndexes: Set<string> = new Set(
+      await this.listIndexes(options)
+        .map(({ name }) => name)
+        .toArray()
+    );
+    return indexNames.every(name => allIndexes.has(name));
   }
 
   /**
@@ -806,9 +808,10 @@ export class Collection<TSchema extends Document = Document> {
       return indexes;
     }
 
-    const object: Record<string, Array<[string, unknown]>> = Object.fromEntries(
-      indexes.map(({ name, key }) => [name, Object.entries(key)])
-    );
+    const object: Record<
+      string,
+      Array<[name: string, direction: IndexDirection]>
+    > = Object.fromEntries(indexes.map(({ name, key }) => [name, Object.entries(key)]));
 
     // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
     return object;

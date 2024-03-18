@@ -22,10 +22,11 @@ import {
   type DropDatabaseOptions
 } from './operations/drop';
 import { executeOperation } from './operations/execute_operation';
-import type {
-  CreateIndexesOptions,
-  IndexInformationOptions,
-  IndexSpecification
+import {
+  CreateIndexesOperation,
+  type CreateIndexesOptions,
+  type IndexInformationOptions,
+  type IndexSpecification
 } from './operations/indexes';
 import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
 import { ProfilingLevelOperation, type ProfilingLevelOptions } from './operations/profiling_level';
@@ -424,7 +425,11 @@ export class Db {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ): Promise<string> {
-    return this.collection(name).createIndex(indexSpec, options);
+    const indexes = await executeOperation(
+      this.client,
+      CreateIndexesOperation.fromIndexSpecification(this, name, indexSpec, options)
+    );
+    return indexes[0];
   }
 
   /**

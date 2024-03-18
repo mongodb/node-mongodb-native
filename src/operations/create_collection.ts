@@ -167,8 +167,6 @@ export class CreateCollectionOperation extends CommandOperation<Collection> {
 
     if (encryptedFields) {
       // Create the required index for queryable encryption support.
-      // We could use `this.db.collection(name).createIndex()` to create the index,
-      // but we can use the same session & server to avoid an extra server selection.
       const createIndexOp = CreateIndexesOperation.fromIndexSpecification(
         db,
         name,
