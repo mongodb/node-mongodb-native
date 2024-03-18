@@ -6,6 +6,7 @@ const {
   MONGODB_VERSIONS,
   versions,
   NODE_VERSIONS,
+  LB_VERSIONS,
   LOWEST_LTS,
   LATEST_LTS,
   TOPOLOGIES,
@@ -121,12 +122,12 @@ TASKS.push(
       tags: ['atlas-connect'],
       commands: [{ func: 'install dependencies' }, { func: 'run atlas tests' }]
     },
-    {
-      name: 'test-5.0-load-balanced',
+    ...LB_VERSIONS.map(ver => ({
+      name: `test-${ver}-load-balanced`,
       tags: ['latest', 'sharded_cluster', 'load_balancer'],
       commands: [
         updateExpansions({
-          VERSION: '5.0',
+          VERSION: ver,
           TOPOLOGY: 'sharded_cluster',
           AUTH: 'auth',
           LOAD_BALANCER: 'true'
@@ -137,41 +138,7 @@ TASKS.push(
         { func: 'run-lb-tests' },
         { func: 'stop-load-balancer' }
       ]
-    },
-    {
-      name: 'test-6.0-load-balanced',
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
-      commands: [
-        updateExpansions({
-          VERSION: '6.0',
-          TOPOLOGY: 'sharded_cluster',
-          AUTH: 'auth',
-          LOAD_BALANCER: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'start-load-balancer' },
-        { func: 'run-lb-tests' },
-        { func: 'stop-load-balancer' }
-      ]
-    },
-    {
-      name: 'test-latest-load-balanced',
-      tags: ['latest', 'sharded_cluster', 'load_balancer'],
-      commands: [
-        updateExpansions({
-          VERSION: 'latest',
-          TOPOLOGY: 'sharded_cluster',
-          AUTH: 'auth',
-          LOAD_BALANCER: 'true'
-        }),
-        { func: 'install dependencies' },
-        { func: 'bootstrap mongo-orchestration' },
-        { func: 'start-load-balancer' },
-        { func: 'run-lb-tests' },
-        { func: 'stop-load-balancer' }
-      ]
-    },
+    })),
     {
       name: 'test-auth-kerberos',
       tags: ['auth', 'kerberos'],
@@ -749,7 +716,6 @@ BUILD_VARIANTS.push({
   },
   tasks: AUTH_DISABLED_TASKS.map(({ name }) => name)
 });
-
 
 BUILD_VARIANTS.push({
   name: 'rhel8-test-lambda',

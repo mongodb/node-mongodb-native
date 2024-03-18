@@ -1785,6 +1785,44 @@ tasks:
       - func: start-load-balancer
       - func: run-lb-tests
       - func: stop-load-balancer
+  - name: test-7.0-load-balanced
+    tags:
+      - latest
+      - sharded_cluster
+      - load_balancer
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: '7.0'}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: start-load-balancer
+      - func: run-lb-tests
+      - func: stop-load-balancer
+  - name: test-rapid-load-balanced
+    tags:
+      - latest
+      - sharded_cluster
+      - load_balancer
+    commands:
+      - command: expansions.update
+        type: setup
+        params:
+          updates:
+            - {key: VERSION, value: rapid}
+            - {key: TOPOLOGY, value: sharded_cluster}
+            - {key: AUTH, value: auth}
+            - {key: LOAD_BALANCER, value: 'true'}
+      - func: install dependencies
+      - func: bootstrap mongo-orchestration
+      - func: start-load-balancer
+      - func: run-lb-tests
+      - func: stop-load-balancer
   - name: test-latest-load-balanced
     tags:
       - latest
@@ -3955,6 +3993,8 @@ buildvariants:
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
@@ -4006,6 +4046,8 @@ buildvariants:
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
@@ -4057,6 +4099,8 @@ buildvariants:
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
@@ -4107,6 +4151,8 @@ buildvariants:
       - test-atlas-connectivity
       - test-5.0-load-balanced
       - test-6.0-load-balanced
+      - test-7.0-load-balanced
+      - test-rapid-load-balanced
       - test-latest-load-balanced
       - test-auth-kerberos
       - test-auth-ldap
