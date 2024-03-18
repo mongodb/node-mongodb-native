@@ -19,10 +19,8 @@ describe('abstract operation', async function () {
       'OptionsOperation',
       'IsCappedOperation',
       'BulkWriteOperation',
-      'IndexExistsOperation',
       'IndexOperation',
-      'CollectionsOperation',
-      'IndexInformationOperation'
+      'CollectionsOperation'
     ];
 
     const sameServerOnlyOperationSubclasses = ['GetMoreOperation', 'KillCursorsOperation'];
@@ -142,26 +140,10 @@ describe('abstract operation', async function () {
         correctCommandName: 'getMore'
       },
       {
-        subclassCreator: () => new mongodb.IndexesOperation(collection, {}),
-        subclassType: mongodb.IndexesOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
-        subclassCreator: () => new mongodb.CreateIndexesOperation(db, 'bar', [{ key: { a: 1 } }]),
+        subclassCreator: () =>
+          mongodb.CreateIndexesOperation.fromIndexDescriptionArray(db, 'bar', [{ key: { a: 1 } }]),
         subclassType: mongodb.CreateIndexesOperation,
         correctCommandName: 'createIndexes'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.CreateIndexOperation(db, 'collectionName', 'indexDescription'),
-        subclassType: mongodb.CreateIndexOperation,
-        correctCommandName: 'createIndexes'
-      },
-      {
-        subclassCreator: () =>
-          new mongodb.EnsureIndexOperation(db, 'collectionName', 'indexDescription'),
-        subclassType: mongodb.EnsureIndexOperation,
-        correctCommandName: 'listIndexes'
       },
       {
         subclassCreator: () => new mongodb.DropIndexOperation(collection, 'a', {}),
@@ -171,16 +153,6 @@ describe('abstract operation', async function () {
       {
         subclassCreator: () => new mongodb.ListIndexesOperation(collection, {}),
         subclassType: mongodb.ListIndexesOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
-        subclassCreator: () => new mongodb.IndexExistsOperation(collection, 'a', {}),
-        subclassType: mongodb.IndexExistsOperation,
-        correctCommandName: 'listIndexes'
-      },
-      {
-        subclassCreator: () => new mongodb.IndexInformationOperation(db, 'a', {}),
-        subclassType: mongodb.IndexInformationOperation,
         correctCommandName: 'listIndexes'
       },
       {

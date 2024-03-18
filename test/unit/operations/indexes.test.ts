@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 
 import {
+  CreateIndexesOperation,
   type CreateIndexesOptions,
-  CreateIndexOperation,
   type IndexDirection,
   ns
 } from '../../mongodb';
 
-describe('class CreateIndexOperation', () => {
+describe('class CreateIndexesOperation', () => {
   const testCases = [
     {
       description: 'single string',
@@ -101,7 +101,12 @@ describe('class CreateIndexOperation', () => {
   ];
 
   const makeIndexOperation = (input, options: CreateIndexesOptions = {}) =>
-    new CreateIndexOperation({ s: { namespace: ns('a.b') } }, 'b', input, options);
+    CreateIndexesOperation.fromIndexSpecification(
+      { s: { namespace: ns('a.b') } },
+      'b',
+      input,
+      options
+    );
 
   describe('#constructor()', () => {
     for (const { description, input, mapData, name } of testCases) {
