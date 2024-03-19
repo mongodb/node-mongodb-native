@@ -1,14 +1,9 @@
-'use strict';
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-const chai = require('chai');
-
-const expect = chai.expect;
-chai.use(require('chai-subset'));
-
-const { loadSpecTests } = require('../../spec/index');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+import { loadSpecTests } from '../../spec/index';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 function enforceServerVersionLimits(requires, scenario) {
   const versionLimits = [];
@@ -251,7 +246,7 @@ describe('CRUD spec v1', function () {
   function executeInsertTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const documents = args.document || args.documents;
-    let options = Object.assign({}, args.options);
+    const options = Object.assign({}, args.options);
     delete options.document;
     delete options.documents;
 
@@ -268,7 +263,7 @@ describe('CRUD spec v1', function () {
   function executeBulkTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const operations = args.requests.map(operation => {
-      let op = {};
+      const op = {};
       op[operation.name] = operation['arguments'];
       if (operation['arguments'].collation) {
         op.collation = operation['arguments'].collation;

@@ -12,16 +12,16 @@ if [ -z ${SERVERLESS_ATLAS_PASSWORD+omitted} ]; then echo "SERVERLESS_ATLAS_PASS
 
 npx mocha \
   --config test/mocha_mongodb.json \
-  test/integration/crud/crud.spec.test.js \
-  test/integration/crud/crud.prose.test.js \
-  test/integration/retryable-reads/retryable_reads.spec.test.js \
+  test/integration/crud/crud.spec.test.ts \
+  test/integration/crud/crud.prose.test.ts \
+  test/integration/retryable-reads/retryable_reads.spec.test.ts \
   test/integration/retryable-writes/retryable_writes.spec.test.ts \
   test/integration/sessions/sessions.spec.test.ts \
   test/integration/sessions/sessions.prose.test.ts \
   test/integration/sessions/sessions.test.ts \
-  test/integration/transactions/transactions.spec.test.js \
+  test/integration/transactions/transactions.spec.test.ts \
   test/integration/transactions/transactions.test.ts \
-  test/integration/versioned-api/versioned_api.spec.test.js \
-  test/integration/load-balancers/load_balancers.spec.test.js \
+  test/integration/versioned-api/versioned_api.spec.test.ts \
+  test/integration/load-balancers/load_balancers.spec.test.ts \
   test/integration/client-side-encryption/client_side_encryption.spec.test.ts \
   test/integration/run-command/run_command.spec.test.ts

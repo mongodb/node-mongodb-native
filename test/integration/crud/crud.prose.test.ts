@@ -1,9 +1,10 @@
-const { expect } = require('chai');
-const { once } = require('events');
-const { MongoBulkWriteError, MongoServerError } = require('../../mongodb');
+import { expect } from 'chai';
+import { once } from 'events';
+
+import { MongoBulkWriteError, type MongoClient, MongoServerError } from '../../mongodb';
 
 describe('CRUD Prose Spec Tests', () => {
-  let client;
+  let client: MongoClient;
 
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
