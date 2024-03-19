@@ -1,12 +1,6 @@
 import { expect } from 'chai';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type Db,
-  MongoServerError,
-  ObjectId
-} from '../../mongodb';
+import { type CommandStartedEvent, MongoServerError, ObjectId } from '../../mongodb';
 import { setupDatabase } from '../shared';
 
 describe('Collection (#findOneAnd...)', function () {
