@@ -60,6 +60,12 @@ expectAssignable<UpdateFilter<Document>>({ $inc: { anyKeyWhatsoever: 2 } });
 // But this no longer asserts anything about what the original keys map to
 expectNotType<UpdateFilter<Document>>({ $inc: { numberField: '2' } });
 
+
+expectAssignable<UpdateFilter<Document>>({ $currentDate: { anyKeyWhatsoever:  { $type: 'timestamp' }} });
+expectAssignable<UpdateFilter<Document>>({ $currentDate: { anyKeyWhatsoever:  { $type: 'date' }} });
+expectAssignable<UpdateFilter<Document>>({ $currentDate: { anyKeyWhatsoever:  true } });
+expectNotType<UpdateFilter<Document>>({ $currentDate: { anyKeyWhatsoever:  'true' } });
+expectNotType<UpdateFilter<Document>>({ $currentDate: { anyKeyWhatsoever: { key2:  true }} });
 // collection.updateX tests
 const client = new MongoClient('');
 const db = client.db('test');

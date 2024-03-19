@@ -330,35 +330,6 @@ describe('Collection (#findOneAnd...)', function () {
         });
       });
     });
-
-    describe('update filter', function () {
-      context('when $currentDate is provided', function () {
-        let client;
-        let db: Db;
-        let collection: Collection;
-
-        beforeEach(async function () {
-          client = this.configuration.newClient({ w: 1 });
-          await client.connect();
-          db = client.db(this.configuration.db);
-          collection = db.collection('test_coll');
-          await collection.insertOne({ a: 'c' });
-        });
-
-        afterEach(async function () {
-          await collection.drop();
-          await client.close();
-        });
-
-        it(`should support fields with value 'true'`, async function () {
-          await collection.findOneAndUpdate(
-            {},
-            { $set: { a: 1 }, $currentDate: { lastModified: true } },
-            { writeConcern: { w: 1 } }
-          );
-        });
-      });
-    });
   });
 
   describe('#findOneAndReplace', function () {
