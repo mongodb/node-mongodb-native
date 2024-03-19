@@ -1,0 +1,58 @@
+description: "standalone-emit-topology-description-changed-before-close"
+
+schemaVersion: "1.16"
+
+runOnRequirements:
+  - topologies:
+      - single
+    minServerVersion: "4.4" # awaitable hello
+
+tests:
+  - description: "Topology lifecycle"
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client client
+                observeEvents:
+                  - topologyDescriptionChangedEvent
+                  - topologyOpeningEvent
+                  - topologyClosedEvent
+                  - serverOpeningEvent
+                  - serverClosedEvent
+      # ensure the topology has been fully discovered before closing the client.
+      # expected events are initial server discovery and server connect event.
+      - name: waitForEvent
+        object: testRunner
+        arguments:
+          client: *client
+          event:
+            topologyDescriptionChangedEvent: {}
+          count: 2
+      - name: close
+        object: *client
+    expectEvents:
+      - client: *client
+        eventType: sdam
+        ignoreExtraEvents: true
+        events:
+          - topologyOpeningEvent: {}
+          - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
+              previousDescription: 
+                type: "Unknown"
+              currentDescription: {}
+          - serverOpeningEvent: {}
+          - topologyDescriptionChangedEvent:  # unknown w disconnected server -> standalone 
+              previousDescription:
+                type: "Unknown"
+              newDescription:
+                type: "Single"
+          - serverClosedEvent: {}
+          - topologyDescriptionChangedEvent:  # standalone -> unknown
+              previousDescription:
+                type: "Single"
+              newDescription:
+                type: "Unknown"
+          - topologyClosedEvent: {}

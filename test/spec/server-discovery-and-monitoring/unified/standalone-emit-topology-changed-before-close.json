@@ -1,0 +1,103 @@
+{
+  "description": "standalone-emit-topology-description-changed-before-close",
+  "schemaVersion": "1.16",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "single"
+      ],
+      "minServerVersion": "4.4"
+    }
+  ],
+  "tests": [
+    {
+      "description": "Topology lifecycle",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "observeEvents": [
+                    "topologyDescriptionChangedEvent",
+                    "topologyOpeningEvent",
+                    "topologyClosedEvent",
+                    "serverOpeningEvent",
+                    "serverClosedEvent"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "topologyDescriptionChangedEvent": {}
+            },
+            "count": 2
+          }
+        },
+        {
+          "name": "close",
+          "object": "client"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "topologyOpeningEvent": {}
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Unknown"
+                },
+                "currentDescription": {}
+              }
+            },
+            {
+              "serverOpeningEvent": {}
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Unknown"
+                },
+                "newDescription": {
+                  "type": "Single"
+                }
+              }
+            },
+            {
+              "serverClosedEvent": {}
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Single"
+                },
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            {
+              "topologyClosedEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
