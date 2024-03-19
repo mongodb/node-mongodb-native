@@ -224,7 +224,7 @@ describe('Connect Tests', function () {
           expect(handshakeDocument.client.env).to.not.have.property('name');
         });
 
-        context('when 512 byte size limit is exceeded', async () => {
+        context('when 512 byte size limit is exceeded', () => {
           it(`should not 'env' property in client`, async () => {
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
             const longAppName = 's'.repeat(493);
@@ -274,7 +274,7 @@ describe('Connect Tests', function () {
           expect(handshakeDocument.client.env.name).to.equal('aws.lambda');
         });
 
-        context('when 512 byte size limit is exceeded', async () => {
+        context('when 512 byte size limit is exceeded', () => {
           it(`should not have 'container' property in client.env`, async () => {
             // make metadata = 507 bytes, so it takes up entire LimitedSizeDocument
             const longAppName = 's'.repeat(447);
