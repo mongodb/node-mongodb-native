@@ -5,8 +5,8 @@ import { executeOperation, Long, Server } from '../../mongodb';
 import * as mongodb from '../../mongodb';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-describe('abstract operation', async function () {
-  describe('command name getter', async function () {
+describe('abstract operation', function () {
+  describe('command name getter', function () {
     interface AbstractOperationSubclasses {
       subclassCreator: () => mongodb.AbstractOperation;
       subclassType: any;
@@ -312,7 +312,7 @@ describe('abstract operation', async function () {
     });
 
     for (const { subclassCreator, subclassType, correctCommandName } of subclassArray) {
-      context(`when subclass is ${subclassType.name}`, async function () {
+      context(`when subclass is ${subclassType.name}`, function () {
         it(`operation.commandName equals correct string`, async function () {
           const subclassInstance = subclassCreator();
           expect(subclassInstance.commandName).to.equal(correctCommandName);

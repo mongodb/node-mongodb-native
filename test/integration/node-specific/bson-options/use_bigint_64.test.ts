@@ -28,7 +28,7 @@ describe('useBigInt64 option', function () {
     }
   });
 
-  describe('when not provided to client', async function () {
+  describe('when not provided to client', function () {
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
     });
@@ -92,7 +92,7 @@ describe('useBigInt64 option', function () {
     });
   });
 
-  describe('when set to true at collection level', async function () {
+  describe('when set to true at collection level', function () {
     let res: WithId<BSON.Document> | null;
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();
@@ -110,7 +110,7 @@ describe('useBigInt64 option', function () {
     });
   });
 
-  describe('when set to false at collection level', async function () {
+  describe('when set to false at collection level', function () {
     let res: WithId<BSON.Document> | null;
     beforeEach(async function () {
       client = await this.configuration.newClient().connect();

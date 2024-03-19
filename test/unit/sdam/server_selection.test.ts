@@ -17,7 +17,7 @@ import {
 import * as mock from '../../tools/mongodb-mock/index';
 import { topologyWithPlaceholderClient } from '../../tools/utils';
 
-describe('server selection', async function () {
+describe('server selection', function () {
   const primary = new ServerDescription('127.0.0.1:27017', {
     setName: 'test',
     isWritablePrimary: true,
@@ -610,7 +610,7 @@ describe('server selection', async function () {
     });
   });
 
-  describe('server selection logging feature flagging', async function () {
+  describe('server selection logging feature flagging', function () {
     let mockServer;
     let topology;
     let address;
