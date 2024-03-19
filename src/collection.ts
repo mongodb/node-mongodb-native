@@ -1072,6 +1072,7 @@ export class Collection<TSchema extends Document = Document> {
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+    const cleanedOptions = (({ readConcern, writeConcern, ...rest }) => rest)(options);
     const indexName =
       indexNameOrOptions == null
         ? null
@@ -1079,7 +1080,7 @@ export class Collection<TSchema extends Document = Document> {
         ? null
         : indexNameOrOptions;
 
-    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
+    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, cleanedOptions);
   }
 
   /**
