@@ -1,6 +1,6 @@
 import { runUnifiedSuite } from '../tools/unified-spec-runner/runner';
 
-describe('Node Driver Atlas Testing', async function () {
+describe('Node Driver Atlas Testing', function () {
   // Astrolabe can, well, take some time. In some cases up to 800s to
   // reconfigure clusters.
   this.timeout(0);

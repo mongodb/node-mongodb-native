@@ -172,7 +172,7 @@ describe('class OpCompressedRequest', () => {
     });
   });
 
-  context('toBin()', async () => {
+  context('toBin()', () => {
     for (const protocol of [OpMsgRequest, OpQueryRequest]) {
       context(`when ${protocol.name} is used`, () => {
         let msg;
