@@ -1052,7 +1052,7 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Returns all search indexes for the current collection.
    *
-   * @param options - The options for the list indexes operation.
+   * @param options - The options for the list indexes operation. This method will ignore 'readConcern' and 'writeConcern' keys if they are present in 'options' (since there is no Atlas support).
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
@@ -1061,7 +1061,7 @@ export class Collection<TSchema extends Document = Document> {
    * Returns all search indexes for the current collection.
    *
    * @param name - The name of the index to search for.  Only indexes with matching index names will be returned.
-   * @param options - The options for the list indexes operation.
+   * @param options - The options for the list indexes operation. This method will ignore 'readConcern' and 'writeConcern' keys if they are present in 'options' (since there is no Atlas support).
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
@@ -1072,7 +1072,10 @@ export class Collection<TSchema extends Document = Document> {
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     const cleanedOptions = (({ readConcern, writeConcern, ...rest }) => rest)(options);
+
     const indexName =
       indexNameOrOptions == null
         ? null
