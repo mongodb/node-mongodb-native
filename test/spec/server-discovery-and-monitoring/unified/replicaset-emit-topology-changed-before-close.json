@@ -1,0 +1,127 @@
+{
+  "description": "replicaset-emit-topology-description-changed-before-close",
+  "schemaVersion": "1.16",
+  "runOnRequirements": [
+    {
+      "topologies": [
+        "replicaset"
+      ],
+      "minServerVersion": "4.4"
+    }
+  ],
+  "tests": [
+    {
+      "description": "Topology lifecycle",
+      "operations": [
+        {
+          "name": "createEntities",
+          "object": "testRunner",
+          "arguments": {
+            "entities": [
+              {
+                "client": {
+                  "id": "client",
+                  "observeEvents": [
+                    "topologyDescriptionChangedEvent",
+                    "topologyOpeningEvent",
+                    "topologyClosedEvent"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "waitForEvent",
+          "object": "testRunner",
+          "arguments": {
+            "client": "client",
+            "event": {
+              "topologyDescriptionChangedEvent": {}
+            },
+            "count": 2
+          }
+        },
+        {
+          "name": "close",
+          "object": "client"
+        }
+      ],
+      "expectEvents": [
+        {
+          "client": "client",
+          "eventType": "sdam",
+          "ignoreExtraEvents": true,
+          "events": [
+            {
+              "topologyOpeningEvent": {}
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Unknown"
+                },
+                "newDescription": {
+                  "type": "ReplicaSetNoPrimary"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "ReplicaSetNoPrimary"
+                },
+                "newDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                },
+                "newDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                },
+                "newDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                },
+                "newDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "ReplicaSetWithPrimary"
+                },
+                "newDescription": {
+                  "type": "Unknown"
+                }
+              }
+            },
+            {
+              "topologyClosedEvent": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
