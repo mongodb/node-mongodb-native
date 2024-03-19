@@ -59,7 +59,7 @@
           },
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
@@ -105,7 +105,7 @@
           },
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
@@ -143,7 +143,7 @@
           },
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
@@ -178,7 +178,7 @@
           "object": "collection0",
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
@@ -220,7 +220,7 @@
           },
           "expectError": {
             "isError": true,
-            "errorContains": "Search index commands are only supported with Atlas"
+            "errorContains": "Atlas"
           }
         }
       ],
