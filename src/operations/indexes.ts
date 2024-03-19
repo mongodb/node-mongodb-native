@@ -1,9 +1,8 @@
 import type { Document } from '../bson';
 import type { Collection } from '../collection';
-import type { Db } from '../db';
-import { MongoCompatibilityError, MONGODB_ERROR_CODES, MongoError } from '../error';
+import { type AbstractCursorOptions } from '../cursor/abstract_cursor';
+import { MongoCompatibilityError } from '../error';
 import { type OneOrMore } from '../mongo_types';
-import { ReadPreference } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import { isObject, maxWireVersion, type MongoDBNamespace } from '../utils';
@@ -13,8 +12,7 @@ import {
   type CommandOperationOptions,
   type OperationParent
 } from './command';
-import { indexInformation, type IndexInformationOptions } from './common_functions';
-import { AbstractOperation, Aspect, defineAspects } from './operation';
+import { Aspect, defineAspects } from './operation';
 
 const VALID_INDEX_OPTIONS = new Set([
   'background',
@@ -72,6 +70,29 @@ export type IndexSpecification = OneOrMore<
   | { [key: string]: IndexDirection }
   | Map<string, IndexDirection>
 >;
+
+/** @public */
+export interface IndexInformationOptions extends ListIndexesOptions {
+  /**
+   * When `true`, an array of index descriptions is returned.
+   * When `false`, the driver returns an object that with keys corresponding to index names with values
+   * corresponding to the entries of the indexes' key.
+   *
+   * For example, the given the following indexes:
+   * ```
+   * [ { name: 'a_1', key: { a: 1 } }, { name: 'b_1_c_1' , key: { b: 1, c: 1 } }]
+   * ```
+   *
+   * When `full` is `true`, the above array is returned.  When `full` is `false`, the following is returned:
+   * ```
+   * {
+   *   'a_1': [['a', 1]],
+   *   'b_1_c_1': [['b', 1], ['c', 1]],
+   * }
+   * ```
+   */
+  full?: boolean;
+}
 
 /** @public */
 export interface IndexDescription
@@ -176,42 +197,12 @@ function makeIndexSpec(
 }
 
 /** @internal */
-export class IndexesOperation extends AbstractOperation<Document[]> {
-  override options: IndexInformationOptions;
-  collection: Collection;
-
-  constructor(collection: Collection, options: IndexInformationOptions) {
-    super(options);
-    this.options = options;
-    this.collection = collection;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(_server: Server, session: ClientSession | undefined): Promise<Document[]> {
-    const coll = this.collection;
-    const options = this.options;
-
-    return indexInformation(coll.s.db, coll.collectionName, {
-      full: true,
-      ...options,
-      readPreference: this.readPreference,
-      session
-    });
-  }
-}
-
-/** @internal */
-export class CreateIndexesOperation<
-  T extends string | string[] = string[]
-> extends CommandOperation<T> {
+export class CreateIndexesOperation extends CommandOperation<string[]> {
   override options: CreateIndexesOptions;
   collectionName: string;
   indexes: ReadonlyArray<Omit<IndexDescription, 'key'> & { key: Map<string, IndexDirection> }>;
 
-  constructor(
+  private constructor(
     parent: OperationParent,
     collectionName: string,
     indexes: IndexDescription[],
@@ -239,11 +230,34 @@ export class CreateIndexesOperation<
     });
   }
 
+  static fromIndexDescriptionArray(
+    parent: OperationParent,
+    collectionName: string,
+    indexes: IndexDescription[],
+    options?: CreateIndexesOptions
+  ): CreateIndexesOperation {
+    return new CreateIndexesOperation(parent, collectionName, indexes, options);
+  }
+
+  static fromIndexSpecification(
+    parent: OperationParent,
+    collectionName: string,
+    indexSpec: IndexSpecification,
+    options?: CreateIndexesOptions
+  ): CreateIndexesOperation {
+    return new CreateIndexesOperation(
+      parent,
+      collectionName,
+      [makeIndexSpec(indexSpec, options)],
+      options
+    );
+  }
+
   override get commandName() {
     return 'createIndexes';
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(server: Server, session: ClientSession | undefined): Promise<string[]> {
     const options = this.options;
     const indexes = this.indexes;
 
@@ -266,61 +280,7 @@ export class CreateIndexesOperation<
     await super.executeCommand(server, session, cmd);
 
     const indexNames = indexes.map(index => index.name || '');
-    return indexNames as T;
-  }
-}
-
-/** @internal */
-export class CreateIndexOperation extends CreateIndexesOperation<string> {
-  constructor(
-    parent: OperationParent,
-    collectionName: string,
-    indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
-  ) {
-    super(parent, collectionName, [makeIndexSpec(indexSpec, options)], options);
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
-    const indexNames = await super.execute(server, session);
-    return indexNames[0];
-  }
-}
-
-/** @internal */
-export class EnsureIndexOperation extends CreateIndexOperation {
-  db: Db;
-
-  constructor(
-    db: Db,
-    collectionName: string,
-    indexSpec: IndexSpecification,
-    options?: CreateIndexesOptions
-  ) {
-    super(db, collectionName, indexSpec, options);
-
-    this.readPreference = ReadPreference.primary;
-    this.db = db;
-    this.collectionName = collectionName;
-  }
-
-  override get commandName() {
-    return 'listIndexes';
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<string> {
-    const indexName = this.indexes[0].name;
-    const indexes = await this.db
-      .collection(this.collectionName)
-      .listIndexes({ session })
-      .toArray()
-      .catch(error => {
-        if (error instanceof MongoError && error.code === MONGODB_ERROR_CODES.NamespaceNotFound)
-          return [];
-        throw error;
-      });
-    if (indexName && indexes.some(index => index.name === indexName)) return indexName;
-    return super.execute(server, session);
+    return indexNames;
   }
 }
 
@@ -352,10 +312,7 @@ export class DropIndexOperation extends CommandOperation<Document> {
 }
 
 /** @public */
-export interface ListIndexesOptions extends Omit<CommandOperationOptions, 'writeConcern'> {
-  /** The batchSize for the returned command cursor or if pre 2.8 the systems batch collection */
-  batchSize?: number;
-}
+export type ListIndexesOptions = AbstractCursorOptions;
 
 /** @internal */
 export class ListIndexesOperation extends CommandOperation<Document> {
@@ -398,78 +355,10 @@ export class ListIndexesOperation extends CommandOperation<Document> {
   }
 }
 
-/** @internal */
-export class IndexExistsOperation extends AbstractOperation<boolean> {
-  override options: IndexInformationOptions;
-  collection: Collection;
-  indexes: string | string[];
-
-  constructor(
-    collection: Collection,
-    indexes: string | string[],
-    options: IndexInformationOptions
-  ) {
-    super(options);
-    this.options = options;
-    this.collection = collection;
-    this.indexes = indexes;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<boolean> {
-    const coll = this.collection;
-    const indexes = this.indexes;
-
-    const info = await indexInformation(coll.s.db, coll.collectionName, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session
-    });
-    // Let's check for the index names
-    if (!Array.isArray(indexes)) return info[indexes] != null;
-    // All keys found return true
-    return indexes.every(indexName => info[indexName] != null);
-  }
-}
-
-/** @internal */
-export class IndexInformationOperation extends AbstractOperation<Document> {
-  override options: IndexInformationOptions;
-  db: Db;
-  name: string;
-
-  constructor(db: Db, name: string, options?: IndexInformationOptions) {
-    super(options);
-    this.options = options ?? {};
-    this.db = db;
-    this.name = name;
-  }
-
-  override get commandName() {
-    return 'listIndexes' as const;
-  }
-
-  override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
-    const db = this.db;
-    const name = this.name;
-
-    return indexInformation(db, name, {
-      ...this.options,
-      readPreference: this.readPreference,
-      session
-    });
-  }
-}
-
 defineAspects(ListIndexesOperation, [
   Aspect.READ_OPERATION,
   Aspect.RETRYABLE,
   Aspect.CURSOR_CREATING
 ]);
 defineAspects(CreateIndexesOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(CreateIndexOperation, [Aspect.WRITE_OPERATION]);
-defineAspects(EnsureIndexOperation, [Aspect.WRITE_OPERATION]);
 defineAspects(DropIndexOperation, [Aspect.WRITE_OPERATION]);

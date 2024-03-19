@@ -11,7 +11,6 @@ import type { MongoClient, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
-import type { IndexInformationOptions } from './operations/common_functions';
 import {
   CreateCollectionOperation,
   type CreateCollectionOptions
@@ -24,9 +23,9 @@ import {
 } from './operations/drop';
 import { executeOperation } from './operations/execute_operation';
 import {
+  CreateIndexesOperation,
   type CreateIndexesOptions,
-  CreateIndexOperation,
-  IndexInformationOperation,
+  type IndexInformationOptions,
   type IndexSpecification
 } from './operations/indexes';
 import type { CollectionInfo, ListCollectionsOptions } from './operations/list_collections';
@@ -426,10 +425,11 @@ export class Db {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ): Promise<string> {
-    return executeOperation(
+    const indexes = await executeOperation(
       this.client,
-      new CreateIndexOperation(this, name, indexSpec, resolveOptions(this, options))
+      CreateIndexesOperation.fromIndexSpecification(this, name, indexSpec, options)
     );
+    return indexes[0];
   }
 
   /**
@@ -480,10 +480,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new IndexInformationOperation(this, name, resolveOptions(this, options))
-    );
+    return this.collection(name).indexInformation(resolveOptions(this, options));
   }
 
   /**

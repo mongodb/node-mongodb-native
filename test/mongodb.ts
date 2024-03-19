@@ -155,7 +155,6 @@ export * from '../src/operations/aggregate';
 export * from '../src/operations/bulk_write';
 export * from '../src/operations/collections';
 export * from '../src/operations/command';
-export * from '../src/operations/common_functions';
 export * from '../src/operations/count';
 export * from '../src/operations/count_documents';
 export * from '../src/operations/create_collection';
