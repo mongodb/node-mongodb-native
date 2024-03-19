@@ -588,7 +588,7 @@ export type StrictFilter<TSchema> =
 export type StrictUpdateFilter<TSchema> = {
   $currentDate?: OnlyFieldsOfType<
     TSchema,
-    true | Date | Timestamp,
+    Date | Timestamp,
     true | { $type: 'date' | 'timestamp' }
   >;
   $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
