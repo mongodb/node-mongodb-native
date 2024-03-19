@@ -2,7 +2,6 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import * as semver from 'semver';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
