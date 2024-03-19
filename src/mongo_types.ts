@@ -283,7 +283,7 @@ export type PullAllOperator<TSchema> = ({
 export type UpdateFilter<TSchema> = {
   $currentDate?: OnlyFieldsOfType<
     TSchema,
-    Date | Timestamp | true,
+    true | Date | Timestamp,
     true | { $type: 'date' | 'timestamp' }
   >;
   $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
@@ -588,7 +588,7 @@ export type StrictFilter<TSchema> =
 export type StrictUpdateFilter<TSchema> = {
   $currentDate?: OnlyFieldsOfType<
     TSchema,
-    Date | Timestamp,
+    true | Date | Timestamp,
     true | { $type: 'date' | 'timestamp' }
   >;
   $inc?: OnlyFieldsOfType<TSchema, NumericType | undefined>;
