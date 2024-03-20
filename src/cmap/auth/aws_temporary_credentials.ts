@@ -25,7 +25,7 @@ export abstract class AWSTemporaryCredentialProvider {
   }
 
   static get isAWSSDKInstalled(): boolean {
-    return 'kModuleError' in AWSTemporaryCredentialProvider.credentialProvider;
+    return !('kModuleError' in AWSTemporaryCredentialProvider.credentialProvider);
   }
 }
 
