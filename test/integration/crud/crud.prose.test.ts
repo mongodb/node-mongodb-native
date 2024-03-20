@@ -23,6 +23,8 @@ describe('CRUD Prose Spec Tests', () => {
     /**
      * Test that writeConcernError.errInfo in a command response is propagated as WriteConcernError.details (or equivalent) in the driver.
      * Using a 4.0+ server, set the following failpoint:
+     * @example
+     * ```js
      * {
      *   "configureFailPoint": "failCommand",
      *   "data": {
@@ -42,6 +44,7 @@ describe('CRUD Prose Spec Tests', () => {
      *   },
      *   "mode": { "times": 1 }
      * }
+     * ```
      *
      * Then, perform an insert operation and assert that a WriteConcernError occurs and that
      * its details property is both accessible and matches the errInfo object from the failpoint.
@@ -56,15 +59,17 @@ describe('CRUD Prose Spec Tests', () => {
     /**
      * Test that writeErrors[].errInfo in a command response is propagated as WriteError.details (or equivalent) in the driver.
      * Using a 5.0+ server, create a collection with document validation like so:
+     * @example
+     * ```js
      * {
      *   "create": "test",
      *   "validator": {
      *     "x": { $type: "string" }
      *   }
      * }
-     *
+     *```
      * Enable command monitoring to observe CommandSucceededEvents.
-     * Then, insert an invalid document (e.g. {x: 1})
+     * Then, insert an invalid document (e.g. `{x: 1}`)
      * and assert that a WriteError occurs, that its code is 121 (i.e. DocumentValidationFailure),
      * and that its details property is accessible.
      * Additionally, assert that a CommandSucceededEvent was observed

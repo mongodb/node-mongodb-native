@@ -6,7 +6,7 @@ import { loadSpecTests } from '../../spec/index';
 import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 function enforceServerVersionLimits(requires, scenario) {
-  const versionLimits = [];
+  const versionLimits: string[] = [];
   if (scenario.minServerVersion) {
     versionLimits.push(`>=${scenario.minServerVersion}`);
   }
@@ -21,12 +21,12 @@ function enforceServerVersionLimits(requires, scenario) {
   }
 }
 
-function findScenarios() {
-  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(arguments));
+function findScenarios(...args: string[]) {
+  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(args));
   return fs
-    .readdirSync(path.resolve.apply(path, route))
+    .readdirSync(path.resolve(...route))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.resolve.apply(path, route.concat([x])), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.resolve(...route.concat([x])), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
