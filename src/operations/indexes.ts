@@ -249,7 +249,7 @@ export class CreateIndexesOperation extends CommandOperation<string[]> {
       // Ensure the key is a Map to preserve index key ordering
       const key =
         userIndex.key instanceof Map ? userIndex.key : new Map(Object.entries(userIndex.key));
-      const name = userIndex.name != null ? userIndex.name : Array.from(key).flat().join('_');
+      const name = userIndex.name ?? Array.from(key).flat().join('_');
       const validIndexOptions = resolveIndexDescription(userIndex);
       return {
         ...validIndexOptions,
