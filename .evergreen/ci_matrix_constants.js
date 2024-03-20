@@ -11,6 +11,8 @@ const LATEST_LTS = NODE_VERSIONS[NODE_VERSIONS.length - 1];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const AWS_AUTH_VERSIONS = ['latest', '6.0', '5.0', '4.4'];
 const TLS_VERSIONS = ['latest', '6.0', '5.0', '4.4', '4.2'];
+const LB_VERSIONS = MONGODB_VERSIONS.slice(0, MONGODB_VERSIONS.indexOf('5.0') + 1);
+LB_VERSIONS.reverse();
 
 const DEFAULT_OS = 'rhel80-large';
 const WINDOWS_OS = 'windows-vsCurrent-large';
@@ -24,6 +26,7 @@ module.exports = {
   MONGODB_VERSIONS,
   versions,
   NODE_VERSIONS,
+  LB_VERSIONS,
   LOWEST_LTS,
   LATEST_LTS,
   TOPOLOGIES,

@@ -2,7 +2,6 @@ import { EJSON } from 'bson';
 import { expect } from 'chai';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import * as semver from 'semver';
 
 import { Decimal128, type Document, Double, Long, type MongoClient } from '../../../src';
 /* eslint-disable @typescript-eslint/no-restricted-imports */
@@ -25,7 +24,9 @@ const metaData: MongoDBMetadataUI = {
 
     // The Range Explicit Encryption tests require MongoDB server 7.0+ for QE v2.
     // The tests must not run against a standalone.
-    mongodb: '>=7.0.0',
+    //
+    // `rangePreview` is not supported on 8.0+ servers.
+    mongodb: '>=7.0.0 <8.0.0',
     topology: '!single'
   }
 };
@@ -127,14 +128,6 @@ const readEncryptedFieldsFile = (dataType: string): Promise<string> =>
 describe('Range Explicit Encryption', function () {
   installNodeDNSWorkaroundHooks();
 
-  beforeEach(async function () {
-    if (semver.gte(this.configuration.version, '7.999.999')) {
-      if (this.currentTest)
-        this.currentTest.skipReason = 'TODO(NODE-5908): skip rangePreview tests on server 8.0+';
-      return this.currentTest?.skip();
-    }
-  });
-
   let clientEncryption;
   let keyId;
   let keyVaultClient;
@@ -145,7 +138,7 @@ describe('Range Explicit Encryption', function () {
   let encryptedTwoHundred;
   let compareNumericValues;
   for (const { type: dataType, rangeOptions, factory } of dataTypes) {
-    context(`datatype ${dataType}`, async function () {
+    context(`datatype ${dataType}`, function () {
       beforeEach(async function () {
         compareNumericValues = function (value: unknown, expected: number): void {
           if (dataType === 'DoubleNoPrecision' || dataType === 'DoublePrecision') {

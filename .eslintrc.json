@@ -10,13 +10,15 @@
     "@typescript-eslint",
     "prettier",
     "unused-imports",
-    "tsdoc"
+    "tsdoc",
+    "mocha"
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
+    // "plugin:mocha/recommended"
   ],
   "env": {
     "node": true,
@@ -112,6 +114,7 @@
         ]
       }
     ],
+    "mocha/no-async-describe": "error",
     "no-restricted-syntax": [
       "error",
       {
