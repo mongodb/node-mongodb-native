@@ -1074,7 +1074,7 @@ export class Collection<TSchema extends Document = Document> {
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
 
     /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const cleanedOptions = (({ readConcern, writeConcern, ...rest }) => rest)(options);
+    const { readConcern, writeConcern, ...cleanedOptions } = options;
 
     const indexName =
       indexNameOrOptions == null
