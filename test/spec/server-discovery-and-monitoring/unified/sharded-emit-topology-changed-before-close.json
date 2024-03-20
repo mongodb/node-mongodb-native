@@ -39,7 +39,7 @@
             "event": {
               "topologyDescriptionChangedEvent": {}
             },
-            "count": 2
+            "count": 3
           }
         },
         {
@@ -70,6 +70,16 @@
               "topologyDescriptionChangedEvent": {
                 "previousDescription": {
                   "type": "Unknown"
+                },
+                "newDescription": {
+                  "type": "Sharded"
+                }
+              }
+            },
+            {
+              "topologyDescriptionChangedEvent": {
+                "previousDescription": {
+                  "type": "Sharded"
                 },
                 "newDescription": {
                   "type": "Sharded"

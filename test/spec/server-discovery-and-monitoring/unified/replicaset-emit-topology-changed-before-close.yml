@@ -21,14 +21,14 @@ tests:
                   - topologyOpeningEvent
                   - topologyClosedEvent
       # ensure the topology has been fully discovered before closing the client.
-      # expected events are initial server discovery and server connect event.
+      # expected events are initial server discovery and 3 server connect events.
       - name: waitForEvent
         object: testRunner
         arguments:
           client: *client
           event:
             topologyDescriptionChangedEvent: {}
-          count: 2
+          count: 4
       - name: close
         object: *client
     expectEvents:
@@ -37,7 +37,7 @@ tests:
         ignoreExtraEvents: true
         events:
           - topologyOpeningEvent: {}
-          - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
+          - topologyDescriptionChangedEvent: # unknown -> replset no primary
               previousDescription: 
                 type: "Unknown"
               newDescription:
@@ -45,11 +45,6 @@ tests:
           - topologyDescriptionChangedEvent:  # server connected
               previousDescription:
                 type: "ReplicaSetNoPrimary"
-              newDescription:
-                type: "ReplicaSetWithPrimary"
-          - topologyDescriptionChangedEvent:  # server connected
-              previousDescription:
-                type: "ReplicaSetWithPrimary"
               newDescription:
                 type: "ReplicaSetWithPrimary"
           - topologyDescriptionChangedEvent:  # server connected

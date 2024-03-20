@@ -20,7 +20,6 @@ tests:
                   - topologyDescriptionChangedEvent
                   - topologyOpeningEvent
                   - topologyClosedEvent
-                  - serverOpeningEvent
       # ensure the topology has been fully discovered before closing the client.
       # expected events are initial server discovery and server connect event.
       - name: waitForEvent
@@ -41,11 +40,9 @@ tests:
               previousDescription: 
                 type: "Unknown"
               currentDescription: {}
-          - serverOpeningEvent: {}
           - topologyDescriptionChangedEvent:  # unknown w disconnected server -> loadBalanced
               newDescription:
-                type: "loadBalanced"
-          - serverClosedEvent: {}
+                type: "LoadBalanced"
           - topologyDescriptionChangedEvent:  # loadbalanced -> unknown
               newDescription:
                 type: "Unknown"

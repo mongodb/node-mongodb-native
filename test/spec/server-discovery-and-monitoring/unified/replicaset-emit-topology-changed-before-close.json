@@ -39,7 +39,7 @@
             "event": {
               "topologyDescriptionChangedEvent": {}
             },
-            "count": 2
+            "count": 4
           }
         },
         {
@@ -70,16 +70,6 @@
               "topologyDescriptionChangedEvent": {
                 "previousDescription": {
                   "type": "ReplicaSetNoPrimary"
-                },
-                "newDescription": {
-                  "type": "ReplicaSetWithPrimary"
-                }
-              }
-            },
-            {
-              "topologyDescriptionChangedEvent": {
-                "previousDescription": {
-                  "type": "ReplicaSetWithPrimary"
                 },
                 "newDescription": {
                   "type": "ReplicaSetWithPrimary"

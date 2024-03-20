@@ -24,8 +24,7 @@
                   "observeEvents": [
                     "topologyDescriptionChangedEvent",
                     "topologyOpeningEvent",
-                    "topologyClosedEvent",
-                    "serverOpeningEvent"
+                    "topologyClosedEvent"
                   ]
                 }
               }
@@ -65,17 +64,11 @@
               }
             },
             {
-              "serverOpeningEvent": {}
-            },
-            {
               "topologyDescriptionChangedEvent": {
                 "newDescription": {
-                  "type": "loadBalanced"
+                  "type": "LoadBalanced"
                 }
               }
-            },
-            {
-              "serverClosedEvent": {}
             },
             {
               "topologyDescriptionChangedEvent": {

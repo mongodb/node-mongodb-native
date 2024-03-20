@@ -21,14 +21,15 @@ tests:
                   - topologyOpeningEvent
                   - topologyClosedEvent
       # ensure the topology has been fully discovered before closing the client.
-      # expected events are initial server discovery and server connect event.
+      # expected events are initial cluster type change from unknown to sharded and connect events
+      # for each of 2 servers
       - name: waitForEvent
         object: testRunner
         arguments:
           client: *client
           event:
             topologyDescriptionChangedEvent: {}
-          count: 2
+          count: 3
       - name: close
         object: *client
     expectEvents:
@@ -45,6 +46,11 @@ tests:
           - topologyDescriptionChangedEvent:  # server connected
               previousDescription:
                 type: "Unknown"
+              newDescription:
+                type: "Sharded"
+          - topologyDescriptionChangedEvent:  # server connected
+              previousDescription:
+                type: "Sharded"
               newDescription:
                 type: "Sharded"
           - topologyDescriptionChangedEvent:  # sharded -> unknown
