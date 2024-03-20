@@ -1,7 +1,8 @@
-const path = require('path');
-const { TestRunnerContext, generateTopologyTests } = require('../../tools/spec-runner');
-const { loadSpecTests } = require('../../spec');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+import * as path from 'path';
+
+import { loadSpecTests } from '../../spec';
+import { generateTopologyTests, TestRunnerContext } from '../../tools/spec-runner';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 describe('Retryable Reads (legacy)', function () {
   const testContext = new TestRunnerContext();
@@ -42,5 +43,6 @@ describe('Retryable Reads (unified)', function () {
         return `The Node.js Driver does not support ${apiName}`;
       }
     }
+    return false;
   });
 });

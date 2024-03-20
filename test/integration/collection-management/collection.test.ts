@@ -389,20 +389,10 @@ describe('Collection', function () {
       );
     });
 
-    it('should support createIndex with no options', function (done) {
-      db.createCollection('create_index_without_options', {}, (err, collection) => {
-        collection.createIndex({ createdAt: 1 }, err => {
-          expect(err).to.not.exist;
-
-          collection.indexInformation({ full: true }, (err, indexes) => {
-            expect(err).to.not.exist;
-            const indexNames = indexes.map(i => i.name);
-            expect(indexNames).to.include('createdAt_1');
-
-            done();
-          });
-        });
-      });
+    it('should support createIndex with no options', async function () {
+      const collection = await db.createCollection('create_index_without_options', {});
+      await collection.createIndex({ createdAt: 1 });
+      expect(await collection.indexExists('createdAt_1')).to.be.true;
     });
   });
 

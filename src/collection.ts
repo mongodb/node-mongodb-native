@@ -24,7 +24,6 @@ import type {
 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { BulkWriteOperation } from './operations/bulk_write';
-import type { IndexInformationOptions } from './operations/common_functions';
 import { CountOperation, type CountOptions } from './operations/count';
 import { CountDocumentsOperation, type CountDocumentsOptions } from './operations/count_documents';
 import {
@@ -49,19 +48,16 @@ import {
   FindOneAndUpdateOperation,
   type FindOneAndUpdateOptions
 } from './operations/find_and_modify';
-import {
-  CreateIndexesOperation,
-  type CreateIndexesOptions,
-  CreateIndexOperation,
-  type DropIndexesOptions,
-  DropIndexOperation,
-  type IndexDescription,
-  IndexesOperation,
-  IndexExistsOperation,
-  IndexInformationOperation,
-  type IndexSpecification,
-  type ListIndexesOptions
+import type {
+  CreateIndexesOptions,
+  DropIndexesOptions,
+  IndexDescription,
+  IndexDirection,
+  IndexInformationOptions,
+  IndexSpecification,
+  ListIndexesOptions
 } from './operations/indexes';
+import { CreateIndexesOperation, DropIndexOperation } from './operations/indexes';
 import {
   InsertManyOperation,
   type InsertManyResult,
@@ -575,15 +571,17 @@ export class Collection<TSchema extends Document = Document> {
     indexSpec: IndexSpecification,
     options?: CreateIndexesOptions
   ): Promise<string> {
-    return executeOperation(
+    const indexes = await executeOperation(
       this.client,
-      new CreateIndexOperation(
-        this as TODO_NODE_3286,
+      CreateIndexesOperation.fromIndexSpecification(
+        this,
         this.collectionName,
         indexSpec,
         resolveOptions(this, options)
       )
     );
+
+    return indexes[0];
   }
 
   /**
@@ -623,8 +621,8 @@ export class Collection<TSchema extends Document = Document> {
   ): Promise<string[]> {
     return executeOperation(
       this.client,
-      new CreateIndexesOperation(
-        this as TODO_NODE_3286,
+      CreateIndexesOperation.fromIndexDescriptionArray(
+        this,
         this.collectionName,
         indexSpecs,
         resolveOptions(this, { ...options, maxTimeMS: undefined })
@@ -680,14 +678,14 @@ export class Collection<TSchema extends Document = Document> {
    * @param indexes - One or more index names to check.
    * @param options - Optional settings for the command
    */
-  async indexExists(
-    indexes: string | string[],
-    options?: IndexInformationOptions
-  ): Promise<boolean> {
-    return executeOperation(
-      this.client,
-      new IndexExistsOperation(this as TODO_NODE_3286, indexes, resolveOptions(this, options))
+  async indexExists(indexes: string | string[], options?: ListIndexesOptions): Promise<boolean> {
+    const indexNames: string[] = Array.isArray(indexes) ? indexes : [indexes];
+    const allIndexes: Set<string> = new Set(
+      await this.listIndexes(options)
+        .map(({ name }) => name)
+        .toArray()
     );
+    return indexNames.every(name => allIndexes.has(name));
   }
 
   /**
@@ -696,10 +694,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    return executeOperation(
-      this.client,
-      new IndexInformationOperation(this.s.db, this.collectionName, resolveOptions(this, options))
-    );
+    return this.indexes({ ...options, full: options?.full ?? false });
   }
 
   /**
@@ -804,10 +799,19 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexes(options?: IndexInformationOptions): Promise<Document[]> {
-    return executeOperation(
-      this.client,
-      new IndexesOperation(this as TODO_NODE_3286, resolveOptions(this, options))
-    );
+    const indexes = await this.listIndexes(options).toArray();
+    const full = options?.full ?? true;
+    if (full) {
+      return indexes;
+    }
+
+    const object: Record<
+      string,
+      Array<[name: string, direction: IndexDirection]>
+    > = Object.fromEntries(indexes.map(({ name, key }) => [name, Object.entries(key)]));
+
+    // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
+    return object;
   }
 
   /**

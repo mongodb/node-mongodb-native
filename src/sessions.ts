@@ -519,6 +519,7 @@ export function maybeClearPinnedConnection(
 
     if (options?.error == null || options?.force) {
       loadBalancer.pool.checkIn(conn);
+      session[kPinnedConnection] = undefined;
       conn.emit(
         UNPINNED,
         session.transaction.state !== TxnState.NO_TRANSACTION
@@ -530,8 +531,6 @@ export function maybeClearPinnedConnection(
         loadBalancer.pool.clear({ serviceId: conn.serviceId });
       }
     }
-
-    session[kPinnedConnection] = undefined;
   }
 }
 

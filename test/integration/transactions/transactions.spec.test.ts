@@ -12,20 +12,9 @@ const SKIPPED_TESTS = [
   'transaction options inherited from defaultTransactionOptions',
   'transaction options inherited from client',
   'causal consistency disabled'
-  // TODO(NODE-5855) - Gone away after NODE-5929
 ];
 
 describe('Transactions Spec Unified Tests', function () {
-  this.beforeEach(function () {
-    if (this.configuration.topologyType === 'LoadBalanced') {
-      if (this.currentTest) {
-        this.currentTest.skipReason =
-          'TODO(NODE-5931) - Fix socket leaks in load balancer transaction tests.';
-      }
-    }
-    this.skip();
-  });
-
   runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), test => {
     return SKIPPED_TESTS.includes(test.description)
       ? 'TODO(NODE-5924/NODE-5925): Skipping failing transaction tests'

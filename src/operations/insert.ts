@@ -6,10 +6,10 @@ import type { InferIdType } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
 import type { MongoDBNamespace } from '../utils';
+import { maybeAddIdToDocuments } from '../utils';
 import { WriteConcern } from '../write_concern';
 import { BulkWriteOperation } from './bulk_write';
 import { CommandOperation, type CommandOperationOptions } from './command';
-import { maybeAddIdToDocuments } from './common_functions';
 import { AbstractOperation, Aspect, defineAspects } from './operation';
 
 /** @internal */
