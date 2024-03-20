@@ -57,7 +57,7 @@ describe('meta tests for BufferingStream', function () {
   });
 });
 
-describe('class MongoLogger', async function () {
+describe('class MongoLogger', function () {
   describe('#constructor()', function () {
     it('assigns each property from the options object onto the logging class', function () {
       const componentSeverities: MongoLoggerOptions['componentSeverities'] = {
@@ -1353,7 +1353,7 @@ describe('class MongoLogger', async function () {
     });
   });
 
-  describe('log', async function () {
+  describe('log', function () {
     let componentSeverities: MongoLoggerOptions['componentSeverities'];
 
     beforeEach(function () {
@@ -1407,7 +1407,7 @@ describe('class MongoLogger', async function () {
         });
       });
     });
-    describe('async stream failure handling', async function () {
+    describe('async stream failure handling', function () {
       context('when stream is not stderr', function () {
         let stderrStub;
 
@@ -1419,7 +1419,7 @@ describe('class MongoLogger', async function () {
           sinon.restore();
         });
 
-        context('when stream user defined stream and stream.write throws async', async function () {
+        context('when stream user defined stream and stream.write throws async', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
             const stream = {
               async write(_log) {
@@ -1456,7 +1456,7 @@ describe('class MongoLogger', async function () {
           });
         });
 
-        context('when stream is stdout and stdout.write throws', async function () {
+        context('when stream is stdout and stdout.write throws', function () {
           it('should catch error, not crash application, warn user, and start writing to stderr', async function () {
             sinon.stub(process.stdout, 'write').throws(new Error('I am stdout and do not work'));
             // print random message at the debug level
@@ -1509,7 +1509,7 @@ describe('class MongoLogger', async function () {
         });
       });
     });
-    context('when async stream has multiple logs with different timeouts', async function () {
+    context('when async stream has multiple logs with different timeouts', function () {
       it('should preserve their order', async function () {
         const stream = {
           buffer: [],
