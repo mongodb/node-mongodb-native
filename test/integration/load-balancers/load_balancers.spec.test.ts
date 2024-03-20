@@ -1,7 +1,7 @@
-'use strict';
-const path = require('path');
-const { loadSpecTests } = require('../../spec/index');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+import * as path from 'path';
+
+import { loadSpecTests } from '../../spec/index';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 const filter = ({ description }) => {
   if (description === 'change streams pin to a connection') {

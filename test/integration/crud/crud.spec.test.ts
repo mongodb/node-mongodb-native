@@ -1,17 +1,12 @@
-'use strict';
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-const chai = require('chai');
-
-const expect = chai.expect;
-chai.use(require('chai-subset'));
-
-const { loadSpecTests } = require('../../spec/index');
-const { runUnifiedSuite } = require('../../tools/unified-spec-runner/runner');
+import { loadSpecTests } from '../../spec/index';
+import { runUnifiedSuite } from '../../tools/unified-spec-runner/runner';
 
 function enforceServerVersionLimits(requires, scenario) {
-  const versionLimits = [];
+  const versionLimits: string[] = [];
   if (scenario.minServerVersion) {
     versionLimits.push(`>=${scenario.minServerVersion}`);
   }
@@ -26,12 +21,12 @@ function enforceServerVersionLimits(requires, scenario) {
   }
 }
 
-function findScenarios() {
-  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(arguments));
+function findScenarios(...args: string[]) {
+  const route = [__dirname, '..', '..', 'spec', 'crud'].concat(Array.from(args));
   return fs
-    .readdirSync(path.resolve.apply(path, route))
+    .readdirSync(path.resolve(...route))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.resolve.apply(path, route.concat([x])), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.resolve(...route.concat([x])), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
@@ -251,7 +246,7 @@ describe('CRUD spec v1', function () {
   function executeInsertTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const documents = args.document || args.documents;
-    let options = Object.assign({}, args.options);
+    const options = Object.assign({}, args.options);
     delete options.document;
     delete options.documents;
 
@@ -268,7 +263,7 @@ describe('CRUD spec v1', function () {
   function executeBulkTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
     const operations = args.requests.map(operation => {
-      let op = {};
+      const op = {};
       op[operation.name] = operation['arguments'];
       if (operation['arguments'].collation) {
         op.collation = operation['arguments'].collation;
