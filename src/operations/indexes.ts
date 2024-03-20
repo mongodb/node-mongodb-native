@@ -204,7 +204,7 @@ function constructIndexDescriptionMap(indexSpec: IndexSpecification): Map<string
 function resolveIndexDescription(
   description: IndexDescription
 ): Omit<ResolvedIndexDescription, 'key'> {
-  const validProvidedOptions = Object.entries({ ...description }).filter(([optionName]) =>
+  const validProvidedOptions = Object.entries(description).filter(([optionName]) =>
     VALID_INDEX_OPTIONS.has(optionName)
   );
 
