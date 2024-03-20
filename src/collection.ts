@@ -1052,29 +1052,31 @@ export class Collection<TSchema extends Document = Document> {
   /**
    * Returns all search indexes for the current collection.
    *
-   * @param options - The options for the list indexes operation. This method will ignore 'readConcern' and 'writeConcern' keys if they are present in 'options' (since there is no Atlas support).
+   * @param options - The options for the list indexes operation.
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
-  listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
+  ): ListSearchIndexesCursor;
   /**
    * Returns all search indexes for the current collection.
    *
    * @param name - The name of the index to search for.  Only indexes with matching index names will be returned.
-   * @param options - The options for the list indexes operation. This method will ignore 'readConcern' and 'writeConcern' keys if they are present in 'options' (since there is no Atlas support).
+   * @param options - The options for the list indexes operation.
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
-  listSearchIndexes(name: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    name: string,
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
+  ): ListSearchIndexesCursor;
   listSearchIndexes(
     indexNameOrOptions?: string | ListSearchIndexesOptions,
-    options?: ListSearchIndexesOptions
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
-
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const { readConcern, writeConcern, ...cleanedOptions } = options;
 
     const indexName =
       indexNameOrOptions == null
@@ -1083,7 +1085,7 @@ export class Collection<TSchema extends Document = Document> {
         ? null
         : indexNameOrOptions;
 
-    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, cleanedOptions);
+    return new ListSearchIndexesCursor(this as TODO_NODE_3286, indexName, options);
   }
 
   /**
