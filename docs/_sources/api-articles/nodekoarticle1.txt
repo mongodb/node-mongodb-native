@@ -1,7 +1,7 @@
-A Basic introduction to Mongo DB
+A Basic introduction to MongoDB
 ================================
 
-Mongo DB has rapidly grown to become a popular database for web
+MongoDB has rapidly grown to become a popular database for web
 applications and is a perfect fit for Node.JS applications, letting you
 write Javascript for the client, backend and database layer. Its
 schemaless nature is a better match to our constantly evolving data
@@ -20,14 +20,14 @@ or go fetch it from github at
 `https://github.com/mongodb/node-mongodb-native <https://github.com/mongodb/node-mongodb-native>`_
 
 Once this business is taken care of, let's move through the types
-available for the driver and then how to connect to your Mongo DB
+available for the driver and then how to connect to your MongoDB
 instance before facing the usage of some CRUD operations.
 
-Mongo DB data types
+MongoDB data types
 -------------------
 
-So there is an important thing to keep in mind when working with Mongo
-DB, and that is the slight mapping difference between types Mongo DB
+So there is an important thing to keep in mind when working with MongoDB, 
+and that is the slight mapping difference between types MongoDB
 supports and native Javascript data types. Let's have a look at the
 types supported out of the box and then how types are promoted by the
 driver to fit as close to native Javascript types as possible.
@@ -42,16 +42,16 @@ driver to fit as close to native Javascript types as possible.
    integer value is at a 53 bit. Mongo has two types for integers, a 32
    bit and a 64 bit. The driver will try to fit the value into 32 bits
    if it can and promote it to 64 bits if it has to. Similarly it will
-   deserialize attempting to fit it into 53 bits if it can. If it cannot
+   deserialize attempting to fit it into 53 bits if it can. If it cannot,
    it will return an instance of **Long** to avoid losing precision.
 -  **Long class** a special class that lets you store 64 bit integers
    and also lets you operate on the 64 bit integers.
 -  **Date** maps directly to a Javascript Date
 -  **RegExp** maps directly to a Javascript RegExp
 -  **String** maps directly to a Javascript String (encoded in utf8)
--  **Binary class** a special class that lets you store data in Mongo DB
--  **Code class** a special class that lets you store javascript
-   functions in Mongo DB, can also provide a scope to run the method in
+-  **Binary class** a special class that lets you store data in MongoDB
+-  **Code class** a special class that lets you store Javascript
+   functions in MongoDB, can also provide a scope to run the method in
 -  **ObjectID class** a special class that holds a MongoDB document
    identifier (the equivalent to a Primary key)
 -  **DbRef class** a special class that lets you include a reference in
@@ -63,13 +63,13 @@ driver to fit as close to native Javascript types as possible.
 As we see the number type can be a little tricky due to the way integers
 are implemented in Javascript. The latest driver will do correct
 conversion up to 53 bits of complexity. If you need to handle big
-integers the recommendation is to use the Long class to operate on the
+integers, the recommendation is to use the Long class to operate on the
 numbers.
 
 Getting that connection to the database
 ---------------------------------------
 
-Let's get around to setting up a connection with the Mongo DB database.
+Let's get around to setting up a connection with the MongoDB database.
 Jumping straight into the code let's do direct connection and then look
 at the code.
 
@@ -86,9 +86,9 @@ at the code.
     });
 
 Let's have a quick look at how the connection code works. The
-**Db.connect** method let's use use a uri to connect to the Mongo
+**Db.connect** method lets us use a uri to connect to the Mongo
 database, where **localhost:27017** is the server host and port and
-**exampleDb** the db we wish to connect to. After the url notice the
+**exampleDb** the db we wish to connect to. After the url, notice the
 hash containing the **auto\_reconnect** key. Auto reconnect tells the
 driver to retry sending a command to the server if there is a failure
 during its execution.
@@ -103,12 +103,12 @@ dispatch and read from the tcp connection.
 We are up and running with a connection to the database. Let's move on
 and look at what collections are and how they work.
 
-Mongo DB and Collections
+MongoDB and Collections
 ------------------------
 
 Collections are the equivalent of tables in traditional databases and
 contain all your documents. A database can have many collections. So how
-do we go about defining and using collections. Well there are a couple
+do we go about defining and using collections. Well, there are a couple
 of methods that we can use. Let's jump straight into code and then look
 at the code.
 
@@ -154,7 +154,7 @@ check if the collection exists and issue an error if it does not.
 
     db.createCollection('test', function(err, collection) {});
 
-This command will create the collection on the Mongo DB database before
+This command will create the collection on the MongoDB database before
 returning the collection object. If the collection already exists it
 will ignore the creation of the collection.
 
@@ -165,13 +165,13 @@ will ignore the creation of the collection.
 The **{strict:true}** option will make the method return an error if the
 collection already exists.
 
-With an open db connection and a collection defined we are ready to do
+With an open db connection and a collection defined, we are ready to do
 some CRUD operation on the data.
 
 And then there was CRUD
 -----------------------
 
-So let's get dirty with the basic operations for Mongo DB. The Mongo DB
+So let's get dirty with the basic operations for MongoDB. The MongoDB
 wire protocol is built around 4 main operations
 **insert/update/remove/query**. Most operations on the database are
 actually queries with special json objects defining the operation on the
@@ -203,15 +203,15 @@ insert first and do it with some code.
     });
 
 A couple of variations on the theme of inserting a document as we can
-see. To understand why it's important to understand how Mongo DB works
+see. To understand why it's important to understand how MongoDB works
 during inserts of documents.
 
-Mongo DB has asynchronous **insert/update/remove** operations. This
-means that when you issue an **insert** operation its a fire and forget
+MongoDB has asynchronous **insert/update/remove** operations. This
+means that when you issue an **insert** operation, it's a fire and forget
 operation where the database does not reply with the status of the
-insert operation. To retrieve the status of the operation you have to
+insert operation. To retrieve the status of the operation, you have to
 issue a query to retrieve the last error status of the connection. To
-make it simpler to the developer the driver implements the **{w:1}**
+make it simpler to the developer, the driver implements the **{w:1}**
 options so that this is done automatically when inserting the document.
 **{w:1}** becomes especially important when you do **update** or
 **remove** as otherwise it's not possible to determine the amount of
@@ -225,7 +225,7 @@ above.
     collection.insert(doc1);
 
 Taking advantage of the async behavior and not needing confirmation
-about the persisting of the data to Mongo DB we just fire off the insert
+about the persisting of the data to MongoDB, we just fire off the insert
 (we are doing live analytics, loosing a couple of records does not
 matter).
 
@@ -244,10 +244,10 @@ A batch insert of document with any errors being reported. This is much
 more efficient if you need to insert large batches of documents as you
 incur a lot less overhead.
 
-Right that's the basics of insert's ironed out. We got some documents in
+Right, that's the basics of insert's ironed out. We got some documents in
 there but want to update them as we need to change the content of a
 field. Let's have a look at a simple example and then we will dive into
-how Mongo DB updates work and how to do them efficiently.
+how MongoDB updates work and how to do them efficiently.
 
 **the requires and and other initializing stuff omitted for brevity**
 
@@ -274,11 +274,11 @@ how Mongo DB updates work and how to do them efficiently.
       });
     });
 
-Alright before we look at the code we want to understand how document
+Alright, before we look at the code, we want to understand how document
 updates work and how to do the efficiently. The most basic and less
 efficient way is to replace the whole document, this is not really the
-way to go if you want to change just a field in your document. Luckily
-Mongo DB provides a whole set of operations that let you modify just
+way to go if you want to change just a field in your document. Luckily,
+MongoDB provides a whole set of operations that let you modify just
 pieces of the document `Atomic operations
 documentation <www.mongodb.com/docs/display/DOCS/Atomic+Operations>`_.
 Basically outlined below.
@@ -288,7 +288,7 @@ Basically outlined below.
 -  $unset - delete a particular field (v1.3+)
 -  $push - append a value to an array
 -  $pushAll - append several values to an array
--  $addToSet - adds value to the array only if its not in the array
+-  $addToSet - adds value to the array only if it's not in the array
    already
 -  $pop - removes the last element in an array
 -  $pull - remove a value(s) from an existing array
@@ -296,17 +296,17 @@ Basically outlined below.
 -  $rename - renames the field
 -  $bit - bitwise operations
 
-Now that the operations are outline let's dig into the specific cases
+Now that the operations are outline, let's dig into the specific cases
 show in the code example.
 
 ::
 
     collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
 
-Right so this update will look for the document that has a field
+Right, so this update will look for the document that has a field
 **mykey** equal to **1** and apply an update to the field
 **fieldtoupdate** setting the value to **2**. Since we are using the
-**{w:1}** option the result parameter in the callback will return the
+**{w:1}** option, the result parameter in the callback will return the
 value **1** indicating that 1 document was modified by the update
 statement.
 
@@ -316,9 +316,9 @@ statement.
 
 This updates adds another document to the field **docs** in the document
 identified by **{mykey:2}** using the atomic operation **$push**. This
-allows you to modify keep such structures as queues in Mongo DB.
+allows you to modify keep such structures as queues in MongoDB.
 
-Let's have a look at the remove operation for the driver. As before
+Let's have a look at the remove operation for the driver. As before,
 let's start with a piece of code.
 
 **the requires and and other initializing stuff omitted for brevity**
@@ -351,7 +351,7 @@ Let's examine the 3 remove variants and what they do.
 
     collection.remove({mykey:1});
 
-This leverages the fact that Mongo DB is asynchronous and that it does
+This leverages the fact that MongoDB is asynchronous and that it does
 not return a result for **insert/update/remove** to allow for
 **synchronous** style execution. This particular remove query will
 remove the document where **mykey** equals **1**.
@@ -361,7 +361,7 @@ remove the document where **mykey** equals **1**.
     collection.remove({mykey:2}, {w:1}, function(err, result) {});
 
 This remove statement removes the document where **mykey** equals **2**
-but since we are using **{w:1}** it will back to Mongo DB to get the
+but since we are using **{w:1}**, it will back to MongoDB to get the
 status of the remove operation and return the number of documents
 removed in the result variable.
 
@@ -375,15 +375,15 @@ Time to Query
 -------------
 
 Queries is of course a fundamental part of interacting with a database
-and Mongo DB is no exception. Fortunately for us it has a rich query
+and MongoDB is no exception. Fortunately, for us it has a rich query
 interface with cursors and close to SQL concepts for slicing and dicing
-your datasets. To build queries we have lots of operators to choose from
-`Mongo DB advanced
+your datasets. To build queries, we have lots of operators to choose from
+`MongoDB advanced
 queries <www.mongodb.com/docs/display/DOCS/Advanced+Queries>`_. There
 are literarily tons of ways to search and ways to limit the query. Let's
 look at some simple code for dealing with queries in different ways.
 
-**the requires and and other initializing stuff omitted for brevity**
+**the requires and other initializing stuff omitted for brevity**
 
 ::
 
@@ -410,11 +410,11 @@ look at some simple code for dealing with queries in different ways.
       });
     });
 
-Before we start picking apart the code there is one thing that needs to
+Before we start picking apart the code, there is one thing that needs to
 be understood, the **find** method does not execute the actual query. It
 builds an instance of **Cursor** that you then use to retrieve the data.
-This lets you manage how you retrieve the data from Mongo DB and keeps
-state about your current Cursor state on Mongo DB. Now let's pick apart
+This lets you manage how you retrieve the data from MongoDB and keeps
+state about your current Cursor state on MongoDB. Now let's pick apart
 the queries we have here and look at what they do.
 
 ::
@@ -425,7 +425,7 @@ This query will fetch all the document in the collection and return them
 as an array of items. Be careful with the function **toArray** as it
 might cause a lot of memory usage as it will instantiate all the
 document into memory before returning the final array of items. If you
-have a big resultset you could run into memory issues.
+have a big resultset, you could run into memory issues.
 
 ::
 
@@ -448,10 +448,10 @@ done.
 This is special supported function to retrieve just one specific
 document bypassing the need for a cursor object.
 
-That's pretty much it for the quick intro on how to use the database. I
+That's pretty much info for the quick intro on how to use the database. I
 have also included a list of links to where to go to find more
-information and also a sample crude location application I wrote using
-express JS and mongo DB.
+information and also a sample CRUD location application I wrote using
+express JS and MongoDB.
 
 Links and stuff
 ---------------
@@ -460,7 +460,7 @@ Links and stuff
    usage <https://github.com/mongodb/node-mongodb-native/tree/master/examples>`_
 -  `All the integration tests, they have tons of different usage
    cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`_
--  `The Mongo DB wiki pages such as the advanced query
+-  `The MongoDB wiki pages such as the advanced query
    link <www.mongodb.com/docs/display/DOCS/Advanced+Queries>`_
 -  `A silly simple location based application using Express JS and Mongo
    DB <https://github.com/christkv/mongodb-presentation>`_
