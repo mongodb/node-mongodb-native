@@ -18,11 +18,14 @@ export interface AWSTempCredentials {
 /** @internal */
 export abstract class AWSTemporaryCredentialProvider {
   abstract getCredentials(): Promise<AWSTempCredentials>;
-  static credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
-  static isAWSSDKInstalled: boolean;
-  static {
-    this.credentialProvider = getAwsCredentialProvider();
-    this.isAWSSDKInstalled = 'kModuleError' in this.credentialProvider;
+  private static _credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
+  protected static get credentialProvider() {
+    AWSTemporaryCredentialProvider._credentialProvider ??= getAwsCredentialProvider();
+    return AWSTemporaryCredentialProvider._credentialProvider;
+  }
+
+  static get isAWSSDKInstalled(): boolean {
+    return 'kModuleError' in AWSTemporaryCredentialProvider.credentialProvider;
   }
 }
 
