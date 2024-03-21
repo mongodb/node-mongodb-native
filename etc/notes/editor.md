@@ -12,7 +12,7 @@ Here's a quick description of each:
 - `dbaeumer.vscode-eslint` - Runs ESLint automatically after file save, saves you the need to run the linter manually most of the time.
 - `hbenl.vscode-test-explorer` - Lets you navigate our tests and run them through button presses.
 - `hbenl.vscode-mocha-test-adapter` - The mocha specific module to the common extension mentioned above.
-- `github.vscode-pull-request-github` - With this you can manage and make pull requests right from VSCode, even reviews can be done via the editor.
+- `github.vscode-pull-request-github` - With this, you can manage and make pull requests right from VSCode, even reviews can be done via the editor.
 - `eamodio.gitlens` - Gives spectacular insight into git history, has many helpful git navigation UI features.
 - `mongodb.mongodb-vscode` - Our VScode extension can be connected to your locally running MongoDB instance (to help debug tests, etc.)
 - `rbuckton.deoptexplorer-vscode` - De-opt explorer can visualize the results of running Node.js profiling results on top of your source code (Run things with `dexnode` for easy use!)
@@ -87,7 +87,7 @@ Here's a quick description of each:
 The two non-default things in the configuration are marked with `CHANGE THIS` comments.
 
 - You need to add `node_modules/node-addon-api` to the include path to find `napi.h`.
-  - For libmongocrypt the path might be: `bindings/node/node_modules/node-addon-api` depending on your workspace root
+  - For libmongocrypt, the path might be: `bindings/node/node_modules/node-addon-api` depending on your workspace root
 - Bump up the cpp standard to whatever the relevant standard is
 
 In VSCode install `ms-vscode.cpptools` and in a `.vscode/c_cpp_properties.json` file add:

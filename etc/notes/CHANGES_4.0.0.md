@@ -2,7 +2,7 @@
 
 _Hello dear reader, **thank you** for adopting version 4.x of the MongoDB Node.js driver, from the bottom of our developer hearts we thank you so much for taking the time to upgrade to our latest and greatest offering of a stunning database experience.
 We hope you enjoy your upgrade experience and this guide gives you all the answers you are searching for.
-If anything, and we mean anything, hinders your upgrade experience please let us know via [JIRA](https://jira.mongodb.org/browse/NODE).
+If anything, and we mean anything, hinders your upgrade experience, please let us know via [JIRA](https://jira.mongodb.org/browse/NODE).
 We know breaking changes are hard but they are sometimes for the best.
 Anyway, enjoy the guide, see you at the end!_
 
@@ -18,8 +18,8 @@ Recently we migrated our BSON library to TypeScript as well, this version of the
 
 #### Community Types users (@types/mongodb)
 
-If you are a user of the community types (@types/mongodb) there will likely be compilation errors while adopting the types from our codebase.
-Unfortunately we could not achieve a one to one match in types due to the details of writing the codebase in Typescript vs definitions for the user layer API along with the breaking changes of this major version. Please let us know if there's anything that is a blocker to upgrading [on JIRA](https://jira.mongodb.org/browse/NODE).
+If you are a user of the community types (@types/mongodb), there will likely be compilation errors while adopting the types from our codebase.
+Unfortunately, we could not achieve a one-to-one match in types due to the details of writing the codebase in Typescript vs definitions for the user layer API along with the breaking changes of this major version. Please let us know if there's anything that is a blocker to upgrading [on JIRA](https://jira.mongodb.org/browse/NODE).
 
 ### Node.js Version
 
@@ -93,7 +93,7 @@ for await (const doc of cursor) {
 }
 ```
 
-Prior to the this release there was inconsistency surrounding how the cursor would error if a setting like limit was applied after cursor execution had begun.
+Prior to this release, there was an inconsistency surrounding how the cursor would error if a setting like limit was applied after cursor execution had begun.
 Now, an error along the lines of: `Cursor is already initialized` is thrown.
 
 ##### Cursor.count always respects skip and limit
@@ -106,7 +106,7 @@ It is recommended that users utilize the `collection.countDocuments` or `collect
 #### ChangeStream must be used as an iterator or an event emitter
 
 You cannot use ChangeStream as an iterator after using as an EventEmitter nor visa versa.
-Previously the driver would permit this kind of usage but it could lead to unpredictable behavior and obscure errors.
+Previously, the driver would permit this kind of usage but it could lead to unpredictable behavior and obscure errors.
 It's unlikely this kind of usage was useful but to be sure we now prevent it by throwing a clear error.
 
 ```javascript
@@ -171,7 +171,7 @@ Specifying `checkServerIdentity === false` (along with enabling tls) is differen
 The 3.x version intercepted `checkServerIdentity: false` and turned it into a no-op function which is the required way to skip checking the server identity by nodejs.
 Setting this option to `false` is only for testing anyway as it disables essential verification to TLS.
 So it made sense for our library to directly expose the option validation from Node.js.
-If you need to test TLS connections without verifying server identity pass in `{ checkServerIdentity: () => {} }`.
+If you need to test TLS connections without verifying server identity, pass in `{ checkServerIdentity: () => {} }`.
 
 #### Kerberos / GSSAPI
 
@@ -218,7 +218,7 @@ The same functionality can be achieved using the aggregation pipeline's `$group`
 ### GridStore removed
 
 The deprecated GridStore API has been removed from the driver.
-For more information on GridFS [see the mongodb manual](https://www.mongodb.com/docs/manual/core/gridfs/).
+For more information on GridFS, [see the mongodb manual](https://www.mongodb.com/docs/manual/core/gridfs/).
 
 Below are some snippets that represent equivalent operations:
 
@@ -293,7 +293,7 @@ const fileMetaDataList: GridFSFile[] = bucket.find({}).toArray();
 #### Hashing an upload
 
 The automatic MD5 hashing has been removed from the upload family of functions.
-This makes the default Grid FS behavior compliant with systems that do not permit usage of MD5 hashing.
+This makes the default GridFS behavior compliant with systems that do not permit usage of MD5 hashing.
 The `disableMD5` option is no longer used and has no effect.
 
 If you still want to add an MD5 hash to your file upload, here's a simple example that can be used with [any hashing algorithm](https://nodejs.org/dist/latest-v14.x/docs/api/crypto.html#crypto_crypto_createhash_algorithm_options) provided by Node.js:
@@ -333,9 +333,9 @@ This version includes an upgrade from js-bson 1.x to js-bson 4.x.
 #### Timestamps math operations return Javascript `Long`s
 
 In versions prior to 4.x of the BSON library, Timestamps were represented with a custom class.  In version 4.x of the BSON library, the Timestamp class was refactored to
-be a subclass of the Javascript Long class.  As a result of this refactor, math operations on Timestamp objects now return Long objects instead of Timestamp objects.
+be a subclass of the Javascript Long class. As a result of this refactor, math operations on Timestamp objects now return Long objects instead of Timestamp objects.
 
-Math operations with Timestamps is not recommended.  However, if Timestamp math must be used, the old behavior can be replicated by using the Timestamp
+Math operations with Timestamps is not recommended. However, if Timestamp math must be used, the old behavior can be replicated by using the Timestamp
 constructor, which takes a Long as an argument.
 
 ```typescript

@@ -1,11 +1,11 @@
 # docs_utils
 
-This directory contains scripts to generate api docs as well our the Hugo site template used for the MongoDB node driver documentation.
+This directory contains scripts to generate API docs as well our the Hugo site template used for the MongoDB node driver documentation.
 
 There are two scripts contained in this folder.
 
 - `legacy-generate.sh` was used to generate API documentation before the driver's docs
-were moved into the main repository.  This script has the ability to generate api docs for older versions of the driver (in case it becomes
+were moved into the main repository.  This script has the ability to generate API docs for older versions of the driver (in case it becomes
 necessary to backport a feature).
 
 - `build.ts` is used to generate API docs for a major or minor release.
