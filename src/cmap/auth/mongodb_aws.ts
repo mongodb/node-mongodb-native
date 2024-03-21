@@ -172,7 +172,7 @@ async function makeTempCredentials(
       source: credentials.source,
       mechanism: AuthMechanism.MONGODB_AWS,
       mechanismProperties: {
-        AWS_SESSION_TOKEN: creds.SessionToken
+        AWS_SESSION_TOKEN: creds.Token
       }
     });
   }

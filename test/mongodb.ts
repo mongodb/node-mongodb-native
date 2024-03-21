@@ -101,6 +101,7 @@ export * from '../src/bulk/ordered';
 export * from '../src/bulk/unordered';
 export * from '../src/change_stream';
 export * from '../src/cmap/auth/auth_provider';
+export * from '../src/cmap/auth/aws_temporary_credentials';
 export * from '../src/cmap/auth/gssapi';
 export * from '../src/cmap/auth/mongo_credentials';
 export * from '../src/cmap/auth/mongocr';

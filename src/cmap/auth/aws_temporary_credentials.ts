@@ -6,16 +6,26 @@ const AWS_RELATIVE_URI = 'http://169.254.170.2';
 const AWS_EC2_URI = 'http://169.254.169.254';
 const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 
-/** @internal */
+/**
+ * @internal
+ * This interface matches the final result of fetching temporary credentials manually, outlined
+ * in the spec [here](https://github.com/mongodb/specifications/blob/master/source/auth/auth.md#ec2-endpoint).
+ *
+ * When we use the AWS SDK, we map the response from the SDK to conform to this interface.
+ */
 export interface AWSTempCredentials {
   AccessKeyId?: string;
   SecretAccessKey?: string;
-  SessionToken?: string;
+  Token?: string;
   RoleArn?: string;
   Expiration?: Date;
 }
 
-/** @internal */
+/**
+ * @internal
+ *
+ * Fetches temporary AWS credentials.
+ */
 export abstract class AWSTemporaryCredentialProvider {
   abstract getCredentials(): Promise<AWSTempCredentials>;
   private static _credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
@@ -32,6 +42,10 @@ export abstract class AWSTemporaryCredentialProvider {
 /** @internal */
 export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
   private _provider?: () => Promise<AWSCredentials>;
+  /**
+   * The AWS SDK caches credentials automatically and handles refresh when the credentials have expired.
+   * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.
+   */
   private get provider(): () => Promise<AWSCredentials> {
     if ('kModuleError' in AWSTemporaryCredentialProvider.credentialProvider) {
       throw AWSTemporaryCredentialProvider.credentialProvider.kModuleError;
@@ -106,7 +120,7 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
       return {
         AccessKeyId: creds.accessKeyId,
         SecretAccessKey: creds.secretAccessKey,
-        SessionToken: creds.sessionToken,
+        Token: creds.sessionToken,
         Expiration: creds.expiration
       };
     } catch (error) {
@@ -115,7 +129,11 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
   }
 }
 
-/** @internal */
+/**
+ * @internal
+ * Fetches credentials manually (without the AWS SDK), as outlined in the [Obtaining Credentials](https://github.com/mongodb/specifications/blob/master/source/auth/auth.md#obtaining-credentials)
+ * section of the Auth spec.
+ */
 export class LegacyAWSTemporaryCredentialProvider extends AWSTemporaryCredentialProvider {
   override async getCredentials(): Promise<AWSTempCredentials> {
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
