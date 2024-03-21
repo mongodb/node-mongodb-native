@@ -9,6 +9,7 @@ const test = {};
 describe('Sessions - unit/sessions', function () {
   describe('Collection', function () {
     afterEach(() => mock.cleanup());
+
     beforeEach(() => {
       return mock.createServer().then(server => {
         test.server = server;

@@ -41,9 +41,11 @@ describe('Topology (unit)', function () {
 
   describe('client metadata', function () {
     let mockServer;
+
     before(async () => {
       mockServer = await mock.createServer();
     });
+
     after(() => mock.cleanup());
 
     it('should correctly pass appname', function () {
@@ -86,7 +88,9 @@ describe('Topology (unit)', function () {
 
   describe('black holes', function () {
     let mockServer;
+
     beforeEach(async () => (mockServer = await mock.createServer()));
+
     afterEach(() => mock.cleanup());
 
     it('should time out operations against servers that have been blackholed', function (done) {
@@ -122,10 +126,12 @@ describe('Topology (unit)', function () {
   describe('error handling', function () {
     let mockServer;
     let secondMockServer;
+
     beforeEach(async () => {
       mockServer = await mock.createServer();
       secondMockServer = await mock.createServer();
     });
+
     afterEach(async () => {
       await mock.cleanup();
       sinon.restore();
@@ -463,6 +469,7 @@ describe('Topology (unit)', function () {
     describe('waitQueue', function () {
       let selectServer;
       let topology;
+
       afterEach(() => {
         selectServer.restore();
         topology.close();

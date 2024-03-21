@@ -9,6 +9,7 @@ describe('ObjectId', function () {
   let collection: Collection<{ name: string }>;
   let commandStartedEvents;
   let commandSucceededEvents;
+
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
     await client

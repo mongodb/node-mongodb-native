@@ -101,6 +101,7 @@ describe('Indexes', function () {
 
   describe('Collection.indexes()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when `full` is not provided', () => {
@@ -130,6 +131,7 @@ describe('Indexes', function () {
 
   describe('Collection.indexInformation()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when `full` is not provided', () => {
@@ -162,6 +164,7 @@ describe('Indexes', function () {
 
   describe('Collection.createIndex()', function () {
     const started: CommandStartedEvent[] = [];
+
     beforeEach(() => {
       started.length = 0;
       client.on('commandStarted', filterForCommands('createIndexes', started));
@@ -188,6 +191,7 @@ describe('Indexes', function () {
 
   describe('Collection.createIndexes()', function () {
     const started: CommandStartedEvent[] = [];
+
     beforeEach(() => {
       started.length = 0;
       client.on('commandStarted', filterForCommands('createIndexes', started));
@@ -238,6 +242,7 @@ describe('Indexes', function () {
 
   describe('Collection.indexExists()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when provided a string index name', () => {

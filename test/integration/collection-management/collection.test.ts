@@ -6,6 +6,7 @@ import { setupDatabase } from '../shared';
 
 describe('Collection', function () {
   let configuration;
+
   before(function () {
     configuration = this.configuration;
     return setupDatabase(configuration, ['listCollectionsDb', 'listCollectionsDb2', 'test_db']);
@@ -14,6 +15,7 @@ describe('Collection', function () {
   describe('standard collection tests', function () {
     let client: MongoClient;
     let db: Db;
+
     beforeEach(function () {
       client = configuration.newClient(configuration.writeConcernMax(), {
         maxPoolSize: 1

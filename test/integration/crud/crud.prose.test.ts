@@ -77,6 +77,7 @@ describe('CRUD Prose Spec Tests', () => {
      */
 
     let collection;
+
     beforeEach(async () => {
       try {
         await client.db().collection('wc_details').drop();

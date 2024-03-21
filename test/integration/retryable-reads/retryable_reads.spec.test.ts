@@ -9,6 +9,7 @@ describe('Retryable Reads (legacy)', function () {
   const testSuites = loadSpecTests(path.join('retryable-reads', 'legacy'));
 
   after(() => testContext.teardown());
+
   before(function () {
     return testContext.setup(this.configuration);
   });
