@@ -69,6 +69,9 @@ expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, number>>({ a: 2 });
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string>>({ b: 'hello' });
 expectAssignable<OnlyFieldsOfType<{ a: number; b: string }, string, boolean>>({ b: true });
 
+// test the case in which AssignableType does not inherit from FieldType, and AssignableType is provided
+expectAssignable<OnlyFieldsOfType<any, string, boolean>>({ b: false });
+
 // test generic schema, essentially we expect nearly no safety here
 expectAssignable<OnlyFieldsOfType<Document, NumericType | undefined>>({ someKey: 2 });
 // We can still at least enforce the type that the keys map to

@@ -219,7 +219,7 @@ export type NotAcceptedFields<TSchema, FieldType> = {
 /** @public */
 export type OnlyFieldsOfType<TSchema, FieldType = any, AssignableType = FieldType> = IsAny<
   TSchema[keyof TSchema],
-  Record<string, FieldType>,
+  AssignableType extends FieldType ? Record<string, FieldType> : Record<string, AssignableType>,
   AcceptedFields<TSchema, FieldType, AssignableType> &
     NotAcceptedFields<TSchema, FieldType> &
     Record<string, AssignableType>
