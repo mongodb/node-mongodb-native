@@ -51,7 +51,7 @@
         {
           "client": "client",
           "eventType": "sdam",
-          "ignoreExtraEvents": true,
+          "ignoreExtraEvents": false,
           "events": [
             {
               "topologyOpeningEvent": {}

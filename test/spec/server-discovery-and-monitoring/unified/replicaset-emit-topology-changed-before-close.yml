@@ -34,7 +34,7 @@ tests:
     expectEvents:
       - client: *client
         eventType: sdam
-        ignoreExtraEvents: true
+        ignoreExtraEvents: false
         events:
           - topologyOpeningEvent: {}
           - topologyDescriptionChangedEvent: # unknown -> replset no primary

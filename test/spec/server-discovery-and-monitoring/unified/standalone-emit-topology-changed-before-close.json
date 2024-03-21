@@ -53,7 +53,7 @@
         {
           "client": "client",
           "eventType": "sdam",
-          "ignoreExtraEvents": true,
+          "ignoreExtraEvents": false,
           "events": [
             {
               "topologyOpeningEvent": {}
@@ -63,7 +63,9 @@
                 "previousDescription": {
                   "type": "Unknown"
                 },
-                "currentDescription": {}
+                "currentDescription": {
+                  "type": "Unknown"
+                }
               }
             },
             {

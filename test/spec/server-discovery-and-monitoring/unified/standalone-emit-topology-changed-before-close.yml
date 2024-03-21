@@ -36,13 +36,14 @@ tests:
     expectEvents:
       - client: *client
         eventType: sdam
-        ignoreExtraEvents: true
+        ignoreExtraEvents: false 
         events:
           - topologyOpeningEvent: {}
           - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
               previousDescription: 
                 type: "Unknown"
-              currentDescription: {}
+              currentDescription: 
+                type: "Unknown"
           - serverOpeningEvent: {}
           - topologyDescriptionChangedEvent:  # unknown w disconnected server -> standalone 
               previousDescription:

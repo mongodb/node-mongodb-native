@@ -25,7 +25,8 @@
                     "topologyDescriptionChangedEvent",
                     "topologyOpeningEvent",
                     "topologyClosedEvent"
-                  ]
+                  ],
+                  "useMultipleMongoses": true
                 }
               }
             ]
@@ -51,7 +52,7 @@
         {
           "client": "client",
           "eventType": "sdam",
-          "ignoreExtraEvents": true,
+          "ignoreExtraEvents": false,
           "events": [
             {
               "topologyOpeningEvent": {}

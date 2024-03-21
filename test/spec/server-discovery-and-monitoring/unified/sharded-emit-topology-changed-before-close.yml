@@ -20,6 +20,7 @@ tests:
                   - topologyDescriptionChangedEvent
                   - topologyOpeningEvent
                   - topologyClosedEvent
+                useMultipleMongoses: true
       # ensure the topology has been fully discovered before closing the client.
       # expected events are initial cluster type change from unknown to sharded and connect events
       # for each of 2 servers
@@ -35,7 +36,7 @@ tests:
     expectEvents:
       - client: *client
         eventType: sdam
-        ignoreExtraEvents: true
+        ignoreExtraEvents: false
         events:
           - topologyOpeningEvent: {}
           - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
