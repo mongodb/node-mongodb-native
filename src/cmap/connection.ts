@@ -57,6 +57,7 @@ import {
   type WriteProtocolMessageType
 } from './commands';
 import type { Stream } from './connect';
+import { type ConnectionPool } from './connection_pool';
 import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
@@ -124,6 +125,8 @@ export interface ConnectionOptions
   extendedMetadata: Promise<Document>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  parent?: ConnectionPool;
 }
 
 /** @public */
@@ -190,6 +193,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private readonly monitorCommands: boolean;
   private readonly socket: Stream;
   private readonly messageStream: Readable;
+  private readonly parent?: ConnectionPool;
 
   /** @event */
   static readonly COMMAND_STARTED = COMMAND_STARTED;
@@ -221,6 +225,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     this.description = new StreamDescription(this.address, options);
     this.generation = options.generation;
     this.lastUseTime = now();
+    this.parent = options.parent;
 
     this.messageStream = this.socket
       .on('error', this.onError.bind(this))

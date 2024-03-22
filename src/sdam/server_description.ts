@@ -1,6 +1,13 @@
 import { type Document, Long, type ObjectId } from '../bson';
 import { type MongoError, MongoRuntimeError } from '../error';
-import { arrayStrictEqual, compareObjectId, errorStrictEqual, HostAddress, now } from '../utils';
+import {
+  arrayStrictEqual,
+  compareObjectId,
+  errorStrictEqual,
+  HostAddress,
+  List,
+  now
+} from '../utils';
 import type { ClusterTime } from './common';
 import { ServerType } from './common';
 
@@ -57,7 +64,7 @@ export class ServerDescription {
   topologyVersion: TopologyVersion | null;
   minWireVersion: number;
   maxWireVersion: number;
-  roundTripTime: number;
+  private _rttSamples: List<number>;
   lastUpdateTime: number;
   lastWriteDate: number;
   me: string | null;
@@ -97,7 +104,11 @@ export class ServerDescription {
     this.tags = hello?.tags ?? {};
     this.minWireVersion = hello?.minWireVersion ?? 0;
     this.maxWireVersion = hello?.maxWireVersion ?? 0;
-    this.roundTripTime = options?.roundTripTime ?? -1;
+    // TODO: maybe use a List for this for quicker insertions and deletions
+    this._rttSamples = new List();
+    if (options?.roundTripTime != null) {
+      this._rttSamples.push(options.roundTripTime);
+    }
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
     this.error = options.error ?? null;
@@ -143,6 +154,36 @@ export class ServerDescription {
   get port(): number {
     const port = this.address.split(':').pop();
     return port ? Number.parseInt(port, 10) : 27017;
+  }
+
+  get roundTripTime(): number {
+    if (this._rttSamples.length > 0) {
+      let avg = 0;
+      for (const v of this._rttSamples) {
+        avg += v;
+      }
+      return avg / this._rttSamples.length;
+    }
+    return -1;
+  }
+
+  get minRoundTripTime(): number {
+    if (this._rttSamples.length >= 2) {
+      let minRTT = Infinity;
+      for (const v of this._rttSamples) {
+        if (v < minRTT) minRTT = v;
+      }
+      return minRTT;
+    }
+
+    return 0;
+  }
+
+  addSample(rtt: number) {
+    if (this._rttSamples.length >= 10) {
+      this._rttSamples.shift();
+    }
+    this._rttSamples.push(rtt);
   }
 
   /**

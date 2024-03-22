@@ -148,6 +148,7 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
+  private readonly server: Server;
   [kPoolState]: (typeof PoolState)[keyof typeof PoolState];
   [kServer]: Server;
   [kConnections]: List<Connection>;
@@ -247,6 +248,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPoolState] = PoolState.paused;
     this[kServer] = server;
+    this.server = server;
     this[kConnections] = new List();
     this[kPending] = 0;
     this[kCheckedOut] = new Set();
@@ -621,7 +623,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders
+      authProviders: this[kServer].topology.client.s.authProviders,
+      parent: this
     };
 
     this[kPending]++;
