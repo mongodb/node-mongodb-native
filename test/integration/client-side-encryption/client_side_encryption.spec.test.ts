@@ -69,7 +69,9 @@ describe('Client Side Encryption (Legacy)', function () {
   );
 
   installNodeDNSWorkaroundHooks();
+
   after(() => testContext.teardown());
+
   before(function () {
     return testContext.setup(this.configuration);
   });

@@ -22,6 +22,7 @@ describe('GetMoreOperation', function () {
     maxAwaitTimeMS: 500,
     readPreference: ReadPreference.primary
   };
+
   afterEach(function () {
     sinon.restore();
   });

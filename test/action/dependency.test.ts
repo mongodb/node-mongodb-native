@@ -132,6 +132,7 @@ describe('package.json', function () {
 
   describe('mongodb imports', () => {
     let imports: string[];
+
     beforeEach(async function () {
       for (const key of Object.keys(require.cache)) delete require.cache[key];
       require('../../src');

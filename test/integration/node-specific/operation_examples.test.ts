@@ -14,6 +14,7 @@ import { setupDatabase } from '../shared';
 
 describe('Operations', function () {
   let client: MongoClient;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

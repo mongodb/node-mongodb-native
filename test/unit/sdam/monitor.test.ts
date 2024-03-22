@@ -66,6 +66,7 @@ describe('monitoring', function () {
   });
 
   after(() => mock.cleanup());
+
   beforeEach(function () {
     return mock.createServer().then(server => (mockServer = server));
   });

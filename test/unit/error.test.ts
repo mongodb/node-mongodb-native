@@ -335,7 +335,9 @@ describe('MongoErrors', () => {
     };
 
     before(() => (test = new ReplSetFixture()));
+
     afterEach(() => cleanup());
+
     beforeEach(() => test.setup());
 
     function makeAndConnectReplSet(cb) {
@@ -590,6 +592,7 @@ describe('MongoErrors', () => {
         expect(isResumableError(new MongoNetworkTimeoutError('ah!'), 8)).to.be.true;
         expect(isResumableError(new MongoNetworkTimeoutError('ah!'), 9)).to.be.true;
       });
+
       it('for labelless MongoError with CursorNotFound code regardless of wire version', () => {
         const mongoError = new MongoError('ah!');
         mongoError.code = MONGODB_ERROR_CODES.CursorNotFound;

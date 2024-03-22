@@ -111,6 +111,7 @@ describe('Change Stream prose tests', function () {
       await client.close();
     }
   });
+
   afterEach(async () => await mock.cleanup());
 
   // TODO(NODE-3884): Add tests 1-4, 6-8. (#5 is removed from spec)
@@ -590,6 +591,7 @@ describe('Change Stream prose tests', function () {
             expect(tokens[0]).to.deep.equal(successes[1].nextBatch[0]._id);
           });
       });
+
       it('must return resumeAfter from the initial aggregate if the option was specified', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {
@@ -629,6 +631,7 @@ describe('Change Stream prose tests', function () {
             expect(token).to.deep.equal(resumeAfter);
           });
       });
+
       it('must be empty if resumeAfter options was not specified', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {
@@ -762,6 +765,7 @@ describe('Change Stream prose tests', function () {
             expect(token).to.deep.equal(startAfter).and.to.not.deep.equal(resumeAfter);
           });
       });
+
       it('must return resumeAfter from the initial aggregate if the option was specified', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {
@@ -797,6 +801,7 @@ describe('Change Stream prose tests', function () {
             expect(token).to.deep.equal(resumeAfter);
           });
       });
+
       it('must be empty if neither the startAfter nor resumeAfter options were specified', function () {
         const manager = new MockServerManager(this.configuration, {
           aggregate: (function* () {

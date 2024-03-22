@@ -45,6 +45,7 @@ describe('ClientEncryption integration tests', function () {
     const sandbox = sinon.createSandbox();
 
     after(() => sandbox.restore());
+
     before(() => {
       // stubbed out for AWS unit testing below
       const MOCK_KMS_ENCRYPT_REPLY = readHttpResponse(

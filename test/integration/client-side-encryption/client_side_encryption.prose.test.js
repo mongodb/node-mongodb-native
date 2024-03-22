@@ -565,6 +565,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     const limitsDoc = loadLimits('limits-doc.json');
 
     let hasRunFirstTimeSetup = false;
+
     beforeEach(async function () {
       if (hasRunFirstTimeSetup) {
         // Even though we have to use a beforeEach here
@@ -1274,6 +1275,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     describe('via loading shared library', function () {
       let clientEncrypted;
       let client;
+
       beforeEach(function () {
         const { cryptSharedLibPath } = getEncryptExtraOptions();
         if (!cryptSharedLibPath) {

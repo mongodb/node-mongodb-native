@@ -13,6 +13,7 @@ describe('Client (unit)', function () {
     await client.close();
     await mock.cleanup();
   });
+
   beforeEach(() => {
     return mock.createServer().then(_server => (server = _server));
   });
