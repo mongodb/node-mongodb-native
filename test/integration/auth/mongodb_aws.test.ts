@@ -270,7 +270,7 @@ describe('MONGODB-AWS', function () {
           numberOfFromNodeProviderChainCalls = 0;
 
           // @ts-expect-error We intentionally access a protected variable.
-          AWSTemporaryCredentialProvider._credentialProvider = {
+          AWSTemporaryCredentialProvider._awsSDK = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
               numberOfFromNodeProviderChainCalls += 1;
@@ -292,7 +292,7 @@ describe('MONGODB-AWS', function () {
             process.env.AWS_REGION = storedEnv.AWS_REGION;
           }
           // @ts-expect-error We intentionally access a protected variable.
-          AWSTemporaryCredentialProvider._credentialProvider = credentialProvider;
+          AWSTemporaryCredentialProvider._awsSDK = credentialProvider;
           calledArguments = [];
         });
 

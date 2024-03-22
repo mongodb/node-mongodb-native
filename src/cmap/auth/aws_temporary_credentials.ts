@@ -28,14 +28,14 @@ export interface AWSTempCredentials {
  */
 export abstract class AWSTemporaryCredentialProvider {
   abstract getCredentials(): Promise<AWSTempCredentials>;
-  private static _credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
-  protected static get credentialProvider() {
-    AWSTemporaryCredentialProvider._credentialProvider ??= getAwsCredentialProvider();
-    return AWSTemporaryCredentialProvider._credentialProvider;
+  private static _awsSDK: ReturnType<typeof getAwsCredentialProvider>;
+  protected static get awsSDK() {
+    AWSTemporaryCredentialProvider._awsSDK ??= getAwsCredentialProvider();
+    return AWSTemporaryCredentialProvider._awsSDK;
   }
 
   static get isAWSSDKInstalled(): boolean {
-    return !('kModuleError' in AWSTemporaryCredentialProvider.credentialProvider);
+    return !('kModuleError' in AWSTemporaryCredentialProvider.awsSDK);
   }
 }
 
@@ -47,8 +47,8 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
    * To ensure this occurs, we need to cache the `provider` returned by the AWS sdk and re-use it when fetching credentials.
    */
   private get provider(): () => Promise<AWSCredentials> {
-    if ('kModuleError' in AWSTemporaryCredentialProvider.credentialProvider) {
-      throw AWSTemporaryCredentialProvider.credentialProvider.kModuleError;
+    if ('kModuleError' in AWSTemporaryCredentialProvider.awsSDK) {
+      throw AWSTemporaryCredentialProvider.awsSDK.kModuleError;
     }
     if (this._provider) {
       return this._provider;
@@ -94,12 +94,12 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
       AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
       (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
 
-    this._provider ??=
+    this._provider =
       awsRegionSettingsExist && useRegionalSts
-        ? AWSTemporaryCredentialProvider.credentialProvider.fromNodeProviderChain({
+        ? AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain({
             clientConfig: { region: AWS_REGION }
           })
-        : AWSTemporaryCredentialProvider.credentialProvider.fromNodeProviderChain();
+        : AWSTemporaryCredentialProvider.awsSDK.fromNodeProviderChain();
 
     return this._provider;
   }
@@ -124,7 +124,7 @@ export class AWSSDKCredentialProvider extends AWSTemporaryCredentialProvider {
         Expiration: creds.expiration
       };
     } catch (error) {
-      throw new MongoAWSError(error.message);
+      throw new MongoAWSError(error.message, { cause: error });
     }
   }
 }

@@ -520,8 +520,8 @@ export class MongoAWSError extends MongoRuntimeError {
    *
    * @public
    **/
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, { cause }: { cause?: AnyError } = {}) {
+    super(message, { cause });
   }
 
   override get name(): string {
