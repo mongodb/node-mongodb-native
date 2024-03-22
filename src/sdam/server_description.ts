@@ -186,6 +186,27 @@ export class ServerDescription {
     this._rttSamples.push(rtt);
   }
 
+  updateWithHello(hello: Document, options: ServerDescriptionOptions = {}) {
+    this.type = parseServerType(hello, options);
+    this.hosts = hello?.hosts?.map((host: string) => host.toLowerCase()) ?? this.hosts;
+    this.passives = hello?.passives?.map((host: string) => host.toLowerCase()) ?? this.passives;
+    this.arbiters = hello?.arbiters?.map((host: string) => host.toLowerCase()) ?? this.arbiters;
+    this.tags = hello?.tags ?? this.tags;
+    this.minWireVersion = hello?.minWireVersion ?? this.minWireVersion;
+    this.maxWireVersion = hello?.maxWireVersion ?? this.maxWireVersion;
+    this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? this.lastWriteDate;
+    this.topologyVersion =
+      this.error?.topologyVersion ?? hello?.topologyVersion ?? this.topologyVersion;
+    this.setName = hello?.setName ?? this.setName;
+    this.setVersion = hello?.setVersion ?? this.setVersion;
+    this.electionId = hello?.electionId ?? this.electionId;
+    this.logicalSessionTimeoutMinutes =
+      hello?.logicalSessionTimeoutMinutes ?? this.logicalSessionTimeoutMinutes;
+    this.primary = hello?.primary ?? this.primary;
+    this.me = hello?.me?.toLowerCase() ?? this.me;
+    this.$clusterTime = hello?.$clusterTime ?? this.$clusterTime;
+  }
+
   /**
    * Determines if another `ServerDescription` is equal to this one per the rules defined
    * in the {@link https://github.com/mongodb/specifications/blob/master/source/server-discovery-and-monitoring/server-discovery-and-monitoring.rst#serverdescription|SDAM spec}
