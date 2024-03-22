@@ -5,6 +5,7 @@ import { filterForCommands } from '../shared';
 
 describe('Aggregation', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

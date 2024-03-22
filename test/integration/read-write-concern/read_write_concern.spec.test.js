@@ -9,6 +9,7 @@ describe('Read Write Concern spec tests', function () {
     const testSuites = loadSpecTests('read-write-concern/operation');
 
     after(() => testContext.teardown());
+
     before(function () {
       return testContext.setup(this.configuration);
     });
