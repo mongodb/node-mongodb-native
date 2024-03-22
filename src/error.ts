@@ -520,7 +520,7 @@ export class MongoAWSError extends MongoRuntimeError {
    *
    * @public
    **/
-  constructor(message: string, options: { cause?: AnyError } = {}) {
+  constructor(message: string, options?: { cause?: Error }) {
     super(message, options);
   }
 
