@@ -1,9 +1,8 @@
-import type { Document } from 'bson';
-
 import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { AbstractOperation } from '../operation';
+import type { SearchIndexDefinition } from './definition';
 
 /**
  * @public
@@ -13,7 +12,7 @@ export interface SearchIndexDescription {
   name?: string;
 
   /** The index definition. */
-  definition: Document;
+  definition: SearchIndexDefinition;
 }
 
 /** @internal */

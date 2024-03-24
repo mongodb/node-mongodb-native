@@ -231,7 +231,9 @@ describe('abstract operation', function () {
       },
       {
         subclassCreator: () =>
-          new mongodb.CreateSearchIndexesOperation(collection, [{ definition: { a: 1 } }]),
+          new mongodb.CreateSearchIndexesOperation(collection, [
+            { definition: { mappings: { dynamic: true } } }
+          ]),
         subclassType: mongodb.CreateSearchIndexesOperation,
         correctCommandName: 'createSearchIndexes'
       },
@@ -243,7 +245,7 @@ describe('abstract operation', function () {
       {
         subclassCreator: () =>
           new mongodb.UpdateSearchIndexOperation(collection, 'dummyName', {
-            a: 1
+            mappings: { dynamic: true }
           }),
         subclassType: mongodb.UpdateSearchIndexOperation,
         correctCommandName: 'updateSearchIndex'
