@@ -1,6 +1,6 @@
-'use strict';
+import { get } from 'http';
 
-const { get } = require('http');
+import { Filter } from './filter';
 
 async function isMockServerSetup() {
   const url = (() => {
@@ -11,7 +11,7 @@ async function isMockServerSetup() {
     url.searchParams.append('resource', 'https://vault.azure.net');
     return url;
   })();
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     get(url, res => {
       if (res.statusCode === 200) {
         return resolve();
@@ -26,24 +26,28 @@ async function isMockServerSetup() {
 /**
  * Filter for tests that require the mock idms server to be running.
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      idmsMockServer: true
  *    }
  * }
+ * ```
  */
-class IDMSMockServerFilter {
-  initializeFilter(client, context, callback) {
-    isMockServerSetup()
-      .then(
-        () => (this.isRunning = true),
-        () => (this.isRunning = false)
-      )
-      .then(() => callback());
+export class IDMSMockServerFilter extends Filter {
+  isRunning: boolean;
+
+  async initializeFilter() {
+    try {
+      await isMockServerSetup();
+      this.isRunning = true;
+    } catch (error) {
+      this.isRunning = false;
+    }
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.idmsMockServer) return true;
@@ -58,5 +62,3 @@ class IDMSMockServerFilter {
     return this.isRunning;
   }
 }
-
-module.exports = IDMSMockServerFilter;

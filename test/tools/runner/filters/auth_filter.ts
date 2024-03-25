@@ -1,21 +1,25 @@
-'use strict';
+import { Filter } from './filter';
 
 /**
  * Filter for authorization enabled or disabled on the server
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      auth: 'enabled' | 'disabled'
  *    }
  * }
+ * ```
  */
-class AuthFilter {
+export class AuthFilter extends Filter {
+  isAuthEnabled: boolean;
   constructor() {
+    super();
     this.isAuthEnabled = process.env.AUTH === 'auth';
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     if (!test.metadata.requires.auth) return true;
@@ -33,5 +37,3 @@ class AuthFilter {
     );
   }
 }
-
-module.exports = AuthFilter;

@@ -1,22 +1,26 @@
-'use strict';
+import { Filter } from './filter';
 
 /**
  * Filter for the MongoDB API Version required for the test
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      apiVersion: '1'
  *    }
  * }
+ * ```
  */
-class ApiVersionFilter {
+export class ApiVersionFilter extends Filter {
+  apiVersion: string | undefined;
   constructor() {
+    super();
     // Get environmental variables that are known
     this.apiVersion = process.env.MONGODB_API_VERSION;
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     if (!test.metadata) return true;
     if (!test.metadata.requires) return true;
     const apiVersion = test.metadata.requires.apiVersion;
@@ -33,5 +37,3 @@ class ApiVersionFilter {
     return apiVersion === this.apiVersion;
   }
 }
-
-module.exports = ApiVersionFilter;
