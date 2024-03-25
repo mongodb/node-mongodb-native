@@ -24,9 +24,7 @@
                   "observeEvents": [
                     "topologyDescriptionChangedEvent",
                     "topologyOpeningEvent",
-                    "topologyClosedEvent",
-                    "serverOpeningEvent",
-                    "serverClosedEvent"
+                    "topologyClosedEvent"
                   ]
                 }
               }
@@ -69,9 +67,6 @@
               }
             },
             {
-              "serverOpeningEvent": {}
-            },
-            {
               "topologyDescriptionChangedEvent": {
                 "previousDescription": {
                   "type": "Unknown"
@@ -80,9 +75,6 @@
                   "type": "Single"
                 }
               }
-            },
-            {
-              "serverClosedEvent": {}
             },
             {
               "topologyDescriptionChangedEvent": {

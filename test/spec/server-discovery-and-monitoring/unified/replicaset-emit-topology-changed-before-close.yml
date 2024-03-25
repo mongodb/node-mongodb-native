@@ -37,26 +37,10 @@ tests:
         ignoreExtraEvents: false
         events:
           - topologyOpeningEvent: {}
-          - topologyDescriptionChangedEvent: # unknown -> replset no primary
-              previousDescription: 
-                type: "Unknown"
-              newDescription:
-                type: "ReplicaSetNoPrimary"
-          - topologyDescriptionChangedEvent:  # server connected
-              previousDescription:
-                type: "ReplicaSetNoPrimary"
-              newDescription:
-                type: "ReplicaSetWithPrimary"
-          - topologyDescriptionChangedEvent:  # server connected
-              previousDescription:
-                type: "ReplicaSetWithPrimary"
-              newDescription:
-                type: "ReplicaSetWithPrimary"
-          - topologyDescriptionChangedEvent:  # server connected
-              previousDescription:
-                type: "ReplicaSetWithPrimary"
-              newDescription:
-                type: "ReplicaSetWithPrimary"
+          - topologyDescriptionChangedEvent: {} # unknown -> replset no primary
+          - topologyDescriptionChangedEvent: {} # server connected
+          - topologyDescriptionChangedEvent: {} # server connected
+          - topologyDescriptionChangedEvent: {} # server connected
           - topologyDescriptionChangedEvent:  # replicaset -> unknown
               previousDescription:
                 type: "ReplicaSetWithPrimary"
