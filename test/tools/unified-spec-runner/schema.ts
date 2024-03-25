@@ -107,6 +107,7 @@ export type TopologyId = (typeof TopologyType)[keyof typeof TopologyType];
 export interface RunOnRequirement {
   serverless?: 'forbid' | 'allow' | 'require';
   auth?: boolean;
+  authMechanism?: string;
   maxServerVersion?: string;
   minServerVersion?: string;
   topologies?: TopologyId[];

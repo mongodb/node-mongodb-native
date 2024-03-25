@@ -171,9 +171,28 @@ functions:
           ${PREPARE_SHELL}
 
           OIDC_TOKEN_DIR="/tmp/tokens" \
+          ENVIRONMENT="aws" \
           AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test_user1" \
+          OIDC_ATLAS_URI_SINGLE="${OIDC_ATLAS_URI_SINGLE}" \
+          OIDC_ATLAS_URI_MULTI="${OIDC_ATLAS_URI_MULTI}" \
           PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
             bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-tests.sh
+
+  "run oidc auth tests aws":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        timeout_secs: 300
+        shell: bash
+        script: |
+          ${PREPARE_SHELL}
+
+          OIDC_TOKEN_DIR="/tmp/tokens" \
+          ENVIRONMENT="aws" \
+          AWS_WEB_IDENTITY_TOKEN_FILE="/tmp/tokens/test_user1" \
+          PROJECT_DIRECTORY="${PROJECT_DIRECTORY}" \
+            bash ${PROJECT_DIRECTORY}/.evergreen/run-oidc-auth-tests.sh
 
   "run tests":
     - command: shell.exec
@@ -1258,11 +1277,6 @@ tasks:
 
   - name: "oidc-auth-test-azure-latest"
     commands:
-      - command: expansions.update
-        type: setup
-        params:
-          updates:
-            - { key: NPM_VERSION, value: "9" }
       - func: "install dependencies"
       - command: subprocess.exec
         params:
@@ -1271,10 +1285,55 @@ tasks:
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
-            AZUREOIDC_CLIENTID: ${testazureoidc_clientid}
-            PROVIDER_NAME: azure
+            ENVIRONMENT: azure
+            SCRIPT: run-oidc-tests.sh
           args:
             - .evergreen/run-oidc-tests-azure.sh
+
+  - name: "oidc-auth-test-azure-latest-auth"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: azure
+            SCRIPT: run-oidc-auth-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-azure.sh
+
+  - name: "oidc-auth-test-gcp-latest"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: gcp
+            SCRIPT: run-oidc-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-gcp.sh
+
+  - name: "oidc-auth-test-gcp-latest-auth"
+    commands:
+      - func: "install dependencies"
+      - command: subprocess.exec
+        params:
+          working_dir: src
+          binary: bash
+          env:
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+            PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+            ENVIRONMENT: gcp
+            SCRIPT: run-oidc-auth-tests.sh
+          args:
+            - .evergreen/run-oidc-tests-gcp.sh
 
   - name: "test-aws-lambda-deployed"
     commands:
@@ -1439,14 +1498,9 @@ task_groups:
           script: |-
             set -o errexit
             ${PREPARE_SHELL}
-            export AZUREOIDC_CLIENTID="${testazureoidc_clientid}"
-            export AZUREOIDC_TENANTID="${testazureoic_tenantid}"
-            export AZUREOIDC_SECRET="${testazureoidc_secret}"
-            export AZUREOIDC_KEYVAULT=${testazureoidc_keyvault}
-            export AZUREOIDC_DRIVERS_TOOLS="$DRIVERS_TOOLS"
             export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
             $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
-    teardown_group:
+    teardown_task:
       - command: shell.exec
         params:
           shell: bash
@@ -1457,6 +1511,75 @@ task_groups:
     setup_group_timeout_secs: 1800
     tasks:
       - oidc-auth-test-azure-latest
+
+  - name: testazureoidcauth_task_group
+    setup_group:
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export AZUREOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/create-and-setup-vm.sh
+    teardown_task:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/azure/delete-vm.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-azure-latest-auth
+
+  - name: testgcpoidc_task_group
+    setup_group:
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/create-and-setup-instance.sh
+    teardown_task:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/delete-instance.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-gcp-latest
+
+  - name: testgcpoidcauth_task_group
+    setup_group:
+      - func: fetch source
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            set -o errexit
+            ${PREPARE_SHELL}
+            export GCPOIDC_VMNAME_PREFIX="NODE_DRIVER"
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/create-and-setup-instance.sh
+    teardown_task:
+      - command: shell.exec
+        params:
+          shell: bash
+          script: |-
+            ${PREPARE_SHELL}
+            $DRIVERS_TOOLS/.evergreen/auth_oidc/gcp/delete-instance.sh
+    setup_group_can_fail_task: true
+    setup_group_timeout_secs: 1800
+    tasks:
+      - oidc-auth-test-gcp-latest-auth
 
   - name: test_atlas_task_group
     setup_group:
@@ -1473,7 +1596,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_group:
+    teardown_task:
       - command: subprocess.exec
         params:
           working_dir: src
@@ -1501,7 +1624,7 @@ task_groups:
       - command: expansions.update
         params:
           file: src/atlas-expansion.yml
-    teardown_group:
+    teardown_task:
       - command: subprocess.exec
         params:
           working_dir: src

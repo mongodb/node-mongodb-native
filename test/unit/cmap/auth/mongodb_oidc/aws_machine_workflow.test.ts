@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { AwsServiceWorkflow, Connection, MongoCredentials } from '../../../../mongodb';
+import { AwsMachineWorkflow, Connection, MongoCredentials } from '../../../../mongodb';
 
-describe('AwsDeviceWorkFlow', function () {
+describe('AwsMachineFlow', function () {
   describe('#execute', function () {
-    const workflow = new AwsServiceWorkflow();
+    const workflow = new AwsMachineWorkflow();
 
     context('when AWS_WEB_IDENTITY_TOKEN_FILE is not in the env', function () {
       let file;

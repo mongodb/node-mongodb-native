@@ -304,7 +304,7 @@ describe('Connection String', function () {
       it('raises an error', function () {
         expect(() => {
           parseOptions(
-            'mongodb://localhost/?authMechanismProperties=PROVIDER_NAME:aws,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC'
+            'mongodb://localhost/?authMechanismProperties=ENVIRONMENT:aws,ALLOWED_HOSTS:[localhost]&authMechanism=MONGODB-OIDC'
           );
         }).to.throw(
           MongoParseError,
@@ -319,7 +319,7 @@ describe('Connection String', function () {
 
         it('sets the allowed hosts property', function () {
           const options = parseOptions(
-            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
+            'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:aws',
             {
               authMechanismProperties: {
                 ALLOWED_HOSTS: hosts
@@ -327,7 +327,7 @@ describe('Connection String', function () {
             }
           );
           expect(options.credentials.mechanismProperties).to.deep.equal({
-            PROVIDER_NAME: 'aws',
+            ENVIRONMENT: 'aws',
             ALLOWED_HOSTS: hosts
           });
         });
@@ -337,7 +337,7 @@ describe('Connection String', function () {
         it('raises an error', function () {
           expect(() => {
             parseOptions(
-              'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws',
+              'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:aws',
               {
                 authMechanismProperties: {
                   ALLOWED_HOSTS: [1, 2, 3]
@@ -355,10 +355,10 @@ describe('Connection String', function () {
     context('when ALLOWED_HOSTS is not in the options', function () {
       it('sets the default value', function () {
         const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:aws'
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:aws'
         );
         expect(options.credentials.mechanismProperties).to.deep.equal({
-          PROVIDER_NAME: 'aws',
+          ENVIRONMENT: 'aws',
           ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
         });
       });
@@ -367,12 +367,12 @@ describe('Connection String', function () {
     context('when TOKEN_AUDIENCE is in the properties', function () {
       context('when it is a uri', function () {
         const options = parseOptions(
-          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=PROVIDER_NAME:azure,TOKEN_AUDIENCE:api%3A%2F%2Ftest'
+          'mongodb://localhost/?authMechanism=MONGODB-OIDC&authMechanismProperties=ENVIRONMENT:azure,TOKEN_AUDIENCE:api%3A%2F%2Ftest'
         );
 
         it('parses the uri', function () {
           expect(options.credentials.mechanismProperties).to.deep.equal({
-            PROVIDER_NAME: 'azure',
+            ENVIRONMENT: 'azure',
             TOKEN_AUDIENCE: 'api://test',
             ALLOWED_HOSTS: DEFAULT_ALLOWED_HOSTS
           });
@@ -656,7 +656,7 @@ describe('Connection String', function () {
         makeStub('authSource=thisShouldNotBeAuthSource');
         const mechanismProperties = {};
         if (mechanism === AuthMechanism.MONGODB_OIDC) {
-          mechanismProperties.PROVIDER_NAME = 'aws';
+          mechanismProperties.ENVIRONMENT = 'aws';
         }
 
         const credentials = new MongoCredentials({

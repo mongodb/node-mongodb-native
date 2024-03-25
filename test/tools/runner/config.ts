@@ -78,6 +78,7 @@ export class TestConfiguration {
   };
   serverApi: ServerApi;
   activeResources: number;
+  isSrv: boolean;
 
   constructor(private uri: string, private context: Record<string, any>) {
     const url = new ConnectionString(uri);
@@ -92,6 +93,7 @@ export class TestConfiguration {
     this.topologyType = this.isLoadBalanced ? TopologyType.LoadBalanced : context.topologyType;
     this.buildInfo = context.buildInfo;
     this.serverApi = context.serverApi;
+    this.isSrv = uri.indexOf('mongodb+srv') > -1;
     this.options = {
       hosts,
       hostAddresses,
@@ -159,8 +161,8 @@ export class TestConfiguration {
     return this.options.replicaSet;
   }
 
-  isAzureOIDC(uri: string): boolean {
-    return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf('PROVIDER_NAME:azure') > -1;
+  isOIDC(uri: string, env: string): boolean {
+    return uri.indexOf('MONGODB-OIDC') > -1 && uri.indexOf(`ENVIRONMENT:${env}`) > -1;
   }
 
   newClient(urlOrQueryOptions?: string | Record<string, any>, serverOptions?: Record<string, any>) {
@@ -345,6 +347,11 @@ export class TestConfiguration {
 
     if (!options.authSource) {
       url.searchParams.append('authSource', 'admin');
+    }
+
+    if (this.uri.includes('MONGODB-OIDC')) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return process.env.MONGODB_URI!;
     }
 
     const connectionString = url.toString().replace(FILLER_HOST, actualHostsString);

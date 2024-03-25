@@ -1,12 +1,10 @@
 import { MongoAzureError } from '../../../error';
 import { request } from '../../../utils';
 import type { MongoCredentials } from '../mongo_credentials';
-import { AzureTokenCache } from './azure_token_cache';
-import { ServiceWorkflow } from './service_workflow';
+import { type AccessToken, MachineWorkflow } from './machine_workflow';
 
 /** Base URL for getting Azure tokens. */
-const AZURE_BASE_URL =
-  'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01';
+const AZURE_BASE_URL = 'http://169.254.169.254/metadata/identity/oauth2/token?';
 
 /** Azure request headers. */
 const AZURE_HEADERS = Object.freeze({ Metadata: 'true', Accept: 'application/json' });
@@ -17,60 +15,46 @@ const ENDPOINT_RESULT_ERROR =
 
 /** Error for when the token audience is missing in the environment. */
 const TOKEN_AUDIENCE_MISSING_ERROR =
-  'TOKEN_AUDIENCE must be set in the auth mechanism properties when PROVIDER_NAME is azure.';
-
-/**
- * The Azure access token format.
- * @internal
- */
-export interface AzureAccessToken {
-  access_token: string;
-  expires_in: number;
-}
+  'TOKEN_AUDIENCE must be set in the auth mechanism properties when ENVIRONMENT is azure.';
 
 /**
  * Device workflow implementation for Azure.
  *
  * @internal
  */
-export class AzureServiceWorkflow extends ServiceWorkflow {
-  cache = new AzureTokenCache();
-
+export class AzureMachineWorkflow extends MachineWorkflow {
   /**
    * Get the token from the environment.
    */
-  async getToken(credentials?: MongoCredentials): Promise<string> {
+  async getToken(credentials?: MongoCredentials): Promise<AccessToken> {
     const tokenAudience = credentials?.mechanismProperties.TOKEN_AUDIENCE;
+    const username = credentials?.username;
     if (!tokenAudience) {
       throw new MongoAzureError(TOKEN_AUDIENCE_MISSING_ERROR);
     }
-    let token;
-    const entry = this.cache.getEntry(tokenAudience);
-    if (entry?.isValid()) {
-      token = entry.token;
-    } else {
-      this.cache.deleteEntry(tokenAudience);
-      const response = await getAzureTokenData(tokenAudience);
-      if (!isEndpointResultValid(response)) {
-        throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
-      }
-      this.cache.addEntry(tokenAudience, response);
-      token = response.access_token;
+    const response = await getAzureTokenData(tokenAudience, username);
+    if (!isEndpointResultValid(response)) {
+      throw new MongoAzureError(ENDPOINT_RESULT_ERROR);
     }
-    return token;
+    return response;
   }
 }
 
 /**
  * Hit the Azure endpoint to get the token data.
  */
-async function getAzureTokenData(tokenAudience: string): Promise<AzureAccessToken> {
-  const url = `${AZURE_BASE_URL}&resource=${tokenAudience}`;
-  const data = await request(url, {
+async function getAzureTokenData(tokenAudience: string, username?: string): Promise<AccessToken> {
+  const url = new URL(AZURE_BASE_URL);
+  url.searchParams.append('api-version', '2018-02-01');
+  url.searchParams.append('resource', tokenAudience);
+  if (username) {
+    url.searchParams.append('client_id', username);
+  }
+  const data = await request(url.toString(), {
     json: true,
     headers: AZURE_HEADERS
   });
-  return data as AzureAccessToken;
+  return data as AccessToken;
 }
 
 /**

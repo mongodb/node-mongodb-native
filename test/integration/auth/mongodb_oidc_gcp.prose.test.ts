@@ -2,14 +2,14 @@ import { expect } from 'chai';
 
 import { type Collection, type MongoClient } from '../../mongodb';
 
-describe('OIDC Auth Spec Azure Tests', function () {
-  describe('Azure Automatic Auth', function () {
+describe('OIDC Auth Spec GCP Tests', function () {
+  describe('GCP Automatic Auth', function () {
     let client: MongoClient;
     let collection: Collection;
 
     beforeEach(function () {
-      if (!this.configuration.isOIDC(process.env.MONGODB_URI, 'azure')) {
-        this.skipReason = 'Azure OIDC tests require an Azure OIDC environment.';
+      if (!this.configuration.isOIDC(process.env.MONGODB_URI, 'gcp')) {
+        this.skipReason = 'GCP OIDC prose tests require a GCP OIDC environment.';
         this.skip();
       }
     });
