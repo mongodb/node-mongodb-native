@@ -76,17 +76,6 @@ describe('CRUD API explain option', function () {
     collection = db.collection('test');
     await collection.insertOne({ a: 1 });
     commandStartedPromise = once(client, 'commandStarted');
-
-    const test = this.currentTest;
-    if (
-      test?.fullTitle().includes('aggregate') &&
-      gte(this.configuration.version, '7.1.0') &&
-      this.currentTest
-    ) {
-      this.currentTest.skipReason =
-        'TODO(NODE-5617): aggregate explain tests failing on latest servers';
-      this.skip();
-    }
   });
 
   afterEach(async function () {

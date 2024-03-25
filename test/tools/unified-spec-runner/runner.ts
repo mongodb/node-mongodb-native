@@ -178,7 +178,6 @@ async function runUnifiedTest(
     if (topologyType === TopologyType.Sharded || topologyType === TopologyType.LoadBalanced) {
       for (const [, collection] of entities.mapOf('collection')) {
         try {
-          // TODO(NODE-4238): create / cleanup entities for each test suite
           await utilClient.db(ns(collection.namespace).db).command({
             distinct: collection.collectionName,
             key: '_id'

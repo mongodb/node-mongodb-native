@@ -34,7 +34,7 @@ const filter: TestFilter = ({ description }) => {
       'remain pinned after non-transient Interrupted error on insertOne'
     ].includes(description)
   ) {
-    return 'TODO(DRIVERS-2816): fix migration conflict in transaction tests';
+    return 'TODO(NODE-5962): fix migration conflict in transaction tests';
   }
 
   if (
