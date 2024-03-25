@@ -1,6 +1,6 @@
 description: "loadbalanced-emit-topology-description-changed-before-close"
 
-schemaVersion: "1.16"
+schemaVersion: "1.19"
 
 runOnRequirements:
   - topologies:
@@ -39,7 +39,7 @@ tests:
           - topologyDescriptionChangedEvent: # unknown -> unknown w disconnected server
               previousDescription: 
                 type: "Unknown"
-              currentDescription: {}
+              newDescription: {}
           - topologyDescriptionChangedEvent:  # unknown w disconnected server -> loadBalanced
               newDescription:
                 type: "LoadBalanced"

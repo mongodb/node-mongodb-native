@@ -1,6 +1,6 @@
 {
   "description": "standalone-emit-topology-description-changed-before-close",
-  "schemaVersion": "1.16",
+  "schemaVersion": "1.19",
   "runOnRequirements": [
     {
       "topologies": [
