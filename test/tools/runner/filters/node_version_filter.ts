@@ -1,19 +1,21 @@
-'use strict';
+import { satisfies } from 'semver';
 
-const { satisfies } = require('semver');
+import { Filter } from './filter';
 
 /**
  * Filter for specific nodejs versions
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      nodejs: '>=14'
  *    }
  * }
+ * ```
  */
-class NodeVersionFilter {
-  filter(test) {
+export class NodeVersionFilter extends Filter {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     const nodeVersionRange = test?.metadata?.requires?.nodejs;
     if (!nodeVersionRange) {
       return true;
@@ -22,5 +24,3 @@ class NodeVersionFilter {
     return satisfies(process.version, nodeVersionRange);
   }
 }
-
-module.exports = NodeVersionFilter;

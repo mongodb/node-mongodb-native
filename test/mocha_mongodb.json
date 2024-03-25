@@ -4,7 +4,7 @@
     "source-map-support/register",
     "ts-node/register",
     "test/tools/runner/chai-addons.js",
-    "test/tools/runner/hooks/configuration.js",
+    "test/tools/runner/hooks/configuration.ts",
     "test/tools/runner/hooks/unhandled_checker.ts",
     "test/tools/runner/hooks/leak_checker.ts",
     "test/tools/runner/hooks/legacy_crud_shims.ts"

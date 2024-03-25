@@ -78,6 +78,7 @@ export class TestConfiguration {
   };
   serverApi: ServerApi;
   activeResources: number;
+  serverlessCredentials: { username: string | undefined; password: string | undefined };
 
   constructor(private uri: string, private context: Record<string, any>) {
     const url = new ConnectionString(uri);

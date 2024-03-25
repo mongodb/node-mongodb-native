@@ -1,22 +1,28 @@
-'use strict';
+import { readFile } from 'fs/promises';
+import { dirname, resolve } from 'path';
+import * as process from 'process';
 
-const { readFileSync } = require('fs');
-const { resolve } = require('path');
-const process = require('process');
+import { type MongoClient } from '../../../mongodb';
+import { Filter } from './filter';
 
 /**
  * Filter for whether or not a test needs / doesn't need Client Side Encryption
  *
- * example:
+ * @example
+ * ```js
  * metadata: {
  *    requires: {
  *      clientSideEncryption: true|false
  *    }
  * }
+ * ```
  */
 
-class ClientSideEncryptionFilter {
-  initializeFilter(client, context, callback) {
+export class ClientSideEncryptionFilter extends Filter {
+  enabled: boolean;
+  static version = null;
+
+  async initializeFilter(client: MongoClient, context: Record<string, any>) {
     const CSFLE_KMS_PROVIDERS = process.env.CSFLE_KMS_PROVIDERS;
     let mongodbClientEncryption;
     try {
@@ -27,11 +33,12 @@ class ClientSideEncryptionFilter {
       }
     }
 
-    const { version } = JSON.parse(
-      readFileSync(
-        resolve(__dirname, '../../../../node_modules/mongodb-client-encryption', 'package.json')
+    ClientSideEncryptionFilter.version ??= JSON.parse(
+      await readFile(
+        resolve(dirname(require.resolve('mongodb-client-encryption')), '..', 'package.json'),
+        'utf8'
       )
-    );
+    ).version;
 
     this.enabled = !!(CSFLE_KMS_PROVIDERS && mongodbClientEncryption);
 
@@ -40,13 +47,11 @@ class ClientSideEncryptionFilter {
       enabled: this.enabled,
       mongodbClientEncryption,
       CSFLE_KMS_PROVIDERS,
-      version
+      version: ClientSideEncryptionFilter.version
     };
-
-    callback();
   }
 
-  filter(test) {
+  filter(test: { metadata?: MongoDBMetadataUI }) {
     const clientSideEncryption =
       test.metadata && test.metadata.requires && test.metadata.requires.clientSideEncryption;
 
@@ -66,5 +71,3 @@ class ClientSideEncryptionFilter {
     return this.enabled;
   }
 }
-
-module.exports = ClientSideEncryptionFilter;
