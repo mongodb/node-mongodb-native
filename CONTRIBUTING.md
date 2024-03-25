@@ -97,7 +97,7 @@ These are the commit types we make use of:
 Below are some conventions that aren't enforced by any of our tooling but we nonetheless do our best to adhere to:
 
 - **Disallow `export default` syntax**
-  - For our use case it is best if all imports / exports remain named.
+  - For our use case, it is best if all imports / exports remain named.
 - **As of 4.0 all code in src is in Typescript**
   - Typescript provides a nice developer experience.
     As a product of using TS, we should be using ES6 syntax features whenever possible.

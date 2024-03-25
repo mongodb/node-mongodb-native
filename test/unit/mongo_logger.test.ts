@@ -50,6 +50,7 @@ describe('meta tests for BufferingStream', function () {
     const stream = new BufferingStream();
     expect(stream.buffer).to.have.lengthOf(0);
   });
+
   it('pushes messages to the buffer when written to', function () {
     const stream = new BufferingStream();
     stream.write('message');
@@ -1251,6 +1252,7 @@ describe('class MongoLogger', function () {
   describe('stringifyWithMaxLen', function () {
     const largeDoc = {};
     const smallDoc = { test: 'Hello' };
+
     before(function () {
       for (let i = 0; i < DEFAULT_MAX_DOCUMENT_LENGTH; i++) {
         largeDoc[`test${i}`] = `Hello_${i}`;
@@ -1407,6 +1409,7 @@ describe('class MongoLogger', function () {
         });
       });
     });
+
     describe('async stream failure handling', function () {
       context('when stream is not stderr', function () {
         let stderrStub;

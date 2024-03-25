@@ -31,6 +31,7 @@ describe('Wire Protocol Version', () => {
   beforeEach(async () => {
     server = await mock.createServer();
   });
+
   afterEach(async () => {
     await client.close();
     await mock.cleanup();

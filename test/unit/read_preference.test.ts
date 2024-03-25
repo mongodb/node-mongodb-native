@@ -6,6 +6,7 @@ describe('class ReadPreference', function () {
   const maxStalenessSeconds = 1234;
   const { PRIMARY, PRIMARY_PREFERRED, SECONDARY, SECONDARY_PREFERRED, NEAREST } = ReadPreference;
   const TAGS = [{ loc: 'dc' }];
+
   describe('::constructor', function () {
     it('should accept (mode)', function () {
       expect(new ReadPreference(PRIMARY)).to.be.an.instanceOf(ReadPreference);

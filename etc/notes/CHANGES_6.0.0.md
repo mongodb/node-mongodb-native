@@ -110,7 +110,7 @@ The `await client.withSession(async session => {})` now returns the value that t
 The `await session.withTransaction(async () => {})` method now returns the value that the provided function returns. Previously, this function returned the server command response which is subject to change depending on the server version or type the driver is connected to. The return value got in the way of writing robust, reliable, consistent code no matter the backing database supporting the application.
 
 > [!WARNING]
-> When upgrading to this version of the driver, be sure to audit any usages of `withTransaction` for `if` statements or other conditional checks on the return value of `withTransaction`. Previously, the return value was the command response if the transaction was committed and `undefined` if it had been manually aborted. It would only throw if an operation or the author of the function threw an error. Since prior to this release it was not possible to get the result of the function passed to `withTransaction` we suspect most existing functions passed to this method return `void`, making `withTransaction` a `void` returning function in this major release. Take care to ensure that the return values of your function match the expectation of the code that follows the completion of `withTransaction`.
+> When upgrading to this version of the driver, be sure to audit any usages of `withTransaction` for `if` statements or other conditional checks on the return value of `withTransaction`. Previously, the return value was the command response if the transaction was committed and `undefined` if it had been manually aborted. It would only throw if an operation or the author of the function threw an error. Since prior to this release, it was not possible to get the result of the function passed to `withTransaction` we suspect most existing functions passed to this method return `void`, making `withTransaction` a `void` returning function in this major release. Take care to ensure that the return values of your function match the expectation of the code that follows the completion of `withTransaction`.
 
 ### Driver methods throw if a session is provided from a different `MongoClient`
 
@@ -155,7 +155,7 @@ const client = new MongoClient('mongodb://localhost:27017?tls=true');
 
 ### Repeated options are no longer allowed in connection strings
 
-In order to avoid accidental misconfiguration the driver will no longer prioritize the first instance of an option provided on the URI. Instead repeated options that are not permitted to be repeated will throw an error.
+In order to avoid accidental misconfiguration, the driver will no longer prioritize the first instance of an option provided on the URI. Instead, repeated options that are not permitted to be repeated will throw an error.
 
 This change will ensure that connection strings that contain options like `tls=true&tls=false` are no longer ambiguous.
 

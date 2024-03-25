@@ -5,6 +5,7 @@ describe('examples.versionedApi:', function () {
   let uri;
   // eslint-disable-next-line no-unused-vars
   let client;
+
   before(function () {
     uri = this.configuration.url();
   });

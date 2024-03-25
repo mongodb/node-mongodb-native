@@ -57,6 +57,7 @@ const unhandledErrors = [
 describe('Server', () => {
   describe('#handleError', () => {
     let server: Server, connection: Connection | undefined;
+
     beforeEach(() => {
       server = new Server(
         topologyWithPlaceholderClient([], {}),

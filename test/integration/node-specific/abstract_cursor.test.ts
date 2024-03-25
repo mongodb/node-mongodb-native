@@ -17,6 +17,7 @@ describe('class AbstractCursor', function () {
     let client: MongoClient;
     let collection: Collection;
     const docs = [{ count: 0 }, { count: 10 }];
+
     beforeEach(async function () {
       client = this.configuration.newClient();
 
@@ -49,6 +50,7 @@ describe('class AbstractCursor', function () {
     let client: MongoClient;
     let collection: Collection;
     const transformSpy = sinon.spy(doc => ({ ...doc, name: doc.name.toUpperCase() }));
+
     beforeEach(async function () {
       client = this.configuration.newClient();
 
@@ -137,6 +139,7 @@ describe('class AbstractCursor', function () {
     const falseyValues = [0, 0n, NaN, '', false, undefined];
 
     let collection: Collection;
+
     beforeEach(async function () {
       client = this.configuration.newClient();
 
@@ -245,6 +248,7 @@ describe('class AbstractCursor', function () {
     let client: MongoClient;
     let collection: Collection;
     const docs = [{ count: 0 }];
+
     beforeEach(async function () {
       client = this.configuration.newClient();
 

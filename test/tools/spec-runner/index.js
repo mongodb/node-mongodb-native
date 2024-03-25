@@ -206,7 +206,9 @@ function generateTopologyTests(testSuites, testContext, filter) {
 
     describe(testSuite.name, function () {
       beforeEach(beforeEachFilter);
+
       beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+
       afterEach(() => testContext.cleanupAfterSuite());
       for (const spec of testSuite.tests) {
         const mochaTest = it(spec.description, async function () {

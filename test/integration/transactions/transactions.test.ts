@@ -264,6 +264,7 @@ describe('Transactions', function () {
 
   describe('TransientTransactionError', function () {
     let client: MongoClient;
+
     beforeEach(async function () {
       client = this.configuration.newClient();
     });

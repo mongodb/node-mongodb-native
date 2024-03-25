@@ -10,6 +10,7 @@ const test = {};
 describe('Sessions - client/unit', function () {
   describe('Client', function () {
     afterEach(() => mock.cleanup());
+
     beforeEach(() => {
       return mock.createServer().then(server => {
         test.server = server;

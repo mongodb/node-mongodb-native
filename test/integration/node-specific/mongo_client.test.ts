@@ -21,6 +21,7 @@ import { setupDatabase } from '../shared';
 
 describe('class MongoClient', function () {
   let client: MongoClient;
+
   before(function () {
     return setupDatabase(this.configuration);
   });

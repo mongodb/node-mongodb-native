@@ -29,7 +29,9 @@ describe('Connection Pool', function () {
       }
     }
   };
+
   after(() => mock.cleanup());
+
   before(() =>
     mock.createServer().then(s => {
       mockMongod = s;
@@ -133,6 +135,7 @@ describe('Connection Pool', function () {
 
   describe('minPoolSize population', function () {
     let clock, timerSandbox;
+
     beforeEach(() => {
       timerSandbox = createTimerSandbox();
       clock = sinon.useFakeTimers();

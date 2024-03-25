@@ -5,6 +5,7 @@ const { setTimeout, setImmediate } = require('timers');
 
 describe('Cursor Streams', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

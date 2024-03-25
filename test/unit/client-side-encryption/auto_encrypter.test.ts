@@ -46,6 +46,7 @@ describe('AutoEncrypter', function () {
   this.timeout(12000);
   let ENABLE_LOG_TEST = false;
   const sandbox = sinon.createSandbox();
+
   beforeEach(() => {
     sandbox.restore();
     sandbox.stub(StateMachine.prototype, 'kmsRequest').callsFake(request => {

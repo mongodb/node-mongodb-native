@@ -128,7 +128,7 @@ driver v4 and v5. However, new features will **only** support a Promise-based AP
 
 ##### Example usage of equivalent callback and Promise usage
 
-After installing the package and modifying imports the following example demonstrates equivalent usages of either `async`/`await` syntax, `.then`/`.catch` chaining, or callbacks:
+After installing the package and modifying imports, the following example demonstrates equivalent usages of either `async`/`await` syntax, `.then`/`.catch` chaining, or callbacks:
 
 ```typescript
 // Just add '-legacy' to my mongodb import
@@ -260,7 +260,7 @@ Three legacy operation helpers on the collection class have been removed:
 | `update(filter)`           | `updateMany(filter)`           |
 | `remove(filter)`           | `deleteMany(filter)`           |
 
-The `insert` method accepted an array of documents for multi-document inserts and a single document for single document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
+The `insert` method accepted an array of documents for multi-document inserts and a single document for single-document inserts. `insertOne` should now be used for single-document inserts and `insertMany` should be used for multi-document inserts.
 
 ```typescript
 // Single document insert:
@@ -355,7 +355,7 @@ The `digestPassword` option has been removed from the add user helper.
 
 ### `ObjectID` type removed in favor of `ObjectId`
 
-For clarity the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
+For clarity, the deprecated and duplicate export `ObjectID` has been removed. `ObjectId` matches the class name and is equal in every way to the capital "D" export.
 
 ### `slaveOk` options removed
 

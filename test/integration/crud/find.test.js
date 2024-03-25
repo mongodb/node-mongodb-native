@@ -7,6 +7,7 @@ const { Code, ObjectId, Long, Binary, ReturnDocument } = require('../../mongodb'
 
 describe('Find', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

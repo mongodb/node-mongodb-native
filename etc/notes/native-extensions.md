@@ -20,14 +20,14 @@ If all the steps complete, you have the right toolchain installed. If you get th
 npm install -g node-gyp
 ```
 
-If it correctly compiles and runs the tests you are golden. We can now try to install the `mongod` driver by performing the following command.
+If it correctly compiles and runs the tests, you are golden. We can now try to install the `mongod` driver by performing the following command.
 
 ```bash
 cd yourproject
 npm install mongodb --save
 ```
 
-If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
+If it still fails, the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
 
 ```bash
 npm --loglevel verbose install mongodb

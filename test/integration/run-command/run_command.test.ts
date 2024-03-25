@@ -13,6 +13,7 @@ describe('RunCommand API', () => {
   let client: MongoClient;
   let db: Db;
   let commandsStarted: CommandStartedEvent[];
+
   beforeEach(async function () {
     const options = {
       serverApi: { version: '1', strict: true, deprecationErrors: false },

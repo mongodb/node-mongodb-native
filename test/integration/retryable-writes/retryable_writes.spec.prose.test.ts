@@ -90,6 +90,7 @@ describe('Retryable Writes Spec Prose', () => {
     let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
     let commandStartedEvents: Array<Record<string, any>>;
     let testCollection: Collection;
+
     beforeEach(async function () {
       // i. Create a client with maxPoolSize=1 and retryWrites=true.
       client = this.configuration.newClient(

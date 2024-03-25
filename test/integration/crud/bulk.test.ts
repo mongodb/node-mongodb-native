@@ -33,6 +33,7 @@ describe('Bulk', function () {
       .createCollection('test')
       .catch(() => null); // make ns exist
   });
+
   afterEach(async function () {
     const cleanup = this.configuration.newClient();
     await cleanup

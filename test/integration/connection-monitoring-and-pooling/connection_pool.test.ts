@@ -7,6 +7,7 @@ import { type ConnectionPoolCreatedEvent, type Db, type MongoClient } from '../.
 describe('Connection Pool', function () {
   let client: MongoClient;
   let db: Db;
+
   afterEach(async function () {
     if (client) {
       if (db) {
@@ -15,6 +16,7 @@ describe('Connection Pool', function () {
       await client.close();
     }
   });
+
   describe('Events', function () {
     describe('ConnectionPoolCreatedEvent', function () {
       context('when no connection pool options are passed in', function () {

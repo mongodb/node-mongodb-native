@@ -752,12 +752,14 @@ describe('MongoClient', function () {
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myDb');
       });
+
       it('should set the database name to the uri pathname and respect the authSource option', () => {
         const client = new MongoClient('mongodb://u:p@host/myDb?authSource=myAuthDb');
         const db = client.db();
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
       });
+
       it('should set the database name to the uri pathname and respect the authSource option in options object', () => {
         const client = new MongoClient('mongodb://u:p@host/myDb', { authSource: 'myAuthDb' });
         const db = client.db();
@@ -773,6 +775,7 @@ describe('MongoClient', function () {
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myDb');
       });
+
       it('should set the database name to dbName and respect the authSource option', () => {
         const client = new MongoClient('mongodb://u:p@host?authSource=myAuthDb', {
           dbName: 'myDb'
@@ -781,6 +784,7 @@ describe('MongoClient', function () {
         expect(db).to.have.property('databaseName', 'myDb');
         expect(client).to.have.nested.property('options.credentials.source', 'myAuthDb');
       });
+
       it('should set the database name to dbName and respect the authSource option in options object', () => {
         const client = new MongoClient('mongodb://u:p@host', {
           dbName: 'myDb',
@@ -830,6 +834,7 @@ describe('MongoClient', function () {
 
   describe('logging client options', function () {
     const loggerFeatureFlag = Symbol.for('@@mdb.enableMongoLogger');
+
     describe('mongodbLogPath', function () {
       context('when mongodbLogPath is in options', function () {
         let stderrStub;
@@ -942,6 +947,7 @@ describe('MongoClient', function () {
         });
       });
     });
+
     describe('mongodbLogComponentSeverities', function () {
       const components = Object.values(MongoLoggableComponent);
       const env_component_names = [
@@ -1105,6 +1111,7 @@ describe('MongoClient', function () {
         });
       });
     });
+
     describe('mongodbLogMaxDocumentLength', function () {
       context('when mongodbLogMaxDocumentLength is in options', function () {
         context('when env option for MONGODB_LOG_MAX_DOCUMENT_LENGTH is not provided', function () {

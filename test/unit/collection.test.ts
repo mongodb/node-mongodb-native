@@ -5,9 +5,11 @@ import { cleanup, createServer, HELLO } from '../tools/mongodb-mock';
 
 describe('Collection', function () {
   let server = null;
+
   beforeEach(async () => {
     server = await createServer();
   });
+
   afterEach(async () => {
     await cleanup();
   });

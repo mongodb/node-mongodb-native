@@ -15,6 +15,7 @@ describe('Sessions Prose Tests', () => {
   describe('5. Session argument is for the right client', () => {
     let client1: MongoClient;
     let client2: MongoClient;
+
     beforeEach(async function () {
       client1 = this.configuration.newClient();
       client2 = this.configuration.newClient();
@@ -67,6 +68,7 @@ describe('Sessions Prose Tests', () => {
   describe('14. Implicit sessions only allocate their server session after a successful connection checkout', () => {
     let client: MongoClient;
     let testCollection: Collection<{ _id: number; a?: number }>;
+
     beforeEach(async function () {
       const configuration = this.configuration;
       client = await configuration.newClient({ maxPoolSize: 1, monitorCommands: true }).connect();
@@ -127,6 +129,7 @@ describe('Sessions Prose Tests', () => {
     const mongocryptdTestPort = '27022';
     let client: MongoClient;
     let childProcess: ChildProcess;
+
     before(() => {
       childProcess = spawn('mongocryptd', ['--port', mongocryptdTestPort, '--ipv6'], {
         stdio: 'ignore',

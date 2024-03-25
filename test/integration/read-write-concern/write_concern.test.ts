@@ -37,6 +37,7 @@ describe('Write Concern', function () {
 
   describe('mock server write concern test', () => {
     let server;
+
     before(() => {
       return mock.createServer().then(s => {
         server = s;

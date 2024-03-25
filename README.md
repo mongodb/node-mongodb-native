@@ -64,8 +64,8 @@ The following table describes add-on component version compatibility for the Nod
 
 We recommend using the latest version of typescript, however we currently ensure the driver's public types compile against `typescript@4.1.6`.
 This is the lowest typescript version guaranteed to work with our driver: older versions may or may not work - use at your own risk.
-Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes) we consider this support best effort.
-If you run into any unexpected compiler failures against our supported TypeScript versions please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
+Since typescript [does not restrict breaking changes to major versions](https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes), we consider this support best effort.
+If you run into any unexpected compiler failures against our supported TypeScript versions, please let us know by filing an issue on our [JIRA](https://jira.mongodb.org/browse/NODE).
 
 ## Installation
 
@@ -153,13 +153,13 @@ Add code to connect to the server and the database **myProject**:
 
 > **NOTE:** Resolving DNS Connection issues
 >
-> Node.js 18 changed the default DNS resolution ordering from always prioritizing ipv4 to the ordering
+> Node.js 18 changed the default DNS resolution ordering from always prioritizing IPv4 to the ordering
 > returned by the DNS provider. In some environments, this can result in `localhost` resolving to
-> an ipv6 address instead of ipv4 and a consequent failure to connect to the server.
+> an IPv6 address instead of IPv4 and a consequent failure to connect to the server.
 >
 > This can be resolved by:
 >
-> - specifying the ip address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
+> - specifying the IP address family using the MongoClient `family` option (`MongoClient(<uri>, { family: 4 } )`)
 > - launching mongod or mongos with the ipv6 flag enabled ([--ipv6 mongod option documentation](https://www.mongodb.com/docs/manual/reference/program/mongod/#std-option-mongod.--ipv6))
 > - using a host of `127.0.0.1` in place of localhost
 > - specifying the DNS resolution ordering with the `--dns-resolution-order` Node.js command line argument (e.g. `node --dns-resolution-order=ipv4first`)
@@ -224,7 +224,7 @@ console.log('Found documents =>', findResult);
 ```
 
 This query returns all the documents in the **documents** collection.
-If you add this below the insertMany example you'll see the document's you've inserted.
+If you add this below the insertMany example, you'll see the documents you've inserted.
 
 ### Find Documents with a Query Filter
 
@@ -272,7 +272,7 @@ For more detailed information, see the [indexing strategies page](https://www.mo
 
 ## Error Handling
 
-If you need to filter certain errors from our driver we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
+If you need to filter certain errors from our driver, we have a helpful tree of errors described in [etc/notes/errors.md](https://github.com/mongodb/node-mongodb-native/blob/HEAD/etc/notes/errors.md).
 
 It is our recommendation to use `instanceof` checks on errors and to avoid relying on parsing `error.message` and `error.name` strings in your code.
 We guarantee `instanceof` checks will pass according to semver guidelines, but errors may be sub-classed or their messages may change at any time, even patch releases, as we see fit to increase the helpfulness of the errors.
@@ -298,14 +298,14 @@ try {
 
 ## Nightly releases
 
-If you need to test with a change from the latest `main` branch our `mongodb` npm package has nightly versions released under the `nightly` tag.
+If you need to test with a change from the latest `main` branch, our `mongodb` npm package has nightly versions released under the `nightly` tag.
 
 ```sh
 npm install mongodb@nightly
 ```
 
 Nightly versions are published regardless of testing outcome.
-This means there could be sematic breakages or partially implemented features.
+This means there could be semantic breakages or partially implemented features.
 The nightly build is not suitable for production use.
 
 ## Next Steps

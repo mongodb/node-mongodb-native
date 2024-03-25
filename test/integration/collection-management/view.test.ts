@@ -5,6 +5,7 @@ import { type CollectionInfo, type Db, type MongoClient } from '../../mongodb';
 describe('Views', function () {
   let client: MongoClient;
   let db: Db;
+
   beforeEach(async function () {
     const configuration = this.configuration;
     client = this.configuration.newClient();

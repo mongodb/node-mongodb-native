@@ -26,6 +26,7 @@ class ConcreteCursor extends AbstractCursor {
 
 describe('class AbstractCursor', () => {
   let client: MongoClient;
+
   beforeEach(async function () {
     client = new MongoClient('mongodb://iLoveJavascript');
   });

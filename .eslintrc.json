@@ -18,7 +18,6 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
-    // "plugin:mocha/recommended"
   ],
   "env": {
     "node": true,
@@ -27,21 +26,6 @@
   },
   "reportUnusedDisableDirectives": true,
   "rules": {
-    "no-restricted-properties": [
-      "error",
-      {
-        "object": "describe",
-        "property": "only"
-      },
-      {
-        "object": "it",
-        "property": "only"
-      },
-      {
-        "object": "context",
-        "property": "only"
-      }
-    ],
     "no-restricted-globals": [
       "error",
       {
@@ -115,6 +99,8 @@
       }
     ],
     "mocha/no-async-describe": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/consistent-spacing-between-blocks": "error",
     "no-restricted-syntax": [
       "error",
       {

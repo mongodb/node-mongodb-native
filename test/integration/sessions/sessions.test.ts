@@ -46,6 +46,7 @@ const test: {
 
 describe('Sessions Spec', function () {
   let client: MongoClient;
+
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
   });

@@ -126,6 +126,7 @@ describe('Feature Flags', () => {
     before(() => {
       cachedEnv = process.env;
     });
+
     after(() => {
       process.env = cachedEnv;
     });

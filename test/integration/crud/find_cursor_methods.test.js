@@ -19,6 +19,7 @@ describe('Find Cursor', function () {
   beforeEach(async function () {
     client = this.configuration.newClient({ monitorCommands: true });
   });
+
   afterEach(async function () {
     await client.close();
   });
@@ -43,6 +44,7 @@ describe('Find Cursor', function () {
 
   describe('#readBufferedDocuments', function () {
     let cursor;
+
     beforeEach(async () => {
       const coll = client.db().collection('abstract_cursor');
       cursor = coll.find({}, { batchSize: 5 });

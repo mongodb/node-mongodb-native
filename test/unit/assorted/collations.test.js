@@ -8,6 +8,7 @@ const { MongoClient } = require('../../mongodb');
 const testContext = {};
 describe('Collation', function () {
   afterEach(() => mock.cleanup());
+
   beforeEach(() => {
     return mock.createServer().then(mockServer => (testContext.server = mockServer));
   });

@@ -27,6 +27,7 @@ describe('class OpMsgResponse', () => {
   });
 
   let client;
+
   afterEach(async () => {
     if (client) await client.close();
   });

@@ -25,9 +25,11 @@ describe('Cursor', function () {
   });
 
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient({ maxPoolSize: 1, monitorCommands: true });
   });
+
   afterEach(async function () {
     await client.close();
   });

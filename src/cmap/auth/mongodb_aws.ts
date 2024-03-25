@@ -1,45 +1,23 @@
-import * as process from 'process';
-
 import type { Binary, BSONSerializeOptions } from '../../bson';
 import * as BSON from '../../bson';
-import { aws4, type AWSCredentials, getAwsCredentialProvider } from '../../deps';
+import { aws4 } from '../../deps';
 import {
-  MongoAWSError,
   MongoCompatibilityError,
   MongoMissingCredentialsError,
   MongoRuntimeError
 } from '../../error';
-import { ByteUtils, maxWireVersion, ns, randomBytes, request } from '../../utils';
+import { ByteUtils, maxWireVersion, ns, randomBytes } from '../../utils';
 import { type AuthContext, AuthProvider } from './auth_provider';
+import {
+  AWSSDKCredentialProvider,
+  type AWSTempCredentials,
+  AWSTemporaryCredentialProvider,
+  LegacyAWSTemporaryCredentialProvider
+} from './aws_temporary_credentials';
 import { MongoCredentials } from './mongo_credentials';
 import { AuthMechanism } from './providers';
 
-/**
- * The following regions use the global AWS STS endpoint, sts.amazonaws.com, by default
- * https://docs.aws.amazon.com/sdkref/latest/guide/feature-sts-regionalized-endpoints.html
- */
-const LEGACY_REGIONS = new Set([
-  'ap-northeast-1',
-  'ap-south-1',
-  'ap-southeast-1',
-  'ap-southeast-2',
-  'aws-global',
-  'ca-central-1',
-  'eu-central-1',
-  'eu-north-1',
-  'eu-west-1',
-  'eu-west-2',
-  'eu-west-3',
-  'sa-east-1',
-  'us-east-1',
-  'us-east-2',
-  'us-west-1',
-  'us-west-2'
-]);
 const ASCII_N = 110;
-const AWS_RELATIVE_URI = 'http://169.254.170.2';
-const AWS_EC2_URI = 'http://169.254.169.254';
-const AWS_EC2_PATH = '/latest/meta-data/iam/security-credentials';
 const bsonOptions: BSONSerializeOptions = {
   useBigInt64: false,
   promoteLongs: true,
@@ -55,40 +33,13 @@ interface AWSSaslContinuePayload {
 }
 
 export class MongoDBAWS extends AuthProvider {
-  static credentialProvider: ReturnType<typeof getAwsCredentialProvider>;
-  provider?: () => Promise<AWSCredentials>;
-
+  private credentialFetcher: AWSTemporaryCredentialProvider;
   constructor() {
     super();
-    MongoDBAWS.credentialProvider ??= getAwsCredentialProvider();
 
-    let { AWS_STS_REGIONAL_ENDPOINTS = '', AWS_REGION = '' } = process.env;
-    AWS_STS_REGIONAL_ENDPOINTS = AWS_STS_REGIONAL_ENDPOINTS.toLowerCase();
-    AWS_REGION = AWS_REGION.toLowerCase();
-
-    /** The option setting should work only for users who have explicit settings in their environment, the driver should not encode "defaults" */
-    const awsRegionSettingsExist =
-      AWS_REGION.length !== 0 && AWS_STS_REGIONAL_ENDPOINTS.length !== 0;
-
-    /**
-     * If AWS_STS_REGIONAL_ENDPOINTS is set to regional, users are opting into the new behavior of respecting the region settings
-     *
-     * If AWS_STS_REGIONAL_ENDPOINTS is set to legacy, then "old" regions need to keep using the global setting.
-     * Technically the SDK gets this wrong, it reaches out to 'sts.us-east-1.amazonaws.com' when it should be 'sts.amazonaws.com'.
-     * That is not our bug to fix here. We leave that up to the SDK.
-     */
-    const useRegionalSts =
-      AWS_STS_REGIONAL_ENDPOINTS === 'regional' ||
-      (AWS_STS_REGIONAL_ENDPOINTS === 'legacy' && !LEGACY_REGIONS.has(AWS_REGION));
-
-    if ('fromNodeProviderChain' in MongoDBAWS.credentialProvider) {
-      this.provider =
-        awsRegionSettingsExist && useRegionalSts
-          ? MongoDBAWS.credentialProvider.fromNodeProviderChain({
-              clientConfig: { region: AWS_REGION }
-            })
-          : MongoDBAWS.credentialProvider.fromNodeProviderChain();
-    }
+    this.credentialFetcher = AWSTemporaryCredentialProvider.isAWSSDKInstalled
+      ? new AWSSDKCredentialProvider()
+      : new LegacyAWSTemporaryCredentialProvider();
   }
 
   override async auth(authContext: AuthContext): Promise<void> {
@@ -109,7 +60,10 @@ export class MongoDBAWS extends AuthProvider {
     }
 
     if (!authContext.credentials.username) {
-      authContext.credentials = await makeTempCredentials(authContext.credentials, this.provider);
+      authContext.credentials = await makeTempCredentials(
+        authContext.credentials,
+        this.credentialFetcher
+      );
     }
 
     const { credentials } = authContext;
@@ -202,17 +156,9 @@ export class MongoDBAWS extends AuthProvider {
   }
 }
 
-interface AWSTempCredentials {
-  AccessKeyId?: string;
-  SecretAccessKey?: string;
-  Token?: string;
-  RoleArn?: string;
-  Expiration?: Date;
-}
-
 async function makeTempCredentials(
   credentials: MongoCredentials,
-  provider?: () => Promise<AWSCredentials>
+  awsCredentialFetcher: AWSTemporaryCredentialProvider
 ): Promise<MongoCredentials> {
   function makeMongoCredentialsFromAWSTemp(creds: AWSTempCredentials) {
     // The AWS session token (creds.Token) may or may not be set.
@@ -230,62 +176,9 @@ async function makeTempCredentials(
       }
     });
   }
+  const temporaryCredentials = await awsCredentialFetcher.getCredentials();
 
-  // Check if the AWS credential provider from the SDK is present. If not,
-  // use the old method.
-  if (provider && !('kModuleError' in MongoDBAWS.credentialProvider)) {
-    /*
-     * Creates a credential provider that will attempt to find credentials from the
-     * following sources (listed in order of precedence):
-     *
-     * - Environment variables exposed via process.env
-     * - SSO credentials from token cache
-     * - Web identity token credentials
-     * - Shared credentials and config ini files
-     * - The EC2/ECS Instance Metadata Service
-     */
-    try {
-      const creds = await provider();
-      return makeMongoCredentialsFromAWSTemp({
-        AccessKeyId: creds.accessKeyId,
-        SecretAccessKey: creds.secretAccessKey,
-        Token: creds.sessionToken,
-        Expiration: creds.expiration
-      });
-    } catch (error) {
-      throw new MongoAWSError(error.message);
-    }
-  } else {
-    // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
-    // is set then drivers MUST assume that it was set by an AWS ECS agent
-    if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-      return makeMongoCredentialsFromAWSTemp(
-        await request(`${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`)
-      );
-    }
-
-    // Otherwise assume we are on an EC2 instance
-
-    // get a token
-    const token = await request(`${AWS_EC2_URI}/latest/api/token`, {
-      method: 'PUT',
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token-ttl-seconds': 30 }
-    });
-
-    // get role name
-    const roleName = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}`, {
-      json: false,
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    // get temp credentials
-    const creds = await request(`${AWS_EC2_URI}/${AWS_EC2_PATH}/${roleName}`, {
-      headers: { 'X-aws-ec2-metadata-token': token }
-    });
-
-    return makeMongoCredentialsFromAWSTemp(creds);
-  }
+  return makeMongoCredentialsFromAWSTemp(temporaryCredentials);
 }
 
 function deriveRegion(host: string) {

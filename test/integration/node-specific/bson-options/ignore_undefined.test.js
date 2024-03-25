@@ -9,6 +9,7 @@ describe('Ignore Undefined', function () {
   });
 
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

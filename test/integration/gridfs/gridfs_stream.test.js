@@ -11,6 +11,7 @@ const { GridFSBucket, ObjectId, MongoAPIError } = require('../../mongodb');
 describe('GridFS Stream', function () {
   let client;
   let db;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
     db = client.db('gridfs_stream_tests');

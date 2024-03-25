@@ -607,6 +607,7 @@ describe('Command Monitoring', function () {
 
   describe('Internal state references', function () {
     let client;
+
     beforeEach(function () {
       client = this.configuration.newClient(
         { writeConcern: { w: 1 } },

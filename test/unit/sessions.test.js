@@ -21,6 +21,7 @@ describe('Sessions - unit', function () {
   let client;
   let serverSessionPool;
   let session;
+
   beforeEach(async function () {
     client = new MongoClient('mongodb://iLoveJavascript');
     serverSessionPool = client.s.sessionPool;
@@ -275,6 +276,7 @@ describe('Sessions - unit', function () {
 
     describe('get serverSession()', () => {
       let serverSessionSymbol;
+
       before(() => {
         serverSessionSymbol = getSymbolFrom(
           new ClientSession({}, serverSessionPool, {}),
@@ -436,6 +438,7 @@ describe('Sessions - unit', function () {
   describe('class ServerSessionPool', function () {
     let client;
     let server;
+
     beforeEach(async () => {
       server = await mock.createServer();
       server.setMessageHandler(request => {
