@@ -64,7 +64,8 @@ export class ServerDescription {
   topologyVersion: TopologyVersion | null;
   minWireVersion: number;
   maxWireVersion: number;
-  private _rttSamples: List<number>;
+  /** @internal */
+  _rttSamples: List<number>;
   lastUpdateTime: number;
   lastWriteDate: number;
   me: string | null;
@@ -179,8 +180,8 @@ export class ServerDescription {
     return 0;
   }
 
-  addSample(rtt: number) {
-    if (this._rttSamples.length >= 10) {
+  addRTTSample(rtt: number) {
+    if (this._rttSamples.length === 10) {
       this._rttSamples.shift();
     }
     this._rttSamples.push(rtt);
