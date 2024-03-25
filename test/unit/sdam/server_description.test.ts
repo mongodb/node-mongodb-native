@@ -198,4 +198,108 @@ describe('ServerDescription', function () {
       makeTopologyVersionComparisonTests(compareTopologyVersionGreaterThanTests);
     });
   });
+
+  describe('roundTripTime()', function () {
+    let serverDescription: ServerDescription;
+    beforeEach(() => {
+      serverDescription = new ServerDescription('localhost:27017');
+    });
+
+    context('when no samples have been taken', function () {
+      it('returns -1 when no samples have been taken', function () {
+        expect(serverDescription.roundTripTime).to.equal(-1);
+      });
+    });
+
+    context('when a postitive number of samples have been taken', function () {
+      beforeEach(() => {
+        serverDescription.addRTTSample(1);
+        serverDescription.addRTTSample(2);
+      });
+
+      it('properly calculates the average round trip time', function () {
+        expect(serverDescription.roundTripTime).to.equal(1.5);
+      });
+    });
+  });
+
+  describe('minRoundTripTime()', function () {
+    let serverDescription: ServerDescription;
+    beforeEach(() => {
+      serverDescription = new ServerDescription('localhost:27017');
+    });
+
+    context('when < 2 samples have been taken', function () {
+      beforeEach(() => {
+        serverDescription.addRTTSample(1);
+      });
+
+      it('returns 0', function () {
+        expect(serverDescription.minRoundTripTime).to.equal(0);
+      });
+    });
+
+    context('when exactly 2 samples have been taken', function () {
+      beforeEach(() => {
+        serverDescription.addRTTSample(1);
+        serverDescription.addRTTSample(2);
+      });
+
+      it('properly computes minRoundTripTime', function () {
+        expect(serverDescription.minRoundTripTime).to.equal(1);
+      });
+    });
+
+    context('when > 2 samples have been taken', function () {
+      beforeEach(() => {
+        serverDescription.addRTTSample(1);
+        serverDescription.addRTTSample(2);
+        serverDescription.addRTTSample(3);
+      });
+
+      it('properly computes minRoundTripTime', function () {
+        expect(serverDescription.minRoundTripTime).to.equal(1);
+      });
+    });
+  });
+
+  describe('addRTTSample()', function () {
+    let serverDescription: ServerDescription;
+    beforeEach(() => {
+      serverDescription = new ServerDescription('localhost:27017');
+      expect(serverDescription._rttSamples.length).to.equal(0);
+    });
+
+    context('when < 10 samples have been collected', function () {
+      beforeEach(() => {
+        serverDescription.addRTTSample(1);
+        serverDescription.addRTTSample(2);
+        serverDescription.addRTTSample(3);
+      });
+
+      it('adds new sample to end of list', function () {
+        serverDescription.addRTTSample(4);
+        expect(serverDescription._rttSamples.last()).to.equal(4);
+      });
+    });
+
+    context('when 10 samples have been collected', function () {
+      let i: number;
+
+      beforeEach(() => {
+        for (i = 1; i <= 10; i++) {
+          serverDescription.addRTTSample(i);
+        }
+        expect(serverDescription._rttSamples.length).to.equal(10);
+      });
+
+      it('removes the first sample and then adds new sample to end of list', function () {
+        serverDescription.addRTTSample(i);
+        expect(serverDescription._rttSamples.length).to.equal(10);
+
+        expect(serverDescription._rttSamples.first()).to.equal(2);
+        expect(serverDescription._rttSamples.last()).to.equal(i);
+      });
+    });
+  });
 });
