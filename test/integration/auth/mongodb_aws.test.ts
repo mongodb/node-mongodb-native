@@ -6,6 +6,7 @@ import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
 import {
+  AWSTemporaryCredentialProvider,
   MongoAWSError,
   type MongoClient,
   MongoDBAWS,
@@ -268,7 +269,8 @@ describe('MONGODB-AWS', function () {
 
           numberOfFromNodeProviderChainCalls = 0;
 
-          MongoDBAWS.credentialProvider = {
+          // @ts-expect-error We intentionally access a protected variable.
+          AWSTemporaryCredentialProvider._awsSDK = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
               numberOfFromNodeProviderChainCalls += 1;
@@ -289,7 +291,8 @@ describe('MONGODB-AWS', function () {
           if (typeof storedEnv.AWS_STS_REGIONAL_ENDPOINTS === 'string') {
             process.env.AWS_REGION = storedEnv.AWS_REGION;
           }
-          MongoDBAWS.credentialProvider = credentialProvider;
+          // @ts-expect-error We intentionally access a protected variable.
+          AWSTemporaryCredentialProvider._awsSDK = credentialProvider;
           calledArguments = [];
         });
 
