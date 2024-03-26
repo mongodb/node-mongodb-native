@@ -187,25 +187,25 @@ export class ServerDescription {
     this._rttSamples.push(rtt);
   }
 
-  updateWithHello(hello: Document, options: ServerDescriptionOptions = {}) {
-    this.type = parseServerType(hello, options);
-    this.hosts = hello?.hosts?.map((host: string) => host.toLowerCase()) ?? this.hosts;
-    this.passives = hello?.passives?.map((host: string) => host.toLowerCase()) ?? this.passives;
-    this.arbiters = hello?.arbiters?.map((host: string) => host.toLowerCase()) ?? this.arbiters;
-    this.tags = hello?.tags ?? this.tags;
-    this.minWireVersion = hello?.minWireVersion ?? this.minWireVersion;
-    this.maxWireVersion = hello?.maxWireVersion ?? this.maxWireVersion;
-    this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? this.lastWriteDate;
+  updateWithHelloResponse(response: Document, options: ServerDescriptionOptions = {}) {
+    this.type = parseServerType(response, options);
+    this.hosts = response?.hosts?.map((host: string) => host.toLowerCase()) ?? this.hosts;
+    this.passives = response?.passives?.map((host: string) => host.toLowerCase()) ?? this.passives;
+    this.arbiters = response?.arbiters?.map((host: string) => host.toLowerCase()) ?? this.arbiters;
+    this.tags = response?.tags ?? this.tags;
+    this.minWireVersion = response?.minWireVersion ?? this.minWireVersion;
+    this.maxWireVersion = response?.maxWireVersion ?? this.maxWireVersion;
+    this.lastWriteDate = response?.lastWrite?.lastWriteDate ?? this.lastWriteDate;
     this.topologyVersion =
-      this.error?.topologyVersion ?? hello?.topologyVersion ?? this.topologyVersion;
-    this.setName = hello?.setName ?? this.setName;
-    this.setVersion = hello?.setVersion ?? this.setVersion;
-    this.electionId = hello?.electionId ?? this.electionId;
+      this.error?.topologyVersion ?? response?.topologyVersion ?? this.topologyVersion;
+    this.setName = response?.setName ?? this.setName;
+    this.setVersion = response?.setVersion ?? this.setVersion;
+    this.electionId = response?.electionId ?? this.electionId;
     this.logicalSessionTimeoutMinutes =
-      hello?.logicalSessionTimeoutMinutes ?? this.logicalSessionTimeoutMinutes;
-    this.primary = hello?.primary ?? this.primary;
-    this.me = hello?.me?.toLowerCase() ?? this.me;
-    this.$clusterTime = hello?.$clusterTime ?? this.$clusterTime;
+      response?.logicalSessionTimeoutMinutes ?? this.logicalSessionTimeoutMinutes;
+    this.primary = response?.primary ?? this.primary;
+    this.me = response?.me?.toLowerCase() ?? this.me;
+    this.$clusterTime = response?.$clusterTime ?? this.$clusterTime;
   }
 
   /**
