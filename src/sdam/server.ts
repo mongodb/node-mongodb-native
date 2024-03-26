@@ -172,7 +172,7 @@ export class Server extends TypedEventEmitter<ServerEvents> {
 
     this.monitor.on('resetServer', (error: MongoServerError) => markServerUnknown(this, error));
     this.monitor.on(Server.SERVER_HEARTBEAT_SUCCEEDED, (event: ServerHeartbeatSucceededEvent) => {
-      this.description.updateWithHello(event.reply);
+      this.description.updateWithHelloResponse(event.reply);
       this.description.addRTTSample(
         calculateRoundTripTime(this.description.roundTripTime, event.duration)
       );
