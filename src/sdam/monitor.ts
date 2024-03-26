@@ -351,6 +351,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
     awaited = false;
     connection
       .command(ns('admin.$cmd'), cmd, options)
+      // eslint-disable-next-line github/no-then
       .then(onHeartbeatSucceeded, onHeartbeatFailed);
 
     return;
@@ -369,6 +370,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       connection.destroy();
       throw error;
     }
+    // eslint-disable-next-line github/no-then
   })().then(
     connection => {
       if (isInCloseState(monitor)) {
@@ -512,6 +514,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const connection = rttPinger.connection;
   if (connection == null) {
+    // eslint-disable-next-line github/no-then
     connect(options).then(
       connection => {
         measureAndReschedule(connection);
@@ -526,6 +529,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
 
   const commandName =
     connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
+  // eslint-disable-next-line github/no-then
   connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
     () => measureAndReschedule(),
     () => {

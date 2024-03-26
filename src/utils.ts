@@ -178,6 +178,7 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
     value != null &&
     typeof value === 'object' &&
     'then' in value &&
+    // eslint-disable-next-line github/no-then
     typeof value.then === 'function'
   );
 }
@@ -1257,6 +1258,20 @@ export function promiseWithResolvers<T>(): {
     reject = promiseReject;
   });
   return { promise, resolve, reject } as const;
+}
+
+/**
+ * A noop function intended for use in preventing unhandled rejections.
+ *
+ * @example
+ * ```js
+ * const promise = myAsyncTask();
+ * // eslint-disable-next-line github/no-then
+ * promise.then(undefined, squashError);
+ * ```
+ */
+export function squashError() {
+  return;
 }
 
 export const randomBytes = promisify(crypto.randomBytes);

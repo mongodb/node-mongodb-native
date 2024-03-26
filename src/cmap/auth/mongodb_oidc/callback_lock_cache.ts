@@ -87,6 +87,7 @@ function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
   let lock: Promise<any> = Promise.resolve();
   return async (info: IdPServerInfo, context: OIDCCallbackContext): Promise<IdPServerResponse> => {
     await lock;
+    // eslint-disable-next-line github/no-then
     lock = lock.then(() => callback(info, context));
     return await lock;
   };

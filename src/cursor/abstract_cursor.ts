@@ -20,7 +20,7 @@ import { ReadConcern, type ReadConcernLike } from '../read_concern';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import { ClientSession, maybeClearPinnedConnection } from '../sessions';
-import { List, type MongoDBNamespace, ns } from '../utils';
+import { List, type MongoDBNamespace, ns, squashError } from '../utils';
 
 /** @internal */
 const kId = Symbol('id');
@@ -309,7 +309,11 @@ export abstract class AbstractCursor<
             const message =
               'Cursor returned a `null` document, but the cursor is not exhausted.  Mapping documents to `null` is not supported in the cursor transform.';
 
-            await cleanupCursor(this, { needsToEmitClosed: true }).catch(() => null);
+            try {
+              await cleanupCursor(this, { needsToEmitClosed: true });
+            } catch {
+              // ignore cleanupCursor errors
+            }
 
             throw new MongoAPIError(message);
           }
@@ -327,7 +331,11 @@ export abstract class AbstractCursor<
       // Only close the cursor if it has not already been closed. This finally clause handles
       // the case when a user would break out of a for await of loop early.
       if (!this.closed) {
-        await this.close().catch(() => null);
+        try {
+          await this.close();
+        } catch {
+          // ignore close errors
+        }
       }
     }
   }
@@ -605,7 +613,8 @@ export abstract class AbstractCursor<
       // We only want to end this session if we created it, and it hasn't ended yet
       if (session.explicit === false) {
         if (!session.hasEnded) {
-          session.endSession().catch(() => null);
+          // eslint-disable-next-line github/no-then
+          session.endSession().then(undefined, squashError);
         }
         this[kSession] = this.client.startSession({ owner: this, explicit: false });
       }
@@ -724,9 +733,11 @@ async function next<T>(
         try {
           return cursor[kTransform](doc);
         } catch (error) {
-          // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
-          // error instead.
-          await cleanupCursor(cursor, { error, needsToEmitClosed: true }).catch(() => null);
+          try {
+            await cleanupCursor(cursor, { error, needsToEmitClosed: true });
+          } catch {
+            // `cleanupCursor` should never throw, squash and throw the original error
+          }
           throw error;
         }
       }
@@ -736,7 +747,7 @@ async function next<T>(
 
     if (cursor.isDead) {
       // if the cursor is dead, we clean it up
-      // cleanupCursorAsync should never throw, but if it does it indicates a bug in the driver
+      // cleanupCursor should never throw, but if it does it indicates a bug in the driver
       // and we should surface the error
       await cleanupCursor(cursor, {});
       return null;
@@ -760,9 +771,11 @@ async function next<T>(
         cursor[kId] = cursorId;
       }
     } catch (error) {
-      // `cleanupCursorAsync` should never throw, but if it does we want to throw the original
-      // error instead.
-      await cleanupCursor(cursor, { error }).catch(() => null);
+      try {
+        await cleanupCursor(cursor, { error, needsToEmitClosed: true });
+      } catch {
+        // `cleanupCursor` should never throw, squash and throw the original error
+      }
       throw error;
     }
 
@@ -857,7 +870,9 @@ async function cleanupCursor(
     await executeOperation(
       cursor[kClient],
       new KillCursorsOperation(cursorId, cursorNs, server, { session })
-    ).catch(() => null);
+    );
+  } catch {
+    // squash kill cursor errors
   } finally {
     await completeCleanup();
   }
@@ -892,6 +907,7 @@ class ReadableCursorStream extends Readable {
   }
 
   override _destroy(error: Error | null, callback: (error?: Error | null) => void): void {
+    // eslint-disable-next-line github/no-then
     this._cursor.close().then(
       () => callback(error),
       closeError => callback(closeError)
@@ -899,12 +915,14 @@ class ReadableCursorStream extends Readable {
   }
 
   private _readNext() {
+    // eslint-disable-next-line github/no-then
     next(this._cursor, { blocking: true, transform: true }).then(
       result => {
         if (result == null) {
           this.push(null);
         } else if (this.destroyed) {
-          this._cursor.close().catch(() => null);
+          // eslint-disable-next-line github/no-then
+          this._cursor.close().then(undefined, squashError);
         } else {
           if (this.push(result)) {
             return this._readNext();
@@ -919,7 +937,8 @@ class ReadableCursorStream extends Readable {
         //       a client during iteration. Alternatively, we could do the "right" thing and
         //       propagate the error message by removing this special case.
         if (err.message.match(/server is closed/)) {
-          this._cursor.close().catch(() => null);
+          // eslint-disable-next-line github/no-then
+          this._cursor.close().then(undefined, squashError);
           return this.push(null);
         }
 

@@ -1,3 +1,4 @@
+/* eslint-disable github/no-then */
 import { promisify } from 'util';
 
 import { Binary, type Document, Long, type Timestamp } from './bson';

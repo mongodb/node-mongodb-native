@@ -94,15 +94,18 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        // this is an optimization for the special case of a limit for a find command to avoid an
-        // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
-        // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
-        // produces results for the find command.  Once a batch is filled up, it is returned and only
-        // on the subsequent getMore will the query framework consider the limit, determine the cursor
-        // is exhausted and return a cursorId of zero.
-        // instead, if we determine there are no more documents to request from the server, we preemptively
-        // close the cursor
-        await this.close().catch(() => null);
+        try {
+          await this.close();
+        } catch {
+          // this is an optimization for the special case of a limit for a find command to avoid an
+          // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
+          // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
+          // produces results for the find command.  Once a batch is filled up, it is returned and only
+          // on the subsequent getMore will the query framework consider the limit, determine the cursor
+          // is exhausted and return a cursorId of zero.
+          // instead, if we determine there are no more documents to request from the server, we preemptively
+          // close the cursor
+        }
         return { cursor: { id: Long.ZERO, nextBatch: [] } };
       }
     }

@@ -614,7 +614,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     return true;
   }
 
-  private createConnection(callback: Callback<Connection>) {
+  private async createConnection(): Promise<Connection> {
     const connectOptions: ConnectionOptions = {
       ...this.options,
       id: this[kConnectionCounter].next().value,
@@ -631,65 +631,60 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
-    connect(connectOptions).then(
-      connection => {
-        // The pool might have closed since we started trying to create a connection
-        if (this[kPoolState] !== PoolState.ready) {
-          this[kPending]--;
-          connection.destroy();
-          callback(this.closed ? new PoolClosedError(this) : new PoolClearedError(this));
-          return;
-        }
+    try {
+      const connection = await connect(connectOptions);
+      // The pool might have closed since we started trying to create a connection
+      if (this[kPoolState] !== PoolState.ready) {
+        this[kPending]--;
+        connection.destroy();
+        const error = this.closed ? new PoolClosedError(this) : new PoolClearedError(this);
+        throw error;
+      }
 
-        // forward all events from the connection to the pool
-        for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
-          connection.on(event, (e: any) => this.emit(event, e));
-        }
+      // forward all events from the connection to the pool
+      for (const event of [...APM_EVENTS, Connection.CLUSTER_TIME_RECEIVED]) {
+        connection.on(event, (e: any) => this.emit(event, e));
+      }
 
-        if (this.loadBalanced) {
-          connection.on(Connection.PINNED, pinType => this[kMetrics].markPinned(pinType));
-          connection.on(Connection.UNPINNED, pinType => this[kMetrics].markUnpinned(pinType));
+      if (this.loadBalanced) {
+        connection.on(Connection.PINNED, pinType => this[kMetrics].markPinned(pinType));
+        connection.on(Connection.UNPINNED, pinType => this[kMetrics].markUnpinned(pinType));
 
-          const serviceId = connection.serviceId;
-          if (serviceId) {
-            let generation;
-            const sid = serviceId.toHexString();
-            if ((generation = this.serviceGenerations.get(sid))) {
-              connection.generation = generation;
-            } else {
-              this.serviceGenerations.set(sid, 0);
-              connection.generation = 0;
-            }
+        const serviceId = connection.serviceId;
+        if (serviceId) {
+          let generation;
+          const sid = serviceId.toHexString();
+          if ((generation = this.serviceGenerations.get(sid))) {
+            connection.generation = generation;
+          } else {
+            this.serviceGenerations.set(sid, 0);
+            connection.generation = 0;
           }
         }
-
-        connection.markAvailable();
-        this.emitAndLog(
-          ConnectionPool.CONNECTION_READY,
-          new ConnectionReadyEvent(this, connection)
-        );
-
-        this[kPending]--;
-        callback(undefined, connection);
-      },
-      error => {
-        this[kPending]--;
-        this.emitAndLog(
-          ConnectionPool.CONNECTION_CLOSED,
-          new ConnectionClosedEvent(
-            this,
-            { id: connectOptions.id, serviceId: undefined },
-            'error',
-            // TODO(NODE-5192): Remove this cast
-            error as MongoError
-          )
-        );
-        if (error instanceof MongoNetworkError || error instanceof MongoServerError) {
-          error.connectionGeneration = connectOptions.generation;
-        }
-        callback(error ?? new MongoRuntimeError('Connection creation failed without error'));
       }
-    );
+
+      connection.markAvailable();
+      this.emitAndLog(ConnectionPool.CONNECTION_READY, new ConnectionReadyEvent(this, connection));
+
+      this[kPending]--;
+      return connection;
+    } catch (error) {
+      this[kPending]--;
+      this.emitAndLog(
+        ConnectionPool.CONNECTION_CLOSED,
+        new ConnectionClosedEvent(
+          this,
+          { id: connectOptions.id, serviceId: undefined },
+          'error',
+          // TODO(NODE-5192): Remove this cast
+          error as MongoError
+        )
+      );
+      if (error instanceof MongoNetworkError || error instanceof MongoServerError) {
+        error.connectionGeneration = connectOptions.generation;
+      }
+      throw new MongoRuntimeError('Connection creation failed without error');
+    }
   }
 
   private ensureMinPoolSize() {
@@ -707,22 +702,26 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // NOTE: ensureMinPoolSize should not try to get all the pending
       // connection permits because that potentially delays the availability of
       // the connection to a checkout request
-      this.createConnection((err, connection) => {
-        if (err) {
-          this[kServer].handleError(err);
-        }
-        if (!err && connection) {
-          this[kConnections].push(connection);
-          process.nextTick(() => this.processWaitQueue());
-        }
-        if (this[kPoolState] === PoolState.ready) {
-          clearTimeout(this[kMinPoolSizeTimer]);
-          this[kMinPoolSizeTimer] = setTimeout(
-            () => this.ensureMinPoolSize(),
-            this.options.minPoolSizeCheckFrequencyMS
-          );
-        }
-      });
+      this.createConnection()
+        // eslint-disable-next-line github/no-then
+        .then(
+          connection => {
+            this[kConnections].push(connection);
+            process.nextTick(() => this.processWaitQueue());
+          },
+          error => {
+            this[kServer].handleError(error);
+          }
+        )
+        .finally(() => {
+          if (this[kPoolState] === PoolState.ready) {
+            clearTimeout(this[kMinPoolSizeTimer]);
+            this[kMinPoolSizeTimer] = setTimeout(
+              () => this.ensureMinPoolSize(),
+              this.options.minPoolSizeCheckFrequencyMS
+            );
+          }
+        });
     } else {
       clearTimeout(this[kMinPoolSizeTimer]);
       this[kMinPoolSizeTimer] = setTimeout(
@@ -795,32 +794,34 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       if (!waitQueueMember || waitQueueMember[kCancelled]) {
         continue;
       }
-      this.createConnection((err, connection) => {
-        if (waitQueueMember[kCancelled]) {
-          if (!err && connection) {
-            this[kConnections].push(connection);
-          }
-        } else {
-          if (err) {
-            this.emitAndLog(
-              ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
-              // TODO(NODE-5192): Remove this cast
-              new ConnectionCheckOutFailedEvent(this, 'connectionError', err as MongoError)
-            );
-            waitQueueMember.reject(err);
-          } else if (connection) {
+
+      this.createConnection()
+        // eslint-disable-next-line github/no-then
+        .then(
+          connection => {
+            if (waitQueueMember[kCancelled]) {
+              this[kConnections].push(connection);
+            }
             this[kCheckedOut].add(connection);
             this.emitAndLog(
               ConnectionPool.CONNECTION_CHECKED_OUT,
               new ConnectionCheckedOutEvent(this, connection)
             );
             waitQueueMember.resolve(connection);
+          },
+          error => {
+            this.emitAndLog(
+              ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
+              // TODO(NODE-5192): Remove this cast
+              new ConnectionCheckOutFailedEvent(this, 'connectionError', error)
+            );
+            waitQueueMember.reject(error);
           }
-
+        )
+        .finally(() => {
           waitQueueMember.timeoutController.clear();
-        }
-        process.nextTick(() => this.processWaitQueue());
-      });
+          process.nextTick(() => this.processWaitQueue());
+        });
     }
     this[kProcessingWaitQueue] = false;
   }

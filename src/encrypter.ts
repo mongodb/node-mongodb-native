@@ -108,13 +108,18 @@ export class Encrypter {
   }
 
   async close(client: MongoClient, force: boolean): Promise<void> {
-    const maybeError: Error | void = await this.autoEncrypter.teardown(!!force).catch(e => e);
+    let error;
+    try {
+      await this.autoEncrypter.teardown(!!force);
+    } catch (autoEncrypterError) {
+      error = autoEncrypterError;
+    }
     const internalClient = this[kInternalClient];
     if (internalClient != null && client !== internalClient) {
       return await internalClient.close(force);
     }
-    if (maybeError) {
-      throw maybeError;
+    if (error != null) {
+      throw error;
     }
   }
 

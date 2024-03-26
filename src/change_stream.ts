@@ -19,7 +19,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import type { ServerSessionId } from './sessions';
-import { filterOptions, getTopology, type MongoDBNamespace } from './utils';
+import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
@@ -867,7 +867,8 @@ export class ChangeStream<
   private _closeEmitterModeWithError(error: AnyError): void {
     this.emit(ChangeStream.ERROR, error);
 
-    this.close().catch(() => null);
+    // eslint-disable-next-line github/no-then
+    this.close().then(undefined, squashError);
   }
 
   /** @internal */
@@ -931,13 +932,15 @@ export class ChangeStream<
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-      this.cursor.close().catch(() => null);
+      // eslint-disable-next-line github/no-then
+      this.cursor.close().then(undefined, squashError);
 
       const topology = getTopology(this.parent);
       topology
         .selectServer(this.cursor.readPreference, {
           operationName: 'reconnect topology in change stream'
         })
+        // eslint-disable-next-line github/no-then
         .then(
           () => {
             this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
@@ -965,7 +968,11 @@ export class ChangeStream<
       throw changeStreamError;
     }
 
-    await this.cursor.close().catch(() => null);
+    try {
+      await this.cursor.close();
+    } catch {
+      // ignore errors from close
+    }
     const topology = getTopology(this.parent);
     try {
       await topology.selectServer(this.cursor.readPreference, {
