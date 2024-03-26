@@ -28,11 +28,12 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
-    return server.command(this.ns, this.command, {
+    const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
       session
-    }) as TODO_NODE_3286;
+    });
+    return res;
   }
 }
 
@@ -54,10 +55,11 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
     this.server = server;
-    return server.command(this.ns, this.command, {
+    const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
       session
-    }) as TODO_NODE_3286;
+    });
+    return res;
   }
 }
