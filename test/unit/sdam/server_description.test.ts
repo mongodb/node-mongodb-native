@@ -201,6 +201,7 @@ describe('ServerDescription', function () {
 
   describe('roundTripTime()', function () {
     let serverDescription: ServerDescription;
+
     beforeEach(() => {
       serverDescription = new ServerDescription('localhost:27017');
     });
@@ -225,6 +226,7 @@ describe('ServerDescription', function () {
 
   describe('minRoundTripTime()', function () {
     let serverDescription: ServerDescription;
+
     beforeEach(() => {
       serverDescription = new ServerDescription('localhost:27017');
     });
@@ -265,6 +267,7 @@ describe('ServerDescription', function () {
 
   describe('addRTTSample()', function () {
     let serverDescription: ServerDescription;
+
     beforeEach(() => {
       serverDescription = new ServerDescription('localhost:27017');
       expect(serverDescription._rttSamples.length).to.equal(0);
