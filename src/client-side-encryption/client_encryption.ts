@@ -25,8 +25,8 @@ import {
 } from './errors';
 import {
   type ClientEncryptionDataKeyProvider,
-  type KMSProviders,
-  refreshKMSCredentials
+  KMSCredentialProvider,
+  type KMSProviders
 } from './providers/index';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
@@ -61,8 +61,7 @@ export class ClientEncryption {
   /** @internal */
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
-  _kmsProviders: KMSProviders;
-
+  _credentialProvider: KMSCredentialProvider;
   /** @internal */
   _mongoCrypt: MongoCrypt;
 
@@ -107,7 +106,7 @@ export class ClientEncryption {
     this._client = client;
     this._proxyOptions = options.proxyOptions ?? {};
     this._tlsOptions = options.tlsOptions ?? {};
-    this._kmsProviders = options.kmsProviders || {};
+    const kmsProviders = options.kmsProviders || {};
 
     if (options.keyVaultNamespace == null) {
       throw new MongoCryptInvalidArgumentError('Missing required option `keyVaultNamespace`');
@@ -116,15 +115,16 @@ export class ClientEncryption {
     const mongoCryptOptions: MongoCryptOptions = {
       ...options,
       cryptoCallbacks,
-      kmsProviders: !Buffer.isBuffer(this._kmsProviders)
-        ? (serialize(this._kmsProviders) as Buffer)
-        : this._kmsProviders
+      kmsProviders: !Buffer.isBuffer(kmsProviders)
+        ? (serialize(kmsProviders) as Buffer)
+        : kmsProviders
     };
 
     this._keyVaultNamespace = options.keyVaultNamespace;
     this._keyVaultClient = options.keyVaultClient || client;
     const MongoCrypt = ClientEncryption.getMongoCrypt();
     this._mongoCrypt = new MongoCrypt(mongoCryptOptions);
+    this._credentialProvider = new KMSCredentialProvider(kmsProviders);
   }
 
   /**
@@ -654,7 +654,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await this._credentialProvider.refreshCredentials();
   }
 
   static get libmongocryptVersion() {

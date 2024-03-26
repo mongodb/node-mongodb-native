@@ -144,25 +144,30 @@ export function isEmptyCredentials(
 }
 
 /**
- * Load cloud provider credentials for the user provided KMS providers.
- * Credentials will only attempt to get loaded if they do not exist
- * and no existing credentials will get overwritten.
- *
  * @internal
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
-  let finalKMSProviders = kmsProviders;
+export class KMSCredentialProvider {
+  constructor(private readonly kmsProviders: KMSProviders) {}
 
-  if (isEmptyCredentials('aws', kmsProviders)) {
-    finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
-  }
+  /**
+   * Load cloud provider credentials for the user provided KMS providers.
+   * Credentials will only attempt to get loaded if they do not exist
+   * and no existing credentials will get overwritten.
+   */
+  async refreshCredentials() {
+    let finalKMSProviders = this.kmsProviders;
 
-  if (isEmptyCredentials('gcp', kmsProviders)) {
-    finalKMSProviders = await loadGCPCredentials(finalKMSProviders);
-  }
+    if (isEmptyCredentials('aws', this.kmsProviders)) {
+      finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+    }
 
-  if (isEmptyCredentials('azure', kmsProviders)) {
-    finalKMSProviders = await loadAzureCredentials(finalKMSProviders);
+    if (isEmptyCredentials('gcp', this.kmsProviders)) {
+      finalKMSProviders = await loadGCPCredentials(finalKMSProviders);
+    }
+
+    if (isEmptyCredentials('azure', this.kmsProviders)) {
+      finalKMSProviders = await loadAzureCredentials(finalKMSProviders);
+    }
+    return finalKMSProviders;
   }
-  return finalKMSProviders;
 }
