@@ -237,7 +237,7 @@
         "no-return-await": "off",
         "@typescript-eslint/return-await": [
           "error",
-          "in-try-catch"
+          "always"
         ],
         "no-restricted-imports": [
           "error",
