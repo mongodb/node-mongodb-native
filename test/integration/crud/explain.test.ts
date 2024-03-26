@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { once } from 'events';
-import { gte } from 'semver';
 
 import {
   type Collection,
