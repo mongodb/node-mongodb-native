@@ -1,20 +1,25 @@
-import { getAwsCredentialProvider } from '../../deps';
+import { AWSSDKCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
 import { type KMSProviders } from '.';
 
 /**
  * @internal
  */
 export async function loadAWSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
-  const credentialProvider = getAwsCredentialProvider();
+  const credentialProvider = new AWSSDKCredentialProvider();
 
-  if ('kModuleError' in credentialProvider) {
-    return kmsProviders;
-  }
-
-  const { fromNodeProviderChain } = credentialProvider;
-  const provider = fromNodeProviderChain();
   // The state machine is the only place calling this so it will
   // catch if there is a rejection here.
-  const aws = await provider();
-  return { ...kmsProviders, aws };
+  const {
+    SecretAccessKey = '',
+    Token = '',
+    AccessKeyId = ''
+  } = await credentialProvider.getCredentials();
+  return {
+    ...kmsProviders,
+    aws: {
+      secretAccessKey: SecretAccessKey,
+      sessionToken: Token,
+      accessKeyId: AccessKeyId
+    }
+  };
 }
