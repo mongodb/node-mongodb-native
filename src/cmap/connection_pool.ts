@@ -146,7 +146,8 @@ export type ConnectionPoolEvents = {
  */
 export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
-  private readonly server: Server;
+  /** @internal */
+  server: Server;
   [kPoolState]: (typeof PoolState)[keyof typeof PoolState];
   [kConnections]: List<Connection>;
   [kPending]: number;
