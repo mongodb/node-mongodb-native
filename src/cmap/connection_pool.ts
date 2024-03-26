@@ -57,8 +57,6 @@ import {
 import { ConnectionPoolMetrics } from './metrics';
 
 /** @internal */
-const kServer = Symbol('server');
-/** @internal */
 const kConnections = Symbol('connections');
 /** @internal */
 const kPending = Symbol('pending');
@@ -150,7 +148,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   options: Readonly<ConnectionPoolOptions>;
   private readonly server: Server;
   [kPoolState]: (typeof PoolState)[keyof typeof PoolState];
-  [kServer]: Server;
   [kConnections]: List<Connection>;
   [kPending]: number;
   [kCheckedOut]: Set<Connection>;
@@ -247,7 +244,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     this[kPoolState] = PoolState.paused;
-    this[kServer] = server;
     this.server = server;
     this[kConnections] = new List();
     this[kPending] = 0;
@@ -262,7 +258,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kMetrics] = new ConnectionPoolMetrics();
     this[kProcessingWaitQueue] = false;
 
-    this.mongoLogger = this[kServer].topology.client?.mongoLogger;
+    this.mongoLogger = this.server.topology.client?.mongoLogger;
     this.component = 'connection';
 
     process.nextTick(() => {
@@ -322,7 +318,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   }
 
   get serverError() {
-    return this[kServer].description.error;
+    return this.server.description.error;
   }
 
   /**
@@ -550,7 +546,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     }
 
     const resolvedCredentials = credentials.resolveAuthMechanism(connection.hello);
-    const provider = this[kServer].topology.client.s.authProviders.getOrCreateProvider(
+    const provider = this.server.topology.client.s.authProviders.getOrCreateProvider(
       resolvedCredentials.mechanism
     );
 
@@ -623,7 +619,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       generation: this[kGeneration],
       cancellationToken: this[kCancellationToken],
       mongoLogger: this.mongoLogger,
-      authProviders: this[kServer].topology.client.s.authProviders,
+      authProviders: this.server.topology.client.s.authProviders,
       parent: this
     };
 
@@ -712,7 +708,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       // the connection to a checkout request
       this.createConnection((err, connection) => {
         if (err) {
-          this[kServer].handleError(err);
+          this.server.handleError(err);
         }
         if (!err && connection) {
           this[kConnections].push(connection);
