@@ -146,7 +146,7 @@ export async function executeOperation<
 
   if (session == null) {
     // No session also means it is not retryable, early exit
-    return operation.execute(server, undefined);
+    return await operation.execute(server, undefined);
   }
 
   if (!operation.hasAspect(Aspect.RETRYABLE)) {

@@ -415,14 +415,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return endTransactionAsync(this, 'commitTransaction');
+    return await endTransactionAsync(this, 'commitTransaction');
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return endTransactionAsync(this, 'abortTransaction');
+    return await endTransactionAsync(this, 'abortTransaction');
   }
 
   /**
@@ -464,7 +464,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     options?: TransactionOptions
   ): Promise<T> {
     const startTime = now();
-    return attemptTransaction(this, startTime, fn, options);
+    return await attemptTransaction(this, startTime, fn, options);
   }
 }
 

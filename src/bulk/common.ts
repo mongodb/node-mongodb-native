@@ -1224,7 +1224,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.collection.client, operation);
+    return await executeOperation(this.s.collection.client, operation);
   }
 
   /**

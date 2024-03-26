@@ -1156,7 +1156,7 @@ export async function request(
   uri: string,
   options: RequestOptions = {}
 ): Promise<string | Record<string, any>> {
-  return new Promise<string | Record<string, any>>((resolve, reject) => {
+  return await new Promise<string | Record<string, any>>((resolve, reject) => {
     const requestOptions = {
       method: 'GET',
       timeout: 10000,

@@ -333,7 +333,7 @@ export class DropIndexOperation extends CommandOperation<Document> {
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
     const cmd = { dropIndexes: this.collection.collectionName, index: this.indexName };
-    return super.executeCommand(server, session, cmd);
+    return await super.executeCommand(server, session, cmd);
   }
 }
 
@@ -377,7 +377,7 @@ export class ListIndexesOperation extends CommandOperation<Document> {
       command.comment = this.options.comment;
     }
 
-    return super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command);
   }
 }
 

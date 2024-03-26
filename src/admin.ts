@@ -73,7 +73,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.s.db.client,
       new RunAdminCommandOperation(command, {
         ...resolveBSONOptions(options),
@@ -89,7 +89,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async buildInfo(options?: CommandOperationOptions): Promise<Document> {
-    return this.command({ buildinfo: 1 }, options);
+    return await this.command({ buildinfo: 1 }, options);
   }
 
   /**
@@ -98,7 +98,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async serverInfo(options?: CommandOperationOptions): Promise<Document> {
-    return this.command({ buildinfo: 1 }, options);
+    return await this.command({ buildinfo: 1 }, options);
   }
 
   /**
@@ -107,7 +107,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async serverStatus(options?: CommandOperationOptions): Promise<Document> {
-    return this.command({ serverStatus: 1 }, options);
+    return await this.command({ serverStatus: 1 }, options);
   }
 
   /**
@@ -116,7 +116,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async ping(options?: CommandOperationOptions): Promise<Document> {
-    return this.command({ ping: 1 }, options);
+    return await this.command({ ping: 1 }, options);
   }
 
   /**
@@ -126,7 +126,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.s.db.client,
       new RemoveUserOperation(this.s.db, username, { dbName: 'admin', ...options })
     );
@@ -142,7 +142,7 @@ export class Admin {
     collectionName: string,
     options: ValidateCollectionOptions = {}
   ): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.s.db.client,
       new ValidateCollectionOperation(this, collectionName, options)
     );
@@ -154,7 +154,7 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async listDatabases(options?: ListDatabasesOptions): Promise<ListDatabasesResult> {
-    return executeOperation(this.s.db.client, new ListDatabasesOperation(this.s.db, options));
+    return await executeOperation(this.s.db.client, new ListDatabasesOperation(this.s.db, options));
   }
 
   /**
@@ -163,6 +163,6 @@ export class Admin {
    * @param options - Optional settings for the command
    */
   async replSetGetStatus(options?: CommandOperationOptions): Promise<Document> {
-    return this.command({ replSetGetStatus: 1 }, options);
+    return await this.command({ replSetGetStatus: 1 }, options);
   }
 }

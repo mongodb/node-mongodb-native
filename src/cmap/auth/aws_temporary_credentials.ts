@@ -139,7 +139,9 @@ export class LegacyAWSTemporaryCredentialProvider extends AWSTemporaryCredential
     // If the environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
     // is set then drivers MUST assume that it was set by an AWS ECS agent
     if (process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI) {
-      return request(`${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`);
+      return await request(
+        `${AWS_RELATIVE_URI}${process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI}`
+      );
     }
 
     // Otherwise assume we are on an EC2 instance

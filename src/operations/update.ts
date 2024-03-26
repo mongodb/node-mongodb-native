@@ -122,7 +122,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    return super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command);
   }
 }
 

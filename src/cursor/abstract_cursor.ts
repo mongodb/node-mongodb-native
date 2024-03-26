@@ -387,7 +387,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return next(this, { blocking: true, transform: true });
+    return await next(this, { blocking: true, transform: true });
   }
 
   /**
@@ -398,7 +398,7 @@ export abstract class AbstractCursor<
       throw new MongoCursorExhaustedError();
     }
 
-    return next(this, { blocking: false, transform: true });
+    return await next(this, { blocking: false, transform: true });
   }
 
   /**
@@ -629,7 +629,7 @@ export abstract class AbstractCursor<
       batchSize
     });
 
-    return executeOperation(this[kClient], getMoreOperation);
+    return await executeOperation(this[kClient], getMoreOperation);
   }
 
   /**
@@ -802,7 +802,7 @@ async function cleanupCursor(
 
   if (error) {
     if (cursor.loadBalanced && error instanceof MongoNetworkError) {
-      return completeCleanup();
+      return await completeCleanup();
     }
   }
 
@@ -850,7 +850,7 @@ async function cleanupCursor(
   cursor[kKilled] = true;
 
   if (session.hasEnded) {
-    return completeCleanup();
+    return await completeCleanup();
   }
 
   try {

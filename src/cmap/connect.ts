@@ -226,13 +226,13 @@ export async function prepareHandshakeDocument(
           `No AuthProvider for ${AuthMechanism.MONGODB_SCRAM_SHA256} defined.`
         );
       }
-      return provider.prepare(handshakeDoc, authContext);
+      return await provider.prepare(handshakeDoc, authContext);
     }
     const provider = authContext.options.authProviders.getOrCreateProvider(credentials.mechanism);
     if (!provider) {
       throw new MongoInvalidArgumentError(`No AuthProvider for ${credentials.mechanism} defined.`);
     }
-    return provider.prepare(handshakeDoc, authContext);
+    return await provider.prepare(handshakeDoc, authContext);
   }
   return handshakeDoc;
 }
@@ -325,7 +325,7 @@ export async function makeSocket(options: MakeConnectionOptions): Promise<Stream
 
   if (options.proxyHost != null) {
     // Currently, only Socks5 is supported.
-    return makeSocks5Connection({
+    return await makeSocks5Connection({
       ...options,
       connectTimeoutMS // Should always be present for Socks5
     });

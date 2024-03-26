@@ -127,7 +127,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (typeof options === 'boolean') {
       throw new MongoInvalidArgumentError('Invalid first parameter to count');
     }
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
@@ -139,7 +139,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Execute the explain for the cursor */
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this

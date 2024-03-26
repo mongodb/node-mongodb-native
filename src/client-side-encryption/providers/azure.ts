@@ -154,7 +154,7 @@ export async function fetchAzureKMSToken(
     }
     throw error;
   });
-  return parseResponse(response);
+  return await parseResponse(response);
 }
 
 /**

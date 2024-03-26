@@ -88,7 +88,7 @@ function withLock(callback: OIDCRequestFunction | OIDCRefreshFunction) {
   return async (info: IdPServerInfo, context: OIDCCallbackContext): Promise<IdPServerResponse> => {
     await lock;
     lock = lock.then(() => callback(info, context));
-    return lock;
+    return await lock;
   };
 }
 

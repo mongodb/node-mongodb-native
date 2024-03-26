@@ -468,7 +468,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    */
   async connect(): Promise<this> {
     if (this.connectionLock) {
-      return this.connectionLock;
+      return await this.connectionLock;
     }
 
     try {
@@ -655,7 +655,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    */
   static async connect(url: string, options?: MongoClientOptions): Promise<MongoClient> {
     const client = new this(url, options);
-    return client.connect();
+    return await client.connect();
   }
 
   /**

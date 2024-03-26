@@ -394,7 +394,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
 
-    return promise;
+    return await promise;
   }
 
   /**

@@ -111,7 +111,7 @@ export class Encrypter {
     const maybeError: Error | void = await this.autoEncrypter.teardown(!!force).catch(e => e);
     const internalClient = this[kInternalClient];
     if (internalClient != null && client !== internalClient) {
-      return internalClient.close(force);
+      return await internalClient.close(force);
     }
     if (maybeError) {
       throw maybeError;
