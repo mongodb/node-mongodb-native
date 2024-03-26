@@ -251,7 +251,8 @@ export class AutoEncrypter {
    * fields were decrypted.
    */
   [kDecorateResult] = false;
-  _credentialProvider: KMSCredentialProvider;
+  /** @internal */
+  private _credentialProvider: KMSCredentialProvider;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {

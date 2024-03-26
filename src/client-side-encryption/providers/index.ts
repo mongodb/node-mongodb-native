@@ -1,4 +1,4 @@
-import { loadAWSCredentials } from './aws';
+import { AWSSDKCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
 
@@ -145,8 +145,17 @@ export function isEmptyCredentials(
 
 /**
  * @internal
+ *
+ * A class that fetchs KMS credentials on-demand during client encryption.  This class is instantiated
+ * per client encryption or auto encrypter and caches the AWS credential provider, if AWS is being used.
  */
 export class KMSCredentialProvider {
+  private _awsCredentialProvider?: AWSSDKCredentialProvider;
+  private get awsCredentialProvider(): AWSSDKCredentialProvider {
+    this._awsCredentialProvider ??= new AWSSDKCredentialProvider();
+    return this._awsCredentialProvider;
+  }
+
   constructor(private readonly kmsProviders: KMSProviders) {}
 
   /**
@@ -158,7 +167,22 @@ export class KMSCredentialProvider {
     let finalKMSProviders = this.kmsProviders;
 
     if (isEmptyCredentials('aws', this.kmsProviders)) {
-      finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+      // We shouldn't ever receive a response from the AWS SDK that doesn't have these
+      // fields.  However, TS says these fields are optional.  We provide empty strings
+      // and let libmongocrypt error if we're unable to fetch the required keys.
+      const {
+        SecretAccessKey = '',
+        Token = '',
+        AccessKeyId = ''
+      } = await this.awsCredentialProvider.getCredentials();
+      finalKMSProviders = {
+        ...this.kmsProviders,
+        aws: {
+          secretAccessKey: SecretAccessKey,
+          sessionToken: Token,
+          accessKeyId: AccessKeyId
+        }
+      };
     }
 
     if (isEmptyCredentials('gcp', this.kmsProviders)) {

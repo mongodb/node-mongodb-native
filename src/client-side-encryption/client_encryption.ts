@@ -61,7 +61,7 @@ export class ClientEncryption {
   /** @internal */
   _tlsOptions: CSFLEKMSTlsOptions;
   /** @internal */
-  _credentialProvider: KMSCredentialProvider;
+  private _credentialProvider: KMSCredentialProvider;
   /** @internal */
   _mongoCrypt: MongoCrypt;
 
