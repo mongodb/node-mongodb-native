@@ -38,7 +38,6 @@ import {
 } from '../../mongodb';
 import { ejson } from '../utils';
 import { type CmapEvent, type CommandEvent, type EntitiesMap, type SdamEvent } from './entities';
-import { trace } from './runner';
 import {
   type ExpectedCmapEvent,
   type ExpectedCommandEvent,
