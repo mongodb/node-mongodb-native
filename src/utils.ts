@@ -1336,6 +1336,52 @@ export function maybeAddIdToDocuments(
   return Array.isArray(docOrDocs) ? docOrDocs.map(transform) : transform(docOrDocs);
 }
 
+export class MovingWindow {
+  private writeIndex: number;
+  private length: number;
+  private samples: Float64Array;
+
+  constructor(windowSize = 10) {
+    this.samples = new Float64Array(windowSize);
+    this.length = 0;
+    this.writeIndex = 0;
+  }
+
+  addSample(sample: number) {
+    this.samples[this.writeIndex++] = sample;
+    if (this.length < this.samples.length) {
+      this.length++;
+    }
+
+    this.writeIndex %= this.samples.length;
+  }
+
+  min(): number {
+    if (this.length < 2) return 0;
+    let min = this.samples[0];
+    for (let i = 1; i < this.length; i++) {
+      if (this.samples[i] < min) min = this.samples[i];
+    }
+
+    return min;
+  }
+
+  average(): number {
+    if (this.length === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < this.length; i++) {
+      sum += this.samples[i];
+    }
+
+    return sum / this.length;
+  }
+
+  clear() {
+    this.length = 0;
+    this.writeIndex = 0;
+  }
+}
+
 export async function fileIsAccessible(fileName: string, mode?: number) {
   try {
     await fs.access(fileName, mode);
