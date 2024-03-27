@@ -1,4 +1,4 @@
-import type { DeserializeOptions, SerializeOptions } from 'bson';
+import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
 
 export {
   Binary,
@@ -24,6 +24,13 @@ export {
   Timestamp,
   UUID
 } from 'bson';
+
+export type BSONElement = BSON.OnDemand['BSONElement'];
+
+export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSONElement[] {
+  const res = BSON.onDemand.parseToElements(bytes, offset);
+  return Array.isArray(res) ? res : [...res];
+}
 
 /**
  * BSON Serialization options.
