@@ -16,24 +16,24 @@ export interface KMSProviders {
    * Configuration options for using 'aws' as your KMS provider
    */
   aws?:
-  | {
-    /**
-     * The access key used for the AWS KMS provider
-     */
-    accessKeyId: string;
+    | {
+        /**
+         * The access key used for the AWS KMS provider
+         */
+        accessKeyId: string;
 
-    /**
-     * The secret access key used for the AWS KMS provider
-     */
-    secretAccessKey: string;
+        /**
+         * The secret access key used for the AWS KMS provider
+         */
+        secretAccessKey: string;
 
-    /**
-     * An optional AWS session token that will be used as the
-     * X-Amz-Security-Token header for AWS requests.
-     */
-    sessionToken?: string;
-  }
-  | Record<string, never>;
+        /**
+         * An optional AWS session token that will be used as the
+         * X-Amz-Security-Token header for AWS requests.
+         */
+        sessionToken?: string;
+      }
+    | Record<string, never>;
 
   /**
    * Configuration options for using 'local' as your KMS provider
@@ -62,66 +62,66 @@ export interface KMSProviders {
    * Configuration options for using 'azure' as your KMS provider
    */
   azure?:
-  | {
-    /**
-     * The tenant ID identifies the organization for the account
-     */
-    tenantId: string;
+    | {
+        /**
+         * The tenant ID identifies the organization for the account
+         */
+        tenantId: string;
 
-    /**
-     * The client ID to authenticate a registered application
-     */
-    clientId: string;
+        /**
+         * The client ID to authenticate a registered application
+         */
+        clientId: string;
 
-    /**
-     * The client secret to authenticate a registered application
-     */
-    clientSecret: string;
+        /**
+         * The client secret to authenticate a registered application
+         */
+        clientSecret: string;
 
-    /**
-     * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-     * This is optional, and only needed if customer is using a non-commercial Azure instance
-     * (e.g. a government or China account, which use different URLs).
-     * Defaults to "login.microsoftonline.com"
-     */
-    identityPlatformEndpoint?: string | undefined;
-  }
-  | {
-    /**
-     * If present, an access token to authenticate with Azure.
-     */
-    accessToken: string;
-  }
-  | Record<string, never>;
+        /**
+         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+         * This is optional, and only needed if customer is using a non-commercial Azure instance
+         * (e.g. a government or China account, which use different URLs).
+         * Defaults to "login.microsoftonline.com"
+         */
+        identityPlatformEndpoint?: string | undefined;
+      }
+    | {
+        /**
+         * If present, an access token to authenticate with Azure.
+         */
+        accessToken: string;
+      }
+    | Record<string, never>;
 
   /**
    * Configuration options for using 'gcp' as your KMS provider
    */
   gcp?:
-  | {
-    /**
-     * The service account email to authenticate
-     */
-    email: string;
+    | {
+        /**
+         * The service account email to authenticate
+         */
+        email: string;
 
-    /**
-     * A PKCS#8 encrypted key. This can either be a base64 string or a binary representation
-     */
-    privateKey: string | Buffer;
+        /**
+         * A PKCS#8 encrypted key. This can either be a base64 string or a binary representation
+         */
+        privateKey: string | Buffer;
 
-    /**
-     * If present, a host with optional port. E.g. "example.com" or "example.com:443".
-     * Defaults to "oauth2.googleapis.com"
-     */
-    endpoint?: string | undefined;
-  }
-  | {
-    /**
-     * If present, an access token to authenticate with GCP.
-     */
-    accessToken: string;
-  }
-  | Record<string, never>;
+        /**
+         * If present, a host with optional port. E.g. "example.com" or "example.com:443".
+         * Defaults to "oauth2.googleapis.com"
+         */
+        endpoint?: string | undefined;
+      }
+    | {
+        /**
+         * If present, an access token to authenticate with GCP.
+         */
+        accessToken: string;
+      }
+    | Record<string, never>;
 }
 
 /**
@@ -156,7 +156,7 @@ export class KMSCredentialProvider {
     return this._awsCredentialProvider;
   }
 
-  constructor(private readonly kmsProviders: KMSProviders) { }
+  constructor(private readonly kmsProviders: KMSProviders) {}
 
   /**
    * Load cloud provider credentials for the user provided KMS providers.
