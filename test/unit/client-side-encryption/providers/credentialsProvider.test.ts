@@ -20,6 +20,8 @@ import {
 } from '../../../../src/client-side-encryption/providers/azure';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/client-side-encryption/providers/utils';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
 import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -173,6 +175,29 @@ describe('#refreshKMSCredentials', function () {
       it('does not refresh credentials', async function () {
         const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
         expect(providers).to.deep.equal(kmsProviders);
+      });
+    });
+
+    context('when the AWS SDK returns unknown fields', function () {
+      beforeEach(() => {
+        sinon.stub(AWSSDKCredentialProvider.prototype, 'getCredentials').resolves({
+          Token: 'example',
+          SecretAccessKey: 'example',
+          AccessKeyId: 'example',
+          // @ts-expect-error This is not an expected key.
+          UnknownField: 'example'
+        });
+      });
+      afterEach(() => sinon.restore());
+      it('only returns fields libmongocrypt expects', async function () {
+        const credentials = await new KMSCredentialProvider({ aws: {} }).refreshCredentials();
+        expect(credentials).to.deep.equal({
+          aws: {
+            accessKeyId: accessKey,
+            secretAccessKey: secretKey,
+            sessionToken: sessionToken
+          }
+        });
       });
     });
   });
