@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.6.0](https://github.com/mongodb/node-mongodb-native/compare/v6.5.0...v6.6.0) (2024-03-27)
+
+
+### Features
+
+* **NODE-6020:** upgrade BSON to ^6.5.0 ([#4035](https://github.com/mongodb/node-mongodb-native/issues/4035)) ([8ab2055](https://github.com/mongodb/node-mongodb-native/commit/8ab205569436a629f8b7b8bbc7f6cb29a3939864))
+
+
+### Bug Fixes
+
+* **NODE-3681:** Typescript error in Collection.findOneAndModify UpdateFilter $currentDate ([#4047](https://github.com/mongodb/node-mongodb-native/issues/4047)) ([a8670a7](https://github.com/mongodb/node-mongodb-native/commit/a8670a76cd2746e8353504c100050b474d844f36))
+* **NODE-5971:** attach `v` to createIndexes command when `version` is specified ([#4043](https://github.com/mongodb/node-mongodb-native/issues/4043)) ([1879a04](https://github.com/mongodb/node-mongodb-native/commit/1879a04b9053e8c77c6957e415886c534fe9992b))
+* **NODE-5999:** Change TopologyDescription.error type to MongoError ([#4028](https://github.com/mongodb/node-mongodb-native/issues/4028)) ([30432e8](https://github.com/mongodb/node-mongodb-native/commit/30432e8664cb142e999159e5d06ceaaf14f51eb8))
+* **NODE-6019:** indexExists always returns false when `full` is set to `true` ([#4034](https://github.com/mongodb/node-mongodb-native/issues/4034)) ([0ebc1ac](https://github.com/mongodb/node-mongodb-native/commit/0ebc1ac099a2ee869d8c1cb1c7632422c4e6a7ba))
+
 ## [6.5.0](https://github.com/mongodb/node-mongodb-native/compare/v6.4.0...v6.5.0) (2024-03-11)
 
 
