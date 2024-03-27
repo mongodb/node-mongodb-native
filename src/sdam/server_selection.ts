@@ -223,9 +223,8 @@ function latencyWindowReducer(
   servers: ServerDescription[]
 ): ServerDescription[] {
   const low = servers.reduce(
-    (min: number, server: ServerDescription) =>
-      min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min),
-    -1
+    (min: number, server: ServerDescription) => Math.min(server.roundTripTime, min),
+    Infinity
   );
 
   const high = low + topologyDescription.localThresholdMS;
