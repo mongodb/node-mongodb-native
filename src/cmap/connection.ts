@@ -28,6 +28,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
+import { type Monitor } from '../sdam/monitor';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
 import {
   BufferPool,
@@ -125,6 +126,8 @@ export interface ConnectionOptions
   extendedMetadata: Promise<Document>;
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
+  /** @internal */
+  parent?: Monitor;
 }
 
 /** @public */

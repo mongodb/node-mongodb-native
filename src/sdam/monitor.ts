@@ -8,8 +8,15 @@ import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback, EventEmitterWithState } from '../utils';
-import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
+import {
+  calculateDurationInMs,
+  type Callback,
+  type EventEmitterWithState,
+  makeStateMachine,
+  MovingWindow,
+  now,
+  ns
+} from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   ServerHeartbeatFailedEvent,
@@ -25,8 +32,6 @@ const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
 /** @internal */
 const kCancellationToken = Symbol('cancellationToken');
-/** @internal */
-const kRoundTripTime = Symbol('roundTripTime');
 
 const STATE_IDLE = 'idle';
 const STATE_MONITORING = 'monitoring';
@@ -100,6 +105,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   rttPinger?: RTTPinger;
   /** @internal */
   override component = MongoLoggableComponent.TOPOLOGY;
+  private rttSamplesMS: MovingWindow;
 
   constructor(server: Server, options: MonitorOptions) {
     super();
@@ -121,6 +127,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
     this.mongoLogger = this[kServer].topology.client?.mongoLogger;
+    this.rttSamplesMS = new MovingWindow(10);
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -135,7 +142,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       useBigInt64: false,
       promoteLongs: true,
       promoteValues: true,
-      promoteBuffers: true
+      promoteBuffers: true,
+      parent: this
     };
 
     // ensure no authentication is used for monitoring
@@ -202,6 +210,22 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     // close monitor
     this.emit('close');
     stateTransition(this, STATE_CLOSED);
+  }
+
+  get roundTripTime(): number {
+    return this.rttSamplesMS.average();
+  }
+
+  get minRoundTripTime(): number {
+    return this.rttSamplesMS.min();
+  }
+
+  addRttSample(rtt: number) {
+    this.rttSamplesMS.addSample(rtt);
+  }
+
+  clearRttSamples() {
+    this.rttSamplesMS.clear();
   }
 }
 
@@ -275,6 +299,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
     }
 
+    // FIXME: Figure out how to set this. Should duration be the instantaneous rtt or the averaged
+    // rtt?
     const duration =
       isAwaitable && monitor.rttPinger
         ? monitor.rttPinger.roundTripTime
@@ -329,6 +355,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
 
     if (isAwaitable && monitor.rttPinger == null) {
       monitor.rttPinger = new RTTPinger(
+        monitor,
         monitor[kCancellationToken],
         Object.assign(
           { heartbeatFrequencyMS: monitor.options.heartbeatFrequencyMS },
@@ -458,23 +485,27 @@ export class RTTPinger {
   /** @internal */
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kRoundTripTime]: number;
-  /** @internal */
   [kMonitorId]: NodeJS.Timeout;
+  /** @internal */
+  monitor: Monitor;
   closed: boolean;
 
-  constructor(cancellationToken: CancellationToken, options: RTTPingerOptions) {
+  constructor(monitor: Monitor, cancellationToken: CancellationToken, options: RTTPingerOptions) {
     this.connection = undefined;
     this[kCancellationToken] = cancellationToken;
-    this[kRoundTripTime] = 0;
     this.closed = false;
+    this.monitor = monitor;
 
     const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
     this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
   }
 
   get roundTripTime(): number {
-    return this[kRoundTripTime];
+    return this.monitor.roundTripTime;
+  }
+
+  get minRoundTripTime(): number {
+    return this.monitor.minRoundTripTime;
   }
 
   close(): void {
@@ -505,7 +536,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
       rttPinger.connection = conn;
     }
 
-    rttPinger[kRoundTripTime] = calculateDurationInMs(start);
+    rttPinger.monitor.addRttSample(calculateDurationInMs(start));
     rttPinger[kMonitorId] = setTimeout(
       () => measureRoundTripTime(rttPinger, options),
       heartbeatFrequencyMS
@@ -521,7 +552,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
       },
       () => {
         rttPinger.connection = undefined;
-        rttPinger[kRoundTripTime] = 0;
+        rttPinger.monitor.clearRttSamples();
       }
     );
     return;
@@ -535,7 +566,7 @@ function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
     () => {
       rttPinger.connection?.destroy();
       rttPinger.connection = undefined;
-      rttPinger[kRoundTripTime] = 0;
+      rttPinger.monitor.clearRttSamples();
       return;
     }
   );
