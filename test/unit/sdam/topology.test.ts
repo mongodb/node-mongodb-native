@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { once } from 'events';
 import * as net from 'net';
 import { type AddressInfo } from 'net';
-import { coerce, type SemVer } from 'semver';
+import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { clearTimeout } from 'timers';
 
@@ -284,11 +284,9 @@ describe('Topology (unit)', function () {
     it('should encounter a server selection timeout on garbled server responses', function () {
       const test = this.test;
 
-      const { major } = coerce(process.version) as SemVer;
-      test.skipReason =
-        major === 18 || major === 20
-          ? 'TODO(NODE-5666): fix failing unit tests on Node18'
-          : undefined;
+      test.skipReason = satisfies(process.version, '>=18.0.0')
+        ? 'TODO(NODE-5666): fix failing unit tests on Node18'
+        : undefined;
 
       if (test.skipReason) this.skip();
 
