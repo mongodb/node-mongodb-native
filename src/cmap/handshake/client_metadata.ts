@@ -5,6 +5,7 @@ import * as process from 'process';
 import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
+import { fileIsAccessible } from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
@@ -156,18 +157,12 @@ export function makeClientMetadata(options: MakeClientMetadataOptions): ClientMe
   return metadataDocument.toObject() as ClientMetadata;
 }
 
-let isDocker: Promise<void> | boolean | undefined;
+let dockerPromise: Promise<boolean>;
 /** @internal */
 async function getContainerMetadata() {
   const containerMetadata: Record<string, any> = {};
-  if (typeof isDocker !== 'boolean') {
-    try {
-      await (isDocker ??= fs.access('/.dockerenv'));
-      isDocker = true;
-    } catch {
-      isDocker = false;
-    }
-  }
+  dockerPromise ??= fileIsAccessible('/.dockerenv');
+  const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;
   const isKubernetes = KUBERNETES_SERVICE_HOST.length > 0 ? true : false;

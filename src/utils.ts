@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
+import { promises as fs } from 'fs';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
@@ -1333,4 +1334,13 @@ export function maybeAddIdToDocuments(
     return doc;
   };
   return Array.isArray(docOrDocs) ? docOrDocs.map(transform) : transform(docOrDocs);
+}
+
+export async function fileIsAccessible(fileName: string, mode?: number) {
+  try {
+    await fs.access(fileName, mode);
+    return true;
+  } catch {
+    return false;
+  }
 }
