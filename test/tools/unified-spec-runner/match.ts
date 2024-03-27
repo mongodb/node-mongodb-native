@@ -561,65 +561,67 @@ function compareEvents(
           );
         }
       }
-      return;
     } else if (expectedEvent.serverHeartbeatStartedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatStartedEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatStartedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverHeartbeatFailedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatFailedEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatFailedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverHeartbeatSucceededEvent) {
       expect(actualEvent).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       const expectedSdamEvent = expectedEvent.serverHeartbeatSucceededEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverOpeningEvent) {
       expect(actualEvent).to.be.instanceOf(ServerOpeningEvent);
       const expectedSdamEvent = expectedEvent.serverOpeningEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.serverClosedEvent) {
       expect(actualEvent).to.be.instanceOf(ServerClosedEvent);
       const expectedSdamEvent = expectedEvent.serverClosedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.topologyOpeningEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyOpeningEvent);
       const expectedSdamEvent = expectedEvent.topologyOpeningEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
-    } else if (expectedEvent.topologyClosingEvent) {
+    } else if (expectedEvent.topologyClosedEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyClosedEvent);
-      const expectedSdamEvent = expectedEvent.topologyClosingEvent;
+      const expectedSdamEvent = expectedEvent.topologyClosedEvent;
       for (const property of Object.keys(expectedSdamEvent)) {
         expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
       }
-      return;
     } else if (expectedEvent.topologyDescriptionChangedEvent) {
       expect(actualEvent).to.be.instanceOf(TopologyDescriptionChangedEvent);
       const expectedSdamEvent = expectedEvent.topologyDescriptionChangedEvent;
-      for (const property of Object.keys(expectedSdamEvent)) {
-        expect(actualEvent[property]).to.equal(expectedSdamEvent[property]);
+      // Only check the previousDescription and newDescription fields
+      for (const property of ['previousDescription', 'newDescription']) {
+        if (expectedSdamEvent[property] === undefined) continue;
+        if (typeof expectedSdamEvent[property] === 'object') {
+          expect(actualEvent[property]).to.have.property('type');
+          expect(actualEvent[property].type).to.equal(expectedSdamEvent[property].type);
+        } else {
+          expect.fail(
+            `Incorrect format of ${property} field.Expected an object with key 'type' with string value, got ${inspect(
+              expectedSdamEvent[property]
+            )} `
+          );
+        }
       }
-      return;
     } else {
-      expect.fail(`Encountered unexpected event - ${inspect(actualEvent)}`);
+      expect.fail(`Encountered unexpected event - ${inspect(actualEvent)} `);
     }
   }
 }
@@ -722,7 +724,7 @@ export function expectErrorCheck(
   expected: ExpectedError,
   entities: EntitiesMap
 ): void {
-  const expectMessage = `\n\nOriginal Error Stack:\n${error.stack}\n\n`;
+  const expectMessage = `\n\nOriginal Error Stack: \n${error.stack} \n\n`;
 
   if (!isMongoCryptError(error)) {
     expect(error, expectMessage).to.be.instanceOf(MongoError);
@@ -753,7 +755,7 @@ export function expectErrorCheck(
     for (const errorLabel of expected.errorLabelsContain) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
-        `Error was supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
+        `Error was supposed to have label ${errorLabel}, has[${mongoError.errorLabels}]--${expectMessage} `
       ).to.be.true;
     }
   }
@@ -763,7 +765,7 @@ export function expectErrorCheck(
     for (const errorLabel of expected.errorLabelsOmit) {
       expect(
         mongoError.hasErrorLabel(errorLabel),
-        `Error was not supposed to have label ${errorLabel}, has [${mongoError.errorLabels}] -- ${expectMessage}`
+        `Error was not supposed to have label ${errorLabel}, has[${mongoError.errorLabels}]--${expectMessage} `
       ).to.be.false;
     }
   }
