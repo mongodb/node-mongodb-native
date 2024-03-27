@@ -74,7 +74,7 @@ export async function resolveSRVRecord(options: MongoOptions): Promise<HostAddre
   const lookupAddress = options.srvHost;
   const txtResolutionPromise = dns.promises.resolveTxt(lookupAddress);
   // eslint-disable-next-line github/no-then
-  txtResolutionPromise.then(undefined, squashError);
+  txtResolutionPromise.then(undefined, squashError); // rejections will be handled later
 
   // Resolve the SRV record and use the result as the list of hosts to connect to.
   const addresses = await dns.promises.resolveSrv(
@@ -556,7 +556,7 @@ export function parseOptions(
   mongoOptions.extendedMetadata = addContainerMetadata(mongoOptions.metadata).then(
     undefined,
     squashError
-  );
+  ); // rejections will be handled later
 
   return mongoOptions;
 }
