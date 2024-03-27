@@ -379,7 +379,7 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/createIndexes/#mongodb-data-createIndexes
  */
 export interface ChangeStreamCreateIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -392,7 +392,7 @@ export interface ChangeStreamCreateIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/dropIndexes/#mongodb-data-dropIndexes
  */
 export interface ChangeStreamDropIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -405,7 +405,7 @@ export interface ChangeStreamDropIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/modify/#mongodb-data-modify
  */
 export interface ChangeStreamCollModDocument
   extends ChangeStreamDocumentCommon,
@@ -416,7 +416,7 @@ export interface ChangeStreamCollModDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/create/#mongodb-data-create
  */
 export interface ChangeStreamCreateDocument
   extends ChangeStreamDocumentCommon,
@@ -427,7 +427,7 @@ export interface ChangeStreamCreateDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/shardCollection/#mongodb-data-shardCollection
  */
 export interface ChangeStreamShardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -439,7 +439,7 @@ export interface ChangeStreamShardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/reshardCollection/#mongodb-data-reshardCollection
  */
 export interface ChangeStreamReshardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -451,7 +451,7 @@ export interface ChangeStreamReshardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/refineCollectionShardKey/#mongodb-data-refineCollectionShardKey
  */
 export interface ChangeStreamRefineCollectionShardKeyDocument
   extends ChangeStreamDocumentCommon,
