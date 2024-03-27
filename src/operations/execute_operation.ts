@@ -26,7 +26,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { squashError, supportsRetryableWrites } from '../utils';
+import { supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -155,8 +155,11 @@ export async function executeOperation<
       return await operation.execute(server, session);
     } finally {
       if (session?.owner != null && session.owner === owner) {
-        // eslint-disable-next-line github/no-then
-        await session.endSession().then(undefined, squashError);
+        try {
+          await session.endSession();
+        } catch {
+          // ignore endSession errors
+        }
       }
     }
   }
@@ -192,8 +195,11 @@ export async function executeOperation<
     throw operationError;
   } finally {
     if (session?.owner != null && session.owner === owner) {
-      // eslint-disable-next-line github/no-then
-      await session.endSession().then(undefined, squashError);
+      try {
+        await session.endSession();
+      } catch {
+        // ignore endSession errors
+      }
     }
   }
 }
