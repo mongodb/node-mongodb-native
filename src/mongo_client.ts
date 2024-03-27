@@ -49,7 +49,8 @@ import {
   isHostMatch,
   type MongoDBNamespace,
   ns,
-  resolveOptions
+  resolveOptions,
+  squashError
 } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
@@ -468,7 +469,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    */
   async connect(): Promise<this> {
     if (this.connectionLock) {
-      return this.connectionLock;
+      return await this.connectionLock;
     }
 
     try {
@@ -599,13 +600,17 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     if (servers.length !== 0) {
       const endSessions = Array.from(this.s.sessionPool.sessions, ({ id }) => id);
       if (endSessions.length !== 0) {
-        await executeOperation(
-          this,
-          new RunAdminCommandOperation(
-            { endSessions },
-            { readPreference: ReadPreference.primaryPreferred, noResponse: true }
-          )
-        ).catch(() => null); // outcome does not matter;
+        try {
+          await executeOperation(
+            this,
+            new RunAdminCommandOperation(
+              { endSessions },
+              { readPreference: ReadPreference.primaryPreferred, noResponse: true }
+            )
+          );
+        } catch (error) {
+          squashError(error);
+        }
       }
     }
 
@@ -655,7 +660,7 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
    */
   static async connect(url: string, options?: MongoClientOptions): Promise<MongoClient> {
     const client = new this(url, options);
-    return client.connect();
+    return await client.connect();
   }
 
   /**
@@ -717,8 +722,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     } finally {
       try {
         await session.endSession();
-      } catch {
-        // We are not concerned with errors from endSession()
+      } catch (error) {
+        squashError(error);
       }
     }
   }

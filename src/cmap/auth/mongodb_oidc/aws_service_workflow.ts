@@ -24,6 +24,6 @@ export class AwsServiceWorkflow extends ServiceWorkflow {
     if (!tokenFile) {
       throw new MongoAWSError(TOKEN_MISSING_ERROR);
     }
-    return fs.promises.readFile(tokenFile, 'utf8');
+    return await fs.promises.readFile(tokenFile, 'utf8');
   }
 }

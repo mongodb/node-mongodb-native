@@ -148,13 +148,15 @@ export async function fetchAzureKMSToken(
   options: AzureKMSRequestOptions = {}
 ): Promise<AzureTokenCacheEntry> {
   const { headers, url } = prepareRequest(options);
-  const response = await get(url, { headers }).catch(error => {
+  try {
+    const response = await get(url, { headers });
+    return await parseResponse(response);
+  } catch (error) {
     if (error instanceof MongoCryptKMSRequestNetworkTimeoutError) {
       throw new MongoCryptAzureKMSRequestError(`[Azure KMS] ${error.message}`);
     }
     throw error;
-  });
-  return parseResponse(response);
+  }
 }
 
 /**

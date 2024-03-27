@@ -52,7 +52,11 @@ export class ListCollectionsOperation extends CommandOperation<Document> {
   }
 
   override async execute(server: Server, session: ClientSession | undefined): Promise<Document> {
-    return super.executeCommand(server, session, this.generateCommand(maxWireVersion(server)));
+    return await super.executeCommand(
+      server,
+      session,
+      this.generateCommand(maxWireVersion(server))
+    );
   }
 
   /* This is here for the purpose of unit testing the final command that gets sent. */

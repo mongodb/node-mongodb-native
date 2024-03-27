@@ -230,7 +230,7 @@ export class Db {
     name: string,
     options?: CreateCollectionOptions
   ): Promise<Collection<TSchema>> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CreateCollectionOperation(this, name, resolveOptions(this, options)) as TODO_NODE_3286
     );
@@ -263,7 +263,7 @@ export class Db {
    */
   async command(command: Document, options?: RunCommandOptions): Promise<Document> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new RunCommandOperation(this, command, {
         ...resolveBSONOptions(options),
@@ -320,7 +320,10 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async stats(options?: DbStatsOptions): Promise<Document> {
-    return executeOperation(this.client, new DbStatsOperation(this, resolveOptions(this, options)));
+    return await executeOperation(
+      this.client,
+      new DbStatsOperation(this, resolveOptions(this, options))
+    );
   }
 
   /**
@@ -366,7 +369,7 @@ export class Db {
     options?: RenameOptions
   ): Promise<Collection<TSchema>> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new RenameOperation(
         this.collection<TSchema>(fromCollection) as TODO_NODE_3286,
@@ -383,7 +386,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async dropCollection(name: string, options?: DropCollectionOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DropCollectionOperation(this, name, resolveOptions(this, options))
     );
@@ -395,7 +398,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async dropDatabase(options?: DropDatabaseOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DropDatabaseOperation(this, resolveOptions(this, options))
     );
@@ -407,7 +410,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async collections(options?: ListCollectionsOptions): Promise<Collection[]> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CollectionsOperation(this, resolveOptions(this, options))
     );
@@ -439,7 +442,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async removeUser(username: string, options?: RemoveUserOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new RemoveUserOperation(this, username, resolveOptions(this, options))
     );
@@ -455,7 +458,7 @@ export class Db {
     level: ProfilingLevel,
     options?: SetProfilingLevelOptions
   ): Promise<ProfilingLevel> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new SetProfilingLevelOperation(this, level, resolveOptions(this, options))
     );
@@ -467,7 +470,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async profilingLevel(options?: ProfilingLevelOptions): Promise<string> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new ProfilingLevelOperation(this, resolveOptions(this, options))
     );
@@ -480,7 +483,7 @@ export class Db {
    * @param options - Optional settings for the command
    */
   async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
-    return this.collection(name).indexInformation(resolveOptions(this, options));
+    return await this.collection(name).indexInformation(resolveOptions(this, options));
   }
 
   /**

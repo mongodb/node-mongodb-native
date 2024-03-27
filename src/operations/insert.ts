@@ -47,7 +47,7 @@ export class InsertOperation extends CommandOperation<Document> {
       command.comment = options.comment;
     }
 
-    return super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command);
   }
 }
 
