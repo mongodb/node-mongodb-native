@@ -10,8 +10,8 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
   isEmptyCredentials,
-  type KMSProviders,
-  refreshKMSCredentials
+  KMSCredentialProvider,
+  type KMSProviders
 } from '../../../../src/client-side-encryption/providers';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import {
@@ -85,7 +85,7 @@ describe('#refreshKMSCredentials', function () {
         });
 
         it('refreshes the aws credentials', async function () {
-          const providers = await refreshKMSCredentials(kmsProviders);
+          const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
           expect(providers).to.deep.equal({
             aws: {
               accessKeyId: accessKey,
@@ -114,7 +114,7 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('refreshes only the aws credentials', async function () {
-            const providers = await refreshKMSCredentials(kmsProviders);
+            const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
             expect(providers).to.deep.equal({
               local: {
                 key: Buffer.alloc(96)
@@ -147,7 +147,7 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('does not refresh credentials', async function () {
-            const providers = await refreshKMSCredentials(kmsProviders);
+            const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
             expect(providers).to.deep.equal(kmsProviders);
           });
         });
@@ -171,7 +171,7 @@ describe('#refreshKMSCredentials', function () {
       });
 
       it('does not refresh credentials', async function () {
-        const providers = await refreshKMSCredentials(kmsProviders);
+        const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
         expect(providers).to.deep.equal(kmsProviders);
       });
     });
@@ -222,7 +222,7 @@ describe('#refreshKMSCredentials', function () {
           const kmsProviders = { gcp: {} };
 
           it('refreshes the gcp credentials', async function () {
-            const providers = await refreshKMSCredentials(kmsProviders);
+            const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
             expect(providers).to.deep.equal({
               gcp: {
                 accessToken: 'abc'
@@ -238,7 +238,9 @@ describe('#refreshKMSCredentials', function () {
           const kmsProviders = { gcp: {} };
 
           it('surfaces error from server', async function () {
-            const error = await refreshKMSCredentials(kmsProviders).catch(error => error);
+            const error = await new KMSCredentialProvider(kmsProviders)
+              .refreshCredentials()
+              .catch(error => error);
             expect(error).to.be.instanceOf(Error);
           });
         });
@@ -258,7 +260,7 @@ describe('#refreshKMSCredentials', function () {
         const kmsProviders = { gcp: {} };
 
         it('does not modify the gcp credentials', async function () {
-          const providers = await refreshKMSCredentials(kmsProviders);
+          const providers = await new KMSCredentialProvider(kmsProviders).refreshCredentials();
           expect(providers).to.deep.equal({ gcp: {} });
         });
       });
@@ -358,7 +360,7 @@ describe('#refreshKMSCredentials', function () {
         httpSpy = sinon.stub(utils, 'get');
         httpSpy.resolves(mockResponse);
 
-        await refreshKMSCredentials({ azure: {} });
+        await new KMSCredentialProvider({ azure: {} }).refreshCredentials();
       });
 
       it('sets the `api-version` param to 2012-02-01', () => {
@@ -441,7 +443,9 @@ describe('#refreshKMSCredentials', function () {
         });
 
         it('throws a MongoCryptKMSRequestError', async () => {
-          const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+          const error = await new KMSCredentialProvider({ azure: {} })
+            .refreshCredentials()
+            .catch(e => e);
           expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
         });
       });
@@ -453,7 +457,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/Malformed JSON body in GET request/);
           });
@@ -465,7 +471,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/Malformed JSON body in GET request/);
           });
@@ -479,12 +487,16 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
           });
 
           it('attaches the body to the error', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.have.property('body').to.deep.equal({ error: 'something went wrong' });
           });
         });
@@ -497,7 +509,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/Malformed JSON body in GET request/);
           });
@@ -509,7 +523,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/Malformed JSON body in GET request/);
           });
@@ -521,7 +537,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/missing field `access_token/);
           });
@@ -533,7 +551,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/missing field `expires_in/);
           });
@@ -548,7 +568,9 @@ describe('#refreshKMSCredentials', function () {
           });
 
           it('throws a MongoCryptKMSRequestError', async () => {
-            const error = await refreshKMSCredentials({ azure: {} }).catch(e => e);
+            const error = await new KMSCredentialProvider({ azure: {} })
+              .refreshCredentials()
+              .catch(e => e);
             expect(error).to.be.instanceOf(MongoCryptAzureKMSRequestError);
             expect(error).to.match(/unable to parse int from `expires_in` field/);
           });
@@ -557,13 +579,16 @@ describe('#refreshKMSCredentials', function () {
 
       context('when a valid token was returned', () => {
         beforeEach(() => {
-          sinon
-            .stub(utils, 'get')
-            .resolves({ status: 200, body: '{ "access_token": "token", "expires_in": "10000" }' });
+          sinon.stub(utils, 'get').resolves({
+            status: 200,
+            body: '{ "access_token": "token", "expires_in": "10000" }'
+          });
         });
 
         it('returns the token in the `azure` field of the kms providers', async () => {
-          const kmsProviders = await refreshKMSCredentials({ azure: {} });
+          const kmsProviders = await new KMSCredentialProvider({
+            azure: {}
+          }).refreshCredentials();
           const azure = kmsProviders.azure;
           expect(azure).to.have.property('accessToken', 'token');
         });
