@@ -1,16 +1,15 @@
-import type { Document } from 'bson';
-
 import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
 import { AbstractOperation } from '../operation';
+import type { SearchIndexDefinition } from './definition';
 
 /** @internal */
 export class UpdateSearchIndexOperation extends AbstractOperation<void> {
   constructor(
     private readonly collection: Collection,
     private readonly name: string,
-    private readonly definition: Document
+    private readonly definition: SearchIndexDefinition
   ) {
     super();
   }

@@ -73,6 +73,7 @@ import {
   CreateSearchIndexesOperation,
   type SearchIndexDescription
 } from './operations/search_indexes/create';
+import type { SearchIndexDefinition } from './operations/search_indexes/definition';
 import { DropSearchIndexOperation } from './operations/search_indexes/drop';
 import { UpdateSearchIndexOperation } from './operations/search_indexes/update';
 import {
@@ -1133,7 +1134,7 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
-  async updateSearchIndex(name: string, definition: Document): Promise<void> {
+  async updateSearchIndex(name: string, definition: SearchIndexDefinition): Promise<void> {
     return executeOperation(
       this.client,
       new UpdateSearchIndexOperation(this as TODO_NODE_3286, name, definition)
