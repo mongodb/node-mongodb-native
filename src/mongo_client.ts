@@ -49,7 +49,8 @@ import {
   isHostMatch,
   type MongoDBNamespace,
   ns,
-  resolveOptions
+  resolveOptions,
+  squashError
 } from './utils';
 import type { W, WriteConcern, WriteConcernSettings } from './write_concern';
 
@@ -607,8 +608,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
               { readPreference: ReadPreference.primaryPreferred, noResponse: true }
             )
           );
-        } catch {
-          // endSessions is best effort
+        } catch (error) {
+          squashError(error);
         }
       }
     }
@@ -721,8 +722,8 @@ export class MongoClient extends TypedEventEmitter<MongoClientEvents> {
     } finally {
       try {
         await session.endSession();
-      } catch {
-        // We are not concerned with errors from endSession()
+      } catch (error) {
+        squashError(error);
       }
     }
   }

@@ -45,6 +45,7 @@ import {
   List,
   maxWireVersion,
   now,
+  squashError,
   uuidV4
 } from './utils';
 import { WriteConcern } from './write_concern';
@@ -275,8 +276,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         this.hasEnded = true;
         this.emit('ended', this);
       }
-    } catch {
+    } catch (error) {
       // spec indicates that we should ignore all errors for `endSessions`
+      squashError(error);
     } finally {
       maybeClearPinnedConnection(this, { force: true, ...options });
     }

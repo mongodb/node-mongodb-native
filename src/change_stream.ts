@@ -676,8 +676,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -703,8 +703,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -731,8 +731,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -754,8 +754,8 @@ export class ChangeStream<
     } finally {
       try {
         await this.close();
-      } catch {
-        // we're not concerned with errors from close()
+      } catch (error) {
+        squashError(error);
       }
     }
   }
@@ -962,16 +962,16 @@ export class ChangeStream<
     if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       try {
         await this.close();
-      } catch {
-        // ignore errors from close
+      } catch (error) {
+        squashError(error);
       }
       throw changeStreamError;
     }
 
     try {
       await this.cursor.close();
-    } catch {
-      // ignore errors from close
+    } catch (error) {
+      squashError(error);
     }
     const topology = getTopology(this.parent);
     try {

@@ -9,7 +9,7 @@ import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
-import { emitWarningOnce, mergeOptions, type MongoDBNamespace } from '../utils';
+import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @internal */
@@ -96,7 +96,8 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       if (batchSize <= 0) {
         try {
           await this.close();
-        } catch {
+        } catch (error) {
+          squashError(error);
           // this is an optimization for the special case of a limit for a find command to avoid an
           // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
           // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it

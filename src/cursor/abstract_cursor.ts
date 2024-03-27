@@ -311,8 +311,8 @@ export abstract class AbstractCursor<
 
             try {
               await cleanupCursor(this, { needsToEmitClosed: true });
-            } catch {
-              // ignore cleanupCursor errors
+            } catch (error) {
+              squashError(error);
             }
 
             throw new MongoAPIError(message);
@@ -333,8 +333,8 @@ export abstract class AbstractCursor<
       if (!this.closed) {
         try {
           await this.close();
-        } catch {
-          // ignore close errors
+        } catch (error) {
+          squashError(error);
         }
       }
     }
@@ -735,8 +735,9 @@ async function next<T>(
         } catch (error) {
           try {
             await cleanupCursor(cursor, { error, needsToEmitClosed: true });
-          } catch {
+          } catch (error) {
             // `cleanupCursor` should never throw, squash and throw the original error
+            squashError(error);
           }
           throw error;
         }
@@ -773,8 +774,9 @@ async function next<T>(
     } catch (error) {
       try {
         await cleanupCursor(cursor, { error, needsToEmitClosed: true });
-      } catch {
+      } catch (error) {
         // `cleanupCursor` should never throw, squash and throw the original error
+        squashError(error);
       }
       throw error;
     }
@@ -871,8 +873,8 @@ async function cleanupCursor(
       cursor[kClient],
       new KillCursorsOperation(cursorId, cursorNs, server, { session })
     );
-  } catch {
-    // squash kill cursor errors
+  } catch (error) {
+    squashError(error);
   } finally {
     await completeCleanup();
   }

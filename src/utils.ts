@@ -1271,7 +1271,7 @@ export function promiseWithResolvers<T>(): {
  * promise.then(undefined, squashError);
  * ```
  */
-export function squashError() {
+export function squashError(_error: unknown) {
   return;
 }
 
