@@ -1,0 +1,146 @@
+description: "search index operations ignore read and write concern"
+schemaVersion: "1.4"
+createEntities:
+  - client:
+      id: &client0 client0
+      useMultipleMongoses: false
+      # Set a non-default read and write concern.
+      uriOptions:
+        readConcernLevel: local
+        w: 1
+      observeEvents:
+        - commandStartedEvent
+  - database:
+      id: &database0 database0
+      client: *client0
+      databaseName: *database0
+  - collection:
+      id: &collection0 collection0
+      database: *database0
+      collectionName: *collection0
+
+runOnRequirements:
+  - minServerVersion: "7.0.0"
+    topologies: [ replicaset, load-balanced, sharded ]
+    serverless: forbid
+
+tests:
+  - description: "createSearchIndex ignores read and write concern"
+    operations:
+      - name: createSearchIndex
+        object: *collection0
+        arguments:
+          model: { definition: &definition { mappings: { dynamic: true } } }
+        expectError:
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
+          isError: true
+          errorContains: Atlas
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                createSearchIndexes: *collection0
+                indexes: [ { definition: *definition } ]
+                $db: *database0
+                # Expect no writeConcern or readConcern to be sent.
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }
+
+  - description: "createSearchIndexes ignores read and write concern"
+    operations:
+      - name: createSearchIndexes
+        object: *collection0
+        arguments:
+          models: []
+        expectError:
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
+          isError: true
+          errorContains: Atlas
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                createSearchIndexes: *collection0
+                indexes: []
+                $db: *database0
+                # Expect no writeConcern or readConcern to be sent.
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }
+
+  - description: "dropSearchIndex ignores read and write concern"
+    operations:
+      - name: dropSearchIndex
+        object: *collection0
+        arguments:
+          name: &indexName 'test index'
+        expectError:
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
+          isError: true
+          errorContains: Atlas
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                dropSearchIndex: *collection0
+                name: *indexName
+                $db: *database0
+                # Expect no writeConcern or readConcern to be sent.
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }
+
+  - description: "listSearchIndexes ignores read and write concern"
+    operations:
+      - name: listSearchIndexes
+        object: *collection0
+        expectError:
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
+          isError: true
+          errorContains: Atlas
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                aggregate: *collection0
+                pipeline:
+                  - $listSearchIndexes: {}
+                # Expect no writeConcern or readConcern to be sent.
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }
+
+  - description: "updateSearchIndex ignores the read and write concern"
+    operations:
+      - name: updateSearchIndex
+        object: *collection0
+        arguments:
+          name: &indexName 'test index'
+          definition: &definition {}
+        expectError:
+          # This test always errors in a non-Atlas environment.  The test functions as a unit test  by asserting
+          # that the driver constructs and sends the correct command.
+          # The expected error message was changed in SERVER-83003. Check for the substring "Atlas" shared by both error messages.
+          isError: true
+          errorContains: Atlas
+    expectEvents:
+      - client: *client0
+        events:
+          - commandStartedEvent:
+              command:
+                updateSearchIndex: *collection0
+                name: *indexName
+                definition: *definition
+                $db: *database0
+                # Expect no writeConcern or readConcern to be sent.
+                writeConcern: { $$exists: false }
+                readConcern: { $$exists: false }

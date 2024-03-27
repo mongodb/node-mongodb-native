@@ -1056,7 +1056,9 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
-  listSearchIndexes(options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
+  ): ListSearchIndexesCursor;
   /**
    * Returns all search indexes for the current collection.
    *
@@ -1065,13 +1067,17 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
-  listSearchIndexes(name: string, options?: ListSearchIndexesOptions): ListSearchIndexesCursor;
+  listSearchIndexes(
+    name: string,
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
+  ): ListSearchIndexesCursor;
   listSearchIndexes(
     indexNameOrOptions?: string | ListSearchIndexesOptions,
-    options?: ListSearchIndexesOptions
+    options?: Omit<ListSearchIndexesOptions, 'readConcern' | 'writeConcern'>
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+
     const indexName =
       indexNameOrOptions == null
         ? null
