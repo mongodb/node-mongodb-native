@@ -30,10 +30,10 @@ async function externalCommand(
   connection: Connection,
   command: ReturnType<typeof saslStart> | ReturnType<typeof saslContinue>
 ): Promise<{ payload: string; conversationId: any }> {
-  return connection.command(ns('$external.$cmd'), command, undefined) as Promise<{
+  return await (connection.command(ns('$external.$cmd'), command, undefined) as Promise<{
     payload: string;
     conversationId: any;
-  }>;
+  }>);
 }
 
 let krb: typeof Kerberos;
@@ -104,7 +104,7 @@ async function makeKerberosClient(authContext: AuthContext): Promise<KerberosCli
     spn = `${spn}@${mechanismProperties.SERVICE_REALM}`;
   }
 
-  return initializeClient(spn, initOptions);
+  return await initializeClient(spn, initOptions);
 }
 
 function saslStart(payload: string) {
@@ -138,14 +138,14 @@ async function negotiate(
       throw error;
     }
     // Adjust number of retries and call step again
-    return negotiate(client, retries - 1, payload);
+    return await negotiate(client, retries - 1, payload);
   }
 }
 
 async function finalize(client: KerberosClient, user: string, payload: string): Promise<string> {
   // GSS Client Unwrap
   const response = await client.unwrap(payload);
-  return client.wrap(response || '', { user });
+  return await client.wrap(response || '', { user });
 }
 
 export async function performGSSAPICanonicalizeHostName(
@@ -174,12 +174,12 @@ export async function performGSSAPICanonicalizeHostName(
       // This can error as ptr records may not exist for all ips. In this case
       // fallback to a cname lookup as dns.lookup() does not return the
       // cname.
-      return resolveCname(host);
+      return await resolveCname(host);
     }
   } else {
     // The case for forward is just to resolve the cname as dns.lookup()
     // will not return it.
-    return resolveCname(host);
+    return await resolveCname(host);
   }
 }
 

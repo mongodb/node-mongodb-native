@@ -128,6 +128,6 @@ export class RunCommandCursor extends AbstractCursor {
       ...this.getMoreOptions
     });
 
-    return executeOperation(this.client, getMoreOperation);
+    return await executeOperation(this.client, getMoreOperation);
   }
 }

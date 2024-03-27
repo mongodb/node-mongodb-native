@@ -47,9 +47,8 @@ const skippedAuthTests = [
   'Insert a document with auto encryption using KMIP KMS provider'
 ];
 
-// TODO(NODE-4006): Investigate csfle test "operation fails with maxWireVersion < 8"
-// TODO(NODE-4324): Int32 and Long not allowed as batchSize option to cursor.
-const skippedNoAuthTests = ['getMore with encryption', 'operation fails with maxWireVersion < 8'];
+// TODO(NODE-6048): Int32 and Long not allowed as batchSize option to cursor.
+const skippedNoAuthTests = ['getMore with encryption'];
 
 const SKIPPED_TESTS = new Set([
   ...(isAuthEnabled ? skippedAuthTests.concat(skippedNoAuthTests) : skippedNoAuthTests),

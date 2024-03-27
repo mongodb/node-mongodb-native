@@ -332,7 +332,7 @@ describe('Aggregation', function () {
         });
       });
     }
-  ).skipReason = 'TODO(NODE-5617): aggregate explain tests failing on latest servers';
+  );
 
   it('should correctly return a cursor with batchSize 1 and call next', function (done) {
     const client = this.configuration.newClient({ w: 1 }, { maxPoolSize: 1 }),

@@ -51,13 +51,13 @@ class ScramSHA extends AuthProvider {
   override async auth(authContext: AuthContext) {
     const { reauthenticating, response } = authContext;
     if (response?.speculativeAuthenticate && !reauthenticating) {
-      return continueScramConversation(
+      return await continueScramConversation(
         this.cryptoMethod,
         response.speculativeAuthenticate,
         authContext
       );
     }
-    return executeScram(this.cryptoMethod, authContext);
+    return await executeScram(this.cryptoMethod, authContext);
   }
 }
 

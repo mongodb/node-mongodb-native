@@ -623,7 +623,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
 
-    return serverPromise;
+    return await serverPromise;
   }
   /**
    * Update the internal TopologyDescription with a ServerDescription

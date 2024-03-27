@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
+import { promises as fs } from 'fs';
 import * as http from 'http';
 import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
@@ -178,6 +179,7 @@ export function isPromiseLike<T = unknown>(value?: unknown): value is PromiseLik
     value != null &&
     typeof value === 'object' &&
     'then' in value &&
+    // eslint-disable-next-line github/no-then
     typeof value.then === 'function'
   );
 }
@@ -1156,7 +1158,7 @@ export async function request(
   uri: string,
   options: RequestOptions = {}
 ): Promise<string | Record<string, any>> {
-  return new Promise<string | Record<string, any>>((resolve, reject) => {
+  return await new Promise<string | Record<string, any>>((resolve, reject) => {
     const requestOptions = {
       method: 'GET',
       timeout: 10000,
@@ -1257,6 +1259,20 @@ export function promiseWithResolvers<T>(): {
     reject = promiseReject;
   });
   return { promise, resolve, reject } as const;
+}
+
+/**
+ * A noop function intended for use in preventing unhandled rejections.
+ *
+ * @example
+ * ```js
+ * const promise = myAsyncTask();
+ * // eslint-disable-next-line github/no-then
+ * promise.then(undefined, squashError);
+ * ```
+ */
+export function squashError(_error: unknown) {
+  return;
 }
 
 export const randomBytes = promisify(crypto.randomBytes);
@@ -1363,5 +1379,14 @@ export class MovingWindow {
   clear() {
     this.length = 0;
     this.writeIndex = 0;
+  }
+}
+
+export async function fileIsAccessible(fileName: string, mode?: number) {
+  try {
+    await fs.access(fileName, mode);
+    return true;
+  } catch {
+    return false;
   }
 }

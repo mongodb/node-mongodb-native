@@ -467,7 +467,7 @@ export class AutoEncrypter {
       proxyOptions: this._proxyOptions,
       tlsOptions: this._tlsOptions
     });
-    return stateMachine.execute<Document>(this, context);
+    return await stateMachine.execute<Document>(this, context);
   }
 
   /**
@@ -502,7 +502,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders);
   }
 
   /**

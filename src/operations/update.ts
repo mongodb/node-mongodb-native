@@ -122,7 +122,7 @@ export class UpdateOperation extends CommandOperation<Document> {
       }
     }
 
-    return super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command);
   }
 }
 
@@ -144,8 +144,8 @@ export class UpdateOneOperation extends UpdateOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<UpdateResult> {
-    const res = await super.execute(server, session);
-    if (this.explain != null) return res as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.execute(server, session);
+    if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
@@ -178,8 +178,8 @@ export class UpdateManyOperation extends UpdateOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<UpdateResult> {
-    const res = await super.execute(server, session);
-    if (this.explain != null) return res as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.execute(server, session);
+    if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 
@@ -231,8 +231,8 @@ export class ReplaceOneOperation extends UpdateOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<UpdateResult> {
-    const res = await super.execute(server, session);
-    if (this.explain != null) return res as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.execute(server, session);
+    if (this.explain != null) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
 

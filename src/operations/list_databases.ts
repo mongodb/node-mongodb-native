@@ -63,7 +63,7 @@ export class ListDatabasesOperation extends CommandOperation<ListDatabasesResult
       cmd.comment = this.options.comment;
     }
 
-    return super.executeCommand(server, session, cmd) as TODO_NODE_3286;
+    return await (super.executeCommand(server, session, cmd) as Promise<TODO_NODE_3286>);
   }
 }
 

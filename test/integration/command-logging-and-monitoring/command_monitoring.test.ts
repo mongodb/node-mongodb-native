@@ -98,8 +98,7 @@ describe('Command Monitoring', function () {
     }
   });
 
-  // NODE-3308
-  it.skip('should correctly receive the APM events for a listIndexes command', {
+  it('should correctly receive the APM events for a listIndexes command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
     test: function () {

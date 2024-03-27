@@ -9,7 +9,7 @@ import { FindOperation, type FindOptions } from '../operations/find';
 import type { Hint } from '../operations/operation';
 import type { ClientSession } from '../sessions';
 import { formatSort, type Sort, type SortDirection } from '../sort';
-import { emitWarningOnce, mergeOptions, type MongoDBNamespace } from '../utils';
+import { emitWarningOnce, mergeOptions, type MongoDBNamespace, squashError } from '../utils';
 import { AbstractCursor, assertUninitialized } from './abstract_cursor';
 
 /** @internal */
@@ -94,15 +94,19 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
         limit && limit > 0 && numReturned + batchSize > limit ? limit - numReturned : batchSize;
 
       if (batchSize <= 0) {
-        // this is an optimization for the special case of a limit for a find command to avoid an
-        // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
-        // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
-        // produces results for the find command.  Once a batch is filled up, it is returned and only
-        // on the subsequent getMore will the query framework consider the limit, determine the cursor
-        // is exhausted and return a cursorId of zero.
-        // instead, if we determine there are no more documents to request from the server, we preemptively
-        // close the cursor
-        await this.close().catch(() => null);
+        try {
+          await this.close();
+        } catch (error) {
+          squashError(error);
+          // this is an optimization for the special case of a limit for a find command to avoid an
+          // extra getMore when the limit has been reached and the limit is a multiple of the batchSize.
+          // This is a consequence of the new query engine in 5.0 having no knowledge of the limit as it
+          // produces results for the find command.  Once a batch is filled up, it is returned and only
+          // on the subsequent getMore will the query framework consider the limit, determine the cursor
+          // is exhausted and return a cursorId of zero.
+          // instead, if we determine there are no more documents to request from the server, we preemptively
+          // close the cursor
+        }
         return { cursor: { id: Long.ZERO, nextBatch: [] } };
       }
     }
@@ -127,7 +131,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
     if (typeof options === 'boolean') {
       throw new MongoInvalidArgumentError('Invalid first parameter to count');
     }
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CountOperation(this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this
@@ -139,7 +143,7 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
 
   /** Execute the explain for the cursor */
   async explain(verbosity?: ExplainVerbosityLike): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new FindOperation(undefined, this.namespace, this[kFilter], {
         ...this[kBuiltOptions], // NOTE: order matters here, we may need to refine this

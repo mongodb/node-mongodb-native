@@ -1,3 +1,4 @@
+/* eslint-disable github/no-then */
 import { promisify } from 'util';
 
 import { Binary, type Document, Long, type Timestamp } from './bson';
@@ -44,6 +45,7 @@ import {
   List,
   maxWireVersion,
   now,
+  squashError,
   uuidV4
 } from './utils';
 import { WriteConcern } from './write_concern';
@@ -274,8 +276,9 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         this.hasEnded = true;
         this.emit('ended', this);
       }
-    } catch {
+    } catch (error) {
       // spec indicates that we should ignore all errors for `endSessions`
+      squashError(error);
     } finally {
       maybeClearPinnedConnection(this, { force: true, ...options });
     }
@@ -415,14 +418,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return endTransactionAsync(this, 'commitTransaction');
+    return await endTransactionAsync(this, 'commitTransaction');
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return endTransactionAsync(this, 'abortTransaction');
+    return await endTransactionAsync(this, 'abortTransaction');
   }
 
   /**
@@ -464,7 +467,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     options?: TransactionOptions
   ): Promise<T> {
     const startTime = now();
-    return attemptTransaction(this, startTime, fn, options);
+    return await attemptTransaction(this, startTime, fn, options);
   }
 }
 

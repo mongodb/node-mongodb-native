@@ -18,7 +18,7 @@ export abstract class ServiceWorkflow implements Workflow {
   async execute(connection: Connection, credentials: MongoCredentials): Promise<Document> {
     const token = await this.getToken(credentials);
     const command = commandDocument(token);
-    return connection.command(ns(credentials.source), command, undefined);
+    return await connection.command(ns(credentials.source), command, undefined);
   }
 
   /**

@@ -3,7 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoRuntimeError } from '../error';
 import { TypedEventEmitter } from '../mongo_types';
-import { HostAddress, matchesParentDomain } from '../utils';
+import { HostAddress, matchesParentDomain, squashError } from '../utils';
 
 /**
  * @internal
@@ -95,7 +95,8 @@ export class SrvPoller extends TypedEventEmitter<SrvPollerEvents> {
     }
 
     this._timeout = setTimeout(() => {
-      this._poll().catch(() => null);
+      // eslint-disable-next-line github/no-then
+      this._poll().then(undefined, squashError);
     }, this.intervalMS);
   }
 

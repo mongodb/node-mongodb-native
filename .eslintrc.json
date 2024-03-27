@@ -11,7 +11,8 @@
     "prettier",
     "unused-imports",
     "tsdoc",
-    "mocha"
+    "mocha",
+    "github"
   ],
   "extends": [
     "eslint:recommended",
@@ -212,7 +213,7 @@
       }
     },
     {
-      // Settings for typescript test files
+      // Settings for typescript src files
       "files": [
         "src/**/*.ts"
       ],
@@ -237,8 +238,9 @@
         "no-return-await": "off",
         "@typescript-eslint/return-await": [
           "error",
-          "in-try-catch"
+          "always"
         ],
+        "github/no-then": "error",
         "no-restricted-imports": [
           "error",
           {

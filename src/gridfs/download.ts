@@ -183,24 +183,13 @@ function doRead(stream: GridFSBucketReadStream): void {
   if (!stream.s.cursor) return;
   if (!stream.s.file) return;
 
-  const handleReadResult = ({
-    error,
-    doc
-  }: { error: Error; doc: null } | { error: null; doc: any }) => {
-    if (stream.destroyed) {
-      return;
-    }
-    if (error) {
-      stream.destroy(error);
-      return;
-    }
+  const handleReadResult = (doc: Document | null) => {
+    if (stream.destroyed) return;
+
     if (!doc) {
       stream.push(null);
-
-      stream.s.cursor?.close().then(
-        () => null,
-        error => stream.destroy(error)
-      );
+      // eslint-disable-next-line github/no-then
+      stream.s.cursor?.close().then(undefined, error => stream.destroy(error));
       return;
     }
 
@@ -271,10 +260,11 @@ function doRead(stream: GridFSBucketReadStream): void {
     return;
   };
 
-  stream.s.cursor.next().then(
-    doc => handleReadResult({ error: null, doc }),
-    error => handleReadResult({ error, doc: null })
-  );
+  // eslint-disable-next-line github/no-then
+  stream.s.cursor.next().then(handleReadResult, error => {
+    if (stream.destroyed) return;
+    stream.destroy(error);
+  });
 }
 
 function init(stream: GridFSBucketReadStream): void {
@@ -289,13 +279,8 @@ function init(stream: GridFSBucketReadStream): void {
     findOneOptions.skip = stream.s.options.skip;
   }
 
-  const handleReadResult = ({
-    error,
-    doc
-  }: { error: Error; doc: null } | { error: null; doc: any }) => {
-    if (error) {
-      return stream.destroy(error);
-    }
+  const handleReadResult = (doc: Document | null) => {
+    if (stream.destroyed) return;
 
     if (!doc) {
       const identifier = stream.s.filter._id
@@ -359,10 +344,11 @@ function init(stream: GridFSBucketReadStream): void {
     return;
   };
 
-  stream.s.files.findOne(stream.s.filter, findOneOptions).then(
-    doc => handleReadResult({ error: null, doc }),
-    error => handleReadResult({ error, doc: null })
-  );
+  // eslint-disable-next-line github/no-then
+  stream.s.files.findOne(stream.s.filter, findOneOptions).then(handleReadResult, error => {
+    if (stream.destroyed) return;
+    stream.destroy(error);
+  });
 }
 
 function waitForFile(stream: GridFSBucketReadStream, callback: Callback): void {

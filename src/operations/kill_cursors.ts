@@ -2,7 +2,7 @@ import type { Long } from '../bson';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
-import type { MongoDBNamespace } from '../utils';
+import { type MongoDBNamespace, squashError } from '../utils';
 import { AbstractOperation, Aspect, defineAspects, type OperationOptions } from './operation';
 
 /**
@@ -47,8 +47,9 @@ export class KillCursorsOperation extends AbstractOperation {
     };
     try {
       await server.command(this.ns, killCursorsCommand, { session });
-    } catch {
+    } catch (error) {
       // The driver should never emit errors from killCursors, this is spec-ed behavior
+      squashError(error);
     }
   }
 }

@@ -19,7 +19,7 @@ import type { AggregateOptions } from './operations/aggregate';
 import type { CollationOptions, OperationParent } from './operations/command';
 import type { ReadPreference } from './read_preference';
 import type { ServerSessionId } from './sessions';
-import { filterOptions, getTopology, type MongoDBNamespace } from './utils';
+import { filterOptions, getTopology, type MongoDBNamespace, squashError } from './utils';
 
 /** @internal */
 const kCursorStream = Symbol('cursorStream');
@@ -379,7 +379,7 @@ export interface ChangeStreamInvalidateDocument extends ChangeStreamDocumentComm
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/createIndexes/#mongodb-data-createIndexes
  */
 export interface ChangeStreamCreateIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -392,7 +392,7 @@ export interface ChangeStreamCreateIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/dropIndexes/#mongodb-data-dropIndexes
  */
 export interface ChangeStreamDropIndexDocument
   extends ChangeStreamDocumentCommon,
@@ -405,7 +405,7 @@ export interface ChangeStreamDropIndexDocument
 /**
  * Only present when the `showExpandedEvents` flag is enabled.
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/modify/#mongodb-data-modify
  */
 export interface ChangeStreamCollModDocument
   extends ChangeStreamDocumentCommon,
@@ -416,7 +416,7 @@ export interface ChangeStreamCollModDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/create/#mongodb-data-create
  */
 export interface ChangeStreamCreateDocument
   extends ChangeStreamDocumentCommon,
@@ -427,7 +427,7 @@ export interface ChangeStreamCreateDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/shardCollection/#mongodb-data-shardCollection
  */
 export interface ChangeStreamShardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -439,7 +439,7 @@ export interface ChangeStreamShardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/reshardCollection/#mongodb-data-reshardCollection
  */
 export interface ChangeStreamReshardCollectionDocument
   extends ChangeStreamDocumentCommon,
@@ -451,7 +451,7 @@ export interface ChangeStreamReshardCollectionDocument
 
 /**
  * @public
- * @see https://www.mongodb.com/docs/manual/reference/change-events/
+ * @see https://www.mongodb.com/docs/manual/reference/change-events/refineCollectionShardKey/#mongodb-data-refineCollectionShardKey
  */
 export interface ChangeStreamRefineCollectionShardKeyDocument
   extends ChangeStreamDocumentCommon,
@@ -676,8 +676,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -703,8 +703,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -731,8 +731,8 @@ export class ChangeStream<
         } catch (error) {
           try {
             await this.close();
-          } catch {
-            // We are not concerned with errors from close()
+          } catch (error) {
+            squashError(error);
           }
           throw error;
         }
@@ -754,8 +754,8 @@ export class ChangeStream<
     } finally {
       try {
         await this.close();
-      } catch {
-        // we're not concerned with errors from close()
+      } catch (error) {
+        squashError(error);
       }
     }
   }
@@ -867,7 +867,8 @@ export class ChangeStream<
   private _closeEmitterModeWithError(error: AnyError): void {
     this.emit(ChangeStream.ERROR, error);
 
-    this.close().catch(() => null);
+    // eslint-disable-next-line github/no-then
+    this.close().then(undefined, squashError);
   }
 
   /** @internal */
@@ -931,13 +932,15 @@ export class ChangeStream<
 
     if (isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       this._endStream();
-      this.cursor.close().catch(() => null);
+      // eslint-disable-next-line github/no-then
+      this.cursor.close().then(undefined, squashError);
 
       const topology = getTopology(this.parent);
       topology
         .selectServer(this.cursor.readPreference, {
           operationName: 'reconnect topology in change stream'
         })
+        // eslint-disable-next-line github/no-then
         .then(
           () => {
             this.cursor = this._createChangeStreamCursor(this.cursor.resumeOptions);
@@ -959,13 +962,17 @@ export class ChangeStream<
     if (!isResumableError(changeStreamError, this.cursor.maxWireVersion)) {
       try {
         await this.close();
-      } catch {
-        // ignore errors from close
+      } catch (error) {
+        squashError(error);
       }
       throw changeStreamError;
     }
 
-    await this.cursor.close().catch(() => null);
+    try {
+      await this.cursor.close();
+    } catch (error) {
+      squashError(error);
+    }
     const topology = getTopology(this.parent);
     try {
       await topology.selectServer(this.cursor.readPreference, {

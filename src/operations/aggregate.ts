@@ -134,7 +134,8 @@ export class AggregateOperation<T = Document> extends CommandOperation<T> {
       command.cursor.batchSize = options.batchSize;
     }
 
-    return super.executeCommand(server, session, command) as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.executeCommand(server, session, command);
+    return res;
   }
 }
 

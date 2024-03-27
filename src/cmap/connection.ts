@@ -39,6 +39,7 @@ import {
   type MongoDBNamespace,
   now,
   once,
+  squashError,
   uuidV4
 } from '../utils';
 import type { WriteConcern } from '../write_concern';
@@ -327,7 +328,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     this.socket.destroy();
     this.error = error;
-    this.dataEvents?.throw(error).then(undefined, () => null); // squash unhandled rejection
+    // eslint-disable-next-line github/no-then
+    this.dataEvents?.throw(error).then(undefined, squashError);
     this.closed = true;
     this.emit(Connection.CLOSE);
   }
@@ -582,7 +584,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       }
       throw new MongoUnexpectedServerResponseError('Server ended moreToCome unexpectedly');
     };
-    exhaustLoop().catch(replyListener);
+    // eslint-disable-next-line github/no-then
+    exhaustLoop().then(undefined, replyListener);
   }
 
   private throwIfAborted() {
@@ -610,7 +613,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const buffer = Buffer.concat(await finalCommand.toBin());
 
     if (this.socket.write(buffer)) return;
-    return once(this.socket, 'drain');
+    return await once(this.socket, 'drain');
   }
 
   /**
@@ -701,7 +704,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return super.command(ns, cmd, options);
+      return await super.command(ns, cmd, options);
     }
 
     if (serverWireVersion < 8) {
@@ -737,6 +740,6 @@ export class CryptoConnection extends Connection {
 
     const response = await super.command(ns, encrypted, options);
 
-    return autoEncrypter.decrypt(response, options);
+    return await autoEncrypter.decrypt(response, options);
   }
 }
