@@ -179,6 +179,46 @@ describe('class OnDemandDocument', () => {
     });
   });
 
+  context('getNumber()', () => {
+    let document: OnDemandDocument;
+    const input = {
+      int: 1,
+      long: 2n,
+      double: 2.3,
+      bool: false
+    };
+
+    beforeEach(async function () {
+      const bytes = BSON.serialize(input);
+      document = new OnDemandDocument(bytes);
+    });
+
+    it('does not cache the result', () => {
+      expect(document.getNumber('int')).to.equal(1);
+      expect(document).to.not.have.nested.property('valueOf.int');
+    });
+
+    it('throws if required is set to true and element name does not exist', () => {
+      expect(() => document.getNumber('blah!', true)).to.throw(BSONError);
+    });
+
+    it('supports parsing int', () => {
+      expect(document.getNumber('int')).to.equal(1);
+    });
+
+    it('supports parsing long', () => {
+      expect(document.getNumber('long')).to.equal(2);
+    });
+
+    it('supports parsing double', () => {
+      expect(document.getNumber('double')).to.equal(2.3);
+    });
+
+    it('supports parsing bool', () => {
+      expect(document.getNumber('bool')).to.equal(0);
+    });
+  });
+
   context('*valuesAs()', () => {
     let array: OnDemandDocument;
     beforeEach(async function () {

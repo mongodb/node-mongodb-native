@@ -6,6 +6,7 @@ import {
   type BSONSerializeOptions,
   BSONType,
   getBigInt64LE,
+  getFloat64LE,
   getInt32LE,
   ObjectId,
   parseToElementsToArray,
@@ -38,11 +39,16 @@ export type JSTypeOf = {
 
 /** @internal */
 export class OnDemandDocument {
+  /** Caches the existence of a property */
   private readonly existenceOf: Record<string, boolean> = Object.create(null);
+  /** Caches a look up of name to element */
   private readonly elementOf: Record<string, BSONElement> = Object.create(null);
+  /** Caches the revived javascript value */
   private readonly valueOf: Record<string, any> = Object.create(null);
+  /** Caches the index of elements that have been named */
   private readonly indexFound: Record<number, boolean> = Object.create(null);
 
+  /** All bson elements in this document */
   private readonly elements: BSONElement[];
 
   /** The number of elements in the BSON document */
@@ -60,6 +66,18 @@ export class OnDemandDocument {
     this.length = this.elements.length;
   }
 
+  /**
+   * Seeks into the elements array for an element matching the given name.
+   *
+   * @remarks
+   * Caching:
+   * - Caches the existence of a property making subsequent look ups for non-existent properties return immediately
+   * - Caches names mapped to elements to avoid reiterating the array and comparing the name again
+   * - Caches the index at which an element has been found to prevent rechecking against elements already determined to belong to another name
+   *
+   * @param name - a basic latin string name of a BSON element
+   * @returns
+   */
   private getElement(name: string): BSONElement | null {
     if (this.existenceOf[name] === false) return null;
 
@@ -86,6 +104,13 @@ export class OnDemandDocument {
     return null;
   }
 
+  /**
+   * Translates BSON bytes into a javascript value. Checking `as` against the BSON element's type
+   * this methods returns the small subset of BSON types that the driver needs to function.
+   *
+   * @param element - The element to revive to a javascript value
+   * @param as - A type byte expected to be returned
+   */
   private reviveValue<T extends keyof JSTypeOf>(element: BSONElement, as: T): JSTypeOf[T];
   private reviveValue(element: BSONElement, as: keyof JSTypeOf): any {
     const type = element[BSONElementOffset.type];
@@ -143,14 +168,32 @@ export class OnDemandDocument {
         return new OnDemandDocument(this.bson, offset, true);
 
       default:
-        throw new Error(`Unsupported BSON type: ${as}`);
+        throw new BSONError(`Unsupported BSON type: ${as}`);
     }
   }
 
+  /**
+   * Checks for the existence of an element by name.
+   *
+   * @remarks
+   * Uses `getElement` with the expectation that will populate caches such that a hasElement call
+   * followed by a `getElement` call will not repeat the cost paid by the first look up.
+   *
+   * @param name - element name
+   */
   public hasElement(name: string): boolean {
     return (this.existenceOf[name] ??= this.getElement(name) != null);
   }
 
+  /**
+   * Turns BSON element with `name` into a javascript value.
+   *
+   * @typeParam T - must be one of the supported BSON types determined by `JSTypeOf` this will determine the return type of this function.
+   * @typeParam Req - A generic to determine the nullish return value of this function. If required is true the return value will not include null.
+   * @param name - the element name
+   * @param as - the bson type expected
+   * @param required - whether or not the element is expected to exist, if true this function will throw if it is not present
+   */
   public getValue<const T extends keyof JSTypeOf, const Req extends boolean = false>(
     name: string,
     as: T,
@@ -178,7 +221,51 @@ export class OnDemandDocument {
   }
 
   /**
-   * Deserialize this object, will not cache result avoid multiple invocations
+   * Supports returning int, double, long, and bool as javascript numbers
+   *
+   * @remarks
+   * **NOTE:**
+   * - Use this _only_ when you believe the potential precision loss of an int64 is acceptable
+   * - This method does not cache the result as Longs or booleans would be stored incorrectly
+   *
+   * @param name - element name
+   * @param required - throws if name does not exist
+   */
+  public getNumber<const Req extends boolean = false>(
+    name: string,
+    required?: Req
+  ): Req extends true ? number : number | null;
+  public getNumber(name: string, required: boolean): number | null {
+    const element = this.getElement(name);
+    if (element == null) {
+      if (required === true) {
+        throw new BSONError(`BSON element "${name}" is missing`);
+      } else {
+        return null;
+      }
+    }
+
+    const type = element[BSONElementOffset.type];
+    const offset = element[BSONElementOffset.offset];
+
+    if (type === BSONType.int) {
+      return getInt32LE(this.bson, offset);
+    }
+    if (type === BSONType.double) {
+      return getFloat64LE(this.bson, offset);
+    }
+    if (type === BSONType.long) {
+      return Number(getBigInt64LE(this.bson, offset));
+    }
+    if (type === BSONType.bool) {
+      return this.bson[offset] ? 1 : 0;
+    }
+
+    return null;
+  }
+
+  /**
+   * Deserialize this object, DOES NOT cache result so avoid multiple invocations
    * @param options - BSON deserialization options
    */
   public toObject(options?: BSONSerializeOptions): Record<string, any> {
@@ -190,8 +277,9 @@ export class OnDemandDocument {
   }
 
   /**
-   * If this is an array with all elements being the same type
-   * Skip converting the keys and start iterating the values!
+   * Iterates through the elements of a document reviving them using the `as` BSONType.
+   *
+   * @param as - The type to revive all elements as
    */
   public *valuesAs<const T extends keyof JSTypeOf>(as: T): Generator<JSTypeOf[T]> {
     if (!this.isArray) {
