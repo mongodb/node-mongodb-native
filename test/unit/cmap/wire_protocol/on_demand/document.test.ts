@@ -185,7 +185,8 @@ describe('class OnDemandDocument', () => {
       int: 1,
       long: 2n,
       double: 2.3,
-      bool: false
+      bool: false,
+      string: 'abc'
     };
 
     beforeEach(async function () {
@@ -200,6 +201,25 @@ describe('class OnDemandDocument', () => {
 
     it('throws if required is set to true and element name does not exist', () => {
       expect(() => document.getNumber('blah!', true)).to.throw(BSONError);
+    });
+
+    it('throws if required is set to true and element is not numeric', () => {
+      // just making sure this test does not fail for the non-exist reason
+      expect(document.hasElement('string')).to.be.true;
+      expect(() => document.getNumber('string', true)).to.throw(BSONError);
+    });
+
+    it('returns null if required is set to false and element does not exist', () => {
+      expect(document.getNumber('blah!', false)).to.be.null;
+      expect(document.getNumber('blah!')).to.be.null;
+    });
+
+    it('returns null if required is set to false and element is not numeric', () => {
+      // just making sure this test does not fail for the non-exist reason
+      expect(document.hasElement('string')).to.be.true;
+
+      expect(document.getNumber('string', false)).to.be.null;
+      expect(document.getNumber('string')).to.be.null;
     });
 
     it('supports parsing int', () => {

@@ -261,7 +261,11 @@ export class OnDemandDocument {
       return this.bson[offset] ? 1 : 0;
     }
 
-    return null;
+    if (required === true) {
+      throw new BSONError(`BSON element "${name}" does not have numeric type: ${type}`);
+    } else {
+      return null;
+    }
   }
 
   /**
