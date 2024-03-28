@@ -406,31 +406,35 @@ export class OpQueryResponse {
         (this.data[this.index + 2] << 16) |
         (this.data[this.index + 3] << 24);
 
+      this.documents[i] = this.data.subarray(this.index, this.index + bsonSize);
       // If we have raw results specified slice the return document
-      if (raw) {
-        this.documents[i] = this.data.slice(this.index, this.index + bsonSize);
-      } else {
-        this.documents[i] = BSON.deserialize(
-          this.data.slice(this.index, this.index + bsonSize),
-          _options
-        );
-      }
+      // if (raw) {
+      // } else {
+      //   this.documents[i] = BSON.deserialize(
+      //     this.data.subarray(this.index, this.index + bsonSize),
+      //     _options
+      //   );
+      // }
 
       // Adjust the index
       this.index = this.index + bsonSize;
     }
 
-    if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: Document = {};
-      fieldsAsRaw[documentsReturnedIn] = true;
-      _options.fieldsAsRaw = fieldsAsRaw;
+    // if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
+    //   const fieldsAsRaw: Document = {};
+    //   fieldsAsRaw[documentsReturnedIn] = true;
+    //   _options.fieldsAsRaw = fieldsAsRaw;
 
-      const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
-      this.documents = [doc];
-    }
+    //   const doc = BSON.deserialize(this.documents[0] as Buffer, _options);
+    //   this.documents = [doc];
+    // }
 
     // Set parsed
     this.parsed = true;
+  }
+
+  getBson(): Uint8Array {
+    return this.documents[0] as Buffer;
   }
 }
 
@@ -658,7 +662,7 @@ export class OpMsgResponse {
     this.index = 4;
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
-    const documentsReturnedIn = options.documentsReturnedIn || null;
+    // const documentsReturnedIn = options.documentsReturnedIn || null;
     const useBigInt64 = options.useBigInt64 ?? this.opts.useBigInt64;
     const promoteLongs = options.promoteLongs ?? this.opts.promoteLongs;
     const promoteValues = options.promoteValues ?? this.opts.promoteValues;
@@ -681,8 +685,14 @@ export class OpMsgResponse {
       const payloadType = this.data.readUInt8(this.index++);
       if (payloadType === 0) {
         const bsonSize = this.data.readUInt32LE(this.index);
-        const bin = this.data.slice(this.index, this.index + bsonSize);
-        this.documents.push(raw ? bin : BSON.deserialize(bin, bsonOptions));
+        const bin = this.data.subarray(this.index, this.index + bsonSize);
+
+        this.documents.push(bin);
+        // if (raw) {
+        // } else {
+        //   this.documents.push(BSON.deserialize(bin, bsonOptions));
+        // }
+
         this.index += bsonSize;
       } else if (payloadType === 1) {
         // It was decided that no driver makes use of payload type 1
@@ -692,15 +702,19 @@ export class OpMsgResponse {
       }
     }
 
-    if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      const fieldsAsRaw: Document = {};
-      fieldsAsRaw[documentsReturnedIn] = true;
-      bsonOptions.fieldsAsRaw = fieldsAsRaw;
-      const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
-      this.documents = [doc];
-    }
+    // if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
+    //   const fieldsAsRaw: Document = {};
+    //   fieldsAsRaw[documentsReturnedIn] = true;
+    //   bsonOptions.fieldsAsRaw = fieldsAsRaw;
+    //   const doc = BSON.deserialize(this.documents[0] as Buffer, bsonOptions);
+    //   this.documents = [doc];
+    // }
 
     this.parsed = true;
+  }
+
+  getBson(): Uint8Array {
+    return this.documents[0] as Buffer;
   }
 
   parseBsonSerializationOptions({ enableUtf8Validation }: BSONSerializeOptions): {

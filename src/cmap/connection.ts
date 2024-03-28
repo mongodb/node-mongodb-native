@@ -62,6 +62,7 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
+import { MongoDBResponse } from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -412,7 +413,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return message;
   }
 
-  private async *sendWire(message: WriteProtocolMessageType, options: CommandOptions) {
+  private async *sendWire(
+    message: WriteProtocolMessageType,
+    options: CommandOptions,
+    returnAs?: typeof MongoDBResponse
+  ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
     if (typeof options.socketTimeoutMS === 'number') {
@@ -428,7 +433,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       });
 
       if (options.noResponse) {
-        yield { ok: 1 };
+        yield MongoDBResponse.empty;
         return;
       }
 
@@ -436,21 +441,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       for await (const response of this.readMany()) {
         this.socket.setTimeout(0);
-        response.parse(options);
+        response.parse({ ...options, raw: true });
 
-        const [document] = response.documents;
-
-        if (!Buffer.isBuffer(document)) {
-          const { session } = options;
-          if (session) {
-            updateSessionFromResponse(session, document);
-          }
-
-          if (document.$clusterTime) {
-            this.clusterTime = document.$clusterTime;
-            this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
-          }
-        }
+        const bson = response.getBson();
+        const document = new (returnAs ?? MongoDBResponse)(bson, 0, false);
 
         yield document;
         this.throwIfAborted();
@@ -469,7 +463,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {}
+    options: CommandOptions = {},
+    returnAs?: typeof MongoDBResponse
   ) {
     const message = this.prepareCommand(ns.db, command, options);
 
@@ -488,16 +483,23 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let document;
     try {
       this.throwIfAborted();
-      for await (document of this.sendWire(message, options)) {
-        if (!Buffer.isBuffer(document) && document.writeConcernError) {
-          throw new MongoWriteConcernError(document.writeConcernError, document);
+      for await (document of this.sendWire(message, options, returnAs)) {
+        if (options.session != null) {
+          updateSessionFromResponse(options.session, document);
         }
 
-        if (
-          !Buffer.isBuffer(document) &&
-          (document.ok === 0 || document.$err || document.errmsg || document.code)
-        ) {
-          throw new MongoServerError(document);
+        if (document.$clusterTime) {
+          this.clusterTime = document.$clusterTime;
+          this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+        }
+
+        const wce = document.getWriteConcernError(options);
+        if (wce != null) {
+          throw new MongoWriteConcernError(wce, document.toObject(options));
+        }
+
+        if (document.ok === 0 || document.$err || document.errmsg || document.code) {
+          throw new MongoServerError(document.toObject(options));
         }
 
         if (this.shouldEmitAndLogCommand) {
@@ -509,14 +511,14 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document,
+              options.noResponse ? undefined : document.toObject(options),
               started,
               this.description.serverConnectionId
             )
           );
         }
 
-        yield document;
+        yield returnAs == null ? document.toObject(options) : document;
         this.throwIfAborted();
       }
     } catch (error) {
@@ -530,7 +532,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document,
+              options.noResponse ? undefined : document?.toObject(options),
               started,
               this.description.serverConnectionId
             )
@@ -555,13 +557,25 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
+  public async command<T extends typeof MongoDBResponse>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions,
+    returnAs: T
+  ): Promise<InstanceType<T>>;
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {}
+    options: CommandOptions
+  ): Promise<Document>;
+  public async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {},
+    returnAs?: typeof MongoDBResponse
   ): Promise<Document> {
     this.throwIfAborted();
-    for await (const document of this.sendCommand(ns, command, options)) {
+    for await (const document of this.sendCommand(ns, command, options, returnAs)) {
       return document;
     }
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');

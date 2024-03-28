@@ -58,7 +58,7 @@ export function drainTimerQueue(queue: TimerQueue): void {
 /** @public */
 export interface ClusterTime {
   clusterTime: Timestamp;
-  signature: {
+  signature?: {
     hash: Binary;
     keyId: Long;
   };
