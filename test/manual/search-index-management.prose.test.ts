@@ -286,7 +286,7 @@ describe('Index Management Prose Tests', function () {
 
     it('Case 7: Driver can successfully handle search index types when creating indexes', metadata, async function () {
       // 01. Create a collection with the "create" command using a randomly generated name (referred to as `coll0`).
-      const coll0 = await client.db('node-test').collection(new ObjectId().toHexString());
+      const coll0 = collection;
       {
         // 02. Create a new search index on `coll0` with the `createSearchIndex` helper. Use the following definition:
         //     ```typescript
