@@ -13,17 +13,18 @@ import {
   type MongoClient,
   MongoDBAWS,
   MongoMissingCredentialsError,
-  MongoServerError
+  MongoServerError,
+  setDifference
 } from '../../mongodb';
 
-const isMongoDBURITest = (process.env.MONGODB_URI ?? '').includes('MONGODB_AWS');
+const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB_AWS');
 
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
   let client: MongoClient;
 
   beforeEach(function () {
-    if (!isMongoDBURITest) {
+    if (!isMongoDBAWSAuthEnvironment) {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
       return this.skip();
     }
@@ -328,7 +329,7 @@ describe('MONGODB-AWS', function () {
 describe('AWS KMS Credential Fetching', function () {
   context('when the AWS SDK is not installed', function () {
     beforeEach(function () {
-      this.currentTest.skipReason = !isMongoDBURITest
+      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
         : AWSTemporaryCredentialProvider.isAWSSDKInstalled
         ? 'This test must run in an environment where the AWS SDK is not installed.'
@@ -343,7 +344,7 @@ describe('AWS KMS Credential Fetching', function () {
 
   context('when the AWS SDK is installed', function () {
     beforeEach(function () {
-      this.currentTest.skipReason = !isMongoDBURITest
+      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
         : AWSTemporaryCredentialProvider.isAWSSDKInstalled
         ? 'This test must run in an environment where the AWS SDK is installed.'
@@ -355,6 +356,18 @@ describe('AWS KMS Credential Fetching', function () {
 
       expect(aws).to.have.property('accessKeyId');
       expect(aws).to.have.property('secretAccessKey');
+    });
+
+    it('does not return any extra keys for the `aws` credential provider', async function () {
+      const { aws } = await new KMSCredentialProvider({ aws: {} }).refreshCredentials();
+
+      const keys = new Set(Object.keys(aws ?? {}));
+      const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
+
+      expect(
+        setDifference(keys, allowedKeys),
+        'received an unexpected key in the response refreshing KMS credentials'
+      ).to.deep.equal([]);
     });
   });
 });
