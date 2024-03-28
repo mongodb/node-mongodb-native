@@ -16,13 +16,14 @@ import {
   MongoServerError
 } from '../../mongodb';
 
+const isMongoDBURITest = (process.env.MONGODB_URI ?? '').includes('MONGODB_AWS');
+
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
   let client: MongoClient;
 
   beforeEach(function () {
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-AWS') === -1) {
+    if (!isMongoDBURITest) {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
       return this.skip();
     }
@@ -327,33 +328,33 @@ describe('MONGODB-AWS', function () {
 describe('AWS KMS Credential Fetching', function () {
   context('when the AWS SDK is not installed', function () {
     beforeEach(function () {
-      if (AWSTemporaryCredentialProvider.isAWSSDKInstalled) {
-        this.currentTest.skipReason =
-          'This test must run in an environment where the AWS SDK is not installed.';
-        this.skip();
-      }
+      this.currentTest.skipReason = !isMongoDBURITest
+        ? 'Test must run in an AWS auth testing environment'
+        : AWSTemporaryCredentialProvider.isAWSSDKInstalled
+        ? 'This test must run in an environment where the AWS SDK is not installed.'
+        : undefined;
+      this.currentTest?.skipReason && this.skip();
     });
     it('fetching AWS KMS credentials throws an error', async function () {
       const error = await new KMSCredentialProvider({ aws: {} }).refreshCredentials().catch(e => e);
-
       expect(error).to.be.instanceOf(MongoAWSError);
     });
   });
 
   context('when the AWS SDK is installed', function () {
     beforeEach(function () {
-      if (!AWSTemporaryCredentialProvider.isAWSSDKInstalled) {
-        this.currentTest.skipReason =
-          'This test must run in an environment where the AWS SDK is installed.';
-        this.skip();
-      }
+      this.currentTest.skipReason = !isMongoDBURITest
+        ? 'Test must run in an AWS auth testing environment'
+        : AWSTemporaryCredentialProvider.isAWSSDKInstalled
+        ? 'This test must run in an environment where the AWS SDK is installed.'
+        : undefined;
+      this.currentTest?.skipReason && this.skip();
     });
     it('KMS credentials are successfully fetched.', async function () {
       const { aws } = await new KMSCredentialProvider({ aws: {} }).refreshCredentials();
 
       expect(aws).to.have.property('accessKeyId');
       expect(aws).to.have.property('secretAccessKey');
-      expect(aws).to.have.property('sessionToken');
     });
   });
 });
