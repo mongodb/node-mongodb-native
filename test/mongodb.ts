@@ -130,6 +130,8 @@ export * from '../src/cmap/metrics';
 export * from '../src/cmap/stream_description';
 export * from '../src/cmap/wire_protocol/compression';
 export * from '../src/cmap/wire_protocol/constants';
+export * from '../src/cmap/wire_protocol/on_demand/document';
+export * from '../src/cmap/wire_protocol/on_demand/string_finder';
 export * from '../src/cmap/wire_protocol/shared';
 export * from '../src/collection';
 export * from '../src/connection_string';
