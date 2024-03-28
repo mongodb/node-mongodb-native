@@ -1,6 +1,14 @@
 import { expect } from 'chai';
 
-import { BSON, OnDemandDocument } from '../../../../mongodb';
+import {
+  Binary,
+  BSON,
+  BSONError,
+  BSONType,
+  ObjectId,
+  OnDemandDocument,
+  Timestamp
+} from '../../../../mongodb';
 
 describe('class OnDemandDocument', () => {
   context('when given an empty BSON sequence', () => {
@@ -49,13 +57,13 @@ describe('class OnDemandDocument', () => {
       expect(doc).to.have.lengthOf(2);
     });
 
-    it('clears element position when finding match', () => {
+    it('tracks element position when finding match', () => {
       const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc.hasElement('ok')).to.be.true;
-      expect(doc).to.have.nested.property('existenceOf.ok', true);
-      expect(doc).to.have.nested.property('elements[0]').to.be.null;
-      expect(doc).to.have.nested.property('elements[1]').to.not.be.null;
+      expect(doc.hasElement('code')).to.be.true;
+      expect(doc).to.have.nested.property('existenceOf.code', true);
+      expect(doc).to.not.have.nested.property('indexFound.0');
+      expect(doc).to.have.nested.property('indexFound.1', true);
     });
   });
 
@@ -78,6 +86,123 @@ describe('class OnDemandDocument', () => {
           promoteValues: false
         })
       );
+    });
+  });
+
+  context('getValue()', () => {
+    let document: OnDemandDocument;
+    const input = {
+      int: 1,
+      long: 2n,
+      timestamp: new Timestamp(2n),
+      binData: new Binary(Uint8Array.from([1, 2, 3]), 3),
+      bool: true,
+      objectId: new ObjectId('01'.repeat(12)),
+      string: 'abc',
+      date: new Date(0),
+      object: { a: 1 },
+      array: [1, 2]
+    };
+
+    beforeEach(async function () {
+      const bytes = BSON.serialize(input);
+      document = new OnDemandDocument(bytes);
+    });
+
+    it('returns the javascript value matching the as parameter', () => {
+      expect(document.getValue('bool', BSONType.bool)).to.be.true;
+    });
+
+    it('throws if the BSON value mismatches the requested type', () => {
+      expect(() => document.getValue('bool', BSONType.int)).to.throw(BSONError);
+    });
+
+    it('throws if required is set to true and element name does not exist', () => {
+      expect(() => document.getValue('blah!', BSONType.bool, true)).to.throw(BSONError);
+      expect(document).to.have.nested.property('existenceOf.blah!', false);
+    });
+
+    it('throws if requested type is unsupported', () => {
+      // @ts-expect-error: checking a bad BSON type
+      expect(() => document.getValue('bool', 100)).to.throw(BSONError);
+    });
+
+    it('caches the value', () => {
+      document.getValue('int', BSONType.int);
+      expect(document).to.have.nested.property('valueOf.int', 1);
+    });
+
+    it('supports returning int', () => {
+      expect(document.getValue('int', BSONType.int, true)).to.deep.equal(input.int);
+    });
+
+    it('supports returning long', () => {
+      expect(document.getValue('long', BSONType.long, true)).to.deep.equal(input.long);
+    });
+
+    it('supports returning timestamp', () => {
+      expect(document.getValue('timestamp', BSONType.timestamp, true)).to.deep.equal(
+        input.timestamp
+      );
+    });
+
+    it('supports returning binData', () => {
+      expect(document.getValue('binData', BSONType.binData, true)).to.deep.equal(input.binData);
+    });
+
+    it('supports returning bool', () => {
+      expect(document.getValue('bool', BSONType.bool, true)).to.deep.equal(input.bool);
+    });
+
+    it('supports returning objectId', () => {
+      expect(document.getValue('objectId', BSONType.objectId, true)).to.deep.equal(input.objectId);
+    });
+
+    it('supports returning string', () => {
+      expect(document.getValue('string', BSONType.string, true)).to.deep.equal(input.string);
+    });
+
+    it('supports returning date', () => {
+      expect(document.getValue('date', BSONType.date, true)).to.deep.equal(input.date);
+    });
+
+    it('supports returning object', () => {
+      const o = document.getValue('object', BSONType.object, true);
+      expect(o).to.be.instanceOf(OnDemandDocument);
+      expect(o).to.have.lengthOf(1);
+    });
+
+    it('supports returning array', () => {
+      const a = document.getValue('array', BSONType.array, true);
+      expect(a).to.be.instanceOf(OnDemandDocument);
+      expect(a).to.have.lengthOf(2);
+    });
+  });
+
+  context('*valuesAs()', () => {
+    let array: OnDemandDocument;
+    beforeEach(async function () {
+      const bytes = BSON.serialize(
+        Object.fromEntries(Array.from({ length: 10 }, () => 1).entries())
+      );
+      array = new OnDemandDocument(bytes, 0, true);
+    });
+
+    it('returns a generator that yields values matching the as BSONType parameter', () => {
+      let didRun = false;
+      for (const item of array.valuesAs(BSONType.int)) {
+        didRun = true;
+        expect(item).to.equal(1);
+      }
+      expect(didRun).to.be.true;
+    });
+
+    it('caches the results in valueOf', () => {
+      const generator = array.valuesAs(BSONType.int);
+      generator.next();
+      generator.next();
+      expect(array).to.have.nested.property('valueOf.0', 1);
+      expect(array).to.have.nested.property('valueOf.1', 1);
     });
   });
 });

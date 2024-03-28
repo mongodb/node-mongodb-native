@@ -3,6 +3,7 @@ import { BSON, type DeserializeOptions, type SerializeOptions } from 'bson';
 export {
   Binary,
   BSON,
+  BSONError,
   BSONRegExp,
   BSONSymbol,
   BSONType,
@@ -31,6 +32,11 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   const res = BSON.onDemand.parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
 }
+
+export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
+export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
+export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
+export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
 
 /**
  * BSON Serialization options.
