@@ -1,4 +1,4 @@
-import { loadAWSCredentials } from './aws';
+import { AWSSDKCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
 import { loadAzureCredentials } from './azure';
 import { loadGCPCredentials } from './gcp';
 
@@ -144,25 +144,57 @@ export function isEmptyCredentials(
 }
 
 /**
- * Load cloud provider credentials for the user provided KMS providers.
- * Credentials will only attempt to get loaded if they do not exist
- * and no existing credentials will get overwritten.
- *
  * @internal
+ *
+ * A class that fetchs KMS credentials on-demand during client encryption.  This class is instantiated
+ * per client encryption or auto encrypter and caches the AWS credential provider, if AWS is being used.
  */
-export async function refreshKMSCredentials(kmsProviders: KMSProviders): Promise<KMSProviders> {
-  let finalKMSProviders = kmsProviders;
-
-  if (isEmptyCredentials('aws', kmsProviders)) {
-    finalKMSProviders = await loadAWSCredentials(finalKMSProviders);
+export class KMSCredentialProvider {
+  private _awsCredentialProvider?: AWSSDKCredentialProvider;
+  private get awsCredentialProvider(): AWSSDKCredentialProvider {
+    this._awsCredentialProvider ??= new AWSSDKCredentialProvider();
+    return this._awsCredentialProvider;
   }
 
-  if (isEmptyCredentials('gcp', kmsProviders)) {
-    finalKMSProviders = await loadGCPCredentials(finalKMSProviders);
-  }
+  constructor(private readonly kmsProviders: KMSProviders) {}
 
-  if (isEmptyCredentials('azure', kmsProviders)) {
-    finalKMSProviders = await loadAzureCredentials(finalKMSProviders);
+  /**
+   * Load cloud provider credentials for the user provided KMS providers.
+   * Credentials will only attempt to get loaded if they do not exist
+   * and no existing credentials will get overwritten.
+   */
+  async refreshCredentials() {
+    let finalKMSProviders = this.kmsProviders;
+
+    if (isEmptyCredentials('aws', this.kmsProviders)) {
+      // We shouldn't ever receive a response from the AWS SDK that doesn't have a `SecretAccessKey`
+      // or `AccessKeyId`.  However, TS says these fields are optional.  We provide empty strings
+      // and let libmongocrypt error if we're unable to fetch the required keys.
+      const {
+        SecretAccessKey = '',
+        AccessKeyId = '',
+        Token
+      } = await this.awsCredentialProvider.getCredentials();
+      const aws: NonNullable<KMSProviders['aws']> = {
+        secretAccessKey: SecretAccessKey,
+        accessKeyId: AccessKeyId
+      };
+      // the AWS session token is only required for temporary credentials
+      Token != null && (aws.sessionToken = Token);
+
+      finalKMSProviders = {
+        ...this.kmsProviders,
+        aws
+      };
+    }
+
+    if (isEmptyCredentials('gcp', this.kmsProviders)) {
+      finalKMSProviders = await loadGCPCredentials(finalKMSProviders);
+    }
+
+    if (isEmptyCredentials('azure', this.kmsProviders)) {
+      finalKMSProviders = await loadAzureCredentials(finalKMSProviders);
+    }
+    return finalKMSProviders;
   }
-  return finalKMSProviders;
 }

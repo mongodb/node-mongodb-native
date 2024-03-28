@@ -13,7 +13,7 @@ import { MongoDBCollectionNamespace } from '../utils';
 import * as cryptoCallbacks from './crypto_callbacks';
 import { MongoCryptInvalidArgumentError } from './errors';
 import { MongocryptdManager } from './mongocryptd_manager';
-import { type KMSProviders, refreshKMSCredentials } from './providers';
+import { KMSCredentialProvider, type KMSProviders } from './providers';
 import { type CSFLEKMSTlsOptions, StateMachine } from './state_machine';
 
 /** @public */
@@ -233,7 +233,6 @@ export class AutoEncrypter {
   _metaDataClient: MongoClient;
   _proxyOptions: ProxyOptions;
   _tlsOptions: CSFLEKMSTlsOptions;
-  _kmsProviders: KMSProviders;
   _bypassMongocryptdAndCryptShared: boolean;
   _contextCounter: number;
 
@@ -252,6 +251,8 @@ export class AutoEncrypter {
    * fields were decrypted.
    */
   [kDecorateResult] = false;
+  /** @internal */
+  private _credentialProvider: KMSCredentialProvider;
 
   /** @internal */
   static getMongoCrypt(): MongoCryptConstructor {
@@ -319,7 +320,7 @@ export class AutoEncrypter {
     this._metaDataClient = options.metadataClient || client;
     this._proxyOptions = options.proxyOptions || {};
     this._tlsOptions = options.tlsOptions || {};
-    this._kmsProviders = options.kmsProviders || {};
+    const kmsProviders = options.kmsProviders || {};
 
     const mongoCryptOptions: MongoCryptOptions = {
       cryptoCallbacks
@@ -336,9 +337,9 @@ export class AutoEncrypter {
         : (serialize(options.encryptedFieldsMap) as Buffer);
     }
 
-    mongoCryptOptions.kmsProviders = !Buffer.isBuffer(this._kmsProviders)
-      ? (serialize(this._kmsProviders) as Buffer)
-      : this._kmsProviders;
+    mongoCryptOptions.kmsProviders = !Buffer.isBuffer(kmsProviders)
+      ? (serialize(kmsProviders) as Buffer)
+      : kmsProviders;
 
     if (options.options?.logger) {
       mongoCryptOptions.logger = options.options.logger;
@@ -389,6 +390,8 @@ export class AutoEncrypter {
 
       this._mongocryptdClient = new MongoClient(this._mongocryptdManager.uri, clientOptions);
     }
+
+    this._credentialProvider = new KMSCredentialProvider(kmsProviders);
   }
 
   /**
@@ -502,7 +505,7 @@ export class AutoEncrypter {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return await refreshKMSCredentials(this._kmsProviders);
+    return await this._credentialProvider.refreshCredentials();
   }
 
   /**

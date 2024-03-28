@@ -1,4 +1,4 @@
-import { coerce } from 'semver';
+import { satisfies } from 'semver';
 
 import { loadSpecTests } from '../spec';
 import { executeUriValidationTest } from '../tools/uri_spec_runner';
@@ -15,13 +15,12 @@ describe('Connection String spec tests', function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
-    const { major } = coerce(process.version);
     const skippedTests = [
       'Invalid port (zero) with IP literal',
       'Invalid port (zero) with hostname'
     ];
     test.skipReason =
-      major === 20 && skippedTests.includes(test.title)
+      satisfies(process.version, '>=20.0.0') && skippedTests.includes(test.title)
         ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
 
