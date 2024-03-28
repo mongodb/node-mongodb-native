@@ -5,7 +5,6 @@
     <link>/node-mongodb-native/tags/</link>
     <description>Recent content in Tags on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <atom:link href="/node-mongodb-native/tags/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language><atom:link href="/node-mongodb-native/tags/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
