@@ -338,12 +338,9 @@ describe('monitoring', function () {
               for (let i = 0; i < 5; i++) {
                 await once(monitor, 'serverHeartbeatSucceeded');
                 monitor.requestCheck();
-                console.log(i);
               }
-              monitor.close();
-
-              console.log(monitor.rttSamplesMS.samples);
               expect(monitor.roundTripTime).to.be.greaterThanOrEqual(heartbeatDurationMS);
+              monitor.close();
             });
           });
         });

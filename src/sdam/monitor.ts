@@ -507,7 +507,7 @@ export class RTTPinger {
     this[kCancellationToken] = cancellationToken;
     this.closed = false;
     this.monitor = monitor;
-    this.latestRTT = 0;
+    this.latestRTT = monitor.latestRTT;
 
     const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
     this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
