@@ -24,6 +24,8 @@ const enum BSONElementOffset {
 }
 
 export type JSTypeOf = {
+  [BSONType.null]: null;
+  [BSONType.undefined]: null;
   [BSONType.int]: number;
   [BSONType.long]: bigint;
   [BSONType.timestamp]: Timestamp;
@@ -121,21 +123,27 @@ export class OnDemandDocument {
    * Translates BSON bytes into a javascript value. Checking `as` against the BSON element's type
    * this methods returns the small subset of BSON types that the driver needs to function.
    *
+   * @remarks
+   * - BSONType.null and BSONType.undefined always return null
+   * - If the type requested does not match this returns null
+   *
    * @param element - The element to revive to a javascript value
    * @param as - A type byte expected to be returned
    */
-  private reviveValue<T extends keyof JSTypeOf>(element: BSONElement, as: T): JSTypeOf[T];
-  private reviveValue(element: BSONElement, as: keyof JSTypeOf): any {
+  private toJSValue<T extends keyof JSTypeOf>(element: BSONElement, as: T): JSTypeOf[T];
+  private toJSValue(element: BSONElement, as: keyof JSTypeOf): any {
     const type = element[BSONElementOffset.type];
     const offset = element[BSONElementOffset.offset];
     const length = element[BSONElementOffset.length];
 
     if (as !== type) {
-      // FIXME need to translate minKey to unsigned value if support is added later
-      throw new BSONError(`Expected to find type ${as} at offset ${offset} but found ${type}`);
+      return null;
     }
 
     switch (as) {
+      case BSONType.null:
+      case BSONType.undefined:
+        return null;
       case BSONType.int:
         return getInt32LE(this.bson, offset);
       case BSONType.long:
@@ -207,15 +215,19 @@ export class OnDemandDocument {
    * @param as - the bson type expected
    * @param required - whether or not the element is expected to exist, if true this function will throw if it is not present
    */
-  public get<const T extends keyof JSTypeOf, const Req extends boolean = false>(
-    name: string,
-    as: T,
-    required?: Req
-  ): Req extends true ? JSTypeOf[T] : JSTypeOf[T] | null;
   public get<const T extends keyof JSTypeOf>(
     name: string,
     as: T,
-    required: boolean
+    required?: false | undefined
+  ): JSTypeOf[T] | null;
+
+  /** `required` will make `get` throw if name does not exist or is null/undefined */
+  public get<const T extends keyof JSTypeOf>(name: string, as: T, required: true): JSTypeOf[T];
+
+  public get<const T extends keyof JSTypeOf>(
+    name: string,
+    as: T,
+    required?: boolean
   ): JSTypeOf[T] | null {
     const element = this.getElement(name);
     if (element == null) {
@@ -227,7 +239,16 @@ export class OnDemandDocument {
     }
 
     if (!(name in this.valueOf)) {
-      this.valueOf[name] = this.reviveValue(element, as);
+      const value = this.toJSValue(element, as);
+      if (value == null) {
+        if (required === true) {
+          throw new BSONError(`BSON element "${name}" is missing`);
+        } else {
+          return null;
+        }
+      }
+      // It is important to never store null
+      this.valueOf[name] = value;
     }
 
     return this.valueOf[name];
@@ -304,7 +325,7 @@ export class OnDemandDocument {
     }
     let counter = 0;
     for (const element of this.elements) {
-      const item = this.reviveValue<T>(element, as);
+      const item = this.toJSValue<T>(element, as);
       this.valueOf[counter] = item;
       yield item;
       counter += 1;

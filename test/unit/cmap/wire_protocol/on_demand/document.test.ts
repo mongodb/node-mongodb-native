@@ -119,8 +119,16 @@ describe('class OnDemandDocument', () => {
       expect(document.get('bool', BSONType.bool)).to.be.true;
     });
 
-    it('throws if the BSON value mismatches the requested type', () => {
-      expect(() => document.get('bool', BSONType.int)).to.throw(BSONError);
+    it('returns null if the BSON value mismatches the requested type', () => {
+      expect(document.get('bool', BSONType.int)).to.be.null;
+    });
+
+    it('supports requesting multiple types', () => {
+      expect(
+        document.get('bool', BSONType.int) ??
+          document.get('bool', BSONType.long) ??
+          document.get('bool', BSONType.bool)
+      ).to.be.true;
     });
 
     it('throws if required is set to true and element name does not exist', () => {
@@ -138,6 +146,18 @@ describe('class OnDemandDocument', () => {
     it('caches the value', () => {
       document.get('int', BSONType.int);
       expect(document).to.have.nested.property('valueOf.int', 1);
+    });
+
+    it('supports returning null for null and undefined bson elements', () => {
+      const bson = Uint8Array.from([
+        ...[11, 0, 0, 0], // doc size
+        ...[6, 97, 0], // a: undefined (6)
+        ...[10, 98, 0], // b: null (10)
+        0 // doc term
+      ]);
+      const document = new OnDemandDocument(bson, 0, false);
+      expect(document.get('a', BSONType.undefined)).to.be.null;
+      expect(document.get('b', BSONType.null)).to.be.null;
     });
 
     it('supports returning int', () => {
