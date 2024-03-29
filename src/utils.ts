@@ -1346,6 +1346,7 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
 }
 
 export class MovingWindow {
+  /** Index of the next slot to be overwritten */
   private writeIndex: number;
   private length: number;
   private samples: Float64Array;
@@ -1383,6 +1384,11 @@ export class MovingWindow {
     }
 
     return sum / this.length;
+  }
+
+  get last(): number | null {
+    if (this.length === 0) return null;
+    return this.samples[this.writeIndex === 0 ? this.length - 1 : this.writeIndex - 1];
   }
 
   clear() {

@@ -220,6 +220,10 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     return this.rttSamplesMS.min();
   }
 
+  get latestRTT(): number {
+    return this.rttSamplesMS.last ?? 0; // FIXME: Check if this is acceptable
+  }
+
   addRttSample(rtt: number) {
     this.rttSamplesMS.addSample(rtt);
   }
@@ -299,12 +303,10 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
     }
 
-    // FIXME: Figure out how to set this. Should duration be the instantaneous rtt or the averaged
-    // rtt?
+    // NOTE: here we use the latestRTT as this measurment corresponds with the value
+    // obtained for this successful heartbeat
     const duration =
-      isAwaitable && monitor.rttPinger
-        ? monitor.rttPinger.roundTripTime
-        : calculateDurationInMs(start);
+      isAwaitable && monitor.rttPinger ? monitor.rttPinger.latestRTT : calculateDurationInMs(start);
 
     monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_SUCCEEDED,
@@ -506,6 +508,10 @@ export class RTTPinger {
 
   get minRoundTripTime(): number {
     return this.monitor.minRoundTripTime;
+  }
+
+  get latestRTT(): number {
+    return this.monitor.latestRTT;
   }
 
   close(): void {
