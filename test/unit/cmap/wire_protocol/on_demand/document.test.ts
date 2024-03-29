@@ -22,8 +22,8 @@ describe('class OnDemandDocument', () => {
     it('sets exists cache to false for any key requested', () => {
       const emptyDocument = BSON.serialize({});
       const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc.hasElement('ok')).to.be.false;
-      expect(doc.hasElement('$clusterTime')).to.be.false;
+      expect(doc.has('ok')).to.be.false;
+      expect(doc.has('$clusterTime')).to.be.false;
       expect(doc).to.have.nested.property('existenceOf.ok', false);
       expect(doc).to.have.nested.property('existenceOf.$clusterTime', false);
     });
@@ -39,14 +39,14 @@ describe('class OnDemandDocument', () => {
     it('sets exists cache to true for ok', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc.hasElement('ok')).to.be.true;
+      expect(doc.has('ok')).to.be.true;
       expect(doc).to.have.nested.property('existenceOf.ok', true);
     });
 
     it('sets exists cache to false for any other key', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc.hasElement('$clusterTime')).to.be.false;
+      expect(doc.has('$clusterTime')).to.be.false;
       expect(doc).to.have.nested.property('existenceOf.$clusterTime', false);
     });
   });
@@ -61,7 +61,7 @@ describe('class OnDemandDocument', () => {
     it('tracks element position when finding match', () => {
       const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc.hasElement('code')).to.be.true;
+      expect(doc.has('code')).to.be.true;
       expect(doc).to.have.nested.property('existenceOf.code', true);
       expect(doc).to.not.have.nested.property('indexFound.0');
       expect(doc).to.have.nested.property('indexFound.1', true);
@@ -90,7 +90,7 @@ describe('class OnDemandDocument', () => {
     });
   });
 
-  context('getValue()', () => {
+  context('get()', () => {
     let document: OnDemandDocument;
     const input = {
       int: 1,
@@ -113,82 +113,80 @@ describe('class OnDemandDocument', () => {
     });
 
     it('returns null if the element does not exist', () => {
-      expect(document.getValue('blah', BSONType.bool)).to.be.null;
+      expect(document.get('blah', BSONType.bool)).to.be.null;
     });
 
     it('returns the javascript value matching the as parameter', () => {
-      expect(document.getValue('bool', BSONType.bool)).to.be.true;
+      expect(document.get('bool', BSONType.bool)).to.be.true;
     });
 
     it('throws if the BSON value mismatches the requested type', () => {
-      expect(() => document.getValue('bool', BSONType.int)).to.throw(BSONError);
+      expect(() => document.get('bool', BSONType.int)).to.throw(BSONError);
     });
 
     it('throws if required is set to true and element name does not exist', () => {
-      expect(() => document.getValue('blah!', BSONType.bool, true)).to.throw(BSONError);
+      expect(() => document.get('blah!', BSONType.bool, true)).to.throw(BSONError);
       expect(document).to.have.nested.property('existenceOf.blah!', false);
     });
 
     it('throws if requested type is unsupported', () => {
       expect(() => {
         // @ts-expect-error: checking a bad BSON type
-        document.getValue('unsupportedType', BSONType.regex);
+        document.get('unsupportedType', BSONType.regex);
       }).to.throw(BSONError, /unsupported/i);
     });
 
     it('caches the value', () => {
-      document.getValue('int', BSONType.int);
+      document.get('int', BSONType.int);
       expect(document).to.have.nested.property('valueOf.int', 1);
     });
 
     it('supports returning int', () => {
-      expect(document.getValue('int', BSONType.int, true)).to.deep.equal(input.int);
+      expect(document.get('int', BSONType.int, true)).to.deep.equal(input.int);
     });
 
     it('supports returning long', () => {
-      expect(document.getValue('long', BSONType.long, true)).to.deep.equal(input.long);
+      expect(document.get('long', BSONType.long, true)).to.deep.equal(input.long);
     });
 
     it('supports returning timestamp', () => {
-      expect(document.getValue('timestamp', BSONType.timestamp, true)).to.deep.equal(
-        input.timestamp
-      );
+      expect(document.get('timestamp', BSONType.timestamp, true)).to.deep.equal(input.timestamp);
     });
 
     it('supports returning binData', () => {
-      expect(document.getValue('binData', BSONType.binData, true)).to.deep.equal(input.binData);
+      expect(document.get('binData', BSONType.binData, true)).to.deep.equal(input.binData);
     });
 
     it('supports returning binData, subtype 2', () => {
-      expect(document.getValue('binDataSubtype2', BSONType.binData, true)).to.deep.equal(
+      expect(document.get('binDataSubtype2', BSONType.binData, true)).to.deep.equal(
         input.binDataSubtype2
       );
     });
 
     it('supports returning bool', () => {
-      expect(document.getValue('bool', BSONType.bool, true)).to.deep.equal(input.bool);
+      expect(document.get('bool', BSONType.bool, true)).to.deep.equal(input.bool);
     });
 
     it('supports returning objectId', () => {
-      expect(document.getValue('objectId', BSONType.objectId, true)).to.deep.equal(input.objectId);
+      expect(document.get('objectId', BSONType.objectId, true)).to.deep.equal(input.objectId);
     });
 
     it('supports returning string', () => {
-      expect(document.getValue('string', BSONType.string, true)).to.deep.equal(input.string);
+      expect(document.get('string', BSONType.string, true)).to.deep.equal(input.string);
     });
 
     it('supports returning date', () => {
-      expect(document.getValue('date', BSONType.date, true)).to.deep.equal(input.date);
+      expect(document.get('date', BSONType.date, true)).to.deep.equal(input.date);
     });
 
     it('supports returning object', () => {
-      const o = document.getValue('object', BSONType.object, true);
+      const o = document.get('object', BSONType.object, true);
       expect(o).to.be.instanceOf(OnDemandDocument);
       expect(o).to.have.lengthOf(1);
     });
 
     it('supports returning array', () => {
-      const a = document.getValue('array', BSONType.array, true);
+      const a = document.get('array', BSONType.array, true);
       expect(a).to.be.instanceOf(OnDemandDocument);
       expect(a).to.have.lengthOf(2);
     });
@@ -221,7 +219,7 @@ describe('class OnDemandDocument', () => {
 
     it('throws if required is set to true and element is not numeric', () => {
       // just making sure this test does not fail for the non-exist reason
-      expect(document.hasElement('string')).to.be.true;
+      expect(document.has('string')).to.be.true;
       expect(() => document.getNumber('string', true)).to.throw(BSONError);
     });
 
@@ -232,7 +230,7 @@ describe('class OnDemandDocument', () => {
 
     it('returns null if required is set to false and element is not numeric', () => {
       // just making sure this test does not fail for the non-exist reason
-      expect(document.hasElement('string')).to.be.true;
+      expect(document.has('string')).to.be.true;
 
       expect(document.getNumber('string', false)).to.be.null;
       expect(document.getNumber('string')).to.be.null;

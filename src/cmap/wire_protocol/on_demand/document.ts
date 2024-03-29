@@ -176,12 +176,12 @@ export class OnDemandDocument {
    * Checks for the existence of an element by name.
    *
    * @remarks
-   * Uses `getElement` with the expectation that will populate caches such that a hasElement call
+   * Uses `getElement` with the expectation that will populate caches such that a `has` call
    * followed by a `getElement` call will not repeat the cost paid by the first look up.
    *
    * @param name - element name
    */
-  public hasElement(name: string): boolean {
+  public has(name: string): boolean {
     return (this.existenceOf[name] ??= this.getElement(name) != null);
   }
 
@@ -194,12 +194,12 @@ export class OnDemandDocument {
    * @param as - the bson type expected
    * @param required - whether or not the element is expected to exist, if true this function will throw if it is not present
    */
-  public getValue<const T extends keyof JSTypeOf, const Req extends boolean = false>(
+  public get<const T extends keyof JSTypeOf, const Req extends boolean = false>(
     name: string,
     as: T,
     required?: Req
   ): Req extends true ? JSTypeOf[T] : JSTypeOf[T] | null;
-  public getValue<const T extends keyof JSTypeOf>(
+  public get<const T extends keyof JSTypeOf>(
     name: string,
     as: T,
     required: boolean
