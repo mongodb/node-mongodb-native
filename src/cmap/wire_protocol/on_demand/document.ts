@@ -53,9 +53,6 @@ export class OnDemandDocument {
   /** All bson elements in this document */
   private readonly elements: BSONElement[];
 
-  /** The number of elements in the BSON document */
-  public readonly length: number;
-
   constructor(
     /** BSON bytes, this document begins at offset */
     protected readonly bson: Uint8Array,
@@ -65,7 +62,6 @@ export class OnDemandDocument {
     public readonly isArray = false
   ) {
     this.elements = parseToElementsToArray(this.bson, offset);
-    this.length = this.elements.length;
   }
 
   /** Only supports basic latin strings */

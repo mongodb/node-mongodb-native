@@ -12,12 +12,6 @@ import {
 
 describe('class OnDemandDocument', () => {
   context('when given an empty BSON sequence', () => {
-    it('has a length of 0', () => {
-      const emptyDocument = BSON.serialize({});
-      const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc).to.have.lengthOf(0);
-    });
-
     it('sets exists cache to false for any key requested', () => {
       const emptyDocument = BSON.serialize({});
       const doc = new OnDemandDocument(emptyDocument, 0, false);
