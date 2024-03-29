@@ -1301,18 +1301,18 @@ export async function once<T>(ee: EventEmitter, name: string): Promise<T> {
   }
 }
 
-export function maybeAddIdToDocuments<T extends Document>(
-  coll: Collection<T>,
+export function maybeAddIdToDocuments(
+  coll: Collection,
   docs: Document[],
   options: { forceServerObjectId?: boolean }
 ): Document[];
-export function maybeAddIdToDocuments<T extends Document>(
-  coll: Collection<T>,
+export function maybeAddIdToDocuments(
+  coll: Collection,
   docs: Document,
   options: { forceServerObjectId?: boolean }
 ): Document;
-export function maybeAddIdToDocuments<T extends Document>(
-  coll: Collection<T>,
+export function maybeAddIdToDocuments(
+  coll: Collection,
   docOrDocs: Document[] | Document,
   options: { forceServerObjectId?: boolean }
 ): Document[] | Document {
