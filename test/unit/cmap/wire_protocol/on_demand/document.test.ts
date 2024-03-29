@@ -4,7 +4,6 @@ import {
   Binary,
   BSON,
   BSONError,
-  BSONSymbol,
   BSONType,
   ObjectId,
   OnDemandDocument,

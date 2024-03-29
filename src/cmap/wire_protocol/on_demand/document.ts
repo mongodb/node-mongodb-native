@@ -13,7 +13,6 @@ import {
   Timestamp,
   toUTF8
 } from '../../../bson';
-import { StringFinder } from './string_finder';
 
 // eslint-disable-next-line no-restricted-syntax
 const enum BSONElementOffset {
@@ -66,6 +65,20 @@ export class OnDemandDocument {
     this.length = this.elements.length;
   }
 
+  /** Only supports basic latin strings */
+  isElementName(name: string, element: BSONElement): boolean {
+    const nameLength = element[BSONElementOffset.nameLength];
+    const nameOffset = element[BSONElementOffset.nameOffset];
+
+    if (name.length !== nameLength) return false;
+
+    for (let i = 0; i < name.length; i++) {
+      if (this.bson[nameOffset + i] !== name.charCodeAt(i)) return false;
+    }
+
+    return true;
+  }
+
   /**
    * Seeks into the elements array for an element matching the given name.
    *
@@ -89,9 +102,9 @@ export class OnDemandDocument {
       const element = this.elements[index];
 
       if (
-        !this.indexFound[index] && // skip this element if it has already been associated with a name
-        name.length === element[BSONElementOffset.nameLength] && // Since we assume basic latin, check the js length against the BSON length before comparing
-        StringFinder.includes(this.bson, name, element[BSONElementOffset.nameOffset]) // compare
+        // skip this element if it has already been associated with a name
+        !this.indexFound[index] &&
+        this.isElementName(name, element)
       ) {
         this.elementOf[name] = element;
         this.indexFound[index] = true;

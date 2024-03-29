@@ -56,58 +56,8 @@ export const ByteUtils = {
     return ByteUtils.toLocalBufferType(seqA).equals(seqB);
   },
 
-  /**
-   * Returns true if subsequence is included in sequence starting at offset
-   */
-  includes(this: void, sequence: Uint8Array, offset: number, subsequence: Uint8Array): boolean {
-    const subEnd = offset + subsequence.length;
-    const lengthToCheck = subEnd - offset;
-
-    if (subsequence.length !== lengthToCheck) return false;
-
-    if (lengthToCheck === 1) {
-      return subsequence[0] === sequence[offset];
-    }
-
-    if (lengthToCheck === 2) {
-      return subsequence[0] === sequence[offset] && subsequence[1] === sequence[offset + 1];
-    }
-
-    if (lengthToCheck === 3) {
-      return (
-        subsequence[0] === sequence[offset] &&
-        subsequence[1] === sequence[offset + 1] &&
-        subsequence[2] === sequence[offset + 2]
-      );
-    }
-
-    if (lengthToCheck <= 25) {
-      for (let i = 0; i < lengthToCheck; i++) {
-        if (subsequence[i] !== sequence[offset + i]) return false;
-      }
-      return true;
-    }
-
-    const comparison = ByteUtils.compare(subsequence, sequence, offset, subEnd);
-    return comparison === 0;
-  },
-
-  compare(
-    this: void,
-    source: Uint8Array,
-    target: Uint8Array,
-    targetStart?: number,
-    targetEnd?: number,
-    sourceStart?: number,
-    sourceEnd?: number
-  ) {
-    return ByteUtils.toLocalBufferType(source).compare(
-      target,
-      targetStart,
-      targetEnd,
-      sourceStart,
-      sourceEnd
-    );
+  compare(this: void, seqA: Uint8Array, seqB: Uint8Array) {
+    return ByteUtils.toLocalBufferType(seqA).compare(seqB);
   },
 
   toBase64(this: void, uint8array: Uint8Array) {
