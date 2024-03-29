@@ -209,7 +209,6 @@ export class OnDemandDocument {
    * Turns BSON element with `name` into a javascript value.
    *
    * @typeParam T - must be one of the supported BSON types determined by `JSTypeOf` this will determine the return type of this function.
-   * @typeParam Req - A generic to determine the nullish return value of this function. If required is true the return value will not include null.
    * @param name - the element name
    * @param as - the bson type expected
    * @param required - whether or not the element is expected to exist, if true this function will throw if it is not present
