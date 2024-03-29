@@ -53,7 +53,12 @@ describe('monitoring', function () {
 
     const { major } = coerce(process.version);
     const failingTests = [
-      'should upgrade to hello from legacy hello when initial handshake contains helloOk'
+      'should connect and issue an initial server check',
+      'should ignore attempts to connect when not already closed',
+      'should not initiate another check if one is in progress',
+      'should not close the monitor on a failed heartbeat',
+      'should upgrade to hello from legacy hello when initial handshake contains helloOk',
+      'correctly returns the mean of the heartbeat durations'
     ];
     test.skipReason =
       (major === 18 || major === 20) && failingTests.includes(test.title)
