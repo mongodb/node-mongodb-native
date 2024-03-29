@@ -1,6 +1,5 @@
-import { getAwsCredentialProvider } from '../../deps';
-import { type KMSProviders } from '.';
 import { AWSSDKCredentialProvider } from '../../cmap/auth/aws_temporary_credentials';
+import { type KMSProviders } from '.';
 
 /**
  * @internal

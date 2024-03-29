@@ -6,7 +6,7 @@ import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
-import { KMSCredentialProvider, refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
+import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
   AWSTemporaryCredentialProvider,
   MongoAWSError,
@@ -17,7 +17,7 @@ import {
   setDifference
 } from '../../mongodb';
 
-const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB_AWS');
+const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
@@ -337,7 +337,7 @@ describe('AWS KMS Credential Fetching', function () {
       this.currentTest?.skipReason && this.skip();
     });
     it('fetching AWS KMS credentials throws an error', async function () {
-      const error = await new KMSCredentialProvider({ aws: {} }).refreshCredentials().catch(e => e);
+      const error = await refreshKMSCredentials({ aws: {} }).catch(e => e);
       expect(error).to.be.instanceOf(MongoAWSError);
     });
   });

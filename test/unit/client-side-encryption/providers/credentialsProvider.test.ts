@@ -20,9 +20,9 @@ import {
 } from '../../../../src/client-side-encryption/providers/azure';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/client-side-encryption/providers/utils';
-import * as requirements from '../requirements.helper';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
-import { MongoAWSError } from '../../../../src/error';
+import * as requirements from '../requirements.helper';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -153,29 +153,6 @@ describe('#refreshKMSCredentials', function () {
             expect(providers).to.deep.equal(kmsProviders);
           });
         });
-      });
-    });
-
-    context('when the sdk is not installed', function () {
-      const kmsProviders = {
-        local: {
-          key: Buffer.alloc(96)
-        },
-        aws: {}
-      };
-
-      before(function () {
-        if (requirements.credentialProvidersInstalled.aws && this.currentTest) {
-          this.currentTest.skipReason = 'Credentials will be loaded when sdk present';
-          this.currentTest.skip();
-          return;
-        }
-      });
-
-      it('throws a MongoAWSError', async function () {
-        const error = await refreshKMSCredentials(kmsProviders).catch(e => e);
-        const expectedErrorMessage = 'Optional module `@aws-sdk/credential-providers` not found';
-        expect(error).to.be.instanceOf(MongoAWSError).to.match(new RegExp(expectedErrorMessage, 'i'));
       });
     });
 
