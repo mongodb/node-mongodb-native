@@ -1348,8 +1348,8 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
 export class MovingWindow {
   /** Index of the next slot to be overwritten */
   private writeIndex: number;
-  private length: number;
-  private samples: Float64Array;
+  length: number;
+  samples: Float64Array;
 
   constructor(windowSize = 10) {
     this.samples = new Float64Array(windowSize);

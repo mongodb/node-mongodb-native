@@ -14,6 +14,7 @@ import {
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoRuntimeError,
+  MovingWindow,
   ObjectId,
   shuffle,
   TimeoutController
@@ -1042,6 +1043,150 @@ describe('driver utils', function () {
           clock.tick(1);
           expect(spy, 'spy was not called after 3000ms').to.have.been.called;
         });
+      });
+    });
+  });
+
+  describe('class MovingWindow', () => {
+    describe('constructor', () => {
+      it('Constructs a Float64 array of length windowSize', () => {
+        const window = new MovingWindow(10);
+        expect(window.samples).to.have.length(10);
+      });
+    });
+
+    describe('addSample', () => {
+      context('when length < windowSize', () => {
+        it('increments the length', () => {
+          const window = new MovingWindow(10);
+          expect(window.length).to.equal(0);
+
+          window.addSample(1);
+
+          expect(window.length).to.equal(1);
+        });
+      });
+      context('when length === windowSize', () => {
+        let window: MovingWindow;
+        const size = 10;
+
+        beforeEach(() => {
+          window = new MovingWindow(size);
+          for (let i = 1; i <= size; i++) {
+            window.addSample(i);
+          }
+        });
+
+        it('does not increment the length', () => {
+          window.addSample(size + 1);
+          expect(window.length).to.equal(size);
+        });
+
+        it('overwrites the oldest element', () => {
+          window.addSample(size + 1);
+          for (const el of window.samples) {
+            if (el === 1) expect.fail('Did not overwrite oldest element');
+          }
+        });
+
+        it('appends the new element to the end of the window', () => {
+          window.addSample(size + 1);
+          expect(window.last).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('min()', () => {
+      context('when length < 2', () => {
+        it('returns 0', () => {
+          const window = new MovingWindow(10);
+          // length 0
+          expect(window.min()).to.equal(0);
+
+          window.addSample(1);
+          // length 1
+          expect(window.min()).to.equal(0);
+        });
+      });
+
+      context('when 2 <= length < windowSize', () => {
+        let window: MovingWindow;
+        beforeEach(() => {
+          window = new MovingWindow(10);
+          for (let i = 1; i <= 3; i++) {
+            window.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(window.min()).to.equal(1);
+        });
+      });
+
+      context('when length == windowSize', () => {
+        let window: MovingWindow;
+        const size = 10;
+
+        beforeEach(() => {
+          window = new MovingWindow(size);
+          for (let i = 1; i <= size * 2; i++) {
+            window.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(window.min()).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('average()', () => {
+      it('correctly computes the mean', () => {
+        const window = new MovingWindow(10);
+        let sum = 0;
+
+        for (let i = 1; i <= 10; i++) {
+          sum += i;
+          window.addSample(i);
+        }
+
+        expect(window.average()).to.equal(sum / 10);
+      });
+    });
+
+    describe('last', () => {
+      context('when length == 0', () => {
+        it('returns null', () => {
+          const window = new MovingWindow(10);
+          expect(window.last).to.be.null;
+        });
+      });
+
+      context('when length > 0', () => {
+        it('returns the most recently inserted element', () => {
+          const window = new MovingWindow(10);
+          for (let i = 0; i < 11; i++) {
+            window.addSample(i);
+          }
+          expect(window.last).to.equal(10);
+        });
+      });
+    });
+
+    describe('clear', () => {
+      let window: MovingWindow;
+
+      beforeEach(() => {
+        window = new MovingWindow(10);
+        for (let i = 0; i < 20; i++) {
+          window.addSample(i);
+        }
+        expect(window.length).to.equal(10);
+      });
+
+      it('sets length to 0', () => {
+        window.clear();
+        expect(window.length).to.equal(0);
       });
     });
   });
