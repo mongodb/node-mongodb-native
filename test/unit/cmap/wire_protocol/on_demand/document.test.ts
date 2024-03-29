@@ -23,12 +23,6 @@ describe('class OnDemandDocument', () => {
   });
 
   context('when given a BSON document with ok set to 1', () => {
-    it('has a length of 1', () => {
-      const emptyDocument = BSON.serialize({ ok: 1 });
-      const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc).to.have.lengthOf(1);
-    });
-
     it('sets exists cache to true for ok', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
@@ -45,12 +39,6 @@ describe('class OnDemandDocument', () => {
   });
 
   context('when given a BSON document with ok set to 0 and code set to 2', () => {
-    it('has a length of 2', () => {
-      const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
-      const doc = new OnDemandDocument(emptyDocument, 0, false);
-      expect(doc).to.have.lengthOf(2);
-    });
-
     it('tracks element position when finding match', () => {
       const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
@@ -200,13 +188,14 @@ describe('class OnDemandDocument', () => {
     it('supports returning object', () => {
       const o = document.get('object', BSONType.object, true);
       expect(o).to.be.instanceOf(OnDemandDocument);
-      expect(o).to.have.lengthOf(1);
+      expect(o.has('a')).to.be.true;
     });
 
     it('supports returning array', () => {
       const a = document.get('array', BSONType.array, true);
       expect(a).to.be.instanceOf(OnDemandDocument);
-      expect(a).to.have.lengthOf(2);
+      expect(a.has('0')).to.be.true;
+      expect(a.has('1')).to.be.true;
     });
   });
 
