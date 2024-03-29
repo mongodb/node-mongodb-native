@@ -906,63 +906,6 @@ describe('driver utils', function () {
       });
     });
 
-    context('includes()', () => {
-      let compareSpy;
-      beforeEach(async function () {
-        compareSpy = sinon.spy(ByteUtils, 'compare');
-      });
-
-      afterEach(async function () {
-        sinon.restore();
-      });
-
-      it('is a function', () => expect(ByteUtils).property('includes').is.a('function'));
-
-      it('returns true for equal Buffer or Uint8Array', () => {
-        const buffer = Buffer.from([1, 2, 3]);
-        const uint8array = new Uint8Array([1, 2, 3]);
-
-        expect(ByteUtils.includes(buffer, 0, uint8array)).to.be.true;
-        expect(ByteUtils.includes(uint8array, 0, buffer)).to.be.true;
-        expect(ByteUtils.includes(uint8array, 0, uint8array)).to.be.true;
-        expect(ByteUtils.includes(buffer, 0, buffer)).to.be.true;
-      });
-
-      it('returns false for nonequal Buffer or Uint8Array', () => {
-        const buffer = Buffer.from([1, 2, 3]);
-        const uint8array = new Uint8Array([1, 2, 4]);
-
-        expect(ByteUtils.includes(buffer, 0, uint8array)).to.be.false;
-        expect(ByteUtils.includes(uint8array, 0, buffer)).to.be.false;
-      });
-
-      it('returns true for equal subset', () => {
-        const sequence = Buffer.from([1, 2, 3, 4, 5, 6]);
-        const subsequence = new Uint8Array([3, 4, 5]);
-        expect(ByteUtils.includes(sequence, 2, subsequence)).to.be.true;
-      });
-
-      it('does not call compare for buffers 25 and under in length', () => {
-        const uint8array = new Uint8Array([1, 2, 3]);
-
-        expect(ByteUtils.includes(uint8array, 0, new Uint8Array([1]))).to.be.true;
-        expect(ByteUtils.includes(uint8array, 0, new Uint8Array([1, 2]))).to.be.true;
-        expect(ByteUtils.includes(uint8array, 0, new Uint8Array([1, 2, 3]))).to.be.true;
-        expect(
-          ByteUtils.includes(Uint8Array.from({ length: 100 }), 0, Uint8Array.from({ length: 25 }))
-        ).to.be.true;
-
-        expect(compareSpy).to.not.have.been.called;
-      });
-
-      it('does call compare for buffers over 25 in length', () => {
-        expect(
-          ByteUtils.includes(Uint8Array.from({ length: 100 }), 0, Uint8Array.from({ length: 26 }))
-        ).to.be.true;
-        expect(compareSpy).to.have.been.called;
-      });
-    });
-
     context('compare()', () => {
       it('is a function', () => expect(ByteUtils).property('compare').is.a('function'));
 
