@@ -4,6 +4,7 @@ import {
   Binary,
   BSON,
   BSONError,
+  BSONSymbol,
   BSONType,
   ObjectId,
   OnDemandDocument,
@@ -96,17 +97,23 @@ describe('class OnDemandDocument', () => {
       long: 2n,
       timestamp: new Timestamp(2n),
       binData: new Binary(Uint8Array.from([1, 2, 3]), 3),
+      binDataSubtype2: new Binary(Uint8Array.from([1, 2, 3]), 2),
       bool: true,
       objectId: new ObjectId('01'.repeat(12)),
       string: 'abc',
       date: new Date(0),
       object: { a: 1 },
-      array: [1, 2]
+      array: [1, 2],
+      unsupportedType: /abc/
     };
 
     beforeEach(async function () {
       const bytes = BSON.serialize(input);
       document = new OnDemandDocument(bytes);
+    });
+
+    it('returns null if the element does not exist', () => {
+      expect(document.getValue('blah', BSONType.bool)).to.be.null;
     });
 
     it('returns the javascript value matching the as parameter', () => {
@@ -123,8 +130,10 @@ describe('class OnDemandDocument', () => {
     });
 
     it('throws if requested type is unsupported', () => {
-      // @ts-expect-error: checking a bad BSON type
-      expect(() => document.getValue('bool', 100)).to.throw(BSONError);
+      expect(() => {
+        // @ts-expect-error: checking a bad BSON type
+        document.getValue('unsupportedType', BSONType.regex);
+      }).to.throw(BSONError, /unsupported/i);
     });
 
     it('caches the value', () => {
@@ -148,6 +157,12 @@ describe('class OnDemandDocument', () => {
 
     it('supports returning binData', () => {
       expect(document.getValue('binData', BSONType.binData, true)).to.deep.equal(input.binData);
+    });
+
+    it('supports returning binData, subtype 2', () => {
+      expect(document.getValue('binDataSubtype2', BSONType.binData, true)).to.deep.equal(
+        input.binDataSubtype2
+      );
     });
 
     it('supports returning bool', () => {
@@ -186,6 +201,7 @@ describe('class OnDemandDocument', () => {
       long: 2n,
       double: 2.3,
       bool: false,
+      boolTrue: true,
       string: 'abc'
     };
 
@@ -236,6 +252,7 @@ describe('class OnDemandDocument', () => {
 
     it('supports parsing bool', () => {
       expect(document.getNumber('bool')).to.equal(0);
+      expect(document.getNumber('boolTrue')).to.equal(1);
     });
   });
 
@@ -246,6 +263,14 @@ describe('class OnDemandDocument', () => {
         Object.fromEntries(Array.from({ length: 10 }, () => 1).entries())
       );
       array = new OnDemandDocument(bytes, 0, true);
+    });
+
+    it('throws if document is not an array', () => {
+      const bytes = BSON.serialize(
+        Object.fromEntries(Array.from({ length: 10 }, () => 1).entries())
+      );
+      array = new OnDemandDocument(bytes, 0, false);
+      expect(() => array.valuesAs(BSONType.int).next()).to.throw();
     });
 
     it('returns a generator that yields values matching the as BSONType parameter', () => {
