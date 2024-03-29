@@ -1345,6 +1345,7 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
   }
 }
 
+/** @internal */
 export class MovingWindow {
   /** Index of the next slot to be overwritten */
   private writeIndex: number;

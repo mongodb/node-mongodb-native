@@ -552,6 +552,7 @@ export type {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
+  MovingWindow,
   TimeoutController
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
