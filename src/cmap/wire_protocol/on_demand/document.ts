@@ -65,7 +65,7 @@ export class OnDemandDocument {
   }
 
   /** Only supports basic latin strings */
-  isElementName(name: string, element: BSONElement): boolean {
+  private isElementName(name: string, element: BSONElement): boolean {
     const nameLength = element[BSONElementOffset.nameLength];
     const nameOffset = element[BSONElementOffset.nameOffset];
 
