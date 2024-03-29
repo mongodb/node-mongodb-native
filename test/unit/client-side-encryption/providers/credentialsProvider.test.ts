@@ -21,6 +21,8 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports
 import * as utils from '../../../../src/client-side-encryption/providers/utils';
 import * as requirements from '../requirements.helper';
+import { AWSSDKCredentialProvider } from '../../../../src/cmap/auth/aws_temporary_credentials';
+import { MongoAWSError } from '../../../../src/error';
 
 const originalAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
 const originalSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
@@ -170,9 +172,32 @@ describe('#refreshKMSCredentials', function () {
         }
       });
 
-      it('does not refresh credentials', async function () {
-        const providers = await refreshKMSCredentials(kmsProviders);
-        expect(providers).to.deep.equal(kmsProviders);
+      it('throws a MongoAWSError', async function () {
+        const error = await refreshKMSCredentials(kmsProviders).catch(e => e);
+        const expectedErrorMessage = 'Optional module `@aws-sdk/credential-providers` not found';
+        expect(error).to.be.instanceOf(MongoAWSError).to.match(new RegExp(expectedErrorMessage, 'i'));
+      });
+    });
+
+    context('when the AWS SDK returns unknown fields', function () {
+      beforeEach(() => {
+        sinon.stub(AWSSDKCredentialProvider.prototype, 'getCredentials').resolves({
+          Token: 'example',
+          SecretAccessKey: 'example',
+          AccessKeyId: 'example',
+          Expiration: new Date()
+        });
+      });
+      afterEach(() => sinon.restore());
+      it('only returns fields libmongocrypt expects', async function () {
+        const credentials = await refreshKMSCredentials({ aws: {} });
+        expect(credentials).to.deep.equal({
+          aws: {
+            accessKeyId: accessKey,
+            secretAccessKey: secretKey,
+            sessionToken: sessionToken
+          }
+        });
       });
     });
   });
