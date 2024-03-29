@@ -93,6 +93,7 @@ describe('class OnDemandDocument', () => {
     let document: OnDemandDocument;
     const input = {
       int: 1,
+      double: 1.2,
       long: 2n,
       timestamp: new Timestamp(2n),
       binData: new Binary(Uint8Array.from([1, 2, 3]), 3),
@@ -164,6 +165,10 @@ describe('class OnDemandDocument', () => {
       expect(document.get('int', BSONType.int, true)).to.deep.equal(input.int);
     });
 
+    it('supports returning double', () => {
+      expect(document.get('double', BSONType.double, true)).to.deep.equal(input.double);
+    });
+
     it('supports returning long', () => {
       expect(document.get('long', BSONType.long, true)).to.deep.equal(input.long);
     });
@@ -227,11 +232,6 @@ describe('class OnDemandDocument', () => {
       document = new OnDemandDocument(bytes);
     });
 
-    it('does not cache the result', () => {
-      expect(document.getNumber('int')).to.equal(1);
-      expect(document).to.not.have.nested.property('valueOf.int');
-    });
-
     it('throws if required is set to true and element name does not exist', () => {
       expect(() => document.getNumber('blah!', true)).to.throw(BSONError);
     });
@@ -239,7 +239,9 @@ describe('class OnDemandDocument', () => {
     it('throws if required is set to true and element is not numeric', () => {
       // just making sure this test does not fail for the non-exist reason
       expect(document.has('string')).to.be.true;
-      expect(() => document.getNumber('string', true)).to.throw(BSONError);
+      expect(() => {
+        document.getNumber('string', true);
+      }).to.throw(BSONError);
     });
 
     it('returns null if required is set to false and element does not exist', () => {

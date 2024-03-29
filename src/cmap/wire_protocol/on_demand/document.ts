@@ -26,6 +26,7 @@ const enum BSONElementOffset {
 export type JSTypeOf = {
   [BSONType.null]: null;
   [BSONType.undefined]: null;
+  [BSONType.double]: number;
   [BSONType.int]: number;
   [BSONType.long]: bigint;
   [BSONType.timestamp]: Timestamp;
@@ -144,6 +145,8 @@ export class OnDemandDocument {
       case BSONType.null:
       case BSONType.undefined:
         return null;
+      case BSONType.double:
+        return getFloat64LE(this.bson, offset);
       case BSONType.int:
         return getInt32LE(this.bson, offset);
       case BSONType.long:
@@ -270,36 +273,19 @@ export class OnDemandDocument {
     required?: Req
   ): Req extends true ? number : number | null;
   public getNumber(name: string, required: boolean): number | null {
-    const element = this.getElement(name);
-    if (element == null) {
-      if (required === true) {
-        throw new BSONError(`BSON element "${name}" is missing`);
-      } else {
-        return null;
-      }
+    const maybeBool = this.get(name, BSONType.bool);
+    const bool = maybeBool == null ? null : maybeBool ? 1 : 0;
+
+    const maybeLong = this.get(name, BSONType.long);
+    const long = maybeLong == null ? null : Number(maybeLong);
+
+    const result = bool ?? long ?? this.get(name, BSONType.int) ?? this.get(name, BSONType.double);
+
+    if (required === true && result == null) {
+      throw new BSONError(`BSON element "${name}" is missing`);
     }
 
-    const type = element[BSONElementOffset.type];
-    const offset = element[BSONElementOffset.offset];
-
-    if (type === BSONType.int) {
-      return getInt32LE(this.bson, offset);
-    }
-    if (type === BSONType.double) {
-      return getFloat64LE(this.bson, offset);
-    }
-    if (type === BSONType.long) {
-      return Number(getBigInt64LE(this.bson, offset));
-    }
-    if (type === BSONType.bool) {
-      return this.bson[offset] ? 1 : 0;
-    }
-
-    if (required === true) {
-      throw new BSONError(`BSON element "${name}" does not have numeric type: ${type}`);
-    } else {
-      return null;
-    }
+    return result;
   }
 
   /**
