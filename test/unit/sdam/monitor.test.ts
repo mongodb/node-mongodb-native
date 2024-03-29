@@ -1,7 +1,7 @@
 import * as net from 'node:net';
 
 import { expect } from 'chai';
-import { coerce } from 'semver';
+import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 
@@ -49,7 +49,6 @@ describe('monitoring', function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
-    const { major } = coerce(process.version);
     const failingTests = [
       'should connect and issue an initial server check',
       'should ignore attempts to connect when not already closed',
@@ -58,7 +57,7 @@ describe('monitoring', function () {
       'should upgrade to hello from legacy hello when initial handshake contains helloOk'
     ];
     test.skipReason =
-      (major === 18 || major === 20) && failingTests.includes(test.title)
+      satisfies(process.version, '>=18.0.0') && failingTests.includes(test.title)
         ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
 
