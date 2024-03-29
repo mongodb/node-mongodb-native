@@ -1,11 +1,13 @@
+import { once } from 'node:events';
 import * as net from 'node:net';
 
 import { expect } from 'chai';
 import { coerce } from 'semver';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
+import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import { MongoClient } from '../../mongodb';
+import { MongoClient, ServerHeartbeatSucceededEvent } from '../../mongodb';
 import {
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -141,7 +143,7 @@ describe('monitoring', function () {
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
   describe('Monitor', function () {
-    let monitor;
+    let monitor: Monitor | null;
 
     beforeEach(() => {
       monitor = null;
@@ -153,7 +155,7 @@ describe('monitoring', function () {
       }
     });
 
-    it('should connect and issue an initial server check', function (done) {
+    it('should connect and issue an initial server check', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -164,15 +166,17 @@ describe('monitoring', function () {
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => {
-        expect(monitor.connection).to.have.property('id', '<monitor>');
-        done();
-      });
+      const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
+      const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
+
+      const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
+
+      expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
+      expect(monitor.connection).to.have.property('id', '<monitor>');
     });
 
-    it('should ignore attempts to connect when not already closed', function (done) {
+    it('should ignore attempts to connect when not already closed', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -183,13 +187,17 @@ describe('monitoring', function () {
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => done());
+      const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
+      const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
+
+      const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
+
+      expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       monitor.connect();
     });
 
-    it('should not initiate another check if one is in progress', function (done) {
+    it('should not initiate another check if one is in progress', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -202,32 +210,27 @@ describe('monitoring', function () {
 
       const startedEvents: ServerHeartbeatStartedEvent[] = [];
       monitor.on('serverHeartbeatStarted', event => startedEvents.push(event));
-      monitor.on('close', () => {
-        expect(startedEvents).to.have.length(2);
-        done();
-      });
+      const monitorClose = once(monitor, 'close');
 
       monitor.connect();
-      monitor.once('serverHeartbeatSucceeded', () => {
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
+      await once(monitor, 'serverHeartbeatSucceeded');
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
 
-        const minHeartbeatFrequencyMS = 500;
-        setTimeout(() => {
-          // wait for minHeartbeatFrequencyMS, then request a check and verify another check occurred
-          monitor.once('serverHeartbeatSucceeded', () => {
-            monitor.close();
-          });
+      const minHeartbeatFrequencyMS = 500;
+      await setTimeoutPromise(minHeartbeatFrequencyMS);
 
-          monitor.requestCheck();
-        }, minHeartbeatFrequencyMS);
-      });
+      await once(monitor, 'serverHeartbeatSucceeded');
+      monitor.close();
+
+      await monitorClose;
+      expect(startedEvents).to.have.length(2);
     });
 
-    it('should not close the monitor on a failed heartbeat', function (done) {
+    it('should not close the monitor on a failed heartbeat', async function () {
       let helloCount = 0;
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -263,16 +266,13 @@ describe('monitoring', function () {
       let successCount = 0;
       monitor.on('serverHeartbeatSucceeded', () => {
         if (successCount++ === 2) {
-          monitor.close();
+          monitor?.close();
         }
       });
 
-      monitor.on('close', () => {
-        expect(events).to.have.length(2);
-        done();
-      });
-
       monitor.connect();
+      await once(monitor, 'close');
+      expect(events).to.have.length(2);
     });
 
     it('should upgrade to hello from legacy hello when initial handshake contains helloOk', function (done) {
@@ -306,6 +306,8 @@ describe('monitoring', function () {
         }, minHeartbeatFrequencyMS);
       });
     });
+
+    describe('');
   });
 
   describe('class MonitorInterval', function () {
