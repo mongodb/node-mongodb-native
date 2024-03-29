@@ -7,7 +7,7 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import { MongoClient, ServerHeartbeatSucceededEvent } from '../../mongodb';
+import { Long, MongoClient, ObjectId, ServerHeartbeatSucceededEvent } from '../../mongodb';
 import {
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -53,10 +53,6 @@ describe('monitoring', function () {
 
     const { major } = coerce(process.version);
     const failingTests = [
-      'should connect and issue an initial server check',
-      'should ignore attempts to connect when not already closed',
-      'should not initiate another check if one is in progress',
-      'should not close the monitor on a failed heartbeat',
       'should upgrade to hello from legacy hello when initial handshake contains helloOk'
     ];
     test.skipReason =
@@ -307,7 +303,49 @@ describe('monitoring', function () {
       });
     });
 
-    describe('');
+    describe('roundTripTime', function () {
+      const table = [
+        {
+          serverMonitoringMode: 'stream',
+          topologyVersion: {
+            processId: new ObjectId(),
+            counter: new Long(0, 0)
+          }
+        },
+        { serverMonitoringMode: 'poll', topologyVersion: undefined }
+      ];
+      for (const { serverMonitoringMode, topologyVersion } of table) {
+        context(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
+          context('when more than one heartbeatSucceededEvent has been captured', () => {
+            const heartbeatDurationMS = 250;
+            it('correctly returns the mean of the heartbeat durations', async () => {
+              mockServer.setMessageHandler(request => {
+                setTimeout(
+                  () => request.reply(Object.assign({ helloOk: true }, mock.HELLO)),
+                  heartbeatDurationMS
+                );
+              });
+              const server = new MockServer(mockServer.address());
+              if (topologyVersion) server.description.topologyVersion = topologyVersion;
+              monitor = new Monitor(server as any, { serverMonitoringMode } as any);
+              monitor.connect();
+
+              for (let i = 0; i < 5; i++) {
+                await once(monitor, 'serverHeartbeatSucceeded');
+                monitor.requestCheck();
+                console.log(i);
+              }
+              monitor.close();
+
+              console.log(monitor.rttSamplesMS.samples);
+              expect(monitor.roundTripTime).to.be.greaterThanOrEqual(heartbeatDurationMS);
+            });
+          });
+        });
+      }
+    });
+
+    //describe('minRoundTripTime');
   });
 
   describe('class MonitorInterval', function () {
