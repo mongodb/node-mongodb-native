@@ -127,7 +127,7 @@ export interface ConnectionOptions
   /** @internal */
   mongoLogger?: MongoLogger | undefined;
   /** @internal */
-  parent?: Monitor;
+  monitor?: Monitor;
 }
 
 /** @public */
