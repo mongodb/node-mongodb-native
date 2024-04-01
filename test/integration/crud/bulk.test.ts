@@ -723,7 +723,7 @@ describe('Bulk', function () {
     }
   });
 
-  it('should correctly execute ordered batch using w:0', function (done) {
+  it.skip('should correctly execute ordered batch using w:0', function (done) {
     client.connect((err, client) => {
       const db = client.db();
       const col = db.collection('batch_write_ordered_ops_9');
@@ -748,7 +748,7 @@ describe('Bulk', function () {
         client.close(done);
       });
     });
-  });
+  }).skipReason = 'TODO(NODE-6060): set `moreToCome` op_msg bit when `w: 0` is specified';
 
   it('should correctly handle single unordered batch API', function (done) {
     client.connect((err, client) => {
