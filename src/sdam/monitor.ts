@@ -305,11 +305,11 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
     }
 
-    // NOTE: here we use the latestRTT as this measurment corresponds with the value
+    // NOTE: here we use the latestRtt as this measurment corresponds with the value
     // obtained for this successful heartbeat
     const duration =
       isAwaitable && monitor.rttPinger
-        ? monitor.rttPinger.latestRTT ?? calculateDurationInMs(start)
+        ? monitor.rttPinger.latestRtt ?? calculateDurationInMs(start)
         : calculateDurationInMs(start);
 
     monitor.addRttSample(duration);
@@ -500,14 +500,14 @@ export class RTTPinger {
   monitor: Monitor;
   closed: boolean;
   /** @internal */
-  latestRTT?: number;
+  latestRtt?: number;
 
   constructor(monitor: Monitor, cancellationToken: CancellationToken, options: RTTPingerOptions) {
     this.connection = undefined;
     this[kCancellationToken] = cancellationToken;
     this.closed = false;
     this.monitor = monitor;
-    this.latestRTT = monitor.latestRtt;
+    this.latestRtt = monitor.latestRtt;
 
     const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
     this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
@@ -548,7 +548,7 @@ function measureAndReschedule(
     rttPinger.connection = conn;
   }
 
-  rttPinger.latestRTT = calculateDurationInMs(start);
+  rttPinger.latestRtt = calculateDurationInMs(start);
   rttPinger[kMonitorId] = setTimeout(
     () => measureRoundTripTime(rttPinger, options),
     options.heartbeatFrequencyMS
