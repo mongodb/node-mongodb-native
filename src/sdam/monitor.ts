@@ -221,7 +221,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     return this.rttSamplesMS.min();
   }
 
-  get latestRTT(): number {
+  get latestRtt(): number {
     return this.rttSamplesMS.last ?? 0; // FIXME: Check if this is acceptable
   }
 
@@ -507,7 +507,7 @@ export class RTTPinger {
     this[kCancellationToken] = cancellationToken;
     this.closed = false;
     this.monitor = monitor;
-    this.latestRTT = monitor.latestRTT;
+    this.latestRTT = monitor.latestRtt;
 
     const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
     this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
