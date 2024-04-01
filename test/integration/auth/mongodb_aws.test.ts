@@ -365,7 +365,7 @@ describe('AWS KMS Credential Fetching', function () {
       const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
 
       expect(
-        setDifference(keys, allowedKeys),
+        Array.from(setDifference(keys, allowedKeys)),
         'received an unexpected key in the response refreshing KMS credentials'
       ).to.deep.equal([]);
     });
