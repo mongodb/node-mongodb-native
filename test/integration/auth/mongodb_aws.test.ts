@@ -346,7 +346,7 @@ describe('AWS KMS Credential Fetching', function () {
     beforeEach(function () {
       this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
         ? 'Test must run in an AWS auth testing environment'
-        : AWSTemporaryCredentialProvider.isAWSSDKInstalled
+        : !AWSTemporaryCredentialProvider.isAWSSDKInstalled
         ? 'This test must run in an environment where the AWS SDK is installed.'
         : undefined;
       this.currentTest?.skipReason && this.skip();
