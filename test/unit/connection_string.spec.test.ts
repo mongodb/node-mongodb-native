@@ -21,7 +21,7 @@ describe('Connection String spec tests', function () {
     ];
     test.skipReason =
       satisfies(process.version, '>=20.0.0') && skippedTests.includes(test.title)
-        ? 'TODO(NODE-5666): fix failing unit tests on Node18'
+        ? 'TODO(NODE-5666): fix failing unit tests on Node20+'
         : undefined;
 
     if (test.skipReason) this.skip();
