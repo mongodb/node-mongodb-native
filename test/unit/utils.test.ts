@@ -14,8 +14,8 @@ import {
   MongoDBCollectionNamespace,
   MongoDBNamespace,
   MongoRuntimeError,
-  MovingWindow,
   ObjectId,
+  RTTSampler,
   shuffle,
   TimeoutController
 } from '../mongodb';
@@ -1047,10 +1047,10 @@ describe('driver utils', function () {
     });
   });
 
-  describe('class MovingWindow', () => {
+  describe('class RTTSampler', () => {
     describe('constructor', () => {
       it('Constructs a Float64 array of length windowSize', () => {
-        const window = new MovingWindow(10);
+        const window = new RTTSampler(10);
         expect(window.samples).to.have.length(10);
       });
     });
@@ -1058,7 +1058,7 @@ describe('driver utils', function () {
     describe('addSample', () => {
       context('when length < windowSize', () => {
         it('increments the length', () => {
-          const window = new MovingWindow(10);
+          const window = new RTTSampler(10);
           expect(window.length).to.equal(0);
 
           window.addSample(1);
@@ -1067,11 +1067,11 @@ describe('driver utils', function () {
         });
       });
       context('when length === windowSize', () => {
-        let window: MovingWindow;
+        let window: RTTSampler;
         const size = 10;
 
         beforeEach(() => {
-          window = new MovingWindow(size);
+          window = new RTTSampler(size);
           for (let i = 1; i <= size; i++) {
             window.addSample(i);
           }
@@ -1099,7 +1099,7 @@ describe('driver utils', function () {
     describe('min()', () => {
       context('when length < 2', () => {
         it('returns 0', () => {
-          const window = new MovingWindow(10);
+          const window = new RTTSampler(10);
           // length 0
           expect(window.min()).to.equal(0);
 
@@ -1110,9 +1110,9 @@ describe('driver utils', function () {
       });
 
       context('when 2 <= length < windowSize', () => {
-        let window: MovingWindow;
+        let window: RTTSampler;
         beforeEach(() => {
-          window = new MovingWindow(10);
+          window = new RTTSampler(10);
           for (let i = 1; i <= 3; i++) {
             window.addSample(i);
           }
@@ -1124,11 +1124,11 @@ describe('driver utils', function () {
       });
 
       context('when length == windowSize', () => {
-        let window: MovingWindow;
+        let window: RTTSampler;
         const size = 10;
 
         beforeEach(() => {
-          window = new MovingWindow(size);
+          window = new RTTSampler(size);
           for (let i = 1; i <= size * 2; i++) {
             window.addSample(i);
           }
@@ -1142,7 +1142,7 @@ describe('driver utils', function () {
 
     describe('average()', () => {
       it('correctly computes the mean', () => {
-        const window = new MovingWindow(10);
+        const window = new RTTSampler(10);
         let sum = 0;
 
         for (let i = 1; i <= 10; i++) {
@@ -1157,14 +1157,14 @@ describe('driver utils', function () {
     describe('last', () => {
       context('when length == 0', () => {
         it('returns null', () => {
-          const window = new MovingWindow(10);
+          const window = new RTTSampler(10);
           expect(window.last).to.be.null;
         });
       });
 
       context('when length > 0', () => {
         it('returns the most recently inserted element', () => {
-          const window = new MovingWindow(10);
+          const window = new RTTSampler(10);
           for (let i = 0; i < 11; i++) {
             window.addSample(i);
           }
@@ -1174,10 +1174,10 @@ describe('driver utils', function () {
     });
 
     describe('clear', () => {
-      let window: MovingWindow;
+      let window: RTTSampler;
 
       beforeEach(() => {
-        window = new MovingWindow(10);
+        window = new RTTSampler(10);
         for (let i = 0; i < 20; i++) {
           window.addSample(i);
         }

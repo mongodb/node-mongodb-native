@@ -1345,55 +1345,91 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
   }
 }
 
-/** @internal */
-export class MovingWindow {
+/** @internal
+ * This class implements the RTT sampling logic specified for [CSOT](https://github.com/mongodb/specifications/blob/bbb335e60cd7ea1e0f7cd9a9443cb95fc9d3b64d/source/client-side-operations-timeout/client-side-operations-timeout.md#drivers-use-minimum-rtt-to-short-circuit-operations)
+ *
+ * This is implemented as a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) keeping
+ * the most recent `windowSize` samples
+ * */
+export class RTTSampler {
   /** Index of the next slot to be overwritten */
   private writeIndex: number;
-  length: number;
-  samples: Float64Array;
+  private _length: number;
+  private _rttSamples: Float64Array;
 
   constructor(windowSize = 10) {
-    this.samples = new Float64Array(windowSize);
-    this.length = 0;
+    this._rttSamples = new Float64Array(windowSize);
+    this._length = 0;
     this.writeIndex = 0;
   }
 
+  /**
+   * Adds an rtt sample to the end of the circular buffer
+   * When `windowSize` samples have been collected, `addSample` overwrites the least recently added
+   * sample
+   */
   addSample(sample: number) {
-    this.samples[this.writeIndex++] = sample;
-    if (this.length < this.samples.length) {
-      this.length++;
+    this._rttSamples[this.writeIndex++] = sample;
+    if (this._length < this._rttSamples.length) {
+      this._length++;
     }
 
-    this.writeIndex %= this.samples.length;
+    this.writeIndex %= this._rttSamples.length;
   }
 
+  /**
+   * When \< 2 samples have been collected, returns 0
+   * Otherwise computes the minimum value samples contained in the buffer
+   */
   min(): number {
-    if (this.length < 2) return 0;
-    let min = this.samples[0];
-    for (let i = 1; i < this.length; i++) {
-      if (this.samples[i] < min) min = this.samples[i];
+    if (this._length < 2) return 0;
+    let min = this._rttSamples[0];
+    for (let i = 1; i < this._length; i++) {
+      if (this._rttSamples[i] < min) min = this._rttSamples[i];
     }
 
     return min;
   }
 
+  /**
+   * Returns mean of samples contained in the buffer
+   */
   average(): number {
-    if (this.length === 0) return 0;
+    if (this._length === 0) return 0;
     let sum = 0;
-    for (let i = 0; i < this.length; i++) {
-      sum += this.samples[i];
+    for (let i = 0; i < this._length; i++) {
+      sum += this._rttSamples[i];
     }
 
-    return sum / this.length;
+    return sum / this._length;
   }
 
+  /**
+   * Returns most recently inserted element in the buffer
+   * Returns null if the buffer is empty
+   * */
   get last(): number | null {
-    if (this.length === 0) return null;
-    return this.samples[this.writeIndex === 0 ? this.length - 1 : this.writeIndex - 1];
+    if (this._length === 0) return null;
+    return this._rttSamples[this.writeIndex === 0 ? this._length - 1 : this.writeIndex - 1];
   }
 
+  /** @remarks Added for testing */
+  get length(): number {
+    return this._length;
+  }
+
+  /** @remarks Added for testing */
+  get samples(): Float64Array {
+    return this._rttSamples;
+  }
+
+  /**
+   * Clear the buffer
+   * NOTE: this does not overwrite the data held in the internal array, just the pointers into
+   * this array
+   */
   clear() {
-    this.length = 0;
+    this._length = 0;
     this.writeIndex = 0;
   }
 }

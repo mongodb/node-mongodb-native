@@ -13,9 +13,9 @@ import {
   type Callback,
   type EventEmitterWithState,
   makeStateMachine,
-  MovingWindow,
   now,
-  ns
+  ns,
+  RTTSampler
 } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
@@ -106,7 +106,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   /** @internal */
   override component = MongoLoggableComponent.TOPOLOGY;
   /** @internal */
-  rttSamplesMS: MovingWindow;
+  private rttSampler: RTTSampler;
 
   constructor(server: Server, options: MonitorOptions) {
     super();
@@ -128,7 +128,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
     this.mongoLogger = this[kServer].topology.client?.mongoLogger;
-    this.rttSamplesMS = new MovingWindow(10);
+    this.rttSampler = new RTTSampler(10);
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -214,23 +214,23 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   }
 
   get roundTripTime(): number {
-    return this.rttSamplesMS.average();
+    return this.rttSampler.average();
   }
 
   get minRoundTripTime(): number {
-    return this.rttSamplesMS.min();
+    return this.rttSampler.min();
   }
 
   get latestRtt(): number {
-    return this.rttSamplesMS.last ?? 0; // FIXME: Check if this is acceptable
+    return this.rttSampler.last ?? 0; // FIXME: Check if this is acceptable
   }
 
   addRttSample(rtt: number) {
-    this.rttSamplesMS.addSample(rtt);
+    this.rttSampler.addSample(rtt);
   }
 
   clearRttSamples() {
-    this.rttSamplesMS.clear();
+    this.rttSampler.clear();
   }
 }
 
@@ -305,7 +305,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
     }
 
-    // NOTE: here we use the latestRtt as this measurment corresponds with the value
+    // NOTE: here we use the latestRtt as this measurement corresponds with the value
     // obtained for this successful heartbeat
     const duration =
       isAwaitable && monitor.rttPinger
@@ -362,14 +362,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       : { socketTimeoutMS: connectTimeoutMS };
 
     if (isAwaitable && monitor.rttPinger == null) {
-      monitor.rttPinger = new RTTPinger(
-        monitor,
-        monitor[kCancellationToken],
-        Object.assign(
-          { heartbeatFrequencyMS: monitor.options.heartbeatFrequencyMS },
-          monitor.connectOptions
-        )
-      );
+      monitor.rttPinger = new RTTPinger(monitor);
     }
 
     // Record new start time before sending handshake
@@ -502,15 +495,15 @@ export class RTTPinger {
   /** @internal */
   latestRtt?: number;
 
-  constructor(monitor: Monitor, cancellationToken: CancellationToken, options: RTTPingerOptions) {
+  constructor(monitor: Monitor) {
     this.connection = undefined;
-    this[kCancellationToken] = cancellationToken;
+    this[kCancellationToken] = monitor[kCancellationToken];
     this.closed = false;
     this.monitor = monitor;
     this.latestRtt = monitor.latestRtt;
 
-    const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
-    this[kMonitorId] = setTimeout(() => this.measureRoundTripTime(options), heartbeatFrequencyMS);
+    const heartbeatFrequencyMS = monitor.options.heartbeatFrequencyMS;
+    this[kMonitorId] = setTimeout(() => this.measureRoundTripTime(), heartbeatFrequencyMS);
   }
 
   get roundTripTime(): number {
@@ -529,7 +522,7 @@ export class RTTPinger {
     this.connection = undefined;
   }
 
-  private measureAndReschedule(options: RTTPingerOptions, start?: number, conn?: Connection) {
+  private measureAndReschedule(start?: number, conn?: Connection) {
     if (start == null) {
       start = now();
     }
@@ -544,14 +537,13 @@ export class RTTPinger {
 
     this.latestRtt = calculateDurationInMs(start);
     this[kMonitorId] = setTimeout(
-      () => this.measureRoundTripTime(options),
-      options.heartbeatFrequencyMS
+      () => this.measureRoundTripTime(),
+      this.monitor.options.heartbeatFrequencyMS
     );
   }
 
-  private measureRoundTripTime(options: RTTPingerOptions) {
+  private measureRoundTripTime() {
     const start = now();
-    options.cancellationToken = this[kCancellationToken];
 
     if (this.closed) {
       return;
@@ -560,9 +552,9 @@ export class RTTPinger {
     const connection = this.connection;
     if (connection == null) {
       // eslint-disable-next-line github/no-then
-      connect(options).then(
+      connect(this.monitor.connectOptions).then(
         connection => {
-          this.measureAndReschedule(options, start, connection);
+          this.measureAndReschedule(start, connection);
         },
         () => {
           this.connection = undefined;
@@ -575,7 +567,7 @@ export class RTTPinger {
       connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
     // eslint-disable-next-line github/no-then
     connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
-      () => this.measureAndReschedule(options),
+      () => this.measureAndReschedule(),
       () => {
         this.connection?.destroy();
         this.connection = undefined;
