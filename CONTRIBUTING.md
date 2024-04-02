@@ -107,6 +107,7 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 
 ## Pull Request Process
 
+1. Create a fork of the repository.
 1. Update the README.md or similar documentation with details of changes you
    wish to make, if applicable.
 1. Add any appropriate tests.
