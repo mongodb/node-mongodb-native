@@ -322,13 +322,14 @@ describe('monitoring', function () {
       for (const { serverMonitoringMode, topologyVersion } of table) {
         context(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
           context('when more than one heartbeatSucceededEvent has been captured', () => {
-            const heartbeatDurationMS = 250;
+            let heartbeatDurationMS = 100;
             it('correctly returns the mean of the heartbeat durations', async () => {
               mockServer.setMessageHandler(request => {
                 setTimeout(
                   () => request.reply(Object.assign({ helloOk: true }, mock.HELLO)),
                   heartbeatDurationMS
                 );
+                heartbeatDurationMS += 100;
               });
               const server = new MockServer(mockServer.address());
               if (topologyVersion) server.description.topologyVersion = topologyVersion;
@@ -339,15 +340,20 @@ describe('monitoring', function () {
                 await once(monitor, 'serverHeartbeatSucceeded');
                 monitor.requestCheck();
               }
-              expect(monitor.roundTripTime).to.be.greaterThanOrEqual(heartbeatDurationMS);
+
+              const avgRtt = monitor.roundTripTime;
+              const expectedRtt = 300; // (100 + 200 + 300 + 400 + 500)/5 = 300
+              // avgRtt will strictly be greater than expectedRtt since setTimeout sets a minimum
+              // delay from the time of scheduling to the time of callback execution
+              expect(avgRtt - expectedRtt).greaterThanOrEqual(0);
+              expect(avgRtt - expectedRtt).lessThan(50);
+
               monitor.close();
             });
           });
         });
       }
     });
-
-    //describe('minRoundTripTime');
   });
 
   describe('class MonitorInterval', function () {
