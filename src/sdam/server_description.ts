@@ -60,6 +60,7 @@ export class ServerDescription {
   minWireVersion: number;
   maxWireVersion: number;
   roundTripTime: number;
+  /** The minimum measurement of the last 10 measurements of roundTripTime that have been collected */
   minRoundTripTime: number;
   lastUpdateTime: number;
   lastWriteDate: number;
