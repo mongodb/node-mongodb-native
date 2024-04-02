@@ -17,8 +17,8 @@ describe('class OnDemandDocument', () => {
       const doc = new OnDemandDocument(emptyDocument, 0, false);
       expect(doc.has('ok')).to.be.false;
       expect(doc.has('$clusterTime')).to.be.false;
-      expect(doc).to.have.nested.property('existenceOf.ok', false);
-      expect(doc).to.have.nested.property('existenceOf.$clusterTime', false);
+      expect(doc).to.have.nested.property('cache.ok', false);
+      expect(doc).to.have.nested.property('cache.$clusterTime', false);
     });
   });
 
@@ -27,14 +27,14 @@ describe('class OnDemandDocument', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
       expect(doc.has('ok')).to.be.true;
-      expect(doc).to.have.nested.property('existenceOf.ok', true);
+      expect(doc).to.have.nested.property('cache.ok').that.is.an('object');
     });
 
     it('sets exists cache to false for any other key', () => {
       const emptyDocument = BSON.serialize({ ok: 1 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
       expect(doc.has('$clusterTime')).to.be.false;
-      expect(doc).to.have.nested.property('existenceOf.$clusterTime', false);
+      expect(doc).to.have.nested.property('cache.$clusterTime', false);
     });
   });
 
@@ -43,7 +43,7 @@ describe('class OnDemandDocument', () => {
       const emptyDocument = BSON.serialize({ ok: 0, code: 2 });
       const doc = new OnDemandDocument(emptyDocument, 0, false);
       expect(doc.has('code')).to.be.true;
-      expect(doc).to.have.nested.property('existenceOf.code', true);
+      expect(doc).to.have.nested.property('cache.code').that.is.an('object');
       expect(doc).to.not.have.nested.property('indexFound.0');
       expect(doc).to.have.nested.property('indexFound.1', true);
     });
@@ -116,7 +116,7 @@ describe('class OnDemandDocument', () => {
 
     it('throws if required is set to true and element name does not exist', () => {
       expect(() => document.get('blah!', BSONType.bool, true)).to.throw(BSONError);
-      expect(document).to.have.nested.property('existenceOf.blah!', false);
+      expect(document).to.have.nested.property('cache.blah!', false);
     });
 
     it('throws if requested type is unsupported', () => {
@@ -127,8 +127,10 @@ describe('class OnDemandDocument', () => {
     });
 
     it('caches the value', () => {
+      document.has('int');
+      expect(document).to.have.nested.property('cache.int.value', undefined);
       document.get('int', BSONType.int);
-      expect(document).to.have.nested.property('valueOf.int', 1);
+      expect(document).to.have.nested.property('cache.int.value', 1);
     });
 
     it('supports returning null for null and undefined bson elements', () => {
@@ -284,12 +286,12 @@ describe('class OnDemandDocument', () => {
       expect(didRun).to.be.true;
     });
 
-    it('caches the results in valueOf', () => {
+    it('caches the results of array', () => {
       const generator = array.valuesAs(BSONType.int);
       generator.next();
       generator.next();
-      expect(array).to.have.nested.property('valueOf.0', 1);
-      expect(array).to.have.nested.property('valueOf.1', 1);
+      expect(array).to.have.nested.property('cache.0.value', 1);
+      expect(array).to.have.nested.property('cache.1.value', 1);
     });
   });
 });

@@ -33,12 +33,8 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   const res = BSON.onDemand.parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
 }
-
-// eslint-disable-next-line @typescript-eslint/unbound-method
 export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
-// eslint-disable-next-line @typescript-eslint/unbound-method
 export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
-// eslint-disable-next-line @typescript-eslint/unbound-method
 export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
 export const toUTF8 = BSON.onDemand.ByteUtils.toUTF8;
 

@@ -40,13 +40,19 @@ export type JSTypeOf = {
 };
 
 /** @internal */
+type CachedBSONElement = { element: BSONElement; value: any | undefined };
+
+/** @internal */
 export class OnDemandDocument {
-  /** Caches the existence of a property */
-  private readonly existenceOf: Record<string, boolean> = Object.create(null);
-  /** Caches a look up of name to element */
-  private readonly elementOf: Record<string, BSONElement> = Object.create(null);
-  /** Caches the revived javascript value */
-  private readonly valueOf: Record<string, any> = Object.create(null);
+  /**
+   * Maps JS strings to elements and jsValues for speeding up subsequent lookups.
+   * - If `false` then name does not exist in the BSON document
+   * - If `CachedBSONElement` instance name exists
+   * - If `cache[name].value == null` jsValue has not yet been parsed
+   *   - Null/Undefined values do not get cached because they are zero-length values.
+   */
+  private readonly cache: Record<string, CachedBSONElement | false | undefined> =
+    Object.create(null);
   /** Caches the index of elements that have been named */
   private readonly indexFound: Record<number, boolean> = Object.create(null);
 
@@ -90,29 +96,27 @@ export class OnDemandDocument {
    * @param name - a basic latin string name of a BSON element
    * @returns
    */
-  private getElement(name: string): BSONElement | null {
-    if (this.existenceOf[name] === false) return null;
+  private getElement(name: string): CachedBSONElement | null {
+    const cachedElement = this.cache[name];
+    if (cachedElement === false) return null;
 
-    if (this.elementOf[name] != null) {
-      return this.elementOf[name];
+    if (cachedElement != null) {
+      return cachedElement;
     }
 
     for (let index = 0; index < this.elements.length; index++) {
       const element = this.elements[index];
 
-      if (
-        // skip this element if it has already been associated with a name
-        !this.indexFound[index] &&
-        this.isElementName(name, element)
-      ) {
-        this.elementOf[name] = element;
+      // skip this element if it has already been associated with a name
+      if (!this.indexFound[index] && this.isElementName(name, element)) {
+        const cachedElement = { element, value: undefined };
+        this.cache[name] = cachedElement;
         this.indexFound[index] = true;
-        this.existenceOf[name] = true;
-        return this.elementOf[name];
+        return cachedElement;
       }
     }
 
-    this.existenceOf[name] = false;
+    this.cache[name] = false;
     return null;
   }
 
@@ -202,7 +206,10 @@ export class OnDemandDocument {
    * @param name - element name
    */
   public has(name: string): boolean {
-    return (this.existenceOf[name] ??= this.getElement(name) != null);
+    const cachedElement = this.cache[name];
+    if (cachedElement === false) return false;
+    if (cachedElement != null) return true;
+    return this.getElement(name) != null;
   }
 
   /**
@@ -236,8 +243,8 @@ export class OnDemandDocument {
       }
     }
 
-    if (!(name in this.valueOf)) {
-      const value = this.toJSValue(element, as);
+    if (element.value == null) {
+      const value = this.toJSValue(element.element, as);
       if (value == null) {
         if (required === true) {
           throw new BSONError(`BSON element "${name}" is missing`);
@@ -246,10 +253,10 @@ export class OnDemandDocument {
         }
       }
       // It is important to never store null
-      this.valueOf[name] = value;
+      element.value = value;
     }
 
-    return this.valueOf[name];
+    return element.value;
   }
 
   /**
@@ -306,9 +313,9 @@ export class OnDemandDocument {
     }
     let counter = 0;
     for (const element of this.elements) {
-      const item = this.toJSValue<T>(element, as);
-      this.valueOf[counter] = item;
-      yield item;
+      const value = this.toJSValue<T>(element, as);
+      this.cache[counter] = { element, value };
+      yield value;
       counter += 1;
     }
   }
