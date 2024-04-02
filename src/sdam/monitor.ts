@@ -143,8 +143,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
       useBigInt64: false,
       promoteLongs: true,
       promoteValues: true,
-      promoteBuffers: true,
-      parent: this
+      promoteBuffers: true
     };
 
     // ensure no authentication is used for monitoring
