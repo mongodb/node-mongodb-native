@@ -652,32 +652,37 @@ describe('Bulk', function () {
     }
   });
 
-  it('should correctly execute ordered batch using w:0', function (done) {
-    client.connect((err, client) => {
-      const db = client.db();
-      const col = db.collection('batch_write_ordered_ops_9');
+  it(
+    'should correctly execute ordered batch using w:0',
+    // TODO(NODE-6060): set `moreToCome` op_msg bit when `w: 0` is specified
+    { requires: { mongodb: '<8.0.0' } },
+    function (done) {
+      client.connect((err, client) => {
+        const db = client.db();
+        const col = db.collection('batch_write_ordered_ops_9');
 
-      const bulk = col.initializeOrderedBulkOp();
-      for (let i = 0; i < 100; i++) {
-        bulk.insert({ a: 1 });
-      }
+        const bulk = col.initializeOrderedBulkOp();
+        for (let i = 0; i < 100; i++) {
+          bulk.insert({ a: 1 });
+        }
 
-      bulk.find({ b: 1 }).upsert().update({ b: 1 });
-      bulk.find({ c: 1 }).delete();
+        bulk.find({ b: 1 }).upsert().update({ b: 1 });
+        bulk.find({ c: 1 }).delete();
 
-      bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
-        expect(err).to.not.exist;
-        test.equal(0, result.upsertedCount);
-        test.equal(0, result.insertedCount);
-        test.equal(0, result.matchedCount);
-        test.ok(0 === result.modifiedCount || result.modifiedCount == null);
-        test.equal(0, result.deletedCount);
-        test.equal(false, result.hasWriteErrors());
+        bulk.execute({ writeConcern: { w: 0 } }, function (err, result) {
+          expect(err).to.not.exist;
+          test.equal(0, result.upsertedCount);
+          test.equal(0, result.insertedCount);
+          test.equal(0, result.matchedCount);
+          test.ok(0 === result.modifiedCount || result.modifiedCount == null);
+          test.equal(0, result.deletedCount);
+          test.equal(false, result.hasWriteErrors());
 
-        client.close(done);
+          client.close(done);
+        });
       });
-    });
-  });
+    }
+  );
 
   it('should correctly handle single unordered batch API', function (done) {
     client.connect((err, client) => {
