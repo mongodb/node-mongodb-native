@@ -1,10 +1,10 @@
-import { promises as fs } from 'fs';
 import * as os from 'os';
 import * as process from 'process';
 
 import { BSON, type Document, Int32 } from '../../bson';
 import { MongoInvalidArgumentError } from '../../error';
 import type { MongoOptions } from '../../mongo_client';
+import { fileIsAccessible } from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const NODE_DRIVER_VERSION = require('../../../package.json').version;
@@ -160,10 +160,7 @@ let dockerPromise: Promise<boolean>;
 /** @internal */
 async function getContainerMetadata() {
   const containerMetadata: Record<string, any> = {};
-  dockerPromise ??= fs.access('/.dockerenv').then(
-    () => true,
-    () => false
-  );
+  dockerPromise ??= fileIsAccessible('/.dockerenv');
   const isDocker = await dockerPromise;
 
   const { KUBERNETES_SERVICE_HOST = '' } = process.env;

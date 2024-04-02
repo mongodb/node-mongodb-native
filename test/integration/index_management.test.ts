@@ -8,7 +8,7 @@ import {
   type MongoClient,
   MongoServerError
 } from '../mongodb';
-import { assert as test, setupDatabase } from './shared';
+import { assert as test, filterForCommands, setupDatabase } from './shared';
 
 describe('Indexes', function () {
   let client: MongoClient;
@@ -101,6 +101,7 @@ describe('Indexes', function () {
 
   describe('Collection.indexes()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when `full` is not provided', () => {
@@ -130,6 +131,7 @@ describe('Indexes', function () {
 
   describe('Collection.indexInformation()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when `full` is not provided', () => {
@@ -160,8 +162,87 @@ describe('Indexes', function () {
     });
   });
 
+  describe('Collection.createIndex()', function () {
+    const started: CommandStartedEvent[] = [];
+
+    beforeEach(() => {
+      started.length = 0;
+      client.on('commandStarted', filterForCommands('createIndexes', started));
+    });
+
+    context('when version is not specified as an option', function () {
+      it('does not attach `v` to the command', async () => {
+        await collection.createIndex({ age: 1 });
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).not.to.have.property('v');
+      });
+    });
+
+    context('when version is specified as an option', function () {
+      it('attaches `v` to the command with the value of `version`', async () => {
+        await collection.createIndex({ age: 1 }, { version: 1 });
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).to.have.property('v', 1);
+      });
+    });
+  });
+
+  describe('Collection.createIndexes()', function () {
+    const started: CommandStartedEvent[] = [];
+
+    beforeEach(() => {
+      started.length = 0;
+      client.on('commandStarted', filterForCommands('createIndexes', started));
+    });
+
+    context('when version is not specified as an option', function () {
+      it('does not attach `v` to the command', async () => {
+        await collection.createIndexes([{ key: { age: 1 } }]);
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).not.to.have.property('v');
+      });
+    });
+
+    context('when version is specified as an option', function () {
+      it('does not attach `v` to the command', async () => {
+        await collection.createIndexes([{ key: { age: 1 } }], { version: 1 });
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).not.to.have.property('v', 1);
+      });
+    });
+
+    context('when version is provided in the index description and the options', function () {
+      it('the value in the description takes precedence', async () => {
+        await collection.createIndexes([{ key: { age: 1 }, version: 1 }], { version: 0 });
+        const { command } = started[0];
+        expect(command).to.exist;
+        expect(command.indexes[0]).to.have.property('v', 1);
+      });
+    });
+
+    context(
+      'when version is provided in some of the index descriptions and the options',
+      function () {
+        it('does not specify a version from the `version` provided in the options', async () => {
+          await collection.createIndexes([{ key: { age: 1 }, version: 1 }, { key: { date: 1 } }], {
+            version: 0
+          });
+          const { command } = started[0];
+          expect(command).to.exist;
+          expect(command.indexes[0]).to.have.property('v', 1);
+          expect(command.indexes[1]).not.to.have.property('v');
+        });
+      }
+    );
+  });
+
   describe('Collection.indexExists()', function () {
     beforeEach(() => collection.createIndex({ age: 1 }));
+
     afterEach(() => collection.dropIndexes());
 
     context('when provided a string index name', () => {

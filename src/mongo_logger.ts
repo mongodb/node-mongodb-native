@@ -836,7 +836,9 @@ export class MongoLogger {
 
     if (isPromiseLike(this.pendingLog)) {
       this.pendingLog = this.pendingLog
+        // eslint-disable-next-line github/no-then
         .then(() => this.logDestination.write(logMessage))
+        // eslint-disable-next-line github/no-then
         .then(this.clearPendingLog.bind(this), this.logWriteFailureHandler.bind(this));
       return;
     }
@@ -844,6 +846,7 @@ export class MongoLogger {
     try {
       const logResult = this.logDestination.write(logMessage);
       if (isPromiseLike(logResult)) {
+        // eslint-disable-next-line github/no-then
         this.pendingLog = logResult.then(
           this.clearPendingLog.bind(this),
           this.logWriteFailureHandler.bind(this)

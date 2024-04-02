@@ -9,6 +9,7 @@ const test = {};
 // TODO (NODE-3799): convert these to run against a real server
 describe('Max Staleness', function () {
   afterEach(() => mock.cleanup());
+
   beforeEach(() => {
     return mock.createServer().then(server => {
       test.server = server;

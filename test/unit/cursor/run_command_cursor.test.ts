@@ -4,6 +4,7 @@ import { MongoAPIError, MongoClient } from '../../mongodb';
 
 describe('class RunCommandCursor', () => {
   let client: MongoClient;
+
   beforeEach(async function () {
     client = new MongoClient('mongodb://iLoveJavascript');
   });

@@ -495,6 +495,7 @@ describe('driver utils', function () {
         expect(list.shift()).to.be.null;
       });
     });
+
     describe('pop()', () => {
       let list: List<number>;
 
@@ -644,6 +645,7 @@ describe('driver utils', function () {
       expect(output).to.not.deep.equal(input);
       expect(output).to.have.lengthOf(input.length);
     });
+
     it('should give a random shuffling of the entire input when limit is explicitly set to 0', () => {
       const input = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
       const output = shuffle(input, 0);
@@ -769,6 +771,7 @@ describe('driver utils', function () {
       });
 
       const socketPath = '/tmp/mongodb-27017.sock';
+
       it('should handle decoded unix socket path', () => {
         const ha = new HostAddress(socketPath);
         expect(ha).to.have.property('socketPath', socketPath);

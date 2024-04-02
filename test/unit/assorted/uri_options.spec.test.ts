@@ -38,6 +38,7 @@ describe('URI option spec tests', function () {
         writeFileSync('ca.pem', 'ca.pem');
         writeFileSync('cert.pem', 'cert.pem');
       });
+
       after(() => {
         unlinkSync('ca.pem');
         unlinkSync('cert.pem');

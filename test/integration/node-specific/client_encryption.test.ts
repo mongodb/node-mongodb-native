@@ -45,6 +45,7 @@ describe('ClientEncryption integration tests', function () {
     const sandbox = sinon.createSandbox();
 
     after(() => sandbox.restore());
+
     before(() => {
       // stubbed out for AWS unit testing below
       const MOCK_KMS_ENCRYPT_REPLY = readHttpResponse(
@@ -262,63 +263,6 @@ describe('ClientEncryption integration tests', function () {
       const rewrapManyDataKeyResult = await clientEncryption.rewrapManyDataKey({ _id: 12345 });
       expect(rewrapManyDataKeyResult.bulkWriteResult).to.equal(undefined);
     });
-
-    it.skip(
-      'should explicitly encrypt and decrypt with a re-wrapped local key (explicit session/transaction)',
-      metadata,
-      function () {
-        const encryption = new ClientEncryption(client, {
-          keyVaultNamespace: 'client.encryption',
-          kmsProviders: { local: { key: 'A'.repeat(128) } }
-        });
-        let encrypted;
-        let rewrapManyDataKeyResult;
-
-        return encryption
-          .createDataKey('local')
-          .then(dataKey => {
-            const encryptOptions = {
-              keyId: dataKey,
-              algorithm: 'Indexed',
-              contentionFactor: 0
-            };
-
-            return encryption.encrypt('hello', encryptOptions);
-          })
-          .then(_encrypted => {
-            encrypted = _encrypted;
-          })
-          .then(() => {
-            // withSession does not forward the callback's return value, hence
-            // the slightly awkward 'rewrapManyDataKeyResult' passing here
-            return client.withSession(session => {
-              return session.withTransaction(() => {
-                expect(session.transaction.isStarting).to.equal(true);
-                expect(session.transaction.isActive).to.equal(true);
-                rewrapManyDataKeyResult = encryption.rewrapManyDataKey(
-                  {},
-                  { provider: 'local', session }
-                );
-                return rewrapManyDataKeyResult.then(() => {
-                  // Verify that the 'session' argument was actually used
-                  expect(session.transaction.isStarting).to.equal(false);
-                  expect(session.transaction.isActive).to.equal(true);
-                });
-              });
-            });
-          })
-          .then(() => {
-            return rewrapManyDataKeyResult;
-          })
-          .then(rewrapManyDataKeyResult => {
-            expect(rewrapManyDataKeyResult.bulkWriteResult.result.nModified).to.equal(1);
-            return encryption.decrypt(encrypted);
-          })
-          .then(decrypted => {
-            expect(decrypted).to.equal('hello');
-          });
-      }
-    ).skipReason = 'TODO(DRIVERS-2389): add explicit session support to key management API';
 
     // TODO(NODE-3371): resolve KMS JSON response does not include string 'Plaintext'. HTTP status=200 error
     it.skip(

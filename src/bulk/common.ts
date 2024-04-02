@@ -589,6 +589,7 @@ function executeCommands(
       : null;
 
     if (operation != null) {
+      // eslint-disable-next-line github/no-then
       executeOperation(bulkOperation.s.collection.client, operation).then(
         result => resultHandler(undefined, result),
         error => resultHandler(error)
@@ -1224,7 +1225,7 @@ export abstract class BulkOperationBase {
     const finalOptions = { ...this.s.options, ...options };
     const operation = new BulkWriteShimOperation(this, finalOptions);
 
-    return executeOperation(this.s.collection.client, operation);
+    return await executeOperation(this.s.collection.client, operation);
   }
 
   /**

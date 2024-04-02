@@ -30,7 +30,7 @@ export class DbStatsOperation extends CommandOperation<Document> {
       command.scale = this.options.scale;
     }
 
-    return super.executeCommand(server, session, command);
+    return await super.executeCommand(server, session, command);
   }
 }
 

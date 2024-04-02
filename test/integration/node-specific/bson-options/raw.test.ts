@@ -47,6 +47,7 @@ describe('raw bson support', () => {
     describe('returns shared buffer', () => {
       let client: MongoClient;
       let collection: Collection<{ _id: number; myData: string }>;
+
       beforeEach(async function () {
         client = this.configuration.newClient();
         collection = client.db('test_raw').collection('test_raw');

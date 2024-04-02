@@ -185,6 +185,7 @@ function assertMonitoringOutcome(outcome: any): asserts outcome is MonitoringOut
 
 describe('Server Discovery and Monitoring (spec)', function () {
   let serverConnect: sinon.SinonStub;
+
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';

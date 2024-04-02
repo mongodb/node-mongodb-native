@@ -6,6 +6,7 @@ const { Topology } = require('../../mongodb');
 
 describe('URI', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

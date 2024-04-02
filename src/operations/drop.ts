@@ -69,7 +69,7 @@ export class DropCollectionOperation extends CommandOperation<boolean> {
       }
     }
 
-    return this.executeWithoutEncryptedFieldsCheck(server, session);
+    return await this.executeWithoutEncryptedFieldsCheck(server, session);
   }
 
   private async executeWithoutEncryptedFieldsCheck(

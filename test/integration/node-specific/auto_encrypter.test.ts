@@ -48,15 +48,18 @@ const MOCK_KMS_DECRYPT_REPLY = readHttpResponse(dataPath(`kms-decrypt-reply.txt`
 describe('crypt_shared library', function () {
   let client: MongoClient;
   let autoEncrypter: AutoEncrypter | undefined;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
     await client.connect();
   });
+
   afterEach(async () => {
     await autoEncrypter?.teardown(true);
     await client?.close();
   });
   const sandbox = sinon.createSandbox();
+
   beforeEach(() => {
     sandbox.restore();
     sandbox.stub(StateMachine.prototype, 'kmsRequest').callsFake(request => {
@@ -95,6 +98,7 @@ describe('crypt_shared library', function () {
   afterEach(() => {
     sandbox.restore();
   });
+
   describe('autoSpawn', function () {
     it(
       'should autoSpawn a mongocryptd on init by default',

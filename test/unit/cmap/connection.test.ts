@@ -23,7 +23,9 @@ const connectionOptionsDefaults = {
 
 describe('new Connection()', function () {
   let server;
+
   after(() => mock.cleanup());
+
   before(() => mock.createServer().then(s => (server = s)));
 
   it('supports fire-and-forget messages', async function () {

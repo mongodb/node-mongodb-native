@@ -63,6 +63,7 @@ const ISODate = function (string) {
 
 describe('crud - insert', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });

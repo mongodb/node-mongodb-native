@@ -105,6 +105,7 @@ const metadata = {
 };
 describe('Connection Pool Deadlock Prevention', function () {
   installNodeDNSWorkaroundHooks();
+
   beforeEach(async function () {
     const url: string = this.configuration.url();
 
@@ -153,6 +154,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   });
 
   const CASE1 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: false };
+
   it(
     'Case 1',
     metadata,
@@ -177,6 +179,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE2 = { maxPoolSize: 1, bypassAutoEncryption: false, useKeyVaultClient: true };
+
   it(
     'Case 2',
     metadata,
@@ -204,6 +207,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE3 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: false };
+
   it(
     'Case 3',
     metadata,
@@ -222,6 +226,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE4 = { maxPoolSize: 1, bypassAutoEncryption: true, useKeyVaultClient: true };
+
   it(
     'Case 4',
     metadata,
@@ -243,6 +248,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE5 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: false };
+
   it(
     'Case 5',
     metadata,
@@ -270,6 +276,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE6 = { maxPoolSize: 0, bypassAutoEncryption: false, useKeyVaultClient: true };
+
   it(
     'Case 6',
     metadata,
@@ -297,6 +304,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE7 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: false };
+
   it(
     'Case 7',
     metadata,
@@ -315,6 +323,7 @@ describe('Connection Pool Deadlock Prevention', function () {
   );
 
   const CASE8 = { maxPoolSize: 0, bypassAutoEncryption: true, useKeyVaultClient: true };
+
   it(
     'Case 8',
     metadata,
