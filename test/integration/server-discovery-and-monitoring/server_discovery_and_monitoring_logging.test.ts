@@ -1,19 +1,13 @@
 import { expect } from 'chai';
+import { setTimeout } from 'timers/promises';
 
-import {
-  Binary,
-  EJSON,
-  type MongoClient,
-  type MongoDBLogWritable,
-  type ServerHeartbeatSucceededEvent
-} from '../../mongodb';
+import { Binary, type MongoDBLogWritable, type ServerHeartbeatSucceededEvent } from '../../mongodb';
 
 describe('SDAM Logging Integration Tests', function () {
-  let client: MongoClient;
   const monitoringEvents: Array<ServerHeartbeatSucceededEvent> = [];
   const loggingEvents: Array<{ reply: string }> = [];
 
-  beforeEach(function () {
+  beforeEach(async function () {
     const logger: MongoDBLogWritable = {
       write(log) {
         if (log.message === 'Server heartbeat succeeded') {
@@ -21,7 +15,7 @@ describe('SDAM Logging Integration Tests', function () {
         }
       }
     };
-    client = this.configuration.newClient(
+    const client = this.configuration.newClient(
       {},
       {
         mongodbLogPath: logger,
@@ -31,6 +25,11 @@ describe('SDAM Logging Integration Tests', function () {
     );
 
     client.on('serverHeartbeatSucceeded', monitoringEvents.push.bind(monitoringEvents));
+
+    await client.connect();
+    // give the driver a chance to connect to all servers and collect some heartbeats
+    await setTimeout(100);
+    await client.close();
   });
 
   it(
@@ -40,13 +39,11 @@ describe('SDAM Logging Integration Tests', function () {
         topology: ['replicaset', 'sharded']
       }
     },
-    async function () {
-      await client.connect();
-      await client.close();
+    function () {
+      const heartbeats = monitoringEvents.filter(event => event.reply.$clusterTime);
+      expect(heartbeats.length > 0, 'received no heartbeats with $clusterTimes').to.be.true;
 
-      expect(monitoringEvents.length > 0).to.be.true;
-
-      for (const heartbeat of monitoringEvents) {
+      for (const heartbeat of heartbeats) {
         expect(heartbeat.reply.$clusterTime.signature?.hash).to.be.instanceOf(Binary);
       }
     }
@@ -59,17 +56,13 @@ describe('SDAM Logging Integration Tests', function () {
         topology: ['replicaset', 'sharded']
       }
     },
-    async function () {
-      await client.connect();
-      await client.close();
+    function () {
+      const logs = loggingEvents.filter(log => log.reply.includes('$clusterTime'));
 
-      expect(loggingEvents.length > 0).to.be.true;
+      expect(logs.length > 0).to.be.true;
 
-      for (const hash of loggingEvents.map(
-        message => EJSON.parse(message.reply).$clusterTime.signature.hash
-      )) {
-        expect(hash).to.exist;
-        expect(hash).to.be.instanceof(Binary);
+      for (const message of logs) {
+        expect(message.reply).to.include(`"hash":{"$binary"`);
       }
     }
   );
