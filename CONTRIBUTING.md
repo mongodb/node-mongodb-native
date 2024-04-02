@@ -17,7 +17,7 @@ All code changes must work on the minimum Node version specified in [package.jso
 
 ### Get the Code
 
-Begin by cloning this repo.  Then run `npm install` to install necessary dependencies.
+Begin by creating a fork of this repo.  Then run `npm install` to install necessary dependencies.
 
 ### MongoDB Helpers
 
@@ -107,7 +107,6 @@ Below are some conventions that aren't enforced by any of our tooling but we non
 
 ## Pull Request Process
 
-1. Create a fork of the repository.
 1. Update the README.md or similar documentation with details of changes you
    wish to make, if applicable.
 1. Add any appropriate tests.
