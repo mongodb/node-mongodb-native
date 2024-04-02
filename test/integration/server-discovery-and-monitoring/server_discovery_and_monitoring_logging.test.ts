@@ -33,7 +33,7 @@ describe('SDAM Logging Integration Tests', function () {
   });
 
   it(
-    'does not promote buffers',
+    'the monitor does not promote buffers in server heartbeats',
     {
       requires: {
         topology: ['replicaset', 'sharded']
@@ -50,7 +50,7 @@ describe('SDAM Logging Integration Tests', function () {
   );
 
   it(
-    'does not log messages `reply` field',
+    'heartbeat log messages do not promote buffers in the `reply` field',
     {
       requires: {
         topology: ['replicaset', 'sharded']
