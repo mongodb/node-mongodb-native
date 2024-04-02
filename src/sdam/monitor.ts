@@ -510,7 +510,7 @@ export class RTTPinger {
     this.latestRtt = monitor.latestRtt;
 
     const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
-    this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
+    this[kMonitorId] = setTimeout(() => this.measureRoundTripTime(options), heartbeatFrequencyMS);
   }
 
   get roundTripTime(): number {
@@ -528,66 +528,61 @@ export class RTTPinger {
     this.connection?.destroy();
     this.connection = undefined;
   }
-}
 
-function measureAndReschedule(
-  rttPinger: RTTPinger,
-  options: RTTPingerOptions,
-  start?: number,
-  conn?: Connection
-) {
-  if (start == null) {
-    start = now();
-  }
-  if (rttPinger.closed) {
-    conn?.destroy();
-    return;
-  }
-
-  if (rttPinger.connection == null) {
-    rttPinger.connection = conn;
-  }
-
-  rttPinger.latestRtt = calculateDurationInMs(start);
-  rttPinger[kMonitorId] = setTimeout(
-    () => measureRoundTripTime(rttPinger, options),
-    options.heartbeatFrequencyMS
-  );
-}
-
-function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
-  const start = now();
-  options.cancellationToken = rttPinger[kCancellationToken];
-
-  if (rttPinger.closed) {
-    return;
-  }
-
-  const connection = rttPinger.connection;
-  if (connection == null) {
-    // eslint-disable-next-line github/no-then
-    connect(options).then(
-      connection => {
-        measureAndReschedule(rttPinger, options, start, connection);
-      },
-      () => {
-        rttPinger.connection = undefined;
-      }
-    );
-    return;
-  }
-
-  const commandName =
-    connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
-  // eslint-disable-next-line github/no-then
-  connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
-    () => measureAndReschedule(rttPinger, options),
-    () => {
-      rttPinger.connection?.destroy();
-      rttPinger.connection = undefined;
+  private measureAndReschedule(options: RTTPingerOptions, start?: number, conn?: Connection) {
+    if (start == null) {
+      start = now();
+    }
+    if (this.closed) {
+      conn?.destroy();
       return;
     }
-  );
+
+    if (this.connection == null) {
+      this.connection = conn;
+    }
+
+    this.latestRtt = calculateDurationInMs(start);
+    this[kMonitorId] = setTimeout(
+      () => this.measureRoundTripTime(options),
+      options.heartbeatFrequencyMS
+    );
+  }
+
+  private measureRoundTripTime(options: RTTPingerOptions) {
+    const start = now();
+    options.cancellationToken = this[kCancellationToken];
+
+    if (this.closed) {
+      return;
+    }
+
+    const connection = this.connection;
+    if (connection == null) {
+      // eslint-disable-next-line github/no-then
+      connect(options).then(
+        connection => {
+          this.measureAndReschedule(options, start, connection);
+        },
+        () => {
+          this.connection = undefined;
+        }
+      );
+      return;
+    }
+
+    const commandName =
+      connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
+    // eslint-disable-next-line github/no-then
+    connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
+      () => this.measureAndReschedule(options),
+      () => {
+        this.connection?.destroy();
+        this.connection = undefined;
+        return;
+      }
+    );
+  }
 }
 
 /**
