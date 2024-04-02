@@ -1354,12 +1354,12 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
 export class RTTSampler {
   /** Index of the next slot to be overwritten */
   private writeIndex: number;
-  private _length: number;
-  private _rttSamples: Float64Array;
+  private length: number;
+  private rttSamples: Float64Array;
 
   constructor(windowSize = 10) {
-    this._rttSamples = new Float64Array(windowSize);
-    this._length = 0;
+    this.rttSamples = new Float64Array(windowSize);
+    this.length = 0;
     this.writeIndex = 0;
   }
 
@@ -1369,12 +1369,12 @@ export class RTTSampler {
    * sample
    */
   addSample(sample: number) {
-    this._rttSamples[this.writeIndex++] = sample;
-    if (this._length < this._rttSamples.length) {
-      this._length++;
+    this.rttSamples[this.writeIndex++] = sample;
+    if (this.length < this.rttSamples.length) {
+      this.length++;
     }
 
-    this.writeIndex %= this._rttSamples.length;
+    this.writeIndex %= this.rttSamples.length;
   }
 
   /**
@@ -1382,10 +1382,10 @@ export class RTTSampler {
    * Otherwise computes the minimum value samples contained in the buffer
    */
   min(): number {
-    if (this._length < 2) return 0;
-    let min = this._rttSamples[0];
-    for (let i = 1; i < this._length; i++) {
-      if (this._rttSamples[i] < min) min = this._rttSamples[i];
+    if (this.length < 2) return 0;
+    let min = this.rttSamples[0];
+    for (let i = 1; i < this.length; i++) {
+      if (this.rttSamples[i] < min) min = this.rttSamples[i];
     }
 
     return min;
@@ -1395,13 +1395,13 @@ export class RTTSampler {
    * Returns mean of samples contained in the buffer
    */
   average(): number {
-    if (this._length === 0) return 0;
+    if (this.length === 0) return 0;
     let sum = 0;
-    for (let i = 0; i < this._length; i++) {
-      sum += this._rttSamples[i];
+    for (let i = 0; i < this.length; i++) {
+      sum += this.rttSamples[i];
     }
 
-    return sum / this._length;
+    return sum / this.length;
   }
 
   /**
@@ -1409,8 +1409,8 @@ export class RTTSampler {
    * Returns null if the buffer is empty
    * */
   get last(): number | null {
-    if (this._length === 0) return null;
-    return this._rttSamples[this.writeIndex === 0 ? this._length - 1 : this.writeIndex - 1];
+    if (this.length === 0) return null;
+    return this.rttSamples[this.writeIndex === 0 ? this.length - 1 : this.writeIndex - 1];
   }
 
   /**
@@ -1419,7 +1419,7 @@ export class RTTSampler {
    * this array
    */
   clear() {
-    this._length = 0;
+    this.length = 0;
     this.writeIndex = 0;
   }
 }

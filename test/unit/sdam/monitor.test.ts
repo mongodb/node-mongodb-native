@@ -342,11 +342,10 @@ describe('monitoring', function () {
               }
 
               const avgRtt = monitor.roundTripTime;
-              const expectedRtt = 300; // (100 + 200 + 300 + 400 + 500)/5 = 300
-              // avgRtt will strictly be greater than expectedRtt since setTimeout sets a minimum
+              // expected avgRtt = (100 + 200 + 300 + 400 + 500)/5 = 300ms
+              // avgRtt will strictly be greater than 300ms since setTimeout sets a minimum
               // delay from the time of scheduling to the time of callback execution
-              expect(avgRtt - expectedRtt).greaterThanOrEqual(0);
-              expect(avgRtt - expectedRtt).lessThan(50);
+              expect(avgRtt).to.be.within(300, 350);
 
               monitor.close();
             });
