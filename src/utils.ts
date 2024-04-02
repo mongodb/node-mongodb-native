@@ -1413,16 +1413,6 @@ export class RTTSampler {
     return this._rttSamples[this.writeIndex === 0 ? this._length - 1 : this.writeIndex - 1];
   }
 
-  /** @remarks Added for testing */
-  get length(): number {
-    return this._length;
-  }
-
-  /** @remarks Added for testing */
-  get samples(): Float64Array {
-    return this._rttSamples;
-  }
-
   /**
    * Clear the buffer
    * NOTE: this does not overwrite the data held in the internal array, just the pointers into

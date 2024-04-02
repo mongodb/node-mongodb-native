@@ -1051,7 +1051,8 @@ describe('driver utils', function () {
     describe('constructor', () => {
       it('Constructs a Float64 array of length windowSize', () => {
         const sampler = new RTTSampler(10);
-        expect(sampler.samples).to.have.length(10);
+        // @ts-expect-error Accessing internal state
+        expect(sampler._rttSamples).to.have.length(10);
       });
     });
 
@@ -1059,11 +1060,11 @@ describe('driver utils', function () {
       context('when length < windowSize', () => {
         it('increments the length', () => {
           const sampler = new RTTSampler(10);
-          expect(sampler.length).to.equal(0);
+          expect(sampler).to.have.property('_length', 0);
 
           sampler.addSample(1);
 
-          expect(sampler.length).to.equal(1);
+          expect(sampler).to.have.property('_length', 1);
         });
       });
       context('when length === windowSize', () => {
@@ -1079,12 +1080,13 @@ describe('driver utils', function () {
 
         it('does not increment the length', () => {
           sampler.addSample(size + 1);
-          expect(sampler.length).to.equal(size);
+          expect(sampler).to.have.property('_length', size);
         });
 
         it('overwrites the oldest element', () => {
           sampler.addSample(size + 1);
-          for (const el of sampler.samples) {
+          // @ts-expect-error Accessing internal state
+          for (const el of sampler._rttSamples) {
             if (el === 1) expect.fail('Did not overwrite oldest element');
           }
         });
@@ -1181,12 +1183,12 @@ describe('driver utils', function () {
         for (let i = 0; i < 20; i++) {
           sampler.addSample(i);
         }
-        expect(sampler.length).to.equal(10);
+        expect(sampler).to.have.property('_length', 10);
       });
 
       it('sets length to 0', () => {
         sampler.clear();
-        expect(sampler.length).to.equal(0);
+        expect(sampler).to.have.property('_length', 0);
       });
     });
   });
