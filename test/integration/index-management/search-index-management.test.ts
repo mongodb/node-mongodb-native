@@ -1,11 +1,6 @@
 import { expect } from 'chai';
 
-import {
-  type Collection,
-  type CommandStartedEvent,
-  type MongoClient,
-  MongoError
-} from '../../mongodb';
+import { type Collection, type CommandStartedEvent, type MongoClient } from '../../mongodb';
 
 describe('Search Index Management Integration Tests', function () {
   describe('read concern and write concern ', function () {
@@ -28,35 +23,30 @@ describe('Search Index Management Integration Tests', function () {
     context('when listSearchIndexes operation is run withTransaction', function () {
       // TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers
       it('should include write concern or read concern in command - TODO(NODE-6047)', async function () {
-        await client
-          .withSession(session => {
-            return session.withTransaction(
-              async () => {
-                expect(session.transaction.isStarting).to.equal(true);
-                expect(session.transaction.isActive).to.equal(true);
-                try {
-                  const res = collection.listSearchIndexes({ session });
-                  await res.toArray();
-                } catch (e) {
-                  // uncomment following assertion after NODE-6047 is completed
-                  // expect(e.errmsg).to.match(/^.*Atlas.*$/);
-                } finally {
-                  // uncomment following assertion after NODE-6047 is completed
-                  // expect(commandStartedEvents[0]).to.exist;
-                  if (commandStartedEvents[0]) {
-                    // flip following assertion after NODE-6047 is completed
-                    expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
-                    expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
-                  }
+        await client.withSession(async session => {
+          return await session.withTransaction(
+            async () => {
+              expect(session.transaction.isStarting).to.equal(true);
+              expect(session.transaction.isActive).to.equal(true);
+              try {
+                const res = collection.listSearchIndexes({ session });
+                await res.toArray();
+              } catch (e) {
+                // uncomment following assertion after NODE-6047 is completed
+                // expect(e.errmsg).to.match(/^.*Atlas.*$/);
+              } finally {
+                // uncomment following assertion after NODE-6047 is completed
+                // expect(commandStartedEvents[0]).to.exist;
+                if (commandStartedEvents[0]) {
+                  // flip following assertion after NODE-6047 is completed
+                  expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
+                  expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
                 }
-              },
-              { readConcern: 'local', writeConcern: { w: 1 } }
-            );
-          })
-          .catch(function (error) {
-            expect(error).to.be.an.instanceof(MongoError);
-            return error;
-          });
+              }
+            },
+            { readConcern: 'local', writeConcern: { w: 1 } }
+          );
+        });
       });
     });
 
