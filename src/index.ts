@@ -552,7 +552,7 @@ export type {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  RTTSampler as MovingWindow,
+  RTTSampler,
   TimeoutController
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
