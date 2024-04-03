@@ -7,7 +7,13 @@ import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import { Long, MongoClient, ObjectId, ServerHeartbeatSucceededEvent } from '../../mongodb';
+import {
+  Long,
+  MongoClient,
+  ObjectId,
+  RTTSampler,
+  ServerHeartbeatSucceededEvent
+} from '../../mongodb';
 import {
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -663,6 +669,152 @@ describe('monitoring', function () {
       const maybeError = await client.connect().catch(e => e);
       expect(maybeError).to.be.instanceOf(Error);
       expect(serverHeartbeatFailed).to.have.property('duration').that.is.lessThan(20); // way less than 80ms
+    });
+  });
+
+  describe('class RTTSampler', () => {
+    describe('constructor', () => {
+      it('Constructs a Float64 array of length windowSize', () => {
+        const sampler = new RTTSampler(10);
+        // @ts-expect-error Accessing internal state
+        expect(sampler.rttSamples).to.have.length(10);
+      });
+    });
+
+    describe('addSample', () => {
+      context('when length < windowSize', () => {
+        it('increments the length', () => {
+          const sampler = new RTTSampler(10);
+          expect(sampler).to.have.property('length', 0);
+
+          sampler.addSample(1);
+
+          expect(sampler).to.have.property('length', 1);
+        });
+      });
+      context('when length === windowSize', () => {
+        let sampler: RTTSampler;
+        const size = 10;
+
+        beforeEach(() => {
+          sampler = new RTTSampler(size);
+          for (let i = 1; i <= size; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('does not increment the length', () => {
+          sampler.addSample(size + 1);
+          expect(sampler).to.have.property('length', size);
+        });
+
+        it('overwrites the oldest element', () => {
+          sampler.addSample(size + 1);
+          // @ts-expect-error Accessing internal state
+          for (const el of sampler.rttSamples) {
+            if (el === 1) expect.fail('Did not overwrite oldest element');
+          }
+        });
+
+        it('appends the new element to the end of the window', () => {
+          sampler.addSample(size + 1);
+          expect(sampler.last).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('min()', () => {
+      context('when length < 2', () => {
+        it('returns 0', () => {
+          const sampler = new RTTSampler(10);
+          // length 0
+          expect(sampler.min()).to.equal(0);
+
+          sampler.addSample(1);
+          // length 1
+          expect(sampler.min()).to.equal(0);
+        });
+      });
+
+      context('when 2 <= length < windowSize', () => {
+        let sampler: RTTSampler;
+        beforeEach(() => {
+          sampler = new RTTSampler(10);
+          for (let i = 1; i <= 3; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(sampler.min()).to.equal(1);
+        });
+      });
+
+      context('when length == windowSize', () => {
+        let sampler: RTTSampler;
+        const size = 10;
+
+        beforeEach(() => {
+          sampler = new RTTSampler(size);
+          for (let i = 1; i <= size * 2; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(sampler.min()).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('average()', () => {
+      it('correctly computes the mean', () => {
+        const sampler = new RTTSampler(10);
+        let sum = 0;
+
+        for (let i = 1; i <= 10; i++) {
+          sum += i;
+          sampler.addSample(i);
+        }
+
+        expect(sampler.average()).to.equal(sum / 10);
+      });
+    });
+
+    describe('last', () => {
+      context('when length == 0', () => {
+        it('returns null', () => {
+          const sampler = new RTTSampler(10);
+          expect(sampler.last).to.be.null;
+        });
+      });
+
+      context('when length > 0', () => {
+        it('returns the most recently inserted element', () => {
+          const sampler = new RTTSampler(10);
+          for (let i = 0; i < 11; i++) {
+            sampler.addSample(i);
+          }
+          expect(sampler.last).to.equal(10);
+        });
+      });
+    });
+
+    describe('clear', () => {
+      let sampler: RTTSampler;
+
+      beforeEach(() => {
+        sampler = new RTTSampler(10);
+        for (let i = 0; i < 20; i++) {
+          sampler.addSample(i);
+        }
+        expect(sampler).to.have.property('length', 10);
+      });
+
+      it('sets length to 0', () => {
+        sampler.clear();
+        expect(sampler).to.have.property('length', 0);
+      });
     });
   });
 });

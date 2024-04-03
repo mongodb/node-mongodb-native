@@ -14,8 +14,7 @@ import {
   type EventEmitterWithState,
   makeStateMachine,
   now,
-  ns,
-  RTTSampler
+  ns
 } from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
@@ -700,4 +699,83 @@ export class MonitorInterval {
       this._reschedule(this.heartbeatFrequencyMS);
     });
   };
+}
+
+/** @internal
+ * This class implements the RTT sampling logic specified for [CSOT](https://github.com/mongodb/specifications/blob/bbb335e60cd7ea1e0f7cd9a9443cb95fc9d3b64d/source/client-side-operations-timeout/client-side-operations-timeout.md#drivers-use-minimum-rtt-to-short-circuit-operations)
+ *
+ * This is implemented as a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) keeping
+ * the most recent `windowSize` samples
+ * */
+export class RTTSampler {
+  /** Index of the next slot to be overwritten */
+  private writeIndex: number;
+  private length: number;
+  private rttSamples: Float64Array;
+
+  constructor(windowSize = 10) {
+    this.rttSamples = new Float64Array(windowSize);
+    this.length = 0;
+    this.writeIndex = 0;
+  }
+
+  /**
+   * Adds an rtt sample to the end of the circular buffer
+   * When `windowSize` samples have been collected, `addSample` overwrites the least recently added
+   * sample
+   */
+  addSample(sample: number) {
+    this.rttSamples[this.writeIndex++] = sample;
+    if (this.length < this.rttSamples.length) {
+      this.length++;
+    }
+
+    this.writeIndex %= this.rttSamples.length;
+  }
+
+  /**
+   * When \< 2 samples have been collected, returns 0
+   * Otherwise computes the minimum value samples contained in the buffer
+   */
+  min(): number {
+    if (this.length < 2) return 0;
+    let min = this.rttSamples[0];
+    for (let i = 1; i < this.length; i++) {
+      if (this.rttSamples[i] < min) min = this.rttSamples[i];
+    }
+
+    return min;
+  }
+
+  /**
+   * Returns mean of samples contained in the buffer
+   */
+  average(): number {
+    if (this.length === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < this.length; i++) {
+      sum += this.rttSamples[i];
+    }
+
+    return sum / this.length;
+  }
+
+  /**
+   * Returns most recently inserted element in the buffer
+   * Returns null if the buffer is empty
+   * */
+  get last(): number | null {
+    if (this.length === 0) return null;
+    return this.rttSamples[this.writeIndex === 0 ? this.length - 1 : this.writeIndex - 1];
+  }
+
+  /**
+   * Clear the buffer
+   * NOTE: this does not overwrite the data held in the internal array, just the pointers into
+   * this array
+   */
+  clear() {
+    this.length = 0;
+    this.writeIndex = 0;
+  }
 }

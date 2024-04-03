@@ -510,6 +510,7 @@ export type {
   MonitorPrivate,
   RTTPinger,
   RTTPingerOptions,
+  RTTSampler,
   ServerMonitoringMode
 } from './sdam/monitor';
 export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
@@ -552,7 +553,6 @@ export type {
   List,
   MongoDBCollectionNamespace,
   MongoDBNamespace,
-  RTTSampler,
   TimeoutController
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
