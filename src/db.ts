@@ -7,7 +7,7 @@ import { AggregationCursor } from './cursor/aggregation_cursor';
 import { ListCollectionsCursor } from './cursor/list_collections_cursor';
 import { RunCommandCursor, type RunCursorCommandOptions } from './cursor/run_command_cursor';
 import { MongoInvalidArgumentError } from './error';
-import type { MongoClient, PkFactory } from './mongo_client';
+import type { MongoClient, MongoClientOptions, PkFactory } from './mongo_client';
 import type { TODO_NODE_3286 } from './mongo_types';
 import type { AggregateOptions } from './operations/aggregate';
 import { CollectionsOperation } from './operations/collections';
@@ -66,7 +66,9 @@ const DB_OPTIONS_ALLOW_LIST = [
   'enableUtf8Validation',
   'promoteValues',
   'compression',
-  'retryWrites'
+  'retryWrites',
+  'timeoutMS',
+  'defaultTimeoutMS'
 ];
 
 /** @internal */
@@ -81,7 +83,10 @@ export interface DbPrivate {
 }
 
 /** @public */
-export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
+export interface DbOptions
+  extends BSONSerializeOptions,
+    WriteConcernOptions,
+    Pick<MongoClientOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
   /** If the database authentication is dependent on another databaseName. */
   authSource?: string;
   /** Force server to assign _id values instead of driver. */
