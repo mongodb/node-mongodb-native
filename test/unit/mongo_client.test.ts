@@ -1208,4 +1208,52 @@ describe('MongoClient', function () {
       expect.fail('missed exception');
     });
   });
+
+  context('timeoutMS', function () {
+    context('when timeoutMS is negative', function () {
+      it('throws MongoParseError', function () {
+        expect(() => new MongoClient('mongodb://host', { timeoutMS: -1 })).to.throw(
+          MongoParseError
+        );
+      });
+    });
+
+    context('when timeoutMS is positive', function () {
+      it('sets the value on the MongoClient', function () {
+        const client = new MongoClient('mongodb://host', { timeoutMS: 1 });
+        expect(client.options.timeoutMS).to.equal(1);
+      });
+    });
+
+    context('when timeoutMS is zero', function () {
+      it('sets the value on the MongoClient', function () {
+        const client = new MongoClient('mongodb://host', { timeoutMS: 0 });
+        expect(client.options.timeoutMS).to.equal(0);
+      });
+    });
+  });
+
+  context('defaultTimeoutMS', function () {
+    context('when defaultTimeoutMS is negative', function () {
+      it('throws MongoParseError', function () {
+        expect(() => new MongoClient('mongodb://host', { defaultTimeoutMS: -1 })).to.throw(
+          MongoParseError
+        );
+      });
+    });
+
+    context('when defaultTimeoutMS is positive', function () {
+      it('sets the value on the MongoClient', function () {
+        const client = new MongoClient('mongodb://host', { defaultTimeoutMS: 1 });
+        expect(client.options.defaultTimeoutMS).to.equal(1);
+      });
+    });
+
+    context('when defaultTimeoutMS is zero', function () {
+      it('sets the value on the MongoClient', function () {
+        const client = new MongoClient('mongodb://host', { defaultTimeoutMS: 0 });
+        expect(client.options.defaultTimeoutMS).to.equal(0);
+      });
+    });
+  });
 });
