@@ -13,10 +13,12 @@ import type { FindOptions } from '../operations/find';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
 import type { Callback } from '../utils';
+import { type GridFSBucketOptions } from '.';
 import type { GridFSChunk } from './upload';
 
 /** @public */
-export interface GridFSBucketReadStreamOptions {
+export interface GridFSBucketReadStreamOptions
+  extends Pick<GridFSBucketOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
   sort?: Sort;
   skip?: number;
   /**

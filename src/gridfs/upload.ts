@@ -8,7 +8,7 @@ import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
-import type { GridFSBucket } from './index';
+import type { GridFSBucket, GridFSBucketOptions } from './index';
 
 /** @public */
 export interface GridFSChunk {
@@ -19,7 +19,9 @@ export interface GridFSChunk {
 }
 
 /** @public */
-export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
+export interface GridFSBucketWriteStreamOptions
+  extends WriteConcernOptions,
+    Pick<GridFSBucketOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
   /** Custom file id for the GridFS file. */
