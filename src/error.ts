@@ -1020,7 +1020,7 @@ export class MongoMissingDependencyError extends MongoAPIError {
    *
    * @public
    **/
-  constructor(message: string, dependencyName: string, options: { cause?: Error } = {}) {
+  constructor(message: string, dependencyName: string, options: { cause: Error }) {
     super(message, options);
     this.dependencyName = dependencyName;
   }
