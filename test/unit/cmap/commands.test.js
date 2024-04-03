@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { OpQueryResponse } = require('../../mongodb');
+const { OpReply } = require('../../mongodb');
 
 describe('commands', function () {
   describe('Response', function () {
@@ -16,7 +16,7 @@ describe('commands', function () {
           const body = Buffer.from([]);
 
           it('throws an exception', function () {
-            const response = new OpQueryResponse(message, header, body);
+            const response = new OpReply(message, header, body);
             expect(() => response.parse()).to.throw(RangeError, /outside buffer bounds/);
           });
         });
@@ -33,8 +33,8 @@ describe('commands', function () {
           body.writeInt32LE(-1, 16);
 
           it('throws an exception', function () {
-            const response = new OpQueryResponse(message, header, body);
-            expect(() => response.parse()).to.throw(RangeError, /Invalid array length/);
+            const response = new OpReply(message, header, body);
+            expect(() => response.parse()).to.throw(RangeError, /Invalid array length/i);
           });
         });
       });
@@ -54,55 +54,55 @@ describe('commands', function () {
         it('does not throw an exception', function () {
           let error;
           try {
-            new OpQueryResponse(message, header, body);
+            new OpReply(message, header, body);
           } catch (err) {
             error = err;
           }
           expect(error).to.be.undefined;
         });
 
-        it('initializes the documents to an empty array', function () {
-          const response = new OpQueryResponse(message, header, body);
-          expect(response.documents).to.be.empty;
+        it('initializes the sections to an empty array', function () {
+          const response = new OpReply(message, header, body);
+          expect(response.sections).to.be.empty;
         });
 
         it('does not set the responseFlags', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.responseFlags).to.be.undefined;
         });
 
         it('does not set the cursorNotFound flag', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.cursorNotFound).to.be.undefined;
         });
 
         it('does not set the cursorId', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.cursorId).to.be.undefined;
         });
 
         it('does not set startingFrom', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.startingFrom).to.be.undefined;
         });
 
         it('does not set numberReturned', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.numberReturned).to.be.undefined;
         });
 
         it('does not set queryFailure', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.queryFailure).to.be.undefined;
         });
 
         it('does not set shardConfigStale', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.shardConfigStale).to.be.undefined;
         });
 
         it('does not set awaitCapable', function () {
-          const response = new OpQueryResponse(message, header, body);
+          const response = new OpReply(message, header, body);
           expect(response.awaitCapable).to.be.undefined;
         });
       });

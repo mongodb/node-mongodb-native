@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { OpMsgResponse } from '../../../mongodb';
+import { MongoDBResponse } from '../../../mongodb';
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false
@@ -13,11 +13,11 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
   }
 };
 
-describe('class OpMsgResponse', () => {
+describe('class MongoDBResponse', () => {
   let bsonSpy: sinon.SinonSpy;
 
   beforeEach(() => {
-    bsonSpy = sinon.spy(OpMsgResponse.prototype, 'parseBsonSerializationOptions');
+    bsonSpy = sinon.spy(MongoDBResponse.prototype, 'parseBsonSerializationOptions');
   });
 
   afterEach(() => {

@@ -8,7 +8,7 @@ import {
   type MessageHeader,
   OpCompressedRequest,
   OpMsgResponse,
-  OpQueryResponse,
+  OpReply,
   type WriteProtocolMessageType
 } from '../commands';
 import { OP_COMPRESSED, OP_MSG } from './constants';
@@ -163,9 +163,7 @@ export async function compressCommand(
  *
  * This method does not parse the response's BSON.
  */
-export async function decompressResponse(
-  message: Buffer
-): Promise<OpMsgResponse | OpQueryResponse> {
+export async function decompressResponse(message: Buffer): Promise<OpMsgResponse | OpReply> {
   const messageHeader: MessageHeader = {
     length: message.readInt32LE(0),
     requestId: message.readInt32LE(4),
@@ -174,7 +172,7 @@ export async function decompressResponse(
   };
 
   if (messageHeader.opCode !== OP_COMPRESSED) {
-    const ResponseType = messageHeader.opCode === OP_MSG ? OpMsgResponse : OpQueryResponse;
+    const ResponseType = messageHeader.opCode === OP_MSG ? OpMsgResponse : OpReply;
     const messageBody = message.subarray(MESSAGE_HEADER_SIZE);
     return new ResponseType(message, messageHeader, messageBody);
   }
@@ -189,7 +187,7 @@ export async function decompressResponse(
   const compressedBuffer = message.slice(MESSAGE_HEADER_SIZE + 9);
 
   // recalculate based on wrapped opcode
-  const ResponseType = header.opCode === OP_MSG ? OpMsgResponse : OpQueryResponse;
+  const ResponseType = header.opCode === OP_MSG ? OpMsgResponse : OpReply;
   const messageBody = await decompress(compressorID, compressedBuffer);
   if (messageBody.length !== header.length) {
     throw new MongoDecompressionError('Message body and message header must be the same length');

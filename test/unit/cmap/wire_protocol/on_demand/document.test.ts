@@ -145,6 +145,18 @@ describe('class OnDemandDocument', () => {
       expect(document.get('b', BSONType.null)).to.be.null;
     });
 
+    it('supports returning null for null and undefined bson elements', () => {
+      const bson = Uint8Array.from([
+        ...[11, 0, 0, 0], // doc size
+        ...[6, 97, 0], // a: undefined (6)
+        ...[10, 98, 0], // b: null (10)
+        0 // doc term
+      ]);
+      const document = new OnDemandDocument(bson, 0, false);
+      expect(document.get('a', BSONType.undefined)).to.be.null;
+      expect(document.get('b', BSONType.null)).to.be.null;
+    });
+
     it('supports returning int', () => {
       expect(document.get('int', BSONType.int, true)).to.deep.equal(input.int);
     });
@@ -163,6 +175,12 @@ describe('class OnDemandDocument', () => {
 
     it('supports returning binData', () => {
       expect(document.get('binData', BSONType.binData, true)).to.deep.equal(input.binData);
+    });
+
+    it('supports returning binData, subtype 2', () => {
+      expect(document.get('binDataSubtype2', BSONType.binData, true)).to.deep.equal(
+        input.binDataSubtype2
+      );
     });
 
     it('supports returning binData, subtype 2', () => {
