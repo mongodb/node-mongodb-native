@@ -36,7 +36,7 @@ async function externalCommand(
   }>);
 }
 
-let krb: typeof Kerberos;
+let krb: Kerberos;
 
 export class GSSAPI extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {

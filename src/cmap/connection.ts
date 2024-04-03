@@ -13,8 +13,8 @@ import {
   UNPINNED
 } from '../constants';
 import {
+  MongoAPIError,
   MongoCompatibilityError,
-  MongoMissingDependencyError,
   MongoNetworkError,
   MongoNetworkTimeoutError,
   MongoParseError,
@@ -695,7 +695,7 @@ export class CryptoConnection extends Connection {
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
-      throw new MongoMissingDependencyError('No AutoEncrypter available for encryption');
+      throw new MongoAPIError('No AutoEncrypter available for encryption');
     }
 
     const serverWireVersion = maxWireVersion(this);

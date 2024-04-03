@@ -18,21 +18,23 @@ function makeErrorModule(error: any) {
   });
 }
 
-export let Kerberos: typeof import('kerberos') | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `kerberos` not found. Please install it to enable kerberos authentication'
-    )
-  );
+export type Kerberos = typeof import('kerberos') | { kModuleError: MongoMissingDependencyError };
 
-export function getKerberos(): typeof Kerberos | { kModuleError: MongoMissingDependencyError } {
+export function getKerberos(): Kerberos {
+  let kerberos: Kerberos;
   try {
     // Ensure you always wrap an optional require in the try block NODE-3199
-    Kerberos = require('kerberos');
-    return Kerberos;
-  } catch {
-    return Kerberos;
+    kerberos = require('kerberos');
+  } catch (error) {
+    kerberos = makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `kerberos` not found. Please install it to enable kerberos authentication',
+        'kerberos',
+        { cause: error }
+      )
+    );
   }
+  return kerberos;
 }
 
 export interface KerberosClient {
@@ -57,20 +59,23 @@ type ZStandardLib = {
   decompress(buf: Buffer): Promise<Buffer>;
 };
 
-export let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError } =
-  makeErrorModule(
-    new MongoMissingDependencyError(
-      'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression'
-    )
-  );
+export type ZStandard = ZStandardLib | { kModuleError: MongoMissingDependencyError };
 
-export function getZstdLibrary(): typeof ZStandard | { kModuleError: MongoMissingDependencyError } {
+export function getZstdLibrary(): ZStandardLib | { kModuleError: MongoMissingDependencyError } {
+  let ZStandard: ZStandardLib | { kModuleError: MongoMissingDependencyError };
   try {
     ZStandard = require('@mongodb-js/zstd');
-    return ZStandard;
-  } catch {
-    return ZStandard;
+  } catch (error) {
+    ZStandard = makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `@mongodb-js/zstd` not found. Please install it to enable zstd compression',
+        'zstd',
+        { cause: error }
+      )
+    );
   }
+
+  return ZStandard;
 }
 
 /**
@@ -100,11 +105,13 @@ export function getAwsCredentialProvider():
     // Ensure you always wrap an optional require in the try block NODE-3199
     const credentialProvider = require('@aws-sdk/credential-providers');
     return credentialProvider;
-  } catch {
+  } catch (error) {
     return makeErrorModule(
       new MongoMissingDependencyError(
         'Optional module `@aws-sdk/credential-providers` not found.' +
-          ' Please install it to enable getting aws credentials via the official sdk.'
+          ' Please install it to enable getting aws credentials via the official sdk.',
+        '@aws-sdk/credential-providers',
+        { cause: error }
       )
     );
   }
@@ -120,11 +127,13 @@ export function getGcpMetadata(): GcpMetadata {
     // Ensure you always wrap an optional require in the try block NODE-3199
     const credentialProvider = require('gcp-metadata');
     return credentialProvider;
-  } catch {
+  } catch (error) {
     return makeErrorModule(
       new MongoMissingDependencyError(
         'Optional module `gcp-metadata` not found.' +
-          ' Please install it to enable getting gcp credentials via the official sdk.'
+          ' Please install it to enable getting gcp credentials via the official sdk.',
+        'gcp-metadata',
+        { cause: error }
       )
     );
   }
@@ -153,6 +162,7 @@ export function getSnappy(): SnappyLib | { kModuleError: MongoMissingDependencyE
   } catch (cause) {
     const kModuleError = new MongoMissingDependencyError(
       'Optional module `snappy` not found. Please install it to enable snappy compression',
+      'snappy',
       { cause }
     );
     return { kModuleError };
@@ -187,6 +197,7 @@ export function getSocks(): SocksLib | { kModuleError: MongoMissingDependencyErr
   } catch (cause) {
     const kModuleError = new MongoMissingDependencyError(
       'Optional module `socks` not found. Please install it to connections over a SOCKS5 proxy',
+      'socks',
       { cause }
     );
     return { kModuleError };
@@ -234,16 +245,24 @@ interface AWS4 {
   };
 }
 
-export let aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = makeErrorModule(
-  new MongoMissingDependencyError(
-    'Optional module `aws4` not found. Please install it to enable AWS authentication'
-  )
-);
+export const aws4: AWS4 | { kModuleError: MongoMissingDependencyError } = loadAws4();
 
-try {
-  // Ensure you always wrap an optional require in the try block NODE-3199
-  aws4 = require('aws4');
-} catch {} // eslint-disable-line
+function loadAws4() {
+  let aws4: AWS4 | { kModuleError: MongoMissingDependencyError };
+  try {
+    aws4 = require('aws4');
+  } catch (error) {
+    aws4 = makeErrorModule(
+      new MongoMissingDependencyError(
+        'Optional module `aws4` not found. Please install it to enable AWS authentication',
+        'aws4',
+        { cause: error }
+      )
+    );
+  }
+
+  return aws4;
+}
 
 /** A utility function to get the instance of mongodb-client-encryption, if it exists. */
 export function getMongoDBClientEncryption():
@@ -259,6 +278,7 @@ export function getMongoDBClientEncryption():
   } catch (cause) {
     const kModuleError = new MongoMissingDependencyError(
       'Optional module `mongodb-client-encryption` not found. Please install it to use auto encryption or ClientEncryption.',
+      'mongodb-client-encryption',
       { cause }
     );
     return { kModuleError };

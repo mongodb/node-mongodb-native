@@ -45,7 +45,7 @@ const ZSTD_COMPRESSION_LEVEL = 3;
 const zlibInflate = promisify(zlib.inflate.bind(zlib));
 const zlibDeflate = promisify(zlib.deflate.bind(zlib));
 
-let zstd: typeof ZStandard;
+let zstd: ZStandard;
 let Snappy: SnappyLib | null = null;
 function loadSnappy() {
   if (Snappy == null) {
