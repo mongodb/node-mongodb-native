@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import type { TcpNetConnectOpts } from 'net';
 import type { ConnectionOptions as TLSConnectionOptions, TLSSocketOptions } from 'tls';
 
-import { type BSONSerializeOptions, type Document, resolveBSONOptions } from './bson';
+import { type BSONSerializeOptions, type Document, type Long, resolveBSONOptions } from './bson';
 import { ChangeStream, type ChangeStreamDocument, type ChangeStreamOptions } from './change_stream';
 import type { AutoEncrypter, AutoEncryptionOptions } from './client-side-encryption/auto_encrypter';
 import {
@@ -121,7 +121,9 @@ export interface MongoClientOptions extends BSONSerializeOptions, SupportedNodeC
   /** Specifies the name of the replica set, if the mongod is a member of a replica set. */
   replicaSet?: string;
   /** @internal This option is in development and currently has no behaviour. */
-  timeoutMS?: number;
+  timeoutMS?: number | bigint | Long;
+  /** @internal This option is in development and currently has no behaviour. */
+  defaultTimeoutMS?: number | bigint | Long;
   /** Enables or disables TLS/SSL for the connection. */
   tls?: boolean;
   /** A boolean to enable or disables TLS/SSL for the connection. (The ssl option is equivalent to the tls option.) */
@@ -803,6 +805,8 @@ export interface MongoOptions
         | 'socketTimeoutMS'
         | 'srvMaxHosts'
         | 'srvServiceName'
+        | 'timeoutMS'
+        | 'defaultTimeoutMS'
         | 'tlsAllowInvalidCertificates'
         | 'tlsAllowInvalidHostnames'
         | 'tlsInsecure'
