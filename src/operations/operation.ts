@@ -1,4 +1,5 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { type MongoClientOptions } from '../mongo_client';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -23,7 +24,9 @@ export interface OperationConstructor extends Function {
 }
 
 /** @public */
-export interface OperationOptions extends BSONSerializeOptions {
+export interface OperationOptions
+  extends BSONSerializeOptions,
+    Pick<MongoClientOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
   /** Specify ClientSession for this command */
   session?: ClientSession;
   willRetryWrite?: boolean;
