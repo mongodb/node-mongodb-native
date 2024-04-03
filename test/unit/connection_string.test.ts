@@ -17,7 +17,6 @@ import {
   Long,
   MongoAPIError,
   MongoClient,
-  type MongoClientOptions,
   MongoCredentials,
   MongoDriverError,
   MongoInvalidArgumentError,
