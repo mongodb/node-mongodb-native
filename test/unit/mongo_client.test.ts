@@ -1,28 +1,28 @@
-('use strict');
-
+import { expect } from 'chai';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as sinon from 'sinon';
+import { Writable } from 'stream';
 import { inspect } from 'util';
 
-const os = require('os');
-const fs = require('fs');
-const { expect } = require('chai');
-const { getSymbolFrom } = require('../tools/utils');
-const { parseOptions, resolveSRVRecord } = require('../mongodb');
-const { ReadConcern } = require('../mongodb');
-const { WriteConcern } = require('../mongodb');
-const { ReadPreference } = require('../mongodb');
-const { MongoCredentials } = require('../mongodb');
-const {
-  MongoClient,
-  MongoParseError,
-  ServerApiVersion,
+import {
   MongoAPIError,
-  MongoInvalidArgumentError
-} = require('../mongodb');
-const { MongoLogger } = require('../mongodb');
-// eslint-disable-next-line no-restricted-modules
-const { SeverityLevel, MongoLoggableComponent } = require('../../src/mongo_logger');
-const sinon = require('sinon');
-const { Writable } = require('stream');
+  MongoClient,
+  type MongoClientOptions,
+  MongoCredentials,
+  MongoInvalidArgumentError,
+  MongoLoggableComponent,
+  MongoLogger,
+  MongoParseError,
+  parseOptions,
+  ReadConcern,
+  ReadPreference,
+  resolveSRVRecord,
+  ServerApiVersion,
+  SeverityLevel,
+  WriteConcern
+} from '../mongodb';
+import { getSymbolFrom } from '../tools/utils';
 
 describe('MongoClient', function () {
   it('MongoClient should always freeze public options', function () {
@@ -144,7 +144,10 @@ describe('MongoClient', function () {
   };
 
   it('should parse all options from the options object', function () {
-    const options = parseOptions('mongodb://localhost:27017/', ALL_OPTIONS);
+    const options = parseOptions(
+      'mongodb://localhost:27017/',
+      ALL_OPTIONS as unknown as MongoClientOptions
+    );
     // Check consolidated options
     expect(options).has.property('writeConcern');
     expect(options.writeConcern).has.property('w', 2);
