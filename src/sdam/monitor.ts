@@ -8,8 +8,14 @@ import { LEGACY_HELLO_COMMAND } from '../constants';
 import { MongoError, MongoErrorLabel, MongoNetworkTimeoutError } from '../error';
 import { MongoLoggableComponent } from '../mongo_logger';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
-import type { Callback, EventEmitterWithState } from '../utils';
-import { calculateDurationInMs, makeStateMachine, now, ns } from '../utils';
+import {
+  calculateDurationInMs,
+  type Callback,
+  type EventEmitterWithState,
+  makeStateMachine,
+  now,
+  ns
+} from '../utils';
 import { ServerType, STATE_CLOSED, STATE_CLOSING } from './common';
 import {
   ServerHeartbeatFailedEvent,
@@ -25,8 +31,6 @@ const kServer = Symbol('server');
 const kMonitorId = Symbol('monitorId');
 /** @internal */
 const kCancellationToken = Symbol('cancellationToken');
-/** @internal */
-const kRoundTripTime = Symbol('roundTripTime');
 
 const STATE_IDLE = 'idle';
 const STATE_MONITORING = 'monitoring';
@@ -100,6 +104,8 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
   rttPinger?: RTTPinger;
   /** @internal */
   override component = MongoLoggableComponent.TOPOLOGY;
+  /** @internal */
+  private rttSampler: RTTSampler;
 
   constructor(server: Server, options: MonitorOptions) {
     super();
@@ -121,6 +127,7 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     });
     this.isRunningInFaasEnv = getFAASEnv() != null;
     this.mongoLogger = this[kServer].topology.client?.mongoLogger;
+    this.rttSampler = new RTTSampler(10);
 
     const cancellationToken = this[kCancellationToken];
     // TODO: refactor this to pull it directly from the pool, requires new ConnectionPool integration
@@ -203,6 +210,26 @@ export class Monitor extends TypedEventEmitter<MonitorEvents> {
     this.emit('close');
     stateTransition(this, STATE_CLOSED);
   }
+
+  get roundTripTime(): number {
+    return this.rttSampler.average();
+  }
+
+  get minRoundTripTime(): number {
+    return this.rttSampler.min();
+  }
+
+  get latestRtt(): number {
+    return this.rttSampler.last ?? 0; // FIXME: Check if this is acceptable
+  }
+
+  addRttSample(rtt: number) {
+    this.rttSampler.addSample(rtt);
+  }
+
+  clearRttSamples() {
+    this.rttSampler.clear();
+  }
 }
 
 function resetMonitorState(monitor: Monitor) {
@@ -216,6 +243,8 @@ function resetMonitorState(monitor: Monitor) {
 
   monitor.connection?.destroy();
   monitor.connection = null;
+
+  monitor.clearRttSamples();
 }
 
 function useStreamingProtocol(monitor: Monitor, topologyVersion: TopologyVersion | null): boolean {
@@ -249,7 +278,6 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
   function onHeartbeatFailed(err: Error) {
     monitor.connection?.destroy();
     monitor.connection = null;
-
     monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_FAILED,
       monitor[kServer].topology.s.id,
@@ -275,10 +303,14 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       hello.isWritablePrimary = hello[LEGACY_HELLO_COMMAND];
     }
 
+    // NOTE: here we use the latestRtt as this measurement corresponds with the value
+    // obtained for this successful heartbeat
     const duration =
       isAwaitable && monitor.rttPinger
-        ? monitor.rttPinger.roundTripTime
+        ? monitor.rttPinger.latestRtt ?? calculateDurationInMs(start)
         : calculateDurationInMs(start);
+
+    monitor.addRttSample(duration);
 
     monitor.emitAndLogHeartbeat(
       Server.SERVER_HEARTBEAT_SUCCEEDED,
@@ -328,13 +360,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
       : { socketTimeoutMS: connectTimeoutMS };
 
     if (isAwaitable && monitor.rttPinger == null) {
-      monitor.rttPinger = new RTTPinger(
-        monitor[kCancellationToken],
-        Object.assign(
-          { heartbeatFrequencyMS: monitor.options.heartbeatFrequencyMS },
-          monitor.connectOptions
-        )
-      );
+      monitor.rttPinger = new RTTPinger(monitor);
     }
 
     // Record new start time before sending handshake
@@ -377,6 +403,8 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         connection.destroy();
         return;
       }
+      const duration = calculateDurationInMs(start);
+      monitor.addRttSample(duration);
 
       monitor.connection = connection;
       monitor.emitAndLogHeartbeat(
@@ -385,7 +413,7 @@ function checkServer(monitor: Monitor, callback: Callback<Document | null>) {
         connection.hello?.connectionId,
         new ServerHeartbeatSucceededEvent(
           monitor.address,
-          calculateDurationInMs(start),
+          duration,
           connection.hello,
           useStreamingProtocol(monitor, connection.hello?.topologyVersion)
         )
@@ -458,23 +486,30 @@ export class RTTPinger {
   /** @internal */
   [kCancellationToken]: CancellationToken;
   /** @internal */
-  [kRoundTripTime]: number;
-  /** @internal */
   [kMonitorId]: NodeJS.Timeout;
+  /** @internal */
+  monitor: Monitor;
   closed: boolean;
+  /** @internal */
+  latestRtt?: number;
 
-  constructor(cancellationToken: CancellationToken, options: RTTPingerOptions) {
+  constructor(monitor: Monitor) {
     this.connection = undefined;
-    this[kCancellationToken] = cancellationToken;
-    this[kRoundTripTime] = 0;
+    this[kCancellationToken] = monitor[kCancellationToken];
     this.closed = false;
+    this.monitor = monitor;
+    this.latestRtt = monitor.latestRtt;
 
-    const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
-    this[kMonitorId] = setTimeout(() => measureRoundTripTime(this, options), heartbeatFrequencyMS);
+    const heartbeatFrequencyMS = monitor.options.heartbeatFrequencyMS;
+    this[kMonitorId] = setTimeout(() => this.measureRoundTripTime(), heartbeatFrequencyMS);
   }
 
   get roundTripTime(): number {
-    return this[kRoundTripTime];
+    return this.monitor.roundTripTime;
+  }
+
+  get minRoundTripTime(): number {
+    return this.monitor.minRoundTripTime;
   }
 
   close(): void {
@@ -484,61 +519,60 @@ export class RTTPinger {
     this.connection?.destroy();
     this.connection = undefined;
   }
-}
 
-function measureRoundTripTime(rttPinger: RTTPinger, options: RTTPingerOptions) {
-  const start = now();
-  options.cancellationToken = rttPinger[kCancellationToken];
-  const heartbeatFrequencyMS = options.heartbeatFrequencyMS;
-
-  if (rttPinger.closed) {
-    return;
-  }
-
-  function measureAndReschedule(conn?: Connection) {
-    if (rttPinger.closed) {
+  private measureAndReschedule(start?: number, conn?: Connection) {
+    if (start == null) {
+      start = now();
+    }
+    if (this.closed) {
       conn?.destroy();
       return;
     }
 
-    if (rttPinger.connection == null) {
-      rttPinger.connection = conn;
+    if (this.connection == null) {
+      this.connection = conn;
     }
 
-    rttPinger[kRoundTripTime] = calculateDurationInMs(start);
-    rttPinger[kMonitorId] = setTimeout(
-      () => measureRoundTripTime(rttPinger, options),
-      heartbeatFrequencyMS
+    this.latestRtt = calculateDurationInMs(start);
+    this[kMonitorId] = setTimeout(
+      () => this.measureRoundTripTime(),
+      this.monitor.options.heartbeatFrequencyMS
     );
   }
 
-  const connection = rttPinger.connection;
-  if (connection == null) {
-    // eslint-disable-next-line github/no-then
-    connect(options).then(
-      connection => {
-        measureAndReschedule(connection);
-      },
-      () => {
-        rttPinger.connection = undefined;
-        rttPinger[kRoundTripTime] = 0;
-      }
-    );
-    return;
-  }
+  private measureRoundTripTime() {
+    const start = now();
 
-  const commandName =
-    connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
-  // eslint-disable-next-line github/no-then
-  connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
-    () => measureAndReschedule(),
-    () => {
-      rttPinger.connection?.destroy();
-      rttPinger.connection = undefined;
-      rttPinger[kRoundTripTime] = 0;
+    if (this.closed) {
       return;
     }
-  );
+
+    const connection = this.connection;
+    if (connection == null) {
+      // eslint-disable-next-line github/no-then
+      connect(this.monitor.connectOptions).then(
+        connection => {
+          this.measureAndReschedule(start, connection);
+        },
+        () => {
+          this.connection = undefined;
+        }
+      );
+      return;
+    }
+
+    const commandName =
+      connection.serverApi?.version || connection.helloOk ? 'hello' : LEGACY_HELLO_COMMAND;
+    // eslint-disable-next-line github/no-then
+    connection.command(ns('admin.$cmd'), { [commandName]: 1 }, undefined).then(
+      () => this.measureAndReschedule(),
+      () => {
+        this.connection?.destroy();
+        this.connection = undefined;
+        return;
+      }
+    );
+  }
 }
 
 /**
@@ -665,4 +699,83 @@ export class MonitorInterval {
       this._reschedule(this.heartbeatFrequencyMS);
     });
   };
+}
+
+/** @internal
+ * This class implements the RTT sampling logic specified for [CSOT](https://github.com/mongodb/specifications/blob/bbb335e60cd7ea1e0f7cd9a9443cb95fc9d3b64d/source/client-side-operations-timeout/client-side-operations-timeout.md#drivers-use-minimum-rtt-to-short-circuit-operations)
+ *
+ * This is implemented as a [circular buffer](https://en.wikipedia.org/wiki/Circular_buffer) keeping
+ * the most recent `windowSize` samples
+ * */
+export class RTTSampler {
+  /** Index of the next slot to be overwritten */
+  private writeIndex: number;
+  private length: number;
+  private rttSamples: Float64Array;
+
+  constructor(windowSize = 10) {
+    this.rttSamples = new Float64Array(windowSize);
+    this.length = 0;
+    this.writeIndex = 0;
+  }
+
+  /**
+   * Adds an rtt sample to the end of the circular buffer
+   * When `windowSize` samples have been collected, `addSample` overwrites the least recently added
+   * sample
+   */
+  addSample(sample: number) {
+    this.rttSamples[this.writeIndex++] = sample;
+    if (this.length < this.rttSamples.length) {
+      this.length++;
+    }
+
+    this.writeIndex %= this.rttSamples.length;
+  }
+
+  /**
+   * When \< 2 samples have been collected, returns 0
+   * Otherwise computes the minimum value samples contained in the buffer
+   */
+  min(): number {
+    if (this.length < 2) return 0;
+    let min = this.rttSamples[0];
+    for (let i = 1; i < this.length; i++) {
+      if (this.rttSamples[i] < min) min = this.rttSamples[i];
+    }
+
+    return min;
+  }
+
+  /**
+   * Returns mean of samples contained in the buffer
+   */
+  average(): number {
+    if (this.length === 0) return 0;
+    let sum = 0;
+    for (let i = 0; i < this.length; i++) {
+      sum += this.rttSamples[i];
+    }
+
+    return sum / this.length;
+  }
+
+  /**
+   * Returns most recently inserted element in the buffer
+   * Returns null if the buffer is empty
+   * */
+  get last(): number | null {
+    if (this.length === 0) return null;
+    return this.rttSamples[this.writeIndex === 0 ? this.length - 1 : this.writeIndex - 1];
+  }
+
+  /**
+   * Clear the buffer
+   * NOTE: this does not overwrite the data held in the internal array, just the pointers into
+   * this array
+   */
+  clear() {
+    this.length = 0;
+    this.writeIndex = 0;
+  }
 }

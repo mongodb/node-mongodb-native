@@ -33,8 +33,10 @@ export interface ServerDescriptionOptions {
   /** An Error used for better reporting debugging */
   error?: MongoError;
 
-  /** The round trip time to ping this server (in ms) */
+  /** The average round trip time to ping this server (in ms) */
   roundTripTime?: number;
+  /** The minimum round trip time to ping this server over the past 10 samples(in ms) */
+  minRoundTripTime?: number;
 
   /** If the client is in load balancing mode. */
   loadBalanced?: boolean;
@@ -58,6 +60,8 @@ export class ServerDescription {
   minWireVersion: number;
   maxWireVersion: number;
   roundTripTime: number;
+  /** The minimum measurement of the last 10 measurements of roundTripTime that have been collected */
+  minRoundTripTime: number;
   lastUpdateTime: number;
   lastWriteDate: number;
   me: string | null;
@@ -98,6 +102,7 @@ export class ServerDescription {
     this.minWireVersion = hello?.minWireVersion ?? 0;
     this.maxWireVersion = hello?.maxWireVersion ?? 0;
     this.roundTripTime = options?.roundTripTime ?? -1;
+    this.minRoundTripTime = options?.minRoundTripTime ?? 0;
     this.lastUpdateTime = now();
     this.lastWriteDate = hello?.lastWrite?.lastWriteDate ?? 0;
     this.error = options.error ?? null;
