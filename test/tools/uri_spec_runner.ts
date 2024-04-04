@@ -349,6 +349,7 @@ export function executeUriValidationTest(
       case 'maxConnecting':
       case 'maxPoolSize':
       case 'minPoolSize':
+      case 'timeoutMS':
       case 'connectTimeoutMS':
       case 'heartbeatFrequencyMS':
       case 'localThresholdMS':
