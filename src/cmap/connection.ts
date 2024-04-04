@@ -479,7 +479,21 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       );
     }
 
-    let document;
+    // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
+    // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
+    const bsonOptions =
+      options.documentsReturnedIn == null || !options.raw
+        ? options
+        : {
+            ...options,
+            raw: false,
+            fieldsAsRaw: { [options.documentsReturnedIn]: true }
+          };
+
+    /** MongoDBResponse instance or subclass */
+    let document: MongoDBResponse | undefined = undefined;
+    /** Cached result of a toObject call */
+    let object: Document | undefined = undefined;
     try {
       this.throwIfAborted();
       for await (document of this.sendWire(message, options, responseType)) {
@@ -493,15 +507,12 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         if (document.has('writeConcernError')) {
-          const objectWithWriteConcernError = document.toObject(options);
-          throw new MongoWriteConcernError(
-            objectWithWriteConcernError.writeConcernError,
-            objectWithWriteConcernError
-          );
+          object ??= document.toObject(bsonOptions);
+          throw new MongoWriteConcernError(object.writeConcernError, object);
         }
 
         if (document.isError) {
-          throw new MongoServerError(document.toObject(options));
+          throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
         if (this.shouldEmitAndLogCommand) {
@@ -513,7 +524,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document.toObject(options),
+              options.noResponse ? undefined : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
@@ -521,17 +532,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         }
 
         if (responseType == null) {
-          // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
-          // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
-          const bsonOptions =
-            options.documentsReturnedIn == null || !options.raw
-              ? options
-              : {
-                  ...options,
-                  raw: false,
-                  fieldsAsRaw: { [options.documentsReturnedIn]: true }
-                };
-          yield document.toObject(bsonOptions);
+          yield (object ??= document.toObject(bsonOptions));
         } else {
           yield document;
         }
@@ -549,7 +550,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document?.toObject(options),
+              options.noResponse ? undefined : (object ??= document?.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )

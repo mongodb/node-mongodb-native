@@ -14,6 +14,7 @@ import {
   makeClientMetadata,
   MongoClient,
   MongoClientAuthProviders,
+  MongoDBResponse,
   MongoServerError,
   ns,
   ServerHeartbeatStartedEvent,
@@ -96,6 +97,48 @@ describe('Connection', function () {
           const hello = await conn?.command(ns('admin.$cmd'), { [LEGACY_HELLO_COMMAND]: 1 });
           expect(hello).to.have.property('ok', 1);
           expect(events).to.have.lengthOf(2);
+        } finally {
+          conn?.destroy();
+        }
+      }
+    });
+
+    afterEach(() => sinon.restore());
+
+    it('command monitoring event do not deserialize more than once', {
+      metadata: { requires: { apiVersion: false, topology: '!load-balanced' } },
+      test: async function () {
+        const connectOptions: ConnectionOptions = {
+          ...commonConnectOptions,
+          connectionType: Connection,
+          ...this.configuration.options,
+          monitorCommands: true,
+          metadata: makeClientMetadata({ driverInfo: {} }),
+          extendedMetadata: addContainerMetadata(makeClientMetadata({ driverInfo: {} }))
+        };
+
+        let conn;
+        try {
+          conn = await connect(connectOptions);
+
+          const toObjectSpy = sinon.spy(MongoDBResponse.prototype, 'toObject');
+
+          const events: any[] = [];
+          conn.on('commandStarted', event => events.push(event));
+          conn.on('commandSucceeded', event => events.push(event));
+          conn.on('commandFailed', event => events.push(event));
+
+          const hello = await conn.command(ns('admin.$cmd'), { ping: 1 });
+          expect(toObjectSpy).to.have.been.calledOnce;
+          expect(hello).to.have.property('ok', 1);
+          expect(events).to.have.lengthOf(2);
+
+          toObjectSpy.resetHistory();
+
+          const garbage = await conn.command(ns('admin.$cmd'), { garbage: 1 }).catch(e => e);
+          expect(toObjectSpy).to.have.been.calledOnce;
+          expect(garbage).to.have.property('ok', 0);
+          expect(events).to.have.lengthOf(4);
         } finally {
           conn?.destroy();
         }
