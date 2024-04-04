@@ -10,7 +10,7 @@ import {
   ListSearchIndexesCursor,
   type ListSearchIndexesOptions
 } from './cursor/list_search_indexes_cursor';
-import type { Db, DbOptions } from './db';
+import type { Db } from './db';
 import { MongoInvalidArgumentError } from './error';
 import type { MongoClient, PkFactory } from './mongo_client';
 import type {
@@ -101,14 +101,13 @@ export interface ModifyResult<TSchema = Document> {
 }
 
 /** @public */
-export interface CollectionOptions
-  extends BSONSerializeOptions,
-    WriteConcernOptions,
-    Pick<DbOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
+export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOptions {
   /** Specify a read concern for the collection. (only MongoDB 3.2 or higher supported) */
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
+  /** @internal */
+  timeoutMS?: number;
 }
 
 /** @internal */

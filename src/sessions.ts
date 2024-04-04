@@ -23,7 +23,7 @@ import {
   MongoTransactionError,
   MongoWriteConcernError
 } from './error';
-import type { MongoClient, MongoClientOptions, MongoOptions } from './mongo_client';
+import type { MongoClient, MongoOptions } from './mongo_client';
 import { TypedEventEmitter } from './mongo_types';
 import { executeOperation } from './operations/execute_operation';
 import { RunAdminCommandOperation } from './operations/run_command';
@@ -53,14 +53,18 @@ import { WriteConcern } from './write_concern';
 const minWireVersionForShardedTransactions = 8;
 
 /** @public */
-export interface ClientSessionOptions
-  extends Pick<MongoClientOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
+export interface ClientSessionOptions {
   /** Whether causal consistency should be enabled on this session */
   causalConsistency?: boolean;
   /** Whether all read operations should be read from the same snapshot for this session (NOTE: not compatible with `causalConsistency=true`) */
   snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
+  /** @internal */
+  timeoutMS?: number;
+  /** @internal
+   * The value of timeoutMS used for CSOT. Used to override client timeoutMS */
+  defaultTimeoutMS?: number;
 
   /** @internal */
   owner?: symbol | AbstractCursor;
@@ -168,6 +172,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
         );
       }
     }
+
+    options.timeoutMS ??= options.defaultTimeoutMS ?? client.options.timeoutMS;
 
     this.client = client;
     this.sessionPool = sessionPool;

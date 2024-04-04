@@ -1108,9 +1108,6 @@ export const OPTIONS = {
   timeoutMS: {
     type: 'uint'
   },
-  defaultTimeoutMS: {
-    type: 'uint'
-  },
   tls: {
     type: 'boolean'
   },

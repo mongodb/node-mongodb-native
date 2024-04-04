@@ -3,7 +3,6 @@ import type { Collection } from '../collection';
 import type { FindCursor } from '../cursor/find_cursor';
 import type { Db } from '../db';
 import { MongoRuntimeError } from '../error';
-import { type MongoClientOptions } from '../mongo_client';
 import { type Filter, TypedEventEmitter } from '../mongo_types';
 import type { ReadPreference } from '../read_preference';
 import type { Sort } from '../sort';
@@ -30,15 +29,15 @@ const DEFAULT_GRIDFS_BUCKET_OPTIONS: {
 };
 
 /** @public */
-export interface GridFSBucketOptions
-  extends WriteConcernOptions,
-    Pick<MongoClientOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
+export interface GridFSBucketOptions extends WriteConcernOptions {
   /** The 'files' and 'chunks' collections will be prefixed with the bucket name followed by a dot. */
   bucketName?: string;
   /** Number of bytes stored in each chunk. Defaults to 255KB */
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
+  /** @internal */
+  timeoutMS?: number;
 }
 
 /** @internal */

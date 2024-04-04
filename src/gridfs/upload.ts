@@ -8,7 +8,7 @@ import { type Callback, squashError } from '../utils';
 import type { WriteConcernOptions } from '../write_concern';
 import { WriteConcern } from './../write_concern';
 import type { GridFSFile } from './download';
-import type { GridFSBucket, GridFSBucketOptions } from './index';
+import type { GridFSBucket } from './index';
 
 /** @public */
 export interface GridFSChunk {
@@ -19,9 +19,7 @@ export interface GridFSChunk {
 }
 
 /** @public */
-export interface GridFSBucketWriteStreamOptions
-  extends WriteConcernOptions,
-    Pick<GridFSBucketOptions, 'timeoutMS' | 'defaultTimeoutMS'> {
+export interface GridFSBucketWriteStreamOptions extends WriteConcernOptions {
   /** Overwrite this bucket's chunkSizeBytes for this file */
   chunkSizeBytes?: number;
   /** Custom file id for the GridFS file. */
@@ -38,6 +36,8 @@ export interface GridFSBucketWriteStreamOptions
    * @deprecated Will be removed in the next major version. Add an aliases field to the metadata document instead.
    */
   aliases?: string[];
+  /** @internal */
+  timeoutMS?: number;
 }
 
 /**
