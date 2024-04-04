@@ -1232,28 +1232,4 @@ describe('MongoClient', function () {
       });
     });
   });
-
-  context('defaultTimeoutMS', function () {
-    context('when defaultTimeoutMS is negative', function () {
-      it('throws MongoParseError', function () {
-        expect(() => new MongoClient('mongodb://host', { defaultTimeoutMS: -1 })).to.throw(
-          MongoParseError
-        );
-      });
-    });
-
-    context('when defaultTimeoutMS is positive', function () {
-      it('sets the value on the MongoClient', function () {
-        const client = new MongoClient('mongodb://host', { defaultTimeoutMS: 1 });
-        expect(client.options.defaultTimeoutMS).to.equal(1);
-      });
-    });
-
-    context('when defaultTimeoutMS is zero', function () {
-      it('sets the value on the MongoClient', function () {
-        const client = new MongoClient('mongodb://host', { defaultTimeoutMS: 0 });
-        expect(client.options.defaultTimeoutMS).to.equal(0);
-      });
-    });
-  });
 });

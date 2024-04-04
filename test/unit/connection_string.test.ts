@@ -952,37 +952,6 @@ describe('Connection String', function () {
     }
   });
 
-  describe('when defaultTimeoutMS is provided as a client option', function () {
-    const connString = 'mongodb://host';
-    const types = ['number', 'bigint', 'Long'];
-    const values = [-100, 0, 100];
-
-    for (const type of types) {
-      describe(`when timeoutMS provided as a ${type}`, function () {
-        for (const v of values) {
-          const defaultTimeoutMS =
-            type === 'number' ? v : type === 'bigint' ? BigInt(v) : Long.fromNumber(v);
-          describe(`when timeoutMS is ${
-            v < 0 ? 'negative' : v > 0 ? 'positive' : 'zero'
-          }`, function () {
-            if (v >= 0) {
-              it('sets the value correctly as a number', function () {
-                const options = parseOptions(connString, { defaultTimeoutMS });
-                expect(options.defaultTimeoutMS).to.equal(v);
-              });
-            } else {
-              it('throws MongoParseError', function () {
-                expect(() => parseOptions(connString, { defaultTimeoutMS })).to.throw(
-                  MongoParseError
-                );
-              });
-            }
-          });
-        }
-      });
-    }
-  });
-
   describe('when timeoutMS is provided in the connection string', function () {
     const values = [-100, 0, 100];
     for (const v of values) {
@@ -994,27 +963,6 @@ describe('Connection String', function () {
           it('sets the value correctly as a number', function () {
             const options = parseOptions(connString);
             expect(options.timeoutMS).to.equal(v);
-          });
-        } else {
-          it('throws MongoParseError', function () {
-            expect(() => parseOptions(connString)).to.throw(MongoParseError);
-          });
-        }
-      });
-    }
-  });
-
-  describe('when defaultTimeoutMS is provided in the connection string', function () {
-    const values = [-100, 0, 100];
-    for (const v of values) {
-      const connString = `mongodb://host?defaultTimeoutMS=${v}`;
-      describe(`when defaultTimeoutMS is ${
-        v < 0 ? 'negative' : v > 0 ? 'positive' : 'zero'
-      }`, function () {
-        if (v >= 0) {
-          it('sets the value correctly as a number', function () {
-            const options = parseOptions(connString);
-            expect(options.defaultTimeoutMS).to.equal(v);
           });
         } else {
           it('throws MongoParseError', function () {
