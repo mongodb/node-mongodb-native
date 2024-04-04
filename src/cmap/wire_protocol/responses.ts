@@ -3,6 +3,11 @@ import { type ClusterTime } from '../../sdam/common';
 import { OnDemandDocument } from './on_demand/document';
 
 /** @internal */
+export type MongoDBResponseConstructor = {
+  new (bson: Uint8Array, offset?: number, isArray?: boolean): MongoDBResponse;
+};
+
+/** @internal */
 export class MongoDBResponse extends OnDemandDocument {
   // {ok:1}
   static empty = new MongoDBResponse(new Uint8Array([13, 0, 0, 0, 16, 111, 107, 0, 1, 0, 0, 0, 0]));

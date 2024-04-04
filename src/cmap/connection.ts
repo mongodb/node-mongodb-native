@@ -62,7 +62,7 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
-import { MongoDBResponse } from './wire_protocol/responses';
+import { MongoDBResponse, type MongoDBResponseConstructor } from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -416,7 +416,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendWire(
     message: WriteProtocolMessageType,
     options: CommandOptions,
-    responseType?: typeof MongoDBResponse
+    responseType?: MongoDBResponseConstructor
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
@@ -462,8 +462,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {},
-    responseType?: typeof MongoDBResponse
+    options: CommandOptions,
+    responseType?: MongoDBResponseConstructor
   ) {
     const message = this.prepareCommand(ns.db, command, options);
 
@@ -574,32 +574,24 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
-  public async command<T extends typeof MongoDBResponse>(
+  public async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
     responseType: T | undefined
-  ): Promise<T extends undefined ? Document : InstanceType<T>>;
+  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
 
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options?: undefined
+    options?: CommandOptions
   ): Promise<Document>;
-
-  public async command(
-    ns: MongoDBNamespace,
-    command: Document,
-    options: CommandOptions
-  ): Promise<Document>;
-
-  public async command(ns: MongoDBNamespace, command: Document): Promise<Document>;
 
   public async command(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions = {},
-    responseType?: typeof MongoDBResponse
+    responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.throwIfAborted();
     for await (const document of this.sendCommand(ns, command, options, responseType)) {
@@ -728,7 +720,7 @@ export class CryptoConnection extends Connection {
     this.autoEncrypter = options.autoEncrypter;
   }
 
-  public override async command<T extends typeof MongoDBResponse>(
+  public override async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
@@ -741,9 +733,7 @@ export class CryptoConnection extends Connection {
     options?: CommandOptions
   ): Promise<Document>;
 
-  public override async command(ns: MongoDBNamespace, command: Document): Promise<Document>;
-
-  override async command<T extends typeof MongoDBResponse>(
+  override async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
