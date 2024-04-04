@@ -67,20 +67,20 @@ export async function compress(
   switch (options.agreedCompressor) {
     case 'snappy': {
       Snappy ??= loadSnappy();
-      return Snappy.compress(dataToBeCompressed);
+      return await Snappy.compress(dataToBeCompressed);
     }
     case 'zstd': {
       loadZstd();
       if ('kModuleError' in zstd) {
         throw zstd['kModuleError'];
       }
-      return zstd.compress(dataToBeCompressed, ZSTD_COMPRESSION_LEVEL);
+      return await zstd.compress(dataToBeCompressed, ZSTD_COMPRESSION_LEVEL);
     }
     case 'zlib': {
       if (options.zlibCompressionLevel) {
         zlibOptions.level = options.zlibCompressionLevel;
       }
-      return zlibDeflate(dataToBeCompressed, zlibOptions);
+      return await zlibDeflate(dataToBeCompressed, zlibOptions);
     }
     default: {
       throw new MongoInvalidArgumentError(
@@ -106,17 +106,17 @@ export async function decompress(compressorID: number, compressedData: Buffer): 
   switch (compressorID) {
     case Compressor.snappy: {
       Snappy ??= loadSnappy();
-      return Snappy.uncompress(compressedData, { asBuffer: true });
+      return await Snappy.uncompress(compressedData, { asBuffer: true });
     }
     case Compressor.zstd: {
       loadZstd();
       if ('kModuleError' in zstd) {
         throw zstd['kModuleError'];
       }
-      return zstd.decompress(compressedData);
+      return await zstd.decompress(compressedData);
     }
     case Compressor.zlib: {
-      return zlibInflate(compressedData);
+      return await zlibInflate(compressedData);
     }
     default: {
       return compressedData;

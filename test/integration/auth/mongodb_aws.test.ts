@@ -5,29 +5,26 @@ import * as http from 'http';
 import { performance } from 'perf_hooks';
 import * as sinon from 'sinon';
 
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports
+import { refreshKMSCredentials } from '../../../src/client-side-encryption/providers';
 import {
+  AWSTemporaryCredentialProvider,
   MongoAWSError,
   type MongoClient,
   MongoDBAWS,
   MongoMissingCredentialsError,
-  MongoServerError
+  MongoServerError,
+  setDifference
 } from '../../mongodb';
 
-function awsSdk() {
-  try {
-    return require('@aws-sdk/credential-providers');
-  } catch {
-    return null;
-  }
-}
+const isMongoDBAWSAuthEnvironment = (process.env.MONGODB_URI ?? '').includes('MONGODB-AWS');
 
 describe('MONGODB-AWS', function () {
   let awsSdkPresent;
   let client: MongoClient;
 
   beforeEach(function () {
-    const MONGODB_URI = process.env.MONGODB_URI;
-    if (!MONGODB_URI || MONGODB_URI.indexOf('MONGODB-AWS') === -1) {
+    if (!isMongoDBAWSAuthEnvironment) {
       this.currentTest.skipReason = 'requires MONGODB_URI to contain MONGODB-AWS auth mechanism';
       return this.skip();
     }
@@ -38,7 +35,7 @@ describe('MONGODB-AWS', function () {
       `Always inform the AWS tests if they run with or without the SDK (MONGODB_AWS_SDK=${MONGODB_AWS_SDK})`
     ).to.include(MONGODB_AWS_SDK);
 
-    awsSdkPresent = !!awsSdk();
+    awsSdkPresent = AWSTemporaryCredentialProvider.isAWSSDKInstalled;
     expect(
       awsSdkPresent,
       MONGODB_AWS_SDK === 'true'
@@ -243,8 +240,10 @@ describe('MONGODB-AWS', function () {
 
         const envCheck = () => {
           const { AWS_WEB_IDENTITY_TOKEN_FILE = '' } = process.env;
-          credentialProvider = awsSdk();
-          return AWS_WEB_IDENTITY_TOKEN_FILE.length === 0 || credentialProvider == null;
+          return (
+            AWS_WEB_IDENTITY_TOKEN_FILE.length === 0 ||
+            !AWSTemporaryCredentialProvider.isAWSSDKInstalled
+          );
         };
 
         beforeEach(function () {
@@ -253,6 +252,9 @@ describe('MONGODB-AWS', function () {
             this.skipReason = 'only relevant to AssumeRoleWithWebIdentity with SDK installed';
             return this.skip();
           }
+
+          // @ts-expect-error We intentionally access a protected variable.
+          credentialProvider = AWSTemporaryCredentialProvider.awsSDK;
 
           storedEnv = process.env;
           if (test.env.AWS_STS_REGIONAL_ENDPOINTS === undefined) {
@@ -268,7 +270,8 @@ describe('MONGODB-AWS', function () {
 
           numberOfFromNodeProviderChainCalls = 0;
 
-          MongoDBAWS.credentialProvider = {
+          // @ts-expect-error We intentionally access a protected variable.
+          AWSTemporaryCredentialProvider._awsSDK = {
             fromNodeProviderChain(...args) {
               calledArguments = args;
               numberOfFromNodeProviderChainCalls += 1;
@@ -289,7 +292,8 @@ describe('MONGODB-AWS', function () {
           if (typeof storedEnv.AWS_STS_REGIONAL_ENDPOINTS === 'string') {
             process.env.AWS_REGION = storedEnv.AWS_REGION;
           }
-          MongoDBAWS.credentialProvider = credentialProvider;
+          // @ts-expect-error We intentionally access a protected variable.
+          AWSTemporaryCredentialProvider._awsSDK = credentialProvider;
           calledArguments = [];
         });
 
@@ -319,5 +323,51 @@ describe('MONGODB-AWS', function () {
         });
       });
     }
+  });
+});
+
+describe('AWS KMS Credential Fetching', function () {
+  context('when the AWS SDK is not installed', function () {
+    beforeEach(function () {
+      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
+        ? 'Test must run in an AWS auth testing environment'
+        : AWSTemporaryCredentialProvider.isAWSSDKInstalled
+        ? 'This test must run in an environment where the AWS SDK is not installed.'
+        : undefined;
+      this.currentTest?.skipReason && this.skip();
+    });
+    it('fetching AWS KMS credentials throws an error', async function () {
+      const error = await refreshKMSCredentials({ aws: {} }).catch(e => e);
+      expect(error).to.be.instanceOf(MongoAWSError);
+    });
+  });
+
+  context('when the AWS SDK is installed', function () {
+    beforeEach(function () {
+      this.currentTest.skipReason = !isMongoDBAWSAuthEnvironment
+        ? 'Test must run in an AWS auth testing environment'
+        : !AWSTemporaryCredentialProvider.isAWSSDKInstalled
+        ? 'This test must run in an environment where the AWS SDK is installed.'
+        : undefined;
+      this.currentTest?.skipReason && this.skip();
+    });
+    it('KMS credentials are successfully fetched.', async function () {
+      const { aws } = await refreshKMSCredentials({ aws: {} });
+
+      expect(aws).to.have.property('accessKeyId');
+      expect(aws).to.have.property('secretAccessKey');
+    });
+
+    it('does not return any extra keys for the `aws` credential provider', async function () {
+      const { aws } = await refreshKMSCredentials({ aws: {} });
+
+      const keys = new Set(Object.keys(aws ?? {}));
+      const allowedKeys = ['accessKeyId', 'secretAccessKey', 'sessionToken'];
+
+      expect(
+        Array.from(setDifference(keys, allowedKeys)),
+        'received an unexpected key in the response refreshing KMS credentials'
+      ).to.deep.equal([]);
+    });
   });
 });

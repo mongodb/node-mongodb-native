@@ -143,7 +143,6 @@ describe('Connection String', function () {
       });
     });
 
-    // TODO(NODE-4172): align uri behavior with object options behavior
     context('when set in the uri', () => {
       it('should parse a string value', () => {
         const options = parseOptions('mongodb://localhost?ca=hello', {});

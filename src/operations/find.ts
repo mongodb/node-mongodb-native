@@ -111,7 +111,7 @@ export class FindOperation extends CommandOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    return server.command(this.ns, findCommand, {
+    return await server.command(this.ns, findCommand, {
       ...this.options,
       ...this.bsonOptions,
       documentsReturnedIn: 'firstBatch',

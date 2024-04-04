@@ -1,11 +1,19 @@
+import { once } from 'node:events';
 import * as net from 'node:net';
 
 import { expect } from 'chai';
-import { coerce } from 'semver';
+import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 import { setTimeout } from 'timers';
+import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
-import { MongoClient } from '../../mongodb';
+import {
+  Long,
+  MongoClient,
+  ObjectId,
+  RTTSampler,
+  ServerHeartbeatSucceededEvent
+} from '../../mongodb';
 import {
   isHello,
   LEGACY_HELLO_COMMAND,
@@ -49,16 +57,16 @@ describe('monitoring', function () {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
-    const { major } = coerce(process.version);
     const failingTests = [
       'should connect and issue an initial server check',
       'should ignore attempts to connect when not already closed',
       'should not initiate another check if one is in progress',
       'should not close the monitor on a failed heartbeat',
-      'should upgrade to hello from legacy hello when initial handshake contains helloOk'
+      'should upgrade to hello from legacy hello when initial handshake contains helloOk',
+      'correctly returns the mean of the heartbeat durations'
     ];
     test.skipReason =
-      (major === 18 || major === 20) && failingTests.includes(test.title)
+      satisfies(process.version, '>=18.0.0') && failingTests.includes(test.title)
         ? 'TODO(NODE-5666): fix failing unit tests on Node18'
         : undefined;
 
@@ -141,7 +149,7 @@ describe('monitoring', function () {
   }).skipReason = 'TODO(NODE-3600): Unskip flaky tests';
 
   describe('Monitor', function () {
-    let monitor;
+    let monitor: Monitor | null;
 
     beforeEach(() => {
       monitor = null;
@@ -153,7 +161,7 @@ describe('monitoring', function () {
       }
     });
 
-    it('should connect and issue an initial server check', function (done) {
+    it('should connect and issue an initial server check', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -164,15 +172,17 @@ describe('monitoring', function () {
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => {
-        expect(monitor.connection).to.have.property('id', '<monitor>');
-        done();
-      });
+      const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
+      const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
+
+      const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
+
+      expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
+      expect(monitor.connection).to.have.property('id', '<monitor>');
     });
 
-    it('should ignore attempts to connect when not already closed', function (done) {
+    it('should ignore attempts to connect when not already closed', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -183,13 +193,17 @@ describe('monitoring', function () {
       const server = new MockServer(mockServer.address());
       monitor = new Monitor(server as any, {} as any);
 
-      monitor.on('serverHeartbeatFailed', () => done(new Error('unexpected heartbeat failure')));
-      monitor.on('serverHeartbeatSucceeded', () => done());
+      const heartbeatFailed = once(monitor, 'serverHeartbeatFailed');
+      const heartbeatSucceeded = once(monitor, 'serverHeartbeatSucceeded');
       monitor.connect();
+
+      const res = await Promise.race([heartbeatFailed, heartbeatSucceeded]);
+
+      expect(res[0]).to.be.instanceOf(ServerHeartbeatSucceededEvent);
       monitor.connect();
     });
 
-    it('should not initiate another check if one is in progress', function (done) {
+    it('should not initiate another check if one is in progress', async function () {
       mockServer.setMessageHandler(request => {
         const doc = request.document;
         if (isHello(doc)) {
@@ -202,32 +216,27 @@ describe('monitoring', function () {
 
       const startedEvents: ServerHeartbeatStartedEvent[] = [];
       monitor.on('serverHeartbeatStarted', event => startedEvents.push(event));
-      monitor.on('close', () => {
-        expect(startedEvents).to.have.length(2);
-        done();
-      });
+      const monitorClose = once(monitor, 'close');
 
       monitor.connect();
-      monitor.once('serverHeartbeatSucceeded', () => {
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
-        monitor.requestCheck();
+      await once(monitor, 'serverHeartbeatSucceeded');
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
+      monitor.requestCheck();
 
-        const minHeartbeatFrequencyMS = 500;
-        setTimeout(() => {
-          // wait for minHeartbeatFrequencyMS, then request a check and verify another check occurred
-          monitor.once('serverHeartbeatSucceeded', () => {
-            monitor.close();
-          });
+      const minHeartbeatFrequencyMS = 500;
+      await setTimeoutPromise(minHeartbeatFrequencyMS);
 
-          monitor.requestCheck();
-        }, minHeartbeatFrequencyMS);
-      });
+      await once(monitor, 'serverHeartbeatSucceeded');
+      monitor.close();
+
+      await monitorClose;
+      expect(startedEvents).to.have.length(2);
     });
 
-    it('should not close the monitor on a failed heartbeat', function (done) {
+    it('should not close the monitor on a failed heartbeat', async function () {
       let helloCount = 0;
       mockServer.setMessageHandler(request => {
         const doc = request.document;
@@ -263,16 +272,13 @@ describe('monitoring', function () {
       let successCount = 0;
       monitor.on('serverHeartbeatSucceeded', () => {
         if (successCount++ === 2) {
-          monitor.close();
+          monitor?.close();
         }
       });
 
-      monitor.on('close', () => {
-        expect(events).to.have.length(2);
-        done();
-      });
-
       monitor.connect();
+      await once(monitor, 'close');
+      expect(events).to.have.length(2);
     });
 
     it('should upgrade to hello from legacy hello when initial handshake contains helloOk', function (done) {
@@ -305,6 +311,52 @@ describe('monitoring', function () {
           monitor.requestCheck();
         }, minHeartbeatFrequencyMS);
       });
+    });
+
+    describe('roundTripTime', function () {
+      const table = [
+        {
+          serverMonitoringMode: 'stream',
+          topologyVersion: {
+            processId: new ObjectId(),
+            counter: new Long(0, 0)
+          }
+        },
+        { serverMonitoringMode: 'poll', topologyVersion: undefined }
+      ];
+      for (const { serverMonitoringMode, topologyVersion } of table) {
+        context(`when serverMonitoringMode = ${serverMonitoringMode}`, () => {
+          context('when more than one heartbeatSucceededEvent has been captured', () => {
+            let heartbeatDurationMS = 100;
+            it('correctly returns the mean of the heartbeat durations', async () => {
+              mockServer.setMessageHandler(request => {
+                setTimeout(
+                  () => request.reply(Object.assign({ helloOk: true }, mock.HELLO)),
+                  heartbeatDurationMS
+                );
+                heartbeatDurationMS += 100;
+              });
+              const server = new MockServer(mockServer.address());
+              if (topologyVersion) server.description.topologyVersion = topologyVersion;
+              monitor = new Monitor(server as any, { serverMonitoringMode } as any);
+              monitor.connect();
+
+              for (let i = 0; i < 5; i++) {
+                await once(monitor, 'serverHeartbeatSucceeded');
+                monitor.requestCheck();
+              }
+
+              const avgRtt = monitor.roundTripTime;
+              // expected avgRtt = (100 + 200 + 300 + 400 + 500)/5 = 300ms
+              // avgRtt will strictly be greater than 300ms since setTimeout sets a minimum
+              // delay from the time of scheduling to the time of callback execution
+              expect(avgRtt).to.be.within(300, 350);
+
+              monitor.close();
+            });
+          });
+        });
+      }
     });
   });
 
@@ -616,6 +668,152 @@ describe('monitoring', function () {
       const maybeError = await client.connect().catch(e => e);
       expect(maybeError).to.be.instanceOf(Error);
       expect(serverHeartbeatFailed).to.have.property('duration').that.is.lessThan(20); // way less than 80ms
+    });
+  });
+
+  describe('class RTTSampler', () => {
+    describe('constructor', () => {
+      it('Constructs a Float64 array of length windowSize', () => {
+        const sampler = new RTTSampler(10);
+        // @ts-expect-error Accessing internal state
+        expect(sampler.rttSamples).to.have.length(10);
+      });
+    });
+
+    describe('addSample', () => {
+      context('when length < windowSize', () => {
+        it('increments the length', () => {
+          const sampler = new RTTSampler(10);
+          expect(sampler).to.have.property('length', 0);
+
+          sampler.addSample(1);
+
+          expect(sampler).to.have.property('length', 1);
+        });
+      });
+      context('when length === windowSize', () => {
+        let sampler: RTTSampler;
+        const size = 10;
+
+        beforeEach(() => {
+          sampler = new RTTSampler(size);
+          for (let i = 1; i <= size; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('does not increment the length', () => {
+          sampler.addSample(size + 1);
+          expect(sampler).to.have.property('length', size);
+        });
+
+        it('overwrites the oldest element', () => {
+          sampler.addSample(size + 1);
+          // @ts-expect-error Accessing internal state
+          for (const el of sampler.rttSamples) {
+            if (el === 1) expect.fail('Did not overwrite oldest element');
+          }
+        });
+
+        it('appends the new element to the end of the window', () => {
+          sampler.addSample(size + 1);
+          expect(sampler.last).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('min()', () => {
+      context('when length < 2', () => {
+        it('returns 0', () => {
+          const sampler = new RTTSampler(10);
+          // length 0
+          expect(sampler.min()).to.equal(0);
+
+          sampler.addSample(1);
+          // length 1
+          expect(sampler.min()).to.equal(0);
+        });
+      });
+
+      context('when 2 <= length < windowSize', () => {
+        let sampler: RTTSampler;
+        beforeEach(() => {
+          sampler = new RTTSampler(10);
+          for (let i = 1; i <= 3; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(sampler.min()).to.equal(1);
+        });
+      });
+
+      context('when length == windowSize', () => {
+        let sampler: RTTSampler;
+        const size = 10;
+
+        beforeEach(() => {
+          sampler = new RTTSampler(size);
+          for (let i = 1; i <= size * 2; i++) {
+            sampler.addSample(i);
+          }
+        });
+
+        it('correctly computes the minimum', () => {
+          expect(sampler.min()).to.equal(size + 1);
+        });
+      });
+    });
+
+    describe('average()', () => {
+      it('correctly computes the mean', () => {
+        const sampler = new RTTSampler(10);
+        let sum = 0;
+
+        for (let i = 1; i <= 10; i++) {
+          sum += i;
+          sampler.addSample(i);
+        }
+
+        expect(sampler.average()).to.equal(sum / 10);
+      });
+    });
+
+    describe('last', () => {
+      context('when length == 0', () => {
+        it('returns null', () => {
+          const sampler = new RTTSampler(10);
+          expect(sampler.last).to.be.null;
+        });
+      });
+
+      context('when length > 0', () => {
+        it('returns the most recently inserted element', () => {
+          const sampler = new RTTSampler(10);
+          for (let i = 0; i < 11; i++) {
+            sampler.addSample(i);
+          }
+          expect(sampler.last).to.equal(10);
+        });
+      });
+    });
+
+    describe('clear', () => {
+      let sampler: RTTSampler;
+
+      beforeEach(() => {
+        sampler = new RTTSampler(10);
+        for (let i = 0; i < 20; i++) {
+          sampler.addSample(i);
+        }
+        expect(sampler).to.have.property('length', 10);
+      });
+
+      it('sets length to 0', () => {
+        sampler.clear();
+        expect(sampler).to.have.property('length', 0);
+      });
     });
   });
 });

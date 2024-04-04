@@ -8,7 +8,6 @@ const filter = ({ description }) => {
     // Verified they use the same connection but the Node implementation executes
     // a getMore before the killCursors even though the stream is immediately
     // closed.
-    // TODO(NODE-3970): implement and reference a node specific integration test for this
     return 'TODO(NODE-3970): implement and reference a node specific integration test for this';
   }
 
