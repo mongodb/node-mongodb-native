@@ -15,9 +15,9 @@ export class MongoDBResponse extends OnDemandDocument {
   /** Indicates this document is a server error */
   public get isError() {
     let isError = this.ok === 0;
-    isError ||= this.has('$err');
     isError ||= this.has('errmsg');
     isError ||= this.has('code');
+    isError ||= this.has('$err'); // The '$err' field is used in OP_REPLY responses
     return isError;
   }
 
