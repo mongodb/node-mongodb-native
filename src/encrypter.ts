@@ -130,7 +130,7 @@ export class Encrypter {
         'Auto-encryption requested, but the module is not installed. ' +
           'Please add `mongodb-client-encryption` as a dependency of your project',
         {
-          cause: mongodbClientEncryption['kModuleError'].cause,
+          cause: mongodbClientEncryption['kModuleError'],
           dependencyName: 'mongodb-client-encryption'
         }
       );
