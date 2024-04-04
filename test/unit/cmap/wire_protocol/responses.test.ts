@@ -14,6 +14,21 @@ describe('class MongoDBResponse', () => {
       expect(doc.isError).to.be.true;
     });
 
+    it('returns true when $err is defined', () => {
+      const doc = new MongoDBResponse(BSON.serialize({ $err: 0 }));
+      expect(doc.isError).to.be.true;
+    });
+
+    it('returns true when errmsg is defined', () => {
+      const doc = new MongoDBResponse(BSON.serialize({ errmsg: 0 }));
+      expect(doc.isError).to.be.true;
+    });
+
+    it('returns true when code is defined', () => {
+      const doc = new MongoDBResponse(BSON.serialize({ code: 0 }));
+      expect(doc.isError).to.be.true;
+    });
+
     it('short circuits detection of $err, errmsg, code', () => {
       const doc = new MongoDBResponse(BSON.serialize({ ok: 0 }));
       expect(doc.isError).to.be.true;

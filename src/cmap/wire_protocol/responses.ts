@@ -38,8 +38,7 @@ export class MongoDBResponse extends OnDemandDocument {
   public get atClusterTime(): Timestamp | null {
     return (
       this.get('cursor', BSONType.object)?.get('atClusterTime', BSONType.timestamp) ??
-      this.get('atClusterTime', BSONType.timestamp) ??
-      null
+      this.get('atClusterTime', BSONType.timestamp)
     );
   }
 

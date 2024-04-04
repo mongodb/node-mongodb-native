@@ -416,7 +416,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendWire(
     message: WriteProtocolMessageType,
     options: CommandOptions,
-    returnAs?: typeof MongoDBResponse
+    responseType?: typeof MongoDBResponse
   ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
@@ -443,7 +443,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
-        const document = new (returnAs ?? MongoDBResponse)(bson, 0, false);
+        const document = new (responseType ?? MongoDBResponse)(bson, 0, false);
 
         yield document;
         this.throwIfAborted();
@@ -463,7 +463,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions = {},
-    returnAs?: typeof MongoDBResponse
+    responseType?: typeof MongoDBResponse
   ) {
     const message = this.prepareCommand(ns.db, command, options);
 
@@ -482,7 +482,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     let document;
     try {
       this.throwIfAborted();
-      for await (document of this.sendWire(message, options, returnAs)) {
+      for await (document of this.sendWire(message, options, responseType)) {
         if (options.session != null) {
           updateSessionFromResponse(options.session, document);
         }
@@ -520,7 +520,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
           );
         }
 
-        if (returnAs == null) {
+        if (responseType == null) {
           // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
           // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
           const bsonOptions =
@@ -578,7 +578,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
-    returnAs: T | undefined
+    responseType: T | undefined
   ): Promise<T extends undefined ? Document : InstanceType<T>>;
 
   public async command(
@@ -599,10 +599,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions = {},
-    returnAs?: typeof MongoDBResponse
+    responseType?: typeof MongoDBResponse
   ): Promise<Document> {
     this.throwIfAborted();
-    for await (const document of this.sendCommand(ns, command, options, returnAs)) {
+    for await (const document of this.sendCommand(ns, command, options, responseType)) {
       return document;
     }
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
@@ -732,7 +732,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     command: Document,
     options: CommandOptions | undefined,
-    returnAs: T
+    responseType: T
   ): Promise<InstanceType<T>>;
 
   public override async command(
@@ -747,7 +747,7 @@ export class CryptoConnection extends Connection {
     ns: MongoDBNamespace,
     cmd: Document,
     options?: CommandOptions,
-    returnAs?: T | undefined
+    responseType?: T | undefined
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
@@ -757,7 +757,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return await super.command<T>(ns, cmd, options, returnAs);
+      return await super.command<T>(ns, cmd, options, responseType);
     }
 
     if (serverWireVersion < 8) {
@@ -791,7 +791,7 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const response = await super.command<T>(ns, encrypted, options, returnAs);
+    const response = await super.command<T>(ns, encrypted, options, responseType);
 
     return await autoEncrypter.decrypt(response, options);
   }
