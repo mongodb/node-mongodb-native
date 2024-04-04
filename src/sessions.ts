@@ -135,6 +135,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   [kPinnedConnection]?: Connection;
   /** @internal */
   [kTxnNumberIncrement]: number;
+  /** @internal */
+  timeoutMS?: number;
 
   /**
    * Create a client session.
@@ -173,12 +175,11 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
       }
     }
 
-    options.timeoutMS ??= options.defaultTimeoutMS ?? client.options.timeoutMS;
-
     this.client = client;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
+    this.timeoutMS = options.defaultTimeoutMS ?? client.options?.timeoutMS;
 
     this.explicit = !!options.explicit;
     this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
