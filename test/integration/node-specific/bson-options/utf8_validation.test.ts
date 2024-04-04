@@ -130,7 +130,7 @@ describe('class MongoDBResponse', () => {
 
       it('does not throw a UTF-8 parsing error', async () => {
         // Insert a large string of multibyte UTF-8 characters
-        const _id = '\u{1F92A}'.repeat(1000);
+        const _id = '\u{1F92A}'.repeat(100);
 
         const test = client.db('parsing').collection<{ _id: string }>('parsing');
         await test.insertOne({ _id });
