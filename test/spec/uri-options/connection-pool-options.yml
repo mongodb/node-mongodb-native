@@ -65,4 +65,3 @@ tests:
       hosts: ~
       auth: ~
       options: {}
-      
