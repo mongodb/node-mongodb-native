@@ -1,4 +1,4 @@
-import { expectAssignable, expectDocCommentIncludes, expectError, expectType } from 'tsd';
+import { expectAssignable, expectError, expectType } from 'tsd';
 
 import type { Binary, ClientSession, ClusterTime, Long, Timestamp } from '../mongodb';
 import { MongoClient, ReadConcern, ReadConcernLevel } from '../mongodb';
@@ -29,5 +29,5 @@ expectError(await client.withSession(() => null));
 declare const ct: ClusterTime;
 expectType<Timestamp>(ct.clusterTime);
 expectAssignable<ClusterTime['signature']>(undefined);
-expectType<Binary>(ct.signature?.hash);
-expectType<Long>(ct.signature?.keyId);
+expectType<Binary | undefined>(ct.signature?.hash);
+expectType<Long | undefined>(ct.signature?.keyId);
