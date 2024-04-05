@@ -1,4 +1,5 @@
 import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '../bson';
+import { MongoInvalidArgumentError } from '../error';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -35,7 +36,7 @@ export interface OperationOptions extends BSONSerializeOptions {
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
 
-  /** @internal */
+  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
 
@@ -72,6 +73,11 @@ export abstract class AbstractOperation<TResult = any> {
     this.bsonOptions = resolveBSONOptions(options);
 
     this[kSession] = options.session != null ? options.session : undefined;
+    if (options?.session?.explicit && options?.session?.timeoutMS != null && options.timeoutMS) {
+      throw new MongoInvalidArgumentError(
+        'Do not specify timeoutMS on operation if already specified on an explicit session'
+      );
+    }
 
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
