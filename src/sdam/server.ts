@@ -175,7 +175,8 @@ export class Server extends TypedEventEmitter<ServerEvents> {
       this.emit(
         Server.DESCRIPTION_RECEIVED,
         new ServerDescription(this.description.hostAddress, event.reply, {
-          roundTripTime: calculateRoundTripTime(this.description.roundTripTime, event.duration)
+          roundTripTime: this.monitor?.roundTripTime,
+          minRoundTripTime: this.monitor?.minRoundTripTime
         })
       );
 
@@ -465,15 +466,6 @@ export class Server extends TypedEventEmitter<ServerEvents> {
   private incrementOperationCount(): number {
     return (this.s.operationCount += 1);
   }
-}
-
-function calculateRoundTripTime(oldRtt: number, duration: number): number {
-  if (oldRtt === -1) {
-    return duration;
-  }
-
-  const alpha = 0.2;
-  return alpha * duration + (1 - alpha) * oldRtt;
 }
 
 function markServerUnknown(server: Server, error?: MongoError) {

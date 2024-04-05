@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import * as dns from 'dns';
 import { once } from 'events';
-import { coerce } from 'semver';
+import { satisfies } from 'semver';
 import * as sinon from 'sinon';
 
 import {
@@ -51,11 +51,9 @@ describe('Polling Srv Records for Mongos Discovery', () => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const test = this.currentTest!;
 
-    const { major } = coerce(process.version);
-    test.skipReason =
-      major === 18 || major === 20
-        ? 'TODO(NODE-5666): fix failing unit tests on Node18'
-        : undefined;
+    test.skipReason = satisfies(process.version, '>=18.0.0')
+      ? `TODO(NODE-5666): fix failing unit tests on Node18 (Running with Nodejs ${process.version})`
+      : undefined;
 
     if (test.skipReason) this.skip();
   });
