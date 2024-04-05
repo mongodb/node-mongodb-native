@@ -36,7 +36,7 @@ export interface GridFSBucketOptions extends WriteConcernOptions {
   chunkSizeBytes?: number;
   /** Read preference to be passed to read operations */
   readPreference?: ReadPreference;
-  /** @internal */
+  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
 

@@ -28,7 +28,7 @@ export interface GridFSBucketReadStreamOptions {
    * to be returned by the stream. `end` is non-inclusive
    */
   end?: number;
-  /** @internal */
+  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
 

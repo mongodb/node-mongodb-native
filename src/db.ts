@@ -95,7 +95,7 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   readConcern?: ReadConcern;
   /** Should retry failed writes */
   retryWrites?: boolean;
-  /** @internal */
+  /** @internal TODO(NODE-5688): make this public */
   timeoutMS?: number;
 }
 
