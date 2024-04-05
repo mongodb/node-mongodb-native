@@ -21,64 +21,80 @@ describe('Search Index Management Integration Tests', function () {
     });
 
     context('when listSearchIndexes operation is run withTransaction', function () {
-      it.skip('should not include write concern or read concern in command', async function () {
-        await client.withSession(session => {
-          return session.withTransaction(
-            async () => {
-              expect(session.transaction.isStarting).to.equal(true);
-              expect(session.transaction.isActive).to.equal(true);
-              try {
-                const res = collection.listSearchIndexes({ session });
-                await res.toArray();
-              } catch (e) {
-                expect(e.errmsg).to.match(/^.*Atlas.*$/);
-              } finally {
-                expect(commandStartedEvents[0]).to.exist;
-                expect(commandStartedEvents[0].command.readConcern).to.not.exist;
-                expect(commandStartedEvents[0].command.writeConcern).to.not.exist;
-              }
-            },
-            { readConcern: 'local', writeConcern: { w: 1 } }
-          );
-        });
-      }).skipReason =
-        'TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers';
+      // TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers
+      it('should include write concern or read concern in command - TODO(NODE-6047)', {
+        metadata: {
+          requires: {
+            topology: '!single',
+            mongodb: '>=7.0',
+            serverless: 'forbid'
+          }
+        },
+        test: async function () {
+          let res;
+          await client.withSession(async session => {
+            await session
+              .withTransaction(
+                async function (session) {
+                  res = collection.listSearchIndexes({ session });
+                  await res.toArray();
+                },
+                { readConcern: 'local', writeConcern: { w: 1 } }
+              )
+              .catch(e => e);
+            // expect(e.errmsg).to.match(/^.*Atlas.*$/) - uncomment after NODE-6047
+            expect(commandStartedEvents[0]).to.exist;
+            // flip assertion after NODE-6047 implementation
+            expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
+            expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
+          });
+        }
+      });
     });
 
     context('when listSearchIndexes operation is run with causalConsistency', function () {
-      it.skip('should not include write concern or read concern in command', async function () {
-        await client.withSession({ causalConsistency: true }, async session => {
-          try {
-            const res = collection.listSearchIndexes({ session });
-            await res.toArray();
-          } catch (e) {
-            expect(e.errmsg).to.match(/^.*Atlas.*$/);
-          } finally {
-            expect(commandStartedEvents[0]).to.exist;
-            expect(commandStartedEvents[0].command.readConcern).to.not.exist;
-            expect(commandStartedEvents[0].command.writeConcern).to.not.exist;
+      it('should not include write concern or read concern in command', {
+        metadata: {
+          requires: {
+            topology: '!single',
+            mongodb: '>=7.0',
+            serverless: 'forbid'
           }
-        });
-      }).skipReason =
-        'TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers';
+        },
+        test: async function () {
+          await client.withSession({ causalConsistency: true }, async session => {
+            const res = collection.listSearchIndexes({ session });
+            await res.toArray().catch(e => expect(e.errmsg).to.match(/^.*Atlas.*$/));
+            expect(commandStartedEvents[0]).to.exist;
+            expect(commandStartedEvents[0]?.command?.readConcern).to.not.exist;
+            expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
+          });
+        }
+      });
     });
 
     context('when listSearchIndexes operation is run with snapshot on', function () {
-      it.skip('should not include write concern or read concern in command', async function () {
-        await client.withSession({ snapshot: true }, async session => {
-          try {
-            const res = collection.listSearchIndexes({ session });
-            await res.toArray();
-          } catch (e) {
-            expect(e.errmsg).to.match(/^.*Atlas.*$/);
-          } finally {
-            expect(commandStartedEvents[0]).to.exist;
-            expect(commandStartedEvents[0].command.readConcern).to.not.exist;
-            expect(commandStartedEvents[0].command.writeConcern).to.not.exist;
+      // TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers
+      it('should include write concern or read concern in command - TODO(NODE-6047)', {
+        metadata: {
+          requires: {
+            topology: ['replicaset', 'sharded'],
+            mongodb: '>=7.0',
+            serverless: 'forbid'
           }
-        });
-      }).skipReason =
-        'TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers';
+        },
+        test: async function () {
+          await client.withSession({ snapshot: true }, async session => {
+            const res = collection.listSearchIndexes({ session });
+            await res.toArray().catch(e => e);
+            // expect(e.errmsg).to.match(/^.*Atlas.*$/) - uncomment after NODE-6047
+            expect(commandStartedEvents[0]).to.exist;
+            // flip assertion after NODE-6047 implementation
+            expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
+            expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
+          });
+        }
+      });
     });
   });
 });
