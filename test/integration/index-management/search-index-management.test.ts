@@ -33,7 +33,7 @@ describe('Search Index Management Integration Tests', function () {
         test: async function () {
           let res;
           await client.withSession(async session => {
-            await session
+            const error = await session
               .withTransaction(
                 async function (session) {
                   res = collection.listSearchIndexes({ session });
@@ -42,7 +42,7 @@ describe('Search Index Management Integration Tests', function () {
                 { readConcern: 'local', writeConcern: { w: 1 } }
               )
               .catch(e => e);
-            // expect(e.errmsg).to.match(/^.*Atlas.*$/) - uncomment after NODE-6047
+            expect(error.errmsg).to.match(/^.*Atlas.*$/);
             expect(commandStartedEvents[0]).to.exist;
             // flip assertion after NODE-6047 implementation
             expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
@@ -86,8 +86,8 @@ describe('Search Index Management Integration Tests', function () {
         test: async function () {
           await client.withSession({ snapshot: true }, async session => {
             const res = collection.listSearchIndexes({ session });
-            await res.toArray().catch(e => e);
-            // expect(e.errmsg).to.match(/^.*Atlas.*$/) - uncomment after NODE-6047
+            const error = await res.toArray().catch(e => e);
+            expect(error.errmsg).to.match(/^.*snapshot.*$/);
             expect(commandStartedEvents[0]).to.exist;
             // flip assertion after NODE-6047 implementation
             expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
