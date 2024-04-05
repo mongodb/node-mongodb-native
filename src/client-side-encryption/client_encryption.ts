@@ -315,7 +315,7 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    return this._keyVaultClient
+    return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
       .deleteOne({ _id }, { writeConcern: { w: 'majority' } });
@@ -364,7 +364,7 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    return this._keyVaultClient
+    return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
       .findOne({ _id }, { readConcern: { level: 'majority' } });
@@ -391,7 +391,7 @@ export class ClientEncryption {
       this._keyVaultNamespace
     );
 
-    return this._keyVaultClient
+    return await this._keyVaultClient
       .db(dbName)
       .collection<DataKey>(collectionName)
       .findOne({ keyAltNames: keyAltName }, { readConcern: { level: 'majority' } });
@@ -589,7 +589,7 @@ export class ClientEncryption {
    * ```
    */
   async encrypt(value: unknown, options: ClientEncryptionEncryptOptions): Promise<Binary> {
-    return this._encrypt(value, false, options);
+    return await this._encrypt(value, false, options);
   }
 
   /**
@@ -614,7 +614,7 @@ export class ClientEncryption {
     expression: Document,
     options: ClientEncryptionEncryptOptions
   ): Promise<Binary> {
-    return this._encrypt(expression, true, options);
+    return await this._encrypt(expression, true, options);
   }
 
   /**
@@ -654,7 +654,7 @@ export class ClientEncryption {
    * the original ones.
    */
   async askForKMSCredentials(): Promise<KMSProviders> {
-    return refreshKMSCredentials(this._kmsProviders);
+    return await refreshKMSCredentials(this._kmsProviders);
   }
 
   static get libmongocryptVersion() {

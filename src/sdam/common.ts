@@ -55,10 +55,16 @@ export function drainTimerQueue(queue: TimerQueue): void {
   queue.clear();
 }
 
-/** @public */
+/**
+ * @public
+ * Gossiped in component for the cluster time tracking the state of user databases
+ * across the cluster. It may optionally include a signature identifying the process that
+ * generated such a value.
+ */
 export interface ClusterTime {
   clusterTime: Timestamp;
-  signature: {
+  /** Used to validate the identity of a request or response's ClusterTime. */
+  signature?: {
     hash: Binary;
     keyId: Long;
   };

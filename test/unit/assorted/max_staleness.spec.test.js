@@ -33,6 +33,7 @@ function collectStalenessTests(specDir) {
 
 describe('Max Staleness (spec)', function () {
   let serverConnect;
+
   before(() => {
     serverConnect = sinon.stub(Server.prototype, 'connect').callsFake(function () {
       this.s.state = 'connected';

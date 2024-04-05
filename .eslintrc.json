@@ -11,14 +11,14 @@
     "prettier",
     "unused-imports",
     "tsdoc",
-    "mocha"
+    "mocha",
+    "github"
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
-    // "plugin:mocha/recommended"
   ],
   "env": {
     "node": true,
@@ -27,21 +27,6 @@
   },
   "reportUnusedDisableDirectives": true,
   "rules": {
-    "no-restricted-properties": [
-      "error",
-      {
-        "object": "describe",
-        "property": "only"
-      },
-      {
-        "object": "it",
-        "property": "only"
-      },
-      {
-        "object": "context",
-        "property": "only"
-      }
-    ],
     "no-restricted-globals": [
       "error",
       {
@@ -115,6 +100,8 @@
       }
     ],
     "mocha/no-async-describe": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/consistent-spacing-between-blocks": "error",
     "no-restricted-syntax": [
       "error",
       {
@@ -226,7 +213,7 @@
       }
     },
     {
-      // Settings for typescript test files
+      // Settings for typescript src files
       "files": [
         "src/**/*.ts"
       ],
@@ -251,8 +238,9 @@
         "no-return-await": "off",
         "@typescript-eslint/return-await": [
           "error",
-          "in-try-catch"
+          "always"
         ],
+        "github/no-then": "error",
         "no-restricted-imports": [
           "error",
           {

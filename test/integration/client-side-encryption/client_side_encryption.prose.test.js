@@ -565,6 +565,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     const limitsDoc = loadLimits('limits-doc.json');
 
     let hasRunFirstTimeSetup = false;
+
     beforeEach(async function () {
       if (hasRunFirstTimeSetup) {
         // Even though we have to use a beforeEach here
@@ -1173,7 +1174,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
 
         expect(insertError).to.be.instanceOf(MongoServerSelectionError);
 
-        // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
         expect(insertError, 'Error must contain ECONNREFUSED').to.satisfy(
           error =>
             /ECONNREFUSED/.test(error.message) ||
@@ -1259,7 +1259,6 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
         client = new MongoClient('mongodb://localhost:27021/db?serverSelectionTimeoutMS=1000');
         const error = await client.connect().catch(e => e);
 
-        // TODO(NODE-5296): check error.message once AggregateErrors are handled correctly
         expect(error, 'Error MUST be a MongoServerSelectionError error').to.be.instanceOf(
           MongoServerSelectionError
         );
@@ -1274,6 +1273,7 @@ describe('Client Side Encryption Prose Tests', metadata, function () {
     describe('via loading shared library', function () {
       let clientEncrypted;
       let client;
+
       beforeEach(function () {
         const { cryptSharedLibPath } = getEncryptExtraOptions();
         if (!cryptSharedLibPath) {

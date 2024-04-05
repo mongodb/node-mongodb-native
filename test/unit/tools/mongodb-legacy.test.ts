@@ -41,6 +41,7 @@ describe('mongodb-legacy', () => {
       expect(ctor.prototype).to.have.property(Symbol.for('@@mdb.callbacks.toLegacy'));
     });
   }
+
   it('test suite imports a LegacyMongoClient as MongoClient', () => {
     // Just confirming that the mongodb-legacy import is correctly overriding the local copy
     // of MongoClient from "src". See test/mongodb.ts for more.

@@ -8,7 +8,7 @@ Support has been added for retryable writes through the connection string. Mongo
 will utilize server sessions to allow some write commands to specify a transaction ID to enforce
 at-most-once semantics for the write operation(s) and allow for retrying the operation if the driver
 fails to obtain a write result (e.g. network error or "not master" error after a replica set
-failover)Full details can be found in the [Retryable Writes Specification](https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst).
+failover). Full details can be found in the [Retryable Writes Specification](https://github.com/mongodb/specifications/blob/master/source/retryable-writes/retryable-writes.rst).
 
 
 ### DNS Seedlist Support
@@ -54,9 +54,9 @@ We've added the following API methods.
 - `Db.prototype.setProfilingLevel`
 - `Db.prototype.profilingInfo`
 
-In core we have removed the possibility of authenticating multiple credentials against the same
+In core, we have removed the possibility of authenticating multiple credentials against the same
 connection pool. This is to avoid problems with MongoDB 3.6 or higher where all users will reside in
-the admin database and thus database level authentication is no longer supported.
+the admin database and thus database-level authentication is no longer supported.
 
 The legacy construct
 
@@ -135,7 +135,7 @@ For more information about connection strings, read the [connection string speci
 ### `BulkWriteResult` & `BulkWriteError`
 
 When errors occured with bulk write operations in the past, the driver would callback or reject with
-the first write error, as well as passing the resulting `BulkWriteResult`.  For example:
+the first write error, as well as passing the resulting `BulkWriteResult`. For example:
 
 ```js
 MongoClient.connect('mongodb://localhost', function(err, client) {
@@ -164,14 +164,14 @@ MongoClient.connect('mongodb://localhost', function(err, client) {
 ```
 
 Where the result of the failed operation is a `BulkWriteError` which has a child value `result`
-which is the original `BulkWriteResult`.  Similarly, the callback form no longer calls back with an
+which is the original `BulkWriteResult`. Similarly, the callback form no longer calls back with an
 `(Error, BulkWriteResult)`, but instead just a `(BulkWriteError)`.
 
 ### `mapReduce` inlined results
 
 When `Collection.prototype.mapReduce` is invoked with a callback that includes `out: 'inline'`,
 it would diverge from the `Promise`-based variant by returning additional data as positional
-arguments to  the callback (`(err, result, stats, ...)`).  This is no longer the case, both variants
+arguments to the callback (`(err, result, stats, ...)`). This is no longer the case, both variants
 of the method will now return a single object for all results - a single value for the default case,
 and an object similar to the existing `Promise` form for cases where there is more data to pass to
 the user.
@@ -180,7 +180,7 @@ the user.
 
 `find` and `findOne` no longer support the `fields` parameter. You can achieve the same results as
 the `fields` parameter by using `Cursor.prototype.project` or by passing the `projection` property
-in on the options object . Additionally, `find` does not support individual options like `skip` and
+in on the options object. Additionally, `find` does not support individual options like `skip` and
 `limit` as positional parameters. You must either pass in these parameters in the `options` object,
 or add them via `Cursor` methods like `Cursor.prototype.skip`.
 
@@ -289,7 +289,7 @@ testCollection.updateOne({_id: 'test'}, {});
 
 ### `keepAlive`
 
-Wherever it occurs, the option `keepAlive` has been changed. `keepAlive` is now a boolean that enables/disables `keepAlive`, while `keepAliveInitialDelay` specifies how long to wait before initiating keepAlive. This brings the API in line with [NodeJS's socket api](https://nodejs.org/dist/latest-v9.x/docs/api/all.html#net_socket_setkeepalive_enable_initialdelay)
+Wherever it occurs, the option `keepAlive` has been changed. `keepAlive` is now a boolean that enables/disables `keepAlive`, while `keepAliveInitialDelay` specifies how long to wait before initiating keepAlive. This brings the API in line with [NodeJS's socket API](https://nodejs.org/dist/latest-v9.x/docs/api/all.html#net_socket_setkeepalive_enable_initialdelay)
 
 ### `insertMany`
 

@@ -394,7 +394,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
 
-    return promise;
+    return await promise;
   }
 
   /**
@@ -631,6 +631,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       new ConnectionCreatedEvent(this, { id: connectOptions.id })
     );
 
+    // eslint-disable-next-line github/no-then
     connect(connectOptions).then(
       connection => {
         // The pool might have closed since we started trying to create a connection

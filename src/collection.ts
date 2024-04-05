@@ -263,7 +263,7 @@ export class Collection<TSchema extends Document = Document> {
     doc: OptionalUnlessRequiredId<TSchema>,
     options?: InsertOneOptions
   ): Promise<InsertOneResult<TSchema>> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new InsertOneOperation(
         this as TODO_NODE_3286,
@@ -285,7 +285,7 @@ export class Collection<TSchema extends Document = Document> {
     docs: OptionalUnlessRequiredId<TSchema>[],
     options?: BulkWriteOptions
   ): Promise<InsertManyResult<TSchema>> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new InsertManyOperation(
         this as TODO_NODE_3286,
@@ -322,7 +322,7 @@ export class Collection<TSchema extends Document = Document> {
       throw new MongoInvalidArgumentError('Argument "operations" must be an array of documents');
     }
 
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new BulkWriteOperation(
         this as TODO_NODE_3286,
@@ -348,7 +348,7 @@ export class Collection<TSchema extends Document = Document> {
     update: UpdateFilter<TSchema> | Document[],
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new UpdateOneOperation(
         this as TODO_NODE_3286,
@@ -371,7 +371,7 @@ export class Collection<TSchema extends Document = Document> {
     replacement: WithoutId<TSchema>,
     options?: ReplaceOptions
   ): Promise<UpdateResult<TSchema> | Document> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new ReplaceOneOperation(
         this as TODO_NODE_3286,
@@ -398,7 +398,7 @@ export class Collection<TSchema extends Document = Document> {
     update: UpdateFilter<TSchema> | Document[],
     options?: UpdateOptions
   ): Promise<UpdateResult<TSchema>> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new UpdateManyOperation(
         this as TODO_NODE_3286,
@@ -419,7 +419,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: DeleteOptions = {}
   ): Promise<DeleteResult> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DeleteOneOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
@@ -435,7 +435,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: DeleteOptions = {}
   ): Promise<DeleteResult> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DeleteManyOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
@@ -452,7 +452,7 @@ export class Collection<TSchema extends Document = Document> {
    */
   async rename(newName: string, options?: RenameOptions): Promise<Collection> {
     // Intentionally, we do not inherit options from parent for this operation.
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new RenameOperation(this as TODO_NODE_3286, newName, {
         ...options,
@@ -467,7 +467,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async drop(options?: DropCollectionOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DropCollectionOperation(this.s.db, this.collectionName, options)
     );
@@ -521,7 +521,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async options(options?: OperationOptions): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new OptionsOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
@@ -533,7 +533,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async isCapped(options?: OperationOptions): Promise<boolean> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new IsCappedOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
@@ -619,7 +619,7 @@ export class Collection<TSchema extends Document = Document> {
     indexSpecs: IndexDescription[],
     options?: CreateIndexesOptions
   ): Promise<string[]> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       CreateIndexesOperation.fromIndexDescriptionArray(
         this,
@@ -637,7 +637,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async dropIndex(indexName: string, options?: DropIndexesOptions): Promise<Document> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DropIndexOperation(this as TODO_NODE_3286, indexName, {
         ...resolveOptions(this, options),
@@ -694,7 +694,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    return this.indexes({ ...options, full: options?.full ?? false });
+    return await this.indexes({ ...options, full: options?.full ?? false });
   }
 
   /**
@@ -711,7 +711,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async estimatedDocumentCount(options?: EstimatedDocumentCountOptions): Promise<number> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new EstimatedDocumentCountOperation(this as TODO_NODE_3286, resolveOptions(this, options))
     );
@@ -746,7 +746,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: CountDocumentsOptions = {}
   ): Promise<number> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CountDocumentsOperation(this as TODO_NODE_3286, filter, resolveOptions(this, options))
     );
@@ -782,7 +782,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema> = {},
     options: DistinctOptions = {}
   ): Promise<any[]> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DistinctOperation(
         this as TODO_NODE_3286,
@@ -837,7 +837,7 @@ export class Collection<TSchema extends Document = Document> {
     filter: Filter<TSchema>,
     options?: FindOneAndDeleteOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new FindOneAndDeleteOperation(
         this as TODO_NODE_3286,
@@ -878,7 +878,7 @@ export class Collection<TSchema extends Document = Document> {
     replacement: WithoutId<TSchema>,
     options?: FindOneAndReplaceOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new FindOneAndReplaceOperation(
         this as TODO_NODE_3286,
@@ -920,7 +920,7 @@ export class Collection<TSchema extends Document = Document> {
     update: UpdateFilter<TSchema>,
     options?: FindOneAndUpdateOptions
   ): Promise<WithId<TSchema> | ModifyResult<TSchema> | null> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new FindOneAndUpdateOperation(
         this as TODO_NODE_3286,
@@ -1043,7 +1043,7 @@ export class Collection<TSchema extends Document = Document> {
    * @param options - Optional settings for the command
    */
   async count(filter: Filter<TSchema> = {}, options: CountOptions = {}): Promise<number> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CountOperation(this.fullNamespace, filter, resolveOptions(this, options))
     );
@@ -1111,7 +1111,7 @@ export class Collection<TSchema extends Document = Document> {
    * @returns
    */
   async createSearchIndexes(descriptions: SearchIndexDescription[]): Promise<string[]> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new CreateSearchIndexesOperation(this as TODO_NODE_3286, descriptions)
     );
@@ -1125,7 +1125,7 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   async dropSearchIndex(name: string): Promise<void> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new DropSearchIndexOperation(this as TODO_NODE_3286, name)
     );
@@ -1140,7 +1140,7 @@ export class Collection<TSchema extends Document = Document> {
    * @remarks Only available when used against a 7.0+ Atlas cluster.
    */
   async updateSearchIndex(name: string, definition: Document): Promise<void> {
-    return executeOperation(
+    return await executeOperation(
       this.client,
       new UpdateSearchIndexOperation(this as TODO_NODE_3286, name, definition)
     );

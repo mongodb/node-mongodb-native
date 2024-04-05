@@ -25,6 +25,7 @@ describe('Retryable Reads Spec Prose', () => {
     let cmapEvents: Array<{ name: string; event: Record<string, any> }>;
     let commandStartedEvents: Array<Record<string, any>>;
     let testCollection: Collection;
+
     beforeEach(async function () {
       // 1. Create a client with maxPoolSize=1 and retryReads=true.
       client = this.configuration.newClient(

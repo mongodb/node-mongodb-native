@@ -95,7 +95,8 @@ export class DeleteOperation extends CommandOperation<DeleteResult> {
       }
     }
 
-    return super.executeCommand(server, session, command) as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.executeCommand(server, session, command);
+    return res;
   }
 }
 
@@ -108,7 +109,7 @@ export class DeleteOneOperation extends DeleteOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<DeleteResult> {
-    const res = (await super.execute(server, session)) as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.execute(server, session);
     if (this.explain) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);
@@ -128,7 +129,7 @@ export class DeleteManyOperation extends DeleteOperation {
     server: Server,
     session: ClientSession | undefined
   ): Promise<DeleteResult> {
-    const res = (await super.execute(server, session)) as TODO_NODE_3286;
+    const res: TODO_NODE_3286 = await super.execute(server, session);
     if (this.explain) return res;
     if (res.code) throw new MongoServerError(res);
     if (res.writeErrors) throw new MongoServerError(res.writeErrors[0]);

@@ -210,6 +210,7 @@ describe('When executing an operation for the first time', () => {
     let changeCausingCollection: Collection;
     let collection: Collection;
     let cs: ChangeStream;
+
     beforeEach(async function () {
       if (this.configuration.topologyType === TopologyType.Single) {
         return;

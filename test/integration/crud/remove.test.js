@@ -3,6 +3,7 @@ const { expect } = require('chai');
 
 describe('Remove', function () {
   let client;
+
   beforeEach(async function () {
     client = this.configuration.newClient();
   });
