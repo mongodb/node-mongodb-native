@@ -87,7 +87,7 @@ describe('TopologyDescription (integration tests)', function () {
       expect(description).to.exist;
 
       const { servers } = JSON.parse(JSON.stringify(description));
-      expect(Object.keys(servers).length > 0).to.be.true;
+      expect(Object.keys(servers).length > 0, '`servers` stringified with no servers.').to.be.true;
     });
   });
 });

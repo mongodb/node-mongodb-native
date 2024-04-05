@@ -1,4 +1,4 @@
-import type { ObjectId } from '../bson';
+import { EJSON, type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { type MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
@@ -341,6 +341,10 @@ export class TopologyDescription {
    */
   hasServer(address: string): boolean {
     return this.servers.has(address);
+  }
+
+  toJSON() {
+    return EJSON.serialize(this);
   }
 }
 
