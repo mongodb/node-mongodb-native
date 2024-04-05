@@ -48,7 +48,7 @@ describe('CSOT driver tests', () => {
           await session.endSession();
         });
 
-        it('overrides the value provided on the db and the session', async () => {
+        it('throws an error', async () => {
           expect(cursor.cursorOptions).to.have.property('timeoutMS', 500);
         });
       });
