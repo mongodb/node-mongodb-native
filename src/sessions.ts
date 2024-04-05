@@ -60,8 +60,6 @@ export interface ClientSessionOptions {
   snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
-  /** @internal */
-  timeoutMS?: number;
   /** @internal
    * The value of timeoutMS used for CSOT. Used to override client timeoutMS */
   defaultTimeoutMS?: number;
