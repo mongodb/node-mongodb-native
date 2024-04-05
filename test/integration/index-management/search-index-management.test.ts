@@ -20,38 +20,6 @@ describe('Search Index Management Integration Tests', function () {
       await client.close();
     });
 
-    context('when listSearchIndexes operation is run withTransaction', function () {
-      // TODO(NODE-6047): Ignore read/write concern in applySession for Atlas Search Index Helpers
-      it('should include write concern or read concern in command - TODO(NODE-6047)', {
-        metadata: {
-          requires: {
-            topology: '!single',
-            mongodb: '>=7.0',
-            serverless: 'forbid'
-          }
-        },
-        test: async function () {
-          let res;
-          await client.withSession(async session => {
-            const error = await session
-              .withTransaction(
-                async function (session) {
-                  res = collection.listSearchIndexes({ session });
-                  await res.toArray();
-                },
-                { readConcern: 'local', writeConcern: { w: 1 } }
-              )
-              .catch(e => e);
-            expect(error.errmsg).to.match(/^.*Atlas.*$/);
-            expect(commandStartedEvents[0]).to.exist;
-            // flip assertion after NODE-6047 implementation
-            expect(commandStartedEvents[0]?.command?.readConcern).to.exist;
-            expect(commandStartedEvents[0]?.command?.writeConcern).to.not.exist;
-          });
-        }
-      });
-    });
-
     context('when listSearchIndexes operation is run with causalConsistency', function () {
       it('should not include write concern or read concern in command', {
         metadata: {
