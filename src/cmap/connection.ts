@@ -497,6 +497,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     try {
       this.throwIfAborted();
       for await (document of this.sendWire(message, options, responseType)) {
+        object = undefined;
         if (options.session != null) {
           updateSessionFromResponse(options.session, document);
         }
