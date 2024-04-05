@@ -1008,6 +1008,11 @@ export class MongoMissingCredentialsError extends MongoAPIError {
  * @category Error
  */
 export class MongoMissingDependencyError extends MongoAPIError {
+  dependencyName: string;
+
+  /** @remarks This property is assigned in the `Error` constructor. */
+  declare cause: Error;
+
   /**
    * **Do not use this constructor!**
    *
@@ -1019,8 +1024,9 @@ export class MongoMissingDependencyError extends MongoAPIError {
    *
    * @public
    **/
-  constructor(message: string, options: { cause?: Error } = {}) {
+  constructor(message: string, options: { cause: Error; dependencyName: string }) {
     super(message, options);
+    this.dependencyName = options.dependencyName;
   }
 
   override get name(): string {
