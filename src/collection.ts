@@ -52,7 +52,8 @@ import type {
   CreateIndexesOptions,
   DropIndexesOptions,
   IndexDescription,
-  IndexDirection,
+  IndexDescriptionCompact,
+  IndexDescriptionInfo,
   IndexInformationOptions,
   IndexSpecification,
   ListIndexesOptions
@@ -120,6 +121,13 @@ export interface CollectionPrivate {
   readConcern?: ReadConcern;
   writeConcern?: WriteConcern;
 }
+
+/** @public */
+export type IndexesInformation<TFull extends boolean = boolean> = TFull extends true
+  ? IndexDescriptionInfo[]
+  : TFull extends false
+  ? IndexDescriptionCompact
+  : IndexDescriptionInfo[] | IndexDescriptionCompact;
 
 /**
  * The **Collection** class is an internal class that embodies a MongoDB collection
@@ -693,8 +701,13 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    return await this.indexes({ ...options, full: options?.full ?? false });
+  async indexInformation<TFull extends boolean = false>(
+    options?: IndexInformationOptions<TFull>
+  ): Promise<IndexesInformation<TFull>> {
+    return (await this.indexes({
+      ...options,
+      full: options?.full ?? false
+    })) as IndexesInformation<TFull>;
   }
 
   /**
@@ -798,20 +811,20 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexes(options?: IndexInformationOptions): Promise<Document[]> {
-    const indexes = await this.listIndexes(options).toArray();
+  async indexes<TFull extends boolean = true>(
+    options?: IndexInformationOptions<TFull>
+  ): Promise<IndexesInformation<TFull>> {
+    const indexes: IndexDescriptionInfo[] = await this.listIndexes(options).toArray();
     const full = options?.full ?? true;
     if (full) {
-      return indexes;
+      return indexes as IndexesInformation<TFull>;
     }
 
-    const object: Record<
-      string,
-      Array<[name: string, direction: IndexDirection]>
-    > = Object.fromEntries(indexes.map(({ name, key }) => [name, Object.entries(key)]));
+    const object: IndexDescriptionCompact = Object.fromEntries(
+      indexes.map(({ name, key }) => [name, Object.entries(key)])
+    );
 
-    // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
-    return object;
+    return object as IndexesInformation<TFull>;
   }
 
   /**

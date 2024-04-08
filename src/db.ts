@@ -482,7 +482,10 @@ export class Db {
    * @param name - The name of the collection.
    * @param options - Optional settings for the command
    */
-  async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
+  async indexInformation<TFull extends boolean = false>(
+    name: string,
+    options?: IndexInformationOptions<TFull>
+  ) {
     return await this.collection(name).indexInformation(resolveOptions(this, options));
   }
 

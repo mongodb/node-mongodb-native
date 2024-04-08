@@ -72,7 +72,7 @@ export type IndexSpecification = OneOrMore<
 >;
 
 /** @public */
-export interface IndexInformationOptions extends ListIndexesOptions {
+export interface IndexInformationOptions<TFull extends boolean> extends ListIndexesOptions {
   /**
    * When `true`, an array of index descriptions is returned.
    * When `false`, the driver returns an object that with keys corresponding to index names with values
@@ -91,7 +91,7 @@ export interface IndexInformationOptions extends ListIndexesOptions {
    * }
    * ```
    */
-  full?: boolean;
+  full?: TFull;
 }
 
 /** @public */
@@ -213,6 +213,18 @@ function resolveIndexDescription(
     validProvidedOptions.map(([name, value]) => (name === 'version' ? ['v', value] : [name, value]))
   );
 }
+
+/**
+ * @public
+ * The index information returned by the listIndexes command. https://www.mongodb.com/docs/manual/reference/command/listIndexes/#mongodb-dbcommand-dbcmd.listIndexes
+ */
+export type IndexDescriptionInfo = Omit<IndexDescription, 'key' | 'version'> & {
+  key: { [key: string]: IndexDirection };
+  v?: IndexDescription['version'];
+};
+
+/** @public */
+export type IndexDescriptionCompact = Record<string, [name: string, direction: IndexDirection][]>;
 
 /**
  * @internal
