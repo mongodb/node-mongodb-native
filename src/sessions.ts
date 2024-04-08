@@ -588,7 +588,7 @@ function userExplicitlyEndedTransaction(session: ClientSession) {
   return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
-function attemptTransaction<T>(
+async function attemptTransaction<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
@@ -604,44 +604,37 @@ function attemptTransaction<T>(
   }
 
   if (!isPromiseLike(promise)) {
-    session.abortTransaction().catch(() => null);
-    return Promise.reject(
+    await session.abortTransaction().catch(() => null);
+    return await Promise.reject(
       new MongoInvalidArgumentError('Function provided to `withTransaction` must return a Promise')
     );
   }
 
-  return promise.then(
-    result => {
-      if (userExplicitlyEndedTransaction(session)) {
-        return result;
-      }
-
-      return attemptTransactionCommit(session, startTime, fn, result, options);
-    },
-    err => {
-      function maybeRetryOrThrow(err: MongoError): Promise<any> {
-        if (
-          err instanceof MongoError &&
-          err.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
-          hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
-        ) {
-          return attemptTransaction(session, startTime, fn, options);
-        }
-
-        if (isMaxTimeMSExpiredError(err)) {
-          err.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
-        }
-
-        throw err;
-      }
-
-      if (session.inTransaction()) {
-        return session.abortTransaction().then(() => maybeRetryOrThrow(err));
-      }
-
-      return maybeRetryOrThrow(err);
+  try {
+    const result = await promise;
+    if (userExplicitlyEndedTransaction(session)) {
+      return result;
     }
-  );
+    return await attemptTransactionCommit(session, startTime, fn, result, options);
+  } catch (err) {
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    if (
+      err instanceof MongoError &&
+      err.hasErrorLabel(MongoErrorLabel.TransientTransactionError) &&
+      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
+    ) {
+      return await attemptTransaction(session, startTime, fn, options);
+    }
+
+    if (isMaxTimeMSExpiredError(err)) {
+      err.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
+    }
+
+    throw err;
+  }
 }
 
 const endTransactionAsync = promisify(
