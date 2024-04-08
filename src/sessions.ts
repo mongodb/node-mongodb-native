@@ -419,14 +419,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return await endTransactionAsync(this, 'commitTransaction');
+    return await endTransaction(this, 'commitTransaction');
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return await endTransactionAsync(this, 'abortTransaction');
+    return await endTransaction(this, 'abortTransaction');
   }
 
   /**
@@ -637,25 +637,15 @@ async function attemptTransaction<T>(
   }
 }
 
-const endTransactionAsync = promisify(
-  endTransaction as (
-    session: ClientSession,
-    commandName: 'abortTransaction' | 'commitTransaction',
-    callback: (error: Error) => void
-  ) => void
-);
-
-function endTransaction(
+async function endTransaction(
   session: ClientSession,
-  commandName: 'abortTransaction' | 'commitTransaction',
-  callback: Callback<void>
-) {
+  commandName: 'abortTransaction' | 'commitTransaction'
+): Promise<void> {
   // handle any initial problematic cases
   const txnState = session.transaction.state;
 
   if (txnState === TxnState.NO_TRANSACTION) {
-    callback(new MongoTransactionError('No transaction started'));
-    return;
+    throw new MongoTransactionError('No transaction started');
   }
 
   if (commandName === 'commitTransaction') {
@@ -665,37 +655,28 @@ function endTransaction(
     ) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_COMMITTED_EMPTY);
-      callback();
       return;
     }
 
     if (txnState === TxnState.TRANSACTION_ABORTED) {
-      callback(
-        new MongoTransactionError('Cannot call commitTransaction after calling abortTransaction')
-      );
-      return;
+      throw new MongoTransactionError('Cannot call commitTransaction after calling abortTransaction');
     }
   } else {
     if (txnState === TxnState.STARTING_TRANSACTION) {
       // the transaction was never started, we can safely exit here
       session.transaction.transition(TxnState.TRANSACTION_ABORTED);
-      callback();
       return;
     }
 
     if (txnState === TxnState.TRANSACTION_ABORTED) {
-      callback(new MongoTransactionError('Cannot call abortTransaction twice'));
-      return;
+      throw new MongoTransactionError('Cannot call abortTransaction twice');
     }
 
     if (
       txnState === TxnState.TRANSACTION_COMMITTED ||
       txnState === TxnState.TRANSACTION_COMMITTED_EMPTY
     ) {
-      callback(
-        new MongoTransactionError('Cannot call abortTransaction after calling commitTransaction')
-      );
-      return;
+      throw new MongoTransactionError('Cannot call abortTransaction after calling commitTransaction');
     }
   }
 
@@ -728,9 +709,8 @@ function endTransaction(
       if (session.loadBalanced) {
         maybeClearPinnedConnection(session, { force: false });
       }
-
-      // The spec indicates that we should ignore all errors on `abortTransaction`
-      return callback();
+      // The spec indicates that if the operation times out or fails with a non-retryable error, we should ignore all errors on `abortTransaction`
+      return;
     }
 
     session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
@@ -751,14 +731,14 @@ function endTransaction(
       }
     }
 
-    callback(error);
+    throw error;
   }
 
   if (session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
-  const handleFirstCommandAttempt = (error?: Error) => {
+  const handleFirstCommandAttempt = async (error?: Error) => {
     if (command.abortTransaction) {
       // always unpin on abort regardless of command outcome
       session.unpin();
@@ -775,29 +755,33 @@ function endTransaction(
         });
       }
 
-      executeOperation(
+      await executeOperation(
         session.client,
         new RunAdminCommandOperation(command, {
           session,
           readPreference: ReadPreference.primary,
           bypassPinningCheck: true
         })
-      ).then(() => commandHandler(), commandHandler);
-      return;
+      ).catch(e => commandHandler(e));
+      commandHandler();
     }
-
     commandHandler(error);
   };
 
-  // send the command
-  executeOperation(
-    session.client,
-    new RunAdminCommandOperation(command, {
-      session,
-      readPreference: ReadPreference.primary,
-      bypassPinningCheck: true
-    })
-  ).then(() => handleFirstCommandAttempt(), handleFirstCommandAttempt);
+  try {
+    // send the command
+    await executeOperation(
+      session.client,
+      new RunAdminCommandOperation(command, {
+        session,
+        readPreference: ReadPreference.primary,
+        bypassPinningCheck: true
+      })
+    );
+    await handleFirstCommandAttempt();
+  } catch (e) {
+    await handleFirstCommandAttempt(e);
+  }
 }
 
 /** @public */

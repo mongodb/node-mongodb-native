@@ -9,7 +9,7 @@ const SKIPPED_TESTS = [
   'withTransaction succeeds if callback aborts'
 ];
 
-describe('Transactions Convenient API Spec Unified Tests', function () {
+describe.only('Transactions Convenient API Spec Unified Tests', function () {
   beforeEach(function () {
     if (this.configuration.topologyType === 'LoadBalanced') {
       if (this.currentTest) {
