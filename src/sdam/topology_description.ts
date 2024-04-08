@@ -343,6 +343,12 @@ export class TopologyDescription {
     return this.servers.has(address);
   }
 
+  /**
+   * Returns a JSON-serializable representation of the TopologyDescription.  This is primarily
+   * intended for use with JSON.stringify().
+   *
+   * This method will not throw.
+   */
   toJSON() {
     return EJSON.serialize(this);
   }
