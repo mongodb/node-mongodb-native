@@ -26,7 +26,7 @@ describe('CSOT driver tests', () => {
     });
 
     afterEach(async () => {
-      if (client) await client.close();
+      await client?.close();
     });
 
     describe('when timeoutMS is provided on an operation', () => {
@@ -44,7 +44,8 @@ describe('CSOT driver tests', () => {
         });
 
         afterEach(async () => {
-          await cursor.close();
+          await cursor?.close();
+          await session?.endSession();
           await session.endSession();
         });
 
@@ -63,7 +64,7 @@ describe('CSOT driver tests', () => {
         });
 
         afterEach(async () => {
-          await cursor.close();
+          await cursor?.close();
         });
 
         it('overrides the value provided on the db', async () => {
