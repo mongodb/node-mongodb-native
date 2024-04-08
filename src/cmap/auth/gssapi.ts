@@ -34,7 +34,7 @@ async function externalCommand(
   return response as { payload: string; conversationId: number };
 }
 
-let krb: typeof Kerberos;
+let krb: Kerberos;
 
 export class GSSAPI extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {

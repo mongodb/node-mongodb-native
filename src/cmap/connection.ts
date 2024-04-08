@@ -743,7 +743,11 @@ export class CryptoConnection extends Connection {
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
-      throw new MongoMissingDependencyError('No AutoEncrypter available for encryption');
+      // TODO(NODE-6065): throw a MongoRuntimeError in Node V7
+      // @ts-expect-error No cause provided because there is no underlying error.
+      throw new MongoMissingDependencyError('No AutoEncrypter available for encryption', {
+        dependencyName: 'n/a'
+      });
     }
 
     const serverWireVersion = maxWireVersion(this);
