@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
+import { type MongoDBResponse } from './cmap/wire_protocol/responses';
 import { isSharded } from './cmap/wire_protocol/shared';
 import { PINNED, UNPINNED } from './constants';
 import type { AbstractCursor } from './cursor/abstract_cursor';
@@ -1040,7 +1041,7 @@ export function applySession(
   return;
 }
 
-export function updateSessionFromResponse(session: ClientSession, document: Document): void {
+export function updateSessionFromResponse(session: ClientSession, document: MongoDBResponse): void {
   if (document.$clusterTime) {
     _advanceClusterTime(session, document.$clusterTime);
   }
@@ -1056,7 +1057,7 @@ export function updateSessionFromResponse(session: ClientSession, document: Docu
   if (session?.[kSnapshotEnabled] && session[kSnapshotTime] == null) {
     // find and aggregate commands return atClusterTime on the cursor
     // distinct includes it in the response body
-    const atClusterTime = document.cursor?.atClusterTime || document.atClusterTime;
+    const atClusterTime = document.atClusterTime;
     if (atClusterTime) {
       session[kSnapshotTime] = atClusterTime;
     }
