@@ -122,13 +122,6 @@ export interface CollectionPrivate {
   writeConcern?: WriteConcern;
 }
 
-/** @public */
-export type IndexesInformation<TFull extends boolean = boolean> = TFull extends true
-  ? IndexDescriptionInfo[]
-  : TFull extends false
-  ? IndexDescriptionCompact
-  : IndexDescriptionInfo[] | IndexDescriptionCompact;
-
 /**
  * The **Collection** class is an internal class that embodies a MongoDB collection
  * allowing for insert/find/update/delete and other command operation on that MongoDB collection.

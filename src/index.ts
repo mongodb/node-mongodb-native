@@ -291,12 +291,7 @@ export type { StreamDescription, StreamDescriptionOptions } from './cmap/stream_
 export type { CompressorName } from './cmap/wire_protocol/compression';
 export type { JSTypeOf, OnDemandDocument } from './cmap/wire_protocol/on_demand/document';
 export type { MongoDBResponse, MongoDBResponseConstructor } from './cmap/wire_protocol/responses';
-export type {
-  CollectionOptions,
-  CollectionPrivate,
-  IndexesInformation,
-  ModifyResult
-} from './collection';
+export type { CollectionOptions, CollectionPrivate, ModifyResult } from './collection';
 export type {
   COMMAND_FAILED,
   COMMAND_STARTED,
