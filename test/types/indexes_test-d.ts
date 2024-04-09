@@ -68,6 +68,8 @@ for (const index of await collection.indexes()) {
   expectType<IndexDescriptionInfo>(index);
 }
 
+// test Db.prototype.indexInformation
+
 const dbDefaultIndexInfo = await db.indexInformation('some-collection');
 const dbEmptyOptionsIndexInfo = await db.indexInformation('some-collection', {});
 const dbFullIndexInfo = await db.indexInformation('some-collection', { full: true });
