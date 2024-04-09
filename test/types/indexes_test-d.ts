@@ -67,3 +67,21 @@ expectType<IndexDescriptionInfo[] | IndexDescriptionCompact>(ambiguousIndexInfo)
 for (const index of await collection.indexes()) {
   expectType<IndexDescriptionInfo>(index);
 }
+
+const dbDefaultIndexInfo = await db.indexInformation('some-collection');
+const dbEmptyOptionsIndexInfo = await db.indexInformation('some-collection', {});
+const dbFullIndexInfo = await db.indexInformation('some-collection', { full: true });
+const dbNotFullIndexInfo = await db.indexInformation('some-collection', { full: false });
+const dbAmbiguousIndexInfo = await db.indexInformation('some-collection', {
+  full: ambiguousFullness
+});
+
+expectAssignable<typeof dbFullIndexInfo>(exampleFullIndexes);
+expectAssignable<typeof dbAmbiguousIndexInfo>(exampleFullIndexes);
+expectAssignable<typeof dbAmbiguousIndexInfo>(exampleCompactIndexes);
+
+expectType<IndexDescriptionCompact>(dbDefaultIndexInfo);
+expectType<IndexDescriptionCompact>(dbEmptyOptionsIndexInfo);
+expectType<IndexDescriptionInfo[]>(dbFullIndexInfo);
+expectType<IndexDescriptionCompact>(dbNotFullIndexInfo);
+expectType<IndexDescriptionInfo[] | IndexDescriptionCompact>(dbAmbiguousIndexInfo);
