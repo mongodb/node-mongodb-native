@@ -701,13 +701,21 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexInformation<TFull extends boolean = false>(
-    options?: IndexInformationOptions<TFull>
-  ): Promise<IndexesInformation<TFull>> {
-    return (await this.indexes({
+  indexInformation(
+    options: IndexInformationOptions & { full: true }
+  ): Promise<IndexDescriptionInfo[]>;
+  indexInformation(
+    options: IndexInformationOptions & { full?: false }
+  ): Promise<IndexDescriptionCompact>;
+  indexInformation(
+    options: IndexInformationOptions & { full: boolean }
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
+  indexInformation(): Promise<IndexDescriptionCompact>;
+  async indexInformation(options?: IndexInformationOptions) {
+    return await this.indexes({
       ...options,
       full: options?.full ?? false
-    })) as IndexesInformation<TFull>;
+    });
   }
 
   /**
@@ -811,20 +819,24 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexes<TFull extends boolean = true>(
-    options?: IndexInformationOptions<TFull>
-  ): Promise<IndexesInformation<TFull>> {
+  indexes(options: IndexInformationOptions & { full?: true }): Promise<IndexDescriptionInfo[]>;
+  indexes(options: IndexInformationOptions & { full: false }): Promise<IndexDescriptionCompact>;
+  indexes(
+    options: IndexInformationOptions & { full: boolean }
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
+  indexes(): Promise<IndexDescriptionInfo[]>;
+  async indexes(options?: IndexInformationOptions) {
     const indexes: IndexDescriptionInfo[] = await this.listIndexes(options).toArray();
     const full = options?.full ?? true;
     if (full) {
-      return indexes as IndexesInformation<TFull>;
+      return indexes;
     }
 
     const object: IndexDescriptionCompact = Object.fromEntries(
       indexes.map(({ name, key }) => [name, Object.entries(key)])
     );
 
-    return object as IndexesInformation<TFull>;
+    return object;
   }
 
   /**

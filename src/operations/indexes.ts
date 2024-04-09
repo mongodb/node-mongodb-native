@@ -72,7 +72,7 @@ export type IndexSpecification = OneOrMore<
 >;
 
 /** @public */
-export interface IndexInformationOptions<TFull extends boolean> extends ListIndexesOptions {
+export interface IndexInformationOptions extends ListIndexesOptions {
   /**
    * When `true`, an array of index descriptions is returned.
    * When `false`, the driver returns an object that with keys corresponding to index names with values
@@ -91,7 +91,7 @@ export interface IndexInformationOptions<TFull extends boolean> extends ListInde
    * }
    * ```
    */
-  full?: TFull;
+  full?: boolean;
 }
 
 /** @public */
@@ -221,7 +221,7 @@ function resolveIndexDescription(
 export type IndexDescriptionInfo = Omit<IndexDescription, 'key' | 'version'> & {
   key: { [key: string]: IndexDirection };
   v?: IndexDescription['version'];
-};
+} & Document;
 
 /** @public */
 export type IndexDescriptionCompact = Record<string, [name: string, direction: IndexDirection][]>;
