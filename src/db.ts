@@ -497,7 +497,10 @@ export class Db {
     options: IndexInformationOptions & { full: boolean }
   ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
   indexInformation(name: string): Promise<IndexDescriptionCompact>;
-  async indexInformation(name: string, options?: IndexInformationOptions) {
+  async indexInformation(
+    name: string,
+    options?: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]> {
     return await this.collection(name).indexInformation(
       resolveOptions(this, options as IndexInformationOptions & { full: boolean })
     );
