@@ -1,5 +1,4 @@
 /* eslint-disable github/no-then */
-import { promisify } from 'util';
 
 import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
@@ -40,7 +39,6 @@ import {
 import {
   ByteUtils,
   calculateDurationInMs,
-  type Callback,
   commandSupportsReadConcern,
   isPromiseLike,
   List,
@@ -419,14 +417,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return await endTransaction(this, 'commitTransaction').catch(e => squashError(e));
+    return await endTransaction(this, 'commitTransaction').catch(e => e);
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return await endTransaction(this, 'abortTransaction').catch(e => squashError(e));
+    return await endTransaction(this, 'abortTransaction').catch(e => e);
   }
 
   /**
@@ -659,7 +657,9 @@ async function endTransaction(
     }
 
     if (txnState === TxnState.TRANSACTION_ABORTED) {
-      throw new MongoTransactionError('Cannot call commitTransaction after calling abortTransaction');
+      throw new MongoTransactionError(
+        'Cannot call commitTransaction after calling abortTransaction'
+      );
     }
   } else {
     if (txnState === TxnState.STARTING_TRANSACTION) {
@@ -676,7 +676,9 @@ async function endTransaction(
       txnState === TxnState.TRANSACTION_COMMITTED ||
       txnState === TxnState.TRANSACTION_COMMITTED_EMPTY
     ) {
-      throw new MongoTransactionError('Cannot call abortTransaction after calling commitTransaction');
+      throw new MongoTransactionError(
+        'Cannot call abortTransaction after calling commitTransaction'
+      );
     }
   }
 
