@@ -1,6 +1,6 @@
 import { expectAssignable, expectType } from 'tsd';
 
-import { MongoClient } from '../../src';
+import { type IndexInformationOptions, MongoClient } from '../../src';
 import { type IndexDescriptionCompact, type IndexDescriptionInfo } from '../mongodb';
 
 const client = new MongoClient('');
@@ -87,3 +87,13 @@ expectType<IndexDescriptionCompact>(dbEmptyOptionsIndexInfo);
 expectType<IndexDescriptionInfo[]>(dbFullIndexInfo);
 expectType<IndexDescriptionCompact>(dbNotFullIndexInfo);
 expectType<IndexDescriptionInfo[] | IndexDescriptionCompact>(dbAmbiguousIndexInfo);
+
+// test indexInformation with non-literal options
+const options: IndexInformationOptions = {};
+const indexInfo = await db.collection('some-collection').indexInformation(options);
+const indexes = await db.collection('some-collection').indexes(options);
+const indexDbInfo = await db.indexInformation('some-collection', options);
+
+expectType<IndexDescriptionCompact | IndexDescriptionInfo[]>(indexInfo);
+expectType<IndexDescriptionCompact | IndexDescriptionInfo[]>(indexes);
+expectType<IndexDescriptionCompact | IndexDescriptionInfo[]>(indexDbInfo);

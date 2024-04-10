@@ -701,7 +701,7 @@ export class Collection<TSchema extends Document = Document> {
     options: IndexInformationOptions & { full?: false }
   ): Promise<IndexDescriptionCompact>;
   indexInformation(
-    options: IndexInformationOptions & { full: boolean }
+    options: IndexInformationOptions
   ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
   indexInformation(): Promise<IndexDescriptionCompact>;
   async indexInformation(
@@ -817,9 +817,9 @@ export class Collection<TSchema extends Document = Document> {
   indexes(options: IndexInformationOptions & { full?: true }): Promise<IndexDescriptionInfo[]>;
   indexes(options: IndexInformationOptions & { full: false }): Promise<IndexDescriptionCompact>;
   indexes(
-    options: IndexInformationOptions & { full: boolean }
+    options: IndexInformationOptions
   ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
-  indexes(): Promise<IndexDescriptionInfo[]>;
+  indexes(options?: ListIndexesOptions): Promise<IndexDescriptionInfo[]>;
   async indexes(
     options?: IndexInformationOptions
   ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]> {
