@@ -1,7 +1,13 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { OpMsgResponse } from '../../../mongodb';
+import {
+  BSON,
+  type MongoClient,
+  MongoDBResponse,
+  MongoServerError,
+  OpMsgResponse
+} from '../../../mongodb';
 
 const EXPECTED_VALIDATION_DISABLED_ARGUMENT = {
   utf8: false
@@ -13,11 +19,11 @@ const EXPECTED_VALIDATION_ENABLED_ARGUMENT = {
   }
 };
 
-describe('class OpMsgResponse', () => {
+describe('class MongoDBResponse', () => {
   let bsonSpy: sinon.SinonSpy;
 
   beforeEach(() => {
-    bsonSpy = sinon.spy(OpMsgResponse.prototype, 'parseBsonSerializationOptions');
+    bsonSpy = sinon.spy(MongoDBResponse.prototype, 'parseBsonSerializationOptions');
   });
 
   afterEach(() => {
@@ -107,4 +113,43 @@ describe('class OpMsgResponse', () => {
       });
     }
   });
+
+  context(
+    'when the server is given a long multibyte utf sequence and there is a writeError',
+    () => {
+      let client: MongoClient;
+      beforeEach(async function () {
+        client = this.configuration.newClient();
+      });
+
+      afterEach(async function () {
+        sinon.restore();
+        await client.db('parsing').dropDatabase();
+        await client.close();
+      });
+
+      it('does not throw a UTF-8 parsing error', async () => {
+        // Insert a large string of multibyte UTF-8 characters
+        const _id = '\u{1F92A}'.repeat(100);
+
+        const test = client.db('parsing').collection<{ _id: string }>('parsing');
+        await test.insertOne({ _id });
+
+        const spy = sinon.spy(OpMsgResponse.prototype, 'parse');
+
+        const error = await test.insertOne({ _id }).catch(error => error);
+
+        // Check that the server sent us broken BSON (bad UTF)
+        expect(() => {
+          BSON.deserialize(spy.returnValues[0], { validation: { utf8: true } });
+        }).to.throw(BSON.BSONError, /Invalid UTF/i);
+
+        // Assert the driver squashed it
+        expect(error).to.be.instanceOf(MongoServerError);
+        expect(error.message).to.match(/duplicate/i);
+        expect(error.message).to.not.match(/utf/i);
+        expect(error.errmsg).to.include('\uFFFD');
+      });
+    }
+  );
 });
