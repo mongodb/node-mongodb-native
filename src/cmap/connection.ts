@@ -54,7 +54,7 @@ import {
   OpMsgRequest,
   type OpMsgResponse,
   OpQueryRequest,
-  type OpQueryResponse,
+  type OpReply,
   type WriteProtocolMessageType
 } from './commands';
 import type { Stream } from './connect';
@@ -62,6 +62,7 @@ import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
 import { onData } from './wire_protocol/on_data';
+import { MongoDBResponse, type MongoDBResponseConstructor } from './wire_protocol/responses';
 import { getReadPreference, isSharded } from './wire_protocol/shared';
 
 /** @internal */
@@ -412,7 +413,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     return message;
   }
 
-  private async *sendWire(message: WriteProtocolMessageType, options: CommandOptions) {
+  private async *sendWire(
+    message: WriteProtocolMessageType,
+    options: CommandOptions,
+    responseType?: MongoDBResponseConstructor
+  ): AsyncGenerator<MongoDBResponse> {
     this.throwIfAborted();
 
     if (typeof options.socketTimeoutMS === 'number') {
@@ -428,7 +433,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       });
 
       if (options.noResponse) {
-        yield { ok: 1 };
+        yield MongoDBResponse.empty;
         return;
       }
 
@@ -436,21 +441,9 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       for await (const response of this.readMany()) {
         this.socket.setTimeout(0);
-        response.parse(options);
+        const bson = response.parse();
 
-        const [document] = response.documents;
-
-        if (!Buffer.isBuffer(document)) {
-          const { session } = options;
-          if (session) {
-            updateSessionFromResponse(session, document);
-          }
-
-          if (document.$clusterTime) {
-            this.clusterTime = document.$clusterTime;
-            this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
-          }
-        }
+        const document = new (responseType ?? MongoDBResponse)(bson, 0, false);
 
         yield document;
         this.throwIfAborted();
@@ -469,7 +462,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
   private async *sendCommand(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {}
+    options: CommandOptions,
+    responseType?: MongoDBResponseConstructor
   ) {
     const message = this.prepareCommand(ns.db, command, options);
 
@@ -485,19 +479,41 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
       );
     }
 
-    let document;
+    // If `documentsReturnedIn` not set or raw is not enabled, use input bson options
+    // Otherwise, support raw flag. Raw only works for cursors that hardcode firstBatch/nextBatch fields
+    const bsonOptions =
+      options.documentsReturnedIn == null || !options.raw
+        ? options
+        : {
+            ...options,
+            raw: false,
+            fieldsAsRaw: { [options.documentsReturnedIn]: true }
+          };
+
+    /** MongoDBResponse instance or subclass */
+    let document: MongoDBResponse | undefined = undefined;
+    /** Cached result of a toObject call */
+    let object: Document | undefined = undefined;
     try {
       this.throwIfAborted();
-      for await (document of this.sendWire(message, options)) {
-        if (!Buffer.isBuffer(document) && document.writeConcernError) {
-          throw new MongoWriteConcernError(document.writeConcernError, document);
+      for await (document of this.sendWire(message, options, responseType)) {
+        object = undefined;
+        if (options.session != null) {
+          updateSessionFromResponse(options.session, document);
         }
 
-        if (
-          !Buffer.isBuffer(document) &&
-          (document.ok === 0 || document.$err || document.errmsg || document.code)
-        ) {
-          throw new MongoServerError(document);
+        if (document.$clusterTime) {
+          this.clusterTime = document.$clusterTime;
+          this.emit(Connection.CLUSTER_TIME_RECEIVED, document.$clusterTime);
+        }
+
+        if (document.has('writeConcernError')) {
+          object ??= document.toObject(bsonOptions);
+          throw new MongoWriteConcernError(object.writeConcernError, object);
+        }
+
+        if (document.isError) {
+          throw new MongoServerError((object ??= document.toObject(bsonOptions)));
         }
 
         if (this.shouldEmitAndLogCommand) {
@@ -509,14 +525,19 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document,
+              options.noResponse ? undefined : (object ??= document.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
           );
         }
 
-        yield document;
+        if (responseType == null) {
+          yield (object ??= document.toObject(bsonOptions));
+        } else {
+          yield document;
+        }
+
         this.throwIfAborted();
       }
     } catch (error) {
@@ -530,7 +551,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
             new CommandSucceededEvent(
               this,
               message,
-              options.noResponse ? undefined : document,
+              options.noResponse ? undefined : (object ??= document?.toObject(bsonOptions)),
               started,
               this.description.serverConnectionId
             )
@@ -555,13 +576,27 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     }
   }
 
+  public async command<T extends MongoDBResponseConstructor>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    responseType: T | undefined
+  ): Promise<typeof responseType extends undefined ? Document : InstanceType<T>>;
+
   public async command(
     ns: MongoDBNamespace,
     command: Document,
-    options: CommandOptions = {}
+    options?: CommandOptions
+  ): Promise<Document>;
+
+  public async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions = {},
+    responseType?: MongoDBResponseConstructor
   ): Promise<Document> {
     this.throwIfAborted();
-    for await (const document of this.sendCommand(ns, command, options)) {
+    for await (const document of this.sendCommand(ns, command, options, responseType)) {
       return document;
     }
     throw new MongoUnexpectedServerResponseError('Unable to get response from server');
@@ -622,7 +657,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  private async *readMany(): AsyncGenerator<OpMsgResponse | OpQueryResponse> {
+  private async *readMany(): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
       this.dataEvents = onData(this.messageStream);
       for await (const message of this.dataEvents) {
@@ -687,11 +722,24 @@ export class CryptoConnection extends Connection {
     this.autoEncrypter = options.autoEncrypter;
   }
 
-  /** @internal @override */
-  override async command(
+  public override async command<T extends MongoDBResponseConstructor>(
+    ns: MongoDBNamespace,
+    command: Document,
+    options: CommandOptions | undefined,
+    responseType: T
+  ): Promise<InstanceType<T>>;
+
+  public override async command(
+    ns: MongoDBNamespace,
+    command: Document,
+    options?: CommandOptions
+  ): Promise<Document>;
+
+  override async command<T extends MongoDBResponseConstructor>(
     ns: MongoDBNamespace,
     cmd: Document,
-    options: CommandOptions
+    options?: CommandOptions,
+    responseType?: T | undefined
   ): Promise<Document> {
     const { autoEncrypter } = this;
     if (!autoEncrypter) {
@@ -705,7 +753,7 @@ export class CryptoConnection extends Connection {
     const serverWireVersion = maxWireVersion(this);
     if (serverWireVersion === 0) {
       // This means the initial handshake hasn't happened yet
-      return await super.command(ns, cmd, options);
+      return await super.command<T>(ns, cmd, options, responseType);
     }
 
     if (serverWireVersion < 8) {
@@ -739,7 +787,7 @@ export class CryptoConnection extends Connection {
       }
     }
 
-    const response = await super.command(ns, encrypted, options);
+    const response = await super.command<T>(ns, encrypted, options, responseType);
 
     return await autoEncrypter.decrypt(response, options);
   }

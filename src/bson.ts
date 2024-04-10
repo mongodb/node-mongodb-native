@@ -33,6 +33,7 @@ export function parseToElementsToArray(bytes: Uint8Array, offset?: number): BSON
   const res = BSON.onDemand.parseToElements(bytes, offset);
   return Array.isArray(res) ? res : [...res];
 }
+
 export const getInt32LE = BSON.onDemand.NumberUtils.getInt32LE;
 export const getFloat64LE = BSON.onDemand.NumberUtils.getFloat64LE;
 export const getBigInt64LE = BSON.onDemand.NumberUtils.getBigInt64LE;
