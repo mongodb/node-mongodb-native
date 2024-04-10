@@ -419,14 +419,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return await endTransaction(this, 'commitTransaction');
+    return await endTransaction(this, 'commitTransaction').catch(e => squashError(e));
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return await endTransaction(this, 'abortTransaction');
+    return await endTransaction(this, 'abortTransaction').catch(e => squashError(e));
   }
 
   /**
