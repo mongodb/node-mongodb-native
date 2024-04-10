@@ -17,7 +17,7 @@ tests:
             maxStalenessSeconds: 120
     -
         description: "Single readPreferenceTags is parsed as array of size one"
-        uri: "mongodb://example.com/?readPreferenceTags=dc:ny"
+        uri: "mongodb://example.com/?readPreference=secondary&readPreferenceTags=dc:ny"
         valid: true
         warning: false
         hosts: ~

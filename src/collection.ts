@@ -106,6 +106,8 @@ export interface CollectionOptions extends BSONSerializeOptions, WriteConcernOpt
   readConcern?: ReadConcernLike;
   /** The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). */
   readPreference?: ReadPreferenceLike;
+  /** @internal TODO(NODE-5688): make this public */
+  timeoutMS?: number;
 }
 
 /** @internal */

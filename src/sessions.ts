@@ -59,6 +59,9 @@ export interface ClientSessionOptions {
   snapshot?: boolean;
   /** The default TransactionOptions to use for transactions started on this session. */
   defaultTransactionOptions?: TransactionOptions;
+  /** @internal
+   * The value of timeoutMS used for CSOT. Used to override client timeoutMS */
+  defaultTimeoutMS?: number;
 
   /** @internal */
   owner?: symbol | AbstractCursor;
@@ -129,6 +132,8 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
   [kPinnedConnection]?: Connection;
   /** @internal */
   [kTxnNumberIncrement]: number;
+  /** @internal */
+  timeoutMS?: number;
 
   /**
    * Create a client session.
@@ -171,6 +176,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.clientOptions = clientOptions;
+    this.timeoutMS = options.defaultTimeoutMS ?? client.options?.timeoutMS;
 
     this.explicit = !!options.explicit;
     this[kServerSession] = this.explicit ? this.sessionPool.acquire() : null;
