@@ -34,6 +34,9 @@ export interface OperationOptions extends BSONSerializeOptions {
   /** @internal Hints to `executeOperation` that this operation should not unpin on an ended transaction */
   bypassPinningCheck?: boolean;
   omitReadPreference?: boolean;
+
+  /** @internal TODO(NODE-5688): make this public */
+  timeoutMS?: number;
 }
 
 /** @internal */

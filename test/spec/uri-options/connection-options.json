@@ -2,7 +2,7 @@
   "tests": [
     {
       "description": "Valid connection and timeout options are parsed correctly",
-      "uri": "mongodb://example.com/?appname=URI-OPTIONS-SPEC-TEST&connectTimeoutMS=20000&heartbeatFrequencyMS=5000&localThresholdMS=3000&maxIdleTimeMS=50000&replicaSet=uri-options-spec&retryWrites=true&serverSelectionTimeoutMS=15000&socketTimeoutMS=7500",
+      "uri": "mongodb://example.com/?appname=URI-OPTIONS-SPEC-TEST&connectTimeoutMS=20000&heartbeatFrequencyMS=5000&localThresholdMS=3000&maxIdleTimeMS=50000&replicaSet=uri-options-spec&retryWrites=true&serverSelectionTimeoutMS=15000&socketTimeoutMS=7500&timeoutMS=100",
       "valid": true,
       "warning": false,
       "hosts": null,
@@ -16,7 +16,8 @@
         "replicaSet": "uri-options-spec",
         "retryWrites": true,
         "serverSelectionTimeoutMS": 15000,
-        "socketTimeoutMS": 7500
+        "socketTimeoutMS": 7500,
+        "timeoutMS": 100
       }
     },
     {
@@ -235,6 +236,35 @@
       "uri": "mongodb://example.com/?loadBalanced=true&replicaSet=replset",
       "valid": false,
       "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "timeoutMS=0",
+      "uri": "mongodb://example.com/?timeoutMS=0",
+      "valid": true,
+      "warning": false,
+      "hosts": null,
+      "auth": null,
+      "options": {
+        "timeoutMS": 0
+      }
+    },
+    {
+      "description": "Non-numeric timeoutMS causes a warning",
+      "uri": "mongodb://example.com/?timeoutMS=invalid",
+      "valid": true,
+      "warning": true,
+      "hosts": null,
+      "auth": null,
+      "options": {}
+    },
+    {
+      "description": "Too low timeoutMS causes a warning",
+      "uri": "mongodb://example.com/?timeoutMS=-2",
+      "valid": true,
+      "warning": true,
       "hosts": null,
       "auth": null,
       "options": {}
