@@ -14,7 +14,7 @@ const SKIPPED_TESTS = [
   'causal consistency disabled'
 ];
 
-describe.only('Transactions Spec Unified Tests', function () {
+describe('Transactions Spec Unified Tests', function () {
   runUnifiedSuite(loadSpecTests(path.join('transactions', 'unified')), test => {
     return SKIPPED_TESTS.includes(test.description)
       ? 'TODO(NODE-5924/NODE-5925): Skipping failing transaction tests'

@@ -570,11 +570,11 @@ async function attemptTransactionCommit<T>(
       !isMaxTimeMSExpiredError(err)
     ) {
       if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
-        return attemptTransactionCommit(session, startTime, fn, result, options);
+        return await attemptTransactionCommit(session, startTime, fn, result, options);
       }
 
       if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-        return attemptTransaction(session, startTime, fn, options);
+        return await attemptTransaction(session, startTime, fn, options);
       }
     }
 
@@ -748,13 +748,28 @@ async function endTransaction(
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
-  const handleFirstCommandAttempt = async (error?: Error) => {
+  const partiallyHandleFirstCommandAttempt = async () => {
     if (command.abortTransaction) {
       // always unpin on abort regardless of command outcome
       session.unpin();
     }
+  };
 
-    if (error instanceof MongoError && isRetryableWriteError(error)) {
+  try {
+    // send the command
+    await executeOperation(
+      session.client,
+      new RunAdminCommandOperation(command, {
+        session,
+        readPreference: ReadPreference.primary,
+        bypassPinningCheck: true
+      })
+    );
+    await partiallyHandleFirstCommandAttempt();
+    commandHandler();
+  } catch (err) {
+    await partiallyHandleFirstCommandAttempt();
+    if (err instanceof MongoError && isRetryableWriteError(err)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
         // per txns spec, must unpin session in this case
@@ -775,27 +790,12 @@ async function endTransaction(
           })
         );
         commandHandler();
-      } catch (e) {
-        commandHandler(e);
+      } catch (err2) {
+        commandHandler(err2);
       }
-      return;
+    } else {
+      commandHandler(err);
     }
-    commandHandler(error);
-  };
-
-  try {
-    // send the command
-    await executeOperation(
-      session.client,
-      new RunAdminCommandOperation(command, {
-        session,
-        readPreference: ReadPreference.primary,
-        bypassPinningCheck: true
-      })
-    );
-    await handleFirstCommandAttempt();
-  } catch (e) {
-    await handleFirstCommandAttempt(e);
   }
 }
 
