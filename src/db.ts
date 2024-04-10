@@ -66,7 +66,8 @@ const DB_OPTIONS_ALLOW_LIST = [
   'enableUtf8Validation',
   'promoteValues',
   'compression',
-  'retryWrites'
+  'retryWrites',
+  'timeoutMS'
 ];
 
 /** @internal */
@@ -94,6 +95,8 @@ export interface DbOptions extends BSONSerializeOptions, WriteConcernOptions {
   readConcern?: ReadConcern;
   /** Should retry failed writes */
   retryWrites?: boolean;
+  /** @internal TODO(NODE-5688): make this public */
+  timeoutMS?: number;
 }
 
 /**
