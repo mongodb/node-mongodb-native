@@ -553,33 +553,33 @@ function isMaxTimeMSExpiredError(err: MongoError) {
   );
 }
 
-function attemptTransactionCommit<T>(
+async function attemptTransactionCommit<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
   result: any,
   options: TransactionOptions
 ): Promise<T> {
-  return session.commitTransaction().then(
-    () => result,
-    (err: MongoError) => {
-      if (
-        err instanceof MongoError &&
-        hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
-        !isMaxTimeMSExpiredError(err)
-      ) {
-        if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
-          return attemptTransactionCommit(session, startTime, fn, result, options);
-        }
-
-        if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-          return attemptTransaction(session, startTime, fn, options);
-        }
+  try {
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    if (
+      err instanceof MongoError &&
+      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
+      !isMaxTimeMSExpiredError(err)
+    ) {
+      if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
+        return attemptTransactionCommit(session, startTime, fn, result, options);
       }
 
-      throw err;
+      if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+        return attemptTransaction(session, startTime, fn, options);
+      }
     }
-  );
+
+    throw err;
+  }
 }
 
 const USER_EXPLICIT_TXN_END_STATES = new Set<TxnState>([
