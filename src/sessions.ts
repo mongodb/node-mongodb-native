@@ -417,14 +417,14 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
    * Commits the currently active transaction in this session.
    */
   async commitTransaction(): Promise<void> {
-    return await endTransaction(this, 'commitTransaction').catch(e => e);
+    return await endTransaction(this, 'commitTransaction');
   }
 
   /**
    * Aborts the currently active transaction in this session.
    */
   async abortTransaction(): Promise<void> {
-    return await endTransaction(this, 'abortTransaction').catch(e => e);
+    return await endTransaction(this, 'abortTransaction');
   }
 
   /**
@@ -733,7 +733,9 @@ async function endTransaction(
       }
     }
 
-    throw error;
+    if (error != null) {
+      throw error;
+    }
   }
 
   if (session.transaction.recoveryToken) {
@@ -757,15 +759,20 @@ async function endTransaction(
         });
       }
 
-      await executeOperation(
-        session.client,
-        new RunAdminCommandOperation(command, {
-          session,
-          readPreference: ReadPreference.primary,
-          bypassPinningCheck: true
-        })
-      ).catch(e => commandHandler(e));
-      commandHandler();
+      try {
+        await executeOperation(
+          session.client,
+          new RunAdminCommandOperation(command, {
+            session,
+            readPreference: ReadPreference.primary,
+            bypassPinningCheck: true
+          })
+        );
+        commandHandler();
+      } catch (e) {
+        commandHandler(e);
+      }
+      return;
     }
     commandHandler(error);
   };
