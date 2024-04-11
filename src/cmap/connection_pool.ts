@@ -21,13 +21,14 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoNetworkError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
 import { Timeout, TimeoutError } from '../timeout';
-import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
+import { type Callback, csotMin, List, makeCounter, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
 import {
@@ -102,7 +103,6 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
 export interface WaitQueueMember {
   resolve: (conn: Connection) => void;
   reject: (err: AnyError) => void;
-  timeout: Timeout;
   [kCancelled]?: boolean;
   checkoutTime: number;
 }
@@ -355,36 +355,56 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(): Promise<Connection> {
-    const checkoutTime = now();
+  async checkOut(options?: { timeout?: Timeout }): Promise<Connection> {
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
     );
 
     const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
+    const serverSelectionTimeoutMS = this[kServer].topology.s.serverSelectionTimeoutMS;
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    const timeout = Timeout.expires(waitQueueTimeoutMS);
+    let timeout: Timeout | null = null;
+    if (options?.timeout) {
+      // CSOT enabled
+      // Determine if we're using the timeout passed in or a new timeout
+      if (options.timeout.duration > 0 || serverSelectionTimeoutMS > 0) {
+        // This check determines whether or not Topology.selectServer used the configured
+        // `timeoutMS` or `serverSelectionTimeoutMS` value for its timeout
+        if (
+          options.timeout.duration === serverSelectionTimeoutMS ||
+          csotMin(options.timeout.duration, serverSelectionTimeoutMS) < serverSelectionTimeoutMS
+        ) {
+          // server selection used `timeoutMS`, so we should use the existing timeout as the timeout
+          // here
+          timeout = options.timeout;
+        } else {
+          // server selection used `serverSelectionTimeoutMS`, so we construct a new timeout with
+          // the time remaining to ensure that Topology.selectServer and ConnectionPool.checkOut
+          // cumulatively don't spend more than `serverSelectionTimeoutMS` blocking
+          timeout = Timeout.expires(serverSelectionTimeoutMS - options.timeout.timeElapsed);
+        }
+      }
+    } else {
+      timeout = Timeout.expires(waitQueueTimeoutMS);
+    }
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
-      reject,
-      timeout,
-      checkoutTime
+      reject
     };
 
     this[kWaitQueue].push(waitQueueMember);
     process.nextTick(() => this.processWaitQueue());
 
     try {
-      return await Promise.race([promise, waitQueueMember.timeout]);
+      timeout?.throwIfExpired();
+      return await (timeout ? Promise.race([promise, timeout]) : promise);
     } catch (error) {
       if (TimeoutError.is(error)) {
         waitQueueMember[kCancelled] = true;
-
-        waitQueueMember.timeout.clear();
 
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
@@ -396,9 +416,16 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
+        if (options?.timeout) {
+          throw new MongoOperationTimeoutError('Timed out during connection checkout', {
+            cause: timeoutError
+          });
+        }
         throw timeoutError;
       }
       throw error;
+    } finally {
+      if (timeout !== options?.timeout) timeout?.clear();
     }
   }
 
@@ -764,7 +791,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, waitQueueMember.checkoutTime, error)
         );
-        waitQueueMember.timeout.clear();
         this[kWaitQueue].shift();
         waitQueueMember.reject(error);
         continue;
@@ -785,7 +811,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
         );
-        waitQueueMember.timeout.clear();
 
         this[kWaitQueue].shift();
         waitQueueMember.resolve(connection);
@@ -828,8 +853,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             );
             waitQueueMember.resolve(connection);
           }
-
-          waitQueueMember.timeout.clear();
         }
         process.nextTick(() => this.processWaitQueue());
       });
