@@ -119,7 +119,7 @@ export class FindOperation extends CommandOperation<CursorResponse> {
         ...this.bsonOptions,
         documentsReturnedIn: 'firstBatch',
         session,
-        timeoutContext
+        timeout: this.timeout
       },
       this.explain ? ExplainedCursorResponse : CursorResponse
     );

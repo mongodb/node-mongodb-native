@@ -143,7 +143,7 @@ describe('CSOT driver tests', () => {
       });
 
       it('throws a MongoOperationTimeoutError', {
-        metadata: { requires: { mongodb: '>=4.4', topology: '!load-balanced' } },
+        metadata: { requires: { mongodb: '>=4.4' } },
         test: async function () {
           const commandsStarted = [];
           client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
