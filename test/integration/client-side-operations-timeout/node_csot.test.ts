@@ -7,7 +7,9 @@ import {
   type Collection,
   type Db,
   type FindCursor,
-  type MongoClient
+  LEGACY_HELLO_COMMAND,
+  type MongoClient,
+  MongoOperationTimeoutError
 } from '../../mongodb';
 
 describe('CSOT driver tests', () => {
@@ -91,6 +93,77 @@ describe('CSOT driver tests', () => {
         it('overrides the value provided on the client', () => {
           expect(db.s.options).to.have.property('timeoutMS', 200);
         });
+      });
+    });
+  });
+
+  describe('autoconnect', () => {
+    let client: MongoClient;
+
+    afterEach(async function () {
+      await client?.close();
+      client = undefined;
+    });
+
+    describe('when failing autoconnect with timeoutMS defined', () => {
+      let configClient: MongoClient;
+
+      beforeEach(async function () {
+        configClient = this.configuration.newClient();
+        const result = await configClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'alwaysOn',
+            data: {
+              failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+              blockConnection: true,
+              blockTimeMS: 10
+            }
+          });
+        expect(result).to.have.property('ok', 1);
+      });
+
+      afterEach(async function () {
+        const result = await configClient
+          .db()
+          .admin()
+          .command({
+            configureFailPoint: 'failCommand',
+            mode: 'off',
+            data: {
+              failCommands: ['ping', 'hello', LEGACY_HELLO_COMMAND],
+              blockConnection: true,
+              blockTimeMS: 10
+            }
+          });
+        expect(result).to.have.property('ok', 1);
+        await configClient.close();
+      });
+
+      it('throws a MongoOperationTimeoutError', {
+        metadata: { requires: { mongodb: '>=4.4' } },
+        test: async function () {
+          const commandsStarted = [];
+          client = this.configuration.newClient(undefined, { timeoutMS: 1, monitorCommands: true });
+
+          client.on('commandStarted', ev => commandsStarted.push(ev));
+
+          const maybeError = await client
+            .db('test')
+            .collection('test')
+            .insertOne({ a: 19 })
+            .then(
+              () => null,
+              e => e
+            );
+
+          expect(maybeError).to.exist;
+          expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+
+          expect(commandsStarted).to.have.length(0); // Ensure that we fail before we start the insertOne
+        }
       });
     });
   });
