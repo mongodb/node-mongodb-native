@@ -23,6 +23,7 @@ const enum BSONElementOffset {
   length = 4
 }
 
+/** @internal */
 export type JSTypeOf = {
   [BSONType.null]: null;
   [BSONType.undefined]: null;

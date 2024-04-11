@@ -1,6 +1,6 @@
-import { expectError, expectType } from 'tsd';
+import { expectAssignable, expectError, expectType } from 'tsd';
 
-import type { ClientSession } from '../mongodb';
+import type { Binary, ClientSession, ClusterTime, Long, Timestamp } from '../mongodb';
 import { MongoClient, ReadConcern, ReadConcernLevel } from '../mongodb';
 
 // test mapped cursor types
@@ -25,3 +25,9 @@ const unknownFn: () => Promise<unknown> = async () => 2;
 expectType<unknown>(await client.withSession(unknownFn));
 // Not a promise returning function
 expectError(await client.withSession(() => null));
+
+declare const ct: ClusterTime;
+expectType<Timestamp>(ct.clusterTime);
+expectAssignable<ClusterTime['signature']>(undefined);
+expectType<Binary | undefined>(ct.signature?.hash);
+expectType<Long | undefined>(ct.signature?.keyId);

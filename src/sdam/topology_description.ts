@@ -1,4 +1,4 @@
-import type { ObjectId } from '../bson';
+import { EJSON, type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { type MongoError, MongoRuntimeError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
@@ -341,6 +341,16 @@ export class TopologyDescription {
    */
   hasServer(address: string): boolean {
     return this.servers.has(address);
+  }
+
+  /**
+   * Returns a JSON-serializable representation of the TopologyDescription.  This is primarily
+   * intended for use with JSON.stringify().
+   *
+   * This method will not throw.
+   */
+  toJSON() {
+    return EJSON.serialize(this);
   }
 }
 

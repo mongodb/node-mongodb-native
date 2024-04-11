@@ -128,7 +128,11 @@ export class Encrypter {
     if ('kModuleError' in mongodbClientEncryption) {
       throw new MongoMissingDependencyError(
         'Auto-encryption requested, but the module is not installed. ' +
-          'Please add `mongodb-client-encryption` as a dependency of your project'
+          'Please add `mongodb-client-encryption` as a dependency of your project',
+        {
+          cause: mongodbClientEncryption['kModuleError'],
+          dependencyName: 'mongodb-client-encryption'
+        }
       );
     }
   }
