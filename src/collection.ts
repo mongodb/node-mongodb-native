@@ -254,6 +254,11 @@ export class Collection<TSchema extends Document = Document> {
     this.s.collectionHint = normalizeHintField(v);
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.s.options.timeoutMS;
+  }
+
   /**
    * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior

@@ -27,6 +27,7 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
+import { Timeout } from '../timeout';
 import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
@@ -152,9 +153,13 @@ export async function executeOperation<
     selector = readPreference;
   }
 
+  const timeout = operation.timeoutMS != null ? Timeout.expires(operation.timeoutMS) : undefined;
+  operation.timeout = timeout;
+
   const server = await topology.selectServer(selector, {
     session,
-    operationName: operation.commandName
+    operationName: operation.commandName,
+    timeout
   });
 
   if (session == null) {
@@ -265,6 +270,7 @@ async function retryOperation<
   // select a new server, and attempt to retry the operation
   const server = await topology.selectServer(selector, {
     session,
+    timeout: operation.timeout,
     operationName: operation.commandName,
     previousServer
   });
