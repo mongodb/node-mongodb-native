@@ -24,8 +24,8 @@ import {
 } from '../sdam/server_selection';
 import type { Topology } from '../sdam/topology';
 import type { ClientSession } from '../sessions';
-import { TimeoutContext } from '../timeout';
-import { supportsRetryableWrites } from '../utils';
+import { Timeout } from '../timeout';
+import { squashError, supportsRetryableWrites } from '../utils';
 import { AbstractOperation, Aspect } from './operation';
 
 const MMAPv1_RETRY_WRITES_ERROR_CODE = MONGODB_ERROR_CODES.IllegalOperation;
@@ -200,10 +200,13 @@ async function tryOperation<
     selector = readPreference;
   }
 
-  let server = await topology.selectServer(selector, {
+  const timeout = operation.timeoutMS != null ? Timeout.expires(operation.timeoutMS) : undefined;
+  operation.timeout = timeout;
+
+  const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    timeoutContext
+    timeout
   });
 
   const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
@@ -278,14 +281,67 @@ async function tryOperation<
     } catch (operationError) {
       if (!(operationError instanceof MongoError)) throw operationError;
 
-      if (
-        previousOperationError != null &&
-        operationError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
-      ) {
-        throw previousOperationError;
-      }
-      previousServer = server.description;
-      previousOperationError = operationError;
+async function retryOperation<
+  T extends AbstractOperation<TResult>,
+  TResult = ResultTypeFromOperation<T>
+>(
+  operation: T,
+  originalError: MongoError,
+  { session, topology, selector, previousServer }: RetryOptions
+): Promise<TResult> {
+  const isWriteOperation = operation.hasAspect(Aspect.WRITE_OPERATION);
+  const isReadOperation = operation.hasAspect(Aspect.READ_OPERATION);
+
+  if (isWriteOperation && originalError.code === MMAPv1_RETRY_WRITES_ERROR_CODE) {
+    throw new MongoServerError({
+      message: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+      errmsg: MMAPv1_RETRY_WRITES_ERROR_MESSAGE,
+      originalError
+    });
+  }
+
+  if (isWriteOperation && !isRetryableWriteError(originalError)) {
+    throw originalError;
+  }
+
+  if (isReadOperation && !isRetryableReadError(originalError)) {
+    throw originalError;
+  }
+
+  if (
+    originalError instanceof MongoNetworkError &&
+    session.isPinned &&
+    !session.inTransaction() &&
+    operation.hasAspect(Aspect.CURSOR_CREATING)
+  ) {
+    // If we have a cursor and the initial command fails with a network error,
+    // we can retry it on another connection. So we need to check it back in, clear the
+    // pool for the service id, and retry again.
+    session.unpin({ force: true, forceClear: true });
+  }
+
+  // select a new server, and attempt to retry the operation
+  const server = await topology.selectServer(selector, {
+    session,
+    timeout: operation.timeout,
+    operationName: operation.commandName,
+    previousServer
+  });
+
+  if (isWriteOperation && !supportsRetryableWrites(server)) {
+    throw new MongoUnexpectedServerResponseError(
+      'Selected server does not support retryable writes'
+    );
+  }
+
+  try {
+    return await operation.execute(server, session);
+  } catch (retryError) {
+    if (
+      retryError instanceof MongoError &&
+      retryError.hasErrorLabel(MongoErrorLabel.NoWritesPerformed)
+    ) {
+      throw originalError;
     }
   }
 
