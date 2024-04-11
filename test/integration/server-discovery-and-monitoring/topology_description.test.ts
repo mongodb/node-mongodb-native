@@ -14,7 +14,22 @@ describe('TopologyDescription (integration tests)', function () {
     await client.close();
   });
 
+  beforeEach(async function () {
+    client = this.configuration.newClient();
+    await client.connect();
+  });
+
   context('options', function () {
+    let client: MongoClient;
+
+    afterEach(async function () {
+      await client.close();
+    });
+
+    beforeEach(async function () {
+      client = this.configuration.newClient();
+    });
+
     context('localThresholdMS', function () {
       it('should default to 15ms', async function () {
         const options: MongoClientOptions = {};
@@ -35,15 +50,6 @@ describe('TopologyDescription (integration tests)', function () {
   });
 
   context('topology types', function () {
-    let client: MongoClient;
-    beforeEach(async function () {
-      client = this.configuration.newClient();
-    });
-
-    afterEach(async function () {
-      await client.close();
-    });
-
     const topologyTypesMap = new Map<TopologyTypeRequirement, TopologyType>([
       ['single', TopologyType.Single],
       ['replicaset', TopologyType.ReplicaSetWithPrimary],
@@ -64,5 +70,24 @@ describe('TopologyDescription (integration tests)', function () {
         }
       );
     }
+  });
+
+  describe('json stringification', function () {
+    it('can be stringified without error', function () {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+      const description = client.topology?.description!;
+      expect(description).to.exist;
+
+      expect(() => JSON.stringify(description)).not.to.throw;
+    });
+
+    it('properly stringifies the server description map', function () {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+      const description = client.topology?.description!;
+      expect(description).to.exist;
+
+      const { servers } = JSON.parse(JSON.stringify(description));
+      expect(Object.keys(servers).length > 0, '`servers` stringified with no servers.').to.be.true;
+    });
   });
 });
