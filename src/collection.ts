@@ -1074,6 +1074,7 @@ export class Collection<TSchema extends Document = Document> {
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+
     const indexName =
       indexNameOrOptions == null
         ? null

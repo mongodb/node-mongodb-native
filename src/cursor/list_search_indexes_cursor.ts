@@ -3,7 +3,7 @@ import type { AggregateOptions } from '../operations/aggregate';
 import { AggregationCursor } from './aggregation_cursor';
 
 /** @public */
-export type ListSearchIndexesOptions = AggregateOptions;
+export type ListSearchIndexesOptions = Omit<AggregateOptions, 'readConcern' | 'writeConcern'>;
 
 /** @public */
 export class ListSearchIndexesCursor extends AggregationCursor<{ name: string }> {
