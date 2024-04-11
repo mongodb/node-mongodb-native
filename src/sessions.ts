@@ -767,9 +767,9 @@ async function endTransaction(
     );
     await partiallyHandleFirstCommandAttempt();
     commandHandler();
-  } catch (err) {
+  } catch (firstAttemptErr) {
     await partiallyHandleFirstCommandAttempt();
-    if (err instanceof MongoError && isRetryableWriteError(err)) {
+    if (firstAttemptErr instanceof MongoError && isRetryableWriteError(firstAttemptErr)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
         // per txns spec, must unpin session in this case
@@ -790,11 +790,11 @@ async function endTransaction(
           })
         );
         commandHandler();
-      } catch (err2) {
-        commandHandler(err2);
+      } catch (secondAttemptErr) {
+        commandHandler(secondAttemptErr);
       }
     } else {
-      commandHandler(err);
+      commandHandler(firstAttemptErr);
     }
   }
 }
