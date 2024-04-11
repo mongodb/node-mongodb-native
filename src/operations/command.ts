@@ -117,6 +117,7 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
     const options = {
       ...this.options,
       ...this.bsonOptions,
+      timeout: this.timeout,
       readPreference: this.readPreference,
       session
     };

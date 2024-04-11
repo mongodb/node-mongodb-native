@@ -24,6 +24,7 @@ import {
   type MongoDriverError,
   MongoError,
   MongoErrorLabel,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerSelectionError,
   MongoTopologyClosedError
@@ -582,7 +583,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
-    const timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+    const timeout = options.timeout
+      ? Timeout.expires(
+          Timeout.min(options.timeout.remainingTime, options.serverSelectionTimeoutMS ?? 0)
+        )
+      : Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
@@ -628,6 +633,9 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
           );
         }
 
+        if (options.timeout) {
+          throw new MongoOperationTimeoutError('Timed out', { cause: timeoutError });
+        }
         throw timeoutError;
       }
       // Other server selection error

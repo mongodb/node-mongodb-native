@@ -1,0 +1,12 @@
+description: "entity-client-observeLogMessages-type"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+      observeLogMessages: 0
+
+tests:
+  - description: "foo"
+    operations: []

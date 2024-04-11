@@ -1,0 +1,38 @@
+description: createEntities-operation
+
+# Note: createEntities is not technically in the 1.9 schema but was introduced at the same time.
+schemaVersion: "1.9"
+
+tests:
+  - description: createEntities operation
+    operations:
+      - name: createEntities
+        object: testRunner
+        arguments:
+          entities:
+            - client:
+                id: &client1 client1
+                observeEvents: [ commandStartedEvent ]
+            - database:
+                id: &database1 database1
+                client: *client1
+                databaseName: &database1Name database1
+            - collection:
+                id: &collection1 collection1
+                database: *database1
+                collectionName: &collection1Name coll1
+      - name: deleteOne
+        object: *collection1
+        arguments:
+          filter: { _id : 1 }
+    expectEvents:
+      - client: *client1
+        events:
+          - commandStartedEvent:
+              command:
+                delete: *collection1Name
+                deletes:
+                  - q: { _id: 1 }
+                    limit: 1
+              commandName: delete
+              databaseName: *database1Name

@@ -21,6 +21,7 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoNetworkError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError
 } from '../error';
@@ -354,7 +355,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(): Promise<Connection> {
+  async checkOut(options?: { timeout?: Timeout }): Promise<Connection> {
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -364,7 +365,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    const timeout = Timeout.expires(waitQueueTimeoutMS);
+    const timeout = options?.timeout
+      ? Timeout.expires(Timeout.min(options.timeout.remainingTime, waitQueueTimeoutMS))
+      : Timeout.expires(waitQueueTimeoutMS);
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
@@ -393,6 +396,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
+        if (options?.timeout) {
+          throw new MongoOperationTimeoutError('Timed out', { cause: timeoutError });
+        }
         throw timeoutError;
       }
       throw error;

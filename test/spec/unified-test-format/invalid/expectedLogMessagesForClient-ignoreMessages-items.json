@@ -1,0 +1,26 @@
+{
+  "description": "expectedLogMessagesForClient-ignoreMessages-items",
+  "schemaVersion": "1.16",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectLogMessages": [
+        {
+          "client": "client0",
+          "messages": [],
+          "ignoreMessages": [
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

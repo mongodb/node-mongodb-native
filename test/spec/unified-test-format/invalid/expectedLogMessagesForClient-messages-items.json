@@ -1,0 +1,25 @@
+{
+  "description": "expectedLogMessagesForClient-messages-items",
+  "schemaVersion": "1.13",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectLogMessages": [
+        {
+          "client": "client0",
+          "messages": [
+            0
+          ]
+        }
+      ]
+    }
+  ]
+}

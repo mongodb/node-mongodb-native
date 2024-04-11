@@ -1,4 +1,4 @@
-description: entity-find-cursor
+description: entity-findCursor
 
 schemaVersion: '1.3'
 
@@ -20,12 +20,6 @@ initialData:
     documents: []
 
 tests:
-  - description: createFindCursor fails if filter is not specified
-    operations:
-      - name: createFindCursor
-        object: *collection0
-        saveResultAsEntity: &cursor0 cursor0
-
   - description: iterateUntilDocumentOrError fails if it references a nonexistent entity
     operations:
       - name: iterateUntilDocumentOrError

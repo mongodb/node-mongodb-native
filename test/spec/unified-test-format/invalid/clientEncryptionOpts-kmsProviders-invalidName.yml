@@ -1,0 +1,19 @@
+description: clientEncryptionOpts-kmsProviders-invalidName
+
+schemaVersion: "1.18"
+
+createEntities:
+  - client:
+      id: &client0 client0
+  - clientEncryption:
+      id: &clientEncryption0 clientEncryption0
+      clientEncryptionOpts:
+        keyVaultClient: *client0
+        keyVaultNamespace: keyvault.datakeys
+        kmsProviders:
+          # The `*` is an invalid character.
+          "aws:name_with_invalid_character*": {}
+
+tests:
+  - description: ""
+    operations: []

@@ -40,6 +40,12 @@ export class Timeout extends Promise<never> {
   public duration: number;
   public timedOut = false;
 
+  get remainingTime(): number {
+    if (this.timedOut) return 0;
+    if (this.duration === 0) return Infinity;
+    return this.start + this.duration - Math.trunc(performance.now());
+  }
+
   /** Create a new timeout that expires in `duration` ms */
   private constructor(executor: Executor = () => null, duration: number) {
     let reject!: Reject;
@@ -92,5 +98,11 @@ export class Timeout extends Promise<never> {
       // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
+  }
+
+  static min(duration1: number, duration2: number): number {
+    if (duration1 === 0) return duration2;
+    if (duration2 === 0) return duration1;
+    return Math.min(duration1, duration2);
   }
 }

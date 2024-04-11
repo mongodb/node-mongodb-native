@@ -1,0 +1,20 @@
+{
+  "description": "entity-client-observeLogMessages-property-type",
+  "schemaVersion": "1.13",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0",
+        "observeLogMessages": {
+          "command": {}
+        }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": []
+    }
+  ]
+}

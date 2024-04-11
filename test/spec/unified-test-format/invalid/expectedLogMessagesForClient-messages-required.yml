@@ -1,0 +1,14 @@
+description: "expectedLogMessagesForClient-messages-required"
+
+schemaVersion: "1.13"
+
+createEntities:
+  - client:
+      id: &client0 "client0"
+
+tests:
+  - description: "foo"
+    operations: []
+    expectLogMessages:
+      - client: *client0
+

@@ -1,0 +1,29 @@
+{
+  "description": "expectedLogMessage-data-type",
+  "schemaVersion": "1.13",
+  "createEntities": [
+    {
+      "client": {
+        "id": "client0"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "description": "foo",
+      "operations": [],
+      "expectLogMessages": [
+        {
+          "client": "client0",
+          "messages": [
+            {
+              "level": "debug",
+              "component": "command",
+              "data": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

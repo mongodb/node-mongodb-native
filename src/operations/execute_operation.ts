@@ -153,7 +153,8 @@ export async function executeOperation<
 
   const server = await topology.selectServer(selector, {
     session,
-    operationName: operation.commandName
+    operationName: operation.commandName,
+    timeout: operation.timeout
   });
 
   if (session == null) {
@@ -264,6 +265,7 @@ async function retryOperation<
   // select a new server, and attempt to retry the operation
   const server = await topology.selectServer(selector, {
     session,
+    timeout: operation.timeout,
     operationName: operation.commandName,
     previousServer
   });
