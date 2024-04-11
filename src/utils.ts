@@ -1077,22 +1077,6 @@ export function commandSupportsReadConcern(command: Document): boolean {
   return false;
 }
 
-export function commandIsReadOperation(command: Document): boolean {
-  if (
-    command.find ||
-    command.count ||
-    command.aggregate ||
-    command.distinct ||
-    command.dbStats ||
-    command.listDatabases ||
-    command.listCollections ||
-    command.getMore
-  ) {
-    return true;
-  }
-  return false;
-}
-
 /**
  * Compare objectIds. `null` is always less
  * - `+1 = oid1 is greater than oid2`

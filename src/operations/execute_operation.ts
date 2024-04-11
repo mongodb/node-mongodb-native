@@ -119,7 +119,11 @@ export async function executeOperation<
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
-  if (inTransaction && !readPreference.equals(ReadPreference.primary)) {
+  if (
+    inTransaction &&
+    !readPreference.equals(ReadPreference.primary) &&
+    operation.hasAspect(Aspect.READ_OPERATION)
+  ) {
     throw new MongoTransactionError(
       `Read preference in a transaction must be primary, not: ${readPreference.mode}`
     );
