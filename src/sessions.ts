@@ -41,6 +41,7 @@ import {
   ByteUtils,
   calculateDurationInMs,
   type Callback,
+  commandIsReadOperation,
   commandSupportsReadConcern,
   isPromiseLike,
   List,
@@ -194,7 +195,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     this.operationTime = undefined;
     this.owner = options.owner;
-    this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
+    this.defaultTransactionOptions = { ...options.defaultTransactionOptions };
     this.transaction = new Transaction();
   }
 
@@ -1037,6 +1038,16 @@ export function applySession(
       session.transaction.options.readConcern || session?.clientOptions?.readConcern;
     if (readConcern) {
       command.readConcern = readConcern;
+    }
+
+    if (
+      commandIsReadOperation(command) &&
+      ((typeof session.transaction.options.readPreference === 'string' &&
+        session.transaction.options.readPreference !== 'primary') ||
+        (typeof session.transaction.options.readPreference === 'object' &&
+          session.transaction.options.readPreference.mode !== 'primary'))
+    ) {
+      throw new MongoTransactionError('read preference in a transaction must be primary');
     }
 
     if (session.supports.causalConsistency && session.operationTime) {
