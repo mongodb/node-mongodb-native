@@ -5,7 +5,7 @@ const { WaitQueueTimeoutError } = require('../../mongodb');
 const mock = require('../../tools/mongodb-mock/index');
 const sinon = require('sinon');
 const { expect } = require('chai');
-const { setImmediate } = require('timers');
+const { setImmediate } = require('timers/promises');
 const { ns, isHello } = require('../../mongodb');
 const { createTimerSandbox } = require('../timer_sandbox');
 const { topologyWithPlaceholderClient } = require('../../tools/utils');
@@ -26,6 +26,9 @@ describe('Connection Pool', function () {
         options: {
           extendedMetadata: {}
         }
+      },
+      s: {
+        serverSelectionTimeoutMS: 0
       }
     }
   };
@@ -98,7 +101,7 @@ describe('Connection Pool', function () {
     pool.checkIn(conn);
   });
 
-  it('should clear timed out wait queue members if no connections are available', function (done) {
+  it('should clear timed out wait queue members if no connections are available', async function () {
     mockMongod.setMessageHandler(request => {
       const doc = request.document;
       if (isHello(doc)) {
@@ -114,23 +117,15 @@ describe('Connection Pool', function () {
 
     pool.ready();
 
-    pool.checkOut().then(conn => {
-      expect(conn).to.exist;
-      pool.checkOut().then(expect.fail, err => {
-        expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
+    const conn = await pool.checkOut();
+    const err = await pool.checkOut().catch(e => e);
+    expect(err).to.exist.and.be.instanceOf(WaitQueueTimeoutError);
+    sinon.stub(pool, 'availableConnectionCount').get(() => 0);
+    pool.checkIn(conn);
 
-        // We can only process the wait queue with `checkIn` and `checkOut`, so we
-        // force the pool here to think there are no available connections, even though
-        // we are checking the connection back in. This simulates a slow leak where
-        // incoming requests outpace the ability of the queue to fully process cancelled
-        // wait queue members
-        sinon.stub(pool, 'availableConnectionCount').get(() => 0);
-        pool.checkIn(conn);
+    await setImmediate();
 
-        setImmediate(() => expect(pool).property('waitQueueSize').to.equal(0));
-        done();
-      });
-    }, expect.fail);
+    expect(pool).property('waitQueueSize').to.equal(0);
   });
 
   describe('minPoolSize population', function () {
