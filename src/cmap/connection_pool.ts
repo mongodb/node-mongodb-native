@@ -21,12 +21,13 @@ import {
   MongoInvalidArgumentError,
   MongoMissingCredentialsError,
   MongoNetworkError,
+  MongoOperationTimeoutError,
   MongoRuntimeError,
   MongoServerError
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { Timeout, TimeoutError } from '../timeout';
+import { type TimeoutContext, TimeoutError } from '../timeout';
 import { type Callback, List, makeCounter, now, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
@@ -102,7 +103,6 @@ export interface ConnectionPoolOptions extends Omit<ConnectionOptions, 'id' | 'g
 export interface WaitQueueMember {
   resolve: (conn: Connection) => void;
   reject: (err: AnyError) => void;
-  timeout: Timeout;
   [kCancelled]?: boolean;
   checkoutTime: number;
 }
@@ -355,23 +355,20 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(): Promise<Connection> {
+  async checkOut(options: { timeoutContext: TimeoutContext }): Promise<Connection> {
     const checkoutTime = now();
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
     );
 
-    const waitQueueTimeoutMS = this.options.waitQueueTimeoutMS;
-
     const { promise, resolve, reject } = promiseWithResolvers<Connection>();
 
-    const timeout = Timeout.expires(waitQueueTimeoutMS);
+    const timeout = options.timeoutContext.connectionCheckoutTimeout;
 
     const waitQueueMember: WaitQueueMember = {
       resolve,
       reject,
-      timeout,
       checkoutTime
     };
 
@@ -379,12 +376,12 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     process.nextTick(() => this.processWaitQueue());
 
     try {
-      return await Promise.race([promise, waitQueueMember.timeout]);
+      timeout?.throwIfExpired();
+      return await (timeout ? Promise.race([promise, timeout]) : promise);
     } catch (error) {
       if (TimeoutError.is(error)) {
+        timeout?.clear();
         waitQueueMember[kCancelled] = true;
-
-        waitQueueMember.timeout.clear();
 
         this.emitAndLog(
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
@@ -396,9 +393,16 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
+        if (options.timeoutContext.csotEnabled()) {
+          throw new MongoOperationTimeoutError('Timed out during connection checkout', {
+            cause: timeoutError
+          });
+        }
         throw timeoutError;
       }
       throw error;
+    } finally {
+      if (options.timeoutContext.clearConnectionCheckoutTimeout) timeout?.clear();
     }
   }
 
@@ -764,7 +768,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, reason, waitQueueMember.checkoutTime, error)
         );
-        waitQueueMember.timeout.clear();
         this[kWaitQueue].shift();
         waitQueueMember.reject(error);
         continue;
@@ -785,7 +788,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECKED_OUT,
           new ConnectionCheckedOutEvent(this, connection, waitQueueMember.checkoutTime)
         );
-        waitQueueMember.timeout.clear();
 
         this[kWaitQueue].shift();
         waitQueueMember.resolve(connection);
@@ -828,8 +830,6 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
             );
             waitQueueMember.resolve(connection);
           }
-
-          waitQueueMember.timeout.clear();
         }
         process.nextTick(() => this.processWaitQueue());
       });

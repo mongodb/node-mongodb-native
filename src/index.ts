@@ -63,6 +63,7 @@ export {
   MongoNetworkTimeoutError,
   MongoNotConnectedError,
   MongoOIDCError,
+  MongoOperationTimeoutError,
   MongoParseError,
   MongoRuntimeError,
   MongoServerClosedError,
@@ -541,7 +542,13 @@ export type {
   RTTSampler,
   ServerMonitoringMode
 } from './sdam/monitor';
-export type { Server, ServerEvents, ServerOptions, ServerPrivate } from './sdam/server';
+export type {
+  Server,
+  ServerCommandOptions,
+  ServerEvents,
+  ServerOptions,
+  ServerPrivate
+} from './sdam/server';
 export type {
   ServerDescription,
   ServerDescriptionOptions,
@@ -572,7 +579,15 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
-export type { Timeout } from './timeout';
+export type {
+  CSOTTimeoutContext,
+  CSOTTimeoutContextOptions,
+  LegacyTimeoutContext,
+  LegacyTimeoutContextOptions,
+  Timeout,
+  TimeoutContext,
+  TimeoutContextOptions
+} from './timeout';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,

@@ -1,8 +1,32 @@
 /* Specification prose tests */
 
+import { expect } from 'chai';
+import * as semver from 'semver';
+import * as sinon from 'sinon';
+
+import {
+  MongoClient,
+  MongoOperationTimeoutError,
+  MongoServerSelectionError,
+  now
+} from '../../mongodb';
+import { type FailPoint } from '../../tools/utils';
+
 // TODO(NODE-5824): Implement CSOT prose tests
-describe.skip('CSOT spec prose tests', () => {
-  context('1. Multi-batch writes', () => {
+describe('CSOT spec prose tests', function () {
+  let internalClient: MongoClient;
+  let client: MongoClient;
+
+  beforeEach(async function () {
+    internalClient = this.configuration.newClient();
+  });
+
+  afterEach(async function () {
+    await internalClient?.close();
+    await client?.close();
+  });
+
+  context.skip('1. Multi-batch writes', () => {
     /**
      * This test MUST only run against standalones on server versions 4.4 and higher.
      * The `insertMany` call takes an exceedingly long time on replicasets and sharded
@@ -31,7 +55,7 @@ describe.skip('CSOT spec prose tests', () => {
      */
   });
 
-  context('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
+  context.skip('2. maxTimeMS is not set for commands sent to mongocryptd', () => {
     /**
      * This test MUST only be run against enterprise server versions 4.2 and higher.
      *
@@ -42,7 +66,7 @@ describe.skip('CSOT spec prose tests', () => {
      */
   });
 
-  context('3. ClientEncryption', () => {
+  context.skip('3. ClientEncryption', () => {
     /**
      * Each test under this category MUST only be run against server versions 4.4 and higher. In these tests,
      * `LOCAL_MASTERKEY` refers to the following base64:
@@ -132,7 +156,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('4. Background Connection Pooling', () => {
+  context.skip('4. Background Connection Pooling', () => {
     /**
      * The tests in this section MUST only be run if the server version is 4.4 or higher and the URI has authentication
      * fields (i.e. a username and password). Each test in this section requires drivers to create a MongoClient and then wait
@@ -192,7 +216,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('5. Blocking Iteration Methods', () => {
+  context.skip('5. Blocking Iteration Methods', () => {
     /**
      * Tests in this section MUST only be run against server versions 4.4 and higher and only apply to drivers that have a
      * blocking method for cursor iteration that executes `getMore` commands in a loop until a document is available or an
@@ -251,7 +275,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('6. GridFS - Upload', () => {
+  context.skip('6. GridFS - Upload', () => {
     /** Tests in this section MUST only be run against server versions 4.4 and higher. */
 
     context('uploads via openUploadStream can be timed out', () => {
@@ -306,7 +330,7 @@ describe.skip('CSOT spec prose tests', () => {
     });
   });
 
-  context('7. GridFS - Download', () => {
+  context.skip('7. GridFS - Download', () => {
     /**
      * This test MUST only be run against server versions 4.4 and higher.
      * 1. Using `internalClient`, drop and re-create the `db.fs.files` and `db.fs.chunks` collections.
@@ -351,96 +375,232 @@ describe.skip('CSOT spec prose tests', () => {
   });
 
   context('8. Server Selection', () => {
-    context('serverSelectionTimeoutMS honored if timeoutMS is not set', () => {
-      /**
-       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?serverSelectionTimeoutMS=10`.
-       * 1. Using `client`, execute the command `{ ping: 1 }` against the `admin` database.
-       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-       */
+    context('using sinon timer', function () {
+      let clock: sinon.SinonFakeTimers;
+
+      beforeEach(function () {
+        clock = sinon.useFakeTimers();
+      });
+
+      afterEach(function () {
+        clock.restore();
+      });
+
+      it.skip('serverSelectionTimeoutMS honored if timeoutMS is not set', async function () {
+        /**
+         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?serverSelectionTimeoutMS=10`.
+         * 1. Using `client`, execute the command `{ ping: 1 }` against the `admin` database.
+         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+         */
+
+        /** NOTE: This is the original implementation of this test, but it was flaky, so was
+         * replaced by the current implementation using sinon fake timers
+         * ```ts
+         *  client = new MongoClient('mongodb://invalid/?serverSelectionTimeoutMS=10');
+         *  const admin = client.db('test').admin();
+         *  const start = performance.now();
+         *  const maybeError = await admin.ping().then(
+         *    () => null,
+         *    e => e
+         *  );
+         *  const end = performance.now();
+         *
+         *  expect(maybeError).to.be.instanceof(MongoServerSelectionError);
+         *  expect(end - start).to.be.lte(15)
+         * ```
+         */
+        client = new MongoClient('mongodb://invalid/?serverSelectionTimeoutMS=10');
+        const admin = client.db('test').admin();
+        const maybeError = admin.ping().then(
+          () => null,
+          e => e
+        );
+
+        await clock.tickAsync(11);
+        expect(await maybeError).to.be.instanceof(MongoServerSelectionError);
+      }).skipReason =
+        'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
     });
 
-    context(
-      "timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+    it.skip("timeoutMS honored for server selection if it's lower than serverSelectionTimeoutMS", async function () {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      client = new MongoClient('mongodb://invalid/?timeoutMS=10&serverSelectionTimeoutMS=20');
+      const start = now();
 
-    context(
-      "serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS",
-      () => {
-        /**
-         * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
-         * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
-         *   - Expect this to fail with a server selection timeout error after no more than 15ms.
-         */
-      }
-    );
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
 
-    context('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', () => {
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+
+    it.skip("serverSelectionTimeoutMS honored for server selection if it's lower than timeoutMS", async function () {
+      /**
+       * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
+       *   - Expect this to fail with a server selection timeout error after no more than 15ms.
+       */
+      client = new MongoClient('mongodb://invalid/?timeoutMS=20&serverSelectionTimeoutMS=10');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
+
+    it.skip('serverSelectionTimeoutMS honored for server selection if timeoutMS=0', async function () {
       /**
        * 1. Create a MongoClient (referred to as `client`) with URI `mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10`.
        * 1. Using `client`, run the command `{ ping: 1 }` against the `admin` database.
        *   - Expect this to fail with a server selection timeout error after no more than 15ms.
        */
-    });
+      client = new MongoClient('mongodb://invalid/?timeoutMS=0&serverSelectionTimeoutMS=10');
+      const start = now();
+      const maybeError = await client
+        .db('test')
+        .admin()
+        .ping()
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
 
-    context(
-      "timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS",
-      () => {
-        /**
-         * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
-         * username and password).
-         * 1. Using `internalClient`, set the following fail point:
-         * ```js
-         *        {
-         *            configureFailPoint: failCommand,
-         *            mode: { times: 1 },
-         *            data: {
-         *                failCommands: ["saslContinue"],
-         *                blockConnection: true,
-         *                blockTimeMS: 15
-         *            }
-         *        }
-         * ```
-         * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=10` and `serverSelectionTimeoutMS=20`.
-         * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
-         *   - Expect this to fail with a timeout error after no more than 15ms.
-         */
-      }
-    );
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(NODE-6223): Auto connect performs extra server selection. Explicit connect throws on invalid host name';
 
-    context(
-      "serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS",
-      () => {
-        /**
-         * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
-         * username and password).
-         * 1. Using `internalClient`, set the following fail point:
-         * ```js
-         *        {
-         *            configureFailPoint: failCommand,
-         *            mode: { times: 1 },
-         *            data: {
-         *                failCommands: ["saslContinue"],
-         *                blockConnection: true,
-         *                blockTimeMS: 15
-         *            }
-         *        }
-         * ```
-         * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=20` and `serverSelectionTimeoutMS=10`.
-         * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
-         *   - Expect this to fail with a timeout error after no more than 15ms.
-         */
-      }
-    );
+    it.skip("timeoutMS honored for connection handshake commands if it's lower than serverSelectionTimeoutMS", async function () {
+      /**
+       * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
+       * username and password).
+       * 1. Using `internalClient`, set the following fail point:
+       * ```js
+       *        {
+       *            configureFailPoint: failCommand,
+       *            mode: { times: 1 },
+       *            data: {
+       *                failCommands: ["saslContinue"],
+       *                blockConnection: true,
+       *                blockTimeMS: 15
+       *            }
+       *        }
+       * ```
+       * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=10` and `serverSelectionTimeoutMS=20`.
+       * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
+       *   - Expect this to fail with a timeout error after no more than 15ms.
+       */
+      await internalClient
+        .db('db')
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['saslContinue'],
+            blockConnection: true,
+            blockTimeMS: 15
+          }
+        });
+
+      client = this.configuration.newClient({
+        serverSelectionTimeoutMS: 20,
+        timeoutMS: 10
+      });
+      const start = now();
+      const maybeError = await client
+        .db('db')
+        .collection('coll')
+        .insertOne({ x: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
+
+    it.skip("serverSelectionTimeoutMS honored for connection handshake commands if it's lower than timeoutMS", async function () {
+      /**
+       * This test MUST only be run if the server version is 4.4 or higher and the URI has authentication fields (i.e. a
+       * username and password).
+       * 1. Using `internalClient`, set the following fail point:
+       * ```js
+       *        {
+       *            configureFailPoint: failCommand,
+       *            mode: { times: 1 },
+       *            data: {
+       *                failCommands: ["saslContinue"],
+       *                blockConnection: true,
+       *                blockTimeMS: 15
+       *            }
+       *        }
+       * ```
+       * 1. Create a new MongoClient (referred to as `client`) with `timeoutMS=20` and `serverSelectionTimeoutMS=10`.
+       * 1. Using `client`, insert the document `{ x: 1 }` into collection `db.coll`.
+       *   - Expect this to fail with a timeout error after no more than 15ms.
+       */
+      await internalClient
+        .db('db')
+        .admin()
+        .command({
+          configureFailPoint: 'failCommand',
+          mode: { times: 1 },
+          data: {
+            failCommands: ['saslContinue'],
+            blockConnection: true,
+            blockTimeMS: 15
+          }
+        });
+
+      client = this.configuration.newClient({
+        serverSelectionTimeoutMS: 10,
+        timeoutMS: 20
+      });
+      const start = now();
+      const maybeError = await client
+        .db('db')
+        .collection('coll')
+        .insertOne({ x: 1 })
+        .then(
+          () => null,
+          e => e
+        );
+      const end = now();
+      expect(maybeError).to.be.instanceof(MongoOperationTimeoutError);
+      expect(end - start).to.be.lte(15);
+    }).skipReason =
+      'TODO(DRIVERS-2347): Requires this ticket to be implemented before we can assert on connection CSOT behaviour';
   });
 
-  context('9. endSession', () => {
+  describe('9. endSession', () => {
+    const metadata: MongoDBMetadataUI = {
+      requires: { mongodb: '>=4.4', topology: ['replicaset', 'sharded'] }
+    };
     /**
      * This test MUST only be run against replica sets and sharded clusters with server version 4.4 or higher. It MUST be
      * run three times: once with the timeout specified via the MongoClient `timeoutMS` option, once with the timeout
@@ -470,12 +630,92 @@ describe.skip('CSOT spec prose tests', () => {
      * 1. Using `session`, execute `session.end_session`
      *    - Expect this to fail with a timeout error after no more than 15ms.
      */
+    const failpoint: FailPoint = {
+      configureFailPoint: 'failCommand',
+      mode: { times: 1 },
+      data: {
+        failCommands: ['abortTransaction'],
+        blockConnection: true,
+        blockTimeMS: 200
+      }
+    };
+
+    beforeEach(async function () {
+      const internalClient = this.configuration.newClient();
+      // End in-progress transactions otherwise "drop" will hang
+      await internalClient.db('admin').command({ killAllSessions: [] });
+      await internalClient
+        .db('endSession_db')
+        .collection('endSession_coll')
+        .drop()
+        .catch(() => null);
+      await internalClient.db('endSession_db').createCollection('endSession_coll');
+      await internalClient.db('admin').command(failpoint);
+      await internalClient.close();
+    });
+
+    let client: MongoClient;
+
+    afterEach(async function () {
+      const internalClient = this.configuration.newClient();
+      await internalClient.db('admin').command({ ...failpoint, mode: 'off' });
+      await internalClient.close();
+      await client?.close();
+    });
+
+    describe('when timeoutMS is provided to the client', () => {
+      it('throws a timeout error from endSession', metadata, async function () {
+        client = this.configuration.newClient({ timeoutMS: 150, monitorCommands: true });
+        const coll = client.db('endSession_db').collection('endSession_coll');
+        const session = client.startSession();
+        session.startTransaction();
+        await coll.insertOne({ x: 1 }, { session });
+        const start = performance.now();
+        const error = await session.endSession().catch(error => error);
+        const end = performance.now();
+        expect(end - start).to.be.within(100, 170);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+      });
+    });
+
+    describe('when defaultTimeoutMS is provided to startSession', () => {
+      it('throws a timeout error from endSession', metadata, async function () {
+        client = this.configuration.newClient();
+        const coll = client.db('endSession_db').collection('endSession_coll');
+        const session = client.startSession({ defaultTimeoutMS: 150 });
+        session.startTransaction();
+        await coll.insertOne({ x: 1 }, { session });
+        const start = performance.now();
+        const error = await session.endSession().catch(error => error);
+        const end = performance.now();
+        expect(end - start).to.be.within(100, 170);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+      });
+    });
+
+    describe('when timeoutMS is provided to endSession', () => {
+      it('throws a timeout error from endSession', metadata, async function () {
+        client = this.configuration.newClient();
+        const coll = client.db('endSession_db').collection('endSession_coll');
+        const session = client.startSession();
+        session.startTransaction();
+        await coll.insertOne({ x: 1 }, { session });
+        const start = performance.now();
+        const error = await session.endSession({ timeoutMS: 150 }).catch(error => error);
+        const end = performance.now();
+        expect(end - start).to.be.within(100, 170);
+        expect(error).to.be.instanceOf(MongoOperationTimeoutError);
+      });
+    });
   });
 
-  context('10. Convenient Transactions', () => {
+  describe('10. Convenient Transactions', () => {
     /** Tests in this section MUST only run against replica sets and sharded clusters with server versions 4.4 or higher. */
+    const metadata: MongoDBMetadataUI = {
+      requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.4' }
+    };
 
-    context('timeoutMS is refreshed for abortTransaction if the callback fails', () => {
+    describe('when an operation fails inside withTransaction callback', () => {
       /**
        * 1. Using `internalClient`, drop the `db.coll` collection.
        * 1. Using `internalClient`, set the following fail point:
@@ -486,7 +726,7 @@ describe.skip('CSOT spec prose tests', () => {
        *     data: {
        *         failCommands: ["insert", "abortTransaction"],
        *         blockConnection: true,
-       *         blockTimeMS: 15
+       *         blockTimeMS: 200
        *     }
        * }
        * ```
@@ -503,6 +743,80 @@ describe.skip('CSOT spec prose tests', () => {
        *   1. `command_started` and `command_failed` events for an `insert` command.
        *   1. `command_started` and `command_failed` events for an `abortTransaction` command.
        */
+
+      const failpoint: FailPoint = {
+        configureFailPoint: 'failCommand',
+        mode: { times: 2 },
+        data: {
+          failCommands: ['insert', 'abortTransaction'],
+          blockConnection: true,
+          blockTimeMS: 200
+        }
+      };
+
+      beforeEach(async function () {
+        if (!semver.satisfies(this.configuration.version, '>=4.4')) {
+          this.skipReason = 'Requires server version 4.4+';
+          this.skip();
+        }
+        const internalClient = this.configuration.newClient();
+        await internalClient
+          .db('db')
+          .collection('coll')
+          .drop()
+          .catch(() => null);
+        await internalClient.db('admin').command(failpoint);
+        await internalClient.close();
+      });
+
+      let client: MongoClient;
+
+      afterEach(async function () {
+        if (semver.satisfies(this.configuration.version, '>=4.4')) {
+          const internalClient = this.configuration.newClient();
+          await internalClient
+            .db('admin')
+            .command({ configureFailPoint: 'failCommand', mode: 'off' });
+          await internalClient.close();
+        }
+        await client?.close();
+      });
+
+      it('timeoutMS is refreshed for abortTransaction', metadata, async function () {
+        if (
+          this.configuration.topologyType === 'ReplicaSetWithPrimary' &&
+          semver.satisfies(this.configuration.version, '<=4.4')
+        ) {
+          this.skipReason = '4.4 replicaset fail point does not blockConnection for requested time';
+          this.skip();
+        }
+
+        const commandsFailed = [];
+        const commandsStarted = [];
+
+        client = this.configuration
+          .newClient({ timeoutMS: 150, monitorCommands: true })
+          .on('commandStarted', e => commandsStarted.push(e.commandName))
+          .on('commandFailed', e => commandsFailed.push(e.commandName));
+
+        const coll = client.db('db').collection('coll');
+
+        const session = client.startSession();
+
+        const withTransactionError = await session
+          .withTransaction(async session => {
+            await coll.insertOne({ x: 1 }, { session });
+          })
+          .catch(error => error);
+
+        try {
+          expect(withTransactionError).to.be.instanceOf(MongoOperationTimeoutError);
+          expect(commandsStarted, 'commands started').to.deep.equal(['insert', 'abortTransaction']);
+          expect(commandsFailed, 'commands failed').to.deep.equal(['insert', 'abortTransaction']);
+        } finally {
+          await session.endSession();
+        }
+      });
     });
   });
 });

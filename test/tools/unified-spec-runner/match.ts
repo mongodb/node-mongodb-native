@@ -24,6 +24,7 @@ import {
   Long,
   MongoBulkWriteError,
   MongoError,
+  MongoOperationTimeoutError,
   MongoServerError,
   ObjectId,
   type OneOrMore,
@@ -97,6 +98,19 @@ export function isMatchAsRootOperator(value: unknown): value is MatchAsRootOpera
   return typeof value === 'object' && value != null && '$$matchAsRoot' in value;
 }
 
+export interface LteOperator {
+  $$lte: number;
+}
+
+export function isLteOperator(value: unknown): value is LteOperator {
+  return (
+    typeof value === 'object' &&
+    value != null &&
+    '$$lte' in value &&
+    typeof value['$$lte'] === 'number'
+  );
+}
+
 export const SpecialOperatorKeys = [
   '$$exists',
   '$$type',
@@ -105,7 +119,8 @@ export const SpecialOperatorKeys = [
   '$$matchAsRoot',
   '$$matchAsDocument',
   '$$unsetOrMatches',
-  '$$sessionLsid'
+  '$$sessionLsid',
+  '$$lte'
 ];
 
 export type SpecialOperator =
@@ -116,7 +131,8 @@ export type SpecialOperator =
   | UnsetOrMatchesOperator
   | SessionLsidOperator
   | MatchAsDocumentOperator
-  | MatchAsRootOperator;
+  | MatchAsRootOperator
+  | LteOperator;
 
 type KeysOfUnion<T> = T extends object ? keyof T : never;
 export type SpecialOperatorKey = KeysOfUnion<SpecialOperator>;
@@ -129,7 +145,8 @@ export function isSpecialOperator(value: unknown): value is SpecialOperator {
     isUnsetOrMatchesOperator(value) ||
     isSessionLsidOperator(value) ||
     isMatchAsRootOperator(value) ||
-    isMatchAsDocumentOperator(value)
+    isMatchAsDocumentOperator(value) ||
+    isLteOperator(value)
   );
 }
 
@@ -156,7 +173,8 @@ TYPE_MAP.set('minKey', actual => actual._bsontype === 'MinKey');
 TYPE_MAP.set('maxKey', actual => actual._bsontype === 'MaxKey');
 TYPE_MAP.set(
   'int',
-  actual => (typeof actual === 'number' && Number.isInteger(actual)) || actual._bsontype === 'Int32'
+  actual =>
+    (typeof actual === 'number' && Number.isInteger(actual)) || actual?._bsontype === 'Int32'
 );
 TYPE_MAP.set(
   'long',
@@ -201,6 +219,10 @@ export function resultCheck(
       resultCheck(objFromActual, value, entities, path, checkExtraKeys);
     } else if (key === 'createIndexes') {
       for (const [i, userIndex] of actual.indexes.entries()) {
+        if (expected?.indexes?.[i]?.key == null) {
+          // The expectation does not include an assertion for the index key
+          continue;
+        }
         expect(expected).to.have.nested.property(`.indexes[${i}].key`).to.be.a('object');
         // @ts-expect-error: Not worth narrowing to a document
         expect(Object.keys(expected.indexes[i].key)).to.have.lengthOf(1);
@@ -343,7 +365,7 @@ export function specialCheck(
     for (const type of types) {
       ok ||= TYPE_MAP.get(type)(actual);
     }
-    expect(ok, `Expected [${actual}] to be one of [${types}]`).to.be.true;
+    expect(ok, `Expected ${path.join('.')} [${actual}] to be one of [${types}]`).to.be.true;
   } else if (isExistsOperator(expected)) {
     // $$exists
     const actualExists = actual !== undefined && actual !== null;
@@ -378,6 +400,9 @@ export function specialCheck(
     );
 
     resultCheck(actual, expected.$$matchAsRoot as any, entities, path, false);
+  } else if (isLteOperator(expected)) {
+    expect(typeof actual).to.equal('number');
+    expect(actual).to.be.lte(expected.$$lte);
   } else {
     expect.fail(`Unknown special operator: ${JSON.stringify(expected)}`);
   }
@@ -476,6 +501,13 @@ function compareCommandFailedEvents(
   }
 }
 
+function expectInstanceOf<T extends new (...args: any[]) => any>(
+  instance: any,
+  ctor: T
+): asserts instance is InstanceType<T> {
+  expect(instance).to.be.instanceOf(ctor);
+}
+
 function compareEvents(
   actual: CommandEvent[] | CmapEvent[] | SdamEvent[],
   expected: (ExpectedCommandEvent & ExpectedCmapEvent & ExpectedSdamEvent)[],
@@ -490,9 +522,7 @@ function compareEvents(
 
     if (expectedEvent.commandStartedEvent) {
       const path = `${rootPrefix}.commandStartedEvent`;
-      if (!(actualEvent instanceof CommandStartedEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandStartedEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandStartedEvent);
       compareCommandStartedEvents(actualEvent, expectedEvent.commandStartedEvent, entities, path);
       if (expectedEvent.commandStartedEvent.hasServerConnectionId) {
         expect(actualEvent).property('serverConnectionId').to.be.a('bigint');
@@ -501,9 +531,7 @@ function compareEvents(
       }
     } else if (expectedEvent.commandSucceededEvent) {
       const path = `${rootPrefix}.commandSucceededEvent`;
-      if (!(actualEvent instanceof CommandSucceededEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandSucceededEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandSucceededEvent);
       compareCommandSucceededEvents(
         actualEvent,
         expectedEvent.commandSucceededEvent,
@@ -517,9 +545,7 @@ function compareEvents(
       }
     } else if (expectedEvent.commandFailedEvent) {
       const path = `${rootPrefix}.commandFailedEvent`;
-      if (!(actualEvent instanceof CommandFailedEvent)) {
-        expect.fail(`expected ${path} to be instanceof CommandFailedEvent`);
-      }
+      expectInstanceOf(actualEvent, CommandFailedEvent);
       compareCommandFailedEvents(actualEvent, expectedEvent.commandFailedEvent, entities, path);
       if (expectedEvent.commandFailedEvent.hasServerConnectionId) {
         expect(actualEvent).property('serverConnectionId').to.be.a('bigint');
@@ -745,6 +771,20 @@ export function expectErrorCheck(
     } else {
       expect(error).not.to.be.instanceOf(MongoServerError);
     }
+  }
+
+  if (expected.isTimeoutError === false) {
+    expect(error).to.not.be.instanceof(MongoOperationTimeoutError);
+  } else if (expected.isTimeoutError === true) {
+    expect(error).to.be.instanceof(MongoOperationTimeoutError);
+  }
+
+  // TODO(NODE-6274): Check for MongoBulkWriteErrors that have a MongoOperationTimeoutError in their
+  // errorResponse field
+  if (expected.isTimeoutError === false) {
+    expect(error).to.not.be.instanceof(MongoOperationTimeoutError);
+  } else if (expected.isTimeoutError === true) {
+    expect(error).to.be.instanceof(MongoOperationTimeoutError);
   }
 
   if (expected.errorContains != null) {

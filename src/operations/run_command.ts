@@ -5,6 +5,7 @@ import { type TODO_NODE_3286 } from '../mongo_types';
 import type { ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type TimeoutContext } from '../timeout';
 import { MongoDBNamespace } from '../utils';
 import { AbstractOperation } from './operation';
 
@@ -14,6 +15,8 @@ export type RunCommandOptions = {
   session?: ClientSession;
   /** The read preference */
   readPreference?: ReadPreferenceLike;
+  /** @internal */
+  timeoutMS?: number;
 } & BSONSerializeOptions;
 
 /** @internal */
@@ -31,7 +34,11 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
     return 'runCommand' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<T> {
     this.server = server;
     const res: TODO_NODE_3286 = await server.command(
       this.ns,
@@ -39,10 +46,12 @@ export class RunCommandOperation<T = Document> extends AbstractOperation<T> {
       {
         ...this.options,
         readPreference: this.readPreference,
-        session
+        session,
+        timeoutContext
       },
       this.options.responseType
     );
+
     return res;
   }
 }
@@ -63,12 +72,17 @@ export class RunAdminCommandOperation<T = Document> extends AbstractOperation<T>
     return 'runCommand' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<T> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<T> {
     this.server = server;
     const res: TODO_NODE_3286 = await server.command(this.ns, this.command, {
       ...this.options,
       readPreference: this.readPreference,
-      session
+      session,
+      timeoutContext
     });
     return res;
   }

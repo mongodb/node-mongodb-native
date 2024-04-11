@@ -3,6 +3,7 @@ import type { Document } from 'bson';
 import type { Collection } from '../../collection';
 import type { Server } from '../../sdam/server';
 import type { ClientSession } from '../../sessions';
+import { type TimeoutContext } from '../../timeout';
 import { AbstractOperation } from '../operation';
 
 /** @internal */
@@ -19,7 +20,11 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
     return 'updateSearchIndex' as const;
   }
 
-  override async execute(server: Server, session: ClientSession | undefined): Promise<void> {
+  override async execute(
+    server: Server,
+    session: ClientSession | undefined,
+    timeoutContext: TimeoutContext
+  ): Promise<void> {
     const namespace = this.collection.fullNamespace;
     const command = {
       updateSearchIndex: namespace.collection,
@@ -27,7 +32,7 @@ export class UpdateSearchIndexOperation extends AbstractOperation<void> {
       definition: this.definition
     };
 
-    await server.command(namespace, command, { session });
+    await server.command(namespace, command, { session, timeoutContext });
     return;
   }
 }

@@ -262,6 +262,11 @@ export class Collection<TSchema extends Document = Document> {
     this.s.collectionHint = normalizeHintField(v);
   }
 
+  /** @internal */
+  get timeoutMS(): number | undefined {
+    return this.s.options.timeoutMS;
+  }
+
   /**
    * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
    * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -465,10 +470,14 @@ export class Collection<TSchema extends Document = Document> {
     // Intentionally, we do not inherit options from parent for this operation.
     return await executeOperation(
       this.client,
-      new RenameOperation(this as TODO_NODE_3286, newName, {
-        ...options,
-        readPreference: ReadPreference.PRIMARY
-      }) as TODO_NODE_3286
+      new RenameOperation(
+        this as TODO_NODE_3286,
+        newName,
+        resolveOptions(undefined, {
+          ...options,
+          readPreference: ReadPreference.PRIMARY
+        })
+      ) as TODO_NODE_3286
     );
   }
 
