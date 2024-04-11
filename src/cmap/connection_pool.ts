@@ -388,6 +388,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
       }
     } else {
       timeout = Timeout.expires(waitQueueTimeoutMS);
+      clearTimeout = true;
     }
 
     const waitQueueMember: WaitQueueMember = {

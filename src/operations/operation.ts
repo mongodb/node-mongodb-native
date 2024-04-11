@@ -67,6 +67,9 @@ export abstract class AbstractOperation<TResult = any> {
   /** @internal */
   timeoutMS?: number;
 
+  /** @internal */
+  serverSelectionTimeout?: Timeout;
+
   [kSession]: ClientSession | undefined;
 
   constructor(options: OperationOptions = {}) {

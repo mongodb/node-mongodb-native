@@ -112,8 +112,7 @@ export class FindOperation extends CommandOperation<Document> {
         ...this.options,
         ...this.bsonOptions,
         documentsReturnedIn: 'firstBatch',
-        session,
-        timeout: this.timeout
+        sessiontimeout: this.timeout
       },
       undefined
     );

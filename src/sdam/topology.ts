@@ -565,6 +565,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
     const serverSelectionTimeoutMS = options.serverSelectionTimeoutMS ?? 0;
     let timeout: Timeout | null;
+
     if (options.timeout) {
       // CSOT Enabled
       if (options.timeout.duration > 0 || serverSelectionTimeoutMS > 0) {
@@ -581,6 +582,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       }
     } else {
       timeout = Timeout.expires(serverSelectionTimeoutMS);
+      clearTimeout = true;
     }
 
     const isSharded = this.description.type === TopologyType.Sharded;
