@@ -2,6 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { type Timeout } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -56,6 +57,11 @@ export abstract class AbstractOperation<TResult = any> {
 
   options: OperationOptions;
 
+  /** @internal */
+  timeout?: Timeout;
+  /** @internal */
+  timeoutMS?: number;
+
   [kSession]: ClientSession | undefined;
 
   static aspects?: Set<symbol>;
@@ -73,6 +79,8 @@ export abstract class AbstractOperation<TResult = any> {
     this.options = options;
     this.bypassPinningCheck = !!options.bypassPinningCheck;
     this.trySecondaryWrite = false;
+
+    this.timeoutMS = options.timeoutMS;
   }
 
   /** Must match the first key of the command object sent to the server.
