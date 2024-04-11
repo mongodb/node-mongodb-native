@@ -1,4 +1,6 @@
-import { EJSON, type ObjectId } from '../bson';
+import { EJSON } from 'bson';
+
+import { type ObjectId } from '../bson';
 import * as WIRE_CONSTANTS from '../cmap/wire_protocol/constants';
 import { MongoRuntimeError, type MongoServerError } from '../error';
 import { compareObjectId, shuffle } from '../utils';
