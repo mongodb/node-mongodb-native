@@ -33,6 +33,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
+import { type Timeout } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -178,6 +179,8 @@ export interface SelectServerOptions {
   session?: ClientSession;
   operationName: string;
   previousServer?: ServerDescription;
+  /** @internal*/
+  timeout?: Timeout | null;
 }
 
 /** @public */
@@ -623,7 +626,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
 
-    return await serverPromise;
+    return await (options.timeout ? Promise.race([options.timeout, serverPromise]) : serverPromise);
   }
   /**
    * Update the internal TopologyDescription with a ServerDescription

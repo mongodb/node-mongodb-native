@@ -547,6 +547,7 @@ export type {
   WithTransactionCallback
 } from './sessions';
 export type { Sort, SortDirection, SortDirectionForCmd, SortForCmd } from './sort';
+export type { Timeout } from './timeout';
 export type { Transaction, TransactionOptions, TxnState } from './transactions';
 export type {
   BufferPool,
