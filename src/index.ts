@@ -471,6 +471,8 @@ export type {
   CreateIndexesOptions,
   DropIndexesOptions,
   IndexDescription,
+  IndexDescriptionCompact,
+  IndexDescriptionInfo,
   IndexDirection,
   IndexSpecification,
   ListIndexesOptions
