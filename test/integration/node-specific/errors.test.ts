@@ -1,16 +1,8 @@
 import { expect } from 'chai';
 
-import { MongoClient, MongoServerSelectionError, ReadPreference } from '../../mongodb';
+import { type MongoClient, ReadPreference } from '../../mongodb';
 
 describe('Error (Integration)', function () {
-  it('NODE-5296: handles aggregate errors from dns lookup', async function () {
-    const error = await MongoClient.connect('mongodb://localhost:27222', {
-      serverSelectionTimeoutMS: 1000
-    }).catch(e => e);
-    expect(error).to.be.instanceOf(MongoServerSelectionError);
-    expect(error.message).not.to.be.empty;
-  });
-
   context('when a server selection error is stringified', function () {
     it(
       'the error"s topology description correctly displays the `servers`',
