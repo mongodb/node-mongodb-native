@@ -1344,3 +1344,7 @@ export async function fileIsAccessible(fileName: string, mode?: number) {
     return false;
   }
 }
+
+export function noop() {
+  return;
+}
