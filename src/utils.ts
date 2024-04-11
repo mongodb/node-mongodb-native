@@ -1080,11 +1080,13 @@ export function commandSupportsReadConcern(command: Document): boolean {
 export function commandIsReadOperation(command: Document): boolean {
   if (
     command.find ||
-    command.findOne ||
-    command.ensureIndex ||
     command.count ||
     command.aggregate ||
-    command.distinct
+    command.distinct ||
+    command.dbStats ||
+    command.listDatabases ||
+    command.listCollections ||
+    command.getMore
   ) {
     return true;
   }
