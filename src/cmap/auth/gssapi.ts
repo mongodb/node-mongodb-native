@@ -29,14 +29,12 @@ type MechanismProperties = {
 async function externalCommand(
   connection: Connection,
   command: ReturnType<typeof saslStart> | ReturnType<typeof saslContinue>
-): Promise<{ payload: string; conversationId: any }> {
-  return await (connection.command(ns('$external.$cmd'), command, undefined) as Promise<{
-    payload: string;
-    conversationId: any;
-  }>);
+): Promise<{ payload: string; conversationId: number }> {
+  const response = await connection.command(ns('$external.$cmd'), command);
+  return response as { payload: string; conversationId: number };
 }
 
-let krb: typeof Kerberos;
+let krb: Kerberos;
 
 export class GSSAPI extends AuthProvider {
   override async auth(authContext: AuthContext): Promise<void> {
