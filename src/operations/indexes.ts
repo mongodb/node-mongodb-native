@@ -215,6 +215,18 @@ function resolveIndexDescription(
 }
 
 /**
+ * @public
+ * The index information returned by the listIndexes command. https://www.mongodb.com/docs/manual/reference/command/listIndexes/#mongodb-dbcommand-dbcmd.listIndexes
+ */
+export type IndexDescriptionInfo = Omit<IndexDescription, 'key' | 'version'> & {
+  key: { [key: string]: IndexDirection };
+  v?: IndexDescription['version'];
+} & Document;
+
+/** @public */
+export type IndexDescriptionCompact = Record<string, [name: string, direction: IndexDirection][]>;
+
+/**
  * @internal
  *
  * Internally, the driver represents index description keys with `Map`s to preserve key ordering.

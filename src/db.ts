@@ -25,6 +25,8 @@ import { executeOperation } from './operations/execute_operation';
 import {
   CreateIndexesOperation,
   type CreateIndexesOptions,
+  type IndexDescriptionCompact,
+  type IndexDescriptionInfo,
   type IndexInformationOptions,
   type IndexSpecification
 } from './operations/indexes';
@@ -485,7 +487,23 @@ export class Db {
    * @param name - The name of the collection.
    * @param options - Optional settings for the command
    */
-  async indexInformation(name: string, options?: IndexInformationOptions): Promise<Document> {
+  indexInformation(
+    name: string,
+    options: IndexInformationOptions & { full: true }
+  ): Promise<IndexDescriptionInfo[]>;
+  indexInformation(
+    name: string,
+    options: IndexInformationOptions & { full?: false }
+  ): Promise<IndexDescriptionCompact>;
+  indexInformation(
+    name: string,
+    options: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
+  indexInformation(name: string): Promise<IndexDescriptionCompact>;
+  async indexInformation(
+    name: string,
+    options?: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]> {
     return await this.collection(name).indexInformation(resolveOptions(this, options));
   }
 

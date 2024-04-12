@@ -52,7 +52,8 @@ import type {
   CreateIndexesOptions,
   DropIndexesOptions,
   IndexDescription,
-  IndexDirection,
+  IndexDescriptionCompact,
+  IndexDescriptionInfo,
   IndexInformationOptions,
   IndexSpecification,
   ListIndexesOptions
@@ -695,8 +696,23 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexInformation(options?: IndexInformationOptions): Promise<Document> {
-    return await this.indexes({ ...options, full: options?.full ?? false });
+  indexInformation(
+    options: IndexInformationOptions & { full: true }
+  ): Promise<IndexDescriptionInfo[]>;
+  indexInformation(
+    options: IndexInformationOptions & { full?: false }
+  ): Promise<IndexDescriptionCompact>;
+  indexInformation(
+    options: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
+  indexInformation(): Promise<IndexDescriptionCompact>;
+  async indexInformation(
+    options?: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]> {
+    return await this.indexes({
+      ...options,
+      full: options?.full ?? false
+    });
   }
 
   /**
@@ -800,19 +816,25 @@ export class Collection<TSchema extends Document = Document> {
    *
    * @param options - Optional settings for the command
    */
-  async indexes(options?: IndexInformationOptions): Promise<Document[]> {
-    const indexes = await this.listIndexes(options).toArray();
+  indexes(options: IndexInformationOptions & { full?: true }): Promise<IndexDescriptionInfo[]>;
+  indexes(options: IndexInformationOptions & { full: false }): Promise<IndexDescriptionCompact>;
+  indexes(
+    options: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]>;
+  indexes(options?: ListIndexesOptions): Promise<IndexDescriptionInfo[]>;
+  async indexes(
+    options?: IndexInformationOptions
+  ): Promise<IndexDescriptionCompact | IndexDescriptionInfo[]> {
+    const indexes: IndexDescriptionInfo[] = await this.listIndexes(options).toArray();
     const full = options?.full ?? true;
     if (full) {
       return indexes;
     }
 
-    const object: Record<
-      string,
-      Array<[name: string, direction: IndexDirection]>
-    > = Object.fromEntries(indexes.map(({ name, key }) => [name, Object.entries(key)]));
+    const object: IndexDescriptionCompact = Object.fromEntries(
+      indexes.map(({ name, key }) => [name, Object.entries(key)])
+    );
 
-    // @ts-expect-error TODO(NODE-6029): fix return type of `indexes()` and `indexInformation()`
     return object;
   }
 
@@ -1074,6 +1096,7 @@ export class Collection<TSchema extends Document = Document> {
   ): ListSearchIndexesCursor {
     options =
       typeof indexNameOrOptions === 'object' ? indexNameOrOptions : options == null ? {} : options;
+
     const indexName =
       indexNameOrOptions == null
         ? null
