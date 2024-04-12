@@ -118,7 +118,8 @@ export abstract class CommandOperation<T> extends AbstractOperation<T> {
       ...this.options,
       ...this.bsonOptions,
       readPreference: this.readPreference,
-      session
+      session,
+      timeout: this.timeout
     };
 
     const serverWireVersion = maxWireVersion(server);

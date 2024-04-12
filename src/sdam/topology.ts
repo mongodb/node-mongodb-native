@@ -180,7 +180,7 @@ export interface SelectServerOptions {
   operationName: string;
   previousServer?: ServerDescription;
   /** @internal*/
-  timeout?: Timeout;
+  timeout?: Timeout | null;
 }
 
 /** @public */
@@ -285,8 +285,8 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
 
     const selectedHosts =
       options.srvMaxHosts == null ||
-        options.srvMaxHosts === 0 ||
-        options.srvMaxHosts >= seedlist.length
+      options.srvMaxHosts === 0 ||
+      options.srvMaxHosts >= seedlist.length
         ? seedlist
         : shuffle(seedlist, options.srvMaxHosts);
 
@@ -932,10 +932,10 @@ function processWaitQueue(topology: Topology) {
       const previousServer = waitQueueMember.previousServer;
       selectedDescriptions = serverSelector
         ? serverSelector(
-          topology.description,
-          serverDescriptions,
-          previousServer ? [previousServer] : []
-        )
+            topology.description,
+            serverDescriptions,
+            previousServer ? [previousServer] : []
+          )
         : serverDescriptions;
     } catch (selectorError) {
       waitQueueMember.timeoutController.clear();

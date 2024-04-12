@@ -2,6 +2,7 @@ import { type BSONSerializeOptions, type Document, resolveBSONOptions } from '..
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
+import { Timeout } from '../timeout';
 import type { MongoDBNamespace } from '../utils';
 
 export const Aspect = {
@@ -63,7 +64,10 @@ export abstract class AbstractOperation<TResult = any> {
 
   [kSession]: ClientSession | undefined;
 
+  timeout?: Timeout | null;
+
   constructor(options: OperationOptions = {}) {
+    this.timeout = options.timeoutMS != null ? Timeout.expires(options.timeoutMS) : null;
     this.readPreference = this.hasAspect(Aspect.WRITE_OPERATION)
       ? ReadPreference.primary
       : ReadPreference.fromOptions(options) ?? ReadPreference.primary;

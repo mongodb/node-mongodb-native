@@ -260,7 +260,8 @@ async function retryOperation<
   const server = await topology.selectServer(selector, {
     session,
     operationName: operation.commandName,
-    previousServer
+    previousServer,
+    timeout: operation.timeout
   });
 
   if (isWriteOperation && !supportsRetryableWrites(server)) {

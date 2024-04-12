@@ -36,7 +36,12 @@ export class BulkWriteOperation extends AbstractOperation<BulkWriteResult> {
   ): Promise<BulkWriteResult> {
     const coll = this.collection;
     const operations = this.operations;
-    const options = { ...this.options, ...this.bsonOptions, readPreference: this.readPreference };
+    const options = {
+      ...this.options,
+      ...this.bsonOptions,
+      readPreference: this.readPreference,
+      timeout: this.timeout
+    };
 
     // Create the bulk operation
     const bulk: BulkOperationBase =
