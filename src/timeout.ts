@@ -3,6 +3,7 @@ import { clearTimeout, setTimeout } from 'timers';
 import { MongoError } from './error';
 import { noop } from './utils';
 
+/** @internal */
 export class CSOTError extends MongoError {
   override get name(): 'CSOTError' {
     return 'CSOTError';
@@ -23,6 +24,7 @@ export class CSOTError extends MongoError {
   }
 }
 
+/** @internal */
 export class Timeout extends Promise<never> {
   get [Symbol.toStringTag](): 'MongoDBTimeout' {
     return 'MongoDBTimeout';
@@ -48,6 +50,8 @@ export class Timeout extends Promise<never> {
     executor: ConstructorParameters<typeof Promise<never>>[0] = () => null,
     duration = 0
   ) {
+    // for a promise constructed as follows new Promise((resolve: (a) => void, reject: (b) => void){})
+    // reject here is of type: typeof(reject)
     let reject!: Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
 
     super((_, promiseReject) => {
@@ -55,10 +59,13 @@ export class Timeout extends Promise<never> {
       executor(noop, promiseReject);
     });
 
+    // Construct timeout error at point of Timeout instantiation to preserve stack traces
     this.timeoutError = new CSOTError('Timeout!');
+
     this.expireTimeout = () => {
       this.ended = Math.trunc(performance.now());
       this.timedOut = true;
+      // Wrap error here: Why?
       reject(CSOTError.from(this.timeoutError));
     };
 
@@ -122,6 +129,7 @@ export class Timeout extends Promise<never> {
       Symbol.toStringTag in timeout &&
       timeout[Symbol.toStringTag] === 'MongoDBTimeout' &&
       'then' in timeout &&
+      // eslint-disable-next-line github/no-then
       typeof timeout.then === 'function'
     );
   }
