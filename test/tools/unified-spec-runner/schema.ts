@@ -362,6 +362,7 @@ export interface StoreEventsAsEntity {
 export interface ExpectedError {
   isError?: true;
   isClientError?: boolean;
+  isTimeoutError?: boolean;
   errorContains?: string;
   errorCode?: number;
   errorCodeName?: string;
