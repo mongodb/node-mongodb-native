@@ -746,13 +746,6 @@ async function endTransaction(
     command.recoveryToken = session.transaction.recoveryToken;
   }
 
-  const partiallyHandleFirstCommandAttempt = async () => {
-    if (command.abortTransaction) {
-      // always unpin on abort regardless of command outcome
-      session.unpin();
-    }
-  };
-
   try {
     // send the command
     await executeOperation(
@@ -763,10 +756,16 @@ async function endTransaction(
         bypassPinningCheck: true
       })
     );
-    await partiallyHandleFirstCommandAttempt();
+    if (command.abortTransaction) {
+      // always unpin on abort regardless of command outcome
+      session.unpin();
+    }
     commandHandler();
   } catch (firstAttemptErr) {
-    await partiallyHandleFirstCommandAttempt();
+    if (command.abortTransaction) {
+      // always unpin on abort regardless of command outcome
+      session.unpin();
+    }
     if (firstAttemptErr instanceof MongoError && isRetryableWriteError(firstAttemptErr)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
