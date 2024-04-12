@@ -29,7 +29,7 @@ import { type CancellationToken, TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import { ServerType } from '../sdam/common';
 import { applySession, type ClientSession, updateSessionFromResponse } from '../sessions';
-import { type Timeout } from '../timeout';
+import { Timeout } from '../timeout';
 import {
   BufferPool,
   calculateDurationInMs,
@@ -59,6 +59,7 @@ import {
   type WriteProtocolMessageType
 } from './commands';
 import type { Stream } from './connect';
+import { type ConnectionPool } from './connection_pool';
 import type { ClientMetadata } from './handshake/client_metadata';
 import { StreamDescription, type StreamDescriptionOptions } from './stream_description';
 import { type CompressorName, decompressResponse } from './wire_protocol/compression';
@@ -183,6 +184,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    * Once connection is established, command logging can log events (if enabled)
    */
   public established: boolean;
+  public pool?: ConnectionPool;
   /** Indicates that the connection (including underlying TCP socket) has been closed. */
   public closed = false;
 
@@ -279,6 +281,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     );
   }
 
+  private get minRoundTripTime(): number {
+    return this.pool?.server.description.minRoundTripTime ?? 0;
+  }
+
   public markAvailable(): void {
     this.lastUseTime = now();
   }
@@ -342,6 +348,10 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     const session = options?.session;
 
     let clusterTime = this.clusterTime;
+
+    if (Timeout.is(options.timeout) && options.timeout.duration > 0) {
+      cmd.maxTimeMS = options.timeout.getMaxTimeMS(this.minRoundTripTime);
+    }
 
     if (this.serverApi) {
       const { version, strict, deprecationErrors } = this.serverApi;
@@ -432,7 +442,8 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
     try {
       await this.writeCommand(message, {
         agreedCompressor: this.description.compressor ?? 'none',
-        zlibCompressionLevel: this.description.zlibCompressionLevel
+        zlibCompressionLevel: this.description.zlibCompressionLevel,
+        timeout: options.timeout
       });
 
       if (options.noResponse) {
@@ -442,7 +453,7 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
       this.throwIfAborted();
 
-      for await (const response of this.readMany()) {
+      for await (const response of this.readMany({ timeout: options.timeout })) {
         this.socket.setTimeout(0);
         const bson = response.parse();
 
@@ -635,7 +646,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    */
   private async writeCommand(
     command: WriteProtocolMessageType,
-    options: { agreedCompressor?: CompressorName; zlibCompressionLevel?: number }
+    options: {
+      agreedCompressor?: CompressorName;
+      zlibCompressionLevel?: number;
+      timeout?: Timeout | null;
+    }
   ): Promise<void> {
     const finalCommand =
       options.agreedCompressor === 'none' || !OpCompressedRequest.canCompress(command)
@@ -647,8 +662,15 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
 
     const buffer = Buffer.concat(await finalCommand.toBin());
 
-    if (this.socket.write(buffer)) return;
-    return await once(this.socket, 'drain');
+    if (this.socket.write(buffer)) {
+      return;
+    }
+    const drain = once(this.socket, 'drain');
+
+    if (options.timeout) {
+      await Promise.race([drain, options.timeout]);
+    }
+    await drain;
   }
 
   /**
@@ -660,9 +682,11 @@ export class Connection extends TypedEventEmitter<ConnectionEvents> {
    *
    * Note that `for-await` loops call `return` automatically when the loop is exited.
    */
-  private async *readMany(): AsyncGenerator<OpMsgResponse | OpReply> {
+  private async *readMany(options: {
+    timeout?: Timeout | null;
+  }): AsyncGenerator<OpMsgResponse | OpReply> {
     try {
-      this.dataEvents = onData(this.messageStream);
+      this.dataEvents = onData(this.messageStream, options);
       for await (const message of this.dataEvents) {
         const response = await decompressResponse(message);
         yield response;

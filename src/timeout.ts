@@ -24,7 +24,10 @@ export class CSOTError extends MongoError {
   }
 }
 
-/** @internal */
+/** @internal
+ * This class is an abstraction over CSOT timeouts, implementing the specification outlined in
+ * https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
+ * */
 export class Timeout extends Promise<never> {
   get [Symbol.toStringTag](): 'MongoDBTimeout' {
     return 'MongoDBTimeout';
@@ -39,6 +42,9 @@ export class Timeout extends Promise<never> {
   public duration: number;
   public timedOut = false;
 
+  /**
+   * Return the amount of time remaining until a CSOTError is thrown
+   * */
   public get remainingTime(): number {
     if (this.duration === 0) return Infinity;
     if (this.timedOut) return 0;
@@ -59,13 +65,13 @@ export class Timeout extends Promise<never> {
       executor(noop, promiseReject);
     });
 
-    // Construct timeout error at point of Timeout instantiation to preserve stack traces
+    // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
     this.timeoutError = new CSOTError('Timeout!');
 
     this.expireTimeout = () => {
       this.ended = Math.trunc(performance.now());
       this.timedOut = true;
-      // Wrap error here: Why?
+      // NOTE: Wrap error here: Why?
       reject(CSOTError.from(this.timeoutError));
     };
 
@@ -108,7 +114,12 @@ export class Timeout extends Promise<never> {
     }
   }
 
+  /**
+   * Implement maxTimeMS calculation detailed in https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md#command-execution
+   * */
   public getMaxTimeMS(minRoundTripTime: number): any {
+    console.log(`remaining time: ${this.remainingTime}, minRTT: ${minRoundTripTime}`);
+    if (!Number.isFinite(this.remainingTime)) return 0;
     if (minRoundTripTime < this.remainingTime) return this.remainingTime - minRoundTripTime;
     throw CSOTError.from(this.timeoutError);
   }
@@ -118,6 +129,7 @@ export class Timeout extends Promise<never> {
     return Timeout.expires(this.duration);
   }
 
+  /** Create a new timeout that expires in `duration` ms */
   public static expires(duration: number): Timeout {
     return new Timeout(undefined, duration);
   }

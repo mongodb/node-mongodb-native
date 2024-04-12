@@ -187,6 +187,9 @@ export async function executeOperation<
   }
 
   try {
+    if (operation.timeout) {
+      return await Promise.race([operation.execute(server, session), operation.timeout]);
+    }
     return await operation.execute(server, session);
   } catch (operationError) {
     if (willRetry && operationError instanceof MongoError) {
@@ -271,6 +274,9 @@ async function retryOperation<
   }
 
   try {
+    if (operation.timeout) {
+      return await Promise.race([operation.execute(server, session), operation.timeout]);
+    }
     return await operation.execute(server, session);
   } catch (retryError) {
     if (

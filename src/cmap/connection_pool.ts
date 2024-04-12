@@ -168,6 +168,8 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
   [kMetrics]: ConnectionPoolMetrics;
   [kProcessingWaitQueue]: boolean;
 
+  server: Server;
+
   /**
    * Emitted when the connection pool is created.
    * @event
@@ -247,6 +249,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
 
     this[kPoolState] = PoolState.paused;
     this[kServer] = server;
+    this.server = server;
     this[kConnections] = new List();
     this[kPending] = 0;
     this[kCheckedOut] = new Set();
