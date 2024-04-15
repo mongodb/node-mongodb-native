@@ -1,11 +1,6 @@
 import { expect } from 'chai';
 
-import {
-  type Collection,
-  type MongoClient,
-  MongoCompatibilityError,
-  ObjectId
-} from '../../../mongodb';
+import { type Collection, type MongoClient, ObjectId } from '../../../mongodb';
 
 describe('raw bson support', () => {
   describe('raw', () => {
@@ -29,14 +24,9 @@ describe('raw bson support', () => {
               .findOne({ myData: 23 }, passOptionTo === 'operation' ? option : undefined)
               .catch(error => error);
 
-            if (passOptionTo === 'client') {
-              // TODO(NODE-3946): When the raw option is passed to the client it crashed parsing hellos
-              // since they are returned as buffers and not js objects
-              expect(insertResult).to.be.instanceOf(MongoCompatibilityError);
-            } else {
-              expect(insertResult).to.have.property('insertedId').that.is.instanceOf(ObjectId);
-              expect(findOneResult).to.be.instanceOf(Buffer);
-            }
+            expect(insertResult).to.have.property('acknowledged').to.be.true;
+            expect(insertResult).to.have.property('insertedId').that.is.instanceOf(ObjectId);
+            expect(findOneResult).to.be.instanceOf(Buffer);
           } finally {
             await client.close();
           }

@@ -19,7 +19,7 @@
       ],
       "closeConnection": false,
       "blockConnection": true,
-      "blockTimeMS": 750
+      "blockTimeMS": 800
     }
   },
   "poolOptions": {
@@ -53,7 +53,7 @@
     },
     {
       "name": "wait",
-      "ms": 100
+      "ms": 400
     },
     {
       "name": "checkOut",

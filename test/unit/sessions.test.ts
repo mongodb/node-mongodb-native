@@ -1,21 +1,21 @@
-'use strict';
+import { expect } from 'chai';
+import * as sinon from 'sinon';
 
-const mock = require('../tools/mongodb-mock/index');
-const { expect } = require('chai');
-const { genClusterTime } = require('../tools/common');
-const {
-  ServerSessionPool,
-  ServerSession,
-  ClientSession,
+import {
   applySession,
-  BSON
-} = require('../mongodb');
-const { now, isHello } = require('../mongodb');
-const { getSymbolFrom } = require('../tools/utils');
-const { Long } = require('../mongodb');
-const { MongoRuntimeError } = require('../mongodb');
-const sinon = require('sinon');
-const { MongoClient } = require('../mongodb');
+  BSON,
+  ClientSession,
+  isHello,
+  Long,
+  MongoClient,
+  MongoRuntimeError,
+  now,
+  ServerSession,
+  ServerSessionPool
+} from '../mongodb';
+import { genClusterTime } from '../tools/common';
+import * as mock from '../tools/mongodb-mock/index';
+import { getSymbolFrom } from '../tools/utils';
 
 describe('Sessions - unit', function () {
   let client;
@@ -272,6 +272,60 @@ describe('Sessions - unit', function () {
         const txnNumberIncrementSymbol = getSymbolFrom(session, 'txnNumberIncrement');
         expect(session).to.have.property(txnNumberIncrementSymbol, 0);
       });
+
+      describe('defaultTimeoutMS', function () {
+        let client: MongoClient;
+        let session: ClientSession;
+        let server;
+
+        beforeEach(async () => {
+          server = await mock.createServer();
+        });
+
+        afterEach(async () => {
+          await mock.cleanup();
+        });
+
+        context('when client has defined timeoutMS', function () {
+          beforeEach(async () => {
+            client = new MongoClient(`mongodb://${server.hostAddress()}`, { timeoutMS: 100 });
+          });
+
+          context('when defaultTimeoutMS is defined', function () {
+            it(`overrides client's timeoutMS value`, function () {
+              session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
+              expect(session).to.have.property('timeoutMS', 200);
+            });
+          });
+
+          context('when defaultTimeoutMS is not defined', function () {
+            it(`inherits client's timeoutMS value`, function () {
+              session = new ClientSession(client, serverSessionPool, {});
+              expect(session).to.have.property('timeoutMS', 100);
+            });
+          });
+        });
+
+        context('when client has not defined timeoutMS', function () {
+          beforeEach(async () => {
+            client = new MongoClient(`mongodb://${server.hostAddress()}`, {});
+          });
+
+          context('when defaultTimeoutMS is defined', function () {
+            it(`sets timeoutMS to defaultTimeoutMS`, function () {
+              session = new ClientSession(client, serverSessionPool, { defaultTimeoutMS: 200 });
+              expect(session).to.have.property('timeoutMS', 200);
+            });
+          });
+
+          context('when defaultTimeoutMS is not defined', function () {
+            it(`leaves timeoutMS as undefined`, function () {
+              session = new ClientSession(client, serverSessionPool, {});
+              expect(session.timeoutMS).to.be.undefined;
+            });
+          });
+        });
+      });
     });
 
     describe('get serverSession()', () => {
@@ -442,7 +496,7 @@ describe('Sessions - unit', function () {
     beforeEach(async () => {
       server = await mock.createServer();
       server.setMessageHandler(request => {
-        var doc = request.document;
+        const doc = request.document;
         if (isHello(doc)) {
           request.reply(Object.assign({}, mock.HELLO, { logicalSessionTimeoutMinutes: 10 }));
         }

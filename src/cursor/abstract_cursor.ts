@@ -109,6 +109,8 @@ export interface AbstractCursorOptions extends BSONSerializeOptions {
    */
   awaitData?: boolean;
   noCursorTimeout?: boolean;
+  /** @internal TODO(NODE-5688): make this public */
+  timeoutMS?: number;
 }
 
 /** @internal */
@@ -184,6 +186,7 @@ export abstract class AbstractCursor<
           : ReadPreference.primary,
       ...pluckBSONSerializeOptions(options)
     };
+    this[kOptions].timeoutMS = options.timeoutMS;
 
     const readConcern = ReadConcern.fromOptions(options);
     if (readConcern) {
