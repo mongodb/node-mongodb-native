@@ -119,10 +119,13 @@ export async function executeOperation<
   const readPreference = operation.readPreference ?? ReadPreference.primary;
   const inTransaction = !!session?.inTransaction();
 
+  const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
+  const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
+
   if (
     inTransaction &&
     !readPreference.equals(ReadPreference.primary) &&
-    (operation.hasAspect(Aspect.READ_OPERATION) || operation.commandName === 'runCommand')
+    (hasReadAspect || operation.commandName === 'runCommand')
   ) {
     throw new MongoTransactionError(
       `Read preference in a transaction must be primary, not: ${readPreference.mode}`
@@ -181,8 +184,6 @@ export async function executeOperation<
     supportsRetryableWrites(server) &&
     operation.canRetryWrite;
 
-  const hasReadAspect = operation.hasAspect(Aspect.READ_OPERATION);
-  const hasWriteAspect = operation.hasAspect(Aspect.WRITE_OPERATION);
   const willRetry = (hasReadAspect && willRetryRead) || (hasWriteAspect && willRetryWrite);
 
   if (hasWriteAspect && willRetryWrite) {
