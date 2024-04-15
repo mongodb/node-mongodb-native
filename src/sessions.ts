@@ -194,7 +194,7 @@ export class ClientSession extends TypedEventEmitter<ClientSessionEvents> {
 
     this.operationTime = undefined;
     this.owner = options.owner;
-    this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
+    this.defaultTransactionOptions = { ...options.defaultTransactionOptions };
     this.transaction = new Transaction();
   }
 
