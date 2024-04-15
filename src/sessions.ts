@@ -1,5 +1,3 @@
-/* eslint-disable github/no-then */
-
 import { Binary, type Document, Long, type Timestamp } from './bson';
 import type { CommandOptions, Connection } from './cmap/connection';
 import { ConnectionPoolMetrics } from './cmap/metrics';
@@ -557,28 +555,28 @@ async function attemptTransactionCommit<T>(
   session: ClientSession,
   startTime: number,
   fn: WithTransactionCallback<T>,
-  result: any,
+  result: T,
   options: TransactionOptions
 ): Promise<T> {
   try {
     await session.commitTransaction();
     return result;
-  } catch (err) {
+  } catch (commitErr) {
     if (
-      err instanceof MongoError &&
+      commitErr instanceof MongoError &&
       hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT) &&
-      !isMaxTimeMSExpiredError(err)
+      !isMaxTimeMSExpiredError(commitErr)
     ) {
-      if (err.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
+      if (commitErr.hasErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult)) {
         return await attemptTransactionCommit(session, startTime, fn, result, options);
       }
 
-      if (err.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+      if (commitErr.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
         return await attemptTransaction(session, startTime, fn, options);
       }
     }
 
-    throw err;
+    throw commitErr;
   }
 }
 
@@ -597,7 +595,7 @@ async function attemptTransaction<T>(
   startTime: number,
   fn: WithTransactionCallback<T>,
   options: TransactionOptions = {}
-): Promise<any> {
+): Promise<T> {
   session.startTransaction(options);
 
   let promise;
@@ -608,7 +606,11 @@ async function attemptTransaction<T>(
   }
 
   if (!isPromiseLike(promise)) {
-    await session.abortTransaction().catch(() => null);
+    try {
+      await session.abortTransaction();
+    } catch (error) {
+      squashError(error);
+    }
     throw new MongoInvalidArgumentError(
       'Function provided to `withTransaction` must return a Promise'
     );
@@ -711,39 +713,6 @@ async function endTransaction(
     Object.assign(command, { maxTimeMS: session.transaction.options.maxTimeMS });
   }
 
-  function commandHandler(error?: Error) {
-    if (commandName !== 'commitTransaction') {
-      session.transaction.transition(TxnState.TRANSACTION_ABORTED);
-      if (session.loadBalanced) {
-        maybeClearPinnedConnection(session, { force: false });
-      }
-      // The spec indicates that if the operation times out or fails with a non-retryable error, we should ignore all errors on `abortTransaction`
-      return;
-    }
-
-    session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
-    if (error instanceof MongoError) {
-      if (
-        isRetryableWriteError(error) ||
-        error instanceof MongoWriteConcernError ||
-        isMaxTimeMSExpiredError(error)
-      ) {
-        if (isUnknownTransactionCommitResult(error)) {
-          error.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
-
-          // per txns spec, must unpin session in this case
-          session.unpin({ error });
-        }
-      } else if (error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
-        session.unpin({ error });
-      }
-    }
-
-    if (error != null) {
-      throw error;
-    }
-  }
-
   if (session.transaction.recoveryToken) {
     command.recoveryToken = session.transaction.recoveryToken;
   }
@@ -762,7 +731,14 @@ async function endTransaction(
       // always unpin on abort regardless of command outcome
       session.unpin();
     }
-    commandHandler();
+    if (commandName !== 'commitTransaction') {
+      session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      if (session.loadBalanced) {
+        maybeClearPinnedConnection(session, { force: false });
+      }
+    } else {
+      session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
+    }
   } catch (firstAttemptErr) {
     if (command.abortTransaction) {
       // always unpin on abort regardless of command outcome
@@ -788,14 +764,56 @@ async function endTransaction(
             bypassPinningCheck: true
           })
         );
-        commandHandler();
+        if (commandName !== 'commitTransaction') {
+          session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+          if (session.loadBalanced) {
+            maybeClearPinnedConnection(session, { force: false });
+          }
+        } else {
+          session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
+        }
       } catch (secondAttemptErr) {
-        commandHandler(secondAttemptErr);
+        handleEndTransactionError(session, commandName, secondAttemptErr);
       }
     } else {
-      commandHandler(firstAttemptErr);
+      handleEndTransactionError(session, commandName, firstAttemptErr);
     }
   }
+}
+
+function handleEndTransactionError(
+  session: ClientSession,
+  commandName: 'abortTransaction' | 'commitTransaction',
+  error: Error
+) {
+  if (commandName !== 'commitTransaction') {
+    session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+    if (session.loadBalanced) {
+      maybeClearPinnedConnection(session, { force: false });
+    }
+    // The spec indicates that if the operation times out or fails with a non-retryable error, we should ignore all errors on `abortTransaction`
+    return;
+  }
+
+  session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
+  if (error instanceof MongoError) {
+    if (
+      isRetryableWriteError(error) ||
+      error instanceof MongoWriteConcernError ||
+      isMaxTimeMSExpiredError(error)
+    ) {
+      if (isUnknownTransactionCommitResult(error)) {
+        error.addErrorLabel(MongoErrorLabel.UnknownTransactionCommitResult);
+
+        // per txns spec, must unpin session in this case
+        session.unpin({ error });
+      }
+    } else if (error.hasErrorLabel(MongoErrorLabel.TransientTransactionError)) {
+      session.unpin({ error });
+    }
+  }
+
+  throw error;
 }
 
 /** @public */
