@@ -609,7 +609,9 @@ async function attemptTransaction<T>(
 
   if (!isPromiseLike(promise)) {
     await session.abortTransaction().catch(() => null);
-    throw new MongoInvalidArgumentError('Function provided to `withTransaction` must return a Promise');
+    throw new MongoInvalidArgumentError(
+      'Function provided to `withTransaction` must return a Promise'
+    );
   }
 
   try {
