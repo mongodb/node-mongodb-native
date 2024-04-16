@@ -61,8 +61,7 @@ export class Timeout extends Promise<never> {
     });
 
     // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
-    // TODO(NODE-5679): Come up with better default message for CSOT error
-    this.timeoutError = new TimeoutError('Timeout!');
+    this.timeoutError = new TimeoutError(`Expired after ${duration}ms`);
 
     this.duration = duration;
     this.start = Math.trunc(performance.now());
