@@ -26,7 +26,8 @@ export class TimeoutError extends Error {
 
 type Executor = ConstructorParameters<typeof Promise<never>>[0];
 type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
-/** @internal
+/**
+ * @internal
  * This class is an abstraction over timeouts, implementing portions of the specification outlined in
  * https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
  * The Timeout class can only be in the pending or rejected states. It is guaranteed not to resolve
@@ -44,16 +45,6 @@ export class Timeout extends Promise<never> {
   public ended: number | null = null;
   public duration: number;
   public timedOut = false;
-
-  /**
-   * Return the amount of time remaining until a TimeoutError is thrown
-   * */
-  public get remainingTime(): number {
-    if (this.duration === 0) return Infinity;
-    if (this.timedOut) return 0;
-    const timePassed = Math.trunc(performance.now()) - this.start;
-    return Math.max(0, this.duration - timePassed);
-  }
 
   /** Create a new timeout that expires in `duration` ms */
   private constructor(executor: Executor = () => null, duration: number) {

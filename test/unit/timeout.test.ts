@@ -1,5 +1,3 @@
-import { setTimeout } from 'node:timers/promises';
-
 import { expect } from 'chai';
 
 import { MongoInvalidArgumentError, Timeout, TimeoutError } from '../mongodb';
@@ -27,9 +25,9 @@ describe('Timeout', function () {
       });
       it('creates a timeout instance that will not keep the Node.js event loop active', function () {
         expect(timeout).to.have.property('id');
-        const id = timeout['id'];
         // @ts-expect-error: accessing private property
         const id = timeout.id;
+        expect(id?.hasRef()).to.be.false;
       });
       it('throws a TimeoutError when it expires', async function () {
         try {
@@ -66,24 +64,53 @@ describe('Timeout', function () {
     });
   });
 
-  describe('get remainingTime()', function () {
-    context('when called on a non-expired timeout with a non-zero duration', function () {
-      it('returns the time elapsed from the start of the timeout', async function () {
-        timeout = Timeout.expires(1000);
-        await setTimeout(500);
-        expect(timeout.remainingTime).to.be.lte(500);
+  describe('is()', function () {
+    context('when called on a Timeout instance', function () {
+      it('returns true', function () {
+        expect(Timeout.is(Timeout.expires(0))).to.be.true;
       });
     });
 
-    context('when called on an expired timeout with a non-zero duration', function () {
-      it('returns 0', async function () {
-        timeout = Timeout.expires(10);
-        try {
-          await timeout;
-        } catch (_) {
-          // Ignore error
-        }
-        expect(timeout.remainingTime).to.equal(0);
+    context('when called on a nullish object ', function () {
+      it('returns false', function () {
+        expect(Timeout.is(undefined)).to.be.false;
+        expect(Timeout.is(null)).to.be.false;
+      });
+    });
+
+    context('when called on a primitive type', function () {
+      it('returns false', function () {
+        expect(Timeout.is(1)).to.be.false;
+        expect(Timeout.is('hello')).to.be.false;
+        expect(Timeout.is(true)).to.be.false;
+        expect(Timeout.is(1n)).to.be.false;
+        expect(Timeout.is(Symbol.for('test'))).to.be.false;
+      });
+    });
+
+    context('when called on a Promise-like object with a matching toStringTag', function () {
+      it('returns true', function () {
+        const timeoutLike = {
+          [Symbol.toStringTag]: 'MongoDBTimeout',
+          then() {
+            return 0;
+          }
+        };
+
+        expect(Timeout.is(timeoutLike)).to.be.true;
+      });
+    });
+
+    context('when called on a Promise-like object without a matching toStringTag', function () {
+      it('returns false', function () {
+        const timeoutLike = {
+          [Symbol.toStringTag]: 'lol',
+          then() {
+            return 0;
+          }
+        };
+
+        expect(Timeout.is(timeoutLike)).to.be.false;
       });
     });
   });
