@@ -27,7 +27,7 @@ export class TimeoutError extends Error {
 type Executor = ConstructorParameters<typeof Promise<never>>[0];
 type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
 /** @internal
- * This class is an abstraction over CSOT timeouts, implementing the specification outlined in
+ * This class is an abstraction over timeouts, implementing portions of the specification outlined in
  * https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
  * The Timeout class can only be in the pending or rejected states. It is guaranteed not to resolve
  * if interacted with exclusively through its public API
@@ -46,7 +46,7 @@ export class Timeout extends Promise<never> {
   public timedOut = false;
 
   /**
-   * Return the amount of time remaining until a CSOTError is thrown
+   * Return the amount of time remaining until a TimeoutError is thrown
    * */
   public get remainingTime(): number {
     if (this.duration === 0) return Infinity;
