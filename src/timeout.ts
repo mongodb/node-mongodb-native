@@ -18,10 +18,6 @@ export class TimeoutError extends Error {
       error != null && typeof error === 'object' && 'name' in error && error.name === 'TimeoutError'
     );
   }
-
-  static from(error: TimeoutError) {
-    return new TimeoutError(error.message, { cause: error });
-  }
 }
 
 type Executor = ConstructorParameters<typeof Promise<never>>[0];
