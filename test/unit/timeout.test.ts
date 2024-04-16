@@ -2,7 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 
-import { CSOTError, MongoInvalidArgumentError, Timeout } from '../mongodb';
+import { MongoInvalidArgumentError, Timeout, TimeoutError } from '../mongodb';
 
 describe('Timeout', function () {
   let timeout: Timeout;
@@ -30,12 +30,12 @@ describe('Timeout', function () {
         const id = timeout['id'];
         expect(id?.hasRef()).to.be.false;
       });
-      it('throws a CSOTError when it expires', async function () {
+      it('throws a TimeoutError when it expires', async function () {
         try {
           await timeout;
           expect.fail('Expected to throw error');
         } catch (err) {
-          expect(err).to.be.instanceof(CSOTError);
+          expect(err).to.be.instanceof(TimeoutError);
         }
       });
     });

@@ -1,26 +1,26 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoError, MongoInvalidArgumentError } from './error';
+import { MongoInvalidArgumentError } from './error';
 import { noop } from './utils';
 
 /** @internal */
-export class CSOTError extends MongoError {
-  override get name(): 'CSOTError' {
-    return 'CSOTError';
+export class TimeoutError extends Error {
+  override get name(): 'TimeoutError' {
+    return 'TimeoutError';
   }
 
   constructor(message: string, options?: { cause?: Error }) {
     super(message, options);
   }
 
-  static is(error: unknown): error is CSOTError {
+  static is(error: unknown): error is TimeoutError {
     return (
-      error != null && typeof error === 'object' && 'name' in error && error.name === 'CSOTError'
+      error != null && typeof error === 'object' && 'name' in error && error.name === 'TimeoutError'
     );
   }
 
-  static from(error: CSOTError) {
-    return new CSOTError(error.message, { cause: error });
+  static from(error: TimeoutError) {
+    return new TimeoutError(error.message, { cause: error });
   }
 }
 
@@ -37,7 +37,7 @@ export class Timeout extends Promise<never> {
     return 'MongoDBTimeout';
   }
 
-  private timeoutError: CSOTError;
+  private timeoutError: TimeoutError;
   private id?: NodeJS.Timeout;
 
   public readonly start: number;
@@ -71,7 +71,7 @@ export class Timeout extends Promise<never> {
 
     // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
     // TODO(NODE-5679): Come up with better default message for CSOT error
-    this.timeoutError = new CSOTError('Timeout!');
+    this.timeoutError = new TimeoutError('Timeout!');
 
     this.duration = duration;
     this.start = Math.trunc(performance.now());
@@ -95,15 +95,6 @@ export class Timeout extends Promise<never> {
   public clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
-  }
-
-  /**
-   * Implement maxTimeMS calculation detailed in https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md#command-execution
-   * */
-  public getMaxTimeMS(minRoundTripTime: number): any {
-    if (!Number.isFinite(this.remainingTime)) return 0;
-    if (minRoundTripTime < this.remainingTime) return this.remainingTime - minRoundTripTime;
-    throw CSOTError.from(this.timeoutError);
   }
 
   /** Create a new pending Timeout with the same duration */
