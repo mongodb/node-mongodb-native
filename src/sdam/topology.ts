@@ -607,11 +607,10 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
         // Timeout
         waitQueueMember[kCancelled] = true;
         timeout.clear();
-        const cause = new MongoServerSelectionError(
+        const timeoutError = new MongoServerSelectionError(
           `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
           this.description
         );
-        const csotError = new CSOTError('Timed out', { cause });
         if (
           this.client.mongoLogger?.willLog(
             MongoLoggableComponent.SERVER_SELECTION,
@@ -623,14 +622,13 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
             new ServerSelectionFailedEvent(
               selector,
               this.description,
-              options.timeout ? csotError : cause,
+              timeoutError,
               options.operationName
             )
           );
         }
 
-        if (options.timeout) throw csotError;
-        throw cause;
+        throw timeoutError;
       }
       // Other server selection error
       throw error;
