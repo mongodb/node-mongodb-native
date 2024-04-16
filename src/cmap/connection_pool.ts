@@ -379,8 +379,9 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     try {
       return await Promise.race([promise, waitQueueMember.timeout]);
     } catch (error) {
-      if (error instanceof TimeoutError) {
+      if (TimeoutError.is(error)) {
         waitQueueMember[kCancelled] = true;
+
         waitQueueMember.timeout.clear();
 
         this.emitAndLog(
