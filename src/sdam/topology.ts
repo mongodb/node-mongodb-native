@@ -582,11 +582,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
-    const timeout = options.timeout
-      ? Timeout.expires(
-          Math.min(options.timeout.remainingTime, options.serverSelectionTimeoutMS ?? 0)
-        )
-      : Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
+    const timeout = Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
