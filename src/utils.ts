@@ -3,7 +3,6 @@ import type { SrvRecord } from 'dns';
 import { type EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import * as http from 'http';
-import { clearTimeout, setTimeout } from 'timers';
 import * as url from 'url';
 import { URL } from 'url';
 import { promisify } from 'util';
@@ -1201,33 +1200,6 @@ export async function request(
     req.once('error', error => reject(error));
     req.end();
   });
-}
-
-/**
- * A custom AbortController that aborts after a specified timeout.
- *
- * If `timeout` is undefined or \<=0, the abort controller never aborts.
- *
- * This class provides two benefits over the built-in AbortSignal.timeout() method.
- * - This class provides a mechanism for cancelling the timeout
- * - This class supports infinite timeouts by interpreting a timeout of 0 as infinite.  This is
- *    consistent with existing timeout options in the Node driver (serverSelectionTimeoutMS, for example).
- * @internal
- */
-export class TimeoutController extends AbortController {
-  constructor(
-    timeout = 0,
-    private timeoutId = timeout > 0 ? setTimeout(() => this.abort(), timeout) : null
-  ) {
-    super();
-  }
-
-  clear() {
-    if (this.timeoutId != null) {
-      clearTimeout(this.timeoutId);
-    }
-    this.timeoutId = null;
-  }
 }
 
 /** @internal */

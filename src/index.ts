@@ -556,7 +556,6 @@ export type {
   HostAddress,
   List,
   MongoDBCollectionNamespace,
-  MongoDBNamespace,
-  TimeoutController
+  MongoDBNamespace
 } from './utils';
 export type { W, WriteConcernOptions, WriteConcernSettings } from './write_concern';
