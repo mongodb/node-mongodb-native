@@ -82,7 +82,7 @@ export class Timeout extends Promise<never> {
         this.timedOut = true;
         reject(this.timeoutError);
       }, this.duration);
-      // Ensure we do not keep the NodeJS event loop running
+      // Ensure we do not keep the Node.js event loop running
       if (typeof this.id.unref === 'function') {
         this.id.unref();
       }
@@ -92,7 +92,7 @@ export class Timeout extends Promise<never> {
   /**
    * Clears the underlying timeout. This method is idempotent
    * */
-  public clear(): void {
+   */
     clearTimeout(this.id);
     this.id = undefined;
   }

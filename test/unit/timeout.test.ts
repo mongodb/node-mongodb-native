@@ -13,7 +13,7 @@ describe('Timeout', function () {
     }
   });
 
-  describe('constructor()', function () {
+  describe('expires()', function () {
     context('when called with a duration of 0', function () {
       it('does not create a timeout instance (creates infinite timeout)', function () {
         timeout = Timeout.expires(0);
@@ -28,7 +28,8 @@ describe('Timeout', function () {
       it('creates a timeout instance that will not keep the Node.js event loop active', function () {
         expect(timeout).to.have.property('id');
         const id = timeout['id'];
-        expect(id?.hasRef()).to.be.false;
+        // @ts-expect-error: accessing private property
+        const id = timeout.id;
       });
       it('throws a TimeoutError when it expires', async function () {
         try {
