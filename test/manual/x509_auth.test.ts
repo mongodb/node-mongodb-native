@@ -8,6 +8,9 @@ import {
   MongoServerSelectionError
 } from '../../src';
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+const connectionString = new ConnectionString(process.env.MONGODB_URI!);
+
 describe('x509 Authentication', function () {
   let client: MongoClient;
   const validOptions: MongoClientOptions = {
@@ -27,7 +30,7 @@ describe('x509 Authentication', function () {
     after('drop x509 user', dropX509User);
 
     it('successfully authenticates using x509', async function () {
-      client = new MongoClient(process.env.MONGODB_URI!, validOptions);
+      client = new MongoClient(connectionString.toString(), validOptions);
       const result = await client
         .db('aws')
         .collection('aws_test')
@@ -40,7 +43,7 @@ describe('x509 Authentication', function () {
 
     context('when an incorrect username is supplied', function () {
       it('fails to authenticate', async function () {
-        const uri = new ConnectionString(process.env.MONGODB_URI!);
+        const uri = connectionString.clone();
         uri.username = 'bob';
         client = new MongoClient(uri.toString(), validOptions);
         const error = await client.connect().catch(error => error);
@@ -55,7 +58,7 @@ describe('x509 Authentication', function () {
     'when a valid cert is provided but the certificate does not correspond to a user',
     function () {
       it('fails to authenticate', async function () {
-        client = new MongoClient(process.env.MONGODB_URI!, validOptions);
+        client = new MongoClient(connectionString.toString(), validOptions);
         const error = await client.connect().catch(e => e);
 
         expect(error).to.be.instanceOf(MongoServerError);
@@ -78,7 +81,7 @@ describe('x509 Authentication', function () {
         authMechanism: 'MONGODB-X509' as const,
         authSource: '$external'
       };
-      client = new MongoClient(process.env.MONGODB_URI!, {
+      client = new MongoClient(connectionString.toString(), {
         ...invalidOptions,
         serverSelectionTimeoutMS: 5000
       });
@@ -90,7 +93,7 @@ describe('x509 Authentication', function () {
 });
 
 async function createX509User() {
-  const utilClient = new MongoClient(process.env.MONGODB_URI!, {
+  const utilClient = new MongoClient(connectionString.toString(), {
     tls: true,
     tlsCertificateKeyFile: process.env.SSL_KEY_FILE,
     tlsCAFile: process.env.SSL_CA_FILE,
@@ -113,7 +116,7 @@ async function createX509User() {
 }
 
 async function dropX509User() {
-  const utilClient = new MongoClient(process.env.MONGODB_URI!, {
+  const utilClient = new MongoClient(connectionString.toString(), {
     tls: true,
     tlsCertificateKeyFile: process.env.SSL_KEY_FILE,
     tlsCAFile: process.env.SSL_CA_FILE,
