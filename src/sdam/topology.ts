@@ -33,7 +33,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { type Timeout } from '../timeout';
+import { CSOTError, Timeout } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -44,8 +44,7 @@ import {
   now,
   ns,
   promiseWithResolvers,
-  shuffle,
-  TimeoutController
+  shuffle
 } from '../utils';
 import {
   _advanceClusterTime,
@@ -108,7 +107,7 @@ export interface ServerSelectionRequest {
   resolve: (server: Server) => void;
   reject: (error: MongoError) => void;
   [kCancelled]?: boolean;
-  timeoutController: TimeoutController;
+  timeout: Timeout;
   operationName: string;
   waitingLogged: boolean;
   previousServer?: ServerDescription;
@@ -583,6 +582,11 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     }
 
     const { promise: serverPromise, resolve, reject } = promiseWithResolvers<Server>();
+    const timeout = options.timeout
+      ? Timeout.expires(
+          Math.min(options.timeout.remainingTime, options.serverSelectionTimeoutMS ?? 0)
+        )
+      : Timeout.expires(options.serverSelectionTimeoutMS ?? 0);
     const waitQueueMember: ServerSelectionRequest = {
       serverSelector,
       topologyDescription: this.description,
@@ -590,43 +594,49 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
       transaction,
       resolve,
       reject,
-      timeoutController: new TimeoutController(options.serverSelectionTimeoutMS),
+      timeout,
       startTime: now(),
       operationName: options.operationName,
       waitingLogged: false,
       previousServer: options.previousServer
     };
 
-    waitQueueMember.timeoutController.signal.addEventListener('abort', () => {
-      waitQueueMember[kCancelled] = true;
-      waitQueueMember.timeoutController.clear();
-      const timeoutError = new MongoServerSelectionError(
-        `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
-        this.description
-      );
-      if (
-        this.client.mongoLogger?.willLog(
-          MongoLoggableComponent.SERVER_SELECTION,
-          SeverityLevel.DEBUG
-        )
-      ) {
-        this.client.mongoLogger?.debug(
-          MongoLoggableComponent.SERVER_SELECTION,
-          new ServerSelectionFailedEvent(
-            selector,
-            this.description,
-            timeoutError,
-            options.operationName
-          )
-        );
-      }
-      waitQueueMember.reject(timeoutError);
-    });
-
     this[kWaitQueue].push(waitQueueMember);
     processWaitQueue(this);
 
-    return await (options.timeout ? Promise.race([options.timeout, serverPromise]) : serverPromise);
+    try {
+      return await Promise.race([serverPromise, waitQueueMember.timeout]);
+    } catch (error) {
+      if (error instanceof CSOTError) {
+        // we timed out
+        waitQueueMember[kCancelled] = true;
+        timeout.clear();
+        const timeoutError = new MongoServerSelectionError(
+          `Server selection timed out after ${options.serverSelectionTimeoutMS} ms`,
+          this.description
+        );
+        if (
+          this.client.mongoLogger?.willLog(
+            MongoLoggableComponent.SERVER_SELECTION,
+            SeverityLevel.DEBUG
+          )
+        ) {
+          this.client.mongoLogger?.debug(
+            MongoLoggableComponent.SERVER_SELECTION,
+            new ServerSelectionFailedEvent(
+              selector,
+              this.description,
+              timeoutError,
+              options.operationName
+            )
+          );
+        }
+
+        throw timeoutError;
+      }
+      // Other server selection error
+      throw error;
+    }
   }
   /**
    * Update the internal TopologyDescription with a ServerDescription
@@ -883,7 +893,7 @@ function drainWaitQueue(queue: List<ServerSelectionRequest>, drainError: MongoDr
       continue;
     }
 
-    waitQueueMember.timeoutController.clear();
+    waitQueueMember.timeout.clear();
 
     if (!waitQueueMember[kCancelled]) {
       if (
@@ -938,7 +948,7 @@ function processWaitQueue(topology: Topology) {
           )
         : serverDescriptions;
     } catch (selectorError) {
-      waitQueueMember.timeoutController.clear();
+      waitQueueMember.timeout.clear();
       if (
         topology.client.mongoLogger?.willLog(
           MongoLoggableComponent.SERVER_SELECTION,
@@ -1026,7 +1036,7 @@ function processWaitQueue(topology: Topology) {
       transaction.pinServer(selectedServer);
     }
 
-    waitQueueMember.timeoutController.clear();
+    waitQueueMember.timeout.clear();
 
     if (
       topology.client.mongoLogger?.willLog(
