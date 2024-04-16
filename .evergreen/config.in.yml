@@ -1111,6 +1111,18 @@ functions:
         binary: bash
         args:
           - ${PROJECT_DIRECTORY}/.evergreen/run-benchmarks.sh
+  "run x509 auth tests":
+    - command: subprocess.exec
+      type: test
+      params:
+        working_dir: "src"
+        env:
+          PROJECT_DIRECTORY: ${PROJECT_DIRECTORY}
+          MONGODB_URI: ${MONGODB_URI}
+          DRIVERS_TOOLS: ${DRIVERS_TOOLS}
+        binary: bash
+        args:
+          - ${PROJECT_DIRECTORY}/.evergreen/run-x509-tests.sh
 
 tasks:
   - name: 'test-atlas-data-lake'
