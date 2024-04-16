@@ -603,7 +603,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     try {
       return await Promise.race([serverPromise, waitQueueMember.timeout]);
     } catch (error) {
-      if (error instanceof TimeoutError) {
+      if (TimeoutError.is(error)) {
         // Timeout
         waitQueueMember[kCancelled] = true;
         timeout.clear();
