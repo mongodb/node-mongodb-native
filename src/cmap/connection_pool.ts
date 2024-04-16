@@ -379,7 +379,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     try {
       return await Promise.race([promise, waitQueueMember.timeout]);
     } catch (error) {
-      if (error instanceof CSOTError) {
+      if (CSOTError.is(error)) {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timeout.clear();
 
