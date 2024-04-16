@@ -620,9 +620,8 @@ export class EntitiesMap<E = Entity> extends Map<string, E> {
               WriteConcern.fromOptions(defaultOptions);
           }
           if (defaultOptions.readPreference) {
-            options.defaultTransactionOptions.readPreference = ReadPreference.fromOptions(
-              defaultOptions.readPreference
-            );
+            options.defaultTransactionOptions.readPreference =
+              ReadPreference.fromOptions(defaultOptions);
           }
           if (typeof defaultOptions.maxCommitTimeMS === 'number') {
             options.defaultTransactionOptions.maxCommitTimeMS = defaultOptions.maxCommitTimeMS;
