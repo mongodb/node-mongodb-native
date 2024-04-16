@@ -2,7 +2,7 @@ import { setTimeout } from 'node:timers/promises';
 
 import { expect } from 'chai';
 
-import { CSOTError, Timeout } from '../mongodb';
+import { CSOTError, MongoInvalidArgumentError, Timeout } from '../mongodb';
 
 describe('Timeout', function () {
   let timeout: Timeout;
@@ -14,14 +14,14 @@ describe('Timeout', function () {
   });
 
   describe('constructor()', function () {
-    context('when called with a timeout of 0', function () {
-      it('does not create a timeout instance', function () {
+    context('when called with a duration of 0', function () {
+      it('does not create a timeout instance (creates infinite timeout)', function () {
         timeout = Timeout.expires(0);
         expect(timeout).to.not.have.property('id');
       });
     });
 
-    context('when called with a timeout greater than 0', function () {
+    context('when called with a duration greater than 0', function () {
       beforeEach(() => {
         timeout = Timeout.expires(2000);
       });
@@ -36,6 +36,17 @@ describe('Timeout', function () {
           expect.fail('Expected to throw error');
         } catch (err) {
           expect(err).to.be.instanceof(CSOTError);
+        }
+      });
+    });
+
+    context('when called with a duration less than 0', function () {
+      it('throws a MongoInvalidArgumentError', function () {
+        try {
+          timeout = Timeout.expires(-1);
+          expect.fail('Expected to throw error');
+        } catch (error) {
+          expect(error).to.be.instanceof(MongoInvalidArgumentError);
         }
       });
     });

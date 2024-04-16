@@ -1,6 +1,6 @@
 import { clearTimeout, setTimeout } from 'timers';
 
-import { MongoError } from './error';
+import { MongoError, MongoInvalidArgumentError } from './error';
 
 /** @internal */
 export class CSOTError extends MongoError {
@@ -55,8 +55,12 @@ export class Timeout extends Promise<never> {
   }
 
   /** Create a new timeout that expires in `duration` ms */
-  private constructor(executor: Executor = () => null, duration = 0) {
+  private constructor(executor: Executor = () => null, duration: number) {
     let reject!: Reject;
+
+    if (duration < 0) {
+      throw new MongoInvalidArgumentError('Cannot create a Timeout with a negative duration');
+    }
 
     super((_, promiseReject) => {
       reject = promiseReject;
