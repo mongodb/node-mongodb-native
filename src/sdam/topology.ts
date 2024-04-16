@@ -33,7 +33,7 @@ import { MongoLoggableComponent, type MongoLogger, SeverityLevel } from '../mong
 import { TypedEventEmitter } from '../mongo_types';
 import { ReadPreference, type ReadPreferenceLike } from '../read_preference';
 import type { ClientSession } from '../sessions';
-import { CSOTError, Timeout } from '../timeout';
+import { Timeout, TimeoutError } from '../timeout';
 import type { Transaction } from '../transactions';
 import {
   type Callback,
@@ -603,7 +603,7 @@ export class Topology extends TypedEventEmitter<TopologyEvents> {
     try {
       return await Promise.race([serverPromise, waitQueueMember.timeout]);
     } catch (error) {
-      if (error instanceof CSOTError) {
+      if (error instanceof TimeoutError) {
         // Timeout
         waitQueueMember[kCancelled] = true;
         timeout.clear();

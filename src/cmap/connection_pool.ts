@@ -26,7 +26,7 @@ import {
 } from '../error';
 import { CancellationToken, TypedEventEmitter } from '../mongo_types';
 import type { Server } from '../sdam/server';
-import { CSOTError, Timeout } from '../timeout';
+import { Timeout, TimeoutError } from '../timeout';
 import { type Callback, List, makeCounter, promiseWithResolvers } from '../utils';
 import { connect } from './connect';
 import { Connection, type ConnectionEvents, type ConnectionOptions } from './connection';
@@ -379,7 +379,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
     try {
       return await Promise.race([promise, waitQueueMember.timeout]);
     } catch (error) {
-      if (error instanceof CSOTError) {
+      if (error instanceof TimeoutError) {
         waitQueueMember[kCancelled] = true;
         waitQueueMember.timeout.clear();
 
