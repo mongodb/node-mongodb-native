@@ -91,15 +91,10 @@ export class Timeout extends Promise<never> {
 
   /**
    * Clears the underlying timeout. This method is idempotent
-   * */
    */
+  clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
-  }
-
-  /** Create a new pending Timeout with the same duration */
-  public clone() {
-    return Timeout.expires(this.duration);
   }
 
   public static expires(durationMS: number): Timeout {
