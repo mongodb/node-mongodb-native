@@ -1,6 +1,7 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoError, MongoInvalidArgumentError } from './error';
+import { noop } from './utils';
 
 /** @internal */
 export class CSOTError extends MongoError {
@@ -65,9 +66,7 @@ export class Timeout extends Promise<never> {
     super((_, promiseReject) => {
       reject = promiseReject;
 
-      executor(() => {
-        return;
-      }, promiseReject);
+      executor(noop, promiseReject);
     });
 
     // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
