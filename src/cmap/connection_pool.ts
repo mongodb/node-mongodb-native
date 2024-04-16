@@ -353,7 +353,7 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
    * will be held by the pool. This means that if a connection is checked out it MUST be checked back in or
    * explicitly destroyed by the new owner.
    */
-  async checkOut(options?: { timeout?: Timeout | null }): Promise<Connection> {
+  async checkOut(options?: { timeout?: Timeout }): Promise<Connection> {
     this.emitAndLog(
       ConnectionPool.CONNECTION_CHECK_OUT_STARTED,
       new ConnectionCheckOutStartedEvent(this)
@@ -387,12 +387,14 @@ export class ConnectionPool extends TypedEventEmitter<ConnectionPoolEvents> {
           ConnectionPool.CONNECTION_CHECK_OUT_FAILED,
           new ConnectionCheckOutFailedEvent(this, 'timeout')
         );
-        throw new WaitQueueTimeoutError(
+        const cause = new WaitQueueTimeoutError(
           this.loadBalanced
             ? this.waitQueueErrorMetrics()
             : 'Timed out while checking out a connection from connection pool',
           this.address
         );
+        if (options?.timeout) throw new CSOTError('Timed out', { cause });
+        throw cause;
       }
       throw error;
     }

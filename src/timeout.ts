@@ -1,7 +1,6 @@
 import { clearTimeout, setTimeout } from 'timers';
 
 import { MongoError } from './error';
-import { noop } from './utils';
 
 /** @internal */
 export class CSOTError extends MongoError {
@@ -24,20 +23,23 @@ export class CSOTError extends MongoError {
   }
 }
 
+type Executor = ConstructorParameters<typeof Promise<never>>[0];
+type Reject = Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
 /** @internal
  * This class is an abstraction over CSOT timeouts, implementing the specification outlined in
  * https://github.com/mongodb/specifications/blob/master/source/client-side-operations-timeout/client-side-operations-timeout.md
+ * The Timeout class can only be in the pending or rejected states. It is guaranteed not to resolve
+ * if interacted with exclusively through its public API
  * */
 export class Timeout extends Promise<never> {
   get [Symbol.toStringTag](): 'MongoDBTimeout' {
     return 'MongoDBTimeout';
   }
 
-  private expireTimeout: () => void;
   private timeoutError: CSOTError;
-  private id: Parameters<typeof clearTimeout>[0];
+  private id?: NodeJS.Timeout;
 
-  public start: number;
+  public readonly start: number;
   public ended: number | null = null;
   public duration: number;
   public timedOut = false;
@@ -52,66 +54,44 @@ export class Timeout extends Promise<never> {
     return Math.max(0, this.duration - timePassed);
   }
 
-  private constructor(
-    executor: ConstructorParameters<typeof Promise<never>>[0] = () => null,
-    duration = 0
-  ) {
-    // for a promise constructed as follows new Promise((resolve: (a) => void, reject: (b) => void){})
-    // reject here is of type: typeof(reject)
-    let reject!: Parameters<ConstructorParameters<typeof Promise<never>>[0]>[1];
+  /** Create a new timeout that expires in `duration` ms */
+  private constructor(executor: Executor = () => null, duration = 0) {
+    let reject!: Reject;
 
     super((_, promiseReject) => {
       reject = promiseReject;
-      executor(noop, promiseReject);
+
+      executor(() => {
+        return;
+      }, promiseReject);
     });
 
     // NOTE: Construct timeout error at point of Timeout instantiation to preserve stack traces
+    // TODO(NODE-5679): Come up with better default message for CSOT error
     this.timeoutError = new CSOTError('Timeout!');
-
-    this.expireTimeout = () => {
-      this.ended = Math.trunc(performance.now());
-      this.timedOut = true;
-      // NOTE: Wrap error here: Why?
-      reject(CSOTError.from(this.timeoutError));
-    };
 
     this.duration = duration;
     this.start = Math.trunc(performance.now());
+
     if (this.duration > 0) {
-      this.id = setTimeout(this.expireTimeout, this.duration);
-      // I see no reason CSOT should keep Node.js running, that's for the sockets to do
+      this.id = setTimeout(() => {
+        this.ended = Math.trunc(performance.now());
+        this.timedOut = true;
+        reject(this.timeoutError);
+      }, this.duration);
+      // Ensure we do not keep the NodeJS event loop running
       if (typeof this.id.unref === 'function') {
         this.id.unref();
       }
     }
   }
 
+  /**
+   * Clears the underlying timeout. This method is idempotent
+   * */
   public clear(): void {
     clearTimeout(this.id);
     this.id = undefined;
-  }
-
-  /** Start the timer over, this only has effect if the timer has not expired. */
-  public refresh() {
-    if (this.timedOut) return;
-    if (this.duration <= 0) return;
-
-    this.start = Math.trunc(performance.now());
-    if (
-      this.id != null &&
-      typeof this.id === 'object' &&
-      'refresh' in this.id &&
-      typeof this.id?.refresh === 'function'
-    ) {
-      this.id.refresh();
-      return;
-    }
-
-    clearTimeout(this.id);
-    this.id = setTimeout(this.expireTimeout, this.duration);
-    if (typeof this.id.unref === 'function') {
-      this.id.unref();
-    }
   }
 
   /**
@@ -128,9 +108,8 @@ export class Timeout extends Promise<never> {
     return Timeout.expires(this.duration);
   }
 
-  /** Create a new timeout that expires in `duration` ms */
-  public static expires(duration: number): Timeout {
-    return new Timeout(undefined, duration);
+  public static expires(durationMS: number): Timeout {
+    return new Timeout(undefined, durationMS);
   }
 
   static is(timeout: unknown): timeout is Timeout {
