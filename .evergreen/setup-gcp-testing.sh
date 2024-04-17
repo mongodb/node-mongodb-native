@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+source "${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/secrets-export.sh"
+
 # Assert required environment variables are present without printing them
 if [ -z ${GCPKMS_GCLOUD+omitted} ]; then echo "GCPKMS_GCLOUD is unset" && exit 1; fi
 if [ -z ${GCPKMS_PROJECT+omitted} ]; then echo "GCPKMS_PROJECT is unset" && exit 1; fi
