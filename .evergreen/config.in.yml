@@ -1162,13 +1162,8 @@ tasks:
         type: setup
         params:
           binary: bash
-          add_expansions_to_env: true
           env:
             DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
             - src/.evergreen/setup-gcp-testing.sh
       # Run Mocha test over on GCE instance
@@ -1178,10 +1173,7 @@ tasks:
           working_dir: src
           binary: bash
           env:
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
+            DRIVERS_TOOLS: ${DRIVERS_TOOLS}
             GCPKMS_CMD: "env EXPECTED_GCPKMS_OUTCOME=success bash src/.evergreen/run-gcp-kms-tests.sh"
           args:
             - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/run-command.sh
@@ -1371,31 +1363,14 @@ task_groups:
         params:
           working_dir: "src"
           binary: bash
-          add_expansions_to_env: true
-          env:
-            testgcpkms_key_file: ${gcpkms_key_file}
-            GCPKMS_SERVICEACCOUNT: ${gcpkms_service_account}
-            GCPKMS_DRIVERS_TOOLS: ${DRIVERS_TOOLS}
-            GCPKMS_MACHINETYPE: "e2-standard-4"
           args:
-            - .evergreen/setup-gcp-instance.sh
-      - command: expansions.update
-        # Load the GCPKMS_GCLOUD, GCPKMS_INSTANCE, GCPKMS_REGION, and GCPKMS_ZONE expansions.
-        params:
-          file: src/testgcpkms-expansions.yml
-
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/setup.sh
     teardown_group:
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
-          env:
-            GCPKMS_GCLOUD: ${GCPKMS_GCLOUD}
-            GCPKMS_PROJECT: ${GCPKMS_PROJECT}
-            GCPKMS_ZONE: ${GCPKMS_ZONE}
-            GCPKMS_INSTANCENAME: ${GCPKMS_INSTANCENAME}
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/delete-instance.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/gcpkms/teardown.sh
     tasks:
       - test-gcpkms-task
 
@@ -1408,25 +1383,18 @@ task_groups:
         params:
           working_dir: "src"
           binary: bash
-          add_expansions_to_env: true
+          env:
+            AZUREKMS_VMNAME_PREFIX: "NODE-DRIVER"
           args:
-            - .evergreen/setup-azure-vm.sh
-      - command: expansions.update
-        # Load AZUREKMS_VMNAME into the expansions.
-        params:
-          file: src/testazurekms-expansions.yml
-
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/setup.sh
     teardown_group:
-      # Load expansions again. The setup task may have failed before running `expansions.update`.
-      - command: expansions.update
-        params:
-          file: testazurekms-expansions.yml
       - command: subprocess.exec
         params:
           binary: bash
-          add_expansions_to_env: true
+          env:
+            AZUREKMS_VMNAME_PREFIX: "NODE-DRIVER"
           args:
-            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/delete-vm.sh
+            - ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/teardown.sh
     tasks:
       - test-azurekms-task
 

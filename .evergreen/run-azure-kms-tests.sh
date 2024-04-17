@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 set -o errexit
+source ${DRIVERS_TOOLS}/.evergreen/csfle/azurekms/secrets-export.sh
 
 pushd "src"
 PROJECT_DIRECTORY="$(pwd)"
