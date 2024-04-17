@@ -33,7 +33,7 @@ describe('x509 Authentication', function () {
       client = new MongoClient(connectionString.toString(), validOptions);
       const result = await client
         .db('aws')
-        .collection('aws_test')
+        .collection('x509_test')
         .estimatedDocumentCount()
         .catch(error => error);
 
