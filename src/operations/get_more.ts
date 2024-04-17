@@ -1,4 +1,5 @@
 import type { Document, Long } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import { MongoRuntimeError } from '../error';
 import type { Server } from '../sdam/server';
 import type { ClientSession } from '../sessions';
@@ -19,6 +20,8 @@ export interface GetMoreOptions extends OperationOptions {
   maxTimeMS?: number;
   /** TODO(NODE-4413): Address bug with maxAwaitTimeMS not being passed in from the cursor correctly */
   maxAwaitTimeMS?: number;
+
+  useCursorResponse: boolean;
 }
 
 /**
@@ -96,7 +99,12 @@ export class GetMoreOperation extends AbstractOperation {
       ...this.options
     };
 
-    return await server.command(this.ns, getMoreCmd, commandOptions);
+    return await server.command(
+      this.ns,
+      getMoreCmd,
+      commandOptions,
+      this.options.useCursorResponse ? CursorResponse : undefined
+    );
   }
 }
 

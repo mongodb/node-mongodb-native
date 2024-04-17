@@ -1,4 +1,5 @@
 import type { Document } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import type { Collection } from '../collection';
 import { MongoInvalidArgumentError } from '../error';
 import { ReadConcern } from '../read_concern';
@@ -111,12 +112,17 @@ export class FindOperation extends CommandOperation<Document> {
       findCommand = decorateWithExplain(findCommand, this.explain);
     }
 
-    return await server.command(this.ns, findCommand, {
-      ...this.options,
-      ...this.bsonOptions,
-      documentsReturnedIn: 'firstBatch',
-      session
-    });
+    return await server.command(
+      this.ns,
+      findCommand,
+      {
+        ...this.options,
+        ...this.bsonOptions,
+        documentsReturnedIn: 'firstBatch',
+        session
+      },
+      this.explain ? undefined : CursorResponse
+    );
   }
 }
 

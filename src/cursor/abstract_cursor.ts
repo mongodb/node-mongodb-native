@@ -1,6 +1,7 @@
 import { Readable, Transform } from 'stream';
 
 import { type BSONSerializeOptions, type Document, Long, pluckBSONSerializeOptions } from '../bson';
+import { CursorResponse } from '../cmap/wire_protocol/responses';
 import {
   type AnyError,
   MongoAPIError,
@@ -144,7 +145,14 @@ export abstract class AbstractCursor<
   /** @internal */
   [kNamespace]: MongoDBNamespace;
   /** @internal */
-  [kDocuments]: List<TSchema>;
+  [kDocuments]: {
+    length: number;
+    shift(bsonOptions?: any): TSchema | null;
+    unshift(doc: TSchema): void;
+    clear(): void;
+    pushMany(many: Iterable<TSchema>): void;
+    push(item: TSchema): void;
+  };
   /** @internal */
   [kClient]: MongoClient;
   /** @internal */
@@ -286,7 +294,7 @@ export abstract class AbstractCursor<
     const documentsToRead = Math.min(number ?? this[kDocuments].length, this[kDocuments].length);
 
     for (let count = 0; count < documentsToRead; count++) {
-      const document = this[kDocuments].shift();
+      const document = this[kDocuments].shift(this[kOptions]);
       if (document != null) {
         bufferedDocs.push(document);
       }
@@ -633,12 +641,13 @@ export abstract class AbstractCursor<
   protected abstract _initialize(session: ClientSession | undefined): Promise<ExecutionResult>;
 
   /** @internal */
-  async getMore(batchSize: number): Promise<Document | null> {
+  async getMore(batchSize: number, useCursorResponse = false): Promise<Document | null> {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getMoreOperation = new GetMoreOperation(this[kNamespace], this[kId]!, this[kServer]!, {
       ...this[kOptions],
       session: this[kSession],
-      batchSize
+      batchSize,
+      useCursorResponse
     });
 
     return await executeOperation(this[kClient], getMoreOperation);
@@ -656,7 +665,11 @@ export abstract class AbstractCursor<
       const state = await this._initialize(this[kSession]);
       const response = state.response;
       this[kServer] = state.server;
-      if (response.cursor) {
+      if (CursorResponse.isCursorResponse(response)) {
+        this[kId] = response.id;
+        if (response.ns) this[kNamespace] = response.ns;
+        this[kDocuments] = response.documents;
+      } else if (response.cursor) {
         // TODO(NODE-2674): Preserve int64 sent from MongoDB
         this[kId] =
           typeof response.cursor.id === 'number'
@@ -730,7 +743,7 @@ async function next<T>(
     }
 
     if (cursor[kDocuments].length !== 0) {
-      const doc = cursor[kDocuments].shift();
+      const doc = cursor[kDocuments].shift(cursor[kOptions]);
 
       if (doc != null && transform && cursor[kTransform]) {
         try {
@@ -762,8 +775,10 @@ async function next<T>(
 
     try {
       const response = await cursor.getMore(batchSize);
-
-      if (response) {
+      if (CursorResponse.isCursorResponse(response)) {
+        cursor[kId] = response.id;
+        cursor[kDocuments] = response.documents;
+      } else if (response) {
         const cursorId =
           typeof response.cursor.id === 'number'
             ? Long.fromNumber(response.cursor.id)

@@ -111,10 +111,10 @@ export class FindCursor<TSchema = any> extends AbstractCursor<TSchema> {
       }
     }
 
-    const response = await super.getMore(batchSize);
+    const response = await super.getMore(batchSize, true);
     // TODO: wrap this in some logic to prevent it from happening if we don't need this support
     if (response) {
-      this[kNumReturned] = this[kNumReturned] + response.cursor.nextBatch.length;
+      this[kNumReturned] = this[kNumReturned] + response.batchLength;
     }
 
     return response;

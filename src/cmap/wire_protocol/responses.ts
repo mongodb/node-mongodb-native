@@ -1,5 +1,13 @@
-import { type BSONSerializeOptions, BSONType, type Document, type Timestamp } from '../../bson';
+import {
+  type BSONSerializeOptions,
+  BSONType,
+  type Document,
+  Long,
+  type Timestamp
+} from '../../bson';
+import { MongoUnexpectedServerResponseError } from '../../error';
 import { type ClusterTime } from '../../sdam/common';
+import { type MongoDBNamespace, ns } from '../../utils';
 import { OnDemandDocument } from './on_demand/document';
 
 /** @internal */
@@ -105,5 +113,82 @@ export class MongoDBResponse extends OnDemandDocument {
     }
 
     return { utf8: { writeErrors: false } };
+  }
+}
+
+function throwUnsupportedError() {
+  throw new Error('Unsupported method');
+}
+
+export class CursorResponse extends MongoDBResponse {
+  id: Long | null = null;
+  ns: MongoDBNamespace | null = null;
+
+  documents: any | null = null;
+  bufferForUnshift: any[] = [];
+
+  private batch: OnDemandDocument | null = null;
+  private values: Generator<OnDemandDocument, void, void> | null = null;
+  private batchSize = 0;
+  private iterated = 0;
+
+  constructor(b: Uint8Array, o?: number, a?: boolean) {
+    super(b, o, a);
+
+    if (this.isError) return;
+
+    const cursor = this.get('cursor', BSONType.object, true);
+
+    const id = cursor.get('id', BSONType.long, true);
+    this.id = new Long(Number(id & 0xffff_ffffn), Number((id >> 32n) & 0xffff_ffffn));
+
+    const namespace = cursor.get('ns', BSONType.string) ?? '';
+    if (namespace) this.ns = ns(namespace);
+
+    if (cursor.has('firstBatch')) this.batch = cursor.get('firstBatch', BSONType.array, true);
+    else if (cursor.has('nextBatch')) this.batch = cursor.get('nextBatch', BSONType.array, true);
+    else throw new MongoUnexpectedServerResponseError('Cursor document did not contain a batch');
+
+    this.values = this.batch.valuesAs(BSONType.object);
+    this.batchSize = this.batch.size();
+    this.iterated = 0;
+    this.documents = Object.defineProperties(Object.create(null), {
+      length: {
+        get: () => {
+          return this.batchSize - this.iterated;
+        }
+      },
+      shift: {
+        value: (options?: BSONSerializeOptions) => {
+          this.iterated += 1;
+          if (this.bufferForUnshift.length) return this.bufferForUnshift.pop();
+          const r = this.values?.next();
+          if (!r || r.done) return null;
+          if (options.raw) {
+            return r.value.toBytes();
+          } else {
+            return r.value.toObject(options);
+          }
+        }
+      },
+      unshift: {
+        value: (v: any) => {
+          this.iterated -= 1;
+          this.bufferForUnshift.push(v);
+        }
+      },
+      clear: {
+        value: () => {
+          this.iterated = this.batchSize;
+          this.values?.return();
+        }
+      },
+      pushMany: { value: throwUnsupportedError },
+      push: { value: throwUnsupportedError }
+    });
+  }
+
+  static isCursorResponse(value: unknown): value is CursorResponse {
+    return value instanceof CursorResponse;
   }
 }

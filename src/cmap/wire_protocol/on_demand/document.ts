@@ -198,6 +198,13 @@ export class OnDemandDocument {
   }
 
   /**
+   * Returns the number of elements in this BSON document
+   */
+  public size() {
+    return this.elements.length;
+  }
+
+  /**
    * Checks for the existence of an element by name.
    *
    * @remarks
@@ -303,12 +310,18 @@ export class OnDemandDocument {
     });
   }
 
+  /** Returns this document's bytes only */
+  toBytes() {
+    const size = getInt32LE(this.bson, this.offset);
+    return this.bson.subarray(this.offset, this.offset + size);
+  }
+
   /**
    * Iterates through the elements of a document reviving them using the `as` BSONType.
    *
    * @param as - The type to revive all elements as
    */
-  public *valuesAs<const T extends keyof JSTypeOf>(as: T): Generator<JSTypeOf[T]> {
+  public *valuesAs<const T extends keyof JSTypeOf>(as: T): Generator<JSTypeOf[T], void, void> {
     if (!this.isArray) {
       throw new BSONError('Unexpected conversion of non-array value to array');
     }
